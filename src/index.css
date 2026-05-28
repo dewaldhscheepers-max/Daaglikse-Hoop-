@@ -1,0 +1,204 @@
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Sunrise palette */
+  --lavender:    #E8E0F0;
+  --peach:       #F2C9A8;
+  --amber:       #C97D3A;
+  --amber-light: #E8A55A;
+  --cream:       #FAF7F2;
+  --cream-dark:  #F0EBE1;
+  --brown:       #4A2E1A;
+  --brown-mid:   #7A4F2D;
+  --text:        #2D1F0E;
+  --text-muted:  #8C7055;
+  --white:       #FFFFFF;
+  --shadow:      rgba(74, 46, 26, 0.12);
+
+  /* Gradient used in headers */
+  --gradient: linear-gradient(135deg, #C4A0E0 0%, #E8A55A 60%, #C97D3A 100%);
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-body:  'Inter', system-ui, sans-serif;
+
+  --nav-height: 68px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── App Shell ─── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  background: var(--cream);
+  box-shadow: 0 0 40px var(--shadow);
+}
+
+/* ─── Screen (scrollable area above nav) ─── */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Bottom Navigation ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--white);
+  border-top: 1px solid var(--cream-dark);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  z-index: 100;
+  box-shadow: 0 -4px 20px var(--shadow);
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px;
+  gap: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-tab.active {
+  color: var(--amber);
+}
+
+.nav-tab svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.8;
+}
+
+/* ─── Shared Header ─── */
+.screen-header {
+  background: var(--gradient);
+  padding: 52px 24px 28px;
+  color: var(--white);
+}
+
+.screen-header h1 {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.screen-header p {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.88;
+  line-height: 1.5;
+}
+
+/* ─── Cards ─── */
+.card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+/* ─── Buttons ─── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--amber);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:hover  { background: var(--amber-light); }
+
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--brown);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-dark:active { transform: scale(0.97); }
+.btn-dark:hover  { background: var(--brown-mid); }
+
+/* ─── Section Headings ─── */
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--brown);
+  margin: 0 0 12px;
+}
+
+/* ─── Scrollbar (desktop) ─── */
+.screen::-webkit-scrollbar { width: 4px; }
+.screen::-webkit-scrollbar-thumb { background: var(--peach); border-radius: 2px; }

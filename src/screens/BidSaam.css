@@ -1,0 +1,141 @@
+.bidsaam-body {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Input card ─── */
+.prayer-input-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.anon-badge {
+  font-size: 12px;
+  color: var(--brown-mid);
+  background: var(--lavender);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+.prayer-textarea {
+  width: 100%;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  background: var(--cream);
+  resize: none;
+  outline: none;
+  line-height: 1.55;
+  transition: border-color 0.2s;
+}
+
+.prayer-textarea:focus {
+  border-color: var(--amber);
+}
+
+.input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.submit-btn {
+  font-size: 14px;
+  padding: 11px 18px;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitted-msg {
+  font-size: 13px;
+  color: #2E7D32;
+  background: #E8F5E9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+/* ─── Prayer list ─── */
+.prayer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prayer-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.prayer-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.prayer-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prayer-text {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.prayer-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.prayed-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid var(--peach);
+  background: var(--cream);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brown-mid);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  align-self: flex-start;
+}
+
+.prayed-btn.prayed {
+  background: var(--peach);
+  border-color: var(--amber);
+  color: var(--brown);
+}
+
+.prayed-btn:active { transform: scale(0.96); }
+
+.prayed-count {
+  font-weight: 700;
+  color: var(--amber);
+}
