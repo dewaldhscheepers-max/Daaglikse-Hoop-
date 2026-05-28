@@ -42,7 +42,7 @@ export default function BottomNav({ active, onChange }) {
     },
     {
       id: 'nooiomy',
-      label: 'Nooi My',
+      label: 'Nooi',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
