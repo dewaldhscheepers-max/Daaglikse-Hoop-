@@ -61,7 +61,7 @@ function PauseIcon({ size = 24 }) {
 function SkipIcon({ direction = 'forward', seconds = 15 }) {
   const flip = direction === 'back' ? 'scale(-1,1)' : ''
   return (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
       <g transform={flip ? `translate(36,0) ${flip}` : ''}>
         <path d="M18 6 A12 12 0 1 0 30 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
         <polyline points="28,10 30,18 22,18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -85,49 +85,6 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
       <div className="mini-bar">
         <div className="mini-fill" style={{ width: `${progress * 100}%` }} />
       </div>
-    </div>
-  )
-}
-
-function FeaturedCard({ note, playing, progress, elapsed, onToggle, onSkip }) {
-  return (
-    <div className="featured-card">
-      {/* Header area with gradient bg and large title */}
-      <div className="featured-header">
-        <span className="featured-badge">Vandag se Oordenking</span>
-        <h2 className="featured-title">{note.title}</h2>
-        <p className="featured-ref">{note.scripture}</p>
-        <p className="featured-scripture">{note.scriptureText}</p>
-      </div>
-
-      {/* Controls */}
-      <div className="featured-controls">
-        <button className="skip-btn" onClick={() => onSkip(-15)} aria-label="15 sekondes terug">
-          <SkipIcon direction="back" seconds={15} />
-        </button>
-
-        <button className="play-btn-big" onClick={onToggle}>
-          {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
-        </button>
-
-        <button className="skip-btn" onClick={() => onSkip(15)} aria-label="15 sekondes vorentoe">
-          <SkipIcon direction="forward" seconds={15} />
-        </button>
-      </div>
-
-      {/* Progress */}
-      <div className="featured-progress">
-        <span className="time-label">{fmtTime(elapsed)}</span>
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
-          <div className="progress-thumb" style={{ left: `${progress * 100}%` }} />
-        </div>
-        <span className="time-label">{fmtTime(note.lengthSeconds)}</span>
-      </div>
-
-      {note.audioUrl === null && (
-        <p className="demo-notice">Demo — koppel Firebase om oudio te laai</p>
-      )}
     </div>
   )
 }
@@ -167,6 +124,7 @@ export default function Luister() {
   const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
   const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
+  const todayPlaying = playing && activeId === today.id
 
   useEffect(() => {
     if (playing) {
@@ -206,24 +164,38 @@ export default function Luister() {
 
   return (
     <div className="luister">
-      <div className="luister-header">
-        <div className="luister-header-bg" />
-        <div className="luister-header-text">
-          <div className="app-title-small">Daaglikse</div>
-          <div className="app-title-big">Hoop</div>
-          <div className="app-tagline">HOOP VIR ELKE DAG</div>
+      {/* ── Hero ── */}
+      <div className="luister-hero">
+        {/* Title — top, subtle dark band behind it */}
+        <div className="hero-title">
+          <div className="hero-title-main">Daaglikse Hoop</div>
+          <div className="hero-title-sub">met Dewald Scheepers</div>
         </div>
 
-        <FeaturedCard
-          note={today}
-          playing={playing && activeId === today.id}
-          progress={activeId === today.id ? progress : 0}
-          elapsed={activeId === today.id ? elapsed : 0}
-          onToggle={() => toggle(today)}
-          onSkip={skip}
-        />
+        {/* Play button only — centred over face */}
+        <div className="hero-controls">
+          <button className="hero-skip" onClick={() => skip(-15)}><SkipIcon direction="back" seconds={15} /></button>
+          <button className="hero-play-btn" onClick={() => toggle(today)}>
+            {todayPlaying ? <PauseIcon size={36} /> : <PlayIcon size={36} />}
+          </button>
+          <button className="hero-skip" onClick={() => skip(15)}><SkipIcon direction="forward" seconds={15} /></button>
+        </div>
+
+        {/* Song info + progress — bottom of hero */}
+        <div className="hero-song-info">
+          <div className="hero-song-title">{today.title}</div>
+          <div className="hero-song-ref">{today.scripture}</div>
+          <div className="hero-progress">
+            <span className="hero-time">{fmtTime(activeId === today.id ? elapsed : 0)}</span>
+            <div className="hero-bar">
+              <div className="hero-fill" style={{ width: `${activeId === today.id ? progress * 100 : 0}%` }} />
+            </div>
+            <span className="hero-time">{fmtTime(today.lengthSeconds)}</span>
+          </div>
+        </div>
       </div>
 
+      {/* ── Recent messages — frosted, see-through ── */}
       <div className="luister-body">
         <h3 className="section-title">Onlangse boodskappe</h3>
         {Object.entries(bySeries).map(([series, notes]) => (
@@ -241,12 +213,12 @@ export default function Luister() {
         ))}
       </div>
 
-      {activeId && activeId !== today.id && (
+      {activeId !== today.id && (
         <MiniPlayer
           note={activeNote}
           playing={playing}
           progress={progress}
-          onToggle={() => setPlaying(p => !p)}
+          onToggle={() => toggle(activeNote)}
         />
       )}
     </div>
