@@ -5,7 +5,7 @@ import './Webtuiste.css'
 
 const PRESET_AMOUNTS = [50, 100, 200, 500]
 
-function DonationModal({ onClose }) {
+export function DonationModal({ onClose }) {
   const [selected, setSelected] = useState(100)
   const [custom, setCustom]     = useState('')
   const [email, setEmail]       = useState('')

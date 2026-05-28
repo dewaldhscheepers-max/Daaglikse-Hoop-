@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react'
 import Luister from './screens/Luister'
 import BidSaam from './screens/BidSaam'
 import Meer from './screens/Meer'
-import Webtuiste from './screens/Webtuiste'
+import { DonationModal } from './screens/Webtuiste'
+import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
 import './App.css'
 
 export default function App() {
   const [tab, setTab]               = useState('luister')
-  const [paymentResult, setPayment] = useState(null) // 'success' | 'cancel' | null
+  const [showDonation, setDonation] = useState(false)
+  const [showNooimy, setNooimy]     = useState(false)
+  const [paymentResult, setPayment] = useState(null)
 
-  // Handle PayFast return redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('payment')
@@ -26,18 +28,25 @@ export default function App() {
     }
   }, [])
 
+  function handleNav(id) {
+    if (id === 'skenk')   { setDonation(true); return }
+    if (id === 'nooiomy') { setNooimy(true);   return }
+    setTab(id)
+  }
+
   return (
     <div className="app">
       <div className="screen">
-        {tab === 'luister'   && <Luister />}
-        {tab === 'bidsaam'   && <BidSaam />}
-        {tab === 'meer'      && <Meer />}
-        {tab === 'webtuiste' && <Webtuiste onNavigate={setTab} />}
+        {tab === 'luister' && <Luister />}
+        {tab === 'bidsaam' && <BidSaam />}
+        {tab === 'meer'    && <Meer />}
       </div>
 
-      <BottomNav active={tab} onChange={setTab} />
+      <BottomNav active={tab} onChange={handleNav} />
 
-      {/* PayFast result banner */}
+      {showDonation && <DonationModal onClose={() => setDonation(false)} />}
+      {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
+
       {paymentResult && (
         <div className={`payment-banner ${paymentResult.status}`}>
           {paymentResult.status === 'success'
