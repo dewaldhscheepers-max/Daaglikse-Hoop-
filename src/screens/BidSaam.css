@@ -1,9 +1,5 @@
-/* Double class for higher specificity than .screen-header */
-.bidsaam-header.screen-header {
+.bidsaam-header {
   text-align: center;
-  background:
-    linear-gradient(175deg, rgba(120,80,170,0.68) 0%, rgba(170,100,60,0.62) 55%, rgba(90,50,10,0.72) 100%),
-    url('/bidsaam-bg.png') center 25% / cover no-repeat !important;
 }
 
 .bidsaam-body {

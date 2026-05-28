@@ -9,10 +9,10 @@
 .luister-header-bg {
   position: absolute;
   inset: 0;
-  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&auto=format&fit=crop&q=70');
+  background-image: url('/bidsaam-bg.png');
   background-size: cover;
-  background-position: center 40%;
-  opacity: 0.35;
+  background-position: center 8%;
+  opacity: 0.30;
   pointer-events: none;
 }
 

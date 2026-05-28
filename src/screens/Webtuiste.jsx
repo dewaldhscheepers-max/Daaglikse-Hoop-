@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { checkoutBook } from '../utils/payfast'
+import NooimyModal from '../components/NooimyModal'
 import './Webtuiste.css'
 
 const PRESET_AMOUNTS = [50, 100, 200, 500]
@@ -82,6 +83,7 @@ function DonationModal({ onClose }) {
 
 export default function Webtuiste({ onNavigate }) {
   const [showDonation, setShowDonation] = useState(false)
+  const [showNooimy, setShowNooimy]     = useState(false)
 
   return (
     <div className="webtuiste">
@@ -126,8 +128,8 @@ export default function Webtuiste({ onNavigate }) {
           </svg>
         </button>
 
-        {/* Nooi my — external */}
-        <a href="https://www.dewaldscheepers.com/nooi-my-om-te-preek/" target="_blank" rel="noopener noreferrer" className="link-card">
+        {/* Nooi my — in-app form */}
+        <button className="link-card in-app-link" onClick={() => setShowNooimy(true)}>
           <div className="link-icon" style={{ background: '#F8EDE8' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -140,7 +142,7 @@ export default function Webtuiste({ onNavigate }) {
           <svg className="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
-        </a>
+        </button>
 
         {/* Skenking — in-app PayFast */}
         <button className="link-card in-app-link donation-link" onClick={() => setShowDonation(true)}>
@@ -164,6 +166,7 @@ export default function Webtuiste({ onNavigate }) {
       </div>
 
       {showDonation && <DonationModal onClose={() => setShowDonation(false)} />}
+      {showNooimy  && <NooimyModal   onClose={() => setShowNooimy(false)} />}
     </div>
   )
 }
