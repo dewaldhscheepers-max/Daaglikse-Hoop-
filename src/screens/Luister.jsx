@@ -1,47 +1,76 @@
 import { useState, useRef, useEffect } from 'react'
 import './Luister.css'
 
-/* ── Sample data (replace with Firebase later) ── */
 const SAMPLE_NOTES = [
   {
     id: '1',
     title: 'Hy Sien Jou Trane',
-    scripture: 'Psalm 56:9 — "U tel my omswerwinge; berg my trane in u kruik."',
+    scripture: 'Psalm 56:9',
+    scriptureText: '"U tel my omswerwinge; berg my trane in u kruik."',
     series: 'God Sien Jou Trane',
     lengthSeconds: 312,
     audioUrl: null,
     isToday: true,
-    color: '#E8E0F0'
+    color: '#EDE8F8'
   },
   {
     id: '2',
     title: 'Wanneer Jy Uitgeput Is',
-    scripture: 'Matteus 11:28 — "Kom na My toe, almal wat vermoeid en belas is."',
+    scripture: 'Matteus 11:28',
+    scriptureText: '"Kom na My toe, almal wat vermoeid en belas is."',
     series: 'Rustelose Gedagtes',
     lengthSeconds: 284,
     audioUrl: null,
     isToday: false,
-    color: '#F2C9A8'
+    color: '#F8EDE8'
   },
   {
     id: '3',
     title: 'Giftige Gedagtes',
-    scripture: 'Romeine 12:2 — "Word verander deur die vernuwing van julle gemoed."',
+    scripture: 'Romeine 12:2',
+    scriptureText: '"Word verander deur die vernuwing van julle gemoed."',
     series: 'TOKSIES',
     lengthSeconds: 398,
     audioUrl: null,
     isToday: false,
-    color: '#D4E8C8'
+    color: '#E8F0EE'
   }
 ]
 
 function fmtTime(sec) {
   const m = Math.floor(sec / 60)
-  const s = String(sec % 60).padStart(2, '0')
+  const s = String(Math.floor(sec % 60)).padStart(2, '0')
   return `${m}:${s}`
 }
 
-/* ── Mini Player ── */
+function PlayIcon({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="6,3 20,12 6,21"/>
+    </svg>
+  )
+}
+function PauseIcon({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="5" y="3" width="4" height="18" rx="1"/>
+      <rect x="15" y="3" width="4" height="18" rx="1"/>
+    </svg>
+  )
+}
+function SkipIcon({ direction = 'forward', seconds = 15 }) {
+  const flip = direction === 'back' ? 'scale(-1,1)' : ''
+  return (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <g transform={flip ? `translate(36,0) ${flip}` : ''}>
+        <path d="M18 6 A12 12 0 1 0 30 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
+        <polyline points="28,10 30,18 22,18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      </g>
+      <text x="18" y="23" textAnchor="middle" fontSize="9" fontWeight="600" fill="currentColor" fontFamily="Inter,sans-serif">{seconds}</text>
+    </svg>
+  )
+}
+
 function MiniPlayer({ note, playing, progress, onToggle }) {
   if (!note) return null
   return (
@@ -51,7 +80,7 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
         <span className="mini-series">{note.series}</span>
       </div>
       <button className="mini-play" onClick={onToggle}>
-        {playing ? <PauseIcon /> : <PlayIcon size={16} />}
+        {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
       </button>
       <div className="mini-bar">
         <div className="mini-fill" style={{ width: `${progress * 100}%` }} />
@@ -60,23 +89,40 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   )
 }
 
-/* ── Featured card (today's note) ── */
-function FeaturedCard({ note, playing, progress, onToggle }) {
+function FeaturedCard({ note, playing, progress, elapsed, onToggle, onSkip }) {
   return (
-    <div className="featured-card card">
-      <div className="featured-badge">Vandag se boodskap</div>
-      <h2 className="featured-title">{note.title}</h2>
-      <p className="featured-scripture">{note.scripture}</p>
-
-      <div className="featured-controls">
-        <button className="play-btn-big" onClick={onToggle}>
-          {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
-        </button>
-        <span className="featured-time">{fmtTime(note.lengthSeconds)}</span>
+    <div className="featured-card">
+      {/* Header area with gradient bg and large title */}
+      <div className="featured-header">
+        <span className="featured-badge">Vandag se Oordenking</span>
+        <h2 className="featured-title">{note.title}</h2>
+        <p className="featured-ref">{note.scripture}</p>
+        <p className="featured-scripture">{note.scriptureText}</p>
       </div>
 
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
+      {/* Controls */}
+      <div className="featured-controls">
+        <button className="skip-btn" onClick={() => onSkip(-15)} aria-label="15 sekondes terug">
+          <SkipIcon direction="back" seconds={15} />
+        </button>
+
+        <button className="play-btn-big" onClick={onToggle}>
+          {playing ? <PauseIcon size={32} /> : <PlayIcon size={32} />}
+        </button>
+
+        <button className="skip-btn" onClick={() => onSkip(15)} aria-label="15 sekondes vorentoe">
+          <SkipIcon direction="forward" seconds={15} />
+        </button>
+      </div>
+
+      {/* Progress */}
+      <div className="featured-progress">
+        <span className="time-label">{fmtTime(elapsed)}</span>
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
+          <div className="progress-thumb" style={{ left: `${progress * 100}%` }} />
+        </div>
+        <span className="time-label">{fmtTime(note.lengthSeconds)}</span>
       </div>
 
       {note.audioUrl === null && (
@@ -86,12 +132,11 @@ function FeaturedCard({ note, playing, progress, onToggle }) {
   )
 }
 
-/* ── List row ── */
 function NoteRow({ note, playing, onToggle }) {
   return (
     <div className="note-row">
       <div className="note-thumb" style={{ background: note.color }}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brown)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
           <path d="M9 18V5l12-2v13"/>
           <circle cx="6" cy="18" r="3"/>
           <circle cx="18" cy="16" r="3"/>
@@ -99,55 +144,39 @@ function NoteRow({ note, playing, onToggle }) {
       </div>
       <div className="note-info">
         <span className="note-title">{note.title}</span>
-        <span className="note-scripture">{note.scripture.split('—')[0].trim()}</span>
+        <span className="note-scripture">{note.scripture}</span>
         <span className="note-series">{note.series}</span>
       </div>
       <div className="note-right">
         <span className="note-length">{fmtTime(note.lengthSeconds)}</span>
         <button className="play-btn-small" onClick={onToggle}>
-          {playing ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
+          {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
         </button>
       </div>
     </div>
   )
 }
 
-/* ── Icons ── */
-function PlayIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5,3 19,12 5,21"/>
-    </svg>
-  )
-}
-function PauseIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="4" width="4" height="16"/>
-      <rect x="14" y="4" width="4" height="16"/>
-    </svg>
-  )
-}
-
-/* ── Main screen ── */
 export default function Luister() {
-  const [activeId, setActiveId]   = useState(null)
-  const [playing, setPlaying]     = useState(false)
-  const [progress, setProgress]   = useState(0)
-  const audioRef                  = useRef(null)
-  const timerRef                  = useRef(null)
+  const [activeId, setActiveId] = useState('1')
+  const [playing, setPlaying]   = useState(false)
+  const [elapsed, setElapsed]   = useState(0)
+  const timerRef                = useRef(null)
 
-  const today    = SAMPLE_NOTES.find(n => n.isToday)
-  const recent   = SAMPLE_NOTES.filter(n => !n.isToday)
+  const today      = SAMPLE_NOTES.find(n => n.isToday)
+  const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
+  const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
 
-  /* Simulate playback progress for demo */
   useEffect(() => {
     if (playing) {
       timerRef.current = setInterval(() => {
-        setProgress(p => {
-          if (p >= 1) { setPlaying(false); return 0 }
-          return p + (1 / (activeNote?.lengthSeconds || 300))
+        setElapsed(e => {
+          if (e >= (activeNote?.lengthSeconds || 300)) {
+            setPlaying(false)
+            return 0
+          }
+          return e + 1
         })
       }, 1000)
     } else {
@@ -161,12 +190,15 @@ export default function Luister() {
       setPlaying(p => !p)
     } else {
       setActiveId(note.id)
-      setProgress(0)
+      setElapsed(0)
       setPlaying(true)
     }
   }
 
-  /* Group recent by series */
+  function skip(seconds) {
+    setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
+  }
+
   const bySeries = recent.reduce((acc, n) => {
     ;(acc[n.series] = acc[n.series] || []).push(n)
     return acc
@@ -174,22 +206,25 @@ export default function Luister() {
 
   return (
     <div className="luister">
-      {/* Header */}
-      <div className="luister-header screen-header">
-        <h1>Daaglikse Hoop</h1>
-        <p>Jou daaglikse woord van hoop</p>
-      </div>
+      <div className="luister-header">
+        <div className="luister-header-bg" />
+        <div className="luister-header-text">
+          <div className="app-title-small">Daaglikse</div>
+          <div className="app-title-big">Hoop</div>
+          <div className="app-tagline">HOOP VIR ELKE DAG</div>
+        </div>
 
-      <div className="luister-body">
-        {/* Featured */}
         <FeaturedCard
           note={today}
           playing={playing && activeId === today.id}
           progress={activeId === today.id ? progress : 0}
+          elapsed={activeId === today.id ? elapsed : 0}
           onToggle={() => toggle(today)}
+          onSkip={skip}
         />
+      </div>
 
-        {/* Recent by series */}
+      <div className="luister-body">
         <h3 className="section-title">Onlangse boodskappe</h3>
         {Object.entries(bySeries).map(([series, notes]) => (
           <div key={series} className="series-group">
@@ -206,7 +241,6 @@ export default function Luister() {
         ))}
       </div>
 
-      {/* Mini player (shows when playing a note while scrolled away from featured) */}
       {activeId && activeId !== today.id && (
         <MiniPlayer
           note={activeNote}

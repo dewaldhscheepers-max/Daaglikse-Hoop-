@@ -1,5 +1,5 @@
 /* ─── Google Fonts ─── */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap');
 
 /* ─── Reset & Base ─── */
 *, *::before, *::after {
@@ -9,27 +9,28 @@
 }
 
 :root {
-  /* Sunrise palette */
-  --lavender:    #E8E0F0;
-  --peach:       #F2C9A8;
-  --amber:       #C97D3A;
-  --amber-light: #E8A55A;
-  --cream:       #FAF7F2;
-  --cream-dark:  #F0EBE1;
-  --brown:       #4A2E1A;
-  --brown-mid:   #7A4F2D;
-  --text:        #2D1F0E;
-  --text-muted:  #8C7055;
-  --white:       #FFFFFF;
-  --shadow:      rgba(74, 46, 26, 0.12);
+  --lavender:      #C4B0E8;
+  --lavender-soft: #EDE8F8;
+  --lavender-mid:  #9B8EC4;
+  --purple:        #7C6FAF;
+  --purple-dark:   #5C4E8E;
+  --peach:         #F2C4A0;
+  --gold:          #D4956A;
+  --cream:         #FAF8F5;
+  --cream-dark:    #F0EBE3;
+  --white:         #FFFFFF;
+  --text:          #2D2040;
+  --text-muted:    #8A7E9A;
+  --shadow:        rgba(92, 78, 142, 0.12);
 
-  /* Gradient used in headers */
-  --gradient: linear-gradient(135deg, #C4A0E0 0%, #E8A55A 60%, #C97D3A 100%);
+  /* Sunrise gradient — lavender sky into warm peach horizon */
+  --gradient: linear-gradient(175deg, #B8A0DC 0%, #D4A0C0 35%, #EDB890 70%, #D4956A 100%);
+  --gradient-light: linear-gradient(175deg, #C8B8EC 0%, #E4B4CC 40%, #F2C8A0 75%, #E0A87A 100%);
 
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-body:  'Inter', system-ui, sans-serif;
 
-  --nav-height: 68px;
+  --nav-height:  68px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -37,7 +38,6 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  /* Force light mode — this app has its own warm palette */
   color-scheme: light only;
 }
 
@@ -57,10 +57,9 @@ body {
   margin: 0 auto;
   position: relative;
   background: var(--cream);
-  box-shadow: 0 0 40px var(--shadow);
+  box-shadow: 0 0 60px rgba(92, 78, 142, 0.15);
 }
 
-/* ─── Screen (scrollable area above nav) ─── */
 .screen {
   flex: 1;
   overflow-y: auto;
@@ -85,7 +84,7 @@ body {
   align-items: flex-start;
   justify-content: space-around;
   z-index: 100;
-  box-shadow: 0 -4px 20px var(--shadow);
+  box-shadow: 0 -4px 24px var(--shadow);
 }
 
 .nav-tab {
@@ -108,9 +107,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav-tab.active {
-  color: var(--amber);
-}
+.nav-tab.active { color: var(--purple); }
 
 .nav-tab svg {
   width: 24px;
@@ -121,32 +118,54 @@ body {
 /* ─── Shared Header ─── */
 .screen-header {
   background: var(--gradient);
-  padding: 52px 24px 28px;
+  padding: 56px 28px 36px;
   color: var(--white);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='200' cy='320' rx='280' ry='160' fill='rgba(255,255,255,0.06)'/%3E%3Cellipse cx='200' cy='340' rx='200' ry='120' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") bottom/cover no-repeat;
 }
 
 .screen-header h1 {
   font-family: var(--font-serif);
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.screen-header .subtitle {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  position: relative;
 }
 
 .screen-header p {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 14px;
   opacity: 0.88;
   line-height: 1.5;
+  position: relative;
 }
 
 /* ─── Cards ─── */
 .card {
   background: var(--white);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 2px 12px var(--shadow);
+  box-shadow: 0 2px 16px var(--shadow);
 }
 
 /* ─── Buttons ─── */
@@ -155,10 +174,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--amber);
+  background: var(--purple-dark);
   color: var(--white);
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px 24px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -169,17 +188,17 @@ body {
 }
 
 .btn-primary:active { transform: scale(0.97); }
-.btn-primary:hover  { background: var(--amber-light); }
+.btn-primary:hover  { background: var(--purple); }
 
 .btn-dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--brown);
+  background: var(--text);
   color: var(--white);
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px 24px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -190,17 +209,15 @@ body {
 }
 
 .btn-dark:active { transform: scale(0.97); }
-.btn-dark:hover  { background: var(--brown-mid); }
 
 /* ─── Section Headings ─── */
 .section-title {
   font-family: var(--font-serif);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
-  color: var(--brown);
-  margin: 0 0 12px;
+  color: var(--text);
 }
 
 /* ─── Scrollbar (desktop) ─── */
 .screen::-webkit-scrollbar { width: 4px; }
-.screen::-webkit-scrollbar-thumb { background: var(--peach); border-radius: 2px; }
+.screen::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 2px; }
