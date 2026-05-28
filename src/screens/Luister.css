@@ -3,11 +3,11 @@
   position: relative;
   background:
     linear-gradient(180deg,
-      rgba(60, 30, 90, 0.30) 0%,
-      rgba(80, 40, 20, 0.15) 50%,
-      rgba(20, 10, 5, 0.45) 100%),
-    url('/bidsaam-bg.png') center 20% / cover no-repeat;
-  padding: 52px 20px 0;
+      rgba(20, 10, 40, 0.18) 0%,
+      rgba(20, 10, 10, 0.08) 45%,
+      rgba(10, 5, 5, 0.22) 100%),
+    url('/bidsaam-bg.png') center 42% / cover no-repeat;
+  padding: 48px 20px 0;
   overflow: visible;
 }
 
@@ -48,13 +48,15 @@
   opacity: 0.8;
 }
 
-/* ─── Featured card ─── */
+/* ─── Featured card — frosted glass so face shows through ─── */
 .featured-card {
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-radius: 24px 24px 0 0;
-  padding: 22px 20px 16px;
+  padding: 18px 20px 14px;
   position: relative;
-  box-shadow: 0 -4px 24px rgba(92, 78, 142, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
   margin: 0 -4px;
 }
 

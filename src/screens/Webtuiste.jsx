@@ -111,17 +111,16 @@ export default function Webtuiste({ onNavigate }) {
           </a>
         </div>
 
-        {/* E-boeke — navigates inside app */}
-        <button className="link-card in-app-link" onClick={() => onNavigate('meer')}>
-          <div className="link-icon" style={{ background: '#EDE8F8' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        {/* Skenking — EERSTE (bo-aan) */}
+        <button className="link-card in-app-link donation-link" onClick={() => setShowDonation(true)}>
+          <div className="link-icon" style={{ background: '#FFF0F3' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#E05A7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </div>
           <div className="link-text">
-            <span className="link-title">E-boeke</span>
-            <span className="link-desc">Koop of laai gratis e-boeke af.</span>
+            <span className="link-title">Maak 'n Skenking</span>
+            <span className="link-desc">Ondersteun die bediening van Daaglikse Hoop.</span>
           </div>
           <svg className="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"/>
@@ -144,16 +143,17 @@ export default function Webtuiste({ onNavigate }) {
           </svg>
         </button>
 
-        {/* Skenking — in-app PayFast */}
-        <button className="link-card in-app-link donation-link" onClick={() => setShowDonation(true)}>
-          <div className="link-icon" style={{ background: '#FFF0F3' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#E05A7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        {/* E-boeke — LAASTE (onder-aan) */}
+        <button className="link-card in-app-link" onClick={() => onNavigate('meer')}>
+          <div className="link-icon" style={{ background: '#EDE8F8' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
             </svg>
           </div>
           <div className="link-text">
-            <span className="link-title">Maak 'n Skenking</span>
-            <span className="link-desc">Ondersteun die bediening van Daaglikse Hoop.</span>
+            <span className="link-title">E-boeke</span>
+            <span className="link-desc">Koop of laai gratis e-boeke af.</span>
           </div>
           <svg className="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"/>
