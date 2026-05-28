@@ -15,8 +15,9 @@ export default function BottomNav({ active, onChange }) {
       id: 'bidsaam',
       label: 'Bid Saam',
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="3" x2="12" y2="21"/>
+          <line x1="5" y1="8" x2="19" y2="8"/>
         </svg>
       )
     },
