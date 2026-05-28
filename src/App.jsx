@@ -5,6 +5,7 @@ import Meer from './screens/Meer'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
+import { subscribeToNotifications } from './firebase'
 import './App.css'
 
 export default function App() {
@@ -12,6 +13,20 @@ export default function App() {
   const [showDonation, setDonation] = useState(false)
   const [showNooimy, setNooimy]     = useState(false)
   const [paymentResult, setPayment] = useState(null)
+  const [showNotifBanner, setNotifBanner] = useState(false)
+
+  useEffect(() => {
+    // Show notification banner after 3 seconds if not already decided
+    if ('Notification' in window && Notification.permission === 'default') {
+      const t = setTimeout(() => setNotifBanner(true), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [])
+
+  async function handleNotifYes() {
+    setNotifBanner(false)
+    await subscribeToNotifications()
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -46,6 +61,17 @@ export default function App() {
 
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
+
+      {showNotifBanner && (
+        <div className="notif-banner">
+          <div className="notif-banner-text">
+            <strong>🌅 More Kennisgewings</strong>
+            Kry elke oggend 'n nuwe oordenking op jou skerm.
+          </div>
+          <button className="notif-banner-yes" onClick={handleNotifYes}>Ja, graag</button>
+          <button className="notif-banner-no" onClick={() => setNotifBanner(false)}>✕</button>
+        </div>
+      )}
 
       {paymentResult && (
         <div className={`payment-banner ${paymentResult.status}`}>
