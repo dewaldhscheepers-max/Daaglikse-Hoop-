@@ -2,10 +2,10 @@
 .luister-hero {
   position: relative;
   background: url('/bidsaam-bg.png') center 52% / cover no-repeat;
-  min-height: 440px;
+  min-height: 460px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
   padding: 52px 20px 20px;
 }
 
@@ -35,6 +35,7 @@
   z-index: 1;
   text-align: center;
   color: var(--white);
+  align-self: stretch;
 }
 
 .hero-title-main {
@@ -42,19 +43,26 @@
   font-size: 28px;
   font-weight: 700;
   line-height: 1.1;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.40);
   letter-spacing: -0.01em;
+  /* Warm sunset glow so text pops against the bright sky */
+  text-shadow:
+    0 0 24px rgba(255, 140, 0, 0.85),
+    0 0 48px rgba(255, 100, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.65);
 }
 
 .hero-title-sub {
   font-size: 13px;
   font-weight: 400;
-  opacity: 0.88;
+  opacity: 0.92;
   margin-top: 3px;
   letter-spacing: 0.02em;
+  text-shadow:
+    0 0 16px rgba(255, 140, 0, 0.70),
+    0 1px 5px rgba(0, 0, 0, 0.55);
 }
 
-/* ─── Play controls — centred ─── */
+/* ─── Play controls — pushed below face ─── */
 .hero-controls {
   position: relative;
   z-index: 1;
@@ -62,6 +70,7 @@
   align-items: center;
   justify-content: center;
   gap: 24px;
+  margin-top: 155px; /* push below chin/beard area */
 }
 
 .hero-play-btn {
@@ -104,6 +113,8 @@
   z-index: 1;
   text-align: center;
   color: var(--white);
+  align-self: stretch;
+  margin-top: 16px;
 }
 
 .hero-song-title {
