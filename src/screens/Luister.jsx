@@ -107,7 +107,7 @@ function FeaturedCard({ note, playing, progress, elapsed, onToggle, onSkip }) {
         </button>
 
         <button className="play-btn-big" onClick={onToggle}>
-          {playing ? <PauseIcon size={32} /> : <PlayIcon size={32} />}
+          {playing ? <PauseIcon size={26} /> : <PlayIcon size={26} />}
         </button>
 
         <button className="skip-btn" onClick={() => onSkip(15)} aria-label="15 sekondes vorentoe">

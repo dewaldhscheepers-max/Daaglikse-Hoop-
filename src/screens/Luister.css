@@ -3,12 +3,16 @@
   position: relative;
   background:
     linear-gradient(180deg,
-      rgba(20, 10, 40, 0.18) 0%,
-      rgba(20, 10, 10, 0.08) 45%,
-      rgba(10, 5, 5, 0.22) 100%),
-    url('/bidsaam-bg.png') center 42% / cover no-repeat;
+      rgba(20, 10, 40, 0.22) 0%,
+      rgba(10, 5, 5, 0.04) 40%,
+      rgba(10, 5, 5, 0.28) 100%),
+    url('/bidsaam-bg.png') center 32% / cover no-repeat;
   padding: 48px 20px 0;
   overflow: visible;
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .luister-header-bg {
@@ -19,7 +23,7 @@
   text-align: center;
   color: var(--white);
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .app-title-small {
@@ -48,51 +52,47 @@
   opacity: 0.8;
 }
 
-/* ─── Featured card — frosted glass so face shows through ─── */
+/* ─── Featured card — slim frosted glass ─── */
 .featured-card {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 24px 24px 0 0;
-  padding: 18px 20px 14px;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 16px 8px;
   position: relative;
-  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
   margin: 0 -4px;
 }
 
 .featured-badge {
   display: inline-block;
-  background: var(--lavender-soft);
-  color: var(--purple);
-  font-size: 11px;
+  background: rgba(180, 160, 220, 0.5);
+  color: var(--white);
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.04em;
   border-radius: 20px;
-  padding: 4px 12px;
+  padding: 2px 8px;
 }
 
 .featured-title {
   font-family: var(--font-serif);
-  font-size: 30px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.1;
-  margin-top: 8px;
+  margin-top: 3px;
 }
 
 .featured-ref {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--purple);
   font-weight: 600;
-  margin-top: 6px;
+  margin-top: 1px;
 }
 
 .featured-scripture {
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  font-style: italic;
-  margin-top: 4px;
+  display: none;
 }
 
 /* ─── Player controls ─── */
@@ -100,13 +100,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  margin: 20px 0 14px;
+  gap: 16px;
+  margin: 6px 0 6px;
 }
 
 .play-btn-big {
-  width: 72px;
-  height: 72px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--purple-dark);
   color: var(--white);
@@ -115,15 +115,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(92, 78, 142, 0.4);
+  box-shadow: 0 4px 16px rgba(92, 78, 142, 0.45);
   transition: transform 0.15s, box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
-  padding-left: 4px;
+  padding-left: 3px;
 }
 
 .play-btn-big:active {
   transform: scale(0.92);
-  box-shadow: 0 2px 12px rgba(92, 78, 142, 0.3);
+  box-shadow: 0 2px 8px rgba(92, 78, 142, 0.3);
 }
 
 .skip-btn {
@@ -146,7 +146,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .time-label {
