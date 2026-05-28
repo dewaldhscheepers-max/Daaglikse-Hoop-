@@ -4,7 +4,7 @@ const links = [
   {
     title: 'E-boeke',
     desc: 'Lees my e-boeke.',
-    url: 'https://dewaldscheepers.com/e-boeke',
+    url: 'https://www.dewaldscheepers.com/my-ebooks/',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -15,7 +15,7 @@ const links = [
   {
     title: 'Nooi My Om Te Preek',
     desc: 'Vra my om by jou gemeente of geleentheid te kom praat.',
-    url: 'https://dewaldscheepers.com/preek',
+    url: 'https://www.dewaldscheepers.com/nooi-my-om-te-preek/',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -25,7 +25,7 @@ const links = [
   {
     title: "Maak 'n Skenking",
     desc: 'Ondersteun die bediening van Daaglikse Hoop.',
-    url: 'https://dewaldscheepers.com/skenking',
+    url: 'https://www.dewaldscheepers.com/donate/',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
