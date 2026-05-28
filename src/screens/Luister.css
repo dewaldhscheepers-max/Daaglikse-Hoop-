@@ -1,19 +1,18 @@
-/* ─── Luister header (gradient "sky" area) ─── */
+/* ─── Luister header ─── */
 .luister-header {
   position: relative;
-  background: var(--gradient);
+  background:
+    linear-gradient(180deg,
+      rgba(60, 30, 90, 0.30) 0%,
+      rgba(80, 40, 20, 0.15) 50%,
+      rgba(20, 10, 5, 0.45) 100%),
+    url('/bidsaam-bg.png') center 20% / cover no-repeat;
   padding: 52px 20px 0;
   overflow: visible;
 }
 
 .luister-header-bg {
-  position: absolute;
-  inset: 0;
-  background-image: url('/bidsaam-bg.png');
-  background-size: cover;
-  background-position: center 8%;
-  opacity: 0.30;
-  pointer-events: none;
+  display: none;
 }
 
 .luister-header-text {
