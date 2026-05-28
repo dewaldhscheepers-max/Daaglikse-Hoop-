@@ -1,18 +1,6 @@
 import './Webtuiste.css'
 
-const links = [
-  {
-    title: 'E-boeke',
-    desc: 'Lees my e-boeke.',
-    url: 'https://www.dewaldscheepers.com/my-ebooks/',
-    color: '#EDE8F8',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-    )
-  },
+const externalLinks = [
   {
     title: 'Nooi My Om Te Preek',
     desc: 'Vra my om by jou gemeente of geleentheid te kom praat.',
@@ -37,7 +25,7 @@ const links = [
   }
 ]
 
-export default function Webtuiste() {
+export default function Webtuiste({ onNavigate }) {
   return (
     <div className="webtuiste">
       <div className="webtuiste-header screen-header">
@@ -64,9 +52,26 @@ export default function Webtuiste() {
           </a>
         </div>
 
-        {/* Link cards */}
+        {/* E-boeke — navigates inside the app */}
+        <button className="link-card in-app-link" onClick={() => onNavigate('meer')}>
+          <div className="link-icon" style={{ background: '#EDE8F8' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div className="link-text">
+            <span className="link-title">E-boeke</span>
+            <span className="link-desc">Koop of laai gratis e-boeke af.</span>
+          </div>
+          <svg className="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        {/* External links */}
         <div className="link-cards">
-          {links.map(link => (
+          {externalLinks.map(link => (
             <a
               key={link.title}
               href={link.url}

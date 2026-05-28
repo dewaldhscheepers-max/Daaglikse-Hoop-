@@ -1,0 +1,37 @@
+.payment-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 300;
+  font-family: var(--font-body);
+}
+
+.payment-banner.success {
+  background: #2E7D32;
+  color: white;
+}
+
+.payment-banner.cancel {
+  background: #B71C1C;
+  color: white;
+}
+
+.payment-banner button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+}

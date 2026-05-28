@@ -76,6 +76,13 @@
 }
 
 /* ─── Link cards ─── */
+.in-app-link {
+  width: 100%;
+  text-align: left;
+  background: var(--white);
+  cursor: pointer;
+}
+
 .link-cards {
   display: flex;
   flex-direction: column;
