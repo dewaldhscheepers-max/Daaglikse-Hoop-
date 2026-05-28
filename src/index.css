@@ -37,6 +37,8 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  /* Force light mode — this app has its own warm palette */
+  color-scheme: light only;
 }
 
 body {
