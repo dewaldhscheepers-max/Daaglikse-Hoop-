@@ -16,7 +16,6 @@ export default function App() {
   const [showNotifBanner, setNotifBanner] = useState(false)
 
   useEffect(() => {
-    // Show notification banner after 3 seconds if not already decided
     if ('Notification' in window && Notification.permission === 'default') {
       const t = setTimeout(() => setNotifBanner(true), 3000)
       return () => clearTimeout(t)
@@ -65,7 +64,7 @@ export default function App() {
       {showNotifBanner && (
         <div className="notif-banner">
           <div className="notif-banner-text">
-            <strong>🌅 More Kennisgewings</strong>
+            <strong>🌅 Oggend Kennisgewings</strong>
             Kry elke oggend 'n nuwe oordenking op jou skerm.
           </div>
           <button className="notif-banner-yes" onClick={handleNotifYes}>Ja, graag</button>
