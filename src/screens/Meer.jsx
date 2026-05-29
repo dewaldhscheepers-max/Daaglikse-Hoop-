@@ -65,6 +65,20 @@ function CartModal({ books, total, onClose }) {
         </button>
 
         <p className="modal-secure">🔒 Veilige betaling · Kaart, EFT, SnapScan</p>
+
+        <div className="eft-divider"><span>of</span></div>
+
+        <div className="eft-option">
+          <p className="eft-label">Verkies direkte EFT?</p>
+          <a className="eft-email" href={
+            `mailto:info@dewaldscheepers.com?subject=${encodeURIComponent('EFT Betaling — E-boeke')}&body=${encodeURIComponent(
+              `Hallo Dewald,\n\nEk wil graag die volgende boeke bestel:\n${books.map(b => `- ${b.title} (R${b.price})`).join('\n')}\n\nTotaal: R${total}\n\nEk sal bewys van betaling aanheg.\n\nMy e-posadres:`
+            )}`
+          }>
+            info@dewaldscheepers.com
+          </a>
+          <p className="eft-note">Stuur bewys van betaling en jou e-posadres — ons stuur die PDF handmatig.</p>
+        </div>
       </div>
     </div>
   )
