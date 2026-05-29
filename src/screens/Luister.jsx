@@ -382,15 +382,21 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
   }
 
+  const BOOKMARK_LIMIT = 10
+
   function handleBookmark(noteId) {
-    const note = notes.find(n => n.id === noteId) || savedNotes[noteId]
+    const note = notes.find(n => n.id === noteId) || allNotes.find(n => n.id === noteId) || savedNotes[noteId]
     if (savedNotes[noteId]) {
       const newSaved = { ...savedNotes }
       delete newSaved[noteId]
       setSavedNotes(newSaved)
       writeSavedNotes(newSaved)
     } else if (note) {
-      const newSaved = { ...savedNotes, [noteId]: { ...note, savedAt: Date.now() } }
+      let newSaved = { ...savedNotes, [noteId]: { ...note, savedAt: Date.now() } }
+      const entries = Object.entries(newSaved).sort((a, b) => (a[1].savedAt || 0) - (b[1].savedAt || 0))
+      if (entries.length > BOOKMARK_LIMIT) {
+        delete newSaved[entries[0][0]]
+      }
       setSavedNotes(newSaved)
       writeSavedNotes(newSaved)
     }
