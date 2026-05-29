@@ -1,0 +1,276 @@
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── PIN screen ─── */
+.admin-pin-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  padding: 40px 32px;
+  position: relative;
+}
+
+.admin-pin-logo {
+  font-size: 48px;
+  margin-bottom: 4px;
+}
+
+.admin-pin-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.admin-pin-input {
+  width: 100%;
+  max-width: 200px;
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 10px;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--text);
+  outline: none;
+  font-family: var(--font-body);
+}
+
+.admin-pin-input.error { border-color: #dc3c5a; }
+.admin-pin-input:focus { border-color: var(--purple); }
+
+.admin-pin-error {
+  color: #dc3c5a;
+  font-size: 13px;
+  text-align: center;
+}
+
+.admin-pin-btn {
+  background: var(--purple-dark);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  width: 100%;
+  max-width: 200px;
+}
+
+/* ─── Close button (shared) ─── */
+.admin-x {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 10px;
+  color: inherit;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-pin-screen .admin-x {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top));
+  right: 16px;
+  color: var(--text-muted);
+}
+
+/* ─── Admin screen ─── */
+.admin-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  padding-top: calc(16px + env(safe-area-inset-top));
+  background: var(--purple-dark);
+  color: white;
+  flex-shrink: 0;
+}
+
+.admin-header-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px calc(32px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── Section ─── */
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-section-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ─── Form fields ─── */
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.admin-field input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--white);
+  font-family: var(--font-body);
+  outline: none;
+}
+
+.admin-field input:focus { border-color: var(--purple); }
+
+.admin-error {
+  background: #fff0f0;
+  color: #c0392b;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.admin-success {
+  background: #f0fef4;
+  color: #27713f;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.admin-save-btn {
+  background: var(--purple-dark);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  margin-top: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-save-btn:disabled { opacity: 0.55; }
+
+/* ─── Note rows ─── */
+.admin-note-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 6px var(--shadow);
+}
+
+.admin-note-info { flex: 1; min-width: 0; }
+
+.admin-note-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-note-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-delete-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.admin-delete-yes {
+  background: #dc3c5a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.admin-delete-no {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.admin-loading {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}

@@ -111,7 +111,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
-export default function Luister({ onPlayingChange, installBanner }) {
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
   const [notes, setNotes]           = useState([])
   const [notesLoading, setLoading]  = useState(true)
   const [activeId, setActiveId]     = useState(null)
@@ -124,9 +124,22 @@ export default function Luister({ onPlayingChange, installBanner }) {
   })
   const [shareToast, setShareToast] = useState(false)
   const [playCount, setPlayCount]   = useState(0)
-  const timerRef  = useRef(null)
-  const audioRef  = useRef(null)
-  const playedRef = useRef(false)
+  const timerRef    = useRef(null)
+  const audioRef    = useRef(null)
+  const playedRef   = useRef(false)
+  const tapCountRef = useRef(0)
+  const tapTimerRef = useRef(null)
+
+  function handleTitleTap() {
+    tapCountRef.current += 1
+    clearTimeout(tapTimerRef.current)
+    if (tapCountRef.current >= 5) {
+      tapCountRef.current = 0
+      onAdminAccess?.()
+      return
+    }
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0 }, 1500)
+  }
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
@@ -331,7 +344,7 @@ export default function Luister({ onPlayingChange, installBanner }) {
     return (
       <div className="luister">
         <div className="luister-hero luister-hero-loading">
-          <div className="hero-title">
+          <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
             <div className="hero-title-main">Daaglikse Hoop</div>
             <div className="hero-title-sub">met Dewald Scheepers</div>
           </div>
@@ -349,7 +362,7 @@ export default function Luister({ onPlayingChange, installBanner }) {
     return (
       <div className="luister">
         <div className="luister-hero luister-hero-loading">
-          <div className="hero-title">
+          <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
             <div className="hero-title-main">Daaglikse Hoop</div>
             <div className="hero-title-sub">met Dewald Scheepers</div>
           </div>
@@ -367,7 +380,7 @@ export default function Luister({ onPlayingChange, installBanner }) {
       <audio ref={audioRef} style={{ display: 'none' }} />
 
       <div className="luister-hero">
-        <div className="hero-title">
+        <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
           <div className="hero-title-main">Daaglikse Hoop</div>
           <div className="hero-title-sub">met Dewald Scheepers</div>
         </div>

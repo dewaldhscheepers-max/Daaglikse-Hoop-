@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Luister from './screens/Luister'
 import BidSaam from './screens/BidSaam'
 import Meer from './screens/Meer'
+import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
@@ -22,6 +23,7 @@ export default function App() {
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
+  const [showAdmin, setShowAdmin] = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -163,13 +165,14 @@ export default function App() {
   return (
     <div className="app">
       <div className="screen">
-        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} />}
+        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} onAdminAccess={() => setShowAdmin(true)} />}
         {tab === 'bidsaam' && <BidSaam />}
         {tab === 'meer'    && <Meer />}
       </div>
 
       <BottomNav active={tab} onChange={handleNav} />
 
+      {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 
