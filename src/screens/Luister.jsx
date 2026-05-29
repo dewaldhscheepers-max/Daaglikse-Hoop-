@@ -92,6 +92,13 @@ function ShareIcon({ size = 20 }) {
     </svg>
   )
 }
+function SearchIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  )
+}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 function MiniPlayer({ note, playing, progress, onToggle }) {
@@ -154,8 +161,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const [liked, setLiked]           = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
-  const [savedNotes, setSavedNotes] = useState(readSavedNotes)
-  const [shareToast, setShareToast] = useState(false)
+  const [savedNotes, setSavedNotes]   = useState(readSavedNotes)
+  const [shareToast, setShareToast]   = useState(false)
+  const [search, setSearch]           = useState('')
+  const [allNotes, setAllNotes]       = useState([])
+  const [loadingAll, setLoadingAll]   = useState(false)
+  const fetchedAllRef                 = useRef(false)
   const [playCount, setPlayCount]   = useState(0)
 
   const timerRef      = useRef(null)
@@ -384,6 +395,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     }
   }
 
+  async function fetchAllForSearch() {
+    if (fetchedAllRef.current) return
+    fetchedAllRef.current = true
+    setLoadingAll(true)
+    try {
+      const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'))
+      const snap = await getDocs(q)
+      setAllNotes(snap.docs.map(mapDoc))
+    } catch { fetchedAllRef.current = false }
+    setLoadingAll(false)
+  }
+
   async function handleShare(note) {
     const msg  = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
     const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
@@ -418,6 +441,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       </div>
     )
   }
+
+  const term    = search.trim().toLowerCase()
+  const pool    = allNotes.length > 0 ? allNotes : notes
+  const results = term ? pool.filter(n =>
+    [n.title, n.scripture, n.series, n.scriptureText].some(f => f?.toLowerCase().includes(term))
+  ) : []
 
   const bySeries = recent.reduce((acc, n) => {
     const key = n.series || 'Ouer boodskappe'
@@ -465,13 +494,30 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
 
       <div className="luister-body">
         {installBanner}
-        {recent.length > 0 && (
-          <>
-            <h3 className="section-title">Onlangse boodskappe</h3>
-            {Object.entries(bySeries).map(([series, seriesNotes]) => (
-              <div key={series} className="series-group">
-                <div className="series-label">{series}</div>
-                {seriesNotes.map(note => (
+
+        {/* ── Search bar ── */}
+        <div className="search-bar">
+          <SearchIcon size={16} />
+          <input
+            className="search-input"
+            placeholder="Soek boodskappe, reekse, skrifverwysings..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); fetchAllForSearch() }}
+          />
+          {search && <button className="search-clear" onClick={() => setSearch('')}>✕</button>}
+        </div>
+
+        {search ? (
+          /* ── Search results ── */
+          <div className="search-results">
+            {loadingAll ? (
+              <div className="search-status">Besig om te soek...</div>
+            ) : results.length === 0 ? (
+              <div className="search-status">Geen resultate vir "<strong>{search}</strong>" nie.</div>
+            ) : (
+              <>
+                <div className="search-count">{results.length} resultate</div>
+                {results.map(note => (
                   <NoteRow
                     key={note.id}
                     note={note}
@@ -482,17 +528,42 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                     onLike={() => handleLike(note.id)}
                   />
                 ))}
-              </div>
-            ))}
+              </>
+            )}
+          </div>
+        ) : (
+          /* ── Normal grouped view ── */
+          <>
+            {recent.length > 0 && (
+              <>
+                <h3 className="section-title">Onlangse boodskappe</h3>
+                {Object.entries(bySeries).map(([series, seriesNotes]) => (
+                  <div key={series} className="series-group">
+                    <div className="series-label">{series}</div>
+                    {seriesNotes.map(note => (
+                      <NoteRow
+                        key={note.id}
+                        note={note}
+                        playing={playing && activeId === note.id}
+                        onToggle={() => toggle(note)}
+                        liked={liked.includes(note.id)}
+                        likeCount={likes[note.id] || 0}
+                        onLike={() => handleLike(note.id)}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {hasMore && (
+              <button className="load-more-btn" onClick={fetchMore} disabled={loadingMore}>
+                {loadingMore ? 'Besig...' : 'Laai meer boodskappe'}
+              </button>
+            )}
+            {!hasMore && notes.length > 1 && <div className="notes-end">Dit was alles 🙏</div>}
           </>
         )}
-
-        {hasMore && (
-          <button className="load-more-btn" onClick={fetchMore} disabled={loadingMore}>
-            {loadingMore ? 'Besig...' : 'Laai meer boodskappe'}
-          </button>
-        )}
-        {!hasMore && notes.length > 1 && <div className="notes-end">Dit was alles 🙏</div>}
 
         {/* ── Gestoor vir later ── */}
         {(() => {
