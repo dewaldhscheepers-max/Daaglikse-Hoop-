@@ -199,10 +199,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     setLoadingMore(false)
   }, [loadingMore])
 
-  // ── On mount: show cache instantly, fetch if stale ──
+  // ── On mount: show cache instantly, always fetch to set up pagination cursor ──
   useEffect(() => {
-    if (stale) fetchNotes()
-    else setLoading(false)
+    fetchNotes()
   }, [])
 
   // ── On visibility change: silently refresh if cache is stale ──

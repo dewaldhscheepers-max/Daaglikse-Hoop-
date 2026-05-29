@@ -2,6 +2,7 @@ import md5 from 'md5'
 
 const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
+const PASSPHRASE   = '' // paste your PayFast passphrase here if set under Settings → Integration
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
 const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
 
@@ -12,9 +13,10 @@ function phpUrlencode(val) {
 }
 
 function buildSignature(params) {
-  const str = Object.entries(params)
+  let str = Object.entries(params)
     .map(([k, v]) => `${k}=${phpUrlencode(v)}`)
     .join('&')
+  if (PASSPHRASE) str += `&passphrase=${phpUrlencode(PASSPHRASE)}`
   return md5(str)
 }
 
