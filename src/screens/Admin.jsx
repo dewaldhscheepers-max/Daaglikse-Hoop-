@@ -1,56 +1,43 @@
-import { useState, useEffect } from 'react'
-import { db } from '../firebase'
+import { useState, useEffect, useRef } from 'react'
+import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc } from 'firebase/firestore'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import './Admin.css'
 
 const ADMIN_PIN = '2025'
 
-function extractFileId(input) {
-  const s = input.trim()
-  const patterns = [
-    /\/d\/([a-zA-Z0-9_-]{20,})/,
-    /[?&]id=([a-zA-Z0-9_-]{20,})/,
-    /open\?id=([a-zA-Z0-9_-]{20,})/,
-  ]
-  for (const p of patterns) {
-    const m = s.match(p)
-    if (m) return m[1]
-  }
-  if (/^[a-zA-Z0-9_-]{20,}$/.test(s)) return s
-  return null
-}
-
 export default function Admin({ onClose }) {
-  const [pin, setPin]         = useState('')
+  const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
 
-  const [title, setTitle]               = useState('')
-  const [driveInput, setDriveInput]     = useState('')
-  const [scripture, setScripture]       = useState('')
-  const [scriptureText, setScriptText]  = useState('')
-  const [series, setSeries]             = useState('')
-  const [publishedAt, setPublishedAt]   = useState(new Date().toISOString().slice(0, 10))
-  const [saving, setSaving]             = useState(false)
-  const [saved, setSaved]               = useState(false)
-  const [formError, setFormError]       = useState('')
+  const [title, setTitle]             = useState('')
+  const [audioFile, setAudioFile]     = useState(null)
+  const [scripture, setScripture]     = useState('')
+  const [scriptureText, setScriptText]= useState('')
+  const [series, setSeries]           = useState('')
+  const [publishedAt, setPublishedAt] = useState(new Date().toISOString().slice(0, 10))
+  const [uploadProgress, setProgress] = useState(0)
+  const [uploading, setUploading]     = useState(false)
+  const [saving, setSaving]           = useState(false)
+  const [saved, setSaved]             = useState(false)
+  const [formError, setFormError]     = useState('')
 
-  const [notes, setNotes]               = useState([])
-  const [notesLoading, setNotesLoading] = useState(true)
+  const [notes, setNotes]             = useState([])
+  const [notesLoading, setLoading]    = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const fileInputRef = useRef(null)
 
-  useEffect(() => {
-    if (unlocked) loadNotes()
-  }, [unlocked])
+  useEffect(() => { if (unlocked) loadNotes() }, [unlocked])
 
   async function loadNotes() {
-    setNotesLoading(true)
+    setLoading(true)
     try {
       const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'))
       const snap = await getDocs(q)
       setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     } catch {}
-    setNotesLoading(false)
+    setLoading(false)
   }
 
   function checkPin() {
@@ -61,14 +48,45 @@ export default function Admin({ onClose }) {
   async function handleSave() {
     setFormError('')
     if (!title.trim()) { setFormError('Titel is verpligtend'); return }
-    const fileId = extractFileId(driveInput)
-    if (!fileId) { setFormError('Ongeldige Drive URL of lêer-ID'); return }
+    if (!audioFile)    { setFormError('Kies \'n oudiolêer'); return }
 
+    // Upload audio to Firebase Storage
+    setUploading(true)
+    setProgress(0)
+    let audioUrl = ''
+    let fileId   = ''
+
+    try {
+      const ext       = audioFile.name.split('.').pop().toLowerCase()
+      const timestamp = Date.now()
+      const safeName  = title.trim().replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)
+      fileId          = `${safeName}_${timestamp}`
+      const storageRef = ref(storage, `audio/${fileId}.${ext}`)
+
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(storageRef, audioFile)
+        task.on('state_changed',
+          snap => setProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
+          reject,
+          async () => {
+            audioUrl = await getDownloadURL(task.snapshot.ref)
+            resolve()
+          }
+        )
+      })
+    } catch (e) {
+      setFormError('Upload misluk: ' + e.message)
+      setUploading(false)
+      return
+    }
+
+    setUploading(false)
     setSaving(true)
+
     try {
       await setDoc(doc(db, 'notes', fileId), {
         title:         title.trim(),
-        audioUrl:      `https://drive.google.com/uc?id=${fileId}&export=download`,
+        audioUrl,
         fileId,
         publishedAt:   new Date(publishedAt + 'T06:00:00'),
         scripture:     scripture.trim(),
@@ -78,9 +96,10 @@ export default function Admin({ onClose }) {
         lengthSeconds: 0
       })
       setSaved(true)
-      setTitle(''); setDriveInput(''); setScripture('')
+      setTitle(''); setAudioFile(null); setScripture('')
       setScriptText(''); setSeries('')
       setPublishedAt(new Date().toISOString().slice(0, 10))
+      if (fileInputRef.current) fileInputRef.current.value = ''
       await loadNotes()
       setTimeout(() => setSaved(false), 3000)
     } catch (e) {
@@ -135,13 +154,31 @@ export default function Admin({ onClose }) {
 
             <div className="admin-field">
               <label>Titel *</label>
-              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="bv. Hy Sien Jou Trane" />
+              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="bv. Vergifnis dag 1" />
             </div>
 
             <div className="admin-field">
-              <label>Google Drive URL of lêer-ID *</label>
-              <input value={driveInput} onChange={e => setDriveInput(e.target.value)} placeholder="Plak die Drive skakel hier" />
+              <label>Oudioléer *</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac"
+                style={{ display: 'none' }}
+                onChange={e => setAudioFile(e.target.files[0] || null)}
+              />
+              <button className="admin-file-btn" onClick={() => fileInputRef.current?.click()}>
+                {audioFile ? `✓ ${audioFile.name}` : '📎 Kies oudioléer'}
+              </button>
             </div>
+
+            {uploading && (
+              <div className="admin-upload-progress">
+                <div className="admin-upload-bar">
+                  <div className="admin-upload-fill" style={{ width: `${uploadProgress}%` }} />
+                </div>
+                <span>{uploadProgress}% opgelaai...</span>
+              </div>
+            )}
 
             <div className="admin-field">
               <label>Skrifverwysing</label>
@@ -155,7 +192,7 @@ export default function Admin({ onClose }) {
 
             <div className="admin-field">
               <label>Reeks / Series</label>
-              <input value={series} onChange={e => setSeries(e.target.value)} placeholder="bv. God Sien Jou Trane" />
+              <input value={series} onChange={e => setSeries(e.target.value)} placeholder="bv. Vergifnis" />
             </div>
 
             <div className="admin-field">
@@ -164,10 +201,10 @@ export default function Admin({ onClose }) {
             </div>
 
             {formError && <div className="admin-error">{formError}</div>}
-            {saved     && <div className="admin-success">✅ Nota gestoor!</div>}
+            {saved     && <div className="admin-success">✅ Nota gestoor en lewendig!</div>}
 
-            <button className="admin-save-btn" onClick={handleSave} disabled={saving}>
-              {saving ? 'Besig om te stoor...' : 'Stoor nota'}
+            <button className="admin-save-btn" onClick={handleSave} disabled={saving || uploading}>
+              {uploading ? `Laai op... ${uploadProgress}%` : saving ? 'Stoor...' : 'Stoor nota'}
             </button>
           </div>
 
@@ -180,13 +217,14 @@ export default function Admin({ onClose }) {
                 <div className="admin-note-info">
                   <div className="admin-note-title">{note.title}</div>
                   <div className="admin-note-meta">
-                    {[note.scripture, note.series].filter(Boolean).join(' · ') || note.id}
+                    {[note.scripture, note.series].filter(Boolean).join(' · ') ||
+                      new Date(note.publishedAt?.seconds * 1000).toLocaleDateString('af')}
                   </div>
                 </div>
                 {deleteConfirm === note.id ? (
                   <div className="admin-delete-confirm">
                     <button className="admin-delete-yes" onClick={() => handleDelete(note.id)}>Ja, skrap</button>
-                    <button className="admin-delete-no" onClick={() => setDeleteConfirm(null)}>Kanselleer</button>
+                    <button className="admin-delete-no" onClick={() => setDeleteConfirm(null)}>Nee</button>
                   </div>
                 ) : (
                   <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
