@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { db } from '../firebase'
 import {
-  collection, addDoc, getDocs, updateDoc, doc,
-  serverTimestamp, orderBy, query, where, increment, Timestamp
+  collection, addDoc, updateDoc, doc,
+  serverTimestamp, orderBy, query, where, increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
 import './BidSaam.css'
 
@@ -42,36 +42,34 @@ export default function BidSaam() {
   })
 
   useEffect(() => {
-    async function load() {
-      try {
-        const sevenDaysAgo = Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-        const q = query(
-          collection(db, 'prayers'),
-          where('createdAt', '>=', sevenDaysAgo),
-          orderBy('createdAt', 'desc')
-        )
-        const snap = await getDocs(q)
+    const sevenDaysAgo = Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+    const q = query(
+      collection(db, 'prayers'),
+      where('createdAt', '>=', sevenDaysAgo),
+      orderBy('createdAt', 'desc')
+    )
+    const unsub = onSnapshot(q,
+      snap => {
         setPrayers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      } catch {
+        setLoading(false)
+      },
+      () => {
         setError('Iets het nie reg gelaai nie. Probeer asseblief weer.')
-      } finally {
         setLoading(false)
       }
-    }
-    load()
+    )
+    return unsub
   }, [])
 
   async function submit() {
     if (!text.trim()) return
-    const newPrayer = {
-      text: text.trim(),
-      prayedCount: 0,
-      createdAt: serverTimestamp(),
-      reported: false
-    }
     try {
-      const ref = await addDoc(collection(db, 'prayers'), newPrayer)
-      setPrayers(prev => [{ id: ref.id, ...newPrayer, createdAt: { toDate: () => new Date() } }, ...prev])
+      await addDoc(collection(db, 'prayers'), {
+        text: text.trim(),
+        prayedCount: 0,
+        createdAt: serverTimestamp(),
+        reported: false
+      })
       setText('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 4000)

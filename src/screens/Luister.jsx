@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, increment } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import './Luister.css'
 
 const FALLBACK_COLORS = ['#EDE8F8','#F8EDE8','#E8F0EE','#F8E8F0','#E8F8EC','#F0F4E8','#E8EEF8']
@@ -176,32 +176,26 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     fetchNotes()
   }, [])
 
-  // ── Fetch play count for today's note ──
+  // ── Real-time play count for today's note ──
   useEffect(() => {
     if (!today) return
-    async function fetchPlayCount() {
-      try {
-        const d = await getDoc(doc(db, 'plays', today.id))
-        if (d.exists()) setPlayCount(d.data().count || 0)
-      } catch { /* offline */ }
-    }
-    fetchPlayCount()
+    const unsub = onSnapshot(doc(db, 'plays', today.id),
+      snap => setPlayCount(snap.exists() ? (snap.data().count || 0) : 0),
+      () => {}
+    )
+    return unsub
   }, [today?.id])
 
-  // ── Fetch like counts ──
+  // ── Real-time like counts for all loaded notes ──
   useEffect(() => {
     if (notes.length === 0) return
-    async function fetchLikes() {
-      const counts = {}
-      await Promise.all(notes.map(async note => {
-        try {
-          const d = await getDoc(doc(db, 'likes', note.id))
-          counts[note.id] = d.exists() ? (d.data().count || 0) : 0
-        } catch { counts[note.id] = 0 }
-      }))
-      setLikes(counts)
-    }
-    fetchLikes()
+    const unsubs = notes.map(note =>
+      onSnapshot(doc(db, 'likes', note.id),
+        snap => setLikes(prev => ({ ...prev, [note.id]: snap.exists() ? (snap.data().count || 0) : 0 })),
+        () => {}
+      )
+    )
+    return () => unsubs.forEach(u => u())
   }, [notes.length])
 
   // ── MediaSession API — lock screen controls ──
