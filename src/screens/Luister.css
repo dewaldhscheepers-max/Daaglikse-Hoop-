@@ -228,12 +228,13 @@
 .note-bookmark-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 11px;
   cursor: pointer;
-  padding: 2px;
+  padding: 10px;
+  margin: -10px;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, transform 0.15s;
 }
@@ -245,13 +246,15 @@
 .note-like-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 3px;
   background: none;
   border: none;
   color: var(--text-muted);
   font-size: 11px;
   cursor: pointer;
-  padding: 2px;
+  padding: 10px;
+  margin: -10px;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s, transform 0.15s;
 }

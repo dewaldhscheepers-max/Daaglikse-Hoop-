@@ -145,11 +145,11 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked
           {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
         </button>
         <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
-          <HeartIcon filled={liked} size={13} />
+          <HeartIcon filled={liked} size={16} />
           {likeCount > 0 && <span>{likeCount}</span>}
         </button>
         <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
-          <BookmarkIcon filled={bookmarked} size={13} />
+          <BookmarkIcon filled={bookmarked} size={16} />
         </button>
       </div>
     </div>
