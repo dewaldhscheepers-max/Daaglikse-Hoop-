@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, doc, getDoc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import './Luister.css'
 
 const FALLBACK_COLORS = ['#EDE8F8','#F8EDE8','#E8F0EE','#F8E8F0','#E8F8EC','#F0F4E8','#E8EEF8']
@@ -149,16 +149,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     : 0
   const todayPlaying = playing && activeId === today?.id
 
-  // ── Fetch notes from Firestore ──
+  // ── Real-time notes from Firestore ──
   useEffect(() => {
-    async function fetchNotes() {
-      try {
-        const q = query(
-          collection(db, 'notes'),
-          orderBy('publishedAt', 'desc'),
-          limit(30)
-        )
-        const snap = await getDocs(q)
+    const q = query(
+      collection(db, 'notes'),
+      orderBy('publishedAt', 'desc'),
+      limit(30)
+    )
+    const unsub = onSnapshot(q,
+      snap => {
         const loaded = snap.docs.map(d => ({
           id: d.id,
           ...d.data(),
@@ -166,14 +165,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           lengthSeconds: d.data().lengthSeconds || 0
         }))
         setNotes(loaded)
-        if (loaded.length > 0) setActiveId(loaded[0].id)
-      } catch (e) {
+        setActiveId(prev => prev || (loaded.length > 0 ? loaded[0].id : null))
+        setLoading(false)
+      },
+      e => {
         console.error('Notes fetch error:', e)
-      } finally {
         setLoading(false)
       }
-    }
-    fetchNotes()
+    )
+    return unsub
   }, [])
 
   // ── Real-time play count for today's note ──
