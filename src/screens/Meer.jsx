@@ -89,8 +89,10 @@ function CartBar({ count, total, onClick }) {
 function BookCard({ book, inCart, onToggle }) {
   return (
     <div className={`book-card${inCart ? ' in-cart' : ''}`}>
-      <div className="book-cover" style={{ background: book.color }}>
-        <span className="book-emoji">{book.emoji}</span>
+      <div className="book-cover" style={{ background: book.coverUrl ? 'transparent' : book.color }}>
+        {book.coverUrl
+          ? <img src={book.coverUrl} className="book-cover-img" alt={book.title} />
+          : <span className="book-emoji">{book.emoji}</span>}
         {book.price === 105 && !inCart && <span className="book-badge">Gewild</span>}
         {inCart && <span className="book-badge cart-check">✓</span>}
       </div>
@@ -120,8 +122,10 @@ function FreeCard({ book }) {
 
   return (
     <div className="book-card free">
-      <div className="book-cover" style={{ background: book.color }}>
-        <span className="book-emoji">{book.emoji}</span>
+      <div className="book-cover" style={{ background: book.coverUrl ? 'transparent' : book.color }}>
+        {book.coverUrl
+          ? <img src={book.coverUrl} className="book-cover-img" alt={book.title} />
+          : <span className="book-emoji">{book.emoji}</span>}
         <span className="book-badge free-badge">GRATIS</span>
       </div>
       <div className="book-info">

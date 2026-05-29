@@ -335,6 +335,13 @@
 
 .admin-pdf-btn:disabled { opacity: 0.5; }
 
+.admin-book-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .admin-file-btn {
   background: var(--white);
   border: 1.5px dashed var(--purple);

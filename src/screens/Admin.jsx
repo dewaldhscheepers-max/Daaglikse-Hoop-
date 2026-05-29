@@ -31,12 +31,17 @@ export default function Admin({ onClose }) {
   const fileInputRef = useRef(null)
 
   // ── Books state ──
-  const [bookOverrides, setBookOverrides] = useState({})
-  const [pdfUploading, setPdfUploading]   = useState(null)
-  const [pdfProgress, setPdfProgress]     = useState(0)
-  const [pdfSaved, setPdfSaved]           = useState(null)
-  const pdfInputRef = useRef(null)
+  const [bookOverrides, setBookOverrides]     = useState({})
+  const [pdfUploading, setPdfUploading]       = useState(null)
+  const [pdfProgress, setPdfProgress]         = useState(0)
+  const [pdfSaved, setPdfSaved]               = useState(null)
+  const pdfInputRef                           = useRef(null)
   const [pdfUploadTarget, setPdfUploadTarget] = useState(null)
+  const [coverUploading, setCoverUploading]   = useState(null)
+  const [coverProgress, setCoverProgress]     = useState(0)
+  const [coverSaved, setCoverSaved]           = useState(null)
+  const coverInputRef                         = useRef(null)
+  const [coverUploadTarget, setCoverUploadTarget] = useState(null)
 
   useEffect(() => {
     if (!unlocked) return
@@ -148,6 +153,42 @@ export default function Admin({ onClose }) {
     } catch (e) { alert('PDF upload misluk: ' + e.message) }
 
     setPdfUploading(null); setPdfUploadTarget(null)
+  }
+
+  // ── Upload cover image for a book ──
+  function triggerCoverUpload(book) {
+    setCoverUploadTarget(book)
+    coverInputRef.current?.click()
+  }
+
+  async function handleCoverUpload(e) {
+    const file = e.target.files[0]
+    if (!file || !coverUploadTarget) return
+    e.target.value = ''
+
+    const book = coverUploadTarget
+    setCoverUploading(book.id); setCoverProgress(0)
+
+    try {
+      const ext  = file.name.split('.').pop().toLowerCase() || 'jpg'
+      const sRef = ref(storage, `covers/${book.id}.${ext}`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, file)
+        task.on('state_changed',
+          s => setCoverProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
+          reject,
+          async () => {
+            const coverUrl = await getDownloadURL(task.snapshot.ref)
+            await setDoc(doc(db, 'books', book.id), { coverUrl, title: book.title, free: book.free, price: book.price }, { merge: true })
+            resolve()
+          }
+        )
+      })
+      setCoverSaved(book.id)
+      setTimeout(() => setCoverSaved(null), 3000)
+    } catch (e) { alert('Cover upload misluk: ' + e.message) }
+
+    setCoverUploading(null); setCoverUploadTarget(null)
   }
 
   if (!unlocked) {
@@ -281,39 +322,60 @@ export default function Admin({ onClose }) {
 
               <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
                 style={{ display: 'none' }} onChange={handlePdfUpload} />
+              <input ref={coverInputRef} type="file" accept="image/*"
+                style={{ display: 'none' }} onChange={handleCoverUpload} />
 
               {BOOKS.map(book => {
-                const override = bookOverrides[book.id]
-                const hasPdf   = override?.pdfUrl
-                const isUploadingThis = pdfUploading === book.id
-                const isSaved  = pdfSaved === book.id
+                const override          = bookOverrides[book.id]
+                const hasPdf            = override?.pdfUrl
+                const hasCover          = override?.coverUrl
+                const isPdfUploading    = pdfUploading === book.id
+                const isCoverUploading  = coverUploading === book.id
+                const isPdfSaved        = pdfSaved === book.id
+                const isCoverSaved      = coverSaved === book.id
 
                 return (
                   <div key={book.id} className="admin-book-row">
-                    <div className="admin-book-icon">{book.emoji}</div>
+                    <div className="admin-book-icon" style={{ position: 'relative' }}>
+                      {hasCover
+                        ? <img src={override.coverUrl} style={{ width: 36, height: 48, borderRadius: 6, objectFit: 'cover' }} />
+                        : book.emoji}
+                    </div>
                     <div className="admin-note-info">
                       <div className="admin-note-title">{book.title}</div>
                       <div className="admin-note-meta">
                         {book.free ? '🎁 Gratis' : `💳 R${book.price}`}
                         {' · '}
-                        {isUploadingThis ? `${pdfProgress}% opgelaai...`
-                          : isSaved ? '✅ PDF opgelaai!'
-                          : hasPdf ? '✓ PDF beskikbaar'
-                          : 'Geen PDF nie'}
+                        {isPdfUploading ? `PDF ${pdfProgress}%...`
+                          : isCoverUploading ? `Cover ${coverProgress}%...`
+                          : isPdfSaved ? '✅ PDF opgelaai!'
+                          : isCoverSaved ? '✅ Cover opgelaai!'
+                          : [hasCover ? 'Cover ✓' : null, hasPdf ? 'PDF ✓' : 'Geen PDF'].filter(Boolean).join(' · ')}
                       </div>
-                      {isUploadingThis && (
+                      {(isPdfUploading || isCoverUploading) && (
                         <div className="admin-upload-bar" style={{ marginTop: 4 }}>
-                          <div className="admin-upload-fill" style={{ width: `${pdfProgress}%` }} />
+                          <div className="admin-upload-fill" style={{ width: `${isPdfUploading ? pdfProgress : coverProgress}%` }} />
                         </div>
                       )}
                     </div>
-                    <button
-                      className="admin-pdf-btn"
-                      onClick={() => triggerPdfUpload(book)}
-                      disabled={isUploadingThis}
-                    >
-                      {hasPdf ? '↑ Opdateer' : '↑ Upload'}
-                    </button>
+                    <div className="admin-book-btns">
+                      <button
+                        className="admin-pdf-btn"
+                        onClick={() => triggerCoverUpload(book)}
+                        disabled={isCoverUploading || isPdfUploading}
+                        title="Laai cover foto op"
+                      >
+                        {hasCover ? '🖼 Opdateer' : '🖼 Cover'}
+                      </button>
+                      <button
+                        className="admin-pdf-btn"
+                        onClick={() => triggerPdfUpload(book)}
+                        disabled={isPdfUploading || isCoverUploading}
+                        title="Laai PDF op"
+                      >
+                        {hasPdf ? '↑ PDF' : '↑ PDF'}
+                      </button>
+                    </div>
                   </div>
                 )
               })}
