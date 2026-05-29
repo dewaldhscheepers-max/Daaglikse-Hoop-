@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import './Luister.css'
 
-// ── Cache helpers (5-min TTL for notes) ─────────────────────────────────────
-const NOTES_TTL = 5 * 60 * 1000
+// ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
+const NOTES_TTL  = 5 * 60 * 1000
+const PAGE_SIZE  = 20
 
 function readCache() {
   try {
@@ -135,24 +136,28 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
   const { notes: cached, stale } = readCache()
 
-  const [notes, setNotes]       = useState(cached)
-  const [loading, setLoading]   = useState(cached.length === 0)
-  const [activeId, setActiveId] = useState(cached[0]?.id || null)
-  const [playing, setPlaying]   = useState(false)
-  const [elapsed, setElapsed]   = useState(0)
-  const [likes, setLikes]       = useState(readLikesCache)
-  const [liked, setLiked]       = useState(() => {
+  const [notes, setNotes]           = useState(cached)
+  const [loading, setLoading]       = useState(cached.length === 0)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore]       = useState(true)
+  const [activeId, setActiveId]     = useState(cached[0]?.id || null)
+  const [playing, setPlaying]       = useState(false)
+  const [elapsed, setElapsed]       = useState(0)
+  const [likes, setLikes]           = useState(readLikesCache)
+  const [liked, setLiked]           = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
   const [shareToast, setShareToast] = useState(false)
   const [playCount, setPlayCount]   = useState(0)
 
-  const timerRef    = useRef(null)
-  const audioRef    = useRef(null)
-  const playedRef   = useRef(false)
-  const tapCountRef = useRef(0)
-  const tapTimerRef = useRef(null)
-  const fetchingRef = useRef(false)
+  const timerRef      = useRef(null)
+  const audioRef      = useRef(null)
+  const playedRef     = useRef(false)
+  const tapCountRef   = useRef(0)
+  const tapTimerRef   = useRef(null)
+  const fetchingRef   = useRef(false)
+  const lastDocRef    = useRef(null)
+  const sentinelRef   = useRef(null)
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
@@ -160,14 +165,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
 
-  // ── Fetch notes from Firestore (one-time, with cache) ──
+  // ── Fetch first page ──
   const fetchNotes = useCallback(async () => {
     if (fetchingRef.current) return
     fetchingRef.current = true
     try {
-      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(200))
+      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(PAGE_SIZE))
       const snap = await getDocs(q)
       const loaded = snap.docs.map(mapDoc)
+      lastDocRef.current = snap.docs[snap.docs.length - 1] || null
+      setHasMore(snap.docs.length === PAGE_SIZE)
       setNotes(loaded)
       setActiveId(prev => prev || loaded[0]?.id || null)
       setLoading(false)
@@ -177,6 +184,21 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     }
     fetchingRef.current = false
   }, [])
+
+  // ── Fetch next page ──
+  const fetchMore = useCallback(async () => {
+    if (!lastDocRef.current || loadingMore) return
+    setLoadingMore(true)
+    try {
+      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), startAfter(lastDocRef.current), limit(PAGE_SIZE))
+      const snap = await getDocs(q)
+      const more = snap.docs.map(mapDoc)
+      lastDocRef.current = snap.docs[snap.docs.length - 1] || null
+      setHasMore(snap.docs.length === PAGE_SIZE)
+      setNotes(prev => [...prev, ...more])
+    } catch {}
+    setLoadingMore(false)
+  }, [loadingMore])
 
   // ── On mount: show cache instantly, fetch if stale ──
   useEffect(() => {
@@ -194,6 +216,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [fetchNotes])
+
+  // ── IntersectionObserver: load more when sentinel comes into view ──
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting && hasMore && !loadingMore) fetchMore() },
+      { rootMargin: '200px' }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasMore, loadingMore, fetchMore])
 
   // ── Real-time: today's note play count (1 listener) ──
   useEffect(() => {
@@ -433,6 +467,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
             ))}
           </>
         )}
+
+        {/* Sentinel: triggers loading next page when scrolled into view */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+        {loadingMore && <div className="notes-loading-more">Laai meer...</div>}
+        {!hasMore && notes.length > 1 && <div className="notes-end">Dit was alles 🙏</div>}
       </div>
 
       {activeNote && activeId !== today.id && (

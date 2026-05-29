@@ -242,6 +242,21 @@
 .note-like-btn.liked { color: #dc3c5a; }
 .note-like-btn:active { transform: scale(0.85); }
 
+/* ─── Infinite scroll ─── */
+.notes-loading-more {
+  text-align: center;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.notes-end {
+  text-align: center;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* ─── Share toast ─── */
 .share-toast {
   position: fixed;
