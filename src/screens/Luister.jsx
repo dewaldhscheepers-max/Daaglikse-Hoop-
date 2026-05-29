@@ -22,6 +22,13 @@ function writeCache(notes) {
   } catch {}
 }
 
+function readSavedNotes() {
+  try { return JSON.parse(localStorage.getItem('savedNoteData') || '{}') } catch { return {} }
+}
+function writeSavedNotes(data) {
+  try { localStorage.setItem('savedNoteData', JSON.stringify(data)) } catch {}
+}
+
 function readLikesCache() {
   try { return JSON.parse(localStorage.getItem('cachedLikes') || '{}') } catch { return {} }
 }
@@ -147,6 +154,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const [liked, setLiked]           = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
+  const [savedNotes, setSavedNotes] = useState(readSavedNotes)
   const [shareToast, setShareToast] = useState(false)
   const [playCount, setPlayCount]   = useState(0)
 
@@ -341,16 +349,39 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   }
 
   async function handleLike(noteId) {
-    if (liked.includes(noteId)) return
-    try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
-    const newLiked = [...liked, noteId]
-    setLiked(newLiked)
-    localStorage.setItem('likedNotes', JSON.stringify(newLiked))
-    setLikes(prev => {
-      const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
-      writeLikesCache(next)
-      return next
-    })
+    const isLiked = liked.includes(noteId)
+    const note    = notes.find(n => n.id === noteId)
+
+    if (isLiked) {
+      const newLiked = liked.filter(id => id !== noteId)
+      setLiked(newLiked)
+      localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+      const newSaved = { ...savedNotes }
+      delete newSaved[noteId]
+      setSavedNotes(newSaved)
+      writeSavedNotes(newSaved)
+      setLikes(prev => {
+        const next = { ...prev, [noteId]: Math.max(0, (prev[noteId] || 1) - 1) }
+        writeLikesCache(next)
+        return next
+      })
+      try { await setDoc(doc(db, 'likes', noteId), { count: increment(-1) }, { merge: true }) } catch {}
+    } else {
+      const newLiked = [...liked, noteId]
+      setLiked(newLiked)
+      localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+      if (note) {
+        const newSaved = { ...savedNotes, [noteId]: { ...note, savedAt: Date.now() } }
+        setSavedNotes(newSaved)
+        writeSavedNotes(newSaved)
+      }
+      setLikes(prev => {
+        const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
+        writeLikesCache(next)
+        return next
+      })
+      try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
+    }
   }
 
   async function handleShare(note) {
@@ -462,6 +493,34 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           </button>
         )}
         {!hasMore && notes.length > 1 && <div className="notes-end">Dit was alles 🙏</div>}
+
+        {/* ── Gestoor vir later ── */}
+        {(() => {
+          const savedList = Object.values(savedNotes).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
+          return (
+            <div className="saved-section">
+              <div className="saved-header">
+                <HeartIcon filled size={14} />
+                <span>Gestoor vir later</span>
+              </div>
+              {savedList.length === 0 ? (
+                <p className="saved-empty">Nog geen boodskappe gestoor nie.<br />Tik die ❤️ op enige boodskap om dit hier te stoor.</p>
+              ) : (
+                savedList.map(note => (
+                  <NoteRow
+                    key={note.id}
+                    note={note}
+                    playing={playing && activeId === note.id}
+                    onToggle={() => toggle(note)}
+                    liked={liked.includes(note.id)}
+                    likeCount={likes[note.id] || 0}
+                    onLike={() => handleLike(note.id)}
+                  />
+                ))
+              )}
+            </div>
+          )
+        })()}
       </div>
 
       {activeNote && activeId !== today.id && (
