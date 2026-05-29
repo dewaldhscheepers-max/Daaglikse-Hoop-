@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import { db } from '../firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import './NooimyModal.css'
 
 export default function NooimyModal({ onClose }) {
-  const [form, setForm]       = useState({ naam: '', epos: '', telefoon: '', gemeente: '', datum: '', boodskap: '' })
-  const [busy, setBusy]       = useState(false)
-  const [sent, setSent]       = useState(false)
-  const [error, setError]     = useState('')
+  const [form, setForm] = useState({
+    naam: '', gemeente: '', dorp: '', datum: '', tipe: '', telefoon: '', boodskap: ''
+  })
+  const [busy, setBusy]   = useState(false)
+  const [sent, setSent]   = useState(false)
+  const [error, setError] = useState('')
 
   function update(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -14,21 +18,18 @@ export default function NooimyModal({ onClose }) {
 
   async function submit() {
     if (!form.naam.trim())     { setError('Voer asb jou naam in.'); return }
-    if (!form.epos.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.epos)) {
-      setError("Voer asb 'n geldige e-posadres in."); return
-    }
-    if (!form.gemeente.trim()) { setError("Voer asb jou gemeente of geleentheid se naam in."); return }
+    if (!form.gemeente.trim()) { setError('Voer asb jou gemeente of organisasie se naam in.'); return }
+    if (!form.telefoon.trim()) { setError('Voer asb jou kontaknommer in.'); return }
 
     setBusy(true)
     try {
-      await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ 'form-name': 'nooi-my', ...form }).toString()
+      await addDoc(collection(db, 'preek_versoeke'), {
+        ...form,
+        createdAt: serverTimestamp()
       })
       setSent(true)
     } catch {
-      setError('Iets het fout gegaan. Probeer asb weer.')
+      setError('Iets het nie reg gegaan nie. Probeer asseblief weer.')
     } finally {
       setBusy(false)
     }
@@ -39,9 +40,9 @@ export default function NooimyModal({ onClose }) {
       <div className="modal-backdrop nooimy-backdrop" onClick={onClose}>
         <div className="nooimy-card" onClick={e => e.stopPropagation()}>
           <div className="sent-icon">✉️</div>
-          <h3 className="nooimy-title">Versoek Gestuur!</h3>
+          <h3 className="nooimy-title">Uitnodiging Ontvang!</h3>
           <p className="nooimy-sent-msg">
-            Dankie, {form.naam.split(' ')[0]}! Ek het jou versoek ontvang en sal so gou moontlik met jou in verbinding tree.
+            Dankie, {form.naam.split(' ')[0]}. Ons het jou uitnodiging ontvang en sal so gou moontlik terugkom.
           </p>
           <button className="btn-primary nooimy-close-btn" onClick={onClose}>Klaar</button>
         </div>
@@ -56,37 +57,44 @@ export default function NooimyModal({ onClose }) {
 
         <div className="nooimy-icon">🎤</div>
         <h3 className="nooimy-title">Nooi My Om Te Preek</h3>
-        <p className="nooimy-sub">Vul die vorm in en ek sal so gou moontlik terugkom na jou.</p>
+        <p className="nooimy-credibility">
+          Dewald Scheepers bring boodskappe oor hoop, gedagtes, trauma, geloof en geestelike herstel.
+        </p>
 
         <div className="nooimy-fields">
           <div className="field-group">
-            <label>Jou naam *</label>
+            <label>Naam *</label>
             <input type="text" placeholder="Jan van der Merwe" value={form.naam}
               onChange={e => update('naam', e.target.value)} />
           </div>
           <div className="field-group">
-            <label>E-posadres *</label>
-            <input type="email" placeholder="jan@kerk.co.za" value={form.epos}
-              onChange={e => update('epos', e.target.value)} />
+            <label>Gemeente / Organisasie *</label>
+            <input type="text" placeholder="NG Kerk Stellenbosch" value={form.gemeente}
+              onChange={e => update('gemeente', e.target.value)} />
           </div>
           <div className="field-group">
-            <label>Telefoonnommer</label>
+            <label>Dorp / Stad</label>
+            <input type="text" placeholder="Kaapstad" value={form.dorp}
+              onChange={e => update('dorp', e.target.value)} />
+          </div>
+          <div className="field-group">
+            <label>Tipe geleentheid</label>
+            <input type="text" placeholder="Oggenddiens / Konferensie / Kamp" value={form.tipe}
+              onChange={e => update('tipe', e.target.value)} />
+          </div>
+          <div className="field-group">
+            <label>Verkose datum</label>
+            <input type="text" placeholder="bv. 15 Augustus 2025" value={form.datum}
+              onChange={e => update('datum', e.target.value)} />
+          </div>
+          <div className="field-group">
+            <label>Kontaknommer *</label>
             <input type="tel" placeholder="082 000 0000" value={form.telefoon}
               onChange={e => update('telefoon', e.target.value)} />
           </div>
           <div className="field-group">
-            <label>Gemeente of geleentheid *</label>
-            <input type="text" placeholder="NG Kerk Stellenbosch / Konferensie naam" value={form.gemeente}
-              onChange={e => update('gemeente', e.target.value)} />
-          </div>
-          <div className="field-group">
-            <label>Verkose datum</label>
-            <input type="text" placeholder="bv. 15 Augustus 2025 of 'n naweek in Julie" value={form.datum}
-              onChange={e => update('datum', e.target.value)} />
-          </div>
-          <div className="field-group">
-            <label>Enige iets anders?</label>
-            <textarea rows={3} placeholder="Tema, tipe geleentheid, grootte van gehoor..." value={form.boodskap}
+            <label>Kort boodskap</label>
+            <textarea rows={3} placeholder="Tema, tipe gehoor, grootte van geleentheid..." value={form.boodskap}
               onChange={e => update('boodskap', e.target.value)} />
           </div>
         </div>
@@ -94,7 +102,7 @@ export default function NooimyModal({ onClose }) {
         {error && <p className="nooimy-error">{error}</p>}
 
         <button className="btn-primary nooimy-submit" onClick={submit} disabled={busy}>
-          {busy ? 'Besig...' : 'Stuur Versoek'}
+          {busy ? 'Besig om te stuur...' : 'Stuur Uitnodiging'}
         </button>
       </div>
     </div>

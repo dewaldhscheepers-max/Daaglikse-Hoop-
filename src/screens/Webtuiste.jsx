@@ -3,16 +3,18 @@ import { checkoutBook } from '../utils/payfast'
 import NooimyModal from '../components/NooimyModal'
 import './Webtuiste.css'
 
-const PRESET_AMOUNTS = [50, 100, 200, 500]
+const PRESET_AMOUNTS = [50, 100, 250]
 
 export function DonationModal({ onClose }) {
   const [selected, setSelected] = useState(100)
   const [custom, setCustom]     = useState('')
+  const [showCustom, setShowCustom] = useState(false)
+  const [showEft, setShowEft]   = useState(false)
   const [email, setEmail]       = useState('')
   const [error, setError]       = useState('')
   const [busy, setBusy]         = useState(false)
 
-  const amount = custom ? Number(custom) : selected
+  const amount = showCustom && custom ? Number(custom) : selected
 
   function validate() {
     if (!amount || amount < 10) { setError('Minimum skenking is R10.'); return false }
@@ -35,7 +37,10 @@ export function DonationModal({ onClose }) {
         <button className="modal-close" onClick={onClose}>✕</button>
 
         <div className="donation-icon">❤️</div>
-        <h3 className="modal-title">Maak 'n Skenking</h3>
+        <h3 className="modal-title">Ondersteun die Bediening</h3>
+        <p className="donation-purpose">
+          Help ons om daaglikse hoop by meer mense te kry. Jou bydrae help met stemnotas, tegnologie, advertensies en gratis geestelike hulpbronne.
+        </p>
         <p className="donation-verse">"Elke gewer wat vrolik gee, is vir God aangenaam." — 2 Kor. 9:7</p>
 
         <p className="modal-label">Kies 'n bedrag</p>
@@ -43,22 +48,31 @@ export function DonationModal({ onClose }) {
           {PRESET_AMOUNTS.map(a => (
             <button
               key={a}
-              className={`amount-btn${selected === a && !custom ? ' selected' : ''}`}
-              onClick={() => { setSelected(a); setCustom(''); setError('') }}
+              className={`amount-btn${selected === a && !showCustom ? ' selected' : ''}`}
+              onClick={() => { setSelected(a); setShowCustom(false); setCustom(''); setError('') }}
             >
               R{a}
             </button>
           ))}
+          <button
+            className={`amount-btn${showCustom ? ' selected' : ''}`}
+            onClick={() => { setShowCustom(true); setError('') }}
+          >
+            Ander
+          </button>
         </div>
 
-        <input
-          className="modal-input amount-input"
-          type="number"
-          placeholder="Of tik jou eie bedrag (bv. R350)"
-          value={custom}
-          min={10}
-          onChange={e => { setCustom(e.target.value); setError('') }}
-        />
+        {showCustom && (
+          <input
+            className="modal-input amount-input"
+            type="number"
+            placeholder="Tik bedrag (bv. 350)"
+            value={custom}
+            min={10}
+            autoFocus
+            onChange={e => { setCustom(e.target.value); setError('') }}
+          />
+        )}
 
         <p className="modal-label">Jou e-posadres</p>
         <input
@@ -75,7 +89,21 @@ export function DonationModal({ onClose }) {
           {busy ? 'Besig...' : `Skenk R${amount || '?'} via PayFast`}
         </button>
 
-        <p className="modal-secure">🔒 Veilige betaling · Kaart, EFT, SnapScan</p>
+        <p className="modal-secure">🔒 Kaart, EFT, SnapScan · Veilige betaling via PayFast</p>
+
+        <button className="eft-toggle" onClick={() => setShowEft(v => !v)}>
+          {showEft ? '▲ Verberg' : '▼ Skenk via direkte EFT'}
+        </button>
+
+        {showEft && (
+          <div className="eft-details">
+            <p className="eft-row"><span>Bank</span><strong>Absa</strong></p>
+            <p className="eft-row"><span>Rekening</span><strong>4075577947</strong></p>
+            <p className="eft-row"><span>Tipe</span><strong>Tjekrekening</strong></p>
+            <p className="eft-row"><span>Naam</span><strong>Dewald Scheepers</strong></p>
+            <p className="eft-note">Gebruik jou naam as verwysing. Stuur 'n bewys na info@dewaldscheepers.com</p>
+          </div>
+        )}
       </div>
     </div>
   )
