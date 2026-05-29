@@ -157,7 +157,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const tapTimerRef   = useRef(null)
   const fetchingRef   = useRef(false)
   const lastDocRef    = useRef(null)
-  const sentinelRef   = useRef(null)
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
@@ -216,18 +215,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [fetchNotes])
-
-  // ── IntersectionObserver: load more when sentinel comes into view ──
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-    const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting && hasMore && !loadingMore) fetchMore() },
-      { rootMargin: '200px' }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [hasMore, loadingMore, fetchMore])
 
   // ── Real-time: today's note play count (1 listener) ──
   useEffect(() => {
@@ -468,9 +455,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           </>
         )}
 
-        {/* Sentinel: triggers loading next page when scrolled into view */}
-        <div ref={sentinelRef} style={{ height: 1 }} />
-        {loadingMore && <div className="notes-loading-more">Laai meer...</div>}
+        {hasMore && (
+          <button className="load-more-btn" onClick={fetchMore} disabled={loadingMore}>
+            {loadingMore ? 'Besig...' : 'Laai meer boodskappe'}
+          </button>
+        )}
         {!hasMore && notes.length > 1 && <div className="notes-end">Dit was alles 🙏</div>}
       </div>
 
