@@ -98,6 +98,7 @@ export default function Admin({ onClose }) {
         scripture: scripture.trim(), scriptureText: scriptureText.trim(),
         series: series.trim(), color: '', lengthSeconds: 0
       })
+      try { localStorage.removeItem('cachedNotesTime') } catch {}
       setSaved(true)
       setTitle(''); setAudioFile(null); setScripture(''); setScriptText(''); setSeries('')
       setPublishedAt(new Date().toISOString().slice(0, 10))
