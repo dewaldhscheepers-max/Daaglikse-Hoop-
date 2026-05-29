@@ -1,38 +1,82 @@
-.payment-banner {
+.payment-popup-backdrop {
   position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  padding: 14px 16px;
+  inset: 0;
+  background: rgba(20, 10, 40, 0.65);
+  z-index: 300;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.payment-popup {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 36px 28px 32px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 12px;
+  text-align: center;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.payment-popup-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.payment-popup-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.payment-popup-msg {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.payment-popup-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.payment-popup-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.payment-popup-cancel {
   font-size: 14px;
-  font-weight: 500;
-  z-index: 300;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
   font-family: var(--font-body);
 }
 
-.payment-banner.success {
-  background: #2E7D32;
-  color: white;
-}
 
-.payment-banner.cancel {
-  background: #B71C1C;
-  color: white;
-}
-
-.payment-banner button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0 4px;
   flex-shrink: 0;
 }
 

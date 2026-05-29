@@ -250,12 +250,33 @@ export default function App() {
         </div>
       )}
 
-      {paymentResult && (
-        <div className={`payment-banner ${paymentResult.status}`}>
-          {paymentResult.status === 'success'
-            ? `✓ Betaling geslaag! Ons stuur "${paymentResult.title}" na jou e-pos.`
-            : '✕ Betaling gekanselleer.'}
-          <button onClick={() => setPayment(null)}>✕</button>
+      {paymentResult?.status === 'success' && (
+        <div className="payment-popup-backdrop" onClick={() => setPayment(null)}>
+          <div className="payment-popup" onClick={e => e.stopPropagation()}>
+            <div className="payment-popup-icon">🎉</div>
+            <div className="payment-popup-title">Betaling geslaag!</div>
+            <p className="payment-popup-msg">
+              Jou PDF{paymentResult.count > 1 ? "'s is" : ' is'} op pad na jou e-pos.<br />
+              <strong>Geen wag nie — dit kom outomaties.</strong>
+            </p>
+            <p className="payment-popup-note">Kyk ook jou spam-vouer as jy dit nie sien nie.</p>
+            <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
+              Dankie! 🙏
+            </button>
+          </div>
+        </div>
+      )}
+
+      {paymentResult?.status === 'cancel' && (
+        <div className="payment-popup-backdrop" onClick={() => setPayment(null)}>
+          <div className="payment-popup" onClick={e => e.stopPropagation()}>
+            <div className="payment-popup-icon">😔</div>
+            <div className="payment-popup-title">Betaling gekanselleer</div>
+            <p className="payment-popup-msg">Geen betaling is verwerk nie. Jy kan enige tyd weer probeer.</p>
+            <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
+              OK
+            </button>
+          </div>
         </div>
       )}
     </div>

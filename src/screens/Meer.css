@@ -68,19 +68,20 @@
 }
 
 .book-cover {
-  width: 72px;
-  min-width: 72px;
-  height: 96px;
-  border-radius: 10px;
+  width: 90px;
+  min-width: 90px;
+  height: 120px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.18);
 }
 
 .book-emoji {
-  font-size: 28px;
+  font-size: 34px;
 }
 
 .book-cover-img {
