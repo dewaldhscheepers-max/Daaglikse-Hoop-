@@ -187,7 +187,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     return unsub
   }, [])
 
-  // ── Real-time play count for today's note ──
+  // ── Real-time play count for today's note only ──
   useEffect(() => {
     if (!today) return
     const unsub = onSnapshot(doc(db, 'plays', today.id),
@@ -197,20 +197,36 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     return unsub
   }, [today?.id])
 
-  // ── Real-time like counts for all loaded notes ──
+  // ── Real-time likes for today's note only; one-time fetch for the rest ──
   useEffect(() => {
-    if (notes.length === 0) return
-    const unsubs = notes.map(note =>
-      onSnapshot(doc(db, 'likes', note.id),
-        snap => setLikes(prev => {
-          const next = { ...prev, [note.id]: snap.exists() ? (snap.data().count || 0) : 0 }
-          try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
-          return next
-        }),
-        () => {}
-      )
+    if (!today) return
+    const unsub = onSnapshot(doc(db, 'likes', today.id),
+      snap => setLikes(prev => {
+        const next = { ...prev, [today.id]: snap.exists() ? (snap.data().count || 0) : 0 }
+        try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
+        return next
+      }),
+      () => {}
     )
-    return () => unsubs.forEach(u => u())
+    return unsub
+  }, [today?.id])
+
+  useEffect(() => {
+    if (notes.length < 2) return
+    Promise.all(
+      notes.slice(1).map(async note => {
+        try {
+          const d = await getDoc(doc(db, 'likes', note.id))
+          return [note.id, d.exists() ? (d.data().count || 0) : 0]
+        } catch { return [note.id, 0] }
+      })
+    ).then(results => {
+      setLikes(prev => {
+        const next = { ...prev, ...Object.fromEntries(results) }
+        try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
+        return next
+      })
+    })
   }, [notes.length])
 
   // ── MediaSession API — lock screen controls ──

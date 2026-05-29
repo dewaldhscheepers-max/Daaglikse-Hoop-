@@ -26,13 +26,17 @@ function PrayingHandsIcon() {
 }
 
 export default function BidSaam() {
-  const [prayers, setPrayers]     = useState([])
+  const [prayers, setPrayers]     = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cachedPrayers') || '[]') }
+    catch { return [] }
+  })
   const [text, setText]           = useState('')
   const [prayed, setPrayed]       = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('prayedFor') || '[]')) }
     catch { return new Set() }
   })
-  const [loading, setLoading]     = useState(true)
+  const cachedHasPrayers = (() => { try { return JSON.parse(localStorage.getItem('cachedPrayers') || '[]').length > 0 } catch { return false } })()
+  const [loading, setLoading]     = useState(!cachedHasPrayers)
   const [error, setError]         = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [prayedToast, setPrayedToast] = useState(false)
@@ -50,8 +54,10 @@ export default function BidSaam() {
     )
     const unsub = onSnapshot(q,
       snap => {
-        setPrayers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        setPrayers(list)
         setLoading(false)
+        try { localStorage.setItem('cachedPrayers', JSON.stringify(list)) } catch {}
       },
       () => {
         setError('Iets het nie reg gelaai nie. Probeer asseblief weer.')
