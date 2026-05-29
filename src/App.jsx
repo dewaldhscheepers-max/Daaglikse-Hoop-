@@ -170,10 +170,13 @@ export default function App() {
     }
   }, [])
 
+  const screenRef = useRef(null)
+
   function handleNav(id) {
     if (id === 'skenk')   { setDonation(true); return }
     if (id === 'nooiomy') { setNooimy(true);   return }
     setTab(id)
+    if (screenRef.current) screenRef.current.scrollTop = 0
   }
 
   // ── Persistent install banner ──
@@ -197,7 +200,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="screen">
+      <div className="screen" ref={screenRef}>
         {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
         {tab === 'bidsaam' && <BidSaam />}
         {tab === 'meer'    && <Meer />}
