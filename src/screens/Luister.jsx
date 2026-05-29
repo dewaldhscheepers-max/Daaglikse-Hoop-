@@ -165,9 +165,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const todayPlaying = playing && activeId === today?.id
 
   // ── Fetch first page ──
-  const fetchNotes = useCallback(async () => {
+  const fetchNotes = useCallback(async (silent = false) => {
     if (fetchingRef.current) return
     fetchingRef.current = true
+    if (!silent) setLoadingMore(true)
     try {
       const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(PAGE_SIZE))
       const snap = await getDocs(q)
@@ -182,6 +183,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       setLoading(false)
     }
     fetchingRef.current = false
+    if (!silent) setLoadingMore(false)
   }, [])
 
   // ── Fetch next page ──
@@ -199,7 +201,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     setLoadingMore(false)
   }, [loadingMore])
 
-  // ── On mount: show cache instantly, always fetch to set up pagination cursor ──
+  // ── On mount: always fetch to set up pagination cursor ──
   useEffect(() => {
     fetchNotes()
   }, [])
@@ -209,7 +211,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     function onVisible() {
       if (document.visibilityState !== 'visible') return
       const { stale: isStale } = readCache()
-      if (isStale) fetchNotes()
+      if (isStale) fetchNotes(true)
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
