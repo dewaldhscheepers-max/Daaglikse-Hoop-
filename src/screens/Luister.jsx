@@ -584,6 +584,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
               <div className="saved-header">
                 <BookmarkIcon filled size={14} />
                 <span>Gestoor vir later</span>
+                <span className="saved-count">{savedList.length}/{BOOKMARK_LIMIT}</span>
               </div>
               {savedList.length === 0 ? (
                 <p className="saved-empty">Nog geen boodskappe gestoor nie.<br />Tik die boekmerkie 🔖 op enige boodskap om dit hier te stoor.</p>
