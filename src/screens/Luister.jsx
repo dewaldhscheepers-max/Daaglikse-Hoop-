@@ -1,45 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
 import { db } from '../firebase'
-import { doc, getDoc, setDoc, increment } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, increment } from 'firebase/firestore'
 import './Luister.css'
 
-const SAMPLE_NOTES = [
-  {
-    id: '1',
-    title: 'Hy Sien Jou Trane',
-    scripture: 'Psalm 56:9',
-    scriptureText: '"U tel my omswerwinge; berg my trane in u kruik."',
-    series: 'God Sien Jou Trane',
-    lengthSeconds: 312,
-    audioUrl: null,
-    isToday: true,
-    color: '#EDE8F8'
-  },
-  {
-    id: '2',
-    title: 'Wanneer Jy Uitgeput Is',
-    scripture: 'Matteus 11:28',
-    scriptureText: '"Kom na My toe, almal wat vermoeid en belas is."',
-    series: 'Rustelose Gedagtes',
-    lengthSeconds: 284,
-    audioUrl: null,
-    isToday: false,
-    color: '#F8EDE8'
-  },
-  {
-    id: '3',
-    title: 'Giftige Gedagtes',
-    scripture: 'Romeine 12:2',
-    scriptureText: '"Word verander deur die vernuwing van julle gemoed."',
-    series: 'TOKSIES',
-    lengthSeconds: 398,
-    audioUrl: null,
-    isToday: false,
-    color: '#E8F0EE'
-  }
-]
+const FALLBACK_COLORS = ['#EDE8F8','#F8EDE8','#E8F0EE','#F8E8F0','#E8F8EC','#F0F4E8','#E8EEF8']
+
+function noteColor(id, stored) {
+  if (stored) return stored
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff
+  return FALLBACK_COLORS[h % FALLBACK_COLORS.length]
+}
 
 function fmtTime(sec) {
+  if (!sec) return '0:00'
   const m = Math.floor(sec / 60)
   const s = String(Math.floor(sec % 60)).padStart(2, '0')
   return `${m}:${s}`
@@ -118,11 +92,13 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
       </div>
       <div className="note-info">
         <span className="note-title">{note.title}</span>
-        <span className="note-scripture">{note.scripture}</span>
-        <span className="note-series">{note.series}</span>
+        {note.scripture && <span className="note-scripture">{note.scripture}</span>}
+        {note.series    && <span className="note-series">{note.series}</span>}
       </div>
       <div className="note-right">
-        <span className="note-length">{fmtTime(note.lengthSeconds)}</span>
+        {note.lengthSeconds > 0 && (
+          <span className="note-length">{fmtTime(note.lengthSeconds)}</span>
+        )}
         <button className="play-btn-small" onClick={onToggle}>
           {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
         </button>
@@ -135,8 +111,10 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
-export default function Luister({ onPlayingChange }) {
-  const [activeId, setActiveId]     = useState('1')
+export default function Luister({ onPlayingChange, installBanner }) {
+  const [notes, setNotes]           = useState([])
+  const [notesLoading, setLoading]  = useState(true)
+  const [activeId, setActiveId]     = useState(null)
   const [playing, setPlaying]       = useState(false)
   const [elapsed, setElapsed]       = useState(0)
   const [likes, setLikes]           = useState({})
@@ -146,18 +124,48 @@ export default function Luister({ onPlayingChange }) {
   })
   const [shareToast, setShareToast] = useState(false)
   const [playCount, setPlayCount]   = useState(0)
-  const timerRef    = useRef(null)
-  const audioRef    = useRef(null)
-  const playedRef   = useRef(false)
+  const timerRef  = useRef(null)
+  const audioRef  = useRef(null)
+  const playedRef = useRef(false)
 
-  const today      = SAMPLE_NOTES.find(n => n.isToday)
-  const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
-  const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
-  const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
-  const todayPlaying = playing && activeId === today.id
+  const today      = notes[0] || null
+  const recent     = notes.slice(1)
+  const activeNote = notes.find(n => n.id === activeId) || today
+  const progress   = activeNote?.lengthSeconds
+    ? Math.min(elapsed / activeNote.lengthSeconds, 1)
+    : 0
+  const todayPlaying = playing && activeId === today?.id
+
+  // ── Fetch notes from Firestore ──
+  useEffect(() => {
+    async function fetchNotes() {
+      try {
+        const q = query(
+          collection(db, 'notes'),
+          orderBy('publishedAt', 'desc'),
+          limit(30)
+        )
+        const snap = await getDocs(q)
+        const loaded = snap.docs.map(d => ({
+          id: d.id,
+          ...d.data(),
+          color: noteColor(d.id, d.data().color),
+          lengthSeconds: d.data().lengthSeconds || 0
+        }))
+        setNotes(loaded)
+        if (loaded.length > 0) setActiveId(loaded[0].id)
+      } catch (e) {
+        console.error('Notes fetch error:', e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchNotes()
+  }, [])
 
   // ── Fetch play count for today's note ──
   useEffect(() => {
+    if (!today) return
     async function fetchPlayCount() {
       try {
         const d = await getDoc(doc(db, 'plays', today.id))
@@ -165,13 +173,14 @@ export default function Luister({ onPlayingChange }) {
       } catch { /* offline */ }
     }
     fetchPlayCount()
-  }, [])
+  }, [today?.id])
 
   // ── Fetch like counts ──
   useEffect(() => {
+    if (notes.length === 0) return
     async function fetchLikes() {
       const counts = {}
-      await Promise.all(SAMPLE_NOTES.map(async note => {
+      await Promise.all(notes.map(async note => {
         try {
           const d = await getDoc(doc(db, 'likes', note.id))
           counts[note.id] = d.exists() ? (d.data().count || 0) : 0
@@ -180,15 +189,15 @@ export default function Luister({ onPlayingChange }) {
       setLikes(counts)
     }
     fetchLikes()
-  }, [])
+  }, [notes.length])
 
   // ── MediaSession API — lock screen controls ──
   useEffect(() => {
-    if (!('mediaSession' in navigator)) return
+    if (!activeNote || !('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata({
-      title:  activeNote?.title  || 'Daaglikse Hoop',
+      title:  activeNote.title  || 'Daaglikse Hoop',
       artist: 'Ds. Dewald Scheepers',
-      album:  activeNote?.series || 'Daaglikse Hoop',
+      album:  activeNote.series || 'Daaglikse Hoop',
       artwork: [
         { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
@@ -205,10 +214,36 @@ export default function Luister({ onPlayingChange }) {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
-    audio.src = activeNote.audioUrl
+    if (audio.src !== activeNote.audioUrl) {
+      audio.src = activeNote.audioUrl
+      setElapsed(0)
+    }
     if (playing) audio.play().catch(() => {})
     else audio.pause()
-  }, [activeNote, playing])
+  }, [activeNote?.id, playing])
+
+  // ── Sync elapsed from real audio ──
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !activeNote?.audioUrl) return
+    function onTimeUpdate() { setElapsed(audio.currentTime) }
+    function onEnded() { setPlaying(false); onPlayingChange?.(false); setElapsed(0) }
+    function onLoadedMetadata() {
+      if (!activeNote.lengthSeconds || activeNote.lengthSeconds === 0) {
+        setNotes(prev => prev.map(n =>
+          n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n
+        ))
+      }
+    }
+    audio.addEventListener('timeupdate', onTimeUpdate)
+    audio.addEventListener('ended', onEnded)
+    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+    return () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate)
+      audio.removeEventListener('ended', onEnded)
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+    }
+  }, [activeNote?.id])
 
   // ── Simulated timer (fallback when no real audio) ──
   useEffect(() => {
@@ -216,7 +251,8 @@ export default function Luister({ onPlayingChange }) {
     if (playing) {
       timerRef.current = setInterval(() => {
         setElapsed(e => {
-          if (e >= (activeNote?.lengthSeconds || 300)) { setPlaying(false); onPlayingChange?.(false); return 0 }
+          const max = activeNote?.lengthSeconds || 300
+          if (e >= max) { setPlaying(false); onPlayingChange?.(false); return 0 }
           return e + 1
         })
       }, 1000)
@@ -224,10 +260,10 @@ export default function Luister({ onPlayingChange }) {
       clearInterval(timerRef.current)
     }
     return () => clearInterval(timerRef.current)
-  }, [playing, activeNote])
+  }, [playing, activeNote?.id])
 
   async function countTodayPlay() {
-    if (playedRef.current) return
+    if (playedRef.current || !today) return
     playedRef.current = true
     setPlayCount(c => c + 1)
     try {
@@ -240,20 +276,22 @@ export default function Luister({ onPlayingChange }) {
       const next = !playing
       setPlaying(next)
       onPlayingChange?.(next)
-      if (next && note.id === today.id) countTodayPlay()
+      if (next && note.id === today?.id) countTodayPlay()
     } else {
       setActiveId(note.id)
       setElapsed(0)
       setPlaying(true)
       onPlayingChange?.(true)
-      if (note.id === today.id) countTodayPlay()
+      if (note.id === today?.id) countTodayPlay()
     }
   }
 
   function skip(seconds) {
-    setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
-    if (audioRef.current && activeNote?.audioUrl) {
-      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + seconds)
+    const audio = audioRef.current
+    if (audio && activeNote?.audioUrl) {
+      audio.currentTime = Math.max(0, audio.currentTime + seconds)
+    } else {
+      setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
     }
   }
 
@@ -261,7 +299,7 @@ export default function Luister({ onPlayingChange }) {
     if (liked.includes(noteId)) return
     try {
       await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true })
-    } catch { /* offline — still update locally */ }
+    } catch { /* offline */ }
     const newLiked = [...liked, noteId]
     setLiked(newLiked)
     localStorage.setItem('likedNotes', JSON.stringify(newLiked))
@@ -269,7 +307,7 @@ export default function Luister({ onPlayingChange }) {
   }
 
   async function handleShare(note) {
-    const msg = `Ek dink vandag se boodskap gaan jou help: "${note.title}" — ${note.scripture} 🙏`
+    const msg = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
     const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
     if (navigator.share) {
       try { await navigator.share(data) } catch { /* cancelled */ }
@@ -283,9 +321,46 @@ export default function Luister({ onPlayingChange }) {
   }
 
   const bySeries = recent.reduce((acc, n) => {
-    ;(acc[n.series] = acc[n.series] || []).push(n)
+    const key = n.series || 'Ouer boodskappe'
+    ;(acc[key] = acc[key] || []).push(n)
     return acc
   }, {})
+
+  // ── Loading state ──
+  if (notesLoading) {
+    return (
+      <div className="luister">
+        <div className="luister-hero luister-hero-loading">
+          <div className="hero-title">
+            <div className="hero-title-main">Daaglikse Hoop</div>
+            <div className="hero-title-sub">met Dewald Scheepers</div>
+          </div>
+          <div className="hero-loading-text">Besig om boodskappe te laai...</div>
+        </div>
+        <div className="luister-body">
+          {installBanner}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Empty state ──
+  if (!today) {
+    return (
+      <div className="luister">
+        <div className="luister-hero luister-hero-loading">
+          <div className="hero-title">
+            <div className="hero-title-main">Daaglikse Hoop</div>
+            <div className="hero-title-sub">met Dewald Scheepers</div>
+          </div>
+          <div className="hero-loading-text">Geen boodskappe beskikbaar nie.</div>
+        </div>
+        <div className="luister-body">
+          {installBanner}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="luister">
@@ -307,7 +382,7 @@ export default function Luister({ onPlayingChange }) {
 
         <div className="hero-song-info">
           <div className="hero-song-title">{today.title}</div>
-          <div className="hero-song-ref">{today.scripture}</div>
+          {today.scripture && <div className="hero-song-ref">{today.scripture}</div>}
           {playCount >= 10 && (
             <div className="hero-play-count">🎧 {playCount} keer geluister</div>
           )}
@@ -316,7 +391,7 @@ export default function Luister({ onPlayingChange }) {
             <div className="hero-bar">
               <div className="hero-fill" style={{ width: `${activeId === today.id ? progress * 100 : 0}%` }} />
             </div>
-            <span className="hero-time">{fmtTime(today.lengthSeconds)}</span>
+            <span className="hero-time">{today.lengthSeconds ? fmtTime(today.lengthSeconds) : '--:--'}</span>
           </div>
 
           <div className="hero-actions">
@@ -336,26 +411,32 @@ export default function Luister({ onPlayingChange }) {
       </div>
 
       <div className="luister-body">
-        <h3 className="section-title">Onlangse boodskappe</h3>
-        {Object.entries(bySeries).map(([series, notes]) => (
-          <div key={series} className="series-group">
-            <div className="series-label">{series}</div>
-            {notes.map(note => (
-              <NoteRow
-                key={note.id}
-                note={note}
-                playing={playing && activeId === note.id}
-                onToggle={() => toggle(note)}
-                liked={liked.includes(note.id)}
-                likeCount={likes[note.id] || 0}
-                onLike={() => handleLike(note.id)}
-              />
+        {installBanner}
+
+        {recent.length > 0 && (
+          <>
+            <h3 className="section-title">Onlangse boodskappe</h3>
+            {Object.entries(bySeries).map(([series, notes]) => (
+              <div key={series} className="series-group">
+                <div className="series-label">{series}</div>
+                {notes.map(note => (
+                  <NoteRow
+                    key={note.id}
+                    note={note}
+                    playing={playing && activeId === note.id}
+                    onToggle={() => toggle(note)}
+                    liked={liked.includes(note.id)}
+                    likeCount={likes[note.id] || 0}
+                    onLike={() => handleLike(note.id)}
+                  />
+                ))}
+              </div>
             ))}
-          </div>
-        ))}
+          </>
+        )}
       </div>
 
-      {activeId !== today.id && (
+      {activeNote && activeId !== today.id && (
         <MiniPlayer
           note={activeNote}
           playing={playing}
