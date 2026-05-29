@@ -198,18 +198,35 @@ export default function App() {
         />
       )}
 
-      {showInstallBanner && (
+      {showInstallBanner && isSamsung && (
+        <div className="install-banner install-banner-samsung">
+          <span className="install-banner-icon">🌅</span>
+          <div className="install-banner-text">
+            <strong>Stoor op jou tuisskerm</strong>
+            Maak oop in Chrome vir maklike installasie
+          </div>
+          <button className="install-banner-yes" onClick={() => {
+            const url = window.location.href
+            window.location.href = `googlechrome://navigate?url=${encodeURIComponent(url)}`
+            setTimeout(() => {
+              navigator.clipboard?.writeText(url)
+              alert('Skakel gekopieër! Plak dit in Chrome.')
+            }, 1500)
+          }}>Open in Chrome</button>
+          <button className="install-banner-no" onClick={dismissInstall}>✕</button>
+        </div>
+      )}
+
+      {showInstallBanner && !isSamsung && (
         <div className="install-banner">
           <span className="install-banner-icon">📱</span>
           <div className="install-banner-text">
             <strong>Voeg by jou tuisskerm</strong>
             {isIos
               ? 'Tik die deel-knoppie (□↑) onderaan en kies "Voeg by tuisskerm"'
-              : isSamsung
-              ? 'Tik die ☰ knoppie regs onder → "Voeg by" → "Tuisskerm"'
               : "Maak Daaglikse Hoop 'n app op jou foon — gratis en vinnig."}
           </div>
-          {!isIos && !isSamsung && (
+          {!isIos && (
             <button className="install-banner-yes" onClick={handleInstall}>Voeg by</button>
           )}
           <button className="install-banner-no" onClick={dismissInstall}>✕</button>
