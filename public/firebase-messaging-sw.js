@@ -19,10 +19,12 @@ const messaging = firebase.messaging()
 // Show notification when app is in the background
 messaging.onBackgroundMessage(payload => {
   self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    data: { url: '/' }
+    body:    payload.notification.body,
+    icon:    '/icons/icon-192.png',
+    badge:   '/icons/icon-192.png',
+    silent:  true,
+    vibrate: [120],
+    data:    { url: '/' }
   })
 })
 
