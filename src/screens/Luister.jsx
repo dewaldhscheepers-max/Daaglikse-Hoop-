@@ -165,7 +165,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     if (fetchingRef.current) return
     fetchingRef.current = true
     try {
-      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(30))
+      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(200))
       const snap = await getDocs(q)
       const loaded = snap.docs.map(mapDoc)
       setNotes(loaded)
