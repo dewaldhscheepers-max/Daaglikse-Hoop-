@@ -111,13 +111,23 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
+function getCachedNotes() {
+  try {
+    const cached = localStorage.getItem('cachedNotes')
+    return cached ? JSON.parse(cached) : []
+  } catch { return [] }
+}
+
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
-  const [notes, setNotes]           = useState([])
-  const [notesLoading, setLoading]  = useState(true)
-  const [activeId, setActiveId]     = useState(null)
+  const cached = getCachedNotes()
+  const [notes, setNotes]           = useState(cached)
+  const [notesLoading, setLoading]  = useState(cached.length === 0)
+  const [activeId, setActiveId]     = useState(cached[0]?.id || null)
   const [playing, setPlaying]       = useState(false)
   const [elapsed, setElapsed]       = useState(0)
-  const [likes, setLikes]           = useState({})
+  const [likes, setLikes]           = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cachedLikes') || '{}') } catch { return {} }
+  })
   const [liked, setLiked]           = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') }
     catch { return [] }
@@ -167,6 +177,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
         setNotes(loaded)
         setActiveId(prev => prev || (loaded.length > 0 ? loaded[0].id : null))
         setLoading(false)
+        try { localStorage.setItem('cachedNotes', JSON.stringify(loaded)) } catch {}
       },
       e => {
         console.error('Notes fetch error:', e)
@@ -191,7 +202,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     if (notes.length === 0) return
     const unsubs = notes.map(note =>
       onSnapshot(doc(db, 'likes', note.id),
-        snap => setLikes(prev => ({ ...prev, [note.id]: snap.exists() ? (snap.data().count || 0) : 0 })),
+        snap => setLikes(prev => {
+          const next = { ...prev, [note.id]: snap.exists() ? (snap.data().count || 0) : 0 }
+          try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
+          return next
+        }),
         () => {}
       )
     )
