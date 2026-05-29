@@ -2,7 +2,7 @@ import md5 from 'md5'
 
 const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
-const PASSPHRASE   = '' // paste your PayFast passphrase here if set under Settings → Integration
+const PASSPHRASE   = 'DaaglikseHoop5320'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
 const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
 
