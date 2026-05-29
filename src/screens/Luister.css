@@ -162,6 +162,96 @@
   transition: width 0.9s linear;
 }
 
+/* ─── Like + Share row ─── */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.hero-like-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: white;
+  border-radius: 24px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-like-btn.liked {
+  background: rgba(220, 60, 90, 0.75);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.hero-like-btn:active { transform: scale(0.93); }
+
+.hero-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: white;
+  border-radius: 24px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-share-btn:active {
+  background: rgba(255,255,255,0.30);
+  transform: scale(0.93);
+}
+
+/* ─── Note row like button ─── */
+.note-like-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s, transform 0.15s;
+}
+
+.note-like-btn.liked { color: #dc3c5a; }
+.note-like-btn:active { transform: scale(0.85); }
+
+/* ─── Share toast ─── */
+.share-toast {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--purple-dark);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  z-index: 300;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
 /* ─── Body — frosted, see-through ─── */
 .luister-body {
   padding: 24px 16px 32px;

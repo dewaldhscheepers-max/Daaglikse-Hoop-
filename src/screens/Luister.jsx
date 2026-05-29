@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc, increment } from 'firebase/firestore'
 import './Luister.css'
 
 const SAMPLE_NOTES = [
@@ -70,6 +72,21 @@ function SkipIcon({ direction = 'forward', seconds = 15 }) {
     </svg>
   )
 }
+function HeartIcon({ filled = false, size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  )
+}
+function ShareIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    </svg>
+  )
+}
 
 function MiniPlayer({ note, playing, progress, onToggle }) {
   if (!note) return null
@@ -89,7 +106,7 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   )
 }
 
-function NoteRow({ note, playing, onToggle }) {
+function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   return (
     <div className="note-row">
       <div className="note-thumb" style={{ background: note.color }}>
@@ -109,6 +126,10 @@ function NoteRow({ note, playing, onToggle }) {
         <button className="play-btn-small" onClick={onToggle}>
           {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
         </button>
+        <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
+          <HeartIcon filled={liked} size={13} />
+          {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
       </div>
     </div>
   )
@@ -118,13 +139,33 @@ export default function Luister() {
   const [activeId, setActiveId] = useState('1')
   const [playing, setPlaying]   = useState(false)
   const [elapsed, setElapsed]   = useState(0)
-  const timerRef                = useRef(null)
+  const [likes, setLikes]       = useState({})
+  const [liked, setLiked]       = useState(() => {
+    try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') }
+    catch { return [] }
+  })
+  const [shareToast, setShareToast] = useState(false)
+  const timerRef = useRef(null)
 
   const today      = SAMPLE_NOTES.find(n => n.isToday)
   const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
   const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today.id
+
+  useEffect(() => {
+    async function fetchLikes() {
+      const counts = {}
+      await Promise.all(SAMPLE_NOTES.map(async note => {
+        try {
+          const d = await getDoc(doc(db, 'likes', note.id))
+          counts[note.id] = d.exists() ? (d.data().count || 0) : 0
+        } catch { counts[note.id] = 0 }
+      }))
+      setLikes(counts)
+    }
+    fetchLikes()
+  }, [])
 
   useEffect(() => {
     if (playing) {
@@ -157,6 +198,32 @@ export default function Luister() {
     setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
   }
 
+  async function handleLike(noteId) {
+    if (liked.includes(noteId)) return
+    try {
+      await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true })
+    } catch { /* offline — still update locally */ }
+    const newLiked = [...liked, noteId]
+    setLiked(newLiked)
+    localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+    setLikes(prev => ({ ...prev, [noteId]: (prev[noteId] || 0) + 1 }))
+  }
+
+  async function handleShare(note) {
+    const data = {
+      title: `Daaglikse Hoop — ${note.title}`,
+      text: `Luister saam na "${note.title}" (${note.scripture}) met Ds. Dewald Scheepers 🙏`,
+      url: window.location.origin
+    }
+    if (navigator.share) {
+      try { await navigator.share(data) } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(window.location.origin)
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }
+  }
+
   const bySeries = recent.reduce((acc, n) => {
     ;(acc[n.series] = acc[n.series] || []).push(n)
     return acc
@@ -164,15 +231,12 @@ export default function Luister() {
 
   return (
     <div className="luister">
-      {/* ── Hero ── */}
       <div className="luister-hero">
-        {/* Title — top, subtle dark band behind it */}
         <div className="hero-title">
           <div className="hero-title-main">Daaglikse Hoop</div>
           <div className="hero-title-sub">met Dewald Scheepers</div>
         </div>
 
-        {/* Play button only — centred over face */}
         <div className="hero-controls">
           <button className="hero-skip" onClick={() => skip(-15)}><SkipIcon direction="back" seconds={15} /></button>
           <button className="hero-play-btn" onClick={() => toggle(today)}>
@@ -181,7 +245,6 @@ export default function Luister() {
           <button className="hero-skip" onClick={() => skip(15)}><SkipIcon direction="forward" seconds={15} /></button>
         </div>
 
-        {/* Song info + progress — bottom of hero */}
         <div className="hero-song-info">
           <div className="hero-song-title">{today.title}</div>
           <div className="hero-song-ref">{today.scripture}</div>
@@ -192,10 +255,23 @@ export default function Luister() {
             </div>
             <span className="hero-time">{fmtTime(today.lengthSeconds)}</span>
           </div>
+
+          <div className="hero-actions">
+            <button
+              className={`hero-like-btn ${liked.includes(today.id) ? 'liked' : ''}`}
+              onClick={() => handleLike(today.id)}
+            >
+              <HeartIcon filled={liked.includes(today.id)} size={18} />
+              <span>{likes[today.id] || 0}</span>
+            </button>
+            <button className="hero-share-btn" onClick={() => handleShare(today)}>
+              <ShareIcon size={18} />
+              <span>Deel met iemand</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Recent messages — frosted, see-through ── */}
       <div className="luister-body">
         <h3 className="section-title">Onlangse boodskappe</h3>
         {Object.entries(bySeries).map(([series, notes]) => (
@@ -207,6 +283,9 @@ export default function Luister() {
                 note={note}
                 playing={playing && activeId === note.id}
                 onToggle={() => toggle(note)}
+                liked={liked.includes(note.id)}
+                likeCount={likes[note.id] || 0}
+                onLike={() => handleLike(note.id)}
               />
             ))}
           </div>
@@ -220,6 +299,10 @@ export default function Luister() {
           progress={progress}
           onToggle={() => toggle(activeNote)}
         />
+      )}
+
+      {shareToast && (
+        <div className="share-toast">Skakel gekopieër! Plak dit om te deel.</div>
       )}
     </div>
   )
