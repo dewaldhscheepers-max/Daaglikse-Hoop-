@@ -3,7 +3,7 @@ import { checkoutBook } from '../utils/payfast'
 import NooimyModal from '../components/NooimyModal'
 import './Webtuiste.css'
 
-const PRESET_AMOUNTS = [50, 100, 250]
+const PRESET_AMOUNTS = [50, 100, 250, 1000]
 
 export function DonationModal({ onClose }) {
   const [selected, setSelected] = useState(100)
