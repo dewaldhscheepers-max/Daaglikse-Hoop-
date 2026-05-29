@@ -122,7 +122,7 @@ export const BOOKS = [
   },
   {
     id: 'bybel-hulpbron',
-    title: 'Gratis Bybel-hulpbron',
+    title: 'Die Bybel Maklik Gemaak',
     desc: "Verstaan die groot prent van die Bybel. Met Bybelstudie-vrae, antwoorde en sertifikaat. Perfek vir selgroepe en huisbybelstudie.",
     price: 0,
     free: true,
