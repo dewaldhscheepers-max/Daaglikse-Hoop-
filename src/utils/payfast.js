@@ -5,9 +5,15 @@ const MERCHANT_KEY = 'acdbj7mteeup0'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
 const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
 
+function phpUrlencode(val) {
+  return encodeURIComponent(String(val).trim())
+    .replace(/%20/g, '+')
+    .replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
+}
+
 function buildSignature(params) {
   const str = Object.entries(params)
-    .map(([k, v]) => `${k}=${encodeURIComponent(String(v).trim()).replace(/%20/g, '+')}`)
+    .map(([k, v]) => `${k}=${phpUrlencode(v)}`)
     .join('&')
   return md5(str)
 }
