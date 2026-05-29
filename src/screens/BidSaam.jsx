@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { db } from '../firebase'
 import {
   collection, addDoc, getDocs, updateDoc, doc,
-  serverTimestamp, orderBy, query, increment
+  serverTimestamp, orderBy, query, where, increment, Timestamp
 } from 'firebase/firestore'
 import './BidSaam.css'
 
@@ -44,7 +44,12 @@ export default function BidSaam() {
   useEffect(() => {
     async function load() {
       try {
-        const q = query(collection(db, 'prayers'), orderBy('createdAt', 'desc'))
+        const sevenDaysAgo = Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+        const q = query(
+          collection(db, 'prayers'),
+          where('createdAt', '>=', sevenDaysAgo),
+          orderBy('createdAt', 'desc')
+        )
         const snap = await getDocs(q)
         setPrayers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       } catch {
