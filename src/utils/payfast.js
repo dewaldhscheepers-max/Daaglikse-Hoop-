@@ -3,7 +3,7 @@ import md5 from 'md5'
 const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
-const ITN_URL      = 'https://daaglikse-hoop.vercel.app/api/payfast-itn'
+const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
 
 function buildSignature(params) {
   const str = Object.entries(params)
