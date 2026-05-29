@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Luister from './screens/Luister'
 import BidSaam from './screens/BidSaam'
 import Meer from './screens/Meer'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
+import { DonationPopup, EbookPopup } from './components/Popups'
+import { BOOKS } from './data/books'
 import { subscribeToNotifications } from './firebase'
 import './App.css'
 
@@ -17,6 +19,73 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIos, setIsIos] = useState(false)
+  const [activePopup, setActivePopup] = useState(null)
+  const [pendingPopup, setPendingPopup] = useState(null)
+  const isPlayingRef = useRef(false)
+
+  function onAudioPlayingChange(playing) {
+    isPlayingRef.current = playing
+    if (!playing && pendingPopup) {
+      setActivePopup(pendingPopup)
+      setPendingPopup(null)
+    }
+  }
+
+  // ── Popup manager ──
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const today     = new Date().toISOString().slice(0, 10)
+      const thisMonth = new Date().toISOString().slice(0, 7)
+
+      if (localStorage.getItem('lastPopupDate') === today) return
+
+      const seenEbooks  = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
+      const unseenBook  = BOOKS.find(b => !seenEbooks.includes(b.id))
+      const donationDue = localStorage.getItem('donationPopupMonth') !== thisMonth
+
+      let popup = null
+      if (unseenBook) {
+        popup = { type: 'ebook', book: unseenBook }
+      } else if (donationDue) {
+        popup = { type: 'donation' }
+      }
+
+      if (!popup) return
+
+      if (isPlayingRef.current) {
+        setPendingPopup(popup)
+      } else {
+        setActivePopup(popup)
+      }
+    }, 5000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  function dismissPopup() {
+    const today     = new Date().toISOString().slice(0, 10)
+    const thisMonth = new Date().toISOString().slice(0, 7)
+    localStorage.setItem('lastPopupDate', today)
+
+    if (activePopup?.type === 'ebook') {
+      const seen = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
+      seen.push(activePopup.book.id)
+      localStorage.setItem('seenEbooks', JSON.stringify(seen))
+    } else if (activePopup?.type === 'donation') {
+      localStorage.setItem('donationPopupMonth', thisMonth)
+    }
+    setActivePopup(null)
+  }
+
+  function handleEbookView() {
+    dismissPopup()
+    setTab('meer')
+  }
+
+  function handleDonationCta() {
+    dismissPopup()
+    setDonation(true)
+  }
 
   // ── Install to home screen prompt ──
   useEffect(() => {
@@ -94,7 +163,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="screen">
-        {tab === 'luister' && <Luister />}
+        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} />}
         {tab === 'bidsaam' && <BidSaam />}
         {tab === 'meer'    && <Meer />}
       </div>
@@ -103,6 +172,21 @@ export default function App() {
 
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
+
+      {activePopup?.type === 'ebook' && (
+        <EbookPopup
+          book={activePopup.book}
+          onView={handleEbookView}
+          onClose={dismissPopup}
+        />
+      )}
+
+      {activePopup?.type === 'donation' && (
+        <DonationPopup
+          onDonate={handleDonationCta}
+          onClose={dismissPopup}
+        />
+      )}
 
       {showInstallBanner && (
         <div className="install-banner">

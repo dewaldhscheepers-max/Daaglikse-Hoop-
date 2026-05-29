@@ -44,7 +44,6 @@
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  /* Warm sunset glow so text pops against the bright sky */
   text-shadow:
     0 0 24px rgba(255, 140, 0, 0.85),
     0 0 48px rgba(255, 100, 0, 0.45),
@@ -62,7 +61,7 @@
     0 1px 5px rgba(0, 0, 0, 0.55);
 }
 
-/* ─── Play controls — pushed below face ─── */
+/* ─── Play controls ─── */
 .hero-controls {
   position: relative;
   z-index: 1;
@@ -70,7 +69,7 @@
   align-items: center;
   justify-content: center;
   gap: 24px;
-  margin-top: 155px; /* push below chin/beard area */
+  margin-top: 155px;
 }
 
 .hero-play-btn {
@@ -129,6 +128,14 @@
   font-size: 12px;
   opacity: 0.82;
   margin-top: 2px;
+}
+
+/* ─── Listen count ─── */
+.hero-play-count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.60);
+  margin-top: 5px;
+  letter-spacing: 0.02em;
 }
 
 .hero-progress {
@@ -252,7 +259,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
-/* ─── Body — frosted, see-through ─── */
+/* ─── Body — frosted ─── */
 .luister-body {
   padding: 24px 16px 32px;
   background: rgba(248, 245, 255, 0.90);

@@ -135,7 +135,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
-export default function Luister() {
+export default function Luister({ onPlayingChange }) {
   const [activeId, setActiveId]     = useState('1')
   const [playing, setPlaying]       = useState(false)
   const [elapsed, setElapsed]       = useState(0)
@@ -145,14 +145,27 @@ export default function Luister() {
     catch { return [] }
   })
   const [shareToast, setShareToast] = useState(false)
-  const timerRef  = useRef(null)
-  const audioRef  = useRef(null)
+  const [playCount, setPlayCount]   = useState(0)
+  const timerRef    = useRef(null)
+  const audioRef    = useRef(null)
+  const playedRef   = useRef(false)
 
   const today      = SAMPLE_NOTES.find(n => n.isToday)
   const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
   const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today.id
+
+  // ── Fetch play count for today's note ──
+  useEffect(() => {
+    async function fetchPlayCount() {
+      try {
+        const d = await getDoc(doc(db, 'plays', today.id))
+        if (d.exists()) setPlayCount(d.data().count || 0)
+      } catch { /* offline */ }
+    }
+    fetchPlayCount()
+  }, [])
 
   // ── Fetch like counts ──
   useEffect(() => {
@@ -181,14 +194,14 @@ export default function Luister() {
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
       ]
     })
-    navigator.mediaSession.setActionHandler('play',         () => setPlaying(true))
-    navigator.mediaSession.setActionHandler('pause',        () => setPlaying(false))
+    navigator.mediaSession.setActionHandler('play',         () => { setPlaying(true);  onPlayingChange?.(true)  })
+    navigator.mediaSession.setActionHandler('pause',        () => { setPlaying(false); onPlayingChange?.(false) })
     navigator.mediaSession.setActionHandler('seekbackward', () => skip(-15))
     navigator.mediaSession.setActionHandler('seekforward',  () => skip(15))
     navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
   }, [activeNote, playing])
 
-  // ── Real audio element (plays when audioUrl is available) ──
+  // ── Real audio element ──
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
@@ -199,11 +212,11 @@ export default function Luister() {
 
   // ── Simulated timer (fallback when no real audio) ──
   useEffect(() => {
-    if (activeNote?.audioUrl) return  // real audio handles its own time
+    if (activeNote?.audioUrl) return
     if (playing) {
       timerRef.current = setInterval(() => {
         setElapsed(e => {
-          if (e >= (activeNote?.lengthSeconds || 300)) { setPlaying(false); return 0 }
+          if (e >= (activeNote?.lengthSeconds || 300)) { setPlaying(false); onPlayingChange?.(false); return 0 }
           return e + 1
         })
       }, 1000)
@@ -213,9 +226,28 @@ export default function Luister() {
     return () => clearInterval(timerRef.current)
   }, [playing, activeNote])
 
+  async function countTodayPlay() {
+    if (playedRef.current) return
+    playedRef.current = true
+    setPlayCount(c => c + 1)
+    try {
+      await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true })
+    } catch { /* offline */ }
+  }
+
   function toggle(note) {
-    if (activeId === note.id) { setPlaying(p => !p) }
-    else { setActiveId(note.id); setElapsed(0); setPlaying(true) }
+    if (activeId === note.id) {
+      const next = !playing
+      setPlaying(next)
+      onPlayingChange?.(next)
+      if (next && note.id === today.id) countTodayPlay()
+    } else {
+      setActiveId(note.id)
+      setElapsed(0)
+      setPlaying(true)
+      onPlayingChange?.(true)
+      if (note.id === today.id) countTodayPlay()
+    }
   }
 
   function skip(seconds) {
@@ -238,11 +270,7 @@ export default function Luister() {
 
   async function handleShare(note) {
     const msg = `Ek dink vandag se boodskap gaan jou help: "${note.title}" — ${note.scripture} 🙏`
-    const data = {
-      title: 'Daaglikse Hoop',
-      text:  msg,
-      url:   window.location.origin
-    }
+    const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
     if (navigator.share) {
       try { await navigator.share(data) } catch { /* cancelled */ }
     } else {
@@ -261,7 +289,6 @@ export default function Luister() {
 
   return (
     <div className="luister">
-      {/* Hidden audio element for real playback + background audio */}
       <audio ref={audioRef} style={{ display: 'none' }} />
 
       <div className="luister-hero">
@@ -281,6 +308,9 @@ export default function Luister() {
         <div className="hero-song-info">
           <div className="hero-song-title">{today.title}</div>
           <div className="hero-song-ref">{today.scripture}</div>
+          {playCount >= 10 && (
+            <div className="hero-play-count">🎧 {playCount} keer geluister</div>
+          )}
           <div className="hero-progress">
             <span className="hero-time">{fmtTime(activeId === today.id ? elapsed : 0)}</span>
             <div className="hero-bar">
