@@ -282,7 +282,7 @@ export default function Admin({ onClose }) {
               <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
                 style={{ display: 'none' }} onChange={handlePdfUpload} />
 
-              {BOOKS.filter(b => b.free).map(book => {
+              {BOOKS.map(book => {
                 const override = bookOverrides[book.id]
                 const hasPdf   = override?.pdfUrl
                 const isUploadingThis = pdfUploading === book.id
@@ -294,6 +294,8 @@ export default function Admin({ onClose }) {
                     <div className="admin-note-info">
                       <div className="admin-note-title">{book.title}</div>
                       <div className="admin-note-meta">
+                        {book.free ? '🎁 Gratis' : `💳 R${book.price}`}
+                        {' · '}
                         {isUploadingThis ? `${pdfProgress}% opgelaai...`
                           : isSaved ? '✅ PDF opgelaai!'
                           : hasPdf ? '✓ PDF beskikbaar'
