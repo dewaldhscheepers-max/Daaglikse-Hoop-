@@ -1,14 +1,10 @@
 import { useState } from 'react'
-import { db } from '../firebase'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import './NooimyModal.css'
 
 export default function NooimyModal({ onClose }) {
   const [form, setForm] = useState({
     naam: '', gemeente: '', dorp: '', datum: '', tipe: '', telefoon: '', boodskap: ''
   })
-  const [busy, setBusy]   = useState(false)
-  const [sent, setSent]   = useState(false)
   const [error, setError] = useState('')
 
   function update(field, value) {
@@ -16,43 +12,26 @@ export default function NooimyModal({ onClose }) {
     setError('')
   }
 
-  async function submit() {
+  function submit() {
     if (!form.naam.trim())     { setError('Voer asb jou naam in.'); return }
     if (!form.gemeente.trim()) { setError('Voer asb jou gemeente of organisasie se naam in.'); return }
     if (!form.telefoon.trim()) { setError('Voer asb jou kontaknommer in.'); return }
 
-    setBusy(true)
-    try {
-      await addDoc(collection(db, 'preek_versoeke'), {
-        ...form,
-        createdAt: serverTimestamp()
-      })
-      fetch('/api/nooimy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      }).catch(() => {})
-      setSent(true)
-    } catch {
-      setError('Iets het nie reg gegaan nie. Probeer asseblief weer.')
-    } finally {
-      setBusy(false)
-    }
-  }
+    const lines = [
+      `Naam: ${form.naam}`,
+      `Gemeente / Organisasie: ${form.gemeente}`,
+      form.dorp     ? `Dorp: ${form.dorp}`             : '',
+      form.tipe     ? `Tipe geleentheid: ${form.tipe}` : '',
+      form.datum    ? `Datum: ${form.datum}`            : '',
+      `Telefoon: ${form.telefoon}`,
+      form.boodskap ? `\nBoodskap:\n${form.boodskap}`  : '',
+    ].filter(Boolean).join('\n')
 
-  if (sent) {
-    return (
-      <div className="modal-backdrop nooimy-backdrop" onClick={onClose}>
-        <div className="nooimy-card" onClick={e => e.stopPropagation()}>
-          <div className="sent-icon">✉️</div>
-          <h3 className="nooimy-title">Uitnodiging Ontvang!</h3>
-          <p className="nooimy-sent-msg">
-            Dankie, {form.naam.split(' ')[0]}. Ons het jou uitnodiging ontvang en sal so gou moontlik terugkom.
-          </p>
-          <button className="btn-primary nooimy-close-btn" onClick={onClose}>Klaar</button>
-        </div>
-      </div>
-    )
+    const subject = encodeURIComponent(`🎤 Uitnodiging om te preek: ${form.naam} — ${form.gemeente}`)
+    const body    = encodeURIComponent(`Hallo Dewald,\n\nHieronder is my besonderhede vir 'n preekuitnodiging:\n\n${lines}\n\nSaggies groete`)
+
+    window.location.href = `mailto:dewald.h.scheepers@gmail.com?subject=${subject}&body=${body}`
+    onClose()
   }
 
   return (
@@ -106,8 +85,8 @@ export default function NooimyModal({ onClose }) {
 
         {error && <p className="nooimy-error">{error}</p>}
 
-        <button className="btn-primary nooimy-submit" onClick={submit} disabled={busy}>
-          {busy ? 'Besig om te stuur...' : 'Stuur Uitnodiging'}
+        <button className="btn-primary nooimy-submit" onClick={submit}>
+          Stuur Uitnodiging
         </button>
       </div>
     </div>
