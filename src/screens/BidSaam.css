@@ -143,3 +143,59 @@
   font-weight: 700;
   color: var(--purple);
 }
+
+/* ─── Prayer actions row ─── */
+.prayer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ─── Report button ─── */
+.report-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 0;
+  opacity: 0.6;
+  font-family: var(--font-body);
+  text-decoration: underline;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.report-btn:active { opacity: 0.3; }
+
+/* ─── Loading / empty / error states ─── */
+.prayers-loading,
+.prayers-empty,
+.prayers-error {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 32px 16px;
+  line-height: 1.6;
+}
+
+.prayers-error { color: #B71C1C; }
+
+/* ─── Prayed toast ─── */
+.prayed-toast {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--purple-dark);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  text-align: center;
+  max-width: calc(100% - 32px);
+  z-index: 300;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  line-height: 1.4;
+}

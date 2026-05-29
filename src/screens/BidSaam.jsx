@@ -1,28 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { db } from '../firebase'
+import {
+  collection, addDoc, getDocs, updateDoc, doc,
+  serverTimestamp, orderBy, query, increment
+} from 'firebase/firestore'
 import './BidSaam.css'
 
-const SAMPLE_PRAYERS = [
-  {
-    id: '1',
-    text: 'Bid asb vir my ma wat siek is. Ek vertrou die Here, maar my hart is soms onrustig.',
-    prayedCount: 14,
-    createdAt: new Date()
-  },
-  {
-    id: '2',
-    text: "Ek soek werk al vir drie maande. Bid saam dat God 'n deur sal oopmaak.",
-    prayedCount: 31,
-    createdAt: new Date(Date.now() - 86400000)
-  },
-  {
-    id: '3',
-    text: "My huwelik gaan deur 'n moeilike tyd. Bid dat God ons herstel.",
-    prayedCount: 47,
-    createdAt: new Date(Date.now() - 172800000)
-  }
-]
-
-function timeLabel(date) {
+function timeLabel(ts) {
+  if (!ts) return 'Nou net'
+  const date = ts.toDate ? ts.toDate() : new Date(ts)
   const diff = Date.now() - date.getTime()
   if (diff < 86400000)  return 'Vandag'
   if (diff < 172800000) return 'Gister'
@@ -40,32 +26,78 @@ function PrayingHandsIcon() {
 }
 
 export default function BidSaam() {
-  const [prayers, setPrayers]     = useState(SAMPLE_PRAYERS)
+  const [prayers, setPrayers]     = useState([])
   const [text, setText]           = useState('')
-  const [prayed, setPrayed]       = useState(new Set())
+  const [prayed, setPrayed]       = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('prayedFor') || '[]')) }
+    catch { return new Set() }
+  })
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [prayedToast, setPrayedToast] = useState(false)
+  const [reported, setReported]   = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('reportedPrayers') || '[]')) }
+    catch { return new Set() }
+  })
 
-  function submit() {
+  useEffect(() => {
+    async function load() {
+      try {
+        const q = query(collection(db, 'prayers'), orderBy('createdAt', 'desc'))
+        const snap = await getDocs(q)
+        setPrayers(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      } catch {
+        setError('Iets het nie reg gelaai nie. Probeer asseblief weer.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  async function submit() {
     if (!text.trim()) return
-    setPrayers(prev => [{
-      id: String(Date.now()),
+    const newPrayer = {
       text: text.trim(),
       prayedCount: 0,
-      createdAt: new Date()
-    }, ...prev])
-    setText('')
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 3000)
+      createdAt: serverTimestamp(),
+      reported: false
+    }
+    try {
+      const ref = await addDoc(collection(db, 'prayers'), newPrayer)
+      setPrayers(prev => [{ id: ref.id, ...newPrayer, createdAt: { toDate: () => new Date() } }, ...prev])
+      setText('')
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 4000)
+    } catch {
+      setError('Kon nie stuur nie. Probeer asseblief weer.')
+    }
   }
 
-  function togglePrayed(id) {
-    setPrayed(prev => {
-      const next = new Set(prev)
-      const delta = next.has(id) ? -1 : 1
-      next.has(id) ? next.delete(id) : next.add(id)
-      setPrayers(ps => ps.map(p => p.id === id ? { ...p, prayedCount: p.prayedCount + delta } : p))
-      return next
-    })
+  async function togglePrayed(id) {
+    if (prayed.has(id)) return
+    const next = new Set(prayed)
+    next.add(id)
+    setPrayed(next)
+    localStorage.setItem('prayedFor', JSON.stringify([...next]))
+    setPrayers(ps => ps.map(p => p.id === id ? { ...p, prayedCount: (p.prayedCount || 0) + 1 } : p))
+    setPrayedToast(true)
+    setTimeout(() => setPrayedToast(false), 3500)
+    try {
+      await updateDoc(doc(db, 'prayers', id), { prayedCount: increment(1) })
+    } catch { /* offline — already updated locally */ }
+  }
+
+  async function reportPrayer(id) {
+    if (reported.has(id)) return
+    const next = new Set(reported)
+    next.add(id)
+    setReported(next)
+    localStorage.setItem('reportedPrayers', JSON.stringify([...next]))
+    try {
+      await updateDoc(doc(db, 'prayers', id), { reported: true })
+    } catch { /* offline */ }
   }
 
   return (
@@ -76,7 +108,6 @@ export default function BidSaam() {
       </div>
 
       <div className="bidsaam-body">
-        {/* Input card */}
         <div className="card prayer-input-card">
           <div className="anon-badge">🔒 Anoniem — geen name word gestoor nie</div>
           <textarea
@@ -94,12 +125,24 @@ export default function BidSaam() {
             </button>
           </div>
           {submitted && (
-            <div className="submitted-msg">✓ Jou versoek is gedeel. Ons bid saam!</div>
+            <div className="submitted-msg">🙏 Jou gebedsversoek is gedeel. Jy is nie alleen nie.</div>
           )}
         </div>
 
-        {/* Prayer wall */}
         <h3 className="section-title">Gebedsversoeke</h3>
+
+        {loading && (
+          <div className="prayers-loading">Besig om gebedsversoeke te laai...</div>
+        )}
+
+        {!loading && error && (
+          <div className="prayers-error">{error}</div>
+        )}
+
+        {!loading && !error && prayers.length === 0 && (
+          <div className="prayers-empty">Wees die eerste om 'n versoek te deel. Jy is nie alleen nie.</div>
+        )}
+
         <div className="prayer-list">
           {prayers.map(prayer => (
             <div key={prayer.id} className="prayer-card card">
@@ -107,19 +150,30 @@ export default function BidSaam() {
               <div className="prayer-content">
                 <p className="prayer-text">{prayer.text}</p>
                 <span className="prayer-meta">Anoniem · {timeLabel(prayer.createdAt)}</span>
-                <button
-                  className={`prayed-btn${prayed.has(prayer.id) ? ' prayed' : ''}`}
-                  onClick={() => togglePrayed(prayer.id)}
-                >
-                  <PrayingHandsIcon />
-                  Ek het gebid
-                  <span className="prayed-count">{prayer.prayedCount}</span>
-                </button>
+                <div className="prayer-actions">
+                  <button
+                    className={`prayed-btn${prayed.has(prayer.id) ? ' prayed' : ''}`}
+                    onClick={() => togglePrayed(prayer.id)}
+                  >
+                    <PrayingHandsIcon />
+                    {prayed.has(prayer.id) ? 'Gebid' : 'Ek het gebid'}
+                    <span className="prayed-count">{prayer.prayedCount || 0}</span>
+                  </button>
+                  {!reported.has(prayer.id) && (
+                    <button className="report-btn" onClick={() => reportPrayer(prayer.id)}>
+                      Rapporteer
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {prayedToast && (
+        <div className="prayed-toast">Dankie. Iemand weet nou hulle dra dit nie alleen nie. 🙏</div>
+      )}
     </div>
   )
 }

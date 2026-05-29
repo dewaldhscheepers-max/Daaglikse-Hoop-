@@ -136,16 +136,17 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
 }
 
 export default function Luister() {
-  const [activeId, setActiveId] = useState('1')
-  const [playing, setPlaying]   = useState(false)
-  const [elapsed, setElapsed]   = useState(0)
-  const [likes, setLikes]       = useState({})
-  const [liked, setLiked]       = useState(() => {
+  const [activeId, setActiveId]     = useState('1')
+  const [playing, setPlaying]       = useState(false)
+  const [elapsed, setElapsed]       = useState(0)
+  const [likes, setLikes]           = useState({})
+  const [liked, setLiked]           = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') }
     catch { return [] }
   })
   const [shareToast, setShareToast] = useState(false)
-  const timerRef = useRef(null)
+  const timerRef  = useRef(null)
+  const audioRef  = useRef(null)
 
   const today      = SAMPLE_NOTES.find(n => n.isToday)
   const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
@@ -153,6 +154,7 @@ export default function Luister() {
   const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today.id
 
+  // ── Fetch like counts ──
   useEffect(() => {
     async function fetchLikes() {
       const counts = {}
@@ -167,14 +169,41 @@ export default function Luister() {
     fetchLikes()
   }, [])
 
+  // ── MediaSession API — lock screen controls ──
   useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  activeNote?.title  || 'Daaglikse Hoop',
+      artist: 'Ds. Dewald Scheepers',
+      album:  activeNote?.series || 'Daaglikse Hoop',
+      artwork: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+      ]
+    })
+    navigator.mediaSession.setActionHandler('play',         () => setPlaying(true))
+    navigator.mediaSession.setActionHandler('pause',        () => setPlaying(false))
+    navigator.mediaSession.setActionHandler('seekbackward', () => skip(-15))
+    navigator.mediaSession.setActionHandler('seekforward',  () => skip(15))
+    navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
+  }, [activeNote, playing])
+
+  // ── Real audio element (plays when audioUrl is available) ──
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !activeNote?.audioUrl) return
+    audio.src = activeNote.audioUrl
+    if (playing) audio.play().catch(() => {})
+    else audio.pause()
+  }, [activeNote, playing])
+
+  // ── Simulated timer (fallback when no real audio) ──
+  useEffect(() => {
+    if (activeNote?.audioUrl) return  // real audio handles its own time
     if (playing) {
       timerRef.current = setInterval(() => {
         setElapsed(e => {
-          if (e >= (activeNote?.lengthSeconds || 300)) {
-            setPlaying(false)
-            return 0
-          }
+          if (e >= (activeNote?.lengthSeconds || 300)) { setPlaying(false); return 0 }
           return e + 1
         })
       }, 1000)
@@ -185,17 +214,15 @@ export default function Luister() {
   }, [playing, activeNote])
 
   function toggle(note) {
-    if (activeId === note.id) {
-      setPlaying(p => !p)
-    } else {
-      setActiveId(note.id)
-      setElapsed(0)
-      setPlaying(true)
-    }
+    if (activeId === note.id) { setPlaying(p => !p) }
+    else { setActiveId(note.id); setElapsed(0); setPlaying(true) }
   }
 
   function skip(seconds) {
     setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
+    if (audioRef.current && activeNote?.audioUrl) {
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + seconds)
+    }
   }
 
   async function handleLike(noteId) {
@@ -210,17 +237,20 @@ export default function Luister() {
   }
 
   async function handleShare(note) {
+    const msg = `Ek dink vandag se boodskap gaan jou help: "${note.title}" — ${note.scripture} 🙏`
     const data = {
-      title: `Daaglikse Hoop — ${note.title}`,
-      text: `Luister saam na "${note.title}" (${note.scripture}) met Ds. Dewald Scheepers 🙏`,
-      url: window.location.origin
+      title: 'Daaglikse Hoop',
+      text:  msg,
+      url:   window.location.origin
     }
     if (navigator.share) {
       try { await navigator.share(data) } catch { /* cancelled */ }
     } else {
-      await navigator.clipboard.writeText(window.location.origin)
-      setShareToast(true)
-      setTimeout(() => setShareToast(false), 2500)
+      try {
+        await navigator.clipboard.writeText(`${msg}\n${window.location.origin}`)
+        setShareToast(true)
+        setTimeout(() => setShareToast(false), 2500)
+      } catch { /* clipboard not available */ }
     }
   }
 
@@ -231,6 +261,9 @@ export default function Luister() {
 
   return (
     <div className="luister">
+      {/* Hidden audio element for real playback + background audio */}
+      <audio ref={audioRef} style={{ display: 'none' }} />
+
       <div className="luister-hero">
         <div className="hero-title">
           <div className="hero-title-main">Daaglikse Hoop</div>
@@ -302,7 +335,7 @@ export default function Luister() {
       )}
 
       {shareToast && (
-        <div className="share-toast">Skakel gekopieër! Plak dit om te deel.</div>
+        <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>
       )}
     </div>
   )
