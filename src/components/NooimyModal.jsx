@@ -27,6 +27,11 @@ export default function NooimyModal({ onClose }) {
         ...form,
         createdAt: serverTimestamp()
       })
+      fetch('/api/nooimy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      }).catch(() => {})
       setSent(true)
     } catch {
       setError('Iets het nie reg gegaan nie. Probeer asseblief weer.')
