@@ -5,7 +5,8 @@ import Meer from './screens/Meer'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
-import { DonationPopup, EbookPopup } from './components/Popups'
+import { DonationPopup, EbookPopup, InstallPopup } from './components/Popups'
+import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications } from './firebase'
 import './App.css'
@@ -16,10 +17,14 @@ export default function App() {
   const [showNooimy, setNooimy]     = useState(false)
   const [paymentResult, setPayment] = useState(null)
   const [showNotifBanner, setNotifBanner] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  )
   const [installPrompt, setInstallPrompt] = useState(null)
-  const [showInstallBanner, setShowInstallBanner] = useState(false)
-  const [isIos, setIsIos] = useState(false)
-  const [isSamsung, setIsSamsung] = useState(false)
+  const [installBannerDismissed, setInstallBannerDismissed] = useState(false)
+  const [showInstallPopup, setShowInstallPopup] = useState(false)
+  const [showInstallHelp, setShowInstallHelp] = useState(false)
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
@@ -32,10 +37,41 @@ export default function App() {
     }
   }
 
+  // ── Capture beforeinstallprompt (Chrome/Edge) ──
+  useEffect(() => {
+    if (isInstalled) return
+    function onPrompt(e) { e.preventDefault(); setInstallPrompt(e) }
+    function onInstalled() { setIsInstalled(true) }
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
+  }, [isInstalled])
+
+  // ── Once-per-day install popup (3s delay, not while audio plays) ──
+  useEffect(() => {
+    if (isInstalled) return
+    const today = new Date().toISOString().slice(0, 10)
+    if (localStorage.getItem('installPopupDate') === today) return
+    const t = setTimeout(() => {
+      if (!isPlayingRef.current) {
+        setShowInstallPopup(true)
+        localStorage.setItem('installPopupDate', today)
+      }
+    }, 3000)
+    return () => clearTimeout(t)
+  }, [isInstalled])
+
   // ── Popup manager ──
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Don't show donation/ebook popup on same day as install popup
       const today     = new Date().toISOString().slice(0, 10)
+      if (!isInstalled) return
+      if (localStorage.getItem('installPopupDate') === today) return
+
       const thisMonth = new Date().toISOString().slice(0, 7)
 
       if (localStorage.getItem('lastPopupDate') === today) return
@@ -61,7 +97,7 @@ export default function App() {
     }, 5000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [isInstalled])
 
   function dismissPopup() {
     const today     = new Date().toISOString().slice(0, 10)
@@ -88,61 +124,29 @@ export default function App() {
     setDonation(true)
   }
 
-  // ── Install to home screen prompt ──
-  useEffect(() => {
-    const alreadyInstalled =
-      window.navigator.standalone ||
-      window.matchMedia('(display-mode: standalone)').matches
-    if (alreadyInstalled) return
-    if (localStorage.getItem('installDismissed')) return
-
-    const ua  = navigator.userAgent
-    const ios     = /iPhone|iPad|iPod/.test(ua) && !window.MSStream
-    const samsung = /SamsungBrowser/.test(ua)
-
-    if (ios) {
-      setIsIos(true)
-      setTimeout(() => setShowInstallBanner(true), 2000)
-      return
-    }
-
-    if (samsung) {
-      setIsSamsung(true)
-      setTimeout(() => setShowInstallBanner(true), 2000)
-      return
-    }
-
-    function onPrompt(e) {
-      e.preventDefault()
-      setInstallPrompt(e)
-      setTimeout(() => setShowInstallBanner(true), 2000)
-    }
-    window.addEventListener('beforeinstallprompt', onPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt)
-  }, [])
-
-  async function handleInstall() {
+  // ── Install handlers ──
+  async function handleInstallCta() {
     if (installPrompt) {
       installPrompt.prompt()
       const { outcome } = await installPrompt.userChoice
-      if (outcome === 'accepted') localStorage.setItem('installDismissed', '1')
+      if (outcome === 'accepted') setIsInstalled(true)
       setInstallPrompt(null)
+    } else {
+      setShowInstallPopup(false)
+      setShowInstallHelp(true)
     }
-    setShowInstallBanner(false)
   }
 
-  function dismissInstall() {
-    setShowInstallBanner(false)
-    localStorage.setItem('installDismissed', '1')
-  }
+  function dismissInstallPopup() { setShowInstallPopup(false) }
 
   // ── Notification permission banner ──
   useEffect(() => {
+    if (!isInstalled) return
     if ('Notification' in window && Notification.permission === 'default') {
       const t = setTimeout(() => setNotifBanner(true), 3000)
       return () => clearTimeout(t)
     }
-  }, [])
+  }, [isInstalled])
 
   async function handleNotifYes() {
     setNotifBanner(false)
@@ -170,10 +174,29 @@ export default function App() {
     setTab(id)
   }
 
+  // ── Persistent install banner ──
+  const persistBanner = !isInstalled && !installBannerDismissed ? (
+    <div className="install-persist-banner">
+      <div className="install-persist-text">
+        <strong>Sit Daaglikse Hoop op jou foon</strong>
+        <span>Luister maklik elke oggend sonder om deur jou browser te soek.</span>
+      </div>
+      <div className="install-persist-actions">
+        <button className="install-persist-btn" onClick={handleInstallCta}>
+          Sit op my foon
+        </button>
+        <button className="install-persist-help" onClick={() => setShowInstallHelp(true)}>
+          Wys my hoe
+        </button>
+      </div>
+      <button className="install-persist-close" onClick={() => setInstallBannerDismissed(true)}>✕</button>
+    </div>
+  ) : null
+
   return (
     <div className="app">
       <div className="screen">
-        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} />}
+        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={persistBanner} />}
         {tab === 'bidsaam' && <BidSaam />}
         {tab === 'meer'    && <Meer />}
       </div>
@@ -198,39 +221,16 @@ export default function App() {
         />
       )}
 
-      {showInstallBanner && isSamsung && (
-        <div className="install-banner install-banner-samsung">
-          <span className="install-banner-icon">🌅</span>
-          <div className="install-banner-text">
-            <strong>Stoor op jou tuisskerm</strong>
-            Maak oop in Chrome vir maklike installasie
-          </div>
-          <button className="install-banner-yes" onClick={() => {
-            const url = window.location.href
-            window.location.href = `googlechrome://navigate?url=${encodeURIComponent(url)}`
-            setTimeout(() => {
-              navigator.clipboard?.writeText(url)
-              alert('Skakel gekopieër! Plak dit in Chrome.')
-            }, 1500)
-          }}>Open in Chrome</button>
-          <button className="install-banner-no" onClick={dismissInstall}>✕</button>
-        </div>
+      {showInstallPopup && !activePopup && (
+        <InstallPopup
+          onInstall={handleInstallCta}
+          onLater={dismissInstallPopup}
+          onHelp={() => { setShowInstallPopup(false); setShowInstallHelp(true) }}
+        />
       )}
 
-      {showInstallBanner && !isSamsung && (
-        <div className="install-banner">
-          <span className="install-banner-icon">📱</span>
-          <div className="install-banner-text">
-            <strong>Voeg by jou tuisskerm</strong>
-            {isIos
-              ? 'Tik die deel-knoppie (□↑) onderaan en kies "Voeg by tuisskerm"'
-              : "Maak Daaglikse Hoop 'n app op jou foon — gratis en vinnig."}
-          </div>
-          {!isIos && (
-            <button className="install-banner-yes" onClick={handleInstall}>Voeg by</button>
-          )}
-          <button className="install-banner-no" onClick={dismissInstall}>✕</button>
-        </div>
+      {showInstallHelp && (
+        <InstallHelp onClose={() => setShowInstallHelp(false)} />
       )}
 
       {showNotifBanner && (

@@ -135,7 +135,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
-export default function Luister({ onPlayingChange }) {
+export default function Luister({ onPlayingChange, installBanner }) {
   const [activeId, setActiveId]     = useState('1')
   const [playing, setPlaying]       = useState(false)
   const [elapsed, setElapsed]       = useState(0)
@@ -336,6 +336,7 @@ export default function Luister({ onPlayingChange }) {
       </div>
 
       <div className="luister-body">
+        {installBanner}
         <h3 className="section-title">Onlangse boodskappe</h3>
         {Object.entries(bySeries).map(([series, notes]) => (
           <div key={series} className="series-group">

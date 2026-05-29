@@ -21,6 +21,30 @@ export function DonationPopup({ onDonate, onClose }) {
   )
 }
 
+export function InstallPopup({ onInstall, onLater, onHelp }) {
+  return (
+    <div className="popup-backdrop" onClick={onLater}>
+      <div className="popup-card" onClick={e => e.stopPropagation()}>
+        <button className="popup-x" onClick={onLater}>✕</button>
+        <div className="popup-icon">🏡</div>
+        <h3 className="popup-title">Wil jy Daaglikse Hoop soos 'n gewone app oopmaak?</h3>
+        <p className="popup-body">
+          Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.
+        </p>
+        <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
+        <button className="popup-btn-secondary" onClick={onLater}>Later</button>
+        <button
+          className="popup-btn-secondary"
+          onClick={onHelp}
+          style={{ fontSize: 13, marginTop: -4 }}
+        >
+          Wys my hoe →
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function EbookPopup({ book, onView, onClose }) {
   return (
     <div className="popup-backdrop" onClick={onClose}>
