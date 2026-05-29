@@ -227,7 +227,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     if (!activeNote || !('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata({
       title:  activeNote.title  || 'Daaglikse Hoop',
-      artist: 'Ds. Dewald Scheepers',
+      artist: 'Dewald Scheepers',
       album:  activeNote.series || 'Daaglikse Hoop',
       artwork: [
         { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
