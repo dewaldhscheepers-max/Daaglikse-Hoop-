@@ -94,7 +94,8 @@ module.exports = async function handler(req, res) {
   // Secure the endpoint with a secret
   const secret = process.env.CRON_SECRET
   const auth   = req.headers.authorization || ''
-  if (secret && auth !== `Bearer ${secret}`) {
+  const query  = req.query?.secret || ''
+  if (secret && auth !== `Bearer ${secret}` && query !== secret) {
     return res.status(401).send('Unauthorized')
   }
 
