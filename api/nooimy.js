@@ -25,6 +25,11 @@ module.exports = async function handler(req, res) {
     </table>
   `
 
+  if (!process.env.RESEND_API_KEY) {
+    console.error('nooimy: RESEND_API_KEY not set')
+    return res.status(500).send('Missing API key')
+  }
+
   try {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -39,10 +44,15 @@ module.exports = async function handler(req, res) {
         html,
       }),
     })
-    if (!r.ok) throw new Error(await r.text())
+    const body = await r.text()
+    if (!r.ok) {
+      console.error('nooimy resend error', r.status, body)
+      return res.status(500).send('Email failed')
+    }
+    console.log('nooimy email sent ok', body)
     return res.status(200).send('OK')
   } catch (e) {
-    console.error('nooimy email error', e)
+    console.error('nooimy email exception', e)
     return res.status(500).send('Email failed')
   }
 }
