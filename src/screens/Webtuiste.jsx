@@ -97,11 +97,11 @@ export function DonationModal({ onClose }) {
 
         {showEft && (
           <div className="eft-details">
-            <p className="eft-row"><span>Bank</span><strong>Absa</strong></p>
-            <p className="eft-row"><span>Rekening</span><strong>4075577947</strong></p>
-            <p className="eft-row"><span>Tipe</span><strong>Tjekrekening</strong></p>
+            <p className="eft-row"><span>Bank</span><strong>Capitec</strong></p>
             <p className="eft-row"><span>Naam</span><strong>Dewald Scheepers</strong></p>
-            <p className="eft-note">Gebruik jou naam as verwysing. Stuur 'n bewys na info@dewaldscheepers.com</p>
+            <p className="eft-row"><span>Rekening</span><strong>2427361174</strong></p>
+            <p className="eft-row"><span>Tak-kode</span><strong>470010</strong></p>
+            <p className="eft-note">Gebruik jou selfoonnommer as verwysing.</p>
           </div>
         )}
       </div>
