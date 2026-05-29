@@ -36,6 +36,55 @@
   flex-shrink: 0;
 }
 
+/* ─── Install to home screen banner ─── */
+.install-banner {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  background: #1a1a2e;
+  color: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 201;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  font-family: var(--font-body);
+}
+
+.install-banner-icon { font-size: 24px; flex-shrink: 0; }
+
+.install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
+
+.install-banner-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+
+.install-banner-yes {
+  background: white;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+}
+
+.install-banner-no {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
 /* ─── Notification permission banner ─── */
 .notif-banner {
   position: fixed;

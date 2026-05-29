@@ -14,7 +14,50 @@ export default function App() {
   const [showNooimy, setNooimy]     = useState(false)
   const [paymentResult, setPayment] = useState(null)
   const [showNotifBanner, setNotifBanner] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+  const [isIos, setIsIos] = useState(false)
 
+  // ── Install to home screen prompt ──
+  useEffect(() => {
+    const alreadyInstalled =
+      window.navigator.standalone ||
+      window.matchMedia('(display-mode: standalone)').matches
+    if (alreadyInstalled) return
+    if (localStorage.getItem('installDismissed')) return
+
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream
+    if (ios) {
+      setIsIos(true)
+      setTimeout(() => setShowInstallBanner(true), 2000)
+      return
+    }
+
+    function onPrompt(e) {
+      e.preventDefault()
+      setInstallPrompt(e)
+      setTimeout(() => setShowInstallBanner(true), 2000)
+    }
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt)
+  }, [])
+
+  async function handleInstall() {
+    if (installPrompt) {
+      installPrompt.prompt()
+      const { outcome } = await installPrompt.userChoice
+      if (outcome === 'accepted') localStorage.setItem('installDismissed', '1')
+      setInstallPrompt(null)
+    }
+    setShowInstallBanner(false)
+  }
+
+  function dismissInstall() {
+    setShowInstallBanner(false)
+    localStorage.setItem('installDismissed', '1')
+  }
+
+  // ── Notification permission banner ──
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       const t = setTimeout(() => setNotifBanner(true), 3000)
@@ -60,6 +103,22 @@ export default function App() {
 
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
+
+      {showInstallBanner && (
+        <div className="install-banner">
+          <span className="install-banner-icon">📱</span>
+          <div className="install-banner-text">
+            <strong>Voeg by jou tuisskerm</strong>
+            {isIos
+              ? 'Tik die deel-knoppie onderaan en kies "Voeg by tuisskerm"'
+              : "Maak Daaglikse Hoop 'n app op jou foon — gratis en vinnig."}
+          </div>
+          {!isIos && (
+            <button className="install-banner-yes" onClick={handleInstall}>Voeg by</button>
+          )}
+          <button className="install-banner-no" onClick={dismissInstall}>✕</button>
+        </div>
+      )}
 
       {showNotifBanner && (
         <div className="notif-banner">
