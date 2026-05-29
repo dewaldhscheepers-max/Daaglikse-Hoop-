@@ -510,30 +510,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       <div className="luister-body">
         {installBanner}
 
-        {/* ── Gestoor vir later (top, only when populated) ── */}
-        {savedList.length > 0 && (
-          <div className="saved-section">
-            <div className="saved-header">
-              <BookmarkIcon filled size={14} />
-              <span>Gestoor vir later</span>
-              <span className="saved-count">{savedList.length}/{BOOKMARK_LIMIT}</span>
-            </div>
-            {savedList.map(note => (
-              <NoteRow
-                key={note.id}
-                note={note}
-                playing={playing && activeId === note.id}
-                onToggle={() => toggle(note)}
-                liked={liked.includes(note.id)}
-                likeCount={likes[note.id] || 0}
-                onLike={() => handleLike(note.id)}
-                bookmarked={savedNotes[note.id] != null}
-                onBookmark={() => handleBookmark(note.id)}
-              />
-            ))}
-          </div>
-        )}
-
         {/* ── Search bar ── */}
         <div className="search-bar">
           <SearchIcon size={16} />
@@ -608,6 +584,30 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           </>
         )}
 
+        {/* ── Gestoor vir later (bottom) ── */}
+        {savedList.length > 0 && (
+          <div className="saved-section">
+            <div className="saved-header">
+              <BookmarkIcon filled size={14} />
+              <span>Gestoor vir later</span>
+              <span className="saved-count">{savedList.length}/{BOOKMARK_LIMIT}</span>
+            </div>
+            {savedList.map(note => (
+              <NoteRow
+                key={note.id}
+                note={note}
+                playing={playing && activeId === note.id}
+                onToggle={() => toggle(note)}
+                liked={liked.includes(note.id)}
+                likeCount={likes[note.id] || 0}
+                onLike={() => handleLike(note.id)}
+                bookmarked={savedNotes[note.id] != null}
+                onBookmark={() => handleBookmark(note.id)}
+              />
+            ))}
+          </div>
+        )}
+
       </div>
 
       {activeNote && activeId !== today.id && (
@@ -615,7 +615,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       )}
 
       {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
-      {bookmarkToast && <div className="share-toast">Gestoor! Jy sal dit bo in jou lys sien 🔖</div>}
+      {bookmarkToast && <div className="share-toast">Gestoor! Blaai af na onder om dit te sien 🔖</div>}
     </div>
   )
 }
