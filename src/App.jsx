@@ -19,6 +19,7 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIos, setIsIos] = useState(false)
+  const [isSamsung, setIsSamsung] = useState(false)
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
@@ -95,9 +96,18 @@ export default function App() {
     if (alreadyInstalled) return
     if (localStorage.getItem('installDismissed')) return
 
-    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream
+    const ua  = navigator.userAgent
+    const ios     = /iPhone|iPad|iPod/.test(ua) && !window.MSStream
+    const samsung = /SamsungBrowser/.test(ua)
+
     if (ios) {
       setIsIos(true)
+      setTimeout(() => setShowInstallBanner(true), 2000)
+      return
+    }
+
+    if (samsung) {
+      setIsSamsung(true)
       setTimeout(() => setShowInstallBanner(true), 2000)
       return
     }
@@ -194,10 +204,12 @@ export default function App() {
           <div className="install-banner-text">
             <strong>Voeg by jou tuisskerm</strong>
             {isIos
-              ? 'Tik die deel-knoppie onderaan en kies "Voeg by tuisskerm"'
+              ? 'Tik die deel-knoppie (□↑) onderaan en kies "Voeg by tuisskerm"'
+              : isSamsung
+              ? 'Tik die ☰ knoppie regs onder → "Voeg by" → "Tuisskerm"'
               : "Maak Daaglikse Hoop 'n app op jou foon — gratis en vinnig."}
           </div>
-          {!isIos && (
+          {!isIos && !isSamsung && (
             <button className="install-banner-yes" onClick={handleInstall}>Voeg by</button>
           )}
           <button className="install-banner-no" onClick={dismissInstall}>✕</button>
