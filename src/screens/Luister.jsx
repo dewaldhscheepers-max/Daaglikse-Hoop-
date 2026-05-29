@@ -172,7 +172,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
   const [savedNotes, setSavedNotes]   = useState(readSavedNotes)
-  const [shareToast, setShareToast]   = useState(false)
+  const [shareToast, setShareToast]     = useState(false)
+  const [bookmarkToast, setBookmarkToast] = useState(false)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -399,6 +400,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       }
       setSavedNotes(newSaved)
       writeSavedNotes(newSaved)
+      if (!localStorage.getItem('bookmarkToastShown')) {
+        localStorage.setItem('bookmarkToastShown', '1')
+        setBookmarkToast(true)
+        setTimeout(() => setBookmarkToast(false), 3500)
+      }
     }
   }
 
@@ -455,6 +461,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     [n.title, n.scripture, n.series, n.scriptureText].some(f => f?.toLowerCase().includes(term))
   ) : []
 
+  const savedList = Object.values(savedNotes).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
+
   const bySeries = recent.reduce((acc, n) => {
     const key = n.series || 'Ouer boodskappe'
     ;(acc[key] = acc[key] || []).push(n)
@@ -501,6 +509,30 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
 
       <div className="luister-body">
         {installBanner}
+
+        {/* ── Gestoor vir later (top, only when populated) ── */}
+        {savedList.length > 0 && (
+          <div className="saved-section">
+            <div className="saved-header">
+              <BookmarkIcon filled size={14} />
+              <span>Gestoor vir later</span>
+              <span className="saved-count">{savedList.length}/{BOOKMARK_LIMIT}</span>
+            </div>
+            {savedList.map(note => (
+              <NoteRow
+                key={note.id}
+                note={note}
+                playing={playing && activeId === note.id}
+                onToggle={() => toggle(note)}
+                liked={liked.includes(note.id)}
+                likeCount={likes[note.id] || 0}
+                onLike={() => handleLike(note.id)}
+                bookmarked={savedNotes[note.id] != null}
+                onBookmark={() => handleBookmark(note.id)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* ── Search bar ── */}
         <div className="search-bar">
@@ -576,43 +608,14 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           </>
         )}
 
-        {/* ── Gestoor vir later ── */}
-        {(() => {
-          const savedList = Object.values(savedNotes).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
-          return (
-            <div className="saved-section">
-              <div className="saved-header">
-                <BookmarkIcon filled size={14} />
-                <span>Gestoor vir later</span>
-                <span className="saved-count">{savedList.length}/{BOOKMARK_LIMIT}</span>
-              </div>
-              {savedList.length === 0 ? (
-                <p className="saved-empty">Nog geen boodskappe gestoor nie.<br />Tik die boekmerkie 🔖 op enige boodskap om dit hier te stoor.</p>
-              ) : (
-                savedList.map(note => (
-                  <NoteRow
-                    key={note.id}
-                    note={note}
-                    playing={playing && activeId === note.id}
-                    onToggle={() => toggle(note)}
-                    liked={liked.includes(note.id)}
-                    likeCount={likes[note.id] || 0}
-                    onLike={() => handleLike(note.id)}
-                    bookmarked={savedNotes[note.id] != null}
-                    onBookmark={() => handleBookmark(note.id)}
-                  />
-                ))
-              )}
-            </div>
-          )
-        })()}
       </div>
 
       {activeNote && activeId !== today.id && (
         <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
       )}
 
-      {shareToast && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
+      {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
+      {bookmarkToast && <div className="share-toast">Gestoor! Jy sal dit bo in jou lys sien 🔖</div>}
     </div>
   )
 }
