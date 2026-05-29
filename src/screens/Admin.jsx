@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { BOOKS } from '../data/books'
 import './Admin.css'
 
 const ADMIN_PIN = '2025'
@@ -10,7 +11,9 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books'
 
+  // ── Notes state ──
   const [title, setTitle]             = useState('')
   const [audioFile, setAudioFile]     = useState(null)
   const [scripture, setScripture]     = useState('')
@@ -22,22 +25,38 @@ export default function Admin({ onClose }) {
   const [saving, setSaving]           = useState(false)
   const [saved, setSaved]             = useState(false)
   const [formError, setFormError]     = useState('')
-
   const [notes, setNotes]             = useState([])
-  const [notesLoading, setLoading]    = useState(true)
+  const [notesLoading, setNotesLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const fileInputRef = useRef(null)
 
-  useEffect(() => { if (unlocked) loadNotes() }, [unlocked])
+  // ── Books state ──
+  const [bookOverrides, setBookOverrides] = useState({})
+  const [pdfUploading, setPdfUploading]   = useState(null)
+  const [pdfProgress, setPdfProgress]     = useState(0)
+  const [pdfSaved, setPdfSaved]           = useState(null)
+  const pdfInputRef = useRef(null)
+  const [pdfUploadTarget, setPdfUploadTarget] = useState(null)
+
+  useEffect(() => {
+    if (!unlocked) return
+    loadNotes()
+    const unsub = onSnapshot(collection(db, 'books'), snap => {
+      const overrides = {}
+      snap.docs.forEach(d => { overrides[d.id] = d.data() })
+      setBookOverrides(overrides)
+    })
+    return unsub
+  }, [unlocked])
 
   async function loadNotes() {
-    setLoading(true)
+    setNotesLoading(true)
     try {
       const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'))
       const snap = await getDocs(q)
       setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     } catch {}
-    setLoading(false)
+    setNotesLoading(false)
   }
 
   function checkPin() {
@@ -45,75 +64,89 @@ export default function Admin({ onClose }) {
     else { setPinError(true); setPin('') }
   }
 
+  // ── Save voice note ──
   async function handleSave() {
     setFormError('')
     if (!title.trim()) { setFormError('Titel is verpligtend'); return }
-    if (!audioFile)    { setFormError('Kies \'n oudiolêer'); return }
+    if (!audioFile)    { setFormError("Kies 'n oudiolêer"); return }
 
-    // Upload audio to Firebase Storage
-    setUploading(true)
-    setProgress(0)
-    let audioUrl = ''
-    let fileId   = ''
+    setUploading(true); setProgress(0)
+    let audioUrl = '', fileId = ''
 
     try {
-      const ext       = audioFile.name.split('.').pop().toLowerCase()
-      const timestamp = Date.now()
-      const safeName  = title.trim().replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)
-      fileId          = `${safeName}_${timestamp}`
-      const storageRef = ref(storage, `audio/${fileId}.${ext}`)
+      const ext      = audioFile.name.split('.').pop().toLowerCase()
+      const safeName = title.trim().replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)
+      fileId         = `${safeName}_${Date.now()}`
+      const sRef     = ref(storage, `audio/${fileId}.${ext}`)
 
       await new Promise((resolve, reject) => {
-        const task = uploadBytesResumable(storageRef, audioFile)
+        const task = uploadBytesResumable(sRef, audioFile)
         task.on('state_changed',
-          snap => setProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100)),
+          s => setProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
           reject,
-          async () => {
-            audioUrl = await getDownloadURL(task.snapshot.ref)
-            resolve()
-          }
+          async () => { audioUrl = await getDownloadURL(task.snapshot.ref); resolve() }
         )
       })
-    } catch (e) {
-      setFormError('Upload misluk: ' + e.message)
-      setUploading(false)
-      return
-    }
+    } catch (e) { setFormError('Upload misluk: ' + e.message); setUploading(false); return }
 
-    setUploading(false)
-    setSaving(true)
+    setUploading(false); setSaving(true)
 
     try {
       await setDoc(doc(db, 'notes', fileId), {
-        title:         title.trim(),
-        audioUrl,
-        fileId,
-        publishedAt:   new Date(publishedAt + 'T06:00:00'),
-        scripture:     scripture.trim(),
-        scriptureText: scriptureText.trim(),
-        series:        series.trim(),
-        color:         '',
-        lengthSeconds: 0
+        title: title.trim(), audioUrl, fileId,
+        publishedAt: new Date(publishedAt + 'T06:00:00'),
+        scripture: scripture.trim(), scriptureText: scriptureText.trim(),
+        series: series.trim(), color: '', lengthSeconds: 0
       })
       setSaved(true)
-      setTitle(''); setAudioFile(null); setScripture('')
-      setScriptText(''); setSeries('')
+      setTitle(''); setAudioFile(null); setScripture(''); setScriptText(''); setSeries('')
       setPublishedAt(new Date().toISOString().slice(0, 10))
       if (fileInputRef.current) fileInputRef.current.value = ''
       await loadNotes()
       setTimeout(() => setSaved(false), 3000)
-    } catch (e) {
-      setFormError('Kon nie stoor nie: ' + e.message)
-    }
+    } catch (e) { setFormError('Kon nie stoor nie: ' + e.message) }
     setSaving(false)
   }
 
   async function handleDelete(id) {
-    try {
-      await deleteDoc(doc(db, 'notes', id))
-      setNotes(prev => prev.filter(n => n.id !== id))
-    } catch { alert('Kon nie skrap nie') }
+    try { await deleteDoc(doc(db, 'notes', id)); setNotes(prev => prev.filter(n => n.id !== id)) }
+    catch { alert('Kon nie skrap nie') }
     setDeleteConfirm(null)
+  }
+
+  // ── Upload PDF for a book ──
+  function triggerPdfUpload(book) {
+    setPdfUploadTarget(book)
+    pdfInputRef.current?.click()
+  }
+
+  async function handlePdfUpload(e) {
+    const file = e.target.files[0]
+    if (!file || !pdfUploadTarget) return
+    e.target.value = ''
+
+    const book = pdfUploadTarget
+    setPdfUploading(book.id); setPdfProgress(0)
+
+    try {
+      const sRef = ref(storage, `pdfs/${book.id}.pdf`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, file)
+        task.on('state_changed',
+          s => setPdfProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
+          reject,
+          async () => {
+            const pdfUrl = await getDownloadURL(task.snapshot.ref)
+            await setDoc(doc(db, 'books', book.id), { pdfUrl, title: book.title, free: book.free, price: book.price }, { merge: true })
+            resolve()
+          }
+        )
+      })
+      setPdfSaved(book.id)
+      setTimeout(() => setPdfSaved(null), 3000)
+    } catch (e) { alert('PDF upload misluk: ' + e.message) }
+
+    setPdfUploading(null); setPdfUploadTarget(null)
   }
 
   if (!unlocked) {
@@ -125,9 +158,7 @@ export default function Admin({ onClose }) {
           <div className="admin-pin-title">Admin</div>
           <input
             className={`admin-pin-input ${pinError ? 'error' : ''}`}
-            type="password"
-            inputMode="numeric"
-            placeholder="PIN"
+            type="password" inputMode="numeric" placeholder="PIN"
             value={pin}
             onChange={e => { setPin(e.target.value); setPinError(false) }}
             onKeyDown={e => e.key === 'Enter' && checkPin()}
@@ -148,90 +179,144 @@ export default function Admin({ onClose }) {
           <button className="admin-x" onClick={onClose}>✕</button>
         </div>
 
+        <div className="admin-tabs">
+          <button className={`admin-tab ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
+            🎙️ Stemnotas
+          </button>
+          <button className={`admin-tab ${activeTab === 'books' ? 'active' : ''}`} onClick={() => setActiveTab('books')}>
+            📚 E-boeke
+          </button>
+        </div>
+
         <div className="admin-body">
-          <div className="admin-section">
-            <div className="admin-section-title">Voeg nuwe nota by</div>
 
-            <div className="admin-field">
-              <label>Titel *</label>
-              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="bv. Vergifnis dag 1" />
-            </div>
+          {/* ── NOTES TAB ── */}
+          {activeTab === 'notes' && (
+            <>
+              <div className="admin-section">
+                <div className="admin-section-title">Voeg nuwe nota by</div>
 
-            <div className="admin-field">
-              <label>Oudioléer *</label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac"
-                style={{ display: 'none' }}
-                onChange={e => setAudioFile(e.target.files[0] || null)}
-              />
-              <button className="admin-file-btn" onClick={() => fileInputRef.current?.click()}>
-                {audioFile ? `✓ ${audioFile.name}` : '📎 Kies oudioléer'}
-              </button>
-            </div>
-
-            {uploading && (
-              <div className="admin-upload-progress">
-                <div className="admin-upload-bar">
-                  <div className="admin-upload-fill" style={{ width: `${uploadProgress}%` }} />
+                <div className="admin-field">
+                  <label>Titel *</label>
+                  <input value={title} onChange={e => setTitle(e.target.value)} placeholder="bv. Vergifnis dag 1" />
                 </div>
-                <span>{uploadProgress}% opgelaai...</span>
-              </div>
-            )}
 
-            <div className="admin-field">
-              <label>Skrifverwysing</label>
-              <input value={scripture} onChange={e => setScripture(e.target.value)} placeholder="bv. Psalm 56:9" />
-            </div>
-
-            <div className="admin-field">
-              <label>Skrifteks</label>
-              <input value={scriptureText} onChange={e => setScriptText(e.target.value)} placeholder="Die teksvers (opsioneel)" />
-            </div>
-
-            <div className="admin-field">
-              <label>Reeks / Series</label>
-              <input value={series} onChange={e => setSeries(e.target.value)} placeholder="bv. Vergifnis" />
-            </div>
-
-            <div className="admin-field">
-              <label>Datum</label>
-              <input type="date" value={publishedAt} onChange={e => setPublishedAt(e.target.value)} />
-            </div>
-
-            {formError && <div className="admin-error">{formError}</div>}
-            {saved     && <div className="admin-success">✅ Nota gestoor en lewendig!</div>}
-
-            <button className="admin-save-btn" onClick={handleSave} disabled={saving || uploading}>
-              {uploading ? `Laai op... ${uploadProgress}%` : saving ? 'Stoor...' : 'Stoor nota'}
-            </button>
-          </div>
-
-          <div className="admin-section">
-            <div className="admin-section-title">Bestaande notas ({notes.length})</div>
-            {notesLoading ? (
-              <div className="admin-loading">Laai notas...</div>
-            ) : notes.map(note => (
-              <div key={note.id} className="admin-note-row">
-                <div className="admin-note-info">
-                  <div className="admin-note-title">{note.title}</div>
-                  <div className="admin-note-meta">
-                    {[note.scripture, note.series].filter(Boolean).join(' · ') ||
-                      new Date(note.publishedAt?.seconds * 1000).toLocaleDateString('af')}
-                  </div>
+                <div className="admin-field">
+                  <label>Oudioléer *</label>
+                  <input ref={fileInputRef} type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac"
+                    style={{ display: 'none' }} onChange={e => setAudioFile(e.target.files[0] || null)} />
+                  <button className="admin-file-btn" onClick={() => fileInputRef.current?.click()}>
+                    {audioFile ? `✓ ${audioFile.name}` : '📎 Kies oudioléer'}
+                  </button>
                 </div>
-                {deleteConfirm === note.id ? (
-                  <div className="admin-delete-confirm">
-                    <button className="admin-delete-yes" onClick={() => handleDelete(note.id)}>Ja, skrap</button>
-                    <button className="admin-delete-no" onClick={() => setDeleteConfirm(null)}>Nee</button>
+
+                {uploading && (
+                  <div className="admin-upload-progress">
+                    <div className="admin-upload-bar">
+                      <div className="admin-upload-fill" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                    <span>{uploadProgress}% opgelaai...</span>
                   </div>
-                ) : (
-                  <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
                 )}
+
+                <div className="admin-field">
+                  <label>Skrifverwysing</label>
+                  <input value={scripture} onChange={e => setScripture(e.target.value)} placeholder="bv. Psalm 56:9" />
+                </div>
+                <div className="admin-field">
+                  <label>Skrifteks</label>
+                  <input value={scriptureText} onChange={e => setScriptText(e.target.value)} placeholder="Die teksvers (opsioneel)" />
+                </div>
+                <div className="admin-field">
+                  <label>Reeks / Series</label>
+                  <input value={series} onChange={e => setSeries(e.target.value)} placeholder="bv. Vergifnis" />
+                </div>
+                <div className="admin-field">
+                  <label>Datum</label>
+                  <input type="date" value={publishedAt} onChange={e => setPublishedAt(e.target.value)} />
+                </div>
+
+                {formError && <div className="admin-error">{formError}</div>}
+                {saved     && <div className="admin-success">✅ Nota gestoor en lewendig!</div>}
+
+                <button className="admin-save-btn" onClick={handleSave} disabled={saving || uploading}>
+                  {uploading ? `Laai op... ${uploadProgress}%` : saving ? 'Stoor...' : 'Stoor nota'}
+                </button>
               </div>
-            ))}
-          </div>
+
+              <div className="admin-section">
+                <div className="admin-section-title">Bestaande notas ({notes.length})</div>
+                {notesLoading ? <div className="admin-loading">Laai notas...</div>
+                  : notes.map(note => (
+                    <div key={note.id} className="admin-note-row">
+                      <div className="admin-note-info">
+                        <div className="admin-note-title">{note.title}</div>
+                        <div className="admin-note-meta">
+                          {[note.scripture, note.series].filter(Boolean).join(' · ') ||
+                            new Date((note.publishedAt?.seconds || 0) * 1000).toLocaleDateString('af')}
+                        </div>
+                      </div>
+                      {deleteConfirm === note.id ? (
+                        <div className="admin-delete-confirm">
+                          <button className="admin-delete-yes" onClick={() => handleDelete(note.id)}>Ja, skrap</button>
+                          <button className="admin-delete-no" onClick={() => setDeleteConfirm(null)}>Nee</button>
+                        </div>
+                      ) : (
+                        <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
+
+          {/* ── BOOKS TAB ── */}
+          {activeTab === 'books' && (
+            <div className="admin-section">
+              <div className="admin-section-title">E-boeke PDFs</div>
+              <div className="admin-books-note">
+                Laai die PDF op vir elke boek. Sodra dit opgelaai is, kan gebruikers dit aflaai.
+              </div>
+
+              <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
+                style={{ display: 'none' }} onChange={handlePdfUpload} />
+
+              {BOOKS.filter(b => b.free).map(book => {
+                const override = bookOverrides[book.id]
+                const hasPdf   = override?.pdfUrl
+                const isUploadingThis = pdfUploading === book.id
+                const isSaved  = pdfSaved === book.id
+
+                return (
+                  <div key={book.id} className="admin-book-row">
+                    <div className="admin-book-icon">{book.emoji}</div>
+                    <div className="admin-note-info">
+                      <div className="admin-note-title">{book.title}</div>
+                      <div className="admin-note-meta">
+                        {isUploadingThis ? `${pdfProgress}% opgelaai...`
+                          : isSaved ? '✅ PDF opgelaai!'
+                          : hasPdf ? '✓ PDF beskikbaar'
+                          : 'Geen PDF nie'}
+                      </div>
+                      {isUploadingThis && (
+                        <div className="admin-upload-bar" style={{ marginTop: 4 }}>
+                          <div className="admin-upload-fill" style={{ width: `${pdfProgress}%` }} />
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="admin-pdf-btn"
+                      onClick={() => triggerPdfUpload(book)}
+                      disabled={isUploadingThis}
+                    >
+                      {hasPdf ? '↑ Opdateer' : '↑ Upload'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
         </div>
       </div>
     </div>

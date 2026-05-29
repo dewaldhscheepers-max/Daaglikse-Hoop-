@@ -268,6 +268,73 @@
   font-family: var(--font-body);
 }
 
+/* ─── Tabs ─── */
+.admin-tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.admin-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-tab.active {
+  color: var(--purple-dark);
+  border-bottom-color: var(--purple-dark);
+}
+
+/* ─── Book rows ─── */
+.admin-books-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.admin-book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 6px var(--shadow);
+}
+
+.admin-book-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.admin-pdf-btn {
+  background: var(--purple-dark);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-pdf-btn:disabled { opacity: 0.5; }
+
 .admin-file-btn {
   background: var(--white);
   border: 1.5px dashed var(--purple);

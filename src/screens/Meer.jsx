@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { BOOKS } from '../data/books'
+import { useState, useEffect } from 'react'
+import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { checkoutBook } from '../utils/payfast'
+import { db } from '../firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
 
 /* ── Checkout modal ── */
@@ -113,7 +115,18 @@ function FreeCard({ book }) {
 /* ── Main screen ── */
 export default function Meer() {
   const [checkout, setCheckout] = useState(null)
+  const [bookOverrides, setBookOverrides] = useState({})
 
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'books'), snap => {
+      const overrides = {}
+      snap.docs.forEach(d => { overrides[d.id] = d.data() })
+      setBookOverrides(overrides)
+    })
+    return unsub
+  }, [])
+
+  const BOOKS = STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) }))
   const paid = BOOKS.filter(b => !b.free)
   const free = BOOKS.filter(b => b.free)
 
