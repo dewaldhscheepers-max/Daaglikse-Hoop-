@@ -158,7 +158,10 @@ export default function Meer() {
   }, [])
 
   const BOOKS = [
-    ...STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) })),
+    ...STATIC_BOOKS.map(b => {
+      const ov = bookOverrides[b.id] || {}
+      return { ...b, pdfUrl: ov.pdfUrl ?? b.pdfUrl ?? null, coverUrl: ov.coverUrl ?? null }
+    }),
     ...Object.entries(bookOverrides)
       .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
       .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, ...d }))

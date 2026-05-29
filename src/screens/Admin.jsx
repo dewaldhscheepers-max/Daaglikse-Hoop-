@@ -152,7 +152,7 @@ export default function Admin({ onClose }) {
           reject,
           async () => {
             const pdfUrl = await getDownloadURL(task.snapshot.ref)
-            await setDoc(doc(db, 'books', book.id), { pdfUrl, title: book.title, free: book.free, price: book.price }, { merge: true })
+            await setDoc(doc(db, 'books', book.id), { pdfUrl }, { merge: true })
             resolve()
           }
         )
@@ -212,7 +212,7 @@ export default function Admin({ onClose }) {
           reject,
           async () => {
             const coverUrl = await getDownloadURL(task.snapshot.ref)
-            await setDoc(doc(db, 'books', book.id), { coverUrl, title: book.title, free: book.free, price: book.price }, { merge: true })
+            await setDoc(doc(db, 'books', book.id), { coverUrl }, { merge: true })
             resolve()
           }
         )
