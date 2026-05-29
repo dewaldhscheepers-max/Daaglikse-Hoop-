@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { BOOKS } from '../data/books'
+import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
 
 const ADMIN_PIN = '2025'
@@ -42,6 +42,15 @@ export default function Admin({ onClose }) {
   const [coverSaved, setCoverSaved]           = useState(null)
   const coverInputRef                         = useRef(null)
   const [coverUploadTarget, setCoverUploadTarget] = useState(null)
+
+  // ── New book form ──
+  const [newTitle, setNewTitle]   = useState('')
+  const [newDesc, setNewDesc]     = useState('')
+  const [newPrice, setNewPrice]   = useState('')
+  const [newFree, setNewFree]     = useState(false)
+  const [newEmoji, setNewEmoji]   = useState('📚')
+  const [addingBook, setAddingBook] = useState(false)
+  const [bookAdded, setBookAdded] = useState(false)
 
   useEffect(() => {
     if (!unlocked) return
@@ -153,6 +162,30 @@ export default function Admin({ onClose }) {
     } catch (e) { alert('PDF upload misluk: ' + e.message) }
 
     setPdfUploading(null); setPdfUploadTarget(null)
+  }
+
+  // ── Add a new book ──
+  async function handleAddBook() {
+    if (!newTitle.trim()) { alert('Titel is verpligtend'); return }
+    setAddingBook(true)
+    try {
+      const slug = newTitle.trim().toLowerCase()
+        .replace(/[àáâäã]/g,'a').replace(/[èéêë]/g,'e')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50)
+      const id = `${slug}-${Date.now()}`
+      await setDoc(doc(db, 'books', id), {
+        title:  newTitle.trim(),
+        desc:   newDesc.trim(),
+        price:  newFree ? 0 : (parseFloat(newPrice) || 0),
+        free:   newFree,
+        emoji:  newEmoji || '📚',
+        color:  '#EDE8F8',
+      })
+      setNewTitle(''); setNewDesc(''); setNewPrice(''); setNewFree(false); setNewEmoji('📚')
+      setBookAdded(true)
+      setTimeout(() => setBookAdded(false), 3000)
+    } catch (e) { alert('Kon nie boek byvoeg nie: ' + e.message) }
+    setAddingBook(false)
   }
 
   // ── Upload cover image for a book ──
@@ -313,19 +346,53 @@ export default function Admin({ onClose }) {
           )}
 
           {/* ── BOOKS TAB ── */}
-          {activeTab === 'books' && (
+          {activeTab === 'books' && (() => {
+            const staticIds = new Set(STATIC_BOOKS.map(b => b.id))
+            const allBooks = [
+              ...STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) })),
+              ...Object.entries(bookOverrides)
+                .filter(([id, d]) => !staticIds.has(id) && d.title)
+                .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, ...d }))
+            ]
+            return (
             <div className="admin-section">
-              <div className="admin-section-title">E-boeke PDFs</div>
-              <div className="admin-books-note">
-                Laai die PDF op vir elke boek. Sodra dit opgelaai is, kan gebruikers dit aflaai.
+              <div className="admin-section-title">Voeg nuwe boek by</div>
+              <div className="admin-field">
+                <label>Titel *</label>
+                <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="bv. Geloof bo Vrees" />
               </div>
+              <div className="admin-field">
+                <label>Beskrywing</label>
+                <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Kort beskrywing..." />
+              </div>
+              <div className="admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <label style={{ margin: 0 }}>Gratis?</label>
+                <input type="checkbox" checked={newFree} onChange={e => setNewFree(e.target.checked)} style={{ width: 20, height: 20 }} />
+              </div>
+              {!newFree && (
+                <div className="admin-field">
+                  <label>Prys (R)</label>
+                  <input type="number" value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="bv. 50" />
+                </div>
+              )}
+              <div className="admin-field">
+                <label>Emoji</label>
+                <input value={newEmoji} onChange={e => setNewEmoji(e.target.value)} placeholder="📚" style={{ width: 60 }} />
+              </div>
+              {bookAdded && <div className="admin-success">✅ Boek bygevoeg! Laai nou cover en PDF op.</div>}
+              <button className="admin-save-btn" onClick={handleAddBook} disabled={addingBook}>
+                {addingBook ? 'Byvoeg...' : '+ Voeg boek by'}
+              </button>
+
+              <div className="admin-section-title" style={{ marginTop: 24 }}>Alle boeke ({allBooks.length})</div>
+              <div className="admin-books-note">Laai cover en PDF op vir elke boek.</div>
 
               <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
                 style={{ display: 'none' }} onChange={handlePdfUpload} />
               <input ref={coverInputRef} type="file" accept="image/*"
                 style={{ display: 'none' }} onChange={handleCoverUpload} />
 
-              {BOOKS.map(book => {
+              {allBooks.map(book => {
                 const override          = bookOverrides[book.id]
                 const hasPdf            = override?.pdfUrl
                 const hasCover          = override?.coverUrl
@@ -380,7 +447,8 @@ export default function Admin({ onClose }) {
                 )
               })}
             </div>
-          )}
+            )
+          })()}
 
         </div>
       </div>

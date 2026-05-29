@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
+
+const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { checkoutCart } from '../utils/payfast'
 import { db } from '../firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
@@ -155,9 +157,14 @@ export default function Meer() {
     return unsub
   }, [])
 
-  const BOOKS     = STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) }))
-  const paid      = BOOKS.filter(b => !b.free)
-  const free      = BOOKS.filter(b => b.free)
+  const BOOKS = [
+    ...STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) })),
+    ...Object.entries(bookOverrides)
+      .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
+      .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, ...d }))
+  ]
+  const paid = BOOKS.filter(b => !b.free)
+  const free = BOOKS.filter(b => b.free)
   const cartBooks = paid.filter(b => cart.includes(b.id))
   const total     = cartBooks.reduce((sum, b) => sum + b.price, 0)
 
