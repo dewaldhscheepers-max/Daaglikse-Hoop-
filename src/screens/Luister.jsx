@@ -145,14 +145,27 @@ export default function Luister({ onPlayingChange }) {
     catch { return [] }
   })
   const [shareToast, setShareToast] = useState(false)
-  const timerRef  = useRef(null)
-  const audioRef  = useRef(null)
+  const [playCount, setPlayCount]   = useState(0)
+  const timerRef    = useRef(null)
+  const audioRef    = useRef(null)
+  const playedRef   = useRef(false)
 
   const today      = SAMPLE_NOTES.find(n => n.isToday)
   const recent     = SAMPLE_NOTES.filter(n => !n.isToday)
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeId) || today
   const progress   = activeNote ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today.id
+
+  // ── Fetch play count for today's note ──
+  useEffect(() => {
+    async function fetchPlayCount() {
+      try {
+        const d = await getDoc(doc(db, 'plays', today.id))
+        if (d.exists()) setPlayCount(d.data().count || 0)
+      } catch { /* offline */ }
+    }
+    fetchPlayCount()
+  }, [])
 
   // ── Fetch like counts ──
   useEffect(() => {
@@ -213,16 +226,27 @@ export default function Luister({ onPlayingChange }) {
     return () => clearInterval(timerRef.current)
   }, [playing, activeNote])
 
+  async function countTodayPlay() {
+    if (playedRef.current) return
+    playedRef.current = true
+    setPlayCount(c => c + 1)
+    try {
+      await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true })
+    } catch { /* offline */ }
+  }
+
   function toggle(note) {
     if (activeId === note.id) {
       const next = !playing
       setPlaying(next)
       onPlayingChange?.(next)
+      if (next && note.id === today.id) countTodayPlay()
     } else {
       setActiveId(note.id)
       setElapsed(0)
       setPlaying(true)
       onPlayingChange?.(true)
+      if (note.id === today.id) countTodayPlay()
     }
   }
 
@@ -284,6 +308,9 @@ export default function Luister({ onPlayingChange }) {
         <div className="hero-song-info">
           <div className="hero-song-title">{today.title}</div>
           <div className="hero-song-ref">{today.scripture}</div>
+          {playCount >= 10 && (
+            <div className="hero-play-count">🎧 {playCount} keer geluister</div>
+          )}
           <div className="hero-progress">
             <span className="hero-time">{fmtTime(activeId === today.id ? elapsed : 0)}</span>
             <div className="hero-bar">
