@@ -1,16 +1,3 @@
-const { initializeApp, getApps, cert } = require('firebase-admin/app')
-const { getFirestore } = require('firebase-admin/firestore')
-
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    })
-  })
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
 
@@ -21,22 +8,37 @@ module.exports = async function handler(req, res) {
   const bookIds = (data.custom_str2 || '').split(',').filter(Boolean)
   if (!email || bookIds.length === 0) return res.status(200).send('OK')
 
-  const db       = getFirestore()
-  const bookDocs = await Promise.all(bookIds.map(id => db.collection('books').doc(id).get()))
+  const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 
-  const booksWithPdf = bookDocs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.pdfUrl)
-  const booksNoPdf   = bookDocs.map(d => ({ id: d.id, ...d.data() })).filter(b => !b.pdfUrl)
+  // Fetch book data from Firestore REST API (no admin SDK needed)
+  const bookDocs = await Promise.all(bookIds.map(async id => {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/books/${id}`
+      const r   = await fetch(url)
+      if (!r.ok) return { id, pdfUrl: null, title: id }
+      const doc = await r.json()
+      const f   = doc.fields || {}
+      return {
+        id,
+        title:  f.title?.stringValue  || id,
+        pdfUrl: f.pdfUrl?.stringValue || null,
+      }
+    } catch { return { id, pdfUrl: null, title: id } }
+  }))
+
+  const booksWithPdf = bookDocs.filter(b => b.pdfUrl)
+  const booksNoPdf   = bookDocs.filter(b => !b.pdfUrl)
 
   const pdfLinksHtml = booksWithPdf.map(b => `
     <div style="margin:16px 0;padding:16px;background:#f8f5ff;border-radius:10px;border-left:4px solid #5C4E8E;">
-      <p style="margin:0 0 10px;font-weight:700;color:#2d2d2d;font-size:16px;">${b.title || b.id}</p>
+      <p style="margin:0 0 10px;font-weight:700;color:#2d2d2d;font-size:16px;">${b.title}</p>
       <a href="${b.pdfUrl}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;">📥 Aflaai PDF</a>
     </div>
   `).join('')
 
   const noPdfHtml = booksNoPdf.length ? `
     <p style="color:#888;font-size:13px;margin-top:8px;">
-      Ons stuur die volgende binnekort: ${booksNoPdf.map(b => `<strong>${b.title || b.id}</strong>`).join(', ')}
+      Ons stuur die volgende binnekort: ${booksNoPdf.map(b => `<strong>${b.title}</strong>`).join(', ')}
     </p>
   ` : ''
 
@@ -77,7 +79,7 @@ module.exports = async function handler(req, res) {
       })
     })
     if (!r.ok) console.error('Resend error:', await r.text())
-    else console.log('Email sent to', email, 'books:', bookIds.join(', '))
+    else console.log('Email sent to', email, 'for books:', bookIds.join(', '))
   } catch (e) {
     console.error('Email failed:', e)
   }
