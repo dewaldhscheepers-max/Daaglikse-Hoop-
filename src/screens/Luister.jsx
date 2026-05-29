@@ -1,8 +1,35 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, doc, getDoc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import './Luister.css'
 
+// ── Cache helpers (5-min TTL for notes) ─────────────────────────────────────
+const NOTES_TTL = 5 * 60 * 1000
+
+function readCache() {
+  try {
+    const notes = JSON.parse(localStorage.getItem('cachedNotes') || '[]')
+    const time  = parseInt(localStorage.getItem('cachedNotesTime') || '0')
+    return { notes, stale: notes.length === 0 || Date.now() - time > NOTES_TTL }
+  } catch { return { notes: [], stale: true } }
+}
+
+function writeCache(notes) {
+  try {
+    localStorage.setItem('cachedNotes', JSON.stringify(notes))
+    localStorage.setItem('cachedNotesTime', String(Date.now()))
+  } catch {}
+}
+
+function readLikesCache() {
+  try { return JSON.parse(localStorage.getItem('cachedLikes') || '{}') } catch { return {} }
+}
+
+function writeLikesCache(likes) {
+  try { localStorage.setItem('cachedLikes', JSON.stringify(likes)) } catch {}
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 const FALLBACK_COLORS = ['#EDE8F8','#F8EDE8','#E8F0EE','#F8E8F0','#E8F8EC','#F0F4E8','#E8EEF8']
 
 function noteColor(id, stored) {
@@ -19,20 +46,16 @@ function fmtTime(sec) {
   return `${m}:${s}`
 }
 
+function mapDoc(d) {
+  return { id: d.id, ...d.data(), color: noteColor(d.id, d.data().color), lengthSeconds: d.data().lengthSeconds || 0 }
+}
+
+// ── Icons ────────────────────────────────────────────────────────────────────
 function PlayIcon({ size = 24 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="6,3 20,12 6,21"/>
-    </svg>
-  )
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
 }
 function PauseIcon({ size = 24 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <rect x="5" y="3" width="4" height="18" rx="1"/>
-      <rect x="15" y="3" width="4" height="18" rx="1"/>
-    </svg>
-  )
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>
 }
 function SkipIcon({ direction = 'forward', seconds = 15 }) {
   const flip = direction === 'back' ? 'scale(-1,1)' : ''
@@ -62,6 +85,7 @@ function ShareIcon({ size = 20 }) {
   )
 }
 
+// ── Sub-components ────────────────────────────────────────────────────────────
 function MiniPlayer({ note, playing, progress, onToggle }) {
   if (!note) return null
   return (
@@ -85,9 +109,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
     <div className="note-row">
       <div className="note-thumb" style={{ background: note.color }}>
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-          <path d="M9 18V5l12-2v13"/>
-          <circle cx="6" cy="18" r="3"/>
-          <circle cx="18" cy="16" r="3"/>
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
         </svg>
       </div>
       <div className="note-info">
@@ -96,9 +118,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
         {note.series    && <span className="note-series">{note.series}</span>}
       </div>
       <div className="note-right">
-        {note.lengthSeconds > 0 && (
-          <span className="note-length">{fmtTime(note.lengthSeconds)}</span>
-        )}
+        {note.lengthSeconds > 0 && <span className="note-length">{fmtTime(note.lengthSeconds)}</span>}
         <button className="play-btn-small" onClick={onToggle}>
           {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
         </button>
@@ -111,83 +131,71 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
   )
 }
 
-function getCachedNotes() {
-  try {
-    const cached = localStorage.getItem('cachedNotes')
-    return cached ? JSON.parse(cached) : []
-  } catch { return [] }
-}
-
+// ── Main component ────────────────────────────────────────────────────────────
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
-  const cached = getCachedNotes()
-  const [notes, setNotes]           = useState(cached)
-  const [notesLoading, setLoading]  = useState(cached.length === 0)
-  const [activeId, setActiveId]     = useState(cached[0]?.id || null)
-  const [playing, setPlaying]       = useState(false)
-  const [elapsed, setElapsed]       = useState(0)
-  const [likes, setLikes]           = useState(() => {
-    try { return JSON.parse(localStorage.getItem('cachedLikes') || '{}') } catch { return {} }
-  })
-  const [liked, setLiked]           = useState(() => {
-    try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') }
-    catch { return [] }
+  const { notes: cached, stale } = readCache()
+
+  const [notes, setNotes]       = useState(cached)
+  const [loading, setLoading]   = useState(cached.length === 0)
+  const [activeId, setActiveId] = useState(cached[0]?.id || null)
+  const [playing, setPlaying]   = useState(false)
+  const [elapsed, setElapsed]   = useState(0)
+  const [likes, setLikes]       = useState(readLikesCache)
+  const [liked, setLiked]       = useState(() => {
+    try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
   const [shareToast, setShareToast] = useState(false)
   const [playCount, setPlayCount]   = useState(0)
+
   const timerRef    = useRef(null)
   const audioRef    = useRef(null)
   const playedRef   = useRef(false)
   const tapCountRef = useRef(0)
   const tapTimerRef = useRef(null)
-
-  function handleTitleTap() {
-    tapCountRef.current += 1
-    clearTimeout(tapTimerRef.current)
-    if (tapCountRef.current >= 5) {
-      tapCountRef.current = 0
-      onAdminAccess?.()
-      return
-    }
-    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0 }, 1500)
-  }
+  const fetchingRef = useRef(false)
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
   const activeNote = notes.find(n => n.id === activeId) || today
-  const progress   = activeNote?.lengthSeconds
-    ? Math.min(elapsed / activeNote.lengthSeconds, 1)
-    : 0
+  const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
 
-  // ── Real-time notes from Firestore ──
-  useEffect(() => {
-    const q = query(
-      collection(db, 'notes'),
-      orderBy('publishedAt', 'desc'),
-      limit(30)
-    )
-    const unsub = onSnapshot(q,
-      snap => {
-        const loaded = snap.docs.map(d => ({
-          id: d.id,
-          ...d.data(),
-          color: noteColor(d.id, d.data().color),
-          lengthSeconds: d.data().lengthSeconds || 0
-        }))
-        setNotes(loaded)
-        setActiveId(prev => prev || (loaded.length > 0 ? loaded[0].id : null))
-        setLoading(false)
-        try { localStorage.setItem('cachedNotes', JSON.stringify(loaded)) } catch {}
-      },
-      e => {
-        console.error('Notes fetch error:', e)
-        setLoading(false)
-      }
-    )
-    return unsub
+  // ── Fetch notes from Firestore (one-time, with cache) ──
+  const fetchNotes = useCallback(async () => {
+    if (fetchingRef.current) return
+    fetchingRef.current = true
+    try {
+      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(30))
+      const snap = await getDocs(q)
+      const loaded = snap.docs.map(mapDoc)
+      setNotes(loaded)
+      setActiveId(prev => prev || loaded[0]?.id || null)
+      setLoading(false)
+      writeCache(loaded)
+    } catch {
+      setLoading(false)
+    }
+    fetchingRef.current = false
   }, [])
 
-  // ── Real-time play count for today's note only ──
+  // ── On mount: show cache instantly, fetch if stale ──
+  useEffect(() => {
+    if (stale) fetchNotes()
+    else setLoading(false)
+  }, [])
+
+  // ── On visibility change: silently refresh if cache is stale ──
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState !== 'visible') return
+      const { stale: isStale } = readCache()
+      if (isStale) fetchNotes()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [fetchNotes])
+
+  // ── Real-time: today's note play count (1 listener) ──
   useEffect(() => {
     if (!today) return
     const unsub = onSnapshot(doc(db, 'plays', today.id),
@@ -197,39 +205,24 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     return unsub
   }, [today?.id])
 
-  // ── Real-time likes for today's note only; one-time fetch for the rest ──
+  // ── Real-time: today's note likes (1 listener) ──
   useEffect(() => {
     if (!today) return
     const unsub = onSnapshot(doc(db, 'likes', today.id),
-      snap => setLikes(prev => {
-        const next = { ...prev, [today.id]: snap.exists() ? (snap.data().count || 0) : 0 }
-        try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
-        return next
-      }),
+      snap => {
+        const count = snap.exists() ? (snap.data().count || 0) : 0
+        setLikes(prev => {
+          const next = { ...prev, [today.id]: count }
+          writeLikesCache(next)
+          return next
+        })
+      },
       () => {}
     )
     return unsub
   }, [today?.id])
 
-  useEffect(() => {
-    if (notes.length < 2) return
-    Promise.all(
-      notes.slice(1).map(async note => {
-        try {
-          const d = await getDoc(doc(db, 'likes', note.id))
-          return [note.id, d.exists() ? (d.data().count || 0) : 0]
-        } catch { return [note.id, 0] }
-      })
-    ).then(results => {
-      setLikes(prev => {
-        const next = { ...prev, ...Object.fromEntries(results) }
-        try { localStorage.setItem('cachedLikes', JSON.stringify(next)) } catch {}
-        return next
-      })
-    })
-  }, [notes.length])
-
-  // ── MediaSession API — lock screen controls ──
+  // ── MediaSession API ──
   useEffect(() => {
     if (!activeNote || !('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -248,29 +241,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
   }, [activeNote, playing])
 
-  // ── Real audio element ──
+  // ── Audio element ──
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
-    if (audio.src !== activeNote.audioUrl) {
-      audio.src = activeNote.audioUrl
-      setElapsed(0)
-    }
+    if (audio.src !== activeNote.audioUrl) { audio.src = activeNote.audioUrl; setElapsed(0) }
     if (playing) audio.play().catch(() => {})
     else audio.pause()
   }, [activeNote?.id, playing])
 
-  // ── Sync elapsed from real audio ──
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
-    function onTimeUpdate() { setElapsed(audio.currentTime) }
-    function onEnded() { setPlaying(false); onPlayingChange?.(false); setElapsed(0) }
+    function onTimeUpdate()     { setElapsed(audio.currentTime) }
+    function onEnded()          { setPlaying(false); onPlayingChange?.(false); setElapsed(0) }
     function onLoadedMetadata() {
-      if (!activeNote.lengthSeconds || activeNote.lengthSeconds === 0) {
-        setNotes(prev => prev.map(n =>
-          n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n
-        ))
+      if (!activeNote.lengthSeconds) {
+        setNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n))
       }
     }
     audio.addEventListener('timeupdate', onTimeUpdate)
@@ -283,7 +270,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     }
   }, [activeNote?.id])
 
-  // ── Simulated timer (fallback when no real audio) ──
+  // ── Fallback timer (no audio URL) ──
   useEffect(() => {
     if (activeNote?.audioUrl) return
     if (playing) {
@@ -294,68 +281,89 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           return e + 1
         })
       }, 1000)
-    } else {
-      clearInterval(timerRef.current)
-    }
+    } else { clearInterval(timerRef.current) }
     return () => clearInterval(timerRef.current)
   }, [playing, activeNote?.id])
+
+  // ── Secret tap for admin ──
+  function handleTitleTap() {
+    tapCountRef.current += 1
+    clearTimeout(tapTimerRef.current)
+    if (tapCountRef.current >= 5) { tapCountRef.current = 0; onAdminAccess?.(); return }
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0 }, 1500)
+  }
 
   async function countTodayPlay() {
     if (playedRef.current || !today) return
     playedRef.current = true
     setPlayCount(c => c + 1)
-    try {
-      await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true })
-    } catch { /* offline */ }
+    try { await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true }) } catch {}
   }
 
   function toggle(note) {
     if (activeId === note.id) {
       const next = !playing
-      setPlaying(next)
-      onPlayingChange?.(next)
+      setPlaying(next); onPlayingChange?.(next)
       if (next && note.id === today?.id) countTodayPlay()
     } else {
-      setActiveId(note.id)
-      setElapsed(0)
-      setPlaying(true)
-      onPlayingChange?.(true)
+      setActiveId(note.id); setElapsed(0)
+      setPlaying(true); onPlayingChange?.(true)
       if (note.id === today?.id) countTodayPlay()
     }
   }
 
   function skip(seconds) {
     const audio = audioRef.current
-    if (audio && activeNote?.audioUrl) {
-      audio.currentTime = Math.max(0, audio.currentTime + seconds)
-    } else {
-      setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
-    }
+    if (audio && activeNote?.audioUrl) audio.currentTime = Math.max(0, audio.currentTime + seconds)
+    else setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
   }
 
   async function handleLike(noteId) {
     if (liked.includes(noteId)) return
-    try {
-      await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true })
-    } catch { /* offline */ }
+    try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
     const newLiked = [...liked, noteId]
     setLiked(newLiked)
     localStorage.setItem('likedNotes', JSON.stringify(newLiked))
-    setLikes(prev => ({ ...prev, [noteId]: (prev[noteId] || 0) + 1 }))
+    setLikes(prev => {
+      const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
+      writeLikesCache(next)
+      return next
+    })
   }
 
   async function handleShare(note) {
-    const msg = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
+    const msg  = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
     const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
     if (navigator.share) {
-      try { await navigator.share(data) } catch { /* cancelled */ }
+      try { await navigator.share(data) } catch {}
     } else {
-      try {
-        await navigator.clipboard.writeText(`${msg}\n${window.location.origin}`)
-        setShareToast(true)
-        setTimeout(() => setShareToast(false), 2500)
-      } catch { /* clipboard not available */ }
+      try { await navigator.clipboard.writeText(`${msg}\n${window.location.origin}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
     }
+  }
+
+  const titleBlock = (
+    <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
+      <div className="hero-title-main">Daaglikse Hoop</div>
+      <div className="hero-title-sub">met Dewald Scheepers</div>
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <div className="luister">
+        <div className="luister-hero luister-hero-loading">{titleBlock}<div className="hero-loading-text">Besig om boodskappe te laai...</div></div>
+        <div className="luister-body">{installBanner}</div>
+      </div>
+    )
+  }
+
+  if (!today) {
+    return (
+      <div className="luister">
+        <div className="luister-hero luister-hero-loading">{titleBlock}<div className="hero-loading-text">Geen boodskappe beskikbaar nie.</div></div>
+        <div className="luister-body">{installBanner}</div>
+      </div>
+    )
   }
 
   const bySeries = recent.reduce((acc, n) => {
@@ -364,51 +372,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     return acc
   }, {})
 
-  // ── Loading state ──
-  if (notesLoading) {
-    return (
-      <div className="luister">
-        <div className="luister-hero luister-hero-loading">
-          <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
-            <div className="hero-title-main">Daaglikse Hoop</div>
-            <div className="hero-title-sub">met Dewald Scheepers</div>
-          </div>
-          <div className="hero-loading-text">Besig om boodskappe te laai...</div>
-        </div>
-        <div className="luister-body">
-          {installBanner}
-        </div>
-      </div>
-    )
-  }
-
-  // ── Empty state ──
-  if (!today) {
-    return (
-      <div className="luister">
-        <div className="luister-hero luister-hero-loading">
-          <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
-            <div className="hero-title-main">Daaglikse Hoop</div>
-            <div className="hero-title-sub">met Dewald Scheepers</div>
-          </div>
-          <div className="hero-loading-text">Geen boodskappe beskikbaar nie.</div>
-        </div>
-        <div className="luister-body">
-          {installBanner}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="luister">
       <audio ref={audioRef} style={{ display: 'none' }} />
 
       <div className="luister-hero">
-        <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
-          <div className="hero-title-main">Daaglikse Hoop</div>
-          <div className="hero-title-sub">met Dewald Scheepers</div>
-        </div>
+        {titleBlock}
 
         <div className="hero-controls">
           <button className="hero-skip" onClick={() => skip(-15)}><SkipIcon direction="back" seconds={15} /></button>
@@ -421,9 +390,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
         <div className="hero-song-info">
           <div className="hero-song-title">{today.title}</div>
           {today.scripture && <div className="hero-song-ref">{today.scripture}</div>}
-          {playCount >= 10 && (
-            <div className="hero-play-count">🎧 {playCount} keer geluister</div>
-          )}
+          {playCount >= 10 && <div className="hero-play-count">🎧 {playCount} keer geluister</div>}
           <div className="hero-progress">
             <span className="hero-time">{fmtTime(activeId === today.id ? elapsed : 0)}</span>
             <div className="hero-bar">
@@ -431,18 +398,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
             </div>
             <span className="hero-time">{today.lengthSeconds ? fmtTime(today.lengthSeconds) : '--:--'}</span>
           </div>
-
           <div className="hero-actions">
-            <button
-              className={`hero-like-btn ${liked.includes(today.id) ? 'liked' : ''}`}
-              onClick={() => handleLike(today.id)}
-            >
+            <button className={`hero-like-btn ${liked.includes(today.id) ? 'liked' : ''}`} onClick={() => handleLike(today.id)}>
               <HeartIcon filled={liked.includes(today.id)} size={18} />
               <span>{likes[today.id] || 0}</span>
             </button>
             <button className="hero-share-btn" onClick={() => handleShare(today)}>
-              <ShareIcon size={18} />
-              <span>Deel met iemand</span>
+              <ShareIcon size={18} /><span>Deel met iemand</span>
             </button>
           </div>
         </div>
@@ -450,14 +412,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
 
       <div className="luister-body">
         {installBanner}
-
         {recent.length > 0 && (
           <>
             <h3 className="section-title">Onlangse boodskappe</h3>
-            {Object.entries(bySeries).map(([series, notes]) => (
+            {Object.entries(bySeries).map(([series, seriesNotes]) => (
               <div key={series} className="series-group">
                 <div className="series-label">{series}</div>
-                {notes.map(note => (
+                {seriesNotes.map(note => (
                   <NoteRow
                     key={note.id}
                     note={note}
@@ -475,17 +436,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       </div>
 
       {activeNote && activeId !== today.id && (
-        <MiniPlayer
-          note={activeNote}
-          playing={playing}
-          progress={progress}
-          onToggle={() => toggle(activeNote)}
-        />
+        <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
       )}
 
-      {shareToast && (
-        <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>
-      )}
+      {shareToast && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
     </div>
   )
 }
