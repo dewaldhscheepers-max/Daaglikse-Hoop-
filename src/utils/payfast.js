@@ -27,6 +27,20 @@ function submitForm(params) {
   form.submit()
 }
 
+export function checkoutBook(book, email) {
+  submitForm({
+    merchant_id:   MERCHANT_ID,
+    merchant_key:  MERCHANT_KEY,
+    return_url:    `${window.location.origin}/?payment=success`,
+    cancel_url:    `${window.location.origin}/?payment=cancel`,
+    email_address: email,
+    amount:        book.price.toFixed(2),
+    item_name:     book.title.substring(0, 100),
+    custom_str1:   email,
+    custom_str2:   book.id,
+  })
+}
+
 export function checkoutCart(books, email) {
   const base  = window.location.origin
   const total = books.reduce((sum, b) => sum + b.price, 0)
