@@ -8,7 +8,6 @@ import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
-import WelcomeModal from './components/WelcomeModal'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications } from './firebase'
 import './App.css'
@@ -31,21 +30,8 @@ export default function App() {
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
   const [showAdmin, setShowAdmin] = useState(false)
-  const [showWelcome, setShowWelcome] = useState(false)
 
-  useEffect(() => {
-    if (!localStorage.getItem('welcomeShown')) {
-      const t = setTimeout(() => setShowWelcome(true), 800)
-      return () => clearTimeout(t)
-    }
-  }, [])
-
-  function dismissWelcome() {
-    localStorage.setItem('welcomeShown', '1')
-    setShowWelcome(false)
-  }
-
-  function onAudioPlayingChange(playing) {
+function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
     if (!playing && pendingPopup) {
       setActivePopup(pendingPopup)
@@ -222,8 +208,7 @@ export default function App() {
 
       <BottomNav active={tab} onChange={handleNav} />
 
-      {showWelcome  && <WelcomeModal onClose={dismissWelcome} />}
-      {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
+{showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 
