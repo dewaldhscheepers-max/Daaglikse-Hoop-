@@ -289,3 +289,146 @@
   color: var(--text-muted);
   text-align: center;
 }
+
+/* ─── Cart bar ─── */
+.cart-bar {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  left: 16px;
+  right: 16px;
+  background: var(--purple-dark);
+  color: white;
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(92, 78, 142, 0.45);
+  cursor: pointer;
+  z-index: 100;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cart-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cart-bar-badge {
+  background: white;
+  color: var(--purple-dark);
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cart-bar-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cart-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-bar-total {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-serif);
+}
+
+.cart-bar-btn {
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+/* ─── In-cart book card ─── */
+.book-card.in-cart {
+  border: 2px solid var(--purple);
+}
+
+.btn-in-cart {
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cart-check {
+  background: var(--purple) !important;
+}
+
+/* ─── Cart book list in modal ─── */
+.cart-book-list {
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-book-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-book-row:last-of-type {
+  border-bottom: none;
+}
+
+.cart-book-emoji {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.cart-book-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.cart-book-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-dark);
+  flex-shrink: 0;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cart-total-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--purple-dark);
+  font-family: var(--font-serif);
+}

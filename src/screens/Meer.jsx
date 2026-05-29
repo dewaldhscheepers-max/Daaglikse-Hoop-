@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
-import { checkoutBook } from '../utils/payfast'
+import { checkoutCart } from '../utils/payfast'
 import { db } from '../firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
 
-/* ── Checkout modal ── */
-function CheckoutModal({ book, onClose }) {
-  const [email, setEmail]   = useState('')
-  const [busy, setBusy]     = useState(false)
-  const [error, setError]   = useState('')
+function validate(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+}
 
-  function validate(e) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
-  }
+/* ── Cart modal ── */
+function CartModal({ books, total, onClose }) {
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
+  const [busy,  setBusy]  = useState(false)
 
   function pay() {
     if (!validate(email)) { setError("Voer asb 'n geldige e-posadres in."); return }
     setBusy(true)
-    checkoutBook(book, email)
+    checkoutCart(books, email)
   }
 
   return (
@@ -26,13 +26,25 @@ function CheckoutModal({ book, onClose }) {
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>✕</button>
 
-        <div className="modal-book-icon" style={{ background: book.color }}>
-          <span>{book.emoji}</span>
+        <h3 className="modal-title">Jou Mandjie 🛒</h3>
+        <p className="modal-note">{books.length} boek{books.length > 1 ? 'e' : ''} geselekteer</p>
+
+        <div className="cart-book-list">
+          {books.map(b => (
+            <div key={b.id} className="cart-book-row">
+              <span className="cart-book-emoji">{b.emoji}</span>
+              <span className="cart-book-title">{b.title}</span>
+              <span className="cart-book-price">R{b.price}</span>
+            </div>
+          ))}
+          <div className="cart-total-row">
+            <span>Totaal</span>
+            <span className="cart-total-amount">R{total}</span>
+          </div>
         </div>
-        <h3 className="modal-title">{book.title}</h3>
-        <p className="modal-price">R{book.price}</p>
-        <p className="modal-note">
-          Na betaling stuur ons die PDF outomaties na jou e-pos.
+
+        <p className="modal-note" style={{ marginTop: 4 }}>
+          Na betaling stuur ons die PDF{books.length > 1 ? "'s" : ''} <strong>outomaties</strong> na jou e-pos. Geen wag nie.
         </p>
 
         <label className="modal-label">Jou e-posadres</label>
@@ -46,35 +58,52 @@ function CheckoutModal({ book, onClose }) {
         />
         {error && <p className="modal-error">{error}</p>}
 
-        <button
-          className="btn-primary modal-pay-btn"
-          onClick={pay}
-          disabled={busy}
-        >
-          {busy ? 'Besig...' : `Betaal R${book.price} met PayFast`}
+        <button className="btn-primary modal-pay-btn" onClick={pay} disabled={busy}>
+          {busy ? 'Besig...' : `Betaal R${total} via PayFast`}
         </button>
 
-        <p className="modal-secure">🔒 Veilige betaling via PayFast · Kaart, EFT, SnapScan</p>
+        <p className="modal-secure">🔒 Veilige betaling · Kaart, EFT, SnapScan</p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Cart bar ── */
+function CartBar({ count, total, onClick }) {
+  if (count === 0) return null
+  return (
+    <div className="cart-bar" onClick={onClick}>
+      <div className="cart-bar-left">
+        <span className="cart-bar-badge">{count}</span>
+        <span className="cart-bar-label">{count} boek{count > 1 ? 'e' : ''} in mandjie</span>
+      </div>
+      <div className="cart-bar-right">
+        <span className="cart-bar-total">R{total}</span>
+        <span className="cart-bar-btn">Betaal →</span>
       </div>
     </div>
   )
 }
 
 /* ── Book card ── */
-function BookCard({ book, onBuy }) {
+function BookCard({ book, inCart, onToggle }) {
   return (
-    <div className="book-card">
+    <div className={`book-card${inCart ? ' in-cart' : ''}`}>
       <div className="book-cover" style={{ background: book.color }}>
         <span className="book-emoji">{book.emoji}</span>
-        {book.price === 105 && <span className="book-badge">Gewild</span>}
+        {book.price === 105 && !inCart && <span className="book-badge">Gewild</span>}
+        {inCart && <span className="book-badge cart-check">✓</span>}
       </div>
       <div className="book-info">
         <h4 className="book-title">{book.title}</h4>
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
           <span className="book-price">R{book.price}</span>
-          <button className="btn-primary book-buy-btn" onClick={() => onBuy(book)}>
-            Koop
+          <button
+            className={`book-buy-btn ${inCart ? 'btn-in-cart' : 'btn-primary'}`}
+            onClick={() => onToggle(book.id)}
+          >
+            {inCart ? '✓ Geselekteer' : 'Voeg by'}
           </button>
         </div>
       </div>
@@ -85,11 +114,8 @@ function BookCard({ book, onBuy }) {
 /* ── Free book card ── */
 function FreeCard({ book }) {
   function download() {
-    if (book.pdfUrl) {
-      window.open(book.pdfUrl, '_blank')
-    } else {
-      alert('Hierdie boek word binnekort beskikbaar. Kontak ons by info@dewaldscheepers.com')
-    }
+    if (book.pdfUrl) window.open(book.pdfUrl, '_blank')
+    else alert('Hierdie boek word binnekort beskikbaar. Kontak ons by info@dewaldscheepers.com')
   }
 
   return (
@@ -103,9 +129,7 @@ function FreeCard({ book }) {
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
           <span className="book-price free-price">Gratis</span>
-          <button className="btn-free book-buy-btn" onClick={download}>
-            Aflaai PDF
-          </button>
+          <button className="btn-free book-buy-btn" onClick={download}>Aflaai PDF</button>
         </div>
       </div>
     </div>
@@ -114,7 +138,8 @@ function FreeCard({ book }) {
 
 /* ── Main screen ── */
 export default function Meer() {
-  const [checkout, setCheckout] = useState(null)
+  const [cart,          setCart]          = useState([])
+  const [showCart,      setShowCart]      = useState(false)
   const [bookOverrides, setBookOverrides] = useState({})
 
   useEffect(() => {
@@ -126,20 +151,25 @@ export default function Meer() {
     return unsub
   }, [])
 
-  const BOOKS = STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) }))
-  const paid = BOOKS.filter(b => !b.free)
-  const free = BOOKS.filter(b => b.free)
+  const BOOKS     = STATIC_BOOKS.map(b => ({ ...b, ...(bookOverrides[b.id] || {}) }))
+  const paid      = BOOKS.filter(b => !b.free)
+  const free      = BOOKS.filter(b => b.free)
+  const cartBooks = paid.filter(b => cart.includes(b.id))
+  const total     = cartBooks.reduce((sum, b) => sum + b.price, 0)
+
+  function toggleCart(id) {
+    setCart(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
 
   return (
     <div className="meer">
       <div className="screen-header meer-header">
         <h1>E-boeke</h1>
         <div className="subtitle">DEUR DEWALD SCHEEPERS</div>
-        <p>Lees op enige toestel. Na betaling stuur ons die PDF dadelik na jou e-pos.</p>
+        <p>Voeg boeke by jou mandjie en betaal alles saam. PDFs word outomaties na jou e-pos gestuur.</p>
       </div>
 
       <div className="meer-body">
-        {/* Free section */}
         <div className="meer-section">
           <div className="section-header">
             <h3 className="section-title">🎁 Gratis Aflaai</h3>
@@ -152,22 +182,23 @@ export default function Meer() {
 
         <div className="divider" />
 
-        {/* Paid section */}
-        <div className="meer-section">
+        <div className="meer-section" style={{ paddingBottom: cart.length ? 80 : 20 }}>
           <div className="section-header">
             <h3 className="section-title">📚 Winkel</h3>
             <span className="section-count">{paid.length} boeke</span>
           </div>
           <div className="book-list">
             {paid.map(b => (
-              <BookCard key={b.id} book={b} onBuy={setCheckout} />
+              <BookCard key={b.id} book={b} inCart={cart.includes(b.id)} onToggle={toggleCart} />
             ))}
           </div>
         </div>
       </div>
 
-      {checkout && (
-        <CheckoutModal book={checkout} onClose={() => setCheckout(null)} />
+      <CartBar count={cartBooks.length} total={total} onClick={() => setShowCart(true)} />
+
+      {showCart && (
+        <CartModal books={cartBooks} total={total} onClose={() => setShowCart(false)} />
       )}
     </div>
   )
