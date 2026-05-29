@@ -84,6 +84,13 @@ function HeartIcon({ filled = false, size = 20 }) {
     </svg>
   )
 }
+function BookmarkIcon({ filled = false, size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  )
+}
 function ShareIcon({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -119,7 +126,7 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   )
 }
 
-function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
+function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark }) {
   return (
     <div className="note-row">
       <div className="note-thumb" style={{ background: note.color }}>
@@ -140,6 +147,9 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike }) {
         <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
           <HeartIcon filled={liked} size={13} />
           {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+        <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
+          <BookmarkIcon filled={bookmarked} size={13} />
         </button>
       </div>
     </div>
@@ -360,38 +370,29 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   }
 
   async function handleLike(noteId) {
-    const isLiked = liked.includes(noteId)
-    const note    = notes.find(n => n.id === noteId)
+    if (liked.includes(noteId)) return
+    const newLiked = [...liked, noteId]
+    setLiked(newLiked)
+    localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+    setLikes(prev => {
+      const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
+      writeLikesCache(next)
+      return next
+    })
+    try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
+  }
 
-    if (isLiked) {
-      const newLiked = liked.filter(id => id !== noteId)
-      setLiked(newLiked)
-      localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+  function handleBookmark(noteId) {
+    const note = notes.find(n => n.id === noteId) || savedNotes[noteId]
+    if (savedNotes[noteId]) {
       const newSaved = { ...savedNotes }
       delete newSaved[noteId]
       setSavedNotes(newSaved)
       writeSavedNotes(newSaved)
-      setLikes(prev => {
-        const next = { ...prev, [noteId]: Math.max(0, (prev[noteId] || 1) - 1) }
-        writeLikesCache(next)
-        return next
-      })
-      try { await setDoc(doc(db, 'likes', noteId), { count: increment(-1) }, { merge: true }) } catch {}
-    } else {
-      const newLiked = [...liked, noteId]
-      setLiked(newLiked)
-      localStorage.setItem('likedNotes', JSON.stringify(newLiked))
-      if (note) {
-        const newSaved = { ...savedNotes, [noteId]: { ...note, savedAt: Date.now() } }
-        setSavedNotes(newSaved)
-        writeSavedNotes(newSaved)
-      }
-      setLikes(prev => {
-        const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
-        writeLikesCache(next)
-        return next
-      })
-      try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
+    } else if (note) {
+      const newSaved = { ...savedNotes, [noteId]: { ...note, savedAt: Date.now() } }
+      setSavedNotes(newSaved)
+      writeSavedNotes(newSaved)
     }
   }
 
@@ -526,6 +527,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                     liked={liked.includes(note.id)}
                     likeCount={likes[note.id] || 0}
                     onLike={() => handleLike(note.id)}
+                    bookmarked={savedNotes[note.id] != null}
+                    onBookmark={() => handleBookmark(note.id)}
                   />
                 ))}
               </>
@@ -549,6 +552,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                         liked={liked.includes(note.id)}
                         likeCount={likes[note.id] || 0}
                         onLike={() => handleLike(note.id)}
+                        bookmarked={savedNotes[note.id] != null}
+                        onBookmark={() => handleBookmark(note.id)}
                       />
                     ))}
                   </div>
@@ -571,11 +576,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
           return (
             <div className="saved-section">
               <div className="saved-header">
-                <HeartIcon filled size={14} />
+                <BookmarkIcon filled size={14} />
                 <span>Gestoor vir later</span>
               </div>
               {savedList.length === 0 ? (
-                <p className="saved-empty">Nog geen boodskappe gestoor nie.<br />Tik die ❤️ op enige boodskap om dit hier te stoor.</p>
+                <p className="saved-empty">Nog geen boodskappe gestoor nie.<br />Tik die boekmerkie 🔖 op enige boodskap om dit hier te stoor.</p>
               ) : (
                 savedList.map(note => (
                   <NoteRow
@@ -586,6 +591,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                     liked={liked.includes(note.id)}
                     likeCount={likes[note.id] || 0}
                     onLike={() => handleLike(note.id)}
+                    bookmarked={savedNotes[note.id] != null}
+                    onBookmark={() => handleBookmark(note.id)}
                   />
                 ))
               )}

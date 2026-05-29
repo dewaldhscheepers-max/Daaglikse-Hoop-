@@ -224,6 +224,23 @@
   transform: scale(0.93);
 }
 
+/* ─── Note row bookmark button ─── */
+.note-bookmark-btn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s, transform 0.15s;
+}
+
+.note-bookmark-btn.bookmarked { color: var(--purple-dark); }
+.note-bookmark-btn:active { transform: scale(0.85); }
+
 /* ─── Note row like button ─── */
 .note-like-btn {
   display: flex;
