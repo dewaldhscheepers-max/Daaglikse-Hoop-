@@ -90,10 +90,10 @@ export default function Admin({ onClose }) {
     try {
       const perm = await Notification.requestPermission()
       if (perm !== 'granted') { setNotifStatus('denied'); setNotifBusy(false); return }
-      const ok = await subscribeToNotifications()
+      const result = await subscribeToNotifications()
       const token = localStorage.getItem('fcmToken')
       setNotifDetail(token ? `Token: ${token.slice(0,30)}…` : 'Geen token')
-      setNotifStatus(ok ? 'ok' : 'fail')
+      setNotifStatus(result.ok ? 'ok' : 'fail')
     } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
   }

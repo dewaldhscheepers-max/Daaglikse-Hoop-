@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
-
-const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { checkoutCart } from '../utils/payfast'
 import { db } from '../firebase'
+
+const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
 

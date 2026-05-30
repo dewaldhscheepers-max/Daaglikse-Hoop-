@@ -10,6 +10,7 @@ import { DonationPopup, EbookPopup, InstallPopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser } from './firebase'
+import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
 export default function App() {
@@ -25,7 +26,6 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installBannerDismissed, setInstallBannerDismissed] = useState(false)
   const [showInstallPopup, setShowInstallPopup] = useState(false)
-  const isSamsungBrowser = /SamsungBrowser/i.test(navigator.userAgent)
   const [samsungBannerDismissed, setSamsungBannerDismissed] = useState(
     () => !!localStorage.getItem('samsungBannerDismissed')
   )
@@ -36,7 +36,7 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false)
   const [targetBookId, setTargetBookId] = useState(null)
 
-function onAudioPlayingChange(playing) {
+  function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
     if (!playing && pendingPopup) {
       setActivePopup(pendingPopup)
@@ -249,14 +249,16 @@ function onAudioPlayingChange(playing) {
   return (
     <div className="app">
       <div className="screen" ref={screenRef}>
-        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
-        {tab === 'bidsaam' && <BidSaam />}
-        {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
+        <ErrorBoundary>
+          {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
+          {tab === 'bidsaam' && <BidSaam />}
+          {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
+        </ErrorBoundary>
       </div>
 
       <BottomNav active={tab} onChange={handleNav} />
 
-{showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
+      {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 

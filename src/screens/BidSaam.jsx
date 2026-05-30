@@ -165,6 +165,12 @@ export default function BidSaam() {
   const [archivePlaying, setArchivePlaying] = useState(false)
   const [showScrollHint, setShowScrollHint] = useState(true)
 
+  useEffect(() => {
+    return () => {
+      if (archiveAudioRef.current) { archiveAudioRef.current.pause(); archiveAudioRef.current = null }
+    }
+  }, [])
+
   const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
@@ -342,7 +348,7 @@ export default function BidSaam() {
         )}
 
         <div className="prayer-list">
-          {prayers.map(prayer => (
+          {prayers.filter(p => !p.reported).map(prayer => (
             <div key={prayer.id} className="prayer-card card">
               <div className="prayer-icon">🙏</div>
               <div className="prayer-content">

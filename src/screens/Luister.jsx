@@ -164,7 +164,7 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
-  const { notes: cached, stale } = readCache()
+  const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
@@ -246,7 +246,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   useEffect(() => {
     if (notes.length === 0) return
     const noteId = new URLSearchParams(window.location.search).get('note')
-    if (noteId && notes.some(n => n.id === noteId)) setActiveId(noteId)
+    if (!noteId) return
+    if (notes.some(n => n.id === noteId)) setActiveId(noteId)
+    window.history.replaceState({}, '', '/')
   }, [notes])
 
   // ── On visibility change: silently refresh if cache is stale ──
