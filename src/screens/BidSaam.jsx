@@ -149,8 +149,16 @@ export default function BidSaam() {
     catch { return new Set() }
   })
 
-  const [todayPrayer,   setTodayPrayer]   = useState(null)
-  const [prevPrayers,   setPrevPrayers]   = useState([])
+  const [todayPrayer, setTodayPrayer] = useState(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null')
+      const todayStr = new Date().toISOString().slice(0, 10)
+      return cached?.date === todayStr ? cached : null
+    } catch { return null }
+  })
+  const [prevPrayers, setPrevPrayers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cachedPrevPrayers') || '[]') } catch { return [] }
+  })
   const [showArchive,   setShowArchive]   = useState(false)
   const [archivePlayer, setArchivePlayer] = useState(null)
   const archiveAudioRef = useRef(null)
@@ -194,8 +202,17 @@ export default function BidSaam() {
         if (list[0].date === today) {
           setTodayPrayer(list[0])
           setPrevPrayers(list.slice(1))
+          try {
+            localStorage.setItem('cachedTodayPrayer', JSON.stringify(list[0]))
+            localStorage.setItem('cachedPrevPrayers', JSON.stringify(list.slice(1)))
+          } catch {}
         } else {
+          setTodayPrayer(null)
           setPrevPrayers(list)
+          try {
+            localStorage.setItem('cachedTodayPrayer', 'null')
+            localStorage.setItem('cachedPrevPrayers', JSON.stringify(list))
+          } catch {}
         }
       } catch {}
     }
