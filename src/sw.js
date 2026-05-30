@@ -38,7 +38,6 @@ onBackgroundMessage(firebaseMessaging, payload => {
       body:               n.body  || '',
       icon:               '/icons/icon-192.png',
       badge:              '/icons/icon-192.png',
-      image:              'https://daagliksehoop.vercel.app/notification-image.jpg',
       requireInteraction: true,
       data:               { url: self.registration.scope }
     }
