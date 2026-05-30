@@ -61,22 +61,22 @@ async function subscribeWebPush() {
 }
 
 export async function subscribeToNotifications() {
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return false
+
+  if (isSamsungBrowser) {
+    const sub = await subscribeWebPush()
+    const subJson = sub.toJSON()
+    const id = btoa(sub.endpoint).replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)
+    await setDoc(doc(db, 'webPushSubscriptions', id), {
+      subscription: subJson,
+      subscribedAt: serverTimestamp()
+    })
+    localStorage.setItem('webPushSubscribed', id)
+    return true
+  }
+
   try {
-    const permission = await Notification.requestPermission()
-    if (permission !== 'granted') return false
-
-    if (isSamsungBrowser) {
-      const sub = await subscribeWebPush()
-      const subJson = sub.toJSON()
-      const id = btoa(sub.endpoint).replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)
-      await setDoc(doc(db, 'webPushSubscriptions', id), {
-        subscription: subJson,
-        subscribedAt: serverTimestamp()
-      })
-      localStorage.setItem('webPushSubscribed', id)
-      return true
-    }
-
     const msg = await messaging
     if (!msg) return false
     const swReg = await navigator.serviceWorker.ready
@@ -87,8 +87,8 @@ export async function subscribeToNotifications() {
       return true
     }
     return false
-  } catch {
-    return false
+  } catch (e) {
+    throw e
   }
 }
 

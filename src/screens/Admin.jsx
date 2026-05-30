@@ -73,8 +73,13 @@ export default function Admin({ onClose }) {
       const perm = await Notification.requestPermission()
       if (perm !== 'granted') { setNotifStatus('denied'); setNotifBusy(false); return }
       const ok = await subscribeToNotifications()
-      const token = localStorage.getItem('fcmToken')
-      setNotifDetail(token ? `Token: ${token.slice(0,30)}…` : 'Geen token')
+      if (isSamsungBrowser) {
+        const id = localStorage.getItem('webPushSubscribed')
+        setNotifDetail(id ? `Web Push ID: ${id.slice(0,20)}…` : 'Geen web push ID')
+      } else {
+        const token = localStorage.getItem('fcmToken')
+        setNotifDetail(token ? `Token: ${token.slice(0,30)}…` : 'Geen token')
+      }
       setNotifStatus(ok ? 'ok' : 'fail')
     } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
@@ -84,18 +89,33 @@ export default function Admin({ onClose }) {
     setNotifBusy(true)
     setNotifStatus(null)
     setNotifDetail(null)
-    const token = localStorage.getItem('fcmToken')
-    if (!token) { setNotifStatus('notoken'); setNotifBusy(false); return }
-    try {
-      const r = await fetch('/api/test-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, pin: '2025' })
-      })
-      const data = await r.json().catch(() => ({}))
-      setNotifDetail(JSON.stringify(data))
-      setNotifStatus(r.ok ? 'testsent' : 'fail')
-    } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
+    if (isSamsungBrowser) {
+      const subscriptionId = localStorage.getItem('webPushSubscribed')
+      if (!subscriptionId) { setNotifStatus('notoken'); setNotifBusy(false); return }
+      try {
+        const r = await fetch('/api/test-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscriptionId, pin: '2025' })
+        })
+        const data = await r.json().catch(() => ({}))
+        setNotifDetail(JSON.stringify(data))
+        setNotifStatus(r.ok ? 'testsent' : 'fail')
+      } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
+    } else {
+      const token = localStorage.getItem('fcmToken')
+      if (!token) { setNotifStatus('notoken'); setNotifBusy(false); return }
+      try {
+        const r = await fetch('/api/test-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, pin: '2025' })
+        })
+        const data = await r.json().catch(() => ({}))
+        setNotifDetail(JSON.stringify(data))
+        setNotifStatus(r.ok ? 'testsent' : 'fail')
+      } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
+    }
     setNotifBusy(false)
   }
 
@@ -602,10 +622,10 @@ export default function Admin({ onClose }) {
               </div>
 
               {notifStatus === 'ok'       && <div className="admin-success">✅ Geregistreer! Tik nou "Stuur toets" om te bevestig.</div>}
-              {notifStatus === 'testsent' && <div className="admin-success">✅ FCM aanvaar. Kyk jou kennisgewings nou.</div>}
+              {notifStatus === 'testsent' && <div className="admin-success">{isSamsungBrowser ? '✅ Web Push gestuur. Kyk jou kennisgewings nou.' : '✅ FCM aanvaar. Kyk jou kennisgewings nou.'}</div>}
               {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk instellings of kennisgewings toegelaat is.</div>}
               {notifStatus === 'denied'   && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings.</div>}
-              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer.</div>}
+              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen {isSamsungBrowser ? 'web push registrasie' : 'token'} — tik eers Registreer.</div>}
               {notifDetail && <div style={{ fontSize: 11, fontFamily: 'monospace', background: '#eee', borderRadius: 4, padding: '4px 8px', marginTop: 4, wordBreak: 'break-all' }}>{notifDetail}</div>}
 
               <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
@@ -617,6 +637,28 @@ export default function Admin({ onClose }) {
               </button>
 
               {(() => {
+                if (isSamsungBrowser) {
+                  const subscriptionId = localStorage.getItem('webPushSubscribed')
+                  if (!subscriptionId) return null
+                  const url = `${window.location.origin}/api/test-notification?subscriptionId=${encodeURIComponent(subscriptionId)}&pin=2025`
+                  return (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Toets terwyl app TOE is:</div>
+                      <button
+                        className="admin-save-btn"
+                        style={{ background: '#555', fontSize: 13 }}
+                        onClick={() => navigator.clipboard.writeText(url).catch(() => {})}
+                      >
+                        📋 Kopieer Samsung toets-skakel
+                      </button>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>
+                        1. Tik hierbo om te kopieer<br/>
+                        2. Maak die PWA toe (swipe weg)<br/>
+                        3. Plak skakel in Samsung Internet adresbalk → Enter
+                      </div>
+                    </div>
+                  )
+                }
                 const token = localStorage.getItem('fcmToken')
                 if (!token) return null
                 const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
