@@ -393,6 +393,63 @@
   padding: 12px 0 4px;
 }
 
+/* ─── Volg Dewald Scheepers ─── */
+.social-links {
+  margin-top: 36px;
+  padding: 20px 0 28px;
+  border-top: 1px solid var(--cream-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.social-label {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.social-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+
+.social-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 20px;
+  background: var(--lavender-soft);
+  border: 1.5px solid var(--lavender);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.social-btn:active { opacity: 0.75; }
+
+.social-btn-tiktok {
+  color: #000;
+}
+
 /* ─── Share toast ─── */
 .share-toast {
   position: fixed;
