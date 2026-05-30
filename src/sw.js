@@ -31,15 +31,17 @@ const firebaseApp = initializeApp({
 const firebaseMessaging = getMessaging(firebaseApp)
 
 onBackgroundMessage(firebaseMessaging, payload => {
-  const n = payload.webpush?.notification || payload.notification || {}
+  const d = payload.data || {}
+  const n = payload.notification || {}
   return self.registration.showNotification(
-    n.title || 'Daaglikse Hoop',
+    d.title || n.title || 'Daaglikse Hoop',
     {
-      body:               n.body  || '',
+      body:               d.body  || n.body || '',
       icon:               '/icons/icon-192.png',
       badge:              '/icons/icon-192.png',
+      image:              d.image || '',
       requireInteraction: true,
-      data:               { url: self.registration.scope }
+      data:               { url: d.url || self.registration.scope }
     }
   )
 })

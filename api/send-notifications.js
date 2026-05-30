@@ -96,14 +96,14 @@ async function sendFcm(token, title, body, accessToken) {
     body: JSON.stringify({
       message: {
         token,
-        notification: { title, body },
+        data: {
+          title,
+          body,
+          image: 'https://daagliksehoop.vercel.app/notification-image.jpg',
+          url:   'https://daagliksehoop.vercel.app/',
+        },
         webpush: {
-          fcmOptions: { link: 'https://daagliksehoop.vercel.app/' },
-          notification: {
-            icon:               'https://daagliksehoop.vercel.app/icons/icon-192.png',
-            badge:              'https://daagliksehoop.vercel.app/icons/icon-192.png',
-            requireInteraction: true,
-          },
+          headers: { Urgency: 'high', TTL: '86400' },
         },
       },
     }),
