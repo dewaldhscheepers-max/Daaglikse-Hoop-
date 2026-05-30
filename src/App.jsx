@@ -149,18 +149,19 @@ function onAudioPlayingChange(playing) {
   function dismissInstallPopup() { setShowInstallPopup(false) }
 
   // ── Notification permission banner + silent auto-resubscribe ──
-  // Runs for any Chrome/non-Samsung user — installed or not.
-  // Samsung Internet users are guided to Chrome via the banner instead.
+  // Only ask once the app is installed (standalone). Asking in the browser
+  // interrupts the install flow and users dismiss without thinking.
   useEffect(() => {
     if (isSamsungBrowser) return
     if (!('Notification' in window)) return
+    if (!isInstalled) return
     const perm = Notification.permission
     if (perm === 'default' || (perm === 'granted' && !localStorage.getItem('fcmToken'))) {
       const t = setTimeout(() => setNotifBanner(true), 3000)
       return () => clearTimeout(t)
     }
     ensureNotificationToken()
-  }, [])
+  }, [isInstalled])
 
   async function handleNotifYes() {
     setNotifBanner(false)
