@@ -5,7 +5,13 @@ service cloud.firestore {
     // Anyone (authenticated or not) can write their own FCM token
     match /fcm_tokens/{token} {
       allow write: if true;
-      allow read:  if false; // only Cloud Functions read this
+      allow read:  if false;
+    }
+
+    // Samsung Internet native Web Push subscriptions
+    match /webPushSubscriptions/{id} {
+      allow write: if true;
+      allow read:  if false;
     }
 
     // Devotionals are read-only to all — written only via Firebase Console / Admin SDK
