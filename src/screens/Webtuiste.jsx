@@ -126,17 +126,7 @@ export default function Webtuiste({ onNavigate }) {
         <div className="card welcome-card">
           <div className="welcome-logo">DH</div>
           <h2>Dewald Scheepers</h2>
-          <p>Besoek die amptelike webtuiste vir preke, e-boeke, en meer.</p>
-          <a href="https://dewaldscheepers.com" target="_blank" rel="noopener noreferrer" className="open-link">
-            <button className="btn-dark open-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              Open webtuiste
-            </button>
-          </a>
+          <p>Daaglikse stemnotas, gebed en geestelike hulpbronne vir elke oggend.</p>
         </div>
 
         {/* Skenking — EERSTE (bo-aan) */}
