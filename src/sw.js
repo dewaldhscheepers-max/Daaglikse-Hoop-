@@ -28,9 +28,24 @@ const firebaseApp = initializeApp({
   appId:             '1:395898489739:web:a250f1fdf0a8cc981ebd8e'
 })
 
-// Initialising Firebase messaging registers its own push event handler
-// which automatically displays notifications when the app is in the background.
+// Handles FCM pushes for Chrome/standard browsers automatically
 getMessaging(firebaseApp)
+
+// Handles standard Web Push for Samsung Internet (payload tagged source:'webpush')
+self.addEventListener('push', event => {
+  if (!event.data) return
+  let data = {}
+  try { data = event.data.json() } catch { return }
+  if (data.source !== 'webpush') return  // let Firebase handle FCM pushes
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Daaglikse Hoop', {
+      body:  data.body || '',
+      icon:  '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data:  { url: data.url || '/' }
+    })
+  )
+})
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()

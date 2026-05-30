@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { subscribeToNotifications } from '../firebase'
+import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
 
@@ -588,13 +588,17 @@ export default function Admin({ onClose }) {
               <div className="admin-section-title">Kennisgewings Toets</div>
 
               <div style={{ fontSize: 12, fontFamily: 'monospace', background: '#f5f5f5', borderRadius: 6, padding: '8px 10px', marginBottom: 10, lineHeight: 1.8 }}>
+                <div>Browser: {isSamsungBrowser ? '📱 Samsung Internet (Web Push)' : '✅ Chrome/Standaard (FCM)'}</div>
                 <div>Toestemming: {
                   'Notification' in window
                     ? (Notification.permission === 'granted' ? '✅ granted' : Notification.permission === 'denied' ? '❌ denied' : '⏳ default')
                     : '❌ nie ondersteun'
                 }</div>
-                <div>SW: {swUrl ? (swUrl.includes('firebase') ? '✅ firebase-messaging-sw.js' : swUrl.split('/').pop()) : '⏳ laai...'}</div>
-                <div>Token: {localStorage.getItem('fcmToken') ? `✅ ${localStorage.getItem('fcmToken').slice(0,25)}…` : '❌ geen'}</div>
+                <div>SW: {swUrl ? swUrl.split('/').pop() : '⏳ laai...'}</div>
+                {isSamsungBrowser
+                  ? <div>Web Push: {localStorage.getItem('webPushSubscribed') ? '✅ geregistreer' : '❌ geen'}</div>
+                  : <div>FCM Token: {localStorage.getItem('fcmToken') ? `✅ ${localStorage.getItem('fcmToken').slice(0,25)}…` : '❌ geen'}</div>
+                }
               </div>
 
               {notifStatus === 'ok'       && <div className="admin-success">✅ Geregistreer! Tik nou "Stuur toets" om te bevestig.</div>}
