@@ -8,7 +8,7 @@ async function getAccessToken() {
   const header  = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
   const claim   = Buffer.from(JSON.stringify({
     iss:   process.env.FIREBASE_CLIENT_EMAIL,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/datastore',
     aud:   'https://oauth2.googleapis.com/token',
     iat:   now,
     exp:   now + 3600,
@@ -42,12 +42,14 @@ async function getTodayTitle() {
 }
 
 // ── Fetch all FCM tokens from Firestore ────────────────────────────────────
-async function getTokens() {
+async function getTokens(accessToken) {
   const tokens = []
   let pageToken = null
   do {
     const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/fcm_tokens?pageSize=300${pageToken ? `&pageToken=${pageToken}` : ''}`
-    const r   = await fetch(url)
+    const r   = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    })
     const data = await r.json()
     ;(data.documents || []).forEach(d => {
       const t = d.fields?.token?.stringValue
@@ -105,10 +107,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const [accessToken, title, tokens] = await Promise.all([
-      getAccessToken(),
+    const accessToken = await getAccessToken()
+    const [title, tokens] = await Promise.all([
       getTodayTitle(),
-      getTokens(),
+      getTokens(accessToken),
     ])
 
     if (tokens.length === 0) {
