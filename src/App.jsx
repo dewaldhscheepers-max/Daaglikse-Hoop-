@@ -6,7 +6,7 @@ import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
-import { DonationPopup, EbookPopup, InstallPopup } from './components/Popups'
+import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser } from './firebase'
@@ -43,6 +43,15 @@ export default function App() {
       setPendingPopup(null)
     }
   }
+
+  // ── Track unique app-open days (for share popup eligibility) ──
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    const days  = JSON.parse(localStorage.getItem('appOpenDays') || '[]')
+    if (!days.includes(today)) {
+      localStorage.setItem('appOpenDays', JSON.stringify([...days, today].slice(-30)))
+    }
+  }, [])
 
   // ── Capture beforeinstallprompt (Chrome/Edge) ──
   useEffect(() => {
@@ -87,11 +96,22 @@ export default function App() {
       const unseenBook  = BOOKS.find(b => !seenEbooks.includes(b.id))
       const donationDue = localStorage.getItem('donationPopupMonth') !== thisMonth
 
+      const appOpenDays      = JSON.parse(localStorage.getItem('appOpenDays') || '[]')
+      const completedListens = parseInt(localStorage.getItem('completedListens') || '0')
+      const shareSharedAt    = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
+      const shareLaterAt     = parseInt(localStorage.getItem('sharePopupLaterAt') || '0')
+      const hasReceivedValue = appOpenDays.length >= 2 || completedListens >= 2
+      const shareDue = hasReceivedValue &&
+        Date.now() - shareSharedAt > 30 * 24 * 60 * 60 * 1000 &&
+        Date.now() - shareLaterAt  >  7 * 24 * 60 * 60 * 1000
+
       let popup = null
       if (unseenBook) {
         popup = { type: 'ebook', book: unseenBook }
       } else if (donationDue) {
         popup = { type: 'donation' }
+      } else if (shareDue) {
+        popup = { type: 'share' }
       }
 
       if (!popup) return
@@ -131,6 +151,22 @@ export default function App() {
   function handleDonationCta() {
     dismissPopup()
     setDonation(true)
+  }
+
+  async function handleShareApp() {
+    localStorage.setItem('sharePopupSharedAt', String(Date.now()))
+    dismissPopup()
+    const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app'
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://daagliksehoop.vercel.app' }) } catch {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+    }
+  }
+
+  function handleShareLater() {
+    localStorage.setItem('sharePopupLaterAt', String(Date.now()))
+    dismissPopup()
   }
 
   // ── Install handlers ──
@@ -274,6 +310,13 @@ export default function App() {
         <DonationPopup
           onDonate={handleDonationCta}
           onClose={dismissPopup}
+        />
+      )}
+
+      {activePopup?.type === 'share' && (
+        <SharePopup
+          onShare={handleShareApp}
+          onLater={handleShareLater}
         />
       )}
 

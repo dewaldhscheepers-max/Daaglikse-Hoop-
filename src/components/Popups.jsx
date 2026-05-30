@@ -45,6 +45,23 @@ export function InstallPopup({ onInstall, onLater, onHelp }) {
   )
 }
 
+export function SharePopup({ onShare, onLater }) {
+  return (
+    <div className="popup-backdrop" onClick={onLater}>
+      <div className="popup-card" onClick={e => e.stopPropagation()}>
+        <button className="popup-x" onClick={onLater}>✕</button>
+        <div className="popup-icon">🌱</div>
+        <h3 className="popup-title">Ken jy iemand wat hoop nodig het?</h3>
+        <p className="popup-body">
+          As Daaglikse Hoop jou gehelp het, deel asseblief die app met iemand wat ook elke oggend 'n woord van hoop nodig het.
+        </p>
+        <button className="popup-btn-primary" onClick={onShare}>Deel die app</button>
+        <button className="popup-btn-secondary" onClick={onLater}>Later</button>
+      </div>
+    </div>
+  )
+}
+
 export function EbookPopup({ book, onView, onClose }) {
   return (
     <div className="popup-backdrop" onClick={onClose}>

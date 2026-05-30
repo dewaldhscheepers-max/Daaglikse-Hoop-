@@ -321,7 +321,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
     function onTimeUpdate()     { setElapsed(audio.currentTime) }
-    function onEnded()          { setPlaying(false); onPlayingChange?.(false); setElapsed(0) }
+    function onEnded() {
+      setPlaying(false); onPlayingChange?.(false); setElapsed(0)
+      const n = parseInt(localStorage.getItem('completedListens') || '0')
+      localStorage.setItem('completedListens', String(n + 1))
+    }
     function onLoadedMetadata() {
       if (!activeNote.lengthSeconds) {
         setNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n))
