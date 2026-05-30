@@ -149,18 +149,20 @@ function onAudioPlayingChange(playing) {
   function dismissInstallPopup() { setShowInstallPopup(false) }
 
   // ── Notification permission banner + silent auto-resubscribe ──
-  // Only ask once the app is installed (standalone). Asking in the browser
-  // interrupts the install flow and users dismiss without thinking.
   useEffect(() => {
     if (isSamsungBrowser) return
     if (!('Notification' in window)) return
-    if (!isInstalled) return
     const perm = Notification.permission
+    if (perm === 'granted' && localStorage.getItem('fcmToken')) {
+      ensureNotificationToken()
+      return
+    }
     if (perm === 'default' || (perm === 'granted' && !localStorage.getItem('fcmToken'))) {
-      const t = setTimeout(() => setNotifBanner(true), 3000)
+      // Installed: ask after 3s. Browser: ask after 20s (give time to install first).
+      const delay = isInstalled ? 3000 : 20000
+      const t = setTimeout(() => setNotifBanner(true), delay)
       return () => clearTimeout(t)
     }
-    ensureNotificationToken()
   }, [isInstalled])
 
   async function handleNotifYes() {
