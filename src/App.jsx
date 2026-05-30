@@ -156,9 +156,9 @@ export default function App() {
   async function handleShareApp() {
     localStorage.setItem('sharePopupSharedAt', String(Date.now()))
     dismissPopup()
-    const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app'
+    const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app/go'
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://daagliksehoop.vercel.app' }) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://daagliksehoop.vercel.app/go' }) } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
     }
