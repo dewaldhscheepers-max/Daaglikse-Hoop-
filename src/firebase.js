@@ -12,11 +12,7 @@ const firebaseConfig = {
   appId:             "1:395898489739:web:a250f1fdf0a8cc981ebd8e"
 }
 
-// Firebase VAPID key (for Chrome/standard FCM)
 const FCM_VAPID_KEY = 'BBG0lF3YGD7BRhdveAO3ufCkT4ze1EaAbncl2r2nfUZwQ-p77uijz3UMts3KYlbqK5U3Hn7OoD01XacY3j7JhPk'
-
-// Our own VAPID public key (for Samsung Internet native web push)
-const WEB_PUSH_VAPID_PUBLIC = 'BAnuOtTx2mu8dUar_e7CO-6a4edbIue7Qi2SMCav-ilvxJeh-W2uH4p93LCHNt4P_9A2uj3HyUoOfjulI2OmN5o'
 
 export const isSamsungBrowser = /SamsungBrowser/i.test(navigator.userAgent)
 
@@ -25,7 +21,6 @@ export const db  = getFirestore(app)
 export const storage = getStorage(app)
 
 export const messaging = (async () => {
-  if (isSamsungBrowser) return null
   const supported = await isSupported()
   if (!supported) return null
   const msg = getMessaging(app)
@@ -49,68 +44,44 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
 }
 
-async function subscribeWebPush() {
-  const reg = await navigator.serviceWorker.ready
-  // Unsubscribe first to force fresh subscription
-  const existing = await reg.pushManager.getSubscription()
-  if (existing) await existing.unsubscribe()
-  return reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(WEB_PUSH_VAPID_PUBLIC)
-  })
-}
-
 export async function subscribeToNotifications() {
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') return false
 
+  // Samsung Internet uses FCM under the hood — subscribe via pushManager with
+  // Firebase's VAPID key so the token is valid for the FCM v1 API
   if (isSamsungBrowser) {
-    const sub = await subscribeWebPush()
-    const subJson = sub.toJSON()
-    const id = btoa(sub.endpoint).replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)
-    await setDoc(doc(db, 'webPushSubscriptions', id), {
-      subscription: subJson,
-      subscribedAt: serverTimestamp()
+    const reg = await navigator.serviceWorker.ready
+    const existing = await reg.pushManager.getSubscription()
+    if (existing) await existing.unsubscribe()
+    const sub   = await reg.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey: urlBase64ToUint8Array(FCM_VAPID_KEY)
     })
-    localStorage.setItem('webPushSubscribed', id)
+    const token = sub.endpoint.split('/').pop()
+    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+    localStorage.setItem('fcmToken', token)
+    localStorage.removeItem('webPushSubscribed')
     return true
   }
 
-  try {
-    const msg = await messaging
-    if (!msg) return false
-    const swReg = await navigator.serviceWorker.ready
-    const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
-    if (token) {
-      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-      localStorage.setItem('fcmToken', token)
-      return true
-    }
-    return false
-  } catch (e) {
-    throw e
+  const msg = await messaging
+  if (!msg) return false
+  const swReg = await navigator.serviceWorker.ready
+  const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
+  if (token) {
+    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+    localStorage.setItem('fcmToken', token)
+    return true
   }
+  return false
 }
 
 export async function ensureNotificationToken() {
   try {
     if (!('Notification' in window)) return
     if (Notification.permission !== 'granted') return
-
-    if (isSamsungBrowser) {
-      if (localStorage.getItem('webPushSubscribed')) return
-      await subscribeToNotifications()
-      return
-    }
-
     if (localStorage.getItem('fcmToken')) return
-    const msg = await messaging
-    if (!msg) return
-    const swReg = await navigator.serviceWorker.ready
-    const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
-    if (token) {
-      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-      localStorage.setItem('fcmToken', token)
-    }
+    await subscribeToNotifications()
   } catch {}
 }
