@@ -612,26 +612,29 @@ export default function Admin({ onClose }) {
                 {notifBusy ? 'Besig...' : '📨 Stuur toets (app oop)'}
               </button>
 
-              {localStorage.getItem('fcmToken') && (
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
-                    Toets terwyl app TOE is — kopieer hierdie skakel, maak die app toe, plak in gewone Chrome:
+              {(() => {
+                const token = localStorage.getItem('fcmToken')
+                if (!token) return null
+                const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
+                return (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Toets terwyl app TOE is:</div>
+                    <button
+                      className="admin-save-btn"
+                      style={{ background: '#555', fontSize: 13 }}
+                      onClick={() => navigator.clipboard.writeText(url).catch(() => {})}
+                    >
+                      📋 Kopieer toets-skakel
+                    </button>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>
+                      1. Tik hierbo om te kopieer<br/>
+                      2. Maak die PWA toe (swipe weg)<br/>
+                      3. Maak gewone Chrome oop<br/>
+                      4. Plak skakel in adresbalk → Enter
+                    </div>
                   </div>
-                  <div
-                    style={{ fontSize: 11, fontFamily: 'monospace', background: '#f0f0f0', borderRadius: 6, padding: '6px 10px', wordBreak: 'break-all', cursor: 'pointer', border: '1px solid #ccc' }}
-                    onClick={() => {
-                      const token = localStorage.getItem('fcmToken')
-                      const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
-                      navigator.clipboard.writeText(url).catch(() => {})
-                    }}
-                  >
-                    {`${window.location.origin}/api/test-notification?token=${localStorage.getItem('fcmToken')?.slice(0,15)}…&pin=2025`}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                    Tik bo om die volle skakel te kopieer
-                  </div>
-                </div>
-              )}
+                )
+              })()}
             </div>
           )}
 
