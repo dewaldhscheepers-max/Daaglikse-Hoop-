@@ -43,10 +43,14 @@ async function sendFcm(token) {
     body: JSON.stringify({
       message: {
         token,
-        notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
+        notification: { title: 'Het jy 3 minute vir God?', body: 'Toets-kennisgewinig — dit werk!' },
         webpush: {
           fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
-          notification: { icon: '/icons/icon-192.png', badge: '/icons/icon-192.png' },
+          notification: {
+            icon:               '/icons/icon-192.png',
+            badge:              '/icons/icon-192.png',
+            requireInteraction: true,
+          },
         },
       }
     })
@@ -78,10 +82,11 @@ async function sendWebPush(subscriptionId) {
   await webpush.sendNotification(
     subscription,
     JSON.stringify({
-      source: 'webpush',
-      title:  '🌅 Daaglikse Hoop',
-      body:   'Toets-kennisgewinig — dit werk!',
-      url:    'https://daaglikse-hoop.vercel.app/'
+      source:             'webpush',
+      title:              'Het jy 3 minute vir God?',
+      body:               'Toets-kennisgewinig — dit werk!',
+      url:                'https://daaglikse-hoop.vercel.app/',
+      requireInteraction: true,
     })
   )
   return { ok: true, endpoint: subscription.endpoint.slice(0, 50) + '...' }

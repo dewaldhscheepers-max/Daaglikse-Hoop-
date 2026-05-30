@@ -39,10 +39,11 @@ self.addEventListener('push', event => {
   if (data.source !== 'webpush') return  // let Firebase handle FCM pushes
   event.waitUntil(
     self.registration.showNotification(data.title || 'Daaglikse Hoop', {
-      body:  data.body || '',
-      icon:  '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      data:  { url: data.url || '/' }
+      body:               data.body || '',
+      icon:               '/icons/icon-192.png',
+      badge:              '/icons/icon-192.png',
+      requireInteraction: !!data.requireInteraction,
+      data:               { url: data.url || '/' }
     })
   )
 })

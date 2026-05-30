@@ -99,7 +99,11 @@ async function sendFcm(token, title, body, accessToken) {
         notification: { title, body },
         webpush: {
           fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
-          notification: { icon: '/icons/icon-192.png', badge: '/icons/icon-192.png' },
+          notification: {
+            icon:                '/icons/icon-192.png',
+            badge:               '/icons/icon-192.png',
+            requireInteraction:  true,
+          },
         },
       },
     }),
@@ -116,7 +120,7 @@ async function sendWebPush(subscription, title, body) {
   try {
     await webpush.sendNotification(
       subscription,
-      JSON.stringify({ source: 'webpush', title, body, url: 'https://daaglikse-hoop.vercel.app/' })
+      JSON.stringify({ source: 'webpush', title, body, url: 'https://daaglikse-hoop.vercel.app/', requireInteraction: true })
     )
     return true
   } catch (e) {
@@ -146,8 +150,8 @@ module.exports = async function handler(req, res) {
       getWebPushSubscriptions(accessToken),
     ])
 
-    const notifTitle = '🌅 Daaglikse Hoop'
-    const notifBody  = title
+    const notifTitle = 'Het jy 3 minute vir God?'
+    const notifBody  = 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
 
     let fcmSent = 0
     for (const token of fcmTokens) {
