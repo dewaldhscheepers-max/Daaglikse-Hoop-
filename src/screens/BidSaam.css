@@ -202,48 +202,56 @@
 
 /* ─── Evening prayer card ─── */
 .ep-card {
-  background: linear-gradient(135deg, #1a1040 0%, #2d1b6e 100%);
-  color: #fff;
-  border: none;
+  background: var(--lavender-soft);
+  border: 1.5px solid var(--lavender);
+  border-radius: 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px;
+  gap: 12px;
 }
 
-.ep-card-header {
+.ep-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .ep-card-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #c4b5fd;
+  color: var(--purple);
 }
 
 .ep-card-date {
   font-size: 12px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-muted);
+}
+
+.ep-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .ep-card-desc {
   font-size: 14px;
-  color: rgba(255,255,255,0.85);
+  color: var(--text-muted);
   line-height: 1.5;
   margin: 0;
 }
 
-.ep-card-desc strong { color: #fff; }
+.ep-card-desc strong { color: var(--text); }
 
 /* ─── Player ─── */
 .ep-player {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .ep-controls {
@@ -256,12 +264,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.25);
+  background: var(--purple);
+  border: none;
   color: #fff;
   border-radius: 24px;
-  padding: 9px 16px;
-  font-size: 13px;
+  padding: 11px 20px;
+  font-size: 14px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -271,29 +279,29 @@
   transition: background 0.2s;
 }
 
-.ep-play-btn:active { background: rgba(255,255,255,0.25); }
+.ep-play-btn:active { background: var(--purple-dark); }
 
 .ep-share-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
+  background: transparent;
+  border: 1.5px solid var(--lavender);
+  color: var(--purple);
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s;
 }
 
-.ep-share-btn:active { background: rgba(255,255,255,0.25); }
+.ep-share-btn:active { background: var(--lavender); }
 
 .ep-progress-track {
   height: 4px;
-  background: rgba(255,255,255,0.2);
+  background: var(--lavender);
   border-radius: 2px;
   cursor: pointer;
   position: relative;
@@ -302,14 +310,14 @@
 
 .ep-progress-fill {
   height: 100%;
-  background: #c4b5fd;
+  background: var(--purple);
   border-radius: 2px;
   transition: width 0.3s linear;
 }
 
 .ep-time {
   font-size: 11px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-muted);
   text-align: right;
 }
 

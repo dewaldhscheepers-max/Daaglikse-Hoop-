@@ -265,13 +265,14 @@ export default function BidSaam() {
       <div className="bidsaam-body">
 
         {todayPrayer && (
-          <div className="ep-card" style={{ background: 'linear-gradient(135deg, #1a1040 0%, #2d1b6e 100%)', color: '#fff', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div className="ep-card-header">
-              <div className="ep-card-label">Aandgebed</div>
-              <div className="ep-card-date">{formatDate(todayPrayer.date)}</div>
+          <div className="ep-card">
+            <div className="ep-card-top">
+              <span className="ep-card-label">Aandgebed</span>
+              <span className="ep-card-date">{formatDate(todayPrayer.date)}</span>
             </div>
+            <p className="ep-card-title">Gebed vir {formatDate(todayPrayer.date)} se versoeke</p>
             <p className="ep-card-desc">
-              Dewald het vanaand oor <strong>{todayPrayer.prayerCount}</strong> gebedsversoeke gebid.
+              Dewald het vanaand oor vandag se <strong>{todayPrayer.prayerCount}</strong> gebedsversoeke gebid.
             </p>
             <EveningPrayerPlayer prayer={todayPrayer} />
           </div>
