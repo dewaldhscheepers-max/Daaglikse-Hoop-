@@ -262,6 +262,16 @@ export default function BidSaam() {
     setArchivePlaying(true)
   }
 
+  async function shareArchivePrayer(prayer) {
+    const text = `Luister hoe daar op ${formatDate(prayer.date)} saam gebid is:\nhttps://daagliksehoop.vercel.app`
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://daagliksehoop.vercel.app' }) }
+      catch {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    }
+  }
+
   return (
     <div className="bidsaam">
       <div className="bidsaam-header screen-header">
@@ -354,12 +364,17 @@ export default function BidSaam() {
                       <span className="ep-archive-date">{formatDate(p.date)}</span>
                       <span className="ep-archive-count">Gebed oor {p.prayerCount} versoeke</span>
                     </div>
-                    <button
-                      className={`ep-archive-play${archivePlayer?.id === p.id && archivePlaying ? ' playing' : ''}`}
-                      onClick={() => toggleArchivePlayer(p)}
-                    >
-                      {archivePlayer?.id === p.id && archivePlaying ? <PauseIcon /> : <PlayIcon />}
-                    </button>
+                    <div className="ep-archive-btns">
+                      <button className="ep-archive-share" onClick={() => shareArchivePrayer(p)}>
+                        <ShareIcon />
+                      </button>
+                      <button
+                        className={`ep-archive-play${archivePlayer?.id === p.id && archivePlaying ? ' playing' : ''}`}
+                        onClick={() => toggleArchivePlayer(p)}
+                      >
+                        {archivePlayer?.id === p.id && archivePlaying ? <PauseIcon /> : <PlayIcon />}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -402,6 +402,31 @@
   color: var(--text-muted);
 }
 
+.ep-archive-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ep-archive-share {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--lavender);
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.ep-archive-share:active { background: var(--lavender-soft); }
+
 .ep-archive-play {
   width: 34px;
   height: 34px;
