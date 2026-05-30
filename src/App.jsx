@@ -165,7 +165,14 @@ function onAudioPlayingChange(playing) {
 
   async function handleNotifYes() {
     setNotifBanner(false)
-    await subscribeToNotifications()
+    try {
+      const result = await subscribeToNotifications()
+      if (!result.ok) {
+        alert('Kennisgewings kon nie geaktiveer word nie.\nRede: ' + result.reason + '\n\nMaak seker Chrome se kennisgewings is aangeskakel in jou foon se instellings.')
+      }
+    } catch (e) {
+      alert('Fout: ' + e.message)
+    }
   }
 
   useEffect(() => {

@@ -46,18 +46,16 @@ function urlBase64ToUint8Array(base64String) {
 
 export async function subscribeToNotifications() {
   const permission = await Notification.requestPermission()
-  if (permission !== 'granted') return false
+  if (permission !== 'granted') return { ok: false, reason: 'permission_denied' }
 
   const msg = await messaging
-  if (!msg) return false
+  if (!msg) return { ok: false, reason: 'messaging_not_supported' }
   const swReg = await navigator.serviceWorker.ready
   const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
-  if (token) {
-    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-    localStorage.setItem('fcmToken', token)
-    return true
-  }
-  return false
+  if (!token) return { ok: false, reason: 'no_token' }
+  await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+  localStorage.setItem('fcmToken', token)
+  return { ok: true }
 }
 
 export async function ensureNotificationToken() {
