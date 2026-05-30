@@ -170,7 +170,11 @@ function onAudioPlayingChange(playing) {
     try {
       const result = await subscribeToNotifications()
       if (!result.ok) {
-        alert('Kennisgewings kon nie geaktiveer word nie.\nRede: ' + result.reason + '\n\nMaak seker Chrome se kennisgewings is aangeskakel in jou foon se instellings.')
+        if (result.reason === 'permission_denied') {
+          alert('Kennisgewings is geblokkeer vir hierdie webtuiste.\n\nOm dit reg te stel:\n1. Tik die 🔒 slotjie in Chrome se adresbalk\n2. Kies "Site settings"\n3. Verander "Notifications" na "Allow"\n4. Herlaai die app')
+        } else {
+          alert('Kennisgewings kon nie geaktiveer word nie. (' + result.reason + ')')
+        }
       }
     } catch (e) {
       alert('Fout: ' + e.message)
