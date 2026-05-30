@@ -43,14 +43,13 @@ module.exports = async function handler(req, res) {
         message: {
           token,
           notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
-          webpush: { notification: { silent: true, vibrate: [120] } },
-          apns: { payload: { aps: { sound: '' } } },
         }
       })
     })
     const data = await r.json()
+    console.log('FCM response:', JSON.stringify(data))
     if (!r.ok) return res.status(500).json({ error: data })
-    return res.status(200).json({ ok: true })
+    return res.status(200).json({ ok: true, fcm: data })
   } catch (e) {
     return res.status(500).json({ error: e.message })
   }

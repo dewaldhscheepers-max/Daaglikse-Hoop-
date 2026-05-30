@@ -72,19 +72,6 @@ async function sendOne(token, title, body, accessToken) {
       message: {
         token,
         notification: { title, body },
-        android: {
-          notification: {
-            sound:        null,
-            default_sound: false,
-            notification_priority: 'PRIORITY_DEFAULT',
-          },
-        },
-        apns: {
-          payload: { aps: { sound: '' } },
-        },
-        webpush: {
-          notification: { silent: true, vibrate: [120] },
-        },
       },
     }),
   })
