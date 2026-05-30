@@ -37,15 +37,15 @@ self.addEventListener('push', event => {
   let data = {}
   try { data = event.data.json() } catch { return }
   if (data.source !== 'webpush') return  // let Firebase handle FCM pushes
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Daaglikse Hoop', {
-      body:               data.body || '',
-      icon:               '/icons/icon-192.png',
-      badge:              '/icons/icon-192.png',
-      requireInteraction: !!data.requireInteraction,
-      data:               { url: data.url || '/' }
-    })
-  )
+  const opts = {
+    body:               data.body || '',
+    icon:               '/icons/icon-192.png',
+    badge:              '/icons/icon-192.png',
+    requireInteraction: !!data.requireInteraction,
+    data:               { url: data.url || '/' }
+  }
+  if (data.image) opts.image = data.image
+  event.waitUntil(self.registration.showNotification(data.title || 'Daaglikse Hoop', opts))
 })
 
 self.addEventListener('notificationclick', event => {

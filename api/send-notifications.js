@@ -100,9 +100,10 @@ async function sendFcm(token, title, body, accessToken) {
         webpush: {
           fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
           notification: {
-            icon:                '/icons/icon-192.png',
-            badge:               '/icons/icon-192.png',
-            requireInteraction:  true,
+            icon:               'https://daagliksehoop.vercel.app/icons/icon-192.png',
+            badge:              'https://daagliksehoop.vercel.app/icons/icon-192.png',
+            image:              'https://daagliksehoop.vercel.app/notification-image.jpg',
+            requireInteraction: true,
           },
         },
       },
@@ -120,7 +121,7 @@ async function sendWebPush(subscription, title, body) {
   try {
     await webpush.sendNotification(
       subscription,
-      JSON.stringify({ source: 'webpush', title, body, url: 'https://daaglikse-hoop.vercel.app/', requireInteraction: true })
+      JSON.stringify({ source: 'webpush', title, body, url: 'https://daaglikse-hoop.vercel.app/', image: 'https://daagliksehoop.vercel.app/notification-image.jpg', requireInteraction: true })
     )
     return true
   } catch (e) {
