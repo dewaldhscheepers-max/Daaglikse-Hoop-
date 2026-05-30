@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
@@ -157,10 +157,22 @@ function FreeCard({ book }) {
 }
 
 /* ── Main screen ── */
-export default function Meer() {
+export default function Meer({ targetBookId, onScrolled }) {
   const [cart,          setCart]          = useState([])
   const [showCart,      setShowCart]      = useState(false)
   const [bookOverrides, setBookOverrides] = useState({})
+
+  useEffect(() => {
+    if (!targetBookId) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(`book-${targetBookId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        if (onScrolled) onScrolled()
+      }
+    }, 150)
+    return () => clearTimeout(t)
+  }, [targetBookId])
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'books'), snap => {
@@ -204,7 +216,11 @@ export default function Meer() {
             <span className="section-count">{free.length} boeke</span>
           </div>
           <div className="book-list">
-            {free.map(b => <FreeCard key={b.id} book={b} />)}
+            {free.map(b => (
+              <div key={b.id} id={`book-${b.id}`}>
+                <FreeCard book={b} />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -217,7 +233,9 @@ export default function Meer() {
           </div>
           <div className="book-list">
             {paid.map(b => (
-              <BookCard key={b.id} book={b} inCart={cart.includes(b.id)} onToggle={toggleCart} />
+              <div key={b.id} id={`book-${b.id}`}>
+                <BookCard book={b} inCart={cart.includes(b.id)} onToggle={toggleCart} />
+              </div>
             ))}
           </div>
         </div>

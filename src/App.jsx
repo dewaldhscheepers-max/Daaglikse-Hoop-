@@ -30,6 +30,7 @@ export default function App() {
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
   const [showAdmin, setShowAdmin] = useState(false)
+  const [targetBookId, setTargetBookId] = useState(null)
 
 function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -117,9 +118,10 @@ function onAudioPlayingChange(playing) {
   }
 
   function handleEbookView() {
+    const bookId = activePopup?.book?.id || null
     dismissPopup()
     setTab('meer')
-    if (screenRef.current) screenRef.current.scrollTop = 0
+    setTargetBookId(bookId)
   }
 
   function handleDonationCta() {
@@ -204,7 +206,7 @@ function onAudioPlayingChange(playing) {
       <div className="screen" ref={screenRef}>
         {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
         {tab === 'bidsaam' && <BidSaam />}
-        {tab === 'meer'    && <Meer />}
+        {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
       </div>
 
       <BottomNav active={tab} onChange={handleNav} />
