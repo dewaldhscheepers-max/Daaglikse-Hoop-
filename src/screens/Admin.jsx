@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { subscribeToNotifications } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
 
@@ -11,7 +12,7 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books'
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif'
 
   // ── Notes state ──
   const [title, setTitle]             = useState('')
@@ -51,6 +52,22 @@ export default function Admin({ onClose }) {
   const [coverSaved, setCoverSaved]           = useState(null)
   const coverInputRef                         = useRef(null)
   const [coverUploadTarget, setCoverUploadTarget] = useState(null)
+
+  // ── Notification test state ──
+  const [notifStatus, setNotifStatus] = useState(null)
+  const [notifBusy,   setNotifBusy]   = useState(false)
+
+  async function handleNotifSubscribe() {
+    setNotifBusy(true)
+    setNotifStatus(null)
+    try {
+      const perm = await Notification.requestPermission()
+      if (perm !== 'granted') { setNotifStatus('denied'); setNotifBusy(false); return }
+      const ok = await subscribeToNotifications()
+      setNotifStatus(ok ? 'ok' : 'fail')
+    } catch { setNotifStatus('fail') }
+    setNotifBusy(false)
+  }
 
   // ── New book form ──
   const [newTitle, setNewTitle]   = useState('')
@@ -319,6 +336,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'books' ? 'active' : ''}`} onClick={() => setActiveTab('books')}>
             📚 E-boeke
           </button>
+          <button className={`admin-tab ${activeTab === 'notif' ? 'active' : ''}`} onClick={() => setActiveTab('notif')}>
+            🔔 Kennisgewings
+          </button>
         </div>
 
         <div className="admin-body">
@@ -531,6 +551,34 @@ export default function Admin({ onClose }) {
             </div>
             )
           })()}
+
+          {/* ── NOTIFICATIONS TAB ── */}
+          {activeTab === 'notif' && (
+            <div className="admin-section">
+              <div className="admin-section-title">Kennisgewings Toets</div>
+
+              <div className="admin-note-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
+                <div className="admin-note-title">Toestelstatus</div>
+                <div className="admin-note-meta">
+                  {'Notification' in window
+                    ? `Toestemming: ${Notification.permission === 'granted' ? '✅ Toegelaat' : Notification.permission === 'denied' ? '❌ Geweier' : '⏳ Nog nie gevra nie'}`
+                    : '❌ Kennisgewings word nie ondersteun op hierdie toestel nie'}
+                </div>
+              </div>
+
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                Tik die knoppie om jou kennisgewinginskrywing te herregistreer. Dit sal jou token in Firestore stoor sodat jy oggendkennisgewings ontvang.
+              </p>
+
+              {notifStatus === 'ok'     && <div className="admin-success">✅ Geregistreer! Jy sal môre 6:30 'n kennisgewinig ontvang.</div>}
+              {notifStatus === 'fail'   && <div className="admin-error">❌ Registrasie misluk. Kyk of kennisgewings toegelaat is in jou foon se instellings.</div>}
+              {notifStatus === 'denied' && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings om dit aan te skakel.</div>}
+
+              <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
+                {notifBusy ? 'Besig...' : '🔔 Registreer / Herregistreer'}
+              </button>
+            </div>
+          )}
 
         </div>
       </div>
