@@ -609,8 +609,29 @@ export default function Admin({ onClose }) {
               </button>
 
               <button className="admin-save-btn" style={{ background: '#27713f', marginTop: 4 }} onClick={handleNotifTest} disabled={notifBusy}>
-                {notifBusy ? 'Besig...' : '📨 Stuur toets-kennisgewinig nou'}
+                {notifBusy ? 'Besig...' : '📨 Stuur toets (app oop)'}
               </button>
+
+              {localStorage.getItem('fcmToken') && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                    Toets terwyl app TOE is — kopieer hierdie skakel, maak die app toe, plak in gewone Chrome:
+                  </div>
+                  <div
+                    style={{ fontSize: 11, fontFamily: 'monospace', background: '#f0f0f0', borderRadius: 6, padding: '6px 10px', wordBreak: 'break-all', cursor: 'pointer', border: '1px solid #ccc' }}
+                    onClick={() => {
+                      const token = localStorage.getItem('fcmToken')
+                      const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
+                      navigator.clipboard.writeText(url).catch(() => {})
+                    }}
+                  >
+                    {`${window.location.origin}/api/test-notification?token=${localStorage.getItem('fcmToken')?.slice(0,15)}…&pin=2025`}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                    Tik bo om die volle skakel te kopieer
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

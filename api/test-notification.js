@@ -28,35 +28,60 @@ async function getAccessToken() {
   return data.access_token
 }
 
+async function sendFcm(token) {
+  const accessToken = await getAccessToken()
+  const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: {
+        token,
+        notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
+        webpush: {
+          fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
+          notification: {
+            icon:  '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+          },
+        },
+      }
+    })
+  })
+  const data = await r.json()
+  console.log('FCM response:', JSON.stringify(data))
+  if (!r.ok) throw new Error(JSON.stringify(data))
+  return data
+}
+
 module.exports = async function handler(req, res) {
+  // GET request: ?token=XXX&pin=2025 — open in any browser to test while PWA is closed
+  if (req.method === 'GET') {
+    const { token, pin } = req.query || {}
+    if (pin !== ADMIN_PIN) return res.status(401).send('Unauthorized')
+    if (!token) return res.status(400).send('No token')
+    try {
+      const fcm = await sendFcm(token)
+      return res.status(200).send(`<html><body style="font-family:sans-serif;padding:24px">
+        <h2>✅ Toets gestuur!</h2>
+        <p>FCM het die boodskap aanvaar. Kyk jou foon se kennisgewings.</p>
+        <pre style="background:#eee;padding:12px;border-radius:6px">${JSON.stringify(fcm, null, 2)}</pre>
+      </body></html>`)
+    } catch (e) {
+      return res.status(500).send(`<html><body style="font-family:sans-serif;padding:24px">
+        <h2>❌ Fout</h2><pre>${e.message}</pre>
+      </body></html>`)
+    }
+  }
+
+  // POST request: { token, pin } — called from Admin panel
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
   const { token, pin } = req.body || {}
   if (pin !== ADMIN_PIN) return res.status(401).send('Unauthorized')
   if (!token) return res.status(400).send('No token')
 
   try {
-    const accessToken = await getAccessToken()
-    const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: {
-          token,
-          notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
-          webpush: {
-            fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
-            notification: {
-              icon:  '/icons/icon-192.png',
-              badge: '/icons/icon-192.png',
-            },
-          },
-        }
-      })
-    })
-    const data = await r.json()
-    console.log('FCM response:', JSON.stringify(data))
-    if (!r.ok) return res.status(500).json({ error: data })
-    return res.status(200).json({ ok: true, fcm: data })
+    const fcm = await sendFcm(token)
+    return res.status(200).json({ ok: true, fcm })
   } catch (e) {
     return res.status(500).json({ error: e.message })
   }
