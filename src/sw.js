@@ -3,7 +3,7 @@ import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { initializeApp } from 'firebase/app'
-import { getMessaging } from 'firebase/messaging/sw'
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
@@ -28,8 +28,22 @@ const firebaseApp = initializeApp({
   appId:             '1:395898489739:web:a250f1fdf0a8cc981ebd8e'
 })
 
-// Handles FCM pushes for Chrome/standard browsers automatically
-getMessaging(firebaseApp)
+const firebaseMessaging = getMessaging(firebaseApp)
+
+onBackgroundMessage(firebaseMessaging, payload => {
+  const n = payload.webpush?.notification || payload.notification || {}
+  return self.registration.showNotification(
+    n.title || 'Daaglikse Hoop',
+    {
+      body:               n.body  || '',
+      icon:               '/icons/icon-192.png',
+      badge:              '/icons/icon-192.png',
+      image:              'https://daagliksehoop.vercel.app/notification-image.jpg',
+      requireInteraction: true,
+      data:               { url: self.registration.scope }
+    }
+  )
+})
 
 // Handles standard Web Push for Samsung Internet (payload tagged source:'webpush')
 self.addEventListener('push', event => {
