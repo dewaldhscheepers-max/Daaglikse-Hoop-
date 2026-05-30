@@ -30,6 +30,15 @@ export default function Admin({ onClose }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const fileInputRef = useRef(null)
 
+  // ── Recording state ──
+  const [recording,    setRecording]    = useState(false)
+  const [recordedUrl,  setRecordedUrl]  = useState(null)
+  const [recordedBlob, setRecordedBlob] = useState(null)
+  const [recordSecs,   setRecordSecs]   = useState(0)
+  const mediaRecorderRef = useRef(null)
+  const chunksRef        = useRef([])
+  const timerRef         = useRef(null)
+
   // ── Books state ──
   const [bookOverrides, setBookOverrides]     = useState({})
   const [pdfUploading, setPdfUploading]       = useState(null)
@@ -71,6 +80,54 @@ export default function Admin({ onClose }) {
       setNotes(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     } catch {}
     setNotesLoading(false)
+  }
+
+  function formatTime(s) {
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  }
+
+  function clearRecording() {
+    if (recordedUrl) URL.revokeObjectURL(recordedUrl)
+    setRecordedUrl(null)
+    setRecordedBlob(null)
+    setRecordSecs(0)
+  }
+
+  async function startRecording() {
+    clearRecording()
+    setAudioFile(null)
+    chunksRef.current = []
+    setRecordSecs(0)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', '']
+        .find(t => !t || MediaRecorder.isTypeSupported(t))
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : {})
+      mediaRecorderRef.current = mr
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        stream.getTracks().forEach(t => t.stop())
+        const mime = mr.mimeType || 'audio/webm'
+        const blob = new Blob(chunksRef.current, { type: mime })
+        const url  = URL.createObjectURL(blob)
+        const ext  = mime.includes('mp4') ? 'm4a' : 'webm'
+        const file = new File([blob], `opname_${Date.now()}.${ext}`, { type: mime })
+        setRecordedBlob(blob)
+        setRecordedUrl(url)
+        setAudioFile(file)
+      }
+      mr.start()
+      setRecording(true)
+      timerRef.current = setInterval(() => setRecordSecs(s => s + 1), 1000)
+    } catch {
+      alert('Mikrofoon toegang geweier. Gaan na jou foon se instellings om dit toe te laat.')
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop()
+    clearInterval(timerRef.current)
+    setRecording(false)
   }
 
   function checkPin() {
@@ -117,6 +174,7 @@ export default function Admin({ onClose }) {
       setTitle(''); setAudioFile(null); setScripture(''); setScriptText(''); setSeries('')
       setPublishedAt(new Date().toISOString().slice(0, 10))
       if (fileInputRef.current) fileInputRef.current.value = ''
+      clearRecording()
       await loadNotes()
       setTimeout(() => setSaved(false), 3000)
     } catch (e) { setFormError('Kon nie stoor nie: ' + e.message) }
@@ -279,10 +337,34 @@ export default function Admin({ onClose }) {
                 <div className="admin-field">
                   <label>Oudioléer *</label>
                   <input ref={fileInputRef} type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac"
-                    style={{ display: 'none' }} onChange={e => setAudioFile(e.target.files[0] || null)} />
-                  <button className="admin-file-btn" onClick={() => fileInputRef.current?.click()}>
-                    {audioFile ? `✓ ${audioFile.name}` : '📎 Kies oudioléer'}
-                  </button>
+                    style={{ display: 'none' }} onChange={e => {
+                      clearRecording()
+                      setAudioFile(e.target.files[0] || null)
+                    }} />
+
+                  {!recording && !recordedUrl && (
+                    <div className="audio-row">
+                      <button className="admin-file-btn" style={{ flex: 1 }} onClick={() => fileInputRef.current?.click()}>
+                        {audioFile ? `✓ ${audioFile.name}` : '📎 Kies lêer'}
+                      </button>
+                      <button className="record-btn" onClick={startRecording}>🎙 Opneem</button>
+                    </div>
+                  )}
+
+                  {recording && (
+                    <div className="record-live">
+                      <span className="record-dot" />
+                      <span className="record-timer">{formatTime(recordSecs)}</span>
+                      <button className="record-stop-btn" onClick={stopRecording}>⏹ Stop</button>
+                    </div>
+                  )}
+
+                  {recordedUrl && !recording && (
+                    <div className="record-preview">
+                      <audio src={recordedUrl} controls className="record-audio" />
+                      <button className="record-redo-btn" onClick={startRecording}>🔁 Opneem weer</button>
+                    </div>
+                  )}
                 </div>
 
                 {uploading && (
