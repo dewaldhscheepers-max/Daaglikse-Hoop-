@@ -48,23 +48,6 @@ export async function subscribeToNotifications() {
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') return false
 
-  // Samsung Internet uses FCM under the hood — subscribe via pushManager with
-  // Firebase's VAPID key so the token is valid for the FCM v1 API
-  if (isSamsungBrowser) {
-    const reg = await navigator.serviceWorker.ready
-    const existing = await reg.pushManager.getSubscription()
-    if (existing) await existing.unsubscribe()
-    const sub   = await reg.pushManager.subscribe({
-      userVisibleOnly:      true,
-      applicationServerKey: urlBase64ToUint8Array(FCM_VAPID_KEY)
-    })
-    const token = sub.endpoint.split('/').pop()
-    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-    localStorage.setItem('fcmToken', token)
-    localStorage.removeItem('webPushSubscribed')
-    return true
-  }
-
   const msg = await messaging
   if (!msg) return false
   const swReg = await navigator.serviceWorker.ready
