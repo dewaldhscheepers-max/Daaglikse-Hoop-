@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daaglikse Hoop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0d0d1a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  img { width: 88px; height: 88px; border-radius: 20px; margin-bottom: 20px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+  p  { color: #aaa; font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
+  p strong { color: #fff; }
+  .btn-chrome {
+    background: #4285f4;
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 28px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+  .skip { color: #555; font-size: 13px; }
+  .skip a { color: #777; text-decoration: underline; }
+</style>
+<script>
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var isSamsung = /SamsungBrowser/i.test(ua);
+  var isChrome  = /Chrome/i.test(ua) && !isSamsung && !/EdgA/i.test(ua) && !/OPR/i.test(ua);
+
+  // Already Chrome or desktop → go straight to app
+  if (!isAndroid || isChrome) {
+    window.location.replace('/');
+  }
+</script>
+</head>
+<body>
+  <img src="/icons/icon-192.png" alt="Daaglikse Hoop">
+  <h1>Daaglikse Hoop</h1>
+  <p>
+    Vir <strong>daaglikse 6:30 kennisgewings</strong>,<br>
+    maak die app in Chrome oop.<br><br>
+    Chrome stuur die kennisgewings —<br>
+    selfs as jy die app via Samsung geïnstalleer het.
+  </p>
+  <a class="btn-chrome"
+     href="intent://daagliksehoop.vercel.app/go#Intent;scheme=https;package=com.android.chrome;end">
+    🔵 Maak in Chrome oop
+  </a>
+  <div class="skip">
+    <a href="/">Gaan voort sonder kennisgewings</a>
+  </div>
+</body>
+</html>
