@@ -3,7 +3,7 @@ import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { initializeApp } from 'firebase/app'
-import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
+import { getMessaging } from 'firebase/messaging/sw'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
@@ -28,17 +28,9 @@ const firebaseApp = initializeApp({
   appId:             '1:395898489739:web:a250f1fdf0a8cc981ebd8e'
 })
 
-const messaging = getMessaging(firebaseApp)
-
-onBackgroundMessage(messaging, payload => {
-  console.log('[SW] Background message received', JSON.stringify(payload))
-  self.registration.showNotification(payload.notification?.title || 'Daaglikse Hoop', {
-    body:  payload.notification?.body || '',
-    icon:  '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    data:  { url: payload.fcmOptions?.link || '/' }
-  })
-})
+// Initialising Firebase messaging registers its own push event handler
+// which automatically displays notifications when the app is in the background.
+getMessaging(firebaseApp)
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
