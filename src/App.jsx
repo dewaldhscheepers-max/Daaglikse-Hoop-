@@ -119,6 +119,7 @@ function onAudioPlayingChange(playing) {
   function handleEbookView() {
     dismissPopup()
     setTab('meer')
+    if (screenRef.current) screenRef.current.scrollTop = 0
   }
 
   function handleDonationCta() {
