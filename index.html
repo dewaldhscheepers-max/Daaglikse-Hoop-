@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#C97D3A" />
+    <meta name="color-scheme" content="light" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Daaglikse Hoop" />
@@ -13,5 +14,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Netlify Forms detection (hidden, required for SPA) -->
+    <form name="nooi-my" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text"  name="naam" />
+      <input type="email" name="epos" />
+      <input type="tel"   name="telefoon" />
+      <input type="text"  name="gemeente" />
+      <input type="text"  name="datum" />
+      <textarea           name="boodskap"></textarea>
+    </form>
   </body>
 </html>

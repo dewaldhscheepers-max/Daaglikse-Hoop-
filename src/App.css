@@ -1,0 +1,265 @@
+.payment-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 40, 0.65);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.payment-popup {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 36px 28px 32px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.payment-popup-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.payment-popup-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.payment-popup-msg {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.payment-popup-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.payment-popup-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.payment-popup-cancel {
+  font-size: 14px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+
+  flex-shrink: 0;
+}
+
+/* ─── Install to home screen banner ─── */
+.install-banner {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  background: #1a1a2e;
+  color: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 201;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  font-family: var(--font-body);
+}
+
+.install-banner-icon { font-size: 24px; flex-shrink: 0; }
+
+.install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
+
+.install-banner-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+
+.install-banner-yes {
+  background: white;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+}
+
+.install-banner-no {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ─── Persistent install banner (inside Luister body) ─── */
+.install-persist-banner {
+  background: linear-gradient(135deg, #FFF4E8, #FEF0DC);
+  border: 1.5px solid rgba(201,125,58,0.25);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  font-family: var(--font-body);
+}
+
+.install-persist-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 24px;
+}
+
+.install-persist-text strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.install-persist-text span {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.install-persist-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-persist-btn {
+  background: var(--purple-dark);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.install-persist-btn:active { opacity: 0.85; }
+
+.install-persist-help {
+  background: none;
+  border: none;
+  color: var(--purple);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-decoration-color: rgba(92,78,142,0.35);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.install-persist-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+}
+
+/* ─── Notification permission banner ─── */
+.notif-banner {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  background: var(--purple-dark);
+  color: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 200;
+  box-shadow: 0 4px 24px rgba(92,78,142,0.35);
+  font-family: var(--font-body);
+}
+
+.notif-banner-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.notif-banner-text strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.notif-banner-yes {
+  background: white;
+  color: var(--purple-dark);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+}
+
+.notif-banner-no {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+}

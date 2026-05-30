@@ -1,3 +1,7 @@
+.bidsaam-header {
+  text-align: center;
+}
+
 .bidsaam-body {
   padding: 20px 16px;
   display: flex;
@@ -14,8 +18,8 @@
 
 .anon-badge {
   font-size: 12px;
-  color: var(--brown-mid);
-  background: var(--lavender);
+  color: var(--purple);
+  background: var(--lavender-soft);
   border-radius: 8px;
   padding: 6px 10px;
   font-weight: 500;
@@ -24,7 +28,7 @@
 .prayer-textarea {
   width: 100%;
   border: 1.5px solid var(--cream-dark);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -36,15 +40,14 @@
   transition: border-color 0.2s;
 }
 
-.prayer-textarea:focus {
-  border-color: var(--amber);
-}
+.prayer-textarea:focus { border-color: var(--purple); }
 
 .input-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .char-count {
@@ -53,12 +56,12 @@
 }
 
 .submit-btn {
-  font-size: 14px;
-  padding: 11px 18px;
+  font-size: 13px;
+  padding: 10px 16px;
 }
 
 .submit-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -101,7 +104,7 @@
 .prayer-text {
   font-size: 15px;
   color: var(--text);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .prayer-meta {
@@ -109,18 +112,19 @@
   color: var(--text-muted);
 }
 
+/* ─── Ek het gebid button ─── */
 .prayed-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1.5px solid var(--peach);
+  border: 1.5px solid var(--lavender);
   background: var(--cream);
   border-radius: 20px;
   padding: 6px 12px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
-  color: var(--brown-mid);
+  color: var(--text-muted);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   -webkit-tap-highlight-color: transparent;
@@ -128,14 +132,70 @@
 }
 
 .prayed-btn.prayed {
-  background: var(--peach);
-  border-color: var(--amber);
-  color: var(--brown);
+  background: var(--lavender-soft);
+  border-color: var(--purple);
+  color: var(--purple);
 }
 
 .prayed-btn:active { transform: scale(0.96); }
 
 .prayed-count {
   font-weight: 700;
-  color: var(--amber);
+  color: var(--purple);
+}
+
+/* ─── Prayer actions row ─── */
+.prayer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ─── Report button ─── */
+.report-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 0;
+  opacity: 0.6;
+  font-family: var(--font-body);
+  text-decoration: underline;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.report-btn:active { opacity: 0.3; }
+
+/* ─── Loading / empty / error states ─── */
+.prayers-loading,
+.prayers-empty,
+.prayers-error {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 32px 16px;
+  line-height: 1.6;
+}
+
+.prayers-error { color: #B71C1C; }
+
+/* ─── Prayed toast ─── */
+.prayed-toast {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--purple-dark);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  text-align: center;
+  max-width: calc(100% - 32px);
+  z-index: 300;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  line-height: 1.4;
 }

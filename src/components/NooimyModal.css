@@ -1,0 +1,152 @@
+.nooimy-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 32, 64, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.nooimy-card {
+  background: var(--white);
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 40px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  max-height: 92dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nooimy-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--cream-dark);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nooimy-icon {
+  font-size: 32px;
+  text-align: center;
+}
+
+.nooimy-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+}
+
+.nooimy-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ─── Fields ─── */
+.nooimy-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field-group input,
+.field-group textarea {
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  background: var(--cream);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.field-group input:focus,
+.field-group textarea:focus {
+  border-color: var(--purple);
+}
+
+.field-group textarea {
+  resize: none;
+  line-height: 1.5;
+}
+
+.nooimy-error {
+  font-size: 13px;
+  color: #C62828;
+  text-align: center;
+}
+
+.nooimy-submit {
+  width: 100%;
+  padding: 15px;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.nooimy-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Success state ─── */
+.sent-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.nooimy-sent-msg {
+  font-size: 15px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 8px;
+}
+
+.nooimy-close-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+}
+
+.nooimy-credibility {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0 0 4px;
+  font-style: italic;
+}

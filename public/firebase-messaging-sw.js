@@ -6,12 +6,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-com
 
 // Paste the same firebaseConfig here when you connect Firebase
 firebase.initializeApp({
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey:            "AIzaSyD8fB-xYtMc9IOFGdfWIwFCsvFwb6Zj67s",
+  authDomain:        "daaglikse-hoop.firebaseapp.com",
+  projectId:         "daaglikse-hoop",
+  storageBucket:     "daaglikse-hoop.firebasestorage.app",
+  messagingSenderId: "395898489739",
+  appId:             "1:395898489739:web:a250f1fdf0a8cc981ebd8e"
 })
 
 const messaging = firebase.messaging()
@@ -19,10 +19,12 @@ const messaging = firebase.messaging()
 // Show notification when app is in the background
 messaging.onBackgroundMessage(payload => {
   self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    data: { url: '/' }
+    body:    payload.notification.body,
+    icon:    '/icons/icon-192.png',
+    badge:   '/icons/icon-192.png',
+    silent:  true,
+    vibrate: [120],
+    data:    { url: '/' }
   })
 })
 

@@ -14,6 +14,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Likes — anyone can read and increment, nobody can delete
+    match /likes/{id} {
+      allow read:   if true;
+      allow write:  if true;
+    }
+
     // Prayer wall — anyone can read and create, nobody can edit/delete
     match /prayers/{id} {
       allow read:   if true;

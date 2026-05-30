@@ -268,9 +268,215 @@
   font-family: var(--font-body);
 }
 
+/* ─── Tabs ─── */
+.admin-tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.admin-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-tab.active {
+  color: var(--purple-dark);
+  border-bottom-color: var(--purple-dark);
+}
+
+/* ─── Book rows ─── */
+.admin-books-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.admin-book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 6px var(--shadow);
+}
+
+.admin-book-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.admin-pdf-btn {
+  background: var(--purple-dark);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-pdf-btn:disabled { opacity: 0.5; }
+
+.admin-book-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admin-file-btn {
+  background: var(--white);
+  border: 1.5px dashed var(--purple);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--purple);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-upload-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.admin-upload-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.admin-upload-progress span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 .admin-loading {
   color: var(--text-muted);
   font-size: 14px;
   text-align: center;
   padding: 20px;
+}
+
+/* ─── Recording UI ─── */
+.audio-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.record-btn {
+  background: #dc3c5a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.record-live {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff0f0;
+  border: 1.5px solid #f5c2c7;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.record-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dc3c5a;
+  flex-shrink: 0;
+  animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+.record-timer {
+  font-size: 18px;
+  font-weight: 700;
+  color: #dc3c5a;
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+}
+
+.record-stop-btn {
+  background: #dc3c5a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.record-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-audio {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.record-redo-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
 }
