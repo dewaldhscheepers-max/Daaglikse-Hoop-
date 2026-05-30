@@ -1,3 +1,47 @@
+.samsung-chrome-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1a1a2e;
+  border-bottom: 2px solid #4285f4;
+  padding: 12px 14px;
+  width: 100%;
+}
+.samsung-chrome-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.samsung-chrome-text strong {
+  font-size: 13px;
+  color: #fff;
+}
+.samsung-chrome-text span {
+  font-size: 11px;
+  color: #aaa;
+}
+.samsung-chrome-btn {
+  background: #4285f4;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.samsung-chrome-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  padding: 4px;
+  cursor: pointer;
+}
+
 .payment-popup-backdrop {
   position: fixed;
   inset: 0;

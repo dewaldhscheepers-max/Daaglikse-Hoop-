@@ -9,7 +9,7 @@ import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
-import { subscribeToNotifications, ensureNotificationToken } from './firebase'
+import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser } from './firebase'
 import './App.css'
 
 export default function App() {
@@ -190,6 +190,28 @@ function onAudioPlayingChange(playing) {
     if (screenRef.current) screenRef.current.scrollTop = 0
   }
 
+  // ── Samsung Internet → open in Chrome banner ──
+  const [samsungChromeDismissed, setSamsungChromeDismissed] = useState(
+    () => !!localStorage.getItem('samsungChromeDismissed')
+  )
+  const chromeIntentUrl = `intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;end`
+
+  const samsungOpenInChromeBanner = isSamsungBrowser && !samsungChromeDismissed ? (
+    <div className="samsung-chrome-banner">
+      <div className="samsung-chrome-text">
+        <strong>Kry kennisgewings elke oggend</strong>
+        <span>Maak Daaglikse Hoop in Chrome oop vir daaglikse kennisgewings.</span>
+      </div>
+      <a className="samsung-chrome-btn" href={chromeIntentUrl}>
+        Maak in Chrome oop
+      </a>
+      <button className="samsung-chrome-close" onClick={() => {
+        setSamsungChromeDismissed(true)
+        localStorage.setItem('samsungChromeDismissed', '1')
+      }}>✕</button>
+    </div>
+  ) : null
+
   // ── Persistent install banner ──
   const persistBanner = !isInstalled && !installBannerDismissed ? (
     <div className="install-persist-banner">
@@ -212,7 +234,7 @@ function onAudioPlayingChange(playing) {
   return (
     <div className="app">
       <div className="screen" ref={screenRef}>
-        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
+        {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} />}
         {tab === 'bidsaam' && <BidSaam />}
         {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
       </div>
