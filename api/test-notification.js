@@ -45,7 +45,7 @@ async function sendFcm(token) {
         token,
         notification: { title: 'Het jy 3 minute vir God?', body: 'Toets-kennisgewinig — dit werk!' },
         webpush: {
-          fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
+          fcmOptions: { link: 'https://daagliksehoop.vercel.app/' },
           notification: {
             icon:               'https://daagliksehoop.vercel.app/icons/icon-192.png',
             badge:              'https://daagliksehoop.vercel.app/icons/icon-192.png',
@@ -94,7 +94,7 @@ async function sendWebPush(subscriptionId) {
       source:             'webpush',
       title:              'Het jy 3 minute vir God?',
       body:               'Toets-kennisgewinig — dit werk!',
-      url:                'https://daaglikse-hoop.vercel.app/',
+      url:                'https://daagliksehoop.vercel.app/',
       image:              'https://daagliksehoop.vercel.app/notification-image.jpg',
       requireInteraction: true,
     })
