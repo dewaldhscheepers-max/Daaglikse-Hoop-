@@ -23,21 +23,47 @@ export const messaging = (async () => {
   return supported ? getMessaging(app) : null
 })()
 
+async function getFcmToken(msg) {
+  // Explicitly register the Firebase SW so getToken always finds it
+  let swReg
+  try {
+    swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' })
+  } catch {
+    swReg = await navigator.serviceWorker.ready
+  }
+  return getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg })
+}
+
 export async function subscribeToNotifications() {
   try {
     const msg = await messaging
     if (!msg) return false
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') return false
-    const token = await getToken(msg, { vapidKey: VAPID_KEY })
+    const token = await getFcmToken(msg)
     if (token) {
-      await setDoc(doc(db, 'fcm_tokens', token), {
-        token,
-        subscribedAt: serverTimestamp()
-      })
+      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+      localStorage.setItem('fcmToken', token)
+      return true
     }
-    return true
+    return false
   } catch {
     return false
   }
+}
+
+// Called silently on app load — re-subscribes if permission is granted but token was never saved
+export async function ensureNotificationToken() {
+  try {
+    if (!('Notification' in window)) return
+    if (Notification.permission !== 'granted') return
+    if (localStorage.getItem('fcmToken')) return
+    const msg = await messaging
+    if (!msg) return
+    const token = await getFcmToken(msg)
+    if (token) {
+      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+      localStorage.setItem('fcmToken', token)
+    }
+  } catch {}
 }
