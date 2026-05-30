@@ -155,8 +155,15 @@ export default function BidSaam() {
   const [archivePlayer, setArchivePlayer] = useState(null)
   const archiveAudioRef = useRef(null)
   const [archivePlaying, setArchivePlaying] = useState(false)
+  const [showScrollHint, setShowScrollHint] = useState(true)
 
   const today = new Date().toISOString().slice(0, 10)
+
+  useEffect(() => {
+    function onScroll() { if (window.scrollY > 30) setShowScrollHint(false) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     const sevenDaysAgo = Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
@@ -364,6 +371,15 @@ export default function BidSaam() {
 
       {prayedToast && (
         <div className="prayed-toast">Dankie. Iemand weet nou hulle dra dit nie alleen nie. 🙏</div>
+      )}
+
+      {showScrollHint && (
+        <div className="scroll-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          <span>meer</span>
+        </div>
       )}
     </div>
   )
