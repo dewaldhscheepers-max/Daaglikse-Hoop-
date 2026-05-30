@@ -39,13 +39,8 @@ export const messaging = (async () => {
 })()
 
 async function getFcmToken(msg) {
-  // Explicitly register the Firebase SW so getToken always finds it
-  let swReg
-  try {
-    swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' })
-  } catch {
-    swReg = await navigator.serviceWorker.ready
-  }
+  // Use the already-registered unified SW (sw.js handles both caching + FCM)
+  const swReg = await navigator.serviceWorker.ready
   return getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg })
 }
 
