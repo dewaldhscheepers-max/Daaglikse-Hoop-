@@ -2,8 +2,6 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
-import { initializeApp } from 'firebase/app'
-import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
@@ -19,57 +17,38 @@ registerRoute(
   })
 )
 
-const firebaseApp = initializeApp({
-  apiKey:            'AIzaSyD8fB-xYtMc9IOFGdfWIwFCsvFwb6Zj67s',
-  authDomain:        'daaglikse-hoop.firebaseapp.com',
-  projectId:         'daaglikse-hoop',
-  storageBucket:     'daaglikse-hoop.firebasestorage.app',
-  messagingSenderId: '395898489739',
-  appId:             '1:395898489739:web:a250f1fdf0a8cc981ebd8e'
-})
-
-const firebaseMessaging = getMessaging(firebaseApp)
-
-onBackgroundMessage(firebaseMessaging, payload => {
-  const d = payload.data || {}
-  const n = payload.notification || {}
-  return self.registration.showNotification(
-    d.title || n.title || 'Daaglikse Hoop',
-    {
-      body:               d.body  || n.body || '',
-      icon:               '/icons/icon-192.png',
-      badge:              '/icons/icon-192.png',
-      image:              d.image || '',
-      requireInteraction: true,
-      data:               { url: d.url || self.registration.scope }
-    }
-  )
-})
-
-// Handles standard Web Push for Samsung Internet (payload tagged source:'webpush')
 self.addEventListener('push', event => {
   if (!event.data) return
-  let data = {}
-  try { data = event.data.json() } catch { return }
-  if (data.source !== 'webpush') return  // let Firebase handle FCM pushes
-  const opts = {
-    body:               data.body || '',
-    icon:               '/icons/icon-192.png',
-    badge:              '/icons/icon-192.png',
-    requireInteraction: !!data.requireInteraction,
-    data:               { url: data.url || '/' }
-  }
-  if (data.image) opts.image = data.image
-  event.waitUntil(self.registration.showNotification(data.title || 'Daaglikse Hoop', opts))
+  let p = {}
+  try { p = event.data.json() } catch { return }
+
+  // FCM wraps the payload — try every known location for the fields
+  const title = p.notification?.title || p.data?.title || p.title
+  if (!title) return
+
+  const body  = p.notification?.body  || p.data?.body  || p.body  || ''
+  const image = p.data?.image || p.notification?.image || p.image || ''
+  const url   = p.data?.url   || p.url   || self.registration.scope
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon:               '/icons/icon-192.png',
+      badge:              '/icons/icon-192.png',
+      ...(image ? { image } : {}),
+      requireInteraction: true,
+      data:               { url }
+    })
+  )
 })
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  const url = self.registration.scope
+  const url = event.notification.data?.url || self.registration.scope
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url.startsWith(url) && 'focus' in client) return client.focus()
+        if (client.url.startsWith(self.registration.scope) && 'focus' in client) return client.focus()
       }
       return clients.openWindow(url)
     })

@@ -43,9 +43,8 @@ async function sendFcm(token) {
     body: JSON.stringify({
       message: {
         token,
+        notification: { title: 'Het jy 3 minute vir God?', body: 'Toets-kennisgewinig — dit werk!' },
         data: {
-          title: 'Het jy 3 minute vir God?',
-          body:  'Toets-kennisgewinig — dit werk!',
           image: 'https://daagliksehoop.vercel.app/notification-image.jpg',
           url:   'https://daagliksehoop.vercel.app/',
         },

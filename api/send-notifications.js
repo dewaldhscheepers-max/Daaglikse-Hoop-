@@ -96,9 +96,8 @@ async function sendFcm(token, title, body, accessToken) {
     body: JSON.stringify({
       message: {
         token,
+        notification: { title, body },
         data: {
-          title,
-          body,
           image: 'https://daagliksehoop.vercel.app/notification-image.jpg',
           url:   'https://daagliksehoop.vercel.app/',
         },
