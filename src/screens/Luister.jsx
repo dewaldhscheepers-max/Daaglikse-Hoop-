@@ -129,35 +129,32 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
 function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark, onShare }) {
   return (
     <div className="note-row">
-      <div className="note-top">
-        <div className="note-thumb" style={{ background: note.color }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-          </svg>
-        </div>
-        <div className="note-info">
-          <span className="note-title">{note.title}</span>
-          {note.scripture && <span className="note-scripture">{note.scripture}</span>}
-          {note.series    && <span className="note-series">{note.series}</span>}
-        </div>
-        <div className="note-right">
-          {note.lengthSeconds > 0 && <span className="note-length">{fmtTime(note.lengthSeconds)}</span>}
-          <button className="play-btn-small" onClick={onToggle}>
-            {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
-          </button>
-          <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
-            <HeartIcon filled={liked} size={16} />
-            {likeCount > 0 && <span>{likeCount}</span>}
-          </button>
-          <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
-            <BookmarkIcon filled={bookmarked} size={16} />
-          </button>
-        </div>
+      <div className="note-thumb" style={{ background: note.color }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
       </div>
-      <button className="note-share-row" onClick={onShare}>
-        <ShareIcon size={13} />
-        <span>Deel hierdie boodskap</span>
-      </button>
+      <div className="note-info">
+        <span className="note-title">{note.title}</span>
+        {note.scripture && <span className="note-scripture">{note.scripture}</span>}
+        {note.series    && <span className="note-series">{note.series}</span>}
+      </div>
+      <div className="note-right">
+        {note.lengthSeconds > 0 && <span className="note-length">{fmtTime(note.lengthSeconds)}</span>}
+        <button className="play-btn-small" onClick={onToggle}>
+          {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
+        </button>
+        <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
+          <HeartIcon filled={liked} size={16} />
+          {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+        <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
+          <BookmarkIcon filled={bookmarked} size={16} />
+        </button>
+        <button className="note-share-btn" onClick={onShare}>
+          <ShareIcon size={14} />
+        </button>
+      </div>
     </div>
   )
 }
@@ -241,6 +238,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   useEffect(() => {
     fetchNotes()
   }, [])
+
+  // ── Deep-link: ?note=id from a shared URL ──
+  useEffect(() => {
+    if (notes.length === 0) return
+    const noteId = new URLSearchParams(window.location.search).get('note')
+    if (noteId && notes.some(n => n.id === noteId)) setActiveId(noteId)
+  }, [notes])
 
   // ── On visibility change: silently refresh if cache is stale ──
   useEffect(() => {
@@ -427,12 +431,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   }
 
   async function handleShare(note) {
-    const msg  = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
-    const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
+    const msg = `Ek dink hierdie boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
+    const url = `${window.location.origin}?note=${note.id}`
     if (navigator.share) {
-      try { await navigator.share(data) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url }) } catch {}
     } else {
-      try { await navigator.clipboard.writeText(`${msg}\n${window.location.origin}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
+      try { await navigator.clipboard.writeText(`${msg}\n${url}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
     }
   }
 
