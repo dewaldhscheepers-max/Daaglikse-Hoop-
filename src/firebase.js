@@ -39,9 +39,7 @@ export const messaging = (async () => {
 })()
 
 async function getFcmToken(msg) {
-  // Use the already-registered unified SW (sw.js handles both caching + FCM)
-  const swReg = await navigator.serviceWorker.ready
-  return getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg })
+  return getToken(msg, { vapidKey: VAPID_KEY })
 }
 
 export async function subscribeToNotifications() {

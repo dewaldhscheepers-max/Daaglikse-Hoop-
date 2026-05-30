@@ -43,6 +43,13 @@ module.exports = async function handler(req, res) {
         message: {
           token,
           notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
+          webpush: {
+            fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
+            notification: {
+              icon:  '/icons/icon-192.png',
+              badge: '/icons/icon-192.png',
+            },
+          },
         }
       })
     })

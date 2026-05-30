@@ -54,24 +54,36 @@ export default function Admin({ onClose }) {
   const [coverUploadTarget, setCoverUploadTarget] = useState(null)
 
   // ── Notification test state ──
-  const [notifStatus, setNotifStatus] = useState(null)
-  const [notifBusy,   setNotifBusy]   = useState(false)
+  const [notifStatus,  setNotifStatus]  = useState(null)
+  const [notifBusy,    setNotifBusy]    = useState(false)
+  const [notifDetail,  setNotifDetail]  = useState(null)
+  const [swUrl,        setSwUrl]        = useState(null)
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => setSwUrl(reg.active?.scriptURL || reg.scope))
+    }
+  }, [])
 
   async function handleNotifSubscribe() {
     setNotifBusy(true)
     setNotifStatus(null)
+    setNotifDetail(null)
     try {
       const perm = await Notification.requestPermission()
       if (perm !== 'granted') { setNotifStatus('denied'); setNotifBusy(false); return }
       const ok = await subscribeToNotifications()
+      const token = localStorage.getItem('fcmToken')
+      setNotifDetail(token ? `Token: ${token.slice(0,30)}…` : 'Geen token')
       setNotifStatus(ok ? 'ok' : 'fail')
-    } catch { setNotifStatus('fail') }
+    } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
   }
 
   async function handleNotifTest() {
     setNotifBusy(true)
     setNotifStatus(null)
+    setNotifDetail(null)
     const token = localStorage.getItem('fcmToken')
     if (!token) { setNotifStatus('notoken'); setNotifBusy(false); return }
     try {
@@ -80,8 +92,10 @@ export default function Admin({ onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, pin: '2025' })
       })
+      const data = await r.json().catch(() => ({}))
+      setNotifDetail(JSON.stringify(data))
       setNotifStatus(r.ok ? 'testsent' : 'fail')
-    } catch { setNotifStatus('fail') }
+    } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
   }
 
@@ -573,24 +587,22 @@ export default function Admin({ onClose }) {
             <div className="admin-section">
               <div className="admin-section-title">Kennisgewings Toets</div>
 
-              <div className="admin-note-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
-                <div className="admin-note-title">Toestelstatus</div>
-                <div className="admin-note-meta">
-                  {'Notification' in window
-                    ? `Toestemming: ${Notification.permission === 'granted' ? '✅ Toegelaat' : Notification.permission === 'denied' ? '❌ Geweier' : '⏳ Nog nie gevra nie'}`
-                    : '❌ Kennisgewings word nie ondersteun op hierdie toestel nie'}
-                </div>
+              <div style={{ fontSize: 12, fontFamily: 'monospace', background: '#f5f5f5', borderRadius: 6, padding: '8px 10px', marginBottom: 10, lineHeight: 1.8 }}>
+                <div>Toestemming: {
+                  'Notification' in window
+                    ? (Notification.permission === 'granted' ? '✅ granted' : Notification.permission === 'denied' ? '❌ denied' : '⏳ default')
+                    : '❌ nie ondersteun'
+                }</div>
+                <div>SW: {swUrl ? (swUrl.includes('firebase') ? '✅ firebase-messaging-sw.js' : swUrl.split('/').pop()) : '⏳ laai...'}</div>
+                <div>Token: {localStorage.getItem('fcmToken') ? `✅ ${localStorage.getItem('fcmToken').slice(0,25)}…` : '❌ geen'}</div>
               </div>
 
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Tik die knoppie om jou kennisgewinginskrywing te herregistreer. Dit sal jou token in Firestore stoor sodat jy oggendkennisgewings ontvang.
-              </p>
-
               {notifStatus === 'ok'       && <div className="admin-success">✅ Geregistreer! Tik nou "Stuur toets" om te bevestig.</div>}
-              {notifStatus === 'testsent' && <div className="admin-success">✅ Toets gestuur! Kyk jou foon se kennisgewings nou.</div>}
-              {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk of kennisgewings toegelaat is in jou foon se instellings.</div>}
+              {notifStatus === 'testsent' && <div className="admin-success">✅ FCM aanvaar. Kyk jou kennisgewings nou.</div>}
+              {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk instellings of kennisgewings toegelaat is.</div>}
               {notifStatus === 'denied'   && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings.</div>}
-              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer hieronder.</div>}
+              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer.</div>}
+              {notifDetail && <div style={{ fontSize: 11, fontFamily: 'monospace', background: '#eee', borderRadius: 4, padding: '4px 8px', marginTop: 4, wordBreak: 'break-all' }}>{notifDetail}</div>}
 
               <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
                 {notifBusy ? 'Besig...' : '🔔 Registreer / Herregistreer'}

@@ -72,9 +72,20 @@ async function sendOne(token, title, body, accessToken) {
       message: {
         token,
         notification: { title, body },
+        webpush: {
+          fcmOptions: { link: 'https://daaglikse-hoop.vercel.app/' },
+          notification: {
+            icon:  '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+          },
+        },
       },
     }),
   })
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}))
+    console.warn('FCM send failed for token:', token.slice(0, 20), JSON.stringify(err))
+  }
   return r.ok
 }
 
