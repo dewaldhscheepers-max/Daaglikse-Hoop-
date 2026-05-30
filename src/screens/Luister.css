@@ -242,22 +242,26 @@
 .note-bookmark-btn.bookmarked { color: var(--purple-dark); }
 .note-bookmark-btn:active { transform: scale(0.85); }
 
-/* ─── Note row share button ─── */
-.note-share-btn {
+/* ─── Note row share strip ─── */
+.note-share-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
+  gap: 6px;
+  width: 100%;
   border: none;
-  color: var(--text-muted);
+  background: var(--lavender-soft);
+  color: var(--purple);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 12px;
   cursor: pointer;
-  padding: 10px;
-  margin: -10px;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.2s, transform 0.15s;
+  transition: background 0.2s;
 }
 
-.note-share-btn:active { color: var(--purple); transform: scale(0.85); }
+.note-share-row:active { background: var(--lavender); }
 
 /* ─── Note row like button ─── */
 .note-like-btn {
@@ -461,12 +465,19 @@
 /* ─── Note row ─── */
 .note-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
   background: var(--white);
   border-radius: 16px;
-  padding: 12px;
+  padding: 12px 12px 0;
   box-shadow: 0 2px 10px var(--shadow);
+  overflow: hidden;
+}
+
+.note-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
 }
 
 .note-thumb {
