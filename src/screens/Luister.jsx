@@ -126,7 +126,7 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   )
 }
 
-function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark }) {
+function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark, onShare }) {
   return (
     <div className="note-row">
       <div className="note-thumb" style={{ background: note.color }}>
@@ -147,6 +147,9 @@ function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked
         <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
           <HeartIcon filled={liked} size={16} />
           {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+        <button className="note-share-btn" onClick={onShare}>
+          <ShareIcon size={14} />
         </button>
         <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
           <BookmarkIcon filled={bookmarked} size={16} />
@@ -543,6 +546,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                     onLike={() => handleLike(note.id)}
                     bookmarked={savedNotes[note.id] != null}
                     onBookmark={() => handleBookmark(note.id)}
+                    onShare={() => handleShare(note)}
                   />
                 ))}
               </>
@@ -568,6 +572,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                         onLike={() => handleLike(note.id)}
                         bookmarked={savedNotes[note.id] != null}
                         onBookmark={() => handleBookmark(note.id)}
+                        onShare={() => handleShare(note)}
                       />
                     ))}
                   </div>
@@ -603,6 +608,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                 onLike={() => handleLike(note.id)}
                 bookmarked={savedNotes[note.id] != null}
                 onBookmark={() => handleBookmark(note.id)}
+                onShare={() => handleShare(note)}
               />
             ))}
           </div>
