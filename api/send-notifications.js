@@ -116,8 +116,15 @@ async function sendFcm(token, title, body, accessToken) {
   return r.ok
 }
 
-// ── Send one standard Web Push (Samsung) ──────────────────────────────────
-async function sendWebPush(subscription, title, body) {
+// ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
+async function sendWebPush(subscription, title, body, accessToken) {
+  // Samsung Internet on Android uses FCM as its push backend.
+  // Extract the registration token and send via FCM v1 API.
+  if (subscription.endpoint.startsWith('https://fcm.googleapis.com/')) {
+    const token = subscription.endpoint.split('/').pop()
+    return sendFcm(token, title, body, accessToken)
+  }
+  // Genuine non-Google web push endpoint (e.g. Mozilla)
   try {
     await webpush.sendNotification(
       subscription,
@@ -161,7 +168,7 @@ module.exports = async function handler(req, res) {
 
     let wpSent = 0
     for (const sub of webPushSubs) {
-      if (await sendWebPush(sub, notifTitle, notifBody)) wpSent++
+      if (await sendWebPush(sub, notifTitle, notifBody, accessToken)) wpSent++
     }
 
     const result = { fcm: { sent: fcmSent, total: fcmTokens.length }, webpush: { sent: wpSent, total: webPushSubs.length } }

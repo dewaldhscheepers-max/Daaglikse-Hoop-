@@ -78,8 +78,16 @@ async function getWebPushSubscription(subscriptionId, accessToken) {
 }
 
 async function sendWebPush(subscriptionId) {
-  const accessToken = await getAccessToken()
+  const accessToken  = await getAccessToken()
   const subscription = await getWebPushSubscription(subscriptionId, accessToken)
+
+  // Samsung Internet on Android uses FCM as its push backend
+  if (subscription.endpoint.startsWith('https://fcm.googleapis.com/')) {
+    const token = subscription.endpoint.split('/').pop()
+    const data  = await sendFcm(token)
+    return { ok: true, via: 'fcm-from-samsung-endpoint', data }
+  }
+
   await webpush.sendNotification(
     subscription,
     JSON.stringify({
