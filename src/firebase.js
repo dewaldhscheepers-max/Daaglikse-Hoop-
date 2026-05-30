@@ -26,12 +26,10 @@ export const messaging = (async () => {
   onMessage(msg, payload => {
     navigator.serviceWorker.ready.then(reg => {
       reg.showNotification(payload.notification?.title || 'Daaglikse Hoop', {
-        body:    payload.notification?.body || '',
-        icon:    '/icons/icon-192.png',
-        badge:   '/icons/icon-192.png',
-        silent:  true,
-        vibrate: [120],
-        data:    { url: '/' }
+        body:  payload.notification?.body || '',
+        icon:  '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data:  { url: '/' }
       })
     }).catch(() => {})
   })
@@ -39,7 +37,8 @@ export const messaging = (async () => {
 })()
 
 async function getFcmToken(msg) {
-  return getToken(msg, { vapidKey: VAPID_KEY })
+  const swReg = await navigator.serviceWorker.ready
+  return getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg })
 }
 
 export async function subscribeToNotifications() {
