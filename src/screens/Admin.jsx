@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
@@ -12,7 +12,25 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif'
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed'
+
+  // ── Aandgebed state ──
+  const [apDate,       setApDate]       = useState(new Date().toISOString().slice(0, 10))
+  const [apCount,      setApCount]      = useState('')
+  const [apAudioFile,  setApAudioFile]  = useState(null)
+  const [apRecUrl,     setApRecUrl]     = useState(null)
+  const [apRecBlob,    setApRecBlob]    = useState(null)
+  const [apRecording,  setApRecording]  = useState(false)
+  const [apRecSecs,    setApRecSecs]    = useState(0)
+  const [apUploading,  setApUploading]  = useState(false)
+  const [apProgress,   setApProgress]   = useState(0)
+  const [apSaved,      setApSaved]      = useState(false)
+  const [apError,      setApError]      = useState('')
+  const [apList,       setApList]       = useState([])
+  const apFileRef      = useRef(null)
+  const apMrRef        = useRef(null)
+  const apChunksRef    = useRef([])
+  const apTimerRef     = useRef(null)
 
   // ── Notes state ──
   const [title, setTitle]             = useState('')
@@ -111,6 +129,7 @@ export default function Admin({ onClose }) {
   useEffect(() => {
     if (!unlocked) return
     loadNotes()
+    loadAandgebede()
     const unsub = onSnapshot(collection(db, 'books'), snap => {
       const overrides = {}
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
@@ -118,6 +137,14 @@ export default function Admin({ onClose }) {
     })
     return unsub
   }, [unlocked])
+
+  async function loadAandgebede() {
+    try {
+      const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(10))
+      const snap = await getDocs(q)
+      setApList(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    } catch {}
+  }
 
   async function loadNotes() {
     setNotesLoading(true)
@@ -180,6 +207,70 @@ export default function Admin({ onClose }) {
   function checkPin() {
     if (pin === ADMIN_PIN) { setUnlocked(true); setPinError(false) }
     else { setPinError(true); setPin('') }
+  }
+
+  // ── Aandgebed recording ──
+  async function startApRecording() {
+    if (apRecUrl) URL.revokeObjectURL(apRecUrl)
+    setApRecUrl(null); setApRecBlob(null); setApAudioFile(null); setApRecSecs(0)
+    apChunksRef.current = []
+    try {
+      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', ''].find(t => !t || MediaRecorder.isTypeSupported(t))
+      const mr       = new MediaRecorder(stream, mimeType ? { mimeType } : {})
+      apMrRef.current = mr
+      mr.ondataavailable = e => { if (e.data.size > 0) apChunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        stream.getTracks().forEach(t => t.stop())
+        const mime = mr.mimeType || 'audio/webm'
+        const blob = new Blob(apChunksRef.current, { type: mime })
+        const url  = URL.createObjectURL(blob)
+        const ext  = mime.includes('mp4') ? 'm4a' : 'webm'
+        setApRecBlob(blob); setApRecUrl(url)
+        setApAudioFile(new File([blob], `aandgebed_${Date.now()}.${ext}`, { type: mime }))
+      }
+      mr.start(); setApRecording(true)
+      apTimerRef.current = setInterval(() => setApRecSecs(s => s + 1), 1000)
+    } catch { alert('Mikrofoon toegang geweier.') }
+  }
+
+  function stopApRecording() {
+    if (apMrRef.current?.state === 'recording') apMrRef.current.stop()
+    clearInterval(apTimerRef.current); setApRecording(false)
+  }
+
+  async function handleApSave() {
+    setApError('')
+    if (!apAudioFile)     { setApError('Kies of neem eers oudio op'); return }
+    if (!apCount || isNaN(Number(apCount))) { setApError('Voer die aantal gebedsversoeke in'); return }
+
+    setApUploading(true); setApProgress(0)
+    let audioUrl = ''
+    try {
+      const ext  = apAudioFile.name.split('.').pop().toLowerCase()
+      const sRef = ref(storage, `aandgebede/${apDate}.${ext}`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, apAudioFile)
+        task.on('state_changed',
+          s => setApProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
+          reject,
+          async () => { audioUrl = await getDownloadURL(task.snapshot.ref); resolve() }
+        )
+      })
+    } catch (e) { setApError('Upload misluk: ' + e.message); setApUploading(false); return }
+
+    setApUploading(false)
+    try {
+      await setDoc(doc(db, 'aandgebede', apDate), {
+        date: apDate, audioUrl, prayerCount: Number(apCount),
+        publishedAt: new Date(apDate + 'T20:00:00')
+      })
+      setApSaved(true); setTimeout(() => setApSaved(false), 3000)
+      setApAudioFile(null); setApRecUrl(null); setApRecBlob(null); setApRecSecs(0)
+      setApCount(''); setApDate(new Date().toISOString().slice(0, 10))
+      if (apFileRef.current) apFileRef.current.value = ''
+      await loadAandgebede()
+    } catch (e) { setApError('Kon nie stoor nie: ' + e.message) }
   }
 
   // ── Save voice note ──
@@ -368,6 +459,9 @@ export default function Admin({ onClose }) {
           </button>
           <button className={`admin-tab ${activeTab === 'notif' ? 'active' : ''}`} onClick={() => setActiveTab('notif')}>
             🔔 Kennisgewings
+          </button>
+          <button className={`admin-tab ${activeTab === 'aandgebed' ? 'active' : ''}`} onClick={() => setActiveTab('aandgebed')}>
+            🙏 Aandgebed
           </button>
         </div>
 
@@ -636,6 +730,113 @@ export default function Admin({ onClose }) {
                 )
               })()}
             </div>
+          )}
+
+          {/* ── AANDGEBED TAB ── */}
+          {activeTab === 'aandgebed' && (
+            <>
+              <div className="admin-section">
+                <div className="admin-section-title">Laai aandgebed op</div>
+
+                <label className="admin-label">Datum</label>
+                <input
+                  type="date"
+                  className="admin-input"
+                  value={apDate}
+                  onChange={e => setApDate(e.target.value)}
+                />
+
+                <label className="admin-label">Aantal gebedsversoeke vandag</label>
+                <input
+                  type="number"
+                  className="admin-input"
+                  placeholder="bv. 47"
+                  value={apCount}
+                  onChange={e => setApCount(e.target.value)}
+                  min="0"
+                />
+
+                <label className="admin-label">Oudio</label>
+                <div className="record-row">
+                  {!apRecording ? (
+                    <button className="record-btn" onClick={startApRecording}>
+                      🎙️ Neem op
+                    </button>
+                  ) : (
+                    <button className="record-btn recording" onClick={stopApRecording}>
+                      ⏹ Stop ({formatTime(apRecSecs)})
+                    </button>
+                  )}
+                  <span className="record-or">of</span>
+                  <label className="file-upload-label">
+                    📁 Kies lêer
+                    <input
+                      ref={apFileRef}
+                      type="file"
+                      accept="audio/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const f = e.target.files[0]
+                        if (f) { setApAudioFile(f); setApRecUrl(null) }
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {apRecUrl && (
+                  <audio src={apRecUrl} controls style={{ width: '100%', marginTop: 8 }} />
+                )}
+                {!apRecUrl && apAudioFile && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+                    ✅ {apAudioFile.name}
+                  </div>
+                )}
+
+                {apUploading && (
+                  <div className="upload-progress">
+                    <div className="upload-bar" style={{ width: `${apProgress}%` }} />
+                    <span>{apProgress}%</span>
+                  </div>
+                )}
+
+                {apError && <div className="admin-error">{apError}</div>}
+                {apSaved  && <div className="admin-success">✅ Aandgebed gestoor!</div>}
+
+                <button
+                  className="admin-save-btn"
+                  onClick={handleApSave}
+                  disabled={apUploading || apRecording}
+                >
+                  {apUploading ? 'Besig...' : 'Stoor Aandgebed'}
+                </button>
+              </div>
+
+              {apList.length > 0 && (
+                <div className="admin-section">
+                  <div className="admin-section-title">Vorige Aandgebede</div>
+                  {apList.map(ap => (
+                    <div key={ap.id} className="admin-note-row" style={{ justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{ap.date}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.prayerCount} versoeke</div>
+                      </div>
+                      <button
+                        className="admin-delete-btn"
+                        onClick={async () => {
+                          if (!window.confirm('Skrap hierdie aandgebed?')) return
+                          try {
+                            await deleteDoc(doc(db, 'aandgebede', ap.id))
+                            setApList(prev => prev.filter(x => x.id !== ap.id))
+                          } catch { alert('Kon nie skrap nie') }
+                        }}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
         </div>

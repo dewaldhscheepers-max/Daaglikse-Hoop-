@@ -199,3 +199,188 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
   line-height: 1.4;
 }
+
+/* ─── Evening prayer card ─── */
+.ep-card {
+  background: linear-gradient(135deg, #1a1040 0%, #2d1b6e 100%);
+  color: #fff;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+}
+
+.ep-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ep-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.ep-card-date {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.ep-card-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ep-card-desc strong { color: #fff; }
+
+/* ─── Player ─── */
+.ep-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ep-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ep-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 24px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  flex: 1;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.ep-play-btn:active { background: rgba(255,255,255,0.25); }
+
+.ep-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.ep-share-btn:active { background: rgba(255,255,255,0.25); }
+
+.ep-progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.ep-progress-fill {
+  height: 100%;
+  background: #c4b5fd;
+  border-radius: 2px;
+  transition: width 0.3s linear;
+}
+
+.ep-time {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  text-align: right;
+}
+
+/* ─── Archive ─── */
+.ep-archive {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ep-archive-toggle {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ep-archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ep-archive-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--cream);
+  border-radius: 12px;
+  border: 1px solid var(--cream-dark);
+}
+
+.ep-archive-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ep-archive-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ep-archive-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ep-archive-play {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--purple);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.ep-archive-play.playing { background: var(--purple-dark); }
+.ep-archive-play:active  { transform: scale(0.93); }

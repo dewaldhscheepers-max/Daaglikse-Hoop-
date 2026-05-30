@@ -20,6 +20,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Evening prayers — anyone can read, admin app writes directly
+    match /aandgebede/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
     // Likes — anyone can read and increment, nobody can delete
     match /likes/{id} {
       allow read:   if true;
