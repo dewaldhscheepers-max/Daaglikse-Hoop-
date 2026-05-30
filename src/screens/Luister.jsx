@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import '../components/PopupStyles.css'
 import './Luister.css'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
@@ -178,8 +179,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
   const [savedNotes, setSavedNotes]   = useState(readSavedNotes)
-  const [shareToast, setShareToast]     = useState(false)
-  const [bookmarkToast, setBookmarkToast] = useState(false)
+  const [shareToast, setShareToast]         = useState(false)
+  const [bookmarkToast, setBookmarkToast]   = useState(false)
+  const [listenShareNote, setListenShareNote] = useState(null)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -325,6 +327,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       setPlaying(false); onPlayingChange?.(false); setElapsed(0)
       const n = parseInt(localStorage.getItem('completedListens') || '0')
       localStorage.setItem('completedListens', String(n + 1))
+      const lastShown = parseInt(localStorage.getItem('listenShareShownAt') || '0')
+      if (Date.now() - lastShown > 3 * 24 * 60 * 60 * 1000) {
+        localStorage.setItem('listenShareShownAt', String(Date.now()))
+        setListenShareNote(activeNote)
+      }
     }
     function onLoadedMetadata() {
       if (!activeNote.lengthSeconds) {
@@ -446,6 +453,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url }) } catch {}
     } else {
       try { await navigator.clipboard.writeText(`${msg}\n${url}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
+    }
+  }
+
+  async function handleListenShare() {
+    setListenShareNote(null)
+    const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://daagliksehoop.vercel.app/go`
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://daagliksehoop.vercel.app/go' }) } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(msg); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
     }
   }
 
@@ -634,6 +651,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
 
       {activeNote && activeId !== today.id && (
         <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
+      )}
+
+      {listenShareNote && (
+        <div className="listen-share-card">
+          <div className="listen-share-top">
+            <span className="listen-share-text">Het dit gehelp? Deel met iemand 🙏</span>
+            <button className="listen-share-close" onClick={() => setListenShareNote(null)}>✕</button>
+          </div>
+          <div className="listen-share-btns">
+            <button className="listen-share-btn" onClick={handleListenShare}>Deel die app</button>
+            <a
+              className="listen-share-wa"
+              href={`https://wa.me/?text=${encodeURIComponent('Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://daagliksehoop.vercel.app/go')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setListenShareNote(null)}
+            >💬 WhatsApp groep</a>
+          </div>
+        </div>
       )}
 
       {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}

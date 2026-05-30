@@ -109,3 +109,132 @@
   padding: 8px;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ─── Share popup additions ─── */
+.share-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.share-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lavender);
+  transition: background 0.25s;
+}
+
+.share-dot-filled { background: var(--purple); }
+
+.popup-btn-whatsapp {
+  display: block;
+  width: 100%;
+  background: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.popup-btn-whatsapp:active { opacity: 0.85; }
+
+/* ─── Post-listen share card ─── */
+.listen-share-card {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  left: 16px;
+  right: 16px;
+  max-width: 448px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 6px 32px rgba(10,5,20,0.18);
+  z-index: 350;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.listen-share-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.listen-share-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+.listen-share-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.listen-share-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.listen-share-btn {
+  flex: 1;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.listen-share-btn:active { opacity: 0.85; }
+
+.listen-share-wa {
+  flex: 1;
+  background: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.listen-share-wa:active { opacity: 0.85; }

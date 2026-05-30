@@ -102,8 +102,8 @@ export default function App() {
       const shareLaterAt     = parseInt(localStorage.getItem('sharePopupLaterAt') || '0')
       const hasReceivedValue = appOpenDays.length >= 2 || completedListens >= 2
       const shareDue = hasReceivedValue &&
-        Date.now() - shareSharedAt > 30 * 24 * 60 * 60 * 1000 &&
-        Date.now() - shareLaterAt  >  7 * 24 * 60 * 60 * 1000
+        Date.now() - shareSharedAt > 10 * 24 * 60 * 60 * 1000 &&
+        Date.now() - shareLaterAt  >  3 * 24 * 60 * 60 * 1000
 
       let popup = null
       if (unseenBook) {
@@ -155,7 +155,6 @@ export default function App() {
 
   async function handleShareApp() {
     localStorage.setItem('sharePopupSharedAt', String(Date.now()))
-    dismissPopup()
     const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app/go'
     if (navigator.share) {
       try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://daagliksehoop.vercel.app/go' }) } catch {}
@@ -163,6 +162,8 @@ export default function App() {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
     }
   }
+
+  function handleShareDone() { dismissPopup() }
 
   function handleShareLater() {
     localStorage.setItem('sharePopupLaterAt', String(Date.now()))
@@ -316,6 +317,7 @@ export default function App() {
       {activePopup?.type === 'share' && (
         <SharePopup
           onShare={handleShareApp}
+          onDone={handleShareDone}
           onLater={handleShareLater}
         />
       )}
