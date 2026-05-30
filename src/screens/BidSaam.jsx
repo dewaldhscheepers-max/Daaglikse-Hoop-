@@ -265,7 +265,7 @@ export default function BidSaam() {
       <div className="bidsaam-body">
 
         {todayPrayer && (
-          <div className="ep-card card">
+          <div className="ep-card" style={{ background: 'linear-gradient(135deg, #1a1040 0%, #2d1b6e 100%)', color: '#fff', borderRadius: '16px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div className="ep-card-header">
               <div className="ep-card-label">Aandgebed</div>
               <div className="ep-card-date">{formatDate(todayPrayer.date)}</div>
