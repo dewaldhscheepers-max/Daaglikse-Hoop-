@@ -246,22 +246,22 @@
 .note-share-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
   border: none;
-  background: var(--lavender-soft);
-  color: var(--purple);
+  border-top: 1px solid var(--cream-dark);
+  background: transparent;
+  color: var(--text-muted);
   font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 7px 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s;
+  transition: color 0.15s;
 }
 
-.note-share-row:active { background: var(--lavender); }
+.note-share-row:active { color: var(--purple); }
 
 /* ─── Note row like button ─── */
 .note-like-btn {
