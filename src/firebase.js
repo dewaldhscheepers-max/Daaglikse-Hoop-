@@ -1,7 +1,7 @@
 import { initializeApp }              from 'firebase/app'
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getStorage }                 from 'firebase/storage'
-import { getMessaging, isSupported, getToken } from 'firebase/messaging'
+import { getMessaging, isSupported, getToken, onMessage } from 'firebase/messaging'
 
 const firebaseConfig = {
   apiKey:            "AIzaSyD8fB-xYtMc9IOFGdfWIwFCsvFwb6Zj67s",
@@ -20,7 +20,22 @@ export const storage = getStorage(app)
 
 export const messaging = (async () => {
   const supported = await isSupported()
-  return supported ? getMessaging(app) : null
+  if (!supported) return null
+  const msg = getMessaging(app)
+  // Show notifications even when app is open in foreground
+  onMessage(msg, payload => {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification(payload.notification?.title || 'Daaglikse Hoop', {
+        body:    payload.notification?.body || '',
+        icon:    '/icons/icon-192.png',
+        badge:   '/icons/icon-192.png',
+        silent:  true,
+        vibrate: [120],
+        data:    { url: '/' }
+      })
+    }).catch(() => {})
+  })
+  return msg
 })()
 
 async function getFcmToken(msg) {
