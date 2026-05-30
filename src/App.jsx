@@ -25,6 +25,10 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installBannerDismissed, setInstallBannerDismissed] = useState(false)
   const [showInstallPopup, setShowInstallPopup] = useState(false)
+  const isSamsungBrowser = /SamsungBrowser/i.test(navigator.userAgent)
+  const [samsungBannerDismissed, setSamsungBannerDismissed] = useState(
+    () => !!localStorage.getItem('samsungBannerDismissed')
+  )
   const [showInstallHelp, setShowInstallHelp] = useState(false)
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
@@ -246,7 +250,28 @@ function onAudioPlayingChange(playing) {
         <InstallHelp onClose={() => setShowInstallHelp(false)} />
       )}
 
-      {showNotifBanner && (
+      {isSamsungBrowser && !samsungBannerDismissed && (
+        <div className="notif-banner" style={{ background: '#1a3a5c' }}>
+          <div className="notif-banner-text">
+            <strong>📱 Gebruik Chrome vir kennisgewings</strong>
+            Samsung Internet ondersteun nie oggendkennisgewings nie. Maak die app in Chrome oop om kennisgewings te ontvang.
+          </div>
+          <button
+            className="notif-banner-yes"
+            onClick={() => {
+              window.location.href = 'intent://daagliksehoop.vercel.app#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdaagliksehoop.vercel.app;end'
+            }}
+          >
+            Maak in Chrome oop
+          </button>
+          <button
+            className="notif-banner-no"
+            onClick={() => { setSamsungBannerDismissed(true); localStorage.setItem('samsungBannerDismissed', '1') }}
+          >✕</button>
+        </div>
+      )}
+
+      {showNotifBanner && !isSamsungBrowser && (
         <div className="notif-banner">
           <div className="notif-banner-text">
             <strong>🌅 Oggend Kennisgewings</strong>
