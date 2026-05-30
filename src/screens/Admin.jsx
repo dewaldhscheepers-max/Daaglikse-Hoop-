@@ -69,6 +69,22 @@ export default function Admin({ onClose }) {
     setNotifBusy(false)
   }
 
+  async function handleNotifTest() {
+    setNotifBusy(true)
+    setNotifStatus(null)
+    const token = localStorage.getItem('fcmToken')
+    if (!token) { setNotifStatus('notoken'); setNotifBusy(false); return }
+    try {
+      const r = await fetch('/api/test-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, pin: '2025' })
+      })
+      setNotifStatus(r.ok ? 'testsent' : 'fail')
+    } catch { setNotifStatus('fail') }
+    setNotifBusy(false)
+  }
+
   // ── New book form ──
   const [newTitle, setNewTitle]   = useState('')
   const [newDesc, setNewDesc]     = useState('')
@@ -570,12 +586,18 @@ export default function Admin({ onClose }) {
                 Tik die knoppie om jou kennisgewinginskrywing te herregistreer. Dit sal jou token in Firestore stoor sodat jy oggendkennisgewings ontvang.
               </p>
 
-              {notifStatus === 'ok'     && <div className="admin-success">✅ Geregistreer! Jy sal môre 6:30 'n kennisgewinig ontvang.</div>}
-              {notifStatus === 'fail'   && <div className="admin-error">❌ Registrasie misluk. Kyk of kennisgewings toegelaat is in jou foon se instellings.</div>}
-              {notifStatus === 'denied' && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings om dit aan te skakel.</div>}
+              {notifStatus === 'ok'       && <div className="admin-success">✅ Geregistreer! Tik nou "Stuur toets" om te bevestig.</div>}
+              {notifStatus === 'testsent' && <div className="admin-success">✅ Toets gestuur! Kyk jou foon se kennisgewings nou.</div>}
+              {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk of kennisgewings toegelaat is in jou foon se instellings.</div>}
+              {notifStatus === 'denied'   && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings.</div>}
+              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer hieronder.</div>}
 
               <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
                 {notifBusy ? 'Besig...' : '🔔 Registreer / Herregistreer'}
+              </button>
+
+              <button className="admin-save-btn" style={{ background: '#27713f', marginTop: 4 }} onClick={handleNotifTest} disabled={notifBusy}>
+                {notifBusy ? 'Besig...' : '📨 Stuur toets-kennisgewinig nou'}
               </button>
             </div>
           )}
