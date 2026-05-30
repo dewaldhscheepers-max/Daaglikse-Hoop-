@@ -2,8 +2,6 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
-import { initializeApp } from 'firebase/app'
-import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
@@ -19,30 +17,27 @@ registerRoute(
   })
 )
 
-const firebaseApp = initializeApp({
-  apiKey:            'AIzaSyD8fB-xYtMc9IOFGdfWIwFCsvFwb6Zj67s',
-  authDomain:        'daaglikse-hoop.firebaseapp.com',
-  projectId:         'daaglikse-hoop',
-  storageBucket:     'daaglikse-hoop.firebasestorage.app',
-  messagingSenderId: '395898489739',
-  appId:             '1:395898489739:web:a250f1fdf0a8cc981ebd8e'
-})
+self.addEventListener('push', event => {
+  if (!event.data) return
+  let p = {}
+  try { p = event.data.json() } catch { return }
 
-const firebaseMessaging = getMessaging(firebaseApp)
+  const title = p.notification?.title || p.data?.title || p.title
+  if (!title) return
 
-onBackgroundMessage(firebaseMessaging, payload => {
-  const n = payload.notification || {}
-  const d = payload.data        || {}
-  return self.registration.showNotification(
-    n.title || d.title || 'Daaglikse Hoop',
-    {
-      body:               n.body  || d.body  || '',
+  const body  = p.notification?.body  || p.data?.body  || p.body  || ''
+  const image = p.data?.image || p.notification?.image || p.image || ''
+  const url   = p.data?.url   || p.url   || self.registration.scope
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
       icon:               '/icons/icon-192.png',
       badge:              '/icons/icon-192.png',
-      image:              d.image || '',
+      ...(image ? { image } : {}),
       requireInteraction: true,
-      data:               { url: d.url || self.registration.scope }
-    }
+      data:               { url }
+    })
   )
 })
 
