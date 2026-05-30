@@ -324,7 +324,7 @@
 /* ─── Scroll hint ─── */
 .scroll-hint {
   position: fixed;
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 14px);
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -332,11 +332,16 @@
   align-items: center;
   gap: 2px;
   color: var(--text-muted);
-  opacity: 0.5;
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-radius: 20px;
+  padding: 4px 10px 5px;
   pointer-events: none;
+  z-index: 200;
   animation: scrollBounce 1.8s ease-in-out infinite;
   font-size: 10px;
   font-family: var(--font-body);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 @keyframes scrollBounce {
