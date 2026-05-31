@@ -47,9 +47,24 @@ export default function NooimyModal({ onClose }) {
           </p>
         </div>
 
-        <p className="nooimy-credibility">
-          Dewald bedien graag by gemeentes, kampe, konferensies en ander geleenthede met boodskappe van hoop, genesing en geestelike versterking.
-        </p>
+        <div className="nooimy-about">
+          <p className="nooimy-credibility">
+            Dewald Scheepers bedien graag by gemeentes, kampe, konferensies en ander geleenthede met boodskappe van hoop, genesing en geestelike versterking.
+          </p>
+          <p className="nooimy-credibility">
+            Sy kernboodskap fokus op mense wie se gedagtes moeg, angstig of oorlaai is — en hoe God ons denke kan vernuwe, ons harte kan genees en ons kan help om weer met vrede te leef.
+          </p>
+          <div className="nooimy-topics">
+            <p className="nooimy-topics-label">Gewilde temas</p>
+            <ul>
+              <li>Rustelose Gedagtes: Verander jou denke. Verander jou lewe.</li>
+              <li>Wen die oorlog in jou gedagtes</li>
+              <li>Lofprysing in moeilike omstandighede</li>
+              <li>Wanneer trauma, vrees en bekommernis jou kop aanval</li>
+              <li>Vergifnis, grense en innerlike genesing</li>
+            </ul>
+          </div>
+        </div>
 
         <p className="nooimy-form-intro">Ons hoor graag van jou. Vertel ons 'n bietjie van die geleentheid hieronder.</p>
 

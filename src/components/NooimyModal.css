@@ -75,15 +75,49 @@
   margin: 0;
 }
 
-/* ─── Credibility + intro ─── */
+/* ─── About section ─── */
+.nooimy-about {
+  padding: 16px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .nooimy-credibility {
   font-size: 13px;
   color: var(--text-muted);
-  text-align: center;
   line-height: 1.6;
   margin: 0;
-  font-style: italic;
-  padding: 16px 24px 0;
+}
+
+.nooimy-topics {
+  background: #FDFAF6;
+  border: 1.5px solid var(--lavender);
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+}
+
+.nooimy-topics-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin: 0 0 8px;
+}
+
+.nooimy-topics ul {
+  margin: 0;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nooimy-topics ul li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.45;
 }
 
 .nooimy-form-intro {
