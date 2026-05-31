@@ -405,11 +405,27 @@ export default function App() {
                 </p>
                 {paymentResult.purchasedBooks?.some(b => b.pdfUrl) && (
                   <div className="payment-popup-downloads">
-                    <p className="payment-popup-download-label">Of laai direk af:</p>
+                    <p className="payment-popup-download-label">Laai direk af na jou foon:</p>
                     {paymentResult.purchasedBooks.filter(b => b.pdfUrl).map(b => (
-                      <a key={b.id} href={b.pdfUrl} target="_blank" rel="noopener noreferrer" className="payment-popup-download-btn">
+                      <button key={b.id} className="payment-popup-download-btn"
+                        onClick={async () => {
+                          try {
+                            const r    = await fetch(b.pdfUrl)
+                            const blob = await r.blob()
+                            const url  = URL.createObjectURL(blob)
+                            const a    = document.createElement('a')
+                            a.href     = url
+                            a.download = b.title + '.pdf'
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                          } catch {
+                            window.open(b.pdfUrl, '_blank')
+                          }
+                        }}>
                         📥 {b.title}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
