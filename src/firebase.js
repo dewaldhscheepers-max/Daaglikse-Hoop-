@@ -62,7 +62,14 @@ export async function ensureNotificationToken() {
   try {
     if (!('Notification' in window)) return
     if (Notification.permission !== 'granted') return
-    if (localStorage.getItem('fcmToken')) return
-    await subscribeToNotifications()
+    const msg = await messaging
+    if (!msg) return
+    const swReg = await navigator.serviceWorker.ready
+    const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
+    if (!token) return
+    const stored = localStorage.getItem('fcmToken')
+    if (stored === token) return
+    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+    localStorage.setItem('fcmToken', token)
   } catch {}
 }
