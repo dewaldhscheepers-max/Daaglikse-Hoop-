@@ -92,6 +92,25 @@ export default function Admin({ onClose }) {
     }
   }, [])
 
+  const [sendAllBusy,   setSendAllBusy]   = useState(false)
+  const [sendAllResult, setSendAllResult] = useState(null)
+
+  async function handleSendAll() {
+    if (!window.confirm('Stuur nou \'n kennisgewings aan ALMAL? Dit sal op almal se fone verskyn.')) return
+    setSendAllBusy(true)
+    setSendAllResult(null)
+    try {
+      const r = await fetch(`/api/send-notifications?secret=DaaglikseHoop2025Cron`)
+      const data = await r.json().catch(() => ({}))
+      setSendAllResult(r.ok
+        ? `✅ Gestuur — FCM: ${data.fcm?.sent ?? '?'}/${data.fcm?.total ?? '?'}, Web Push: ${data.webpush?.sent ?? '?'}/${data.webpush?.total ?? '?'}`
+        : `❌ Misluk: ${JSON.stringify(data)}`)
+    } catch (e) {
+      setSendAllResult('❌ Netwerkfout: ' + e.message)
+    }
+    setSendAllBusy(false)
+  }
+
   async function handleTestEmail(allBooks) {
     if (!testEmailBookId) { alert('Kies eers \'n boek'); return }
     setTestEmailBusy(true)
@@ -830,6 +849,21 @@ export default function Admin({ onClose }) {
               {notifStatus === 'denied'   && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings.</div>}
               {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer.</div>}
               {notifDetail && <div style={{ fontSize: 11, fontFamily: 'monospace', background: '#eee', borderRadius: 4, padding: '4px 8px', marginTop: 4, wordBreak: 'break-all' }}>{notifDetail}</div>}
+
+              <button
+                className="admin-save-btn"
+                style={{ background: '#b03030', marginBottom: 4 }}
+                onClick={handleSendAll}
+                disabled={sendAllBusy || notifBusy}
+              >
+                {sendAllBusy ? 'Besig...' : '📣 Stuur kennisgewings aan ALMAL nou'}
+              </button>
+              {sendAllResult && (
+                <div style={{ fontSize: 13, fontFamily: 'monospace', background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 8,
+                  color: sendAllResult.startsWith('✅') ? '#1a6b2e' : '#c0392b' }}>
+                  {sendAllResult}
+                </div>
+              )}
 
               <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
                 {notifBusy ? 'Besig...' : '🔔 Registreer / Herregistreer'}
