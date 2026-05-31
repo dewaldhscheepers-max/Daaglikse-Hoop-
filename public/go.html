@@ -180,36 +180,12 @@
 <script>
   var ua        = navigator.userAgent
   var isAndroid = /Android/i.test(ua)
-  var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
 
   document.addEventListener('DOMContentLoaded', function () {
-    if (isAndroid && !isChrome) {
-      // Not Chrome on Android — show overlay
-      document.getElementById('chrome-overlay').classList.add('show')
+    if (isAndroid) {
+      document.getElementById('start-btn').href =
+        'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end'
     }
-
-    document.getElementById('start-btn').addEventListener('click', function (e) {
-      if (isAndroid && !isChrome) {
-        e.preventDefault()
-        document.getElementById('chrome-overlay').classList.add('show')
-      }
-    })
-
-    document.getElementById('copy-btn').addEventListener('click', function () {
-      var url = 'https://dewaldscheepers.com/go'
-      navigator.clipboard.writeText(url).catch(function () {
-        var ta = document.createElement('textarea')
-        ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
-      })
-      var btn = document.getElementById('copy-btn')
-      btn.textContent = '✓ Gekopieeer!'
-      btn.classList.add('copied')
-    })
-
-    document.getElementById('skip-btn').addEventListener('click', function () {
-      document.getElementById('chrome-overlay').classList.remove('show')
-      window.location.href = '/'
-    })
   })
 </script>
 </head>
@@ -249,18 +225,5 @@
     </div>
   </div>
 
-  <!-- Chrome overlay for non-Chrome Android browsers -->
-  <div class="chrome-overlay" id="chrome-overlay">
-    <div class="chrome-sheet">
-      <h2>🔵 Maak in Chrome oop</h2>
-      <p>
-        Vir kennisgewings en die volledige app-ervaring<br>
-        moet jy <strong>Chrome</strong> gebruik.<br><br>
-        Kopieer die skakel en plak dit in Chrome.
-      </p>
-      <button class="btn-copy" id="copy-btn">📋 Kopieer skakel</button>
-      <button class="btn-skip" id="skip-btn">Gaan aan sonder Chrome</button>
-    </div>
-  </div>
 </body>
 </html>
