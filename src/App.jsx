@@ -376,7 +376,7 @@ export default function App() {
                   Jou e-boek{paymentResult.count > 1 ? 'e is' : ' is'} op pad na jou e-pos.<br />
                   <strong>Geen wag nie — dit kom outomaties.</strong>
                 </p>
-                <p className="payment-popup-note">Kyk ook jou strooipos-vouer as jy dit nie sien nie.</p>
+                <p className="payment-popup-note">Kyk ook jou spam-houer as jy dit nie sien nie.</p>
               </>
             )}
             <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
