@@ -241,7 +241,7 @@ export default function App() {
     const urlBooks    = (params.get('books') || '').split(',').filter(Boolean)
     const storedBooks = (localStorage.getItem('pendingPurchase') || '').split(',').filter(Boolean)
     const bookIds     = urlBooks.length > 0 ? urlBooks : storedBooks
-    const email       = localStorage.getItem('pendingEmail') || ''
+    const email       = params.get('em') ? decodeURIComponent(params.get('em')) : (localStorage.getItem('pendingEmail') || '')
     localStorage.removeItem('pendingPurchase')
     localStorage.removeItem('pendingEmail')
     if (status === 'success') {

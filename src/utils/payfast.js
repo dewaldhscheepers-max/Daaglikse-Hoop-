@@ -43,7 +43,7 @@ export function checkoutBook(book, email, type = 'ebook') {
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}`,
+    return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${window.location.origin}/?payment=cancel`,
     notify_url:    ITN_URL,
     email_address: email,
@@ -66,7 +66,7 @@ export function checkoutCart(books, email) {
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${base}/?payment=success&type=ebook&books=${encodeURIComponent(books.map(b => b.id).join(','))}`,
+    return_url:    `${base}/?payment=success&type=ebook&books=${encodeURIComponent(books.map(b => b.id).join(','))}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${base}/?payment=cancel`,
     notify_url:    ITN_URL,
     email_address: email,
