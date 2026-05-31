@@ -12,7 +12,9 @@ const firebaseConfig = {
   appId:             "1:395898489739:web:a250f1fdf0a8cc981ebd8e"
 }
 
-const VAPID_KEY = 'BBG0lF3YGD7BRhdveAO3ufCkT4ze1EaAbncl2r2nfUZwQ-p77uijz3UMts3KYlbqK5U3Hn7OoD01XacY3j7JhPk'
+const FCM_VAPID_KEY = 'BBG0lF3YGD7BRhdveAO3ufCkT4ze1EaAbncl2r2nfUZwQ-p77uijz3UMts3KYlbqK5U3Hn7OoD01XacY3j7JhPk'
+
+export const isSamsungBrowser = /SamsungBrowser/i.test(navigator.userAgent)
 
 const app        = initializeApp(firebaseConfig)
 export const db  = getFirestore(app)
@@ -22,58 +24,52 @@ export const messaging = (async () => {
   const supported = await isSupported()
   if (!supported) return null
   const msg = getMessaging(app)
-  // Show notifications even when app is open in foreground
   onMessage(msg, payload => {
     navigator.serviceWorker.ready.then(reg => {
       reg.showNotification(payload.notification?.title || 'Daaglikse Hoop', {
-        body:    payload.notification?.body || '',
-        icon:    '/icons/icon-192.png',
-        badge:   '/icons/icon-192.png',
-        silent:  true,
-        vibrate: [120],
-        data:    { url: '/' }
+        body:  payload.notification?.body || '',
+        icon:  '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data:  { url: '/' }
       })
     }).catch(() => {})
   })
   return msg
 })()
 
-async function getFcmToken(msg) {
-  // Use the already-registered unified SW (sw.js handles both caching + FCM)
-  const swReg = await navigator.serviceWorker.ready
-  return getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg })
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
 }
 
 export async function subscribeToNotifications() {
-  try {
-    const msg = await messaging
-    if (!msg) return false
-    const permission = await Notification.requestPermission()
-    if (permission !== 'granted') return false
-    const token = await getFcmToken(msg)
-    if (token) {
-      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-      localStorage.setItem('fcmToken', token)
-      return true
-    }
-    return false
-  } catch {
-    return false
-  }
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return { ok: false, reason: 'permission_denied' }
+
+  const msg = await messaging
+  if (!msg) return { ok: false, reason: 'messaging_not_supported' }
+  const swReg = await navigator.serviceWorker.ready
+  const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
+  if (!token) return { ok: false, reason: 'no_token' }
+  await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+  localStorage.setItem('fcmToken', token)
+  return { ok: true }
 }
 
-// Called silently on app load — re-subscribes if permission is granted but token was never saved
 export async function ensureNotificationToken() {
   try {
     if (!('Notification' in window)) return
     if (Notification.permission !== 'granted') return
-    if (localStorage.getItem('fcmToken')) return
     const msg = await messaging
     if (!msg) return
-    const token = await getFcmToken(msg)
-    if (token) {
-      await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
-      localStorage.setItem('fcmToken', token)
-    }
+    const swReg = await navigator.serviceWorker.ready
+    const token = await getToken(msg, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg })
+    if (!token) return
+    const stored = localStorage.getItem('fcmToken')
+    if (stored === token) return
+    await setDoc(doc(db, 'fcm_tokens', token), { token, subscribedAt: serverTimestamp() })
+    localStorage.setItem('fcmToken', token)
   } catch {}
 }

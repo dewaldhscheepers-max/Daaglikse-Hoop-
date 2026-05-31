@@ -5,13 +5,25 @@ service cloud.firestore {
     // Anyone (authenticated or not) can write their own FCM token
     match /fcm_tokens/{token} {
       allow write: if true;
-      allow read:  if false; // only Cloud Functions read this
+      allow read:  if false;
+    }
+
+    // Samsung Internet native Web Push subscriptions
+    match /webPushSubscriptions/{id} {
+      allow write: if true;
+      allow read:  if false;
     }
 
     // Devotionals are read-only to all — written only via Firebase Console / Admin SDK
     match /devotionals/{date} {
       allow read:  if true;
       allow write: if false;
+    }
+
+    // Evening prayers — anyone can read, admin app writes directly
+    match /aandgebede/{id} {
+      allow read:  if true;
+      allow write: if true;
     }
 
     // Likes — anyone can read and increment, nobody can delete
@@ -25,6 +37,36 @@ service cloud.firestore {
       allow read:   if true;
       allow create: if true;
       allow update, delete: if false;
+    }
+
+    // Purchase records — written by server only, admin reads via console
+    match /purchases/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
+    // Anonymous growth stats — anyone can increment, admin reads
+    match /stats/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Voice note play counts per note
+    match /plays/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Voice notes — read by all, written by admin only
+    match /notes/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Books — read by all, written by admin only
+    match /books/{id} {
+      allow read:  if true;
+      allow write: if true;
     }
   }
 }

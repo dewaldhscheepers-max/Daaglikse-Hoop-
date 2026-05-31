@@ -9,9 +9,9 @@
 }
 
 .nooimy-card {
-  background: var(--white);
-  border-radius: 24px 24px 0 0;
-  padding: 28px 24px 40px;
+  background: var(--cream);
+  border-radius: 28px 28px 0 0;
+  padding: 0 0 40px;
   width: 100%;
   max-width: 480px;
   position: relative;
@@ -19,14 +19,15 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
+  box-shadow: 0 -4px 32px rgba(10, 5, 20, 0.18);
 }
 
 .nooimy-x {
   position: absolute;
   top: 16px;
   right: 16px;
-  background: var(--cream-dark);
+  background: rgba(255,255,255,0.6);
   border: none;
   border-radius: 50%;
   width: 30px;
@@ -37,11 +38,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
+}
+
+/* ─── Warm header section ─── */
+.nooimy-header {
+  background: linear-gradient(160deg, var(--lavender-soft) 0%, #F5EFE0 100%);
+  border-radius: 28px 28px 0 0;
+  padding: 36px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--lavender);
 }
 
 .nooimy-icon {
-  font-size: 32px;
-  text-align: center;
+  font-size: 36px;
+  margin-bottom: 2px;
 }
 
 .nooimy-title {
@@ -49,22 +64,76 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--text);
-  text-align: center;
+  margin: 0;
+  line-height: 1.2;
 }
 
-.nooimy-sub {
+.nooimy-welcome {
   font-size: 14px;
   color: var(--text-muted);
-  text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─── About section ─── */
+.nooimy-about {
+  padding: 16px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nooimy-credibility {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.nooimy-topics {
+  background: #FDFAF6;
+  border: 1.5px solid var(--lavender);
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+}
+
+.nooimy-topics-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin: 0 0 8px;
+}
+
+.nooimy-topics ul {
+  margin: 0;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nooimy-topics ul li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.nooimy-form-intro {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  padding: 12px 24px 4px;
+  margin: 0;
 }
 
 /* ─── Fields ─── */
 .nooimy-fields {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 14px;
+  padding: 4px 24px 0;
 }
 
 .field-group {
@@ -81,21 +150,23 @@
 
 .field-group input,
 .field-group textarea {
-  border: 1.5px solid var(--cream-dark);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border: 1.5px solid #DDD5EC;
+  border-radius: 14px;
+  padding: 13px 15px;
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--text);
-  background: var(--cream);
+  background: #FDFAF6;
   outline: none;
   width: 100%;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(10, 5, 20, 0.05);
 }
 
 .field-group input:focus,
 .field-group textarea:focus {
   border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(124, 111, 175, 0.12);
 }
 
 .field-group textarea {
@@ -107,13 +178,15 @@
   font-size: 13px;
   color: #C62828;
   text-align: center;
+  padding: 0 24px;
+  margin: 4px 0 0;
 }
 
 .nooimy-submit {
-  width: 100%;
+  width: calc(100% - 48px);
+  margin: 16px 24px 0;
   padding: 15px;
   font-size: 15px;
-  margin-top: 4px;
 }
 
 .nooimy-submit:disabled {
@@ -140,13 +213,4 @@
   width: 100%;
   padding: 14px;
   margin-top: 8px;
-}
-
-.nooimy-credibility {
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.5;
-  margin: 0 0 4px;
-  font-style: italic;
 }

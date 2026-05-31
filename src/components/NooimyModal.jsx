@@ -27,8 +27,8 @@ export default function NooimyModal({ onClose }) {
       form.boodskap ? `\nBoodskap:\n${form.boodskap}`  : '',
     ].filter(Boolean).join('\n')
 
-    const subject = encodeURIComponent(`🎤 Uitnodiging om te preek: ${form.naam} — ${form.gemeente}`)
-    const body    = encodeURIComponent(`Hallo Dewald,\n\nHieronder is my besonderhede vir 'n preekuitnodiging:\n\n${lines}\n\nSaggies groete`)
+    const subject = encodeURIComponent(`Uitnodiging: ${form.naam} — ${form.gemeente}`)
+    const body    = encodeURIComponent(`Hallo Dewald,\n\nHieronder is my besonderhede vir 'n bedieningsgeleentheid:\n\n${lines}\n\nSaggies groete`)
 
     window.location.href = `mailto:dewald.h.scheepers@gmail.com?subject=${subject}&body=${body}`
     onClose()
@@ -39,11 +39,34 @@ export default function NooimyModal({ onClose }) {
       <div className="nooimy-card" onClick={e => e.stopPropagation()}>
         <button className="nooimy-x" onClick={onClose}>✕</button>
 
-        <div className="nooimy-icon">🎤</div>
-        <h3 className="nooimy-title">Nooi My Om Te Preek</h3>
-        <p className="nooimy-credibility">
-          Dewald Scheepers bring boodskappe oor hoop, gedagtes, trauma, geloof en geestelike herstel.
-        </p>
+        <div className="nooimy-header">
+          <div className="nooimy-icon">🎤</div>
+          <h3 className="nooimy-title">Nooi Dewald Scheepers</h3>
+          <p className="nooimy-welcome">
+            Dankie dat jy belangstel om Dewald te nooi. Vul net die vorm hieronder in en ons sal so gou moontlik na jou terugkom.
+          </p>
+        </div>
+
+        <div className="nooimy-about">
+          <p className="nooimy-credibility">
+            Dewald Scheepers bedien graag by gemeentes, kampe, konferensies en ander geleenthede met boodskappe van hoop, genesing en geestelike versterking.
+          </p>
+          <p className="nooimy-credibility">
+            Sy kernboodskap fokus op mense wie se gedagtes moeg, angstig of oorlaai is — en hoe God ons denke kan vernuwe, ons harte kan genees en ons kan help om weer met vrede te leef.
+          </p>
+          <div className="nooimy-topics">
+            <p className="nooimy-topics-label">Gewilde temas</p>
+            <ul>
+              <li>Rustelose Gedagtes: Verander jou denke. Verander jou lewe.</li>
+              <li>Wen die oorlog in jou gedagtes</li>
+              <li>Lofprysing in moeilike omstandighede</li>
+              <li>Wanneer trauma, vrees en bekommernis jou kop aanval</li>
+              <li>Vergifnis, grense en innerlike genesing</li>
+            </ul>
+          </div>
+        </div>
+
+        <p className="nooimy-form-intro">Ons hoor graag van jou. Vertel ons 'n bietjie van die geleentheid hieronder.</p>
 
         <div className="nooimy-fields">
           <div className="field-group">
@@ -86,7 +109,7 @@ export default function NooimyModal({ onClose }) {
         {error && <p className="nooimy-error">{error}</p>}
 
         <button className="btn-primary nooimy-submit" onClick={submit}>
-          Stuur Uitnodiging
+          Stuur uitnodiging 🙏
         </button>
       </div>
     </div>

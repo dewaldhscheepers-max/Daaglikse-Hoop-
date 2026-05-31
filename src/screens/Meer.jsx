@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
-
-const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { checkoutCart } from '../utils/payfast'
 import { db } from '../firebase'
+
+const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
 
@@ -207,6 +207,7 @@ export default function Meer({ targetBookId, onScrolled }) {
         <h1>E-boeke</h1>
         <div className="subtitle">DEUR DEWALD SCHEEPERS</div>
         <p>Voeg boeke by jou mandjie en betaal alles saam. PDFs word outomaties na jou e-pos gestuur.</p>
+        <p style={{ fontSize: 13, marginTop: 6, color: 'rgba(255,255,255,0.8)' }}>Sukkel? <a href="mailto:info@dewaldscheepers.com" style={{ color: 'white', fontWeight: 600 }}>info@dewaldscheepers.com</a></p>
       </div>
 
       <div className="meer-body">

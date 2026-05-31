@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { trackPlay, trackShare } from '../utils/stats'
+import '../components/PopupStyles.css'
 import './Luister.css'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
@@ -126,31 +128,81 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   )
 }
 
-function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark }) {
+function NoteRow({ note, playing, onToggle, liked, likeCount, onLike, bookmarked, onBookmark, onShare }) {
   return (
     <div className="note-row">
-      <div className="note-thumb" style={{ background: note.color }}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-        </svg>
+      <div className="note-top">
+        <div className="note-thumb" style={{ background: note.color }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <div className="note-info">
+          <span className="note-title">{note.title}</span>
+          {note.scripture && <span className="note-scripture">{note.scripture}</span>}
+          {note.series    && <span className="note-series">{note.series}</span>}
+        </div>
+        <div className="note-right">
+          {note.lengthSeconds > 0 && <span className="note-length">{fmtTime(note.lengthSeconds)}</span>}
+          <button className="play-btn-small" onClick={onToggle}>
+            {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
+          </button>
+          <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
+            <HeartIcon filled={liked} size={20} />
+            {likeCount > 0 && <span>{likeCount}</span>}
+          </button>
+          <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
+            <BookmarkIcon filled={bookmarked} size={20} />
+          </button>
+        </div>
       </div>
-      <div className="note-info">
-        <span className="note-title">{note.title}</span>
-        {note.scripture && <span className="note-scripture">{note.scripture}</span>}
-        {note.series    && <span className="note-series">{note.series}</span>}
-      </div>
-      <div className="note-right">
-        {note.lengthSeconds > 0 && <span className="note-length">{fmtTime(note.lengthSeconds)}</span>}
-        <button className="play-btn-small" onClick={onToggle}>
-          {playing ? <PauseIcon size={13} /> : <PlayIcon size={13} />}
-        </button>
-        <button className={`note-like-btn ${liked ? 'liked' : ''}`} onClick={onLike}>
-          <HeartIcon filled={liked} size={16} />
-          {likeCount > 0 && <span>{likeCount}</span>}
-        </button>
-        <button className={`note-bookmark-btn ${bookmarked ? 'bookmarked' : ''}`} onClick={onBookmark}>
-          <BookmarkIcon filled={bookmarked} size={16} />
-        </button>
+      <button className="note-share-row" onClick={onShare}>
+        <ShareIcon size={12} />
+        <span>Deel hierdie boodskap</span>
+      </button>
+    </div>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="#1877F2">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  )
+}
+
+function TikTokIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.73a4.85 4.85 0 0 1-1.01-.04z"/>
+    </svg>
+  )
+}
+
+function SpotifyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="#1DB954">
+      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.36-.66.48-1.021.24-2.82-1.74-6.36-2.1-10.561-1.14-.418.12-.779-.18-.899-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.32.42.18.479.66.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.02.6-1.14 4.44-1.32 9.84-.66 13.561 1.56.361.18.54.78.24 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+    </svg>
+  )
+}
+
+function SocialLinks() {
+  return (
+    <div className="social-links">
+      <p className="social-label">Volg Dewald Scheepers</p>
+      <p className="social-desc">Kry ook kort video's, stemnotas en bemoediging op Facebook, TikTok en Spotify.</p>
+      <div className="social-btns">
+        <a className="social-btn" href="https://www.facebook.com/share/1DZwDnCjb7/" target="_blank" rel="noopener noreferrer">
+          <FacebookIcon /><span>Facebook</span>
+        </a>
+        <a className="social-btn social-btn-tiktok" href="https://www.tiktok.com/@dewald.h.scheepers?_r=1&_t=ZS-96ncVZUx5yH" target="_blank" rel="noopener noreferrer">
+          <TikTokIcon /><span>TikTok</span>
+        </a>
+        <a className="social-btn" href="https://open.spotify.com/show/76d1oJAAosj1P4aagU7Tb7?si=PJ5v-imGSz-LAUOVT2ZVug" target="_blank" rel="noopener noreferrer">
+          <SpotifyIcon /><span>Spotify</span>
+        </a>
       </div>
     </div>
   )
@@ -201,8 +253,8 @@ function SocialLinks() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
-  const { notes: cached, stale } = readCache()
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished }) {
+  const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
@@ -216,8 +268,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     try { return JSON.parse(localStorage.getItem('likedNotes') || '[]') } catch { return [] }
   })
   const [savedNotes, setSavedNotes]   = useState(readSavedNotes)
-  const [shareToast, setShareToast]     = useState(false)
-  const [bookmarkToast, setBookmarkToast] = useState(false)
+  const [shareToast, setShareToast]         = useState(false)
+  const [bookmarkToast, setBookmarkToast]   = useState(false)
+  const [listenShareNote, setListenShareNote] = useState(null)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -237,6 +290,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   const activeNote = notes.find(n => n.id === activeId) || today
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
+
+  // ── Real-time: all likes ──
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'likes'),
+      snap => {
+        const counts = {}
+        snap.docs.forEach(d => { counts[d.id] = d.data().count || 0 })
+        setLikes(prev => {
+          const next = { ...prev, ...counts }
+          writeLikesCache(next)
+          return next
+        })
+      },
+      () => {}
+    )
+    return unsub
+  }, [])
 
   // ── Fetch first page ──
   const fetchNotes = useCallback(async (silent = false) => {
@@ -280,16 +350,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     fetchNotes()
   }, [])
 
-  // ── On visibility change: silently refresh if cache is stale ──
+  // ── Deep-link: ?note=id from a shared URL ──
+  useEffect(() => {
+    if (notes.length === 0) return
+    const noteId = new URLSearchParams(window.location.search).get('note')
+    if (!noteId) return
+    if (notes.some(n => n.id === noteId)) setActiveId(noteId)
+    window.history.replaceState({}, '', '/')
+  }, [notes])
+
+  // ── On visibility change: silently refresh if cache is stale or notes empty ──
   useEffect(() => {
     function onVisible() {
       if (document.visibilityState !== 'visible') return
       const { stale: isStale } = readCache()
-      if (isStale) fetchNotes(true)
+      if (isStale || notes.length === 0) fetchNotes(true)
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [fetchNotes])
+  }, [fetchNotes, notes.length])
 
   // ── Real-time: today's note play count (1 listener) ──
   useEffect(() => {
@@ -301,22 +380,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     return unsub
   }, [today?.id])
 
-  // ── Real-time: today's note likes (1 listener) ──
-  useEffect(() => {
-    if (!today) return
-    const unsub = onSnapshot(doc(db, 'likes', today.id),
-      snap => {
-        const count = snap.exists() ? (snap.data().count || 0) : 0
-        setLikes(prev => {
-          const next = { ...prev, [today.id]: count }
-          writeLikesCache(next)
-          return next
-        })
-      },
-      () => {}
-    )
-    return unsub
-  }, [today?.id])
 
   // ── MediaSession API ──
   useEffect(() => {
@@ -350,7 +413,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
     function onTimeUpdate()     { setElapsed(audio.currentTime) }
-    function onEnded()          { setPlaying(false); onPlayingChange?.(false); setElapsed(0) }
+    function onEnded() {
+      setPlaying(false); onPlayingChange?.(false); setElapsed(0)
+      const n = parseInt(localStorage.getItem('completedListens') || '0')
+      localStorage.setItem('completedListens', String(n + 1))
+      const today = new Date().toISOString().slice(0, 10)
+      if (localStorage.getItem('listenShareShownDate') !== today) {
+        localStorage.setItem('listenShareShownDate', today)
+        onNoteFinished?.()
+      }
+    }
     function onLoadedMetadata() {
       if (!activeNote.lengthSeconds) {
         setNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n))
@@ -400,11 +472,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
     if (activeId === note.id) {
       const next = !playing
       setPlaying(next); onPlayingChange?.(next)
-      if (next && note.id === today?.id) countTodayPlay()
+      if (next) {
+        if (note.id === today?.id) countTodayPlay()
+        trackPlay(note.id)
+      }
     } else {
       setActiveId(note.id); setElapsed(0)
       setPlaying(true); onPlayingChange?.(true)
       if (note.id === today?.id) countTodayPlay()
+      trackPlay(note.id)
     }
   }
 
@@ -465,12 +541,24 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
   }
 
   async function handleShare(note) {
-    const msg  = `Ek dink vandag se boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
-    const data = { title: 'Daaglikse Hoop', text: msg, url: window.location.origin }
+    trackShare()
+    const msg = `Ek dink hierdie boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
+    const url = `${window.location.origin}?note=${note.id}`
     if (navigator.share) {
-      try { await navigator.share(data) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url }) } catch {}
     } else {
-      try { await navigator.clipboard.writeText(`${msg}\n${window.location.origin}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
+      try { await navigator.clipboard.writeText(`${msg}\n${url}`); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
+    }
+  }
+
+  async function handleListenShare() {
+    trackShare()
+    setListenShareNote(null)
+    const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(msg); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
     }
   }
 
@@ -587,6 +675,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                     onLike={() => handleLike(note.id)}
                     bookmarked={savedNotes[note.id] != null}
                     onBookmark={() => handleBookmark(note.id)}
+                    onShare={() => handleShare(note)}
                   />
                 ))}
               </>
@@ -612,6 +701,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                         onLike={() => handleLike(note.id)}
                         bookmarked={savedNotes[note.id] != null}
                         onBookmark={() => handleBookmark(note.id)}
+                        onShare={() => handleShare(note)}
                       />
                     ))}
                   </div>
@@ -647,6 +737,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
                 onLike={() => handleLike(note.id)}
                 bookmarked={savedNotes[note.id] != null}
                 onBookmark={() => handleBookmark(note.id)}
+                onShare={() => handleShare(note)}
               />
             ))}
           </div>
@@ -659,6 +750,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       {activeNote && activeId !== today.id && (
         <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
       )}
+
 
       {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
       {bookmarkToast && <div className="share-toast">Gestoor! Blaai af na onder om dit te sien 🔖</div>}

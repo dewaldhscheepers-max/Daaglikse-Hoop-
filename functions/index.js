@@ -179,7 +179,7 @@ exports.payfastItn = functions.https.onRequest(async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from:     'Daaglikse Hoop <onboarding@resend.dev>',
+        from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
         to:       email,
         reply_to: 'info@dewaldscheepers.com',
         subject:  `Jou e-boek${booksWithPdf.length > 1 ? 'e' : ''} van Daaglikse Hoop 📚`,

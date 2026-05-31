@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { subscribeToNotifications } from '../firebase'
+import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
+import { readStats } from '../utils/stats'
 import './Admin.css'
 
 const ADMIN_PIN = '2025'
@@ -12,7 +13,27 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif'
+  const [activeTab, setActiveTab] = useState('stats') // 'stats' | 'notes' | 'books' | 'notif' | 'aandgebed'
+  const [stats, setStats]           = useState(null)
+  const [statsLoading, setStatsLoading] = useState(false)
+
+  // ── Aandgebed state ──
+  const [apDate,       setApDate]       = useState(new Date().toISOString().slice(0, 10))
+  const [apCount,      setApCount]      = useState('')
+  const [apAudioFile,  setApAudioFile]  = useState(null)
+  const [apRecUrl,     setApRecUrl]     = useState(null)
+  const [apRecBlob,    setApRecBlob]    = useState(null)
+  const [apRecording,  setApRecording]  = useState(false)
+  const [apRecSecs,    setApRecSecs]    = useState(0)
+  const [apUploading,  setApUploading]  = useState(false)
+  const [apProgress,   setApProgress]   = useState(0)
+  const [apSaved,      setApSaved]      = useState(false)
+  const [apError,      setApError]      = useState('')
+  const [apList,       setApList]       = useState([])
+  const apFileRef      = useRef(null)
+  const apMrRef        = useRef(null)
+  const apChunksRef    = useRef([])
+  const apTimerRef     = useRef(null)
 
   // ── Notes state ──
   const [title, setTitle]             = useState('')
@@ -53,25 +74,87 @@ export default function Admin({ onClose }) {
   const coverInputRef                         = useRef(null)
   const [coverUploadTarget, setCoverUploadTarget] = useState(null)
 
+  // ── Email test state ──
+  const [testEmailAddr,    setTestEmailAddr]    = useState('dewald.h.scheepers@gmail.com')
+  const [testEmailBookId,  setTestEmailBookId]  = useState('')
+  const [testEmailBusy,    setTestEmailBusy]    = useState(false)
+  const [testEmailResult,  setTestEmailResult]  = useState(null)
+
   // ── Notification test state ──
-  const [notifStatus, setNotifStatus] = useState(null)
-  const [notifBusy,   setNotifBusy]   = useState(false)
+  const [notifStatus,  setNotifStatus]  = useState(null)
+  const [notifBusy,    setNotifBusy]    = useState(false)
+  const [notifDetail,  setNotifDetail]  = useState(null)
+  const [swUrl,        setSwUrl]        = useState(null)
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => setSwUrl(reg.active?.scriptURL || reg.scope))
+    }
+  }, [])
+
+  const [sendAllBusy,   setSendAllBusy]   = useState(false)
+  const [sendAllResult, setSendAllResult] = useState(null)
+  const [customTitle,   setCustomTitle]   = useState('')
+  const [customBody,    setCustomBody]    = useState('')
+
+  async function handleSendAll() {
+    if (!customTitle.trim()) { alert('Voer eers \'n titel in'); return }
+    if (!window.confirm(`Stuur aan ALMAL?\n\n"${customTitle.trim()}"\n${customBody.trim()}`)) return
+    setSendAllBusy(true)
+    setSendAllResult(null)
+    try {
+      const r = await fetch('/api/send-notifications?secret=DaaglikseHoop2025Cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: customTitle.trim(), body: customBody.trim() })
+      })
+      const data = await r.json().catch(() => ({}))
+      setSendAllResult(r.ok
+        ? `✅ Gestuur aan ${(data.fcm?.sent ?? 0) + (data.webpush?.sent ?? 0)} mense`
+        : `❌ Misluk: ${JSON.stringify(data)}`)
+    } catch (e) {
+      setSendAllResult('❌ Netwerkfout: ' + e.message)
+    }
+    setSendAllBusy(false)
+  }
+
+  async function handleTestEmail(allBooks) {
+    if (!testEmailBookId) { alert('Kies eers \'n boek'); return }
+    setTestEmailBusy(true)
+    setTestEmailResult(null)
+    try {
+      const r = await fetch('/api/test-itn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: '2025', email: testEmailAddr, bookIds: [testEmailBookId] })
+      })
+      const data = await r.json()
+      setTestEmailResult(data)
+    } catch (e) {
+      setTestEmailResult({ steps: ['❌ Netwerkfout: ' + e.message] })
+    }
+    setTestEmailBusy(false)
+  }
 
   async function handleNotifSubscribe() {
     setNotifBusy(true)
     setNotifStatus(null)
+    setNotifDetail(null)
     try {
       const perm = await Notification.requestPermission()
       if (perm !== 'granted') { setNotifStatus('denied'); setNotifBusy(false); return }
-      const ok = await subscribeToNotifications()
-      setNotifStatus(ok ? 'ok' : 'fail')
-    } catch { setNotifStatus('fail') }
+      const result = await subscribeToNotifications()
+      const token = localStorage.getItem('fcmToken')
+      setNotifDetail(token ? `Token: ${token.slice(0,30)}…` : 'Geen token')
+      setNotifStatus(result.ok ? 'ok' : 'fail')
+    } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
   }
 
   async function handleNotifTest() {
     setNotifBusy(true)
     setNotifStatus(null)
+    setNotifDetail(null)
     const token = localStorage.getItem('fcmToken')
     if (!token) { setNotifStatus('notoken'); setNotifBusy(false); return }
     try {
@@ -80,8 +163,10 @@ export default function Admin({ onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, pin: '2025' })
       })
+      const data = await r.json().catch(() => ({}))
+      setNotifDetail(JSON.stringify(data))
       setNotifStatus(r.ok ? 'testsent' : 'fail')
-    } catch { setNotifStatus('fail') }
+    } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
   }
 
@@ -95,8 +180,15 @@ export default function Admin({ onClose }) {
   const [bookAdded, setBookAdded] = useState(false)
 
   useEffect(() => {
+    if (activeTab !== 'stats' || !unlocked) return
+    setStatsLoading(true)
+    readStats().then(s => { setStats(s); setStatsLoading(false) })
+  }, [activeTab, unlocked])
+
+  useEffect(() => {
     if (!unlocked) return
     loadNotes()
+    loadAandgebede()
     const unsub = onSnapshot(collection(db, 'books'), snap => {
       const overrides = {}
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
@@ -104,6 +196,14 @@ export default function Admin({ onClose }) {
     })
     return unsub
   }, [unlocked])
+
+  async function loadAandgebede() {
+    try {
+      const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(10))
+      const snap = await getDocs(q)
+      setApList(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    } catch {}
+  }
 
   async function loadNotes() {
     setNotesLoading(true)
@@ -166,6 +266,70 @@ export default function Admin({ onClose }) {
   function checkPin() {
     if (pin === ADMIN_PIN) { setUnlocked(true); setPinError(false) }
     else { setPinError(true); setPin('') }
+  }
+
+  // ── Aandgebed recording ──
+  async function startApRecording() {
+    if (apRecUrl) URL.revokeObjectURL(apRecUrl)
+    setApRecUrl(null); setApRecBlob(null); setApAudioFile(null); setApRecSecs(0)
+    apChunksRef.current = []
+    try {
+      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', ''].find(t => !t || MediaRecorder.isTypeSupported(t))
+      const mr       = new MediaRecorder(stream, mimeType ? { mimeType } : {})
+      apMrRef.current = mr
+      mr.ondataavailable = e => { if (e.data.size > 0) apChunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        stream.getTracks().forEach(t => t.stop())
+        const mime = mr.mimeType || 'audio/webm'
+        const blob = new Blob(apChunksRef.current, { type: mime })
+        const url  = URL.createObjectURL(blob)
+        const ext  = mime.includes('mp4') ? 'm4a' : 'webm'
+        setApRecBlob(blob); setApRecUrl(url)
+        setApAudioFile(new File([blob], `aandgebed_${Date.now()}.${ext}`, { type: mime }))
+      }
+      mr.start(); setApRecording(true)
+      apTimerRef.current = setInterval(() => setApRecSecs(s => s + 1), 1000)
+    } catch { alert('Mikrofoon toegang geweier.') }
+  }
+
+  function stopApRecording() {
+    if (apMrRef.current?.state === 'recording') apMrRef.current.stop()
+    clearInterval(apTimerRef.current); setApRecording(false)
+  }
+
+  async function handleApSave() {
+    setApError('')
+    if (!apAudioFile)     { setApError('Kies of neem eers oudio op'); return }
+    if (!apCount || isNaN(Number(apCount))) { setApError('Voer die aantal gebedsversoeke in'); return }
+
+    setApUploading(true); setApProgress(0)
+    let audioUrl = ''
+    try {
+      const ext  = apAudioFile.name.split('.').pop().toLowerCase()
+      const sRef = ref(storage, `aandgebede/${apDate}.${ext}`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, apAudioFile)
+        task.on('state_changed',
+          s => setApProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
+          reject,
+          async () => { audioUrl = await getDownloadURL(task.snapshot.ref); resolve() }
+        )
+      })
+    } catch (e) { setApError('Upload misluk: ' + e.message); setApUploading(false); return }
+
+    setApUploading(false)
+    try {
+      await setDoc(doc(db, 'aandgebede', apDate), {
+        date: apDate, audioUrl, prayerCount: Number(apCount),
+        publishedAt: new Date(apDate + 'T20:00:00')
+      })
+      setApSaved(true); setTimeout(() => setApSaved(false), 3000)
+      setApAudioFile(null); setApRecUrl(null); setApRecBlob(null); setApRecSecs(0)
+      setApCount(''); setApDate(new Date().toISOString().slice(0, 10))
+      if (apFileRef.current) apFileRef.current.value = ''
+      await loadAandgebede()
+    } catch (e) { setApError('Kon nie stoor nie: ' + e.message) }
   }
 
   // ── Save voice note ──
@@ -346,18 +510,80 @@ export default function Admin({ onClose }) {
         </div>
 
         <div className="admin-tabs">
+          <button className={`admin-tab ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>
+            📊 Groei
+          </button>
           <button className={`admin-tab ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
-            🎙️ Stemnotas
+            🎙️ Notas
           </button>
           <button className={`admin-tab ${activeTab === 'books' ? 'active' : ''}`} onClick={() => setActiveTab('books')}>
-            📚 E-boeke
+            📚 Boeke
           </button>
           <button className={`admin-tab ${activeTab === 'notif' ? 'active' : ''}`} onClick={() => setActiveTab('notif')}>
-            🔔 Kennisgewings
+            🔔 Notifs
+          </button>
+          <button className={`admin-tab ${activeTab === 'aandgebed' ? 'active' : ''}`} onClick={() => setActiveTab('aandgebed')}>
+            🙏 Gebed
           </button>
         </div>
 
         <div className="admin-body">
+
+          {/* ── STATS TAB ── */}
+          {activeTab === 'stats' && (
+            <div className="admin-section">
+              <div className="admin-section-title">App Groei — Vandag &amp; Totaal</div>
+              {statsLoading && <div className="admin-loading">Laai statistieke...</div>}
+              {!statsLoading && stats && (
+                <div className="stats-grid">
+                  <div className="stat-card stat-card-accent">
+                    <div className="stat-value">{stats.installs ?? '—'}</div>
+                    <div className="stat-label">App-installasies</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{stats.opensToday ?? '—'}</div>
+                    <div className="stat-label">Vandag oopgemaak</div>
+                  </div>
+                  <div className="stat-card stat-card-accent">
+                    <div className="stat-value">{stats.notifSubscribers ?? '—'}</div>
+                    <div className="stat-label">Kennisgewings aan</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{stats.playsToday ?? '—'}</div>
+                    <div className="stat-label">Boodskap gespeel vandag</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{stats.totalPlays ?? '—'}</div>
+                    <div className="stat-label">Totale spele</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{stats.prayerRequests ?? '—'}</div>
+                    <div className="stat-label">Gebedsversoeke</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{stats.prayedTaps ?? '—'}</div>
+                    <div className="stat-label">Mense het gebid</div>
+                  </div>
+                  <div className="stat-card stat-card-accent">
+                    <div className="stat-value">{stats.appShares ?? '—'}</div>
+                    <div className="stat-label">App gedeel</div>
+                  </div>
+                </div>
+              )}
+              {!statsLoading && !stats && (
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '12px 0' }}>
+                  Nog geen data nie. Statistieke begin opbou sodra gebruikers die app gebruik.
+                </div>
+              )}
+              <button
+                className="admin-save-btn"
+                style={{ marginTop: 14 }}
+                onClick={() => { setStatsLoading(true); readStats().then(s => { setStats(s); setStatsLoading(false) }) }}
+              >
+                🔄 Verfris
+              </button>
+            </div>
+          )}
 
           {/* ── NOTES TAB ── */}
           {activeTab === 'notes' && (
@@ -510,6 +736,46 @@ export default function Admin({ onClose }) {
               <input ref={coverInputRef} type="file" accept="image/*"
                 style={{ display: 'none' }} onChange={handleCoverUpload} />
 
+              <div className="admin-section-title" style={{ marginTop: 28 }}>📧 Toets E-pos Aflewering</div>
+              <div className="admin-field">
+                <label>Boek</label>
+                <select
+                  value={testEmailBookId}
+                  onChange={e => setTestEmailBookId(e.target.value)}
+                  style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid #DDD5EC', fontSize: 14, background: '#FDFAF6' }}
+                >
+                  <option value="">— Kies 'n boek —</option>
+                  {allBooks.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>E-posadres</label>
+                <input
+                  type="email"
+                  value={testEmailAddr}
+                  onChange={e => setTestEmailAddr(e.target.value)}
+                  placeholder="jou@epos.com"
+                />
+              </div>
+              <button
+                className="admin-save-btn"
+                style={{ background: '#27713f' }}
+                onClick={() => handleTestEmail(allBooks)}
+                disabled={testEmailBusy}
+              >
+                {testEmailBusy ? 'Besig...' : '📧 Stuur toets-e-pos'}
+              </button>
+              {testEmailResult && (
+                <div style={{ marginTop: 12, background: '#f5f5f5', borderRadius: 10, padding: '12px 14px' }}>
+                  {testEmailResult.steps?.map((s, i) => (
+                    <div key={i} style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1.8,
+                      color: s.startsWith('✅') ? '#1a6b2e' : s.startsWith('❌') ? '#c0392b' : '#333' }}>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {allBooks.map(book => {
                 const override          = bookOverrides[book.id]
                 const hasPdf            = override?.pdfUrl
@@ -573,33 +839,196 @@ export default function Admin({ onClose }) {
             <div className="admin-section">
               <div className="admin-section-title">Kennisgewings Toets</div>
 
-              <div className="admin-note-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
-                <div className="admin-note-title">Toestelstatus</div>
-                <div className="admin-note-meta">
-                  {'Notification' in window
-                    ? `Toestemming: ${Notification.permission === 'granted' ? '✅ Toegelaat' : Notification.permission === 'denied' ? '❌ Geweier' : '⏳ Nog nie gevra nie'}`
-                    : '❌ Kennisgewings word nie ondersteun op hierdie toestel nie'}
-                </div>
+              <div style={{ fontSize: 12, fontFamily: 'monospace', background: '#f5f5f5', borderRadius: 6, padding: '8px 10px', marginBottom: 10, lineHeight: 1.8 }}>
+                <div>Browser: {isSamsungBrowser ? '📱 Samsung Internet (Web Push)' : '✅ Chrome/Standaard (FCM)'}</div>
+                <div>Toestemming: {
+                  'Notification' in window
+                    ? (Notification.permission === 'granted' ? '✅ granted' : Notification.permission === 'denied' ? '❌ denied' : '⏳ default')
+                    : '❌ nie ondersteun'
+                }</div>
+                <div>SW: {swUrl ? swUrl.split('/').pop() : '⏳ laai...'}</div>
+                  <div>FCM Token: {localStorage.getItem('fcmToken') ? `✅ ${localStorage.getItem('fcmToken').slice(0,25)}…` : '❌ geen'}</div>
               </div>
 
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Tik die knoppie om jou kennisgewinginskrywing te herregistreer. Dit sal jou token in Firestore stoor sodat jy oggendkennisgewings ontvang.
-              </p>
-
               {notifStatus === 'ok'       && <div className="admin-success">✅ Geregistreer! Tik nou "Stuur toets" om te bevestig.</div>}
-              {notifStatus === 'testsent' && <div className="admin-success">✅ Toets gestuur! Kyk jou foon se kennisgewings nou.</div>}
-              {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk of kennisgewings toegelaat is in jou foon se instellings.</div>}
+              {notifStatus === 'testsent' && <div className="admin-success">✅ FCM aanvaar. Kyk jou kennisgewings nou.</div>}
+              {notifStatus === 'fail'     && <div className="admin-error">❌ Misluk. Kyk instellings of kennisgewings toegelaat is.</div>}
               {notifStatus === 'denied'   && <div className="admin-error">❌ Toestemming geweier. Gaan na Instellings → Kennisgewings.</div>}
-              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer hieronder.</div>}
+              {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer.</div>}
+              {notifDetail && <div style={{ fontSize: 11, fontFamily: 'monospace', background: '#eee', borderRadius: 4, padding: '4px 8px', marginTop: 4, wordBreak: 'break-all' }}>{notifDetail}</div>}
+
+              <div className="admin-section-title" style={{ marginTop: 4, marginBottom: 8 }}>📣 Stuur boodskap aan almal</div>
+              <div className="admin-field">
+                <label>Titel *</label>
+                <input
+                  value={customTitle}
+                  onChange={e => setCustomTitle(e.target.value)}
+                  placeholder="bv. Ek bid vir jou"
+                  maxLength={60}
+                />
+              </div>
+              <div className="admin-field">
+                <label>Boodskap</label>
+                <input
+                  value={customBody}
+                  onChange={e => setCustomBody(e.target.value)}
+                  placeholder="bv. God is by jou vandag. Hy hoor jou gebede."
+                  maxLength={120}
+                />
+              </div>
+              <button
+                className="admin-save-btn"
+                style={{ background: '#5C4E8E', marginBottom: 4 }}
+                onClick={handleSendAll}
+                disabled={sendAllBusy || notifBusy}
+              >
+                {sendAllBusy ? 'Besig...' : '📣 Stuur nou aan almal'}
+              </button>
+              {sendAllResult && (
+                <div style={{ fontSize: 13, background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 8,
+                  color: sendAllResult.startsWith('✅') ? '#1a6b2e' : '#c0392b' }}>
+                  {sendAllResult}
+                </div>
+              )}
 
               <button className="admin-save-btn" onClick={handleNotifSubscribe} disabled={notifBusy}>
                 {notifBusy ? 'Besig...' : '🔔 Registreer / Herregistreer'}
               </button>
 
               <button className="admin-save-btn" style={{ background: '#27713f', marginTop: 4 }} onClick={handleNotifTest} disabled={notifBusy}>
-                {notifBusy ? 'Besig...' : '📨 Stuur toets-kennisgewinig nou'}
+                {notifBusy ? 'Besig...' : '📨 Stuur toets (app oop)'}
               </button>
+
+              {(() => {
+                const token = localStorage.getItem('fcmToken')
+                if (!token) return null
+                const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
+                return (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Toets terwyl app TOE is:</div>
+                    <button
+                      className="admin-save-btn"
+                      style={{ background: '#555', fontSize: 13 }}
+                      onClick={() => navigator.clipboard.writeText(url).catch(() => {})}
+                    >
+                      📋 Kopieer toets-skakel
+                    </button>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>
+                      1. Tik hierbo om te kopieer<br/>
+                      2. Maak die PWA toe (swipe weg)<br/>
+                      3. Plak skakel in adresbalk → Enter
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
+          )}
+
+          {/* ── AANDGEBED TAB ── */}
+          {activeTab === 'aandgebed' && (
+            <>
+              <div className="admin-section">
+                <div className="admin-section-title">Laai aandgebed op</div>
+
+                <label className="admin-label">Datum</label>
+                <input
+                  type="date"
+                  className="admin-input"
+                  value={apDate}
+                  onChange={e => setApDate(e.target.value)}
+                />
+
+                <label className="admin-label">Aantal gebedsversoeke vandag</label>
+                <input
+                  type="number"
+                  className="admin-input"
+                  placeholder="bv. 47"
+                  value={apCount}
+                  onChange={e => setApCount(e.target.value)}
+                  min="0"
+                />
+
+                <label className="admin-label">Oudio</label>
+                <div className="record-row">
+                  {!apRecording ? (
+                    <button className="record-btn" onClick={startApRecording}>
+                      🎙️ Neem op
+                    </button>
+                  ) : (
+                    <button className="record-btn recording" onClick={stopApRecording}>
+                      ⏹ Stop ({formatTime(apRecSecs)})
+                    </button>
+                  )}
+                  <span className="record-or">of</span>
+                  <label className="file-upload-label">
+                    📁 Kies lêer
+                    <input
+                      ref={apFileRef}
+                      type="file"
+                      accept="audio/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const f = e.target.files[0]
+                        if (f) { setApAudioFile(f); setApRecUrl(null) }
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {apRecUrl && (
+                  <audio src={apRecUrl} controls style={{ width: '100%', marginTop: 8 }} />
+                )}
+                {!apRecUrl && apAudioFile && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+                    ✅ {apAudioFile.name}
+                  </div>
+                )}
+
+                {apUploading && (
+                  <div className="upload-progress">
+                    <div className="upload-bar" style={{ width: `${apProgress}%` }} />
+                    <span>{apProgress}%</span>
+                  </div>
+                )}
+
+                {apError && <div className="admin-error">{apError}</div>}
+                {apSaved  && <div className="admin-success">✅ Aandgebed gestoor!</div>}
+
+                <button
+                  className="admin-save-btn"
+                  onClick={handleApSave}
+                  disabled={apUploading || apRecording}
+                >
+                  {apUploading ? 'Besig...' : 'Stoor Aandgebed'}
+                </button>
+              </div>
+
+              {apList.length > 0 && (
+                <div className="admin-section">
+                  <div className="admin-section-title">Vorige Aandgebede</div>
+                  {apList.map(ap => (
+                    <div key={ap.id} className="admin-note-row" style={{ justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{ap.date}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.prayerCount} versoeke</div>
+                      </div>
+                      <button
+                        className="admin-delete-btn"
+                        onClick={async () => {
+                          if (!window.confirm('Skrap hierdie aandgebed?')) return
+                          try {
+                            await deleteDoc(doc(db, 'aandgebede', ap.id))
+                            setApList(prev => prev.filter(x => x.id !== ap.id))
+                          } catch { alert('Kon nie skrap nie') }
+                        }}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
         </div>

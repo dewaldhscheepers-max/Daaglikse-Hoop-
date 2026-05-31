@@ -1,14 +1,21 @@
-const crypto = require('crypto')
+const crypto  = require('crypto')
+const webpush = require('web-push')
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 const ADMIN_PIN  = '2025'
+
+webpush.setVapidDetails(
+  'mailto:dewald.h.scheepers@gmail.com',
+  process.env.VAPID_PUBLIC_KEY  || 'BAnuOtTx2mu8dUar_e7CO-6a4edbIue7Qi2SMCav-ilvxJeh-W2uH4p93LCHNt4P_9A2uj3HyUoOfjulI2OmN5o',
+  process.env.VAPID_PRIVATE_KEY || ''
+)
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
   const claim  = Buffer.from(JSON.stringify({
     iss:   process.env.FIREBASE_CLIENT_EMAIL,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    scope: 'https://www.googleapis.com/auth/firebase.messaging https://www.googleapis.com/auth/datastore',
     aud:   'https://oauth2.googleapis.com/token',
     iat:   now,
     exp:   now + 3600,
@@ -28,28 +35,110 @@ async function getAccessToken() {
   return data.access_token
 }
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
-  const { token, pin } = req.body || {}
-  if (pin !== ADMIN_PIN) return res.status(401).send('Unauthorized')
-  if (!token) return res.status(400).send('No token')
-
-  try {
-    const accessToken = await getAccessToken()
-    const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: {
-          token,
-          notification: { title: '🌅 Daaglikse Hoop', body: 'Toets-kennisgewinig — dit werk!' },
-        }
-      })
+async function sendFcm(token) {
+  const accessToken = await getAccessToken()
+  const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: {
+        token,
+        notification: { title: 'Het jy 3 minute vir God?', body: 'Toets-kennisgewinig — dit werk!' },
+        data: {
+          image: 'https://dewaldscheepers.com/notification-image.jpg',
+          url:   'https://dewaldscheepers.com/',
+        },
+        webpush: {
+          headers: { Urgency: 'high', TTL: '86400' },
+        },
+      }
     })
-    const data = await r.json()
-    console.log('FCM response:', JSON.stringify(data))
-    if (!r.ok) return res.status(500).json({ error: data })
-    return res.status(200).json({ ok: true, fcm: data })
+  })
+  const data = await r.json()
+  if (!r.ok) throw new Error(JSON.stringify(data))
+  return data
+}
+
+async function getWebPushSubscription(subscriptionId, accessToken) {
+  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/webPushSubscriptions/${subscriptionId}`
+  const r = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } })
+  const data = await r.json()
+  if (!r.ok || !data.fields) throw new Error('Subscription nie gevind: ' + subscriptionId)
+  const subField = data.fields?.subscription?.mapValue?.fields
+  if (!subField?.endpoint?.stringValue) throw new Error('Ongeldige subscription data')
+  return {
+    endpoint: subField.endpoint.stringValue,
+    keys: {
+      p256dh: subField.keys?.mapValue?.fields?.p256dh?.stringValue,
+      auth:   subField.keys?.mapValue?.fields?.auth?.stringValue,
+    }
+  }
+}
+
+async function sendWebPush(subscriptionId) {
+  const accessToken  = await getAccessToken()
+  const subscription = await getWebPushSubscription(subscriptionId, accessToken)
+
+  // Samsung Internet on Android uses FCM as its push backend
+  if (subscription.endpoint.startsWith('https://fcm.googleapis.com/')) {
+    const token = subscription.endpoint.split('/').pop()
+    const data  = await sendFcm(token)
+    return { ok: true, via: 'fcm-from-samsung-endpoint', data }
+  }
+
+  await webpush.sendNotification(
+    subscription,
+    JSON.stringify({
+      source:             'webpush',
+      title:              'Het jy 3 minute vir God?',
+      body:               'Toets-kennisgewinig — dit werk!',
+      url:                'https://dewaldscheepers.com/',
+      requireInteraction: true,
+    })
+  )
+  return { ok: true, endpoint: subscription.endpoint.slice(0, 50) + '...' }
+}
+
+module.exports = async function handler(req, res) {
+  // GET: ?token=XXX&pin=2025  or  ?subscriptionId=XXX&pin=2025
+  if (req.method === 'GET') {
+    const { token, subscriptionId, pin } = req.query || {}
+    if (pin !== ADMIN_PIN) return res.status(401).send('Unauthorized')
+    try {
+      if (subscriptionId) {
+        const result = await sendWebPush(subscriptionId)
+        return res.status(200).send(`<html><body style="font-family:sans-serif;padding:24px;background:#111;color:#fff">
+          <h2>✅ Samsung Web Push gestuur!</h2>
+          <p>Kyk jou Samsung Internet kennisgewings.</p>
+          <pre style="background:#222;padding:12px;border-radius:6px">${JSON.stringify(result, null, 2)}</pre>
+        </body></html>`)
+      }
+      if (!token) return res.status(400).send('No token or subscriptionId')
+      const fcm = await sendFcm(token)
+      return res.status(200).send(`<html><body style="font-family:sans-serif;padding:24px">
+        <h2>✅ Toets gestuur!</h2>
+        <p>FCM het die boodskap aanvaar. Kyk jou foon se kennisgewings.</p>
+        <pre style="background:#eee;padding:12px;border-radius:6px">${JSON.stringify(fcm, null, 2)}</pre>
+      </body></html>`)
+    } catch (e) {
+      return res.status(500).send(`<html><body style="font-family:sans-serif;padding:24px">
+        <h2>❌ Fout</h2><pre>${e.message}</pre>
+      </body></html>`)
+    }
+  }
+
+  // POST: { token, pin }  or  { subscriptionId, pin }
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
+  const { token, subscriptionId, pin } = req.body || {}
+  if (pin !== ADMIN_PIN) return res.status(401).send('Unauthorized')
+  try {
+    if (subscriptionId) {
+      const result = await sendWebPush(subscriptionId)
+      return res.status(200).json({ ok: true, webpush: result })
+    }
+    if (!token) return res.status(400).json({ error: 'No token or subscriptionId' })
+    const fcm = await sendFcm(token)
+    return res.status(200).json({ ok: true, fcm })
   } catch (e) {
     return res.status(500).json({ error: e.message })
   }

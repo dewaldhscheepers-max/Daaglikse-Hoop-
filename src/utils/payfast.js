@@ -4,7 +4,7 @@ const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
 const PASSPHRASE   = 'DaaglikseHoop5320'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
-const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
+const ITN_URL      = 'https://dewaldscheepers.com/api/payfast-itn'
 
 function phpUrlencode(val) {
   return encodeURIComponent(String(val).trim())
@@ -35,12 +35,17 @@ function submitForm(params) {
   form.submit()
 }
 
-export function checkoutBook(book, email) {
+export function checkoutBook(book, email, type = 'ebook') {
+  if (type === 'ebook') {
+    localStorage.setItem('pendingPurchase', book.id)
+    localStorage.setItem('pendingEmail', email)
+  }
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${window.location.origin}/?payment=success`,
+    return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${window.location.origin}/?payment=cancel`,
+    notify_url:    ITN_URL,
     email_address: email,
     amount:        book.price.toFixed(2),
     item_name:     book.title.substring(0, 100),
@@ -54,12 +59,14 @@ export function checkoutCart(books, email) {
   const total = books.reduce((sum, b) => sum + b.price, 0)
   const name  = books.length === 1
     ? books[0].title.substring(0, 100)
-    : `${books.length} E-boeke — Daaglikse Hoop`
+    : books.map(b => b.title).join(', ').substring(0, 100)
 
+  localStorage.setItem('pendingPurchase', books.map(b => b.id).join(','))
+  localStorage.setItem('pendingEmail', email)
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${base}/?payment=success`,
+    return_url:    `${base}/?payment=success&type=ebook&books=${encodeURIComponent(books.map(b => b.id).join(','))}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${base}/?payment=cancel`,
     notify_url:    ITN_URL,
     email_address: email,
