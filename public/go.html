@@ -6,7 +6,6 @@
 <title>Daaglikse Hoop — Elke oggend 'n woord van hoop</title>
 <meta name="description" content="Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.">
 
-<!-- Open Graph (WhatsApp, Facebook, iMessage) -->
 <meta property="og:type"         content="website">
 <meta property="og:url"          content="https://dewaldscheepers.com/go">
 <meta property="og:title"        content="Daaglikse Hoop">
@@ -14,13 +13,10 @@
 <meta property="og:image"        content="https://dewaldscheepers.com/notification-image.jpg">
 <meta property="og:image:width"  content="800">
 <meta property="og:image:height" content="400">
-
-<!-- Twitter / X -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Daaglikse Hoop">
 <meta name="twitter:description" content="Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.">
 <meta name="twitter:image"       content="https://dewaldscheepers.com/notification-image.jpg">
-
 <link rel="icon" href="/icons/icon-192.png">
 
 <style>
@@ -51,54 +47,46 @@
     background: #fff;
     border-radius: 28px;
     padding: 36px 24px 32px;
-    max-width: 380px;
+    max-width: 400px;
     width: 100%;
     box-shadow: 0 8px 40px rgba(124,111,175,0.13);
   }
 
   .app-icon {
-    width: 76px;
-    height: 76px;
-    border-radius: 18px;
-    margin: 0 auto 16px;
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    margin: 0 auto 18px;
     display: block;
   }
 
-  .tag {
-    display: inline-block;
-    background: #EDE8F8;
-    color: var(--purple);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    border-radius: 20px;
-    padding: 4px 12px;
+  h1 {
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+
+  .byline {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 500;
     margin-bottom: 12px;
   }
 
-  h1 {
-    font-size: 27px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
-
   .subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--muted);
     line-height: 1.6;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .chrome-notice {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text);
     line-height: 1.6;
     margin-bottom: 18px;
-    padding: 14px 16px;
-    background: #EDE8F8;
-    border-radius: 14px;
   }
 
   .btn-chrome {
@@ -107,12 +95,13 @@
     background: var(--purple-dark);
     color: #fff;
     text-decoration: none;
-    padding: 17px 24px;
+    padding: 19px 24px;
     border-radius: 16px;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
-    margin-bottom: 10px;
-    letter-spacing: 0.2px;
+    margin-bottom: 12px;
+    border: none;
+    cursor: pointer;
   }
   .btn-chrome:active { background: #4a3d78; }
 
@@ -122,17 +111,19 @@
     color: var(--muted);
     text-decoration: none;
     padding: 10px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     margin-bottom: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
   .chooser-hint {
     font-size: 12px;
     color: var(--muted);
     line-height: 1.55;
-    margin-top: -6px;
-    margin-bottom: 20px;
+    margin: -4px 0 16px;
   }
 
   .divider {
@@ -153,27 +144,28 @@
   .features {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     text-align: left;
+    margin-bottom: 20px;
   }
 
   .feature {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text);
-    line-height: 1.45;
+    line-height: 1.4;
   }
 
-  .feature-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
+  .feature-icon { font-size: 20px; flex-shrink: 0; }
+  .feature strong { font-weight: 700; }
 
-  .feature strong {
-    font-weight: 700;
+  .closing {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
   }
 
   .steps {
@@ -181,7 +173,7 @@
     flex-direction: column;
     gap: 12px;
     text-align: left;
-    margin-top: 4px;
+    margin-bottom: 20px;
   }
 
   .step {
@@ -198,7 +190,7 @@
     color: #fff;
     font-weight: 800;
     font-size: 14px;
-    width: 30px;
+    min-width: 30px;
     height: 30px;
     border-radius: 50%;
     display: flex;
@@ -212,50 +204,49 @@
 <body>
   <div class="card">
     <img class="app-icon" src="/icons/icon-192.png" alt="Daaglikse Hoop">
-    <span class="tag">Deur Dewald Scheepers</span>
+
     <h1>Daaglikse Hoop</h1>
+    <p class="byline">Deur Dewald Scheepers</p>
     <p class="subtitle">Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.</p>
 
-    <!-- State A: Chrome with install prompt available -->
-    <div id="state-install" style="display:none">
-      <p class="chrome-notice">
-        Jy is in Chrome. Tik die knoppie om die app op jou tuisskerm te sit.
-      </p>
-      <button class="btn-chrome" id="btn-install">📲 Installeer Daaglikse Hoop</button>
-      <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
-    </div>
-
-    <!-- State B: Chrome — go straight to the app where the install banner shows -->
-    <div id="state-open" style="display:none">
-      <script>window.location.replace('/')</script>
-    </div>
-
-    <!-- State C: Samsung Internet / other Android browser -->
+    <!-- Samsung Internet state -->
     <div id="state-samsung" style="display:none">
-      <p class="chrome-notice">
-        Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
-      </p>
+      <p class="chrome-notice">Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.</p>
       <a class="btn-chrome"
          href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
         Maak oop in Chrome
       </a>
-      <p class="chooser-hint">
-        As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
-      </p>
+      <p class="chooser-hint">As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.</p>
       <a class="btn-continue" href="/">Gaan voort in hierdie browser</a>
     </div>
 
-    <!-- State D: iOS -->
-    <div id="state-ios" style="display:none">
-      <p class="chrome-notice">
-        Installeer die app op jou iPhone:
-      </p>
+    <!-- Chrome with install prompt -->
+    <div id="state-install" style="display:none">
+      <p class="chrome-notice">Tik om die app op jou tuisskerm te sit — een tik, klaar.</p>
+      <button class="btn-chrome" id="btn-install">📲 Installeer Daaglikse Hoop</button>
+      <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
+    </div>
+
+    <!-- Chrome, no install prompt -->
+    <div id="state-open" style="display:none">
+      <p class="chrome-notice">Om die app te installeer:</p>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><span>Tik die <strong>⬆ Deel</strong> knoppie onderaan Safari</span></div>
+        <div class="step"><span class="step-num">1</span><span>Tik <strong>⋮</strong> regs bo in Chrome</span></div>
         <div class="step"><span class="step-num">2</span><span>Kies <strong>"Voeg by tuisskerm"</strong></span></div>
-        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Voeg by"</strong> regs bo — klaar!</span></div>
+        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Installeer"</strong> — klaar!</span></div>
       </div>
-      <a class="btn-chrome" style="margin-top:20px" href="/">Maak die app oop</a>
+      <a class="btn-chrome" href="/">Maak die app oop</a>
+    </div>
+
+    <!-- iOS state -->
+    <div id="state-ios" style="display:none">
+      <p class="chrome-notice">Om die app te installeer op iPhone:</p>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><span>Tik die <strong>⬆ Deel</strong> knoppie onderaan</span></div>
+        <div class="step"><span class="step-num">2</span><span>Kies <strong>"Voeg by tuisskerm"</strong></span></div>
+        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Voeg by"</strong> — klaar!</span></div>
+      </div>
+      <a class="btn-chrome" href="/">Maak die app oop</a>
     </div>
 
     <script>
@@ -277,15 +268,12 @@
         } else if (isAndroid && !isChrome) {
           showState('samsung')
         } else {
-          // Chrome — wait up to 2s for beforeinstallprompt before showing manual steps
-          setTimeout(function () {
-            if (!deferredPrompt) showState('open')
-          }, 2000)
+          setTimeout(function () { if (!deferredPrompt) showState('open') }, 2000)
         }
       })()
 
       function showState(name) {
-        ;['install','open','samsung','ios'].forEach(function (s) {
+        ;['samsung','install','open','ios'].forEach(function (s) {
           document.getElementById('state-' + s).style.display = s === name ? 'block' : 'none'
         })
       }
@@ -293,7 +281,7 @@
       document.getElementById('btn-install').addEventListener('click', function () {
         if (!deferredPrompt) { showState('open'); return }
         deferredPrompt.prompt()
-        deferredPrompt.userChoice.then(function (r) {
+        deferredPrompt.userChoice.then(function () {
           deferredPrompt = null
           window.location.href = '/'
         })
@@ -304,23 +292,13 @@
 
     <p class="features-title">Wat jy in die app kry</p>
     <div class="features">
-      <div class="feature">
-        <span class="feature-icon">🎧</span>
-        <span><strong>Luister</strong> — daaglikse stemnotas van hoop</span>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🙏</span>
-        <span><strong>Bid Saam</strong> — deel jou gebedsversoek anoniem</span>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">📚</span>
-        <span><strong>E-boeke</strong> — gratis en betaalde hulpbronne</span>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🔔</span>
-        <span><strong>06:30 kennisgewings</strong> — jou oggendboodskap op jou foon</span>
-      </div>
+      <div class="feature"><span class="feature-icon">🎧</span><span><strong>Luister</strong> — daaglikse stemnotas van hoop</span></div>
+      <div class="feature"><span class="feature-icon">🙏</span><span><strong>Bid Saam</strong> — deel jou gebedsversoek anoniem</span></div>
+      <div class="feature"><span class="feature-icon">📚</span><span><strong>E-boeke</strong> — gratis en betaalde hulpbronne</span></div>
+      <div class="feature"><span class="feature-icon">🔔</span><span><strong>06:30 kennisgewings</strong> — jou oggendboodskap op jou foon</span></div>
     </div>
+
+    <p class="closing">"Vir die beste ervaring, maak dit in Chrome oop."</p>
   </div>
 </body>
 </html>
