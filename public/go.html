@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daaglikse Hoop — Elke oggend 'n woord van hoop</title>
-<meta name="description" content="Elke oggend 'n kort boodskap van hoop, gebed en bemoediging. Gratis. Geen registrasie.">
+<meta name="description" content="Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.">
 
 <!-- Open Graph (WhatsApp, Facebook, iMessage) -->
-<meta property="og:type"        content="website">
-<meta property="og:url"         content="https://dewaldscheepers.com/go">
-<meta property="og:title"       content="Daaglikse Hoop">
-<meta property="og:description" content="Elke oggend 'n kort boodskap van hoop, gebed en bemoediging. Gratis. Geen registrasie.">
-<meta property="og:image"       content="https://dewaldscheepers.com/notification-image.jpg">
+<meta property="og:type"         content="website">
+<meta property="og:url"          content="https://dewaldscheepers.com/go">
+<meta property="og:title"        content="Daaglikse Hoop">
+<meta property="og:description"  content="Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.">
+<meta property="og:image"        content="https://dewaldscheepers.com/notification-image.jpg">
 <meta property="og:image:width"  content="800">
 <meta property="og:image:height" content="400">
 
 <!-- Twitter / X -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Daaglikse Hoop">
-<meta name="twitter:description" content="Elke oggend 'n kort boodskap van hoop, gebed en bemoediging.">
+<meta name="twitter:description" content="Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.">
 <meta name="twitter:image"       content="https://dewaldscheepers.com/notification-image.jpg">
 
 <link rel="icon" href="/icons/icon-192.png">
@@ -29,7 +29,6 @@
   :root {
     --purple:      #7C6FAF;
     --purple-dark: #5C4E8E;
-    --lavender:    #C4B0E8;
     --cream:       #FAF8F5;
     --text:        #2D2040;
     --muted:       #8A7E9A;
@@ -44,24 +43,24 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px 60px;
+    padding: 32px 20px 48px;
     text-align: center;
   }
 
   .card {
     background: #fff;
     border-radius: 28px;
-    padding: 40px 28px 36px;
+    padding: 36px 24px 32px;
     max-width: 380px;
     width: 100%;
-    box-shadow: 0 8px 40px rgba(124,111,175,0.12);
+    box-shadow: 0 8px 40px rgba(124,111,175,0.13);
   }
 
   .app-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
-    margin: 0 auto 20px;
+    width: 76px;
+    height: 76px;
+    border-radius: 18px;
+    margin: 0 auto 16px;
     display: block;
   }
 
@@ -75,171 +74,165 @@
     text-transform: uppercase;
     border-radius: 20px;
     padding: 4px 12px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   h1 {
-    font-size: 28px;
+    font-size: 27px;
     font-weight: 800;
     color: var(--text);
-    margin-bottom: 10px;
-    line-height: 1.2;
+    margin-bottom: 8px;
   }
 
   .subtitle {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--muted);
     line-height: 1.6;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
   }
 
-  .btn-primary {
+  .chrome-notice {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    background: #EDE8F8;
+    border-radius: 14px;
+  }
+
+  .btn-chrome {
     display: block;
     width: 100%;
-    background: var(--purple);
+    background: var(--purple-dark);
     color: #fff;
     text-decoration: none;
-    padding: 16px 24px;
+    padding: 17px 24px;
     border-radius: 16px;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    transition: background 0.2s;
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: 0.2px;
   }
-  .btn-primary:active { background: var(--purple-dark); }
+  .btn-chrome:active { background: #4a3d78; }
+
+  .btn-continue {
+    display: block;
+    width: 100%;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .chooser-hint {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: -6px;
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #EDE8F8;
+    margin-bottom: 20px;
+  }
+
+  .features-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
 
   .features {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 24px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
   }
 
   .feature {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .feature-icon { font-size: 20px; }
-
-  .chrome-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 0 0 32px;
-  }
-  .chrome-overlay.show { display: flex; }
-
-  .chrome-sheet {
-    background: #fff;
-    border-radius: 24px 24px 16px 16px;
-    padding: 28px 24px 24px;
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-  }
-  .chrome-sheet h2 { font-size: 19px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
-  .chrome-sheet p  { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 20px; }
-
-  .btn-copy {
-    display: block;
-    width: 100%;
-    background: #4285f4;
-    color: #fff;
-    border: none;
-    padding: 15px 24px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-  .btn-copy.copied { background: #34a853; }
-
-  .btn-skip {
-    display: block;
-    width: 100%;
-    background: none;
-    border: none;
-    color: var(--muted);
+    align-items: flex-start;
+    gap: 12px;
     font-size: 14px;
-    padding: 10px;
-    cursor: pointer;
+    color: var(--text);
+    line-height: 1.45;
+  }
+
+  .feature-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .feature strong {
+    font-weight: 700;
   }
 </style>
-
 </head>
 
 <body>
   <div class="card">
     <img class="app-icon" src="/icons/icon-192.png" alt="Daaglikse Hoop">
-
     <span class="tag">Deur Dewald Scheepers</span>
-
     <h1>Daaglikse Hoop</h1>
+    <p class="subtitle">Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.</p>
 
-    <p class="subtitle">
-      Stemnotas, gebed, e-boeke en daaglikse<br>
-      bemoediging — alles op een plek.
+    <p class="chrome-notice">
+      Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
     </p>
 
-    <!-- Chrome / iOS / Desktop -->
-    <a class="btn-primary" id="btn-normal" href="/">Begin luister →</a>
-
-    <!-- Samsung Internet / non-Chrome Android -->
-    <div id="chrome-section" style="display:none">
-      <p style="font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:16px;">
-        Vir die beste ervaring met installasie en kennisgewings,<br>gebruik asseblief Google Chrome.<br><br>Tik hieronder:
-      </p>
-      <a class="btn-primary"
-         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
-        Maak oop in Chrome
-      </a>
-      <p style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5;">
-        As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
-      </p>
-    </div>
+    <a class="btn-chrome" id="btn-chrome" href="/">Maak oop in Chrome</a>
+    <p class="chooser-hint" id="chooser-hint" style="display:none">
+      As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
+    </p>
+    <a class="btn-continue" href="/">Gaan voort in hierdie browser</a>
 
     <script>
       (function () {
         var ua = navigator.userAgent
         var isAndroid = /Android/i.test(ua)
         var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
+        var isIOS     = /iPhone|iPad|iPod/i.test(ua)
+
         if (isAndroid && !isChrome) {
-          document.getElementById('btn-normal').style.display = 'none'
-          document.getElementById('chrome-section').style.display = 'block'
+          document.getElementById('btn-chrome').href =
+            'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end'
+          document.getElementById('chooser-hint').style.display = 'block'
+        } else if (isIOS) {
+          document.getElementById('btn-chrome').href = 'googlechrome://navigate?url=https://dewaldscheepers.com/'
         }
       })()
     </script>
 
+    <hr class="divider">
+
+    <p class="features-title">Wat jy in die app kry</p>
     <div class="features">
       <div class="feature">
         <span class="feature-icon">🎧</span>
-        <span>Stemnotas</span>
+        <span><strong>Luister</strong> — daaglikse stemnotas van hoop</span>
       </div>
       <div class="feature">
         <span class="feature-icon">🙏</span>
-        <span>Gebedsruimte</span>
+        <span><strong>Bid Saam</strong> — deel jou gebedsversoek anoniem</span>
       </div>
       <div class="feature">
-        <span class="feature-icon">📖</span>
-        <span>E-boeke</span>
+        <span class="feature-icon">📚</span>
+        <span><strong>E-boeke</strong> — gratis en betaalde hulpbronne</span>
       </div>
       <div class="feature">
         <span class="feature-icon">🔔</span>
-        <span>6:30 kennisgewings</span>
+        <span><strong>06:30 kennisgewings</strong> — jou oggendboodskap op jou foon</span>
       </div>
     </div>
   </div>
-
 </body>
 </html>
