@@ -282,12 +282,15 @@ export default function App() {
         <span>Luister maklik elke oggend sonder om deur jou browser te soek.</span>
       </div>
       <div className="install-persist-actions">
-        <button className="install-persist-btn" onClick={handleInstallCta}>
-          Sit op my foon
-        </button>
-        <button className="install-persist-help" onClick={() => setShowInstallHelp(true)}>
-          Wys my hoe
-        </button>
+        {installPrompt ? (
+          <button className="install-persist-btn" onClick={handleInstallCta}>
+            Sit op my foon
+          </button>
+        ) : (
+          <button className="install-persist-btn" onClick={() => setShowInstallHelp(true)}>
+            Hoe om te installeer
+          </button>
+        )}
       </div>
       <button className="install-persist-close" onClick={() => setInstallBannerDismissed(true)}>✕</button>
     </div>
