@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
   if (!data || data.payment_status !== 'COMPLETE') return res.status(200).send('OK')
 
   const email   = data.custom_str1
-  const bookIds = (data.custom_str2 || '').split(',').filter(Boolean)
+  const bookIds = (data.custom_str2 || '').split(',').filter(Boolean).filter(id => id !== 'skenking')
   if (!email || bookIds.length === 0) return res.status(200).send('OK')
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
