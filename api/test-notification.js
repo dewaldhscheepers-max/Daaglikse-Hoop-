@@ -45,8 +45,8 @@ async function sendFcm(token) {
         token,
         notification: { title: 'Het jy 3 minute vir God?', body: 'Toets-kennisgewinig — dit werk!' },
         data: {
-          image: 'https://daagliksehoop.vercel.app/notification-image.jpg',
-          url:   'https://daagliksehoop.vercel.app/',
+          image: 'https://dewaldscheepers.com/notification-image.jpg',
+          url:   'https://dewaldscheepers.com/',
         },
         webpush: {
           headers: { Urgency: 'high', TTL: '86400' },
@@ -92,7 +92,7 @@ async function sendWebPush(subscriptionId) {
       source:             'webpush',
       title:              'Het jy 3 minute vir God?',
       body:               'Toets-kennisgewinig — dit werk!',
-      url:                'https://daagliksehoop.vercel.app/',
+      url:                'https://dewaldscheepers.com/',
       requireInteraction: true,
     })
   )

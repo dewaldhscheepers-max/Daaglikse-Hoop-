@@ -45,7 +45,7 @@ export function InstallPopup({ onInstall, onLater, onHelp }) {
   )
 }
 
-const SHARE_MSG = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app/go'
+const SHARE_MSG = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://dewaldscheepers.com/go'
 const WA_GROUP_URL = `https://wa.me/?text=${encodeURIComponent(SHARE_MSG)}`
 
 export function SharePopup({ onShare, onDone, onLater }) {

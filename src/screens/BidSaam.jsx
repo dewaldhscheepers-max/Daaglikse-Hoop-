@@ -87,9 +87,9 @@ function EveningPrayerPlayer({ prayer }) {
   }
 
   async function share() {
-    const text = `Luister hoe daar vanaand saam met ons gebid is:\nhttps://daagliksehoop.vercel.app/go`
+    const text = `Luister hoe daar vanaand saam met ons gebid is:\nhttps://dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://daagliksehoop.vercel.app/go' }) }
+      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://dewaldscheepers.com/go' }) }
       catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
@@ -278,9 +278,9 @@ export default function BidSaam() {
   }
 
   async function shareArchivePrayer(prayer) {
-    const text = `Luister hoe daar op ${formatDate(prayer.date)} saam gebid is:\nhttps://daagliksehoop.vercel.app/go`
+    const text = `Luister hoe daar op ${formatDate(prayer.date)} saam gebid is:\nhttps://dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://daagliksehoop.vercel.app/go' }) }
+      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://dewaldscheepers.com/go' }) }
       catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')

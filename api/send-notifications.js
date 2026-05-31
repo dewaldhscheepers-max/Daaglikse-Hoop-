@@ -98,8 +98,8 @@ async function sendFcm(token, title, body, accessToken) {
         token,
         notification: { title, body },
         data: {
-          image: 'https://daagliksehoop.vercel.app/notification-image.jpg',
-          url:   'https://daagliksehoop.vercel.app/',
+          image: 'https://dewaldscheepers.com/notification-image.jpg',
+          url:   'https://dewaldscheepers.com/',
         },
         webpush: {
           headers: { Urgency: 'high', TTL: '86400' },
@@ -126,7 +126,7 @@ async function sendWebPush(subscription, title, body, accessToken) {
   try {
     await webpush.sendNotification(
       subscription,
-      JSON.stringify({ source: 'webpush', title, body, url: 'https://daagliksehoop.vercel.app/', requireInteraction: true })
+      JSON.stringify({ source: 'webpush', title, body, url: 'https://dewaldscheepers.com/', requireInteraction: true })
     )
     return true
   } catch (e) {

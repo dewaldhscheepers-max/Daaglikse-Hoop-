@@ -4,7 +4,7 @@ const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
 const PASSPHRASE   = 'DaaglikseHoop5320'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
-const ITN_URL      = 'https://daagliksehoop.vercel.app/api/payfast-itn'
+const ITN_URL      = 'https://dewaldscheepers.com/api/payfast-itn'
 
 function phpUrlencode(val) {
   return encodeURIComponent(String(val).trim())
