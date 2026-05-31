@@ -153,7 +153,7 @@ module.exports = async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
+        from:     'Daaglikse Hoop <onboarding@resend.dev>',
         to:       email,
         reply_to: 'info@dewaldscheepers.com',
         subject:  `Jou e-boek${booksWithPdf.length !== 1 ? 'e' : ''}: ${titles}`,
