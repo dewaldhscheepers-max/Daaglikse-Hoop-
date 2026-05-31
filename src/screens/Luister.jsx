@@ -298,16 +298,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     window.history.replaceState({}, '', '/')
   }, [notes])
 
-  // ── On visibility change: silently refresh if cache is stale ──
+  // ── On visibility change: silently refresh if cache is stale or notes empty ──
   useEffect(() => {
     function onVisible() {
       if (document.visibilityState !== 'visible') return
       const { stale: isStale } = readCache()
-      if (isStale) fetchNotes(true)
+      if (isStale || notes.length === 0) fetchNotes(true)
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [fetchNotes])
+  }, [fetchNotes, notes.length])
 
   // ── Real-time: today's note play count (1 listener) ──
   useEffect(() => {
