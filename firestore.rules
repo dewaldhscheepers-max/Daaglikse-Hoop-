@@ -39,6 +39,12 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Purchase records — written by server only, admin reads via console
+    match /purchases/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
     // Anonymous growth stats — anyone can increment, admin reads
     match /stats/{id} {
       allow read:  if true;

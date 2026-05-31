@@ -54,7 +54,7 @@ export function checkoutCart(books, email) {
   const total = books.reduce((sum, b) => sum + b.price, 0)
   const name  = books.length === 1
     ? books[0].title.substring(0, 100)
-    : `${books.length} E-boeke — Daaglikse Hoop`
+    : books.map(b => b.title).join(', ').substring(0, 100)
 
   submitForm({
     merchant_id:   MERCHANT_ID,
