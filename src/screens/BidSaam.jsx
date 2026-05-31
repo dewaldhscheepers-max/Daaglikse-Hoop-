@@ -29,7 +29,7 @@ function PrayingHandsIcon() {
 
 function PlayIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style={{flexShrink:0}}>
       <polygon points="5,3 19,12 5,21"/>
     </svg>
   )
@@ -37,7 +37,7 @@ function PlayIcon() {
 
 function PauseIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style={{flexShrink:0}}>
       <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
     </svg>
   )
