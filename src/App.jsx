@@ -91,7 +91,6 @@ export default function App() {
     const timer = setTimeout(() => {
       const today     = new Date().toISOString().slice(0, 10)
       if (!isInstalled) return
-      if (localStorage.getItem('installPopupDate') === today) return
       if (localStorage.getItem('lastPopupDate') === today) return
 
       const thisMonth = new Date().toISOString().slice(0, 7)
@@ -336,7 +335,7 @@ export default function App() {
     <div className="app">
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
-          {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => setActivePopup({ type: 'share' })} />}
+          {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (!pendingPopup) setActivePopup({ type: 'share' }) }} />}
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
         </ErrorBoundary>
