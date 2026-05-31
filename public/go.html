@@ -185,31 +185,86 @@
     <h1>Daaglikse Hoop</h1>
     <p class="subtitle">Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.</p>
 
-    <p class="chrome-notice">
-      Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
-    </p>
+    <!-- State A: Chrome with install prompt available -->
+    <div id="state-install" style="display:none">
+      <p class="chrome-notice">
+        Jy is in Chrome. Installeer die app op jou tuisskerm vir <strong>06:30 kennisgewings</strong> en vinnige toegang.
+      </p>
+      <button class="btn-chrome" id="btn-install">📲 Installeer Daaglikse Hoop</button>
+      <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
+    </div>
 
-    <a class="btn-chrome" id="btn-chrome" href="/">Maak oop in Chrome</a>
-    <p class="chooser-hint" id="chooser-hint" style="display:none">
-      As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
-    </p>
-    <a class="btn-continue" href="/">Gaan voort in hierdie browser</a>
+    <!-- State B: Chrome but no install prompt (already installed / desktop) -->
+    <div id="state-open" style="display:none">
+      <p class="chrome-notice">
+        Jy is in Chrome. Tik om die app oop te maak.
+      </p>
+      <a class="btn-chrome" href="/">Maak Daaglikse Hoop oop</a>
+    </div>
+
+    <!-- State C: Samsung Internet / other Android browser -->
+    <div id="state-samsung" style="display:none">
+      <p class="chrome-notice">
+        Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
+      </p>
+      <a class="btn-chrome"
+         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
+        Maak oop in Chrome
+      </a>
+      <p class="chooser-hint">
+        As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
+      </p>
+      <a class="btn-continue" href="/">Gaan voort in hierdie browser</a>
+    </div>
+
+    <!-- State D: iOS -->
+    <div id="state-ios" style="display:none">
+      <p class="chrome-notice">
+        Tik <strong>Deel</strong> (⬆) onderaan Safari en kies <strong>"Voeg by tuisskerm"</strong> om die app te installeer.
+      </p>
+      <a class="btn-chrome" href="/">Maak die app oop</a>
+    </div>
 
     <script>
-      (function () {
-        var ua = navigator.userAgent
+      var deferredPrompt = null
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault()
+        deferredPrompt = e
+        showState('install')
+      })
+
+      ;(function () {
+        var ua        = navigator.userAgent
         var isAndroid = /Android/i.test(ua)
         var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
         var isIOS     = /iPhone|iPad|iPod/i.test(ua)
 
-        if (isAndroid && !isChrome) {
-          document.getElementById('btn-chrome').href =
-            'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end'
-          document.getElementById('chooser-hint').style.display = 'block'
-        } else if (isIOS) {
-          document.getElementById('btn-chrome').href = 'googlechrome://navigate?url=https://dewaldscheepers.com/'
+        if (isIOS) {
+          showState('ios')
+        } else if (isAndroid && !isChrome) {
+          showState('samsung')
+        } else {
+          // Chrome on Android or desktop — wait briefly for beforeinstallprompt
+          setTimeout(function () {
+            if (!deferredPrompt) showState('open')
+          }, 400)
         }
       })()
+
+      function showState(name) {
+        ;['install','open','samsung','ios'].forEach(function (s) {
+          document.getElementById('state-' + s).style.display = s === name ? 'block' : 'none'
+        })
+      }
+
+      document.getElementById('btn-install').addEventListener('click', function () {
+        if (!deferredPrompt) { window.location.href = '/'; return }
+        deferredPrompt.prompt()
+        deferredPrompt.userChoice.then(function (r) {
+          deferredPrompt = null
+          if (r.outcome === 'accepted') showState('open')
+        })
+      })
     </script>
 
     <hr class="divider">
