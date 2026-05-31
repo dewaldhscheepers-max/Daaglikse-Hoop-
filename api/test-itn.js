@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
       method:  'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from:    'Daaglikse Hoop <onboarding@resend.dev>',
+        from:    'Daaglikse Hoop <noreply@dewaldscheepers.com>',
         to:      email,
         subject: `[TOETS] Jou e-boeke: ${titles}`,
         html,

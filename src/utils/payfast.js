@@ -41,6 +41,7 @@ export function checkoutBook(book, email, type = 'ebook') {
     merchant_key:  MERCHANT_KEY,
     return_url:    `${window.location.origin}/?payment=success&type=${type}`,
     cancel_url:    `${window.location.origin}/?payment=cancel`,
+    notify_url:    ITN_URL,
     email_address: email,
     amount:        book.price.toFixed(2),
     item_name:     book.title.substring(0, 100),
