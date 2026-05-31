@@ -38,5 +38,29 @@ service cloud.firestore {
       allow create: if true;
       allow update, delete: if false;
     }
+
+    // Anonymous growth stats — anyone can increment, admin reads
+    match /stats/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Voice note play counts per note
+    match /plays/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Voice notes — read by all, written by admin only
+    match /notes/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
+    // Books — read by all, written by admin only
+    match /books/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
   }
 }
