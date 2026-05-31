@@ -177,17 +177,6 @@
   }
 </style>
 
-<script>
-  var ua        = navigator.userAgent
-  var isAndroid = /Android/i.test(ua)
-
-  document.addEventListener('DOMContentLoaded', function () {
-    if (isAndroid) {
-      document.getElementById('start-btn').href =
-        'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end'
-    }
-  })
-</script>
 </head>
 
 <body>
@@ -204,6 +193,7 @@
     </p>
 
     <a class="btn-primary" id="start-btn" href="/">Begin luister →</a>
+    <script>if(/Android/i.test(navigator.userAgent)){document.getElementById('start-btn').href='intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end';}</script>
 
     <div class="features">
       <div class="feature">
