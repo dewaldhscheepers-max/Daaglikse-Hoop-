@@ -3,7 +3,7 @@ import { db } from '../firebase'
 import {
   collection, addDoc, updateDoc, doc,
   serverTimestamp, orderBy, query, where, limit,
-  increment, Timestamp, onSnapshot, getDocs
+  increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
 import { trackPrayerRequest, trackPrayedTap } from '../utils/stats'
 import './BidSaam.css'
@@ -71,16 +71,15 @@ function EveningPrayerPlayer({ prayer }) {
   const [duration, setDuration] = useState(0)
   const audioRef = useRef(null)
 
-  const [amenCount, setAmenCount] = useState(prayer.amenCount || 0)
   const [amened, setAmened] = useState(() => {
     try { return JSON.parse(localStorage.getItem('amenedPrayers') || '[]').includes(prayer.id) }
     catch { return false }
   })
+  const amenCount = prayer.amenCount || 0
 
   async function handleAmen() {
     if (amened) return
     setAmened(true)
-    setAmenCount(c => c + 1)
     try {
       const list = JSON.parse(localStorage.getItem('amenedPrayers') || '[]')
       localStorage.setItem('amenedPrayers', JSON.stringify([...list, prayer.id]))
@@ -220,10 +219,9 @@ export default function BidSaam() {
   }, [])
 
   useEffect(() => {
-    async function fetchAandgebede() {
-      try {
-        const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(8))
-        const snap = await getDocs(q)
+    const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(8))
+    const unsub = onSnapshot(q,
+      snap => {
         const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         if (list.length === 0) return
         setTodayPrayer(list[0])
@@ -232,9 +230,10 @@ export default function BidSaam() {
           localStorage.setItem('cachedTodayPrayer', JSON.stringify(list[0]))
           localStorage.setItem('cachedPrevPrayers', JSON.stringify(list.slice(1)))
         } catch {}
-      } catch {}
-    }
-    fetchAandgebede()
+      },
+      () => {}
+    )
+    return unsub
   }, [today])
 
   async function submit() {
