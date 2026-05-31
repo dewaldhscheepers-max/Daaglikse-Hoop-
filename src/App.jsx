@@ -281,7 +281,7 @@ export default function App() {
   ) : null
 
   // ── Persistent install banner ──
-  const persistBanner = !isInstalled && !installBannerDismissed ? (
+  const persistBanner = !isInstalled ? (
     <div className="install-persist-banner">
       <div className="install-persist-text">
         <strong>Sit Daaglikse Hoop op jou foon</strong>
@@ -295,7 +295,6 @@ export default function App() {
           Wys my hoe
         </button>
       </div>
-      <button className="install-persist-close" onClick={() => setInstallBannerDismissed(true)}>✕</button>
     </div>
   ) : null
 
