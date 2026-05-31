@@ -36,6 +36,7 @@ function submitForm(params) {
 }
 
 export function checkoutBook(book, email, type = 'ebook') {
+  if (type === 'ebook') localStorage.setItem('pendingPurchase', book.id)
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
@@ -57,6 +58,7 @@ export function checkoutCart(books, email) {
     ? books[0].title.substring(0, 100)
     : books.map(b => b.title).join(', ').substring(0, 100)
 
+  localStorage.setItem('pendingPurchase', books.map(b => b.id).join(','))
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,

@@ -238,7 +238,10 @@ export default function App() {
     const params   = new URLSearchParams(window.location.search)
     const status   = params.get('payment')
     const type     = params.get('type') || 'ebook'
-    const bookIds  = (params.get('books') || '').split(',').filter(Boolean)
+    const urlBooks     = (params.get('books') || '').split(',').filter(Boolean)
+    const storedBooks  = (localStorage.getItem('pendingPurchase') || '').split(',').filter(Boolean)
+    const bookIds      = urlBooks.length > 0 ? urlBooks : storedBooks
+    localStorage.removeItem('pendingPurchase')
     if (status === 'success') {
       setTab('meer')
       window.history.replaceState({}, '', '/')
