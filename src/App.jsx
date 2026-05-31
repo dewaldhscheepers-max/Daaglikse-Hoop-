@@ -9,7 +9,8 @@ import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
-import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser } from './firebase'
+import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, db } from './firebase'
+import { getDoc, doc } from 'firebase/firestore'
 import { trackInstall, trackOpen, trackNotifSubscriber, trackShare } from './utils/stats'
 import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
@@ -234,14 +235,30 @@ export default function App() {
   }
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const status = params.get('payment')
-    const title  = params.get('title')
-    const type   = params.get('type') || 'ebook'
+    const params   = new URLSearchParams(window.location.search)
+    const status   = params.get('payment')
+    const type     = params.get('type') || 'ebook'
+    const bookIds  = (params.get('books') || '').split(',').filter(Boolean)
     if (status === 'success') {
-      setPayment({ status: 'success', type, title: decodeURIComponent(title || '') })
       setTab('meer')
       window.history.replaceState({}, '', '/')
+      if (type === 'ebook' && bookIds.length > 0) {
+        Promise.all(bookIds.map(async id => {
+          try {
+            const snap       = await getDoc(doc(db, 'books', id))
+            const fsData     = snap.data() || {}
+            const staticBook = BOOKS.find(b => b.id === id) || {}
+            return { id, title: staticBook.title || id, pdfUrl: fsData.pdfUrl || staticBook.pdfUrl || null }
+          } catch {
+            const staticBook = BOOKS.find(b => b.id === id) || {}
+            return { id, title: staticBook.title || id, pdfUrl: staticBook.pdfUrl || null }
+          }
+        })).then(purchasedBooks => {
+          setPayment({ status: 'success', type, count: bookIds.length, purchasedBooks })
+        })
+      } else {
+        setPayment({ status: 'success', type, count: bookIds.length })
+      }
     } else if (status === 'cancel') {
       setPayment({ status: 'cancel' })
       setTab('meer')
@@ -383,7 +400,17 @@ export default function App() {
                   Jou e-boek{paymentResult.count > 1 ? 'e is' : ' is'} op pad na jou e-pos.<br />
                   <strong>Geen wag nie — dit kom outomaties.</strong>
                 </p>
-                <p className="payment-popup-note">Kyk ook jou spam-houer as jy dit nie sien nie.</p>
+                {paymentResult.purchasedBooks?.some(b => b.pdfUrl) && (
+                  <div className="payment-popup-downloads">
+                    <p className="payment-popup-download-label">Of laai direk af:</p>
+                    {paymentResult.purchasedBooks.filter(b => b.pdfUrl).map(b => (
+                      <a key={b.id} href={b.pdfUrl} target="_blank" rel="noopener noreferrer" className="payment-popup-download-btn">
+                        📥 {b.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <p className="payment-popup-note">Kyk ook jou spam-houer as jy die e-pos nie sien nie.</p>
               </>
             )}
             <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
