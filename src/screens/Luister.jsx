@@ -376,9 +376,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       setPlaying(false); onPlayingChange?.(false); setElapsed(0)
       const n = parseInt(localStorage.getItem('completedListens') || '0')
       localStorage.setItem('completedListens', String(n + 1))
-      const today = new Date().toISOString().slice(0, 10)
-      if (localStorage.getItem('listenShareShownDate') !== today) {
-        localStorage.setItem('listenShareShownDate', today)
+      const sharedAt = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
+      const laterAt  = parseInt(localStorage.getItem('sharePopupLaterAt')  || '0')
+      if (Date.now() - sharedAt > 10 * 24 * 60 * 60 * 1000 &&
+          Date.now() - laterAt  >  3 * 24 * 60 * 60 * 1000) {
         onNoteFinished?.()
       }
     }
