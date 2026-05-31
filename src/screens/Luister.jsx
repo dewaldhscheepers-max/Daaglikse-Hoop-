@@ -274,7 +274,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
   const fetchedAllRef                 = useRef(false)
-  const [playCount, setPlayCount]   = useState(0)
+  const [playCounts, setPlayCounts] = useState({})
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -289,6 +289,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const activeNote = notes.find(n => n.id === activeId) || today
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
+  const playCount  = today ? (playCounts[today.id] || 0) : 0
 
   // ── Real-time: all likes ──
   useEffect(() => {
@@ -369,15 +370,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [fetchNotes, notes.length])
 
-  // ── Real-time: today's note play count (1 listener) ──
+  // ── Real-time: all play counts (fires the moment anyone plays) ──
   useEffect(() => {
-    if (!today) return
-    const unsub = onSnapshot(doc(db, 'plays', today.id),
-      snap => setPlayCount(snap.exists() ? (snap.data().count || 0) : 0),
+    const unsub = onSnapshot(collection(db, 'plays'),
+      snap => {
+        const counts = {}
+        snap.docs.forEach(d => { counts[d.id] = d.data().count || 0 })
+        setPlayCounts(counts)
+      },
       () => {}
     )
     return unsub
-  }, [today?.id])
+  }, [])
 
 
   // ── MediaSession API ──
@@ -463,7 +467,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   async function countTodayPlay() {
     if (playedRef.current || !today) return
     playedRef.current = true
-    setPlayCount(c => c + 1)
+    setPlayCounts(prev => ({ ...prev, [today.id]: (prev[today.id] || 0) + 1 }))
     try { await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true }) } catch {}
   }
 
