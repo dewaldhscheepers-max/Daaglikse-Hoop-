@@ -192,8 +192,34 @@
       bemoediging — alles op een plek.
     </p>
 
-    <a class="btn-primary" id="start-btn" href="/">Begin luister →</a>
-    <script>if(/Android/i.test(navigator.userAgent)){document.getElementById('start-btn').href='intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end';}</script>
+    <!-- Chrome / iOS / Desktop -->
+    <a class="btn-primary" id="btn-normal" href="/">Begin luister →</a>
+
+    <!-- Samsung Internet / non-Chrome Android -->
+    <div id="chrome-section" style="display:none">
+      <p style="font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:16px;">
+        Vir die beste ervaring met installasie en kennisgewings,<br>gebruik asseblief Google Chrome.<br><br>Tik hieronder:
+      </p>
+      <a class="btn-primary"
+         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
+        Maak oop in Chrome
+      </a>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5;">
+        As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.
+      </p>
+    </div>
+
+    <script>
+      (function () {
+        var ua = navigator.userAgent
+        var isAndroid = /Android/i.test(ua)
+        var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
+        if (isAndroid && !isChrome) {
+          document.getElementById('btn-normal').style.display = 'none'
+          document.getElementById('chrome-section').style.display = 'block'
+        }
+      })()
+    </script>
 
     <div class="features">
       <div class="feature">
