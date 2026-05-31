@@ -49,11 +49,14 @@ module.exports = async function handler(req, res) {
     data = Object.fromEntries(new URLSearchParams(data))
   }
 
-  if (!data || data.payment_status !== 'COMPLETE') return res.status(200).send('OK')
+  // Respond 200 immediately so PayFast doesn't time out waiting for us
+  res.status(200).send('OK')
+
+  if (!data || data.payment_status !== 'COMPLETE') return
 
   const email   = data.custom_str1
   const bookIds = (data.custom_str2 || '').split(',').filter(Boolean).filter(id => id !== 'skenking')
-  if (!email || bookIds.length === 0) return res.status(200).send('OK')
+  if (!email || bookIds.length === 0) return
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 
@@ -179,6 +182,4 @@ module.exports = async function handler(req, res) {
       resendResponse: { stringValue: resendResult.slice(0, 500) },
     })
   }
-
-  res.status(200).send('OK')
 }
