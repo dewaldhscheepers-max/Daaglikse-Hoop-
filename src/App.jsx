@@ -90,20 +90,21 @@ export default function App() {
   // ── Popup manager ──
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Don't show donation/ebook popup on same day as install popup
       const today     = new Date().toISOString().slice(0, 10)
       if (!isInstalled) return
       if (localStorage.getItem('installPopupDate') === today) return
+      if (localStorage.getItem('lastPopupDate') === today) return
 
       const thisMonth = new Date().toISOString().slice(0, 7)
+      const appOpenDays = JSON.parse(localStorage.getItem('appOpenDays') || '[]')
 
-      if (localStorage.getItem('lastPopupDate') === today) return
+      // Don't show ebook/donation to someone who only opened the app once
+      if (appOpenDays.length < 2) return
 
       const seenEbooks  = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
       const unseenBook  = BOOKS.find(b => !seenEbooks.includes(b.id))
       const donationDue = localStorage.getItem('donationPopupMonth') !== thisMonth
 
-      const appOpenDays      = JSON.parse(localStorage.getItem('appOpenDays') || '[]')
       const completedListens = parseInt(localStorage.getItem('completedListens') || '0')
       const shareSharedAt    = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
       const shareLaterAt     = parseInt(localStorage.getItem('sharePopupLaterAt') || '0')
@@ -128,7 +129,7 @@ export default function App() {
       } else {
         setActivePopup(popup)
       }
-    }, 5000)
+    }, 30000)
 
     return () => clearTimeout(timer)
   }, [isInstalled])
