@@ -157,15 +157,17 @@
 
 <script>
   var ua        = navigator.userAgent
-  var isSamsung = /SamsungBrowser/i.test(ua)
   var isAndroid = /Android/i.test(ua)
 
-  // Show Samsung chrome prompt only for Samsung Browser on Android
-  if (isSamsung && isAndroid) {
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('chrome-prompt').style.display = 'block'
-    })
+  function getStartUrl() {
+    if (isAndroid) return 'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end'
+    return '/'
   }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('start-btn')
+    btn.href = getStartUrl()
+  })
 </script>
 </head>
 
@@ -182,7 +184,7 @@
       gebed en bemoediging — gratis.
     </p>
 
-    <a class="btn-primary" href="/">Begin luister →</a>
+    <a class="btn-primary" id="start-btn" href="/">Begin luister →</a>
 
     <div class="features">
       <div class="feature">
@@ -201,16 +203,6 @@
         <span class="feature-icon">🔔</span>
         <span>6:30 kennisgewings</span>
       </div>
-    </div>
-
-    <div class="chrome-prompt" id="chrome-prompt">
-      <p>
-        Vir <strong>daaglikse 6:30 kennisgewings</strong>, maak die app in Chrome oop.
-      </p>
-      <a class="btn-chrome"
-         href="intent://dewaldscheepers.com/go#Intent;scheme=https;package=com.android.chrome;end">
-        🔵 Maak in Chrome oop
-      </a>
     </div>
   </div>
 </body>
