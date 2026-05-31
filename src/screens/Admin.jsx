@@ -4,7 +4,6 @@ import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
-import { readStats } from '../utils/stats'
 import './Admin.css'
 
 const ADMIN_PIN = '2025'
@@ -13,9 +12,7 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('stats') // 'stats' | 'notes' | 'books' | 'notif' | 'aandgebed'
-  const [stats, setStats]           = useState(null)
-  const [statsLoading, setStatsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed'
 
   // ── Aandgebed state ──
   const [apDate,       setApDate]       = useState(new Date().toISOString().slice(0, 10))
@@ -178,12 +175,6 @@ export default function Admin({ onClose }) {
   const [newEmoji, setNewEmoji]   = useState('📚')
   const [addingBook, setAddingBook] = useState(false)
   const [bookAdded, setBookAdded] = useState(false)
-
-  useEffect(() => {
-    if (activeTab !== 'stats' || !unlocked) return
-    setStatsLoading(true)
-    readStats().then(s => { setStats(s); setStatsLoading(false) })
-  }, [activeTab, unlocked])
 
   useEffect(() => {
     if (!unlocked) return
@@ -510,9 +501,6 @@ export default function Admin({ onClose }) {
         </div>
 
         <div className="admin-tabs">
-          <button className={`admin-tab ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>
-            📊 Groei
-          </button>
           <button className={`admin-tab ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
             🎙️ Notas
           </button>
@@ -528,62 +516,6 @@ export default function Admin({ onClose }) {
         </div>
 
         <div className="admin-body">
-
-          {/* ── STATS TAB ── */}
-          {activeTab === 'stats' && (
-            <div className="admin-section">
-              <div className="admin-section-title">App Groei — Vandag &amp; Totaal</div>
-              {statsLoading && <div className="admin-loading">Laai statistieke...</div>}
-              {!statsLoading && stats && (
-                <div className="stats-grid">
-                  <div className="stat-card stat-card-accent">
-                    <div className="stat-value">{stats.installs ?? '—'}</div>
-                    <div className="stat-label">App-installasies</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{stats.opensToday ?? '—'}</div>
-                    <div className="stat-label">Vandag oopgemaak</div>
-                  </div>
-                  <div className="stat-card stat-card-accent">
-                    <div className="stat-value">{stats.notifSubscribers ?? '—'}</div>
-                    <div className="stat-label">Kennisgewings aan</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{stats.playsToday ?? '—'}</div>
-                    <div className="stat-label">Boodskap gespeel vandag</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{stats.totalPlays ?? '—'}</div>
-                    <div className="stat-label">Totale spele</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{stats.prayerRequests ?? '—'}</div>
-                    <div className="stat-label">Gebedsversoeke</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-value">{stats.prayedTaps ?? '—'}</div>
-                    <div className="stat-label">Mense het gebid</div>
-                  </div>
-                  <div className="stat-card stat-card-accent">
-                    <div className="stat-value">{stats.appShares ?? '—'}</div>
-                    <div className="stat-label">App gedeel</div>
-                  </div>
-                </div>
-              )}
-              {!statsLoading && !stats && (
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '12px 0' }}>
-                  Nog geen data nie. Statistieke begin opbou sodra gebruikers die app gebruik.
-                </div>
-              )}
-              <button
-                className="admin-save-btn"
-                style={{ marginTop: 14 }}
-                onClick={() => { setStatsLoading(true); readStats().then(s => { setStats(s); setStatsLoading(false) }) }}
-              >
-                🔄 Verfris
-              </button>
-            </div>
-          )}
 
           {/* ── NOTES TAB ── */}
           {activeTab === 'notes' && (

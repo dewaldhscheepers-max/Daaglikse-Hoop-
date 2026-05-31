@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
-import { trackPlay, trackShare } from '../utils/stats'
 import '../components/PopupStyles.css'
 import './Luister.css'
 
@@ -474,13 +473,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       setPlaying(next); onPlayingChange?.(next)
       if (next) {
         if (note.id === today?.id) countTodayPlay()
-        trackPlay(note.id)
       }
     } else {
       setActiveId(note.id); setElapsed(0)
       setPlaying(true); onPlayingChange?.(true)
       if (note.id === today?.id) countTodayPlay()
-      trackPlay(note.id)
     }
   }
 
@@ -541,7 +538,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   }
 
   async function handleShare(note) {
-    trackShare()
     const msg = `Ek dink hierdie boodskap gaan jou help: "${note.title}"${note.scripture ? ` — ${note.scripture}` : ''} 🙏`
     const url = `${window.location.origin}?note=${note.id}`
     if (navigator.share) {
@@ -552,7 +548,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   }
 
   async function handleListenShare() {
-    trackShare()
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
     if (navigator.share) {
