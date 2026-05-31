@@ -281,6 +281,36 @@
 
 .ep-play-btn:active { background: var(--purple-dark); }
 
+.ep-amen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1.5px solid var(--lavender);
+  color: var(--purple);
+  border-radius: 24px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.ep-amen-btn.amened {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+}
+
+.ep-amen-btn:active { background: var(--lavender); }
+.ep-amen-btn.amened:active { background: var(--purple-dark); }
+
+.ep-amen-emoji { font-size: 15px; line-height: 1; }
+.ep-amen-count { font-size: 12px; opacity: 0.8; }
+
 .ep-share-btn {
   display: flex;
   align-items: center;

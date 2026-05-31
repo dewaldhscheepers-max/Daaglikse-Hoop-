@@ -71,6 +71,23 @@ function EveningPrayerPlayer({ prayer }) {
   const [duration, setDuration] = useState(0)
   const audioRef = useRef(null)
 
+  const [amenCount, setAmenCount] = useState(prayer.amenCount || 0)
+  const [amened, setAmened] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('amenedPrayers') || '[]').includes(prayer.id) }
+    catch { return false }
+  })
+
+  async function handleAmen() {
+    if (amened) return
+    setAmened(true)
+    setAmenCount(c => c + 1)
+    try {
+      const list = JSON.parse(localStorage.getItem('amenedPrayers') || '[]')
+      localStorage.setItem('amenedPrayers', JSON.stringify([...list, prayer.id]))
+    } catch {}
+    try { await updateDoc(doc(db, 'aandgebede', prayer.id), { amenCount: increment(1) }) } catch {}
+  }
+
   function togglePlay() {
     const a = audioRef.current
     if (!a) return
@@ -115,6 +132,11 @@ function EveningPrayerPlayer({ prayer }) {
         <button className="ep-play-btn" onClick={togglePlay}>
           {playing ? <PauseIcon /> : <PlayIcon />}
           <span>{playing ? 'Pouseer' : 'Luister na die gebed'}</span>
+        </button>
+        <button className={`ep-amen-btn${amened ? ' amened' : ''}`} onClick={handleAmen}>
+          <span className="ep-amen-emoji">🙏</span>
+          <span className="ep-amen-label">{amened ? 'Amen!' : 'Amen'}</span>
+          {amenCount > 0 && <span className="ep-amen-count">{amenCount}</span>}
         </button>
         <button className="ep-share-btn" onClick={share}>
           <ShareIcon />
