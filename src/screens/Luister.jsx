@@ -209,7 +209,7 @@ function SocialLinks() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Luister({ onPlayingChange, installBanner, onAdminAccess }) {
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished }) {
   const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
@@ -372,10 +372,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
       setPlaying(false); onPlayingChange?.(false); setElapsed(0)
       const n = parseInt(localStorage.getItem('completedListens') || '0')
       localStorage.setItem('completedListens', String(n + 1))
-      const lastShown = parseInt(localStorage.getItem('listenShareShownAt') || '0')
-      if (Date.now() - lastShown > 3 * 24 * 60 * 60 * 1000) {
-        localStorage.setItem('listenShareShownAt', String(Date.now()))
-        setListenShareNote(activeNote)
+      const today = new Date().toISOString().slice(0, 10)
+      if (localStorage.getItem('listenShareShownDate') !== today) {
+        localStorage.setItem('listenShareShownDate', today)
+        onNoteFinished?.()
       }
     }
     function onLoadedMetadata() {
@@ -706,24 +706,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess 
         <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
       )}
 
-      {listenShareNote && (
-        <div className="listen-share-card">
-          <div className="listen-share-top">
-            <span className="listen-share-text">Het dit gehelp? Deel met iemand 🙏</span>
-            <button className="listen-share-close" onClick={() => setListenShareNote(null)}>✕</button>
-          </div>
-          <div className="listen-share-btns">
-            <button className="listen-share-btn" onClick={handleListenShare}>Deel die app</button>
-            <a
-              className="listen-share-wa"
-              href={`https://wa.me/?text=${encodeURIComponent('Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://daagliksehoop.vercel.app/go')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setListenShareNote(null)}
-            >💬 WhatsApp groep</a>
-          </div>
-        </div>
-      )}
 
       {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
       {bookmarkToast && <div className="share-toast">Gestoor! Blaai af na onder om dit te sien 🔖</div>}
