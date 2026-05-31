@@ -195,7 +195,6 @@ export default function App() {
 
   // ── Notification permission banner + silent auto-resubscribe ──
   useEffect(() => {
-    if (isSamsungBrowser) return
     if (!('Notification' in window)) return
     const perm = Notification.permission
     if (perm === 'granted' && localStorage.getItem('fcmToken')) {
