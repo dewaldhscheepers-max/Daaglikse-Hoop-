@@ -175,6 +175,37 @@
   .feature strong {
     font-weight: 700;
   }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    margin-top: 4px;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .step-num {
+    background: var(--purple-dark);
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 
@@ -188,18 +219,23 @@
     <!-- State A: Chrome with install prompt available -->
     <div id="state-install" style="display:none">
       <p class="chrome-notice">
-        Jy is in Chrome. Installeer die app op jou tuisskerm vir <strong>06:30 kennisgewings</strong> en vinnige toegang.
+        Jy is in Chrome. Tik die knoppie om die app op jou tuisskerm te sit.
       </p>
       <button class="btn-chrome" id="btn-install">📲 Installeer Daaglikse Hoop</button>
       <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
     </div>
 
-    <!-- State B: Chrome but no install prompt (already installed / desktop) -->
+    <!-- State B: Chrome but no install prompt — show manual steps -->
     <div id="state-open" style="display:none">
       <p class="chrome-notice">
-        Jy is in Chrome. Tik om die app oop te maak.
+        Jy is in Chrome. Volg hierdie stappe om die app te installeer:
       </p>
-      <a class="btn-chrome" href="/">Maak Daaglikse Hoop oop</a>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><span>Tik die <strong>⋮</strong> knoppie regs bo in Chrome</span></div>
+        <div class="step"><span class="step-num">2</span><span>Kies <strong>"Voeg by tuisskerm"</strong></span></div>
+        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Installeer"</strong> — klaar!</span></div>
+      </div>
+      <a class="btn-chrome" style="margin-top:20px" href="/">Maak die app oop</a>
     </div>
 
     <!-- State C: Samsung Internet / other Android browser -->
@@ -208,7 +244,7 @@
         Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
       </p>
       <a class="btn-chrome"
-         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
+         href="intent://dewaldscheepers.com/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com%2Fgo;end">
         Maak oop in Chrome
       </a>
       <p class="chooser-hint">
@@ -220,9 +256,14 @@
     <!-- State D: iOS -->
     <div id="state-ios" style="display:none">
       <p class="chrome-notice">
-        Tik <strong>Deel</strong> (⬆) onderaan Safari en kies <strong>"Voeg by tuisskerm"</strong> om die app te installeer.
+        Installeer die app op jou iPhone:
       </p>
-      <a class="btn-chrome" href="/">Maak die app oop</a>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><span>Tik die <strong>⬆ Deel</strong> knoppie onderaan Safari</span></div>
+        <div class="step"><span class="step-num">2</span><span>Kies <strong>"Voeg by tuisskerm"</strong></span></div>
+        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Voeg by"</strong> regs bo — klaar!</span></div>
+      </div>
+      <a class="btn-chrome" style="margin-top:20px" href="/">Maak die app oop</a>
     </div>
 
     <script>
@@ -244,10 +285,10 @@
         } else if (isAndroid && !isChrome) {
           showState('samsung')
         } else {
-          // Chrome on Android or desktop — wait briefly for beforeinstallprompt
+          // Chrome — wait up to 2s for beforeinstallprompt before showing manual steps
           setTimeout(function () {
             if (!deferredPrompt) showState('open')
-          }, 400)
+          }, 2000)
         }
       })()
 
@@ -258,11 +299,11 @@
       }
 
       document.getElementById('btn-install').addEventListener('click', function () {
-        if (!deferredPrompt) { window.location.href = '/'; return }
+        if (!deferredPrompt) { showState('open'); return }
         deferredPrompt.prompt()
         deferredPrompt.userChoice.then(function (r) {
           deferredPrompt = null
-          if (r.outcome === 'accepted') showState('open')
+          window.location.href = '/'
         })
       })
     </script>
