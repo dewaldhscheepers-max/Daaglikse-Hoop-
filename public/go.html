@@ -225,17 +225,9 @@
       <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
     </div>
 
-    <!-- State B: Chrome but no install prompt — show manual steps -->
+    <!-- State B: Chrome — go straight to the app where the install banner shows -->
     <div id="state-open" style="display:none">
-      <p class="chrome-notice">
-        Jy is in Chrome. Volg hierdie stappe om die app te installeer:
-      </p>
-      <div class="steps">
-        <div class="step"><span class="step-num">1</span><span>Tik die <strong>⋮</strong> knoppie regs bo in Chrome</span></div>
-        <div class="step"><span class="step-num">2</span><span>Kies <strong>"Voeg by tuisskerm"</strong></span></div>
-        <div class="step"><span class="step-num">3</span><span>Tik <strong>"Installeer"</strong> — klaar!</span></div>
-      </div>
-      <a class="btn-chrome" style="margin-top:20px" href="/">Maak die app oop</a>
+      <script>window.location.replace('/')</script>
     </div>
 
     <!-- State C: Samsung Internet / other Android browser -->
@@ -244,7 +236,7 @@
         Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.
       </p>
       <a class="btn-chrome"
-         href="intent://dewaldscheepers.com/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com%2Fgo;end">
+         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
         Maak oop in Chrome
       </a>
       <p class="chooser-hint">

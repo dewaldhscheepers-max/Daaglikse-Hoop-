@@ -275,7 +275,7 @@ export default function App() {
   ) : null
 
   // ── Persistent install banner ──
-  const persistBanner = !isInstalled && !installBannerDismissed && installPrompt ? (
+  const persistBanner = !isInstalled && !installBannerDismissed ? (
     <div className="install-persist-banner">
       <div className="install-persist-text">
         <strong>Sit Daaglikse Hoop op jou foon</strong>
@@ -284,6 +284,9 @@ export default function App() {
       <div className="install-persist-actions">
         <button className="install-persist-btn" onClick={handleInstallCta}>
           Sit op my foon
+        </button>
+        <button className="install-persist-help" onClick={() => setShowInstallHelp(true)}>
+          Wys my hoe
         </button>
       </div>
       <button className="install-persist-close" onClick={() => setInstallBannerDismissed(true)}>✕</button>
