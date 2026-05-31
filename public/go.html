@@ -268,7 +268,8 @@
         } else if (isAndroid && !isChrome) {
           showState('samsung')
         } else {
-          setTimeout(function () { if (!deferredPrompt) showState('open') }, 2000)
+          // Chrome or desktop — go straight to the app
+          window.location.replace('/')
         }
       })()
 
