@@ -160,7 +160,7 @@
   var isAndroid = /Android/i.test(ua)
 
   function getStartUrl() {
-    if (isAndroid) return 'intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;end'
+    if (isAndroid) return 'googlechrome://navigate?url=https://dewaldscheepers.com/'
     return '/'
   }
 
