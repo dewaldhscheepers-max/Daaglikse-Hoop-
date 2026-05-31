@@ -248,26 +248,37 @@ export default function App() {
       setTab('meer')
       window.history.replaceState({}, '', '/')
       if (type === 'ebook' && bookIds.length > 0) {
-        // Trigger immediate email delivery — don't rely only on PayFast ITN
-        if (email) {
-          fetch('/api/deliver-purchase', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, bookIds }),
-          }).catch(() => {})
-        }
-        Promise.all(bookIds.map(async id => {
-          try {
-            const snap       = await getDoc(doc(db, 'books', id))
-            const fsData     = snap.data() || {}
-            const staticBook = BOOKS.find(b => b.id === id) || {}
-            return { id, title: staticBook.title || id, pdfUrl: fsData.pdfUrl || staticBook.pdfUrl || null }
-          } catch {
-            const staticBook = BOOKS.find(b => b.id === id) || {}
-            return { id, title: staticBook.title || id, pdfUrl: staticBook.pdfUrl || null }
-          }
-        })).then(purchasedBooks => {
-          setPayment({ status: 'success', type, count: bookIds.length, purchasedBooks })
+        // Trigger immediate email delivery and get download tokens
+        const deliverPromise = email
+          ? fetch('/api/deliver-purchase', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, bookIds }),
+            }).then(r => r.json()).catch(() => ({}))
+          : Promise.resolve({})
+
+        Promise.all([
+          deliverPromise,
+          Promise.all(bookIds.map(async id => {
+            try {
+              const snap       = await getDoc(doc(db, 'books', id))
+              const fsData     = snap.data() || {}
+              const staticBook = BOOKS.find(b => b.id === id) || {}
+              return { id, title: staticBook.title || id, pdfUrl: fsData.pdfUrl || staticBook.pdfUrl || null }
+            } catch {
+              const staticBook = BOOKS.find(b => b.id === id) || {}
+              return { id, title: staticBook.title || id, pdfUrl: staticBook.pdfUrl || null }
+            }
+          }))
+        ]).then(([deliverResult, purchasedBooks]) => {
+          const tokens = deliverResult?.downloadTokens || {}
+          const booksWithDownload = purchasedBooks.map(b => ({
+            ...b,
+            downloadUrl: tokens[b.id]
+              ? `/api/download-pdf?bookId=${b.id}&token=${tokens[b.id]}`
+              : null,
+          }))
+          setPayment({ status: 'success', type, count: bookIds.length, purchasedBooks: booksWithDownload })
         })
       } else {
         setPayment({ status: 'success', type, count: bookIds.length })
@@ -417,25 +428,12 @@ export default function App() {
                   <div className="payment-popup-downloads">
                     <p className="payment-popup-download-label">Laai direk af na jou foon:</p>
                     {paymentResult.purchasedBooks.filter(b => b.pdfUrl).map(b => (
-                      <button key={b.id} className="payment-popup-download-btn"
-                        onClick={async () => {
-                          try {
-                            const r    = await fetch(b.pdfUrl)
-                            const blob = await r.blob()
-                            const url  = URL.createObjectURL(blob)
-                            const a    = document.createElement('a')
-                            a.href     = url
-                            a.download = b.title + '.pdf'
-                            document.body.appendChild(a)
-                            a.click()
-                            document.body.removeChild(a)
-                            URL.revokeObjectURL(url)
-                          } catch {
-                            window.open(b.pdfUrl, '_blank')
-                          }
-                        }}>
+                      <a key={b.id}
+                        href={b.downloadUrl || b.pdfUrl}
+                        download={b.title + '.pdf'}
+                        className="payment-popup-download-btn">
                         📥 {b.title}
-                      </button>
+                      </a>
                     ))}
                   </div>
                 )}

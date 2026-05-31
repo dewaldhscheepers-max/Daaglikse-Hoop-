@@ -1,5 +1,12 @@
 const crypto = require('crypto')
 
+function todayStr() { return new Date().toISOString().slice(0, 10) }
+
+function makeDownloadToken(bookId) {
+  return crypto.createHmac('sha256', process.env.CRON_SECRET || 'DaaglikseHoop2025Cron')
+    .update(bookId + ':' + todayStr()).digest('hex').slice(0, 32)
+}
+
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
@@ -162,5 +169,9 @@ module.exports = async function handler(req, res) {
     })
   } catch {}
 
-  return res.status(200).json({ ok: true })
+  // Return download tokens so the app can offer in-app download
+  const downloadTokens = {}
+  booksWithPdf.forEach(b => { downloadTokens[b.id] = makeDownloadToken(b.id) })
+
+  return res.status(200).json({ ok: true, downloadTokens })
 }
