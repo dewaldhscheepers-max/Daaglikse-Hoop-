@@ -148,16 +148,20 @@ module.exports = async function handler(req, res) {
     return res.status(500).send('Missing Firebase env vars')
   }
 
+  const body = req.body || {}
+  const customTitle = body.title?.trim()
+  const customBody  = body.body?.trim()
+
   try {
     const accessToken = await getAccessToken()
-    const [title, fcmTokens, webPushSubs] = await Promise.all([
-      getTodayTitle(),
+    const [todayTitle, fcmTokens, webPushSubs] = await Promise.all([
+      customTitle ? Promise.resolve(customTitle) : getTodayTitle(),
       getFcmTokens(accessToken),
       getWebPushSubscriptions(accessToken),
     ])
 
-    const notifTitle = 'Het jy 3 minute vir God?'
-    const notifBody  = 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
+    const notifTitle = todayTitle || 'Daaglikse Hoop'
+    const notifBody  = customBody || 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
 
     let fcmSent = 0
     for (const token of fcmTokens) {

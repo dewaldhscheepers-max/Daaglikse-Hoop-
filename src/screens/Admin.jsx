@@ -94,16 +94,23 @@ export default function Admin({ onClose }) {
 
   const [sendAllBusy,   setSendAllBusy]   = useState(false)
   const [sendAllResult, setSendAllResult] = useState(null)
+  const [customTitle,   setCustomTitle]   = useState('')
+  const [customBody,    setCustomBody]    = useState('')
 
   async function handleSendAll() {
-    if (!window.confirm('Stuur nou \'n kennisgewings aan ALMAL? Dit sal op almal se fone verskyn.')) return
+    if (!customTitle.trim()) { alert('Voer eers \'n titel in'); return }
+    if (!window.confirm(`Stuur aan ALMAL?\n\n"${customTitle.trim()}"\n${customBody.trim()}`)) return
     setSendAllBusy(true)
     setSendAllResult(null)
     try {
-      const r = await fetch(`/api/send-notifications?secret=DaaglikseHoop2025Cron`)
+      const r = await fetch('/api/send-notifications?secret=DaaglikseHoop2025Cron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: customTitle.trim(), body: customBody.trim() })
+      })
       const data = await r.json().catch(() => ({}))
       setSendAllResult(r.ok
-        ? `✅ Gestuur — FCM: ${data.fcm?.sent ?? '?'}/${data.fcm?.total ?? '?'}, Web Push: ${data.webpush?.sent ?? '?'}/${data.webpush?.total ?? '?'}`
+        ? `✅ Gestuur aan ${(data.fcm?.sent ?? 0) + (data.webpush?.sent ?? 0)} mense`
         : `❌ Misluk: ${JSON.stringify(data)}`)
     } catch (e) {
       setSendAllResult('❌ Netwerkfout: ' + e.message)
@@ -850,16 +857,35 @@ export default function Admin({ onClose }) {
               {notifStatus === 'notoken'  && <div className="admin-error">❌ Geen token — tik eers Registreer.</div>}
               {notifDetail && <div style={{ fontSize: 11, fontFamily: 'monospace', background: '#eee', borderRadius: 4, padding: '4px 8px', marginTop: 4, wordBreak: 'break-all' }}>{notifDetail}</div>}
 
+              <div className="admin-section-title" style={{ marginTop: 4, marginBottom: 8 }}>📣 Stuur boodskap aan almal</div>
+              <div className="admin-field">
+                <label>Titel *</label>
+                <input
+                  value={customTitle}
+                  onChange={e => setCustomTitle(e.target.value)}
+                  placeholder="bv. Ek bid vir jou"
+                  maxLength={60}
+                />
+              </div>
+              <div className="admin-field">
+                <label>Boodskap</label>
+                <input
+                  value={customBody}
+                  onChange={e => setCustomBody(e.target.value)}
+                  placeholder="bv. God is by jou vandag. Hy hoor jou gebede."
+                  maxLength={120}
+                />
+              </div>
               <button
                 className="admin-save-btn"
-                style={{ background: '#b03030', marginBottom: 4 }}
+                style={{ background: '#5C4E8E', marginBottom: 4 }}
                 onClick={handleSendAll}
                 disabled={sendAllBusy || notifBusy}
               >
-                {sendAllBusy ? 'Besig...' : '📣 Stuur kennisgewings aan ALMAL nou'}
+                {sendAllBusy ? 'Besig...' : '📣 Stuur nou aan almal'}
               </button>
               {sendAllResult && (
-                <div style={{ fontSize: 13, fontFamily: 'monospace', background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 8,
+                <div style={{ fontSize: 13, background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 8,
                   color: sendAllResult.startsWith('✅') ? '#1a6b2e' : '#c0392b' }}>
                   {sendAllResult}
                 </div>
