@@ -63,6 +63,11 @@ export default function App() {
   // ── Capture beforeinstallprompt (Chrome/Edge) ──
   useEffect(() => {
     if (isInstalled) return
+    // Pick up any prompt captured before React mounted
+    if (window.__installPrompt) {
+      setInstallPrompt(window.__installPrompt)
+      window.__installPrompt = null
+    }
     function onPrompt(e) { e.preventDefault(); setInstallPrompt(e) }
     function onInstalled() { setIsInstalled(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
