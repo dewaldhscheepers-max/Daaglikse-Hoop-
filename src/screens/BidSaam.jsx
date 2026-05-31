@@ -151,9 +151,7 @@ export default function BidSaam() {
 
   const [todayPrayer, setTodayPrayer] = useState(() => {
     try {
-      const cached = JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null')
-      const todayStr = new Date().toISOString().slice(0, 10)
-      return cached?.date === todayStr ? cached : null
+      return JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null')
     } catch { return null }
   })
   const [prevPrayers, setPrevPrayers] = useState(() => {
@@ -205,21 +203,12 @@ export default function BidSaam() {
         const snap = await getDocs(q)
         const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         if (list.length === 0) return
-        if (list[0].date === today) {
-          setTodayPrayer(list[0])
-          setPrevPrayers(list.slice(1))
-          try {
-            localStorage.setItem('cachedTodayPrayer', JSON.stringify(list[0]))
-            localStorage.setItem('cachedPrevPrayers', JSON.stringify(list.slice(1)))
-          } catch {}
-        } else {
-          setTodayPrayer(null)
-          setPrevPrayers(list)
-          try {
-            localStorage.setItem('cachedTodayPrayer', 'null')
-            localStorage.setItem('cachedPrevPrayers', JSON.stringify(list))
-          } catch {}
-        }
+        setTodayPrayer(list[0])
+        setPrevPrayers(list.slice(1))
+        try {
+          localStorage.setItem('cachedTodayPrayer', JSON.stringify(list[0]))
+          localStorage.setItem('cachedPrevPrayers', JSON.stringify(list.slice(1)))
+        } catch {}
       } catch {}
     }
     fetchAandgebede()
@@ -312,7 +301,7 @@ export default function BidSaam() {
             </div>
             <p className="ep-card-title">Gebed vir {formatDate(todayPrayer.date)} se versoeke</p>
             <p className="ep-card-desc">
-              Dewald het vanaand oor vandag se <strong>{todayPrayer.prayerCount}</strong> gebedsversoeke gebid.
+              Dewald het op {formatDate(todayPrayer.date)} oor <strong>{todayPrayer.prayerCount}</strong> gebedsversoeke gebid.
             </p>
             <EveningPrayerPlayer prayer={todayPrayer} />
           </div>
