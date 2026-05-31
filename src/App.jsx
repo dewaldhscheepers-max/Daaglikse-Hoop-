@@ -231,8 +231,9 @@ export default function App() {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('payment')
     const title  = params.get('title')
+    const type   = params.get('type') || 'ebook'
     if (status === 'success') {
-      setPayment({ status: 'success', title: decodeURIComponent(title || '') })
+      setPayment({ status: 'success', type, title: decodeURIComponent(title || '') })
       setTab('meer')
       window.history.replaceState({}, '', '/')
     } else if (status === 'cancel') {
@@ -357,13 +358,27 @@ export default function App() {
       {paymentResult?.status === 'success' && (
         <div className="payment-popup-backdrop" onClick={() => setPayment(null)}>
           <div className="payment-popup" onClick={e => e.stopPropagation()}>
-            <div className="payment-popup-icon">🎉</div>
-            <div className="payment-popup-title">Betaling geslaag!</div>
-            <p className="payment-popup-msg">
-              Jou PDF{paymentResult.count > 1 ? "'s is" : ' is'} op pad na jou e-pos.<br />
-              <strong>Geen wag nie — dit kom outomaties.</strong>
-            </p>
-            <p className="payment-popup-note">Kyk ook jou spam-vouer as jy dit nie sien nie.</p>
+            {paymentResult.type === 'donation' ? (
+              <>
+                <div className="payment-popup-icon">🙏</div>
+                <div className="payment-popup-title">Baie dankie!</div>
+                <p className="payment-popup-msg">
+                  Jou skenking is ontvang.<br />
+                  <strong>Mag God jou oorvloedig seën.</strong>
+                </p>
+                <p className="payment-popup-note">"Elke gewer wat vrolik gee, is vir God aangenaam." — 2 Kor. 9:7</p>
+              </>
+            ) : (
+              <>
+                <div className="payment-popup-icon">🎉</div>
+                <div className="payment-popup-title">Betaling geslaag!</div>
+                <p className="payment-popup-msg">
+                  Jou e-boek{paymentResult.count > 1 ? 'e is' : ' is'} op pad na jou e-pos.<br />
+                  <strong>Geen wag nie — dit kom outomaties.</strong>
+                </p>
+                <p className="payment-popup-note">Kyk ook jou strooipos-vouer as jy dit nie sien nie.</p>
+              </>
+            )}
             <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
               Dankie! 🙏
             </button>

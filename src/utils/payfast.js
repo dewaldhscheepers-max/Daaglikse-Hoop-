@@ -35,11 +35,11 @@ function submitForm(params) {
   form.submit()
 }
 
-export function checkoutBook(book, email) {
+export function checkoutBook(book, email, type = 'ebook') {
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${window.location.origin}/?payment=success`,
+    return_url:    `${window.location.origin}/?payment=success&type=${type}`,
     cancel_url:    `${window.location.origin}/?payment=cancel`,
     email_address: email,
     amount:        book.price.toFixed(2),
@@ -59,7 +59,7 @@ export function checkoutCart(books, email) {
   submitForm({
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${base}/?payment=success`,
+    return_url:    `${base}/?payment=success&type=ebook`,
     cancel_url:    `${base}/?payment=cancel`,
     notify_url:    ITN_URL,
     email_address: email,

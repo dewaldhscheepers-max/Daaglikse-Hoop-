@@ -27,7 +27,8 @@ export function DonationModal({ onClose }) {
     setBusy(true)
     checkoutBook(
       { id: 'skenking', title: 'Skenking — Daaglikse Hoop', desc: 'Skenking vir die bediening van Daaglikse Hoop', price: amount },
-      email
+      email,
+      'donation'
     )
   }
 
