@@ -5,6 +5,7 @@ import {
   serverTimestamp, orderBy, query, where, limit,
   increment, Timestamp, onSnapshot, getDocs
 } from 'firebase/firestore'
+import { trackPrayerRequest, trackPrayedTap } from '../utils/stats'
 import './BidSaam.css'
 
 function timeLabel(ts) {
@@ -223,6 +224,7 @@ export default function BidSaam() {
         createdAt: serverTimestamp(),
         reported: false
       })
+      trackPrayerRequest()
       setText('')
       setSubmitted(true)
       setTimeout(() => setSubmitted(false), 4000)
@@ -237,6 +239,7 @@ export default function BidSaam() {
     next.add(id)
     setPrayed(next)
     localStorage.setItem('prayedFor', JSON.stringify([...next]))
+    trackPrayedTap()
     setPrayers(ps => ps.map(p => p.id === id ? { ...p, prayedCount: (p.prayedCount || 0) + 1 } : p))
     setPrayedToast(true)
     setTimeout(() => setPrayedToast(false), 3500)

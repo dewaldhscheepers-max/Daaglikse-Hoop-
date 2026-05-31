@@ -10,6 +10,7 @@ import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './component
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser } from './firebase'
+import { trackInstall, trackOpen, trackNotifSubscriber, trackShare } from './utils/stats'
 import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
@@ -52,6 +53,12 @@ export default function App() {
       localStorage.setItem('appOpenDays', JSON.stringify([...days, today].slice(-30)))
     }
   }, [])
+
+  // ── Admin stats: track app open + install ──
+  useEffect(() => {
+    trackOpen()
+    if (isInstalled) trackInstall()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Capture beforeinstallprompt (Chrome/Edge) ──
   useEffect(() => {
@@ -154,6 +161,7 @@ export default function App() {
   }
 
   async function handleShareApp() {
+    trackShare()
     localStorage.setItem('sharePopupSharedAt', String(Date.now()))
     const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://daagliksehoop.vercel.app/go'
     if (navigator.share) {
@@ -206,6 +214,7 @@ export default function App() {
     setNotifBanner(false)
     try {
       const result = await subscribeToNotifications()
+      if (result.ok) trackNotifSubscriber()
       if (!result.ok) {
         if (result.reason === 'permission_denied') {
           alert('Kennisgewings is geblokkeer vir hierdie webtuiste.\n\nOm dit reg te stel:\n1. Tik die 🔒 slotjie in Chrome se adresbalk\n2. Kies "Site settings"\n3. Verander "Notifications" na "Allow"\n4. Herlaai die app')
