@@ -238,14 +238,24 @@ export default function App() {
     const params   = new URLSearchParams(window.location.search)
     const status   = params.get('payment')
     const type     = params.get('type') || 'ebook'
-    const urlBooks     = (params.get('books') || '').split(',').filter(Boolean)
-    const storedBooks  = (localStorage.getItem('pendingPurchase') || '').split(',').filter(Boolean)
-    const bookIds      = urlBooks.length > 0 ? urlBooks : storedBooks
+    const urlBooks    = (params.get('books') || '').split(',').filter(Boolean)
+    const storedBooks = (localStorage.getItem('pendingPurchase') || '').split(',').filter(Boolean)
+    const bookIds     = urlBooks.length > 0 ? urlBooks : storedBooks
+    const email       = localStorage.getItem('pendingEmail') || ''
     localStorage.removeItem('pendingPurchase')
+    localStorage.removeItem('pendingEmail')
     if (status === 'success') {
       setTab('meer')
       window.history.replaceState({}, '', '/')
       if (type === 'ebook' && bookIds.length > 0) {
+        // Trigger immediate email delivery — don't rely only on PayFast ITN
+        if (email) {
+          fetch('/api/deliver-purchase', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, bookIds }),
+          }).catch(() => {})
+        }
         Promise.all(bookIds.map(async id => {
           try {
             const snap       = await getDoc(doc(db, 'books', id))
