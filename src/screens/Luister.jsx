@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot, documentId, where } from 'firebase/firestore'
 import { trackPlay, trackShare } from '../utils/stats'
 import '../components/PopupStyles.css'
 import './Luister.css'
@@ -247,6 +247,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
 
+  // ── Fetch fresh like counts from Firestore for given note IDs ──
+  const refreshLikes = useCallback(async (noteIds) => {
+    if (!noteIds.length) return
+    try {
+      const chunks = []
+      for (let i = 0; i < noteIds.length; i += 10) chunks.push(noteIds.slice(i, i + 10))
+      const counts = {}
+      await Promise.all(chunks.map(async ids => {
+        const snap = await getDocs(query(collection(db, 'likes'), where(documentId(), 'in', ids)))
+        snap.docs.forEach(d => { counts[d.id] = d.data().count || 0 })
+      }))
+      setLikes(prev => {
+        const next = { ...prev, ...counts }
+        writeLikesCache(next)
+        return next
+      })
+    } catch {}
+  }, [])
+
   // ── Fetch first page ──
   const fetchNotes = useCallback(async (silent = false) => {
     if (fetchingRef.current) return
@@ -262,6 +281,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       setActiveId(prev => prev || loaded[0]?.id || null)
       setLoading(false)
       writeCache(loaded)
+      refreshLikes(loaded.map(n => n.id))
     } catch {
       setLoading(false)
     }
@@ -280,6 +300,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       lastDocRef.current = snap.docs[snap.docs.length - 1] || null
       setHasMore(snap.docs.length === PAGE_SIZE)
       setNotes(prev => [...prev, ...more])
+      refreshLikes(more.map(n => n.id))
     } catch {}
     setLoadingMore(false)
   }, [loadingMore])
