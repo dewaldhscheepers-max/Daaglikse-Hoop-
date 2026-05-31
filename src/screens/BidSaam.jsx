@@ -114,7 +114,7 @@ function EveningPrayerPlayer({ prayer }) {
       <div className="ep-controls">
         <button className="ep-play-btn" onClick={togglePlay}>
           {playing ? <PauseIcon /> : <PlayIcon />}
-          <span>{playing ? 'Pauzeer' : 'Luister na die gebed'}</span>
+          <span>{playing ? 'Pouseer' : 'Luister na die gebed'}</span>
         </button>
         <button className="ep-share-btn" onClick={share}>
           <ShareIcon />
