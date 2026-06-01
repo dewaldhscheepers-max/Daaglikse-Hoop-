@@ -71,6 +71,17 @@ export default function Admin({ onClose }) {
   const coverInputRef                         = useRef(null)
   const [coverUploadTarget, setCoverUploadTarget] = useState(null)
 
+  // ── Install count ──
+  const [installCount, setInstallCount] = useState(null)
+
+  useEffect(() => {
+    if (!unlocked) return
+    fetch('/api/count-install?pin=2025')
+      .then(r => r.json())
+      .then(d => setInstallCount(d.total ?? 0))
+      .catch(() => {})
+  }, [unlocked])
+
   // ── Email test state ──
   const [testEmailAddr,    setTestEmailAddr]    = useState('dewald.h.scheepers@gmail.com')
   const [testEmailBookId,  setTestEmailBookId]  = useState('')
@@ -497,6 +508,11 @@ export default function Admin({ onClose }) {
       <div className="admin-screen">
         <div className="admin-header">
           <span className="admin-header-title">Admin</span>
+          {installCount !== null && (
+            <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 'auto', marginLeft: 10 }}>
+              📲 {installCount} installe
+            </span>
+          )}
           <button className="admin-x" onClick={onClose}>✕</button>
         </div>
 

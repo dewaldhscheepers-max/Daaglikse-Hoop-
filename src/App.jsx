@@ -63,13 +63,24 @@ export default function App() {
       window.__installPrompt = null
     }
     function onPrompt(e) { e.preventDefault(); setInstallPrompt(e) }
-    function onInstalled() { setIsInstalled(true) }
+    function onInstalled() { setIsInstalled(true); recordInstall() }
     window.addEventListener('beforeinstallprompt', onPrompt)
     window.addEventListener('appinstalled', onInstalled)
     return () => {
       window.removeEventListener('beforeinstallprompt', onPrompt)
       window.removeEventListener('appinstalled', onInstalled)
     }
+  }, [isInstalled])
+
+  // ── Count installs once per device ──
+  function recordInstall() {
+    if (localStorage.getItem('installCounted')) return
+    localStorage.setItem('installCounted', '1')
+    fetch('/api/count-install', { method: 'POST' }).catch(() => {})
+  }
+
+  useEffect(() => {
+    if (isInstalled) recordInstall()
   }, [isInstalled])
 
   // ── Once-per-day install popup (3s delay, not while audio plays) ──
