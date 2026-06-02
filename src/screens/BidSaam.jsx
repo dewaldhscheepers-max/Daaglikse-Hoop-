@@ -308,8 +308,10 @@ export default function BidSaam() {
   return (
     <div className="bidsaam">
       <div className="bidsaam-header screen-header">
-        <h1>Bid Saam</h1>
-        <p>Ons is hier vir mekaar. Deel jou versoek anoniem en laat ons saam bid.</p>
+        <h1>Stort jou hart uit.</h1>
+        <p>Jy hoef nie jou gebed mooi te laat klink nie. Skryf net wat regtig in jou hart is.</p>
+        <p className="bidsaam-scripture">"Stort julle hart uit voor sy aangesig! God is 'n toevlug vir ons."</p>
+        <p className="bidsaam-scripture-ref">Psalm 62:9</p>
       </div>
 
       <div className="bidsaam-body">

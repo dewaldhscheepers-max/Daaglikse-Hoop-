@@ -2,6 +2,20 @@
   text-align: center;
 }
 
+.bidsaam-scripture {
+  font-style: italic;
+  color: var(--purple);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0 2px;
+}
+
+.bidsaam-scripture-ref {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .bidsaam-body {
   padding: 20px 16px;
   display: flex;
