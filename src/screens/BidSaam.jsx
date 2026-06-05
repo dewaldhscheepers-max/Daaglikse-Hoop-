@@ -477,7 +477,7 @@ export default function BidSaam() {
                     className={`testimony-like-btn${amenedTestimonies.has(t.id) ? ' liked' : ''}`}
                     onClick={() => likeTestimony(t.id)}
                   >
-                    {amenedTestimonies.has(t.id) ? '❤️' : '🤍'}
+                    {amenedTestimonies.has(t.id) ? 'God is goed 🙌' : 'God is goed 🙌'}
                     {(t.likeCount || 0) > 0 && <span className="prayed-count">{t.likeCount}</span>}
                   </button>
                 </div>
