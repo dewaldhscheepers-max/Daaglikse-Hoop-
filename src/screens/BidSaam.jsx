@@ -448,10 +448,10 @@ export default function BidSaam() {
               value={testimonyText}
               onChange={e => setTestimonyText(e.target.value)}
               rows={3}
-              maxLength={600}
+              maxLength={1250}
             />
             <div className="input-footer">
-              <span className="char-count">{testimonyText.length}/600</span>
+              <span className="char-count">{testimonyText.length}/1250</span>
               <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
                 Deel my getuienis
               </button>
