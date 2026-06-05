@@ -171,6 +171,15 @@ export default function BidSaam() {
   })
   const [visibleCount, setVisibleCount] = useState(7)
 
+  const [testimonies, setTestimonies]               = useState([])
+  const [visibleTestimonies, setVisibleTestimonies] = useState(3)
+  const [testimonyText, setTestimonyText]           = useState('')
+  const [testimonySubmitted, setTestimonySubmitted] = useState(false)
+  const [amenedTestimonies, setAmenedTestimonies]   = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('amenedTestimonies') || '[]')) }
+    catch { return new Set() }
+  })
+
   const [todayPrayer, setTodayPrayer] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null')
@@ -214,6 +223,15 @@ export default function BidSaam() {
         try { localStorage.setItem('cachedPrayers', JSON.stringify(list)) } catch {}
       },
       () => { setError('Iets het nie reg gelaai nie.'); setLoading(false) }
+    )
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    const q = query(collection(db, 'testimonies'), orderBy('createdAt', 'desc'), limit(60))
+    const unsub = onSnapshot(q,
+      snap => setTestimonies(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      () => {}
     )
     return unsub
   }, [])
@@ -265,6 +283,30 @@ export default function BidSaam() {
     try {
       await updateDoc(doc(db, 'prayers', id), { prayedCount: increment(1) })
     } catch {}
+  }
+
+  async function submitTestimony() {
+    if (!testimonyText.trim()) return
+    try {
+      await addDoc(collection(db, 'testimonies'), {
+        text: testimonyText.trim(),
+        amenCount: 0,
+        createdAt: serverTimestamp(),
+      })
+      setTestimonyText('')
+      setTestimonySubmitted(true)
+      setTimeout(() => setTestimonySubmitted(false), 4000)
+    } catch {}
+  }
+
+  async function amenTestimony(id) {
+    if (amenedTestimonies.has(id)) return
+    const next = new Set(amenedTestimonies)
+    next.add(id)
+    setAmenedTestimonies(next)
+    localStorage.setItem('amenedTestimonies', JSON.stringify([...next]))
+    setTestimonies(ts => ts.map(t => t.id === id ? { ...t, amenCount: (t.amenCount || 0) + 1 } : t))
+    try { await updateDoc(doc(db, 'testimonies', id), { amenCount: increment(1) }) } catch {}
   }
 
   async function reportPrayer(id) {
@@ -391,6 +433,67 @@ export default function BidSaam() {
             Laai meer gebede
           </button>
         )}
+
+        <div className="testimony-section">
+          <div className="testimony-header">
+            <div className="testimony-flame">🕊️</div>
+            <h3 className="testimony-title">Getuienisse</h3>
+            <p className="testimony-sub">Wat God in jou lewe gedoen het, was dalk nooit net vir jou bedoel nie.</p>
+            <p className="testimony-sub">Jou getuienis kan iemand anders help om weer te glo.</p>
+            <p className="testimony-scripture">"En hulle het hom oorwin deur die bloed van die Lam en deur die woord van hulle getuienis."</p>
+            <p className="testimony-scripture-ref">Openbaring 12:11</p>
+          </div>
+
+          <div className="card testimony-input-card">
+            <textarea
+              className="prayer-textarea"
+              placeholder="Wat het God in jou lewe gedoen? Hoe het Hy jou gebed beantwoord?"
+              value={testimonyText}
+              onChange={e => setTestimonyText(e.target.value)}
+              rows={4}
+              maxLength={600}
+            />
+            <div className="input-footer">
+              <span className="char-count">{testimonyText.length}/600</span>
+              <button className="btn-primary submit-btn testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
+                Deel my getuienis
+              </button>
+            </div>
+            {testimonySubmitted && (
+              <div className="submitted-msg">🕊️ Dankie. Jou getuienis kan iemand se geloof aansteek.</div>
+            )}
+          </div>
+
+          {testimonies.slice(0, visibleTestimonies).map(t => (
+            <div key={t.id} className="testimony-card card">
+              <div className="testimony-icon">✨</div>
+              <div className="testimony-content">
+                <p className="testimony-text">{t.text}</p>
+                <span className="prayer-meta">Anoniem · {timeLabel(t.createdAt)}</span>
+                <div className="prayer-actions">
+                  <button
+                    className={`prayed-btn${amenedTestimonies.has(t.id) ? ' prayed' : ''}`}
+                    onClick={() => amenTestimony(t.id)}
+                  >
+                    <PrayingHandsIcon />
+                    {amenedTestimonies.has(t.id) ? 'Amen!' : 'Amen'}
+                    {(t.amenCount || 0) > 0 && <span className="prayed-count">{t.amenCount}</span>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {testimonies.length > visibleTestimonies && (
+            <button className="load-more-btn" onClick={() => setVisibleTestimonies(v => v + 5)}>
+              Laai meer getuienisse
+            </button>
+          )}
+
+          {testimonies.length === 0 && (
+            <div className="prayers-empty">Wees die eerste om te deel wat God gedoen het.</div>
+          )}
+        </div>
 
         {prevPrayers.length > 0 && (
           <div className="ep-archive">
