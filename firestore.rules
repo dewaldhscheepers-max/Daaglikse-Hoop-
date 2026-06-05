@@ -39,6 +39,20 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Testimonies — anyone can read and create, update only for amenCount/likeCount
+    match /testimonies/{id} {
+      allow read:   if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if false;
+    }
+
+    // Install counter
+    match /counters/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
     // Purchase records — written by server only, admin reads via console
     match /purchases/{id} {
       allow read:  if false;

@@ -98,6 +98,26 @@
   margin: 0;
 }
 
+.testimony-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid #E8A55A;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background 0.15s;
+}
+
+.testimony-like-btn.liked {
+  background: #FFF3E6;
+  border-color: #E8A55A;
+  color: #C97D3A;
+}
+
 .bidsaam-scripture {
   font-style: italic;
   color: var(--purple);

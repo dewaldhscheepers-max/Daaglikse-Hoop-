@@ -293,23 +293,25 @@ export default function BidSaam() {
     try {
       await addDoc(collection(db, 'testimonies'), {
         text: testimonyText.trim(),
-        amenCount: 0,
+        likeCount: 0,
         createdAt: serverTimestamp(),
       })
       setTestimonyText('')
       setTestimonySubmitted(true)
       setTimeout(() => setTestimonySubmitted(false), 4000)
-    } catch {}
+    } catch {
+      setError('Kon nie stuur nie. Probeer asseblief weer.')
+    }
   }
 
-  async function amenTestimony(id) {
+  async function likeTestimony(id) {
     if (amenedTestimonies.has(id)) return
     const next = new Set(amenedTestimonies)
     next.add(id)
     setAmenedTestimonies(next)
     localStorage.setItem('amenedTestimonies', JSON.stringify([...next]))
-    setTestimonies(ts => ts.map(t => t.id === id ? { ...t, amenCount: (t.amenCount || 0) + 1 } : t))
-    try { await updateDoc(doc(db, 'testimonies', id), { amenCount: increment(1) }) } catch {}
+    setTestimonies(ts => ts.map(t => t.id === id ? { ...t, likeCount: (t.likeCount || 0) + 1 } : t))
+    try { await updateDoc(doc(db, 'testimonies', id), { likeCount: increment(1) }) } catch {}
   }
 
   async function reportPrayer(id) {
@@ -472,12 +474,11 @@ export default function BidSaam() {
                 <span className="prayer-meta">Anoniem · {timeLabel(t.createdAt)}</span>
                 <div className="prayer-actions">
                   <button
-                    className={`prayed-btn${amenedTestimonies.has(t.id) ? ' prayed' : ''}`}
-                    onClick={() => amenTestimony(t.id)}
+                    className={`testimony-like-btn${amenedTestimonies.has(t.id) ? ' liked' : ''}`}
+                    onClick={() => likeTestimony(t.id)}
                   >
-                    <PrayingHandsIcon />
-                    {amenedTestimonies.has(t.id) ? 'Amen!' : 'Amen'}
-                    {(t.amenCount || 0) > 0 && <span className="prayed-count">{t.amenCount}</span>}
+                    {amenedTestimonies.has(t.id) ? '❤️' : '🤍'}
+                    {(t.likeCount || 0) > 0 && <span className="prayed-count">{t.likeCount}</span>}
                   </button>
                 </div>
               </div>
