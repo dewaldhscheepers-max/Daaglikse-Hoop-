@@ -438,25 +438,21 @@ export default function BidSaam() {
           <div className="testimony-header">
             <div className="testimony-flame">🕊️</div>
             <h3 className="testimony-title">Getuienisse</h3>
-            <p className="testimony-sub">Wat God in jou lewe gedoen het, was dalk nooit net vir jou bedoel nie.</p>
-            <p className="testimony-sub">Jou getuienis kan iemand anders help om weer te glo.</p>
+            <p className="testimony-sub">Wat God gedoen het, was dalk nooit net vir jou bedoel nie. Jou getuienis kan iemand anders help om weer te glo.</p>
           </div>
 
           <div className="card testimony-input-card">
             <textarea
               className="prayer-textarea"
-              placeholder="Wat het God in jou lewe gedoen? Hoe het Hy jou gebed beantwoord?"
+              placeholder="Wat het God vir jou gedoen? Hoe het Hy jou gebed beantwoord?"
               value={testimonyText}
               onChange={e => setTestimonyText(e.target.value)}
-              rows={4}
+              rows={3}
               maxLength={600}
             />
-            <div className="input-footer">
-              <span className="char-count">{testimonyText.length}/600</span>
-              <button className="btn-primary submit-btn testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
-                Deel my getuienis
-              </button>
-            </div>
+            <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
+              Deel my getuienis
+            </button>
             {testimonySubmitted && (
               <div className="submitted-msg">🕊️ Dankie. Jou getuienis kan iemand se geloof aansteek.</div>
             )}

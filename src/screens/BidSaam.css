@@ -32,8 +32,8 @@
 .testimony-sub {
   font-size: 15px;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin: 0 0 4px;
+  line-height: 1.65;
+  margin: 0;
 }
 
 .testimony-scripture {
@@ -55,7 +55,22 @@
 }
 
 .testimony-submit-btn {
-  background: linear-gradient(135deg, #C4A0E0, #E8A55A) !important;
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  background: linear-gradient(135deg, #C4A0E0 0%, #E8A55A 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+}
+
+.testimony-submit-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .testimony-card {
