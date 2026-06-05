@@ -440,8 +440,6 @@ export default function BidSaam() {
             <h3 className="testimony-title">Getuienisse</h3>
             <p className="testimony-sub">Wat God in jou lewe gedoen het, was dalk nooit net vir jou bedoel nie.</p>
             <p className="testimony-sub">Jou getuienis kan iemand anders help om weer te glo.</p>
-            <p className="testimony-scripture">"En hulle het hom oorwin deur die bloed van die Lam en deur die woord van hulle getuienis."</p>
-            <p className="testimony-scripture-ref">Openbaring 12:11</p>
           </div>
 
           <div className="card testimony-input-card">
