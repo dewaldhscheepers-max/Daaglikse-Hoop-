@@ -169,7 +169,7 @@ export default function BidSaam() {
     try { return new Set(JSON.parse(localStorage.getItem('reportedPrayers') || '[]')) }
     catch { return new Set() }
   })
-  const [visibleCount, setVisibleCount] = useState(10)
+  const [visibleCount, setVisibleCount] = useState(7)
 
   const [todayPrayer, setTodayPrayer] = useState(() => {
     try {
