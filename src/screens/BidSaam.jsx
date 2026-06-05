@@ -500,11 +500,6 @@ export default function BidSaam() {
                     God is goed 🙌
                     <span className="prayed-count">{t.likeCount || 0}</span>
                   </button>
-                  {!reportedTestimonies.has(t.id) && (
-                    <button className="report-btn" onClick={() => reportTestimony(t.id)}>
-                      Rapporteer
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
