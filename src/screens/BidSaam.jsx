@@ -169,6 +169,7 @@ export default function BidSaam() {
     try { return new Set(JSON.parse(localStorage.getItem('reportedPrayers') || '[]')) }
     catch { return new Set() }
   })
+  const [visibleCount, setVisibleCount] = useState(10)
 
   const [todayPrayer, setTodayPrayer] = useState(() => {
     try {
@@ -360,7 +361,7 @@ export default function BidSaam() {
         )}
 
         <div className="prayer-list">
-          {prayers.filter(p => !p.reported).map(prayer => (
+          {prayers.filter(p => !p.reported).slice(0, visibleCount).map(prayer => (
             <div key={prayer.id} className="prayer-card card">
               <div className="prayer-icon">🙏</div>
               <div className="prayer-content">
@@ -385,6 +386,11 @@ export default function BidSaam() {
             </div>
           ))}
         </div>
+        {prayers.filter(p => !p.reported).length > visibleCount && (
+          <button className="load-more-btn" onClick={() => setVisibleCount(v => v + 10)}>
+            Laai meer gebede
+          </button>
+        )}
 
         {prevPrayers.length > 0 && (
           <div className="ep-archive">

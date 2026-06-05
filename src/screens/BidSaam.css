@@ -16,6 +16,18 @@
   margin: 0;
 }
 
+.load-more-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--lavender-soft);
+  color: var(--purple);
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .bidsaam-body {
   padding: 20px 16px;
   display: flex;
