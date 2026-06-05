@@ -479,7 +479,7 @@ export default function BidSaam() {
             )}
           </div>
 
-          {testimonies.slice(0, visibleTestimonies).map(t => (
+          {testimonies.filter(t => !t.reported).slice(0, visibleTestimonies).map(t => (
             <div key={t.id} className="testimony-card card">
               <div className="testimony-icon">✨</div>
               <div className="testimony-content">
@@ -503,13 +503,13 @@ export default function BidSaam() {
             </div>
           ))}
 
-          {testimonies.length > visibleTestimonies && (
+          {testimonies.filter(t => !t.reported).length > visibleTestimonies && (
             <button className="load-more-btn" onClick={() => setVisibleTestimonies(v => v + 5)}>
               Laai meer getuienisse
             </button>
           )}
 
-          {testimonies.length === 0 && (
+          {testimonies.filter(t => !t.reported).length === 0 && (
             <div className="prayers-empty">Wees die eerste om te deel wat God gedoen het.</div>
           )}
         </div>
