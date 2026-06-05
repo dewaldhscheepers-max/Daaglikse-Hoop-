@@ -55,17 +55,15 @@
 }
 
 .testimony-submit-btn {
-  width: 100%;
-  margin-top: 10px;
-  padding: 14px;
+  padding: 11px 18px;
   background: linear-gradient(135deg, #C4A0E0 0%, #E8A55A 100%);
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .testimony-submit-btn:disabled {

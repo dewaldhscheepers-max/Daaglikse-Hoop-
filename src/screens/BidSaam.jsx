@@ -450,9 +450,12 @@ export default function BidSaam() {
               rows={3}
               maxLength={600}
             />
-            <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
-              Deel my getuienis
-            </button>
+            <div className="input-footer">
+              <span className="char-count">{testimonyText.length}/600</span>
+              <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
+                Deel my getuienis
+              </button>
+            </div>
             {testimonySubmitted && (
               <div className="submitted-msg">🕊️ Dankie. Jou getuienis kan iemand se geloof aansteek.</div>
             )}
