@@ -174,7 +174,10 @@ export default function BidSaam() {
   })
   const [visibleCount, setVisibleCount] = useState(7)
 
-  const [testimonies, setTestimonies]               = useState([])
+  const [testimonies, setTestimonies]               = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cachedTestimonies') || '[]') }
+    catch { return [] }
+  })
   const [visibleTestimonies, setVisibleTestimonies] = useState(3)
   const [testimonyText, setTestimonyText]           = useState('')
   const [testimonySubmitted, setTestimonySubmitted] = useState(false)
@@ -237,7 +240,11 @@ export default function BidSaam() {
   useEffect(() => {
     const q = query(collection(db, 'testimonies'), orderBy('createdAt', 'desc'), limit(60))
     const unsub = onSnapshot(q,
-      snap => setTestimonies(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      snap => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        setTestimonies(list)
+        try { localStorage.setItem('cachedTestimonies', JSON.stringify(list)) } catch {}
+      },
       () => {}
     )
     return unsub
