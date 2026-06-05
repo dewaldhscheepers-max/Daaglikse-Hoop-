@@ -172,13 +172,13 @@ export default function BidSaam() {
     try { return new Set(JSON.parse(localStorage.getItem('reportedPrayers') || '[]')) }
     catch { return new Set() }
   })
-  const [visibleCount, setVisibleCount] = useState(7)
+  const [visibleCount, setVisibleCount] = useState(5)
 
   const [testimonies, setTestimonies]               = useState(() => {
     try { return JSON.parse(localStorage.getItem('cachedTestimonies') || '[]') }
     catch { return [] }
   })
-  const [visibleTestimonies, setVisibleTestimonies] = useState(5)
+  const [visibleTestimonies, setVisibleTestimonies] = useState(3)
   const [testimonyText, setTestimonyText]           = useState('')
   const [testimonySubmitted, setTestimonySubmitted] = useState(false)
   const [amenedTestimonies, setAmenedTestimonies]   = useState(() => {
