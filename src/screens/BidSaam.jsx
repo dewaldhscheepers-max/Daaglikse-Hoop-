@@ -182,6 +182,10 @@ export default function BidSaam() {
     try { return new Set(JSON.parse(localStorage.getItem('amenedTestimonies') || '[]')) }
     catch { return new Set() }
   })
+  const [reportedTestimonies, setReportedTestimonies] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('reportedTestimonies') || '[]')) }
+    catch { return new Set() }
+  })
 
   const [todayPrayer, setTodayPrayer] = useState(() => {
     try {
@@ -302,6 +306,15 @@ export default function BidSaam() {
     } catch {
       setError('Kon nie stuur nie. Probeer asseblief weer.')
     }
+  }
+
+  async function reportTestimony(id) {
+    if (reportedTestimonies.has(id)) return
+    const next = new Set(reportedTestimonies)
+    next.add(id)
+    setReportedTestimonies(next)
+    localStorage.setItem('reportedTestimonies', JSON.stringify([...next]))
+    try { await updateDoc(doc(db, 'testimonies', id), { reported: true }) } catch {}
   }
 
   async function likeTestimony(id) {
@@ -477,9 +490,14 @@ export default function BidSaam() {
                     className={`testimony-like-btn${amenedTestimonies.has(t.id) ? ' liked' : ''}`}
                     onClick={() => likeTestimony(t.id)}
                   >
-                    {amenedTestimonies.has(t.id) ? 'God is goed 🙌' : 'God is goed 🙌'}
+                    God is goed 🙌
                     {(t.likeCount || 0) > 0 && <span className="prayed-count">{t.likeCount}</span>}
                   </button>
+                  {!reportedTestimonies.has(t.id) && (
+                    <button className="report-btn" onClick={() => reportTestimony(t.id)}>
+                      Rapporteer
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
