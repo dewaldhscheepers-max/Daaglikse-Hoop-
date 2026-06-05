@@ -9,8 +9,11 @@ import './BidSaam.css'
 
 function timeLabel(ts) {
   if (!ts) return 'Nou net'
-  const date = ts.toDate ? ts.toDate() : new Date(ts)
+  const date = ts.toDate ? ts.toDate()
+             : ts.seconds ? new Date(ts.seconds * 1000)
+             : new Date(ts)
   const diff = Date.now() - date.getTime()
+  if (isNaN(diff) || diff < 0) return 'Nou net'
   if (diff < 86400000)  return 'Vandag'
   if (diff < 172800000) return 'Gister'
   return `${Math.floor(diff / 86400000)} dae gelede`
