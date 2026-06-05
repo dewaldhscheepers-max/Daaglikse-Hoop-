@@ -684,46 +684,6 @@ export default function Admin({ onClose }) {
               <input ref={coverInputRef} type="file" accept="image/*"
                 style={{ display: 'none' }} onChange={handleCoverUpload} />
 
-              <div className="admin-section-title" style={{ marginTop: 28 }}>📧 Toets E-pos Aflewering</div>
-              <div className="admin-field">
-                <label>Boek</label>
-                <select
-                  value={testEmailBookId}
-                  onChange={e => setTestEmailBookId(e.target.value)}
-                  style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid #DDD5EC', fontSize: 14, background: '#FDFAF6' }}
-                >
-                  <option value="">— Kies 'n boek —</option>
-                  {allBooks.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
-                </select>
-              </div>
-              <div className="admin-field">
-                <label>E-posadres</label>
-                <input
-                  type="email"
-                  value={testEmailAddr}
-                  onChange={e => setTestEmailAddr(e.target.value)}
-                  placeholder="jou@epos.com"
-                />
-              </div>
-              <button
-                className="admin-save-btn"
-                style={{ background: '#27713f' }}
-                onClick={() => handleTestEmail(allBooks)}
-                disabled={testEmailBusy}
-              >
-                {testEmailBusy ? 'Besig...' : '📧 Stuur toets-e-pos'}
-              </button>
-              {testEmailResult && (
-                <div style={{ marginTop: 12, background: '#f5f5f5', borderRadius: 10, padding: '12px 14px' }}>
-                  {testEmailResult.steps?.map((s, i) => (
-                    <div key={i} style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1.8,
-                      color: s.startsWith('✅') ? '#1a6b2e' : s.startsWith('❌') ? '#c0392b' : '#333' }}>
-                      {s}
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {allBooks.map(book => {
                 const override          = bookOverrides[book.id]
                 const hasPdf            = override?.pdfUrl
@@ -778,6 +738,46 @@ export default function Admin({ onClose }) {
                   </div>
                 )
               })}
+
+              <div className="admin-section-title" style={{ marginTop: 28 }}>📧 Toets E-pos Aflewering</div>
+              <div className="admin-field">
+                <label>Boek</label>
+                <select
+                  value={testEmailBookId}
+                  onChange={e => setTestEmailBookId(e.target.value)}
+                  style={{ padding: '10px 12px', borderRadius: 10, border: '1px solid #DDD5EC', fontSize: 14, background: '#FDFAF6' }}
+                >
+                  <option value="">— Kies 'n boek —</option>
+                  {allBooks.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>E-posadres</label>
+                <input
+                  type="email"
+                  value={testEmailAddr}
+                  onChange={e => setTestEmailAddr(e.target.value)}
+                  placeholder="jou@epos.com"
+                />
+              </div>
+              <button
+                className="admin-save-btn"
+                style={{ background: '#27713f' }}
+                onClick={() => handleTestEmail(allBooks)}
+                disabled={testEmailBusy}
+              >
+                {testEmailBusy ? 'Besig...' : '📧 Stuur toets-e-pos'}
+              </button>
+              {testEmailResult && (
+                <div style={{ marginTop: 12, background: '#f5f5f5', borderRadius: 10, padding: '12px 14px' }}>
+                  {testEmailResult.steps?.map((s, i) => (
+                    <div key={i} style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1.8,
+                      color: s.startsWith('✅') ? '#1a6b2e' : s.startsWith('❌') ? '#c0392b' : '#333' }}>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             )
           })()}
