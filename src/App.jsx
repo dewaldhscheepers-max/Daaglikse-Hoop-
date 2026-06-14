@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Luister from './screens/Luister'
 import BidSaam from './screens/BidSaam'
+import BidNou from './screens/BidNou'
 import Meer from './screens/Meer'
 import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
@@ -293,6 +294,13 @@ export default function App() {
 
   const screenRef = useRef(null)
 
+  // ── BidNou → BidSaam navigation ──
+  useEffect(() => {
+    function onBidNouNav(e) { setTab(e.detail) }
+    window.addEventListener('bidnou-navigate', onBidNouNav)
+    return () => window.removeEventListener('bidnou-navigate', onBidNouNav)
+  }, [])
+
   function handleNav(id) {
     if (id === 'skenk')   { setDonation(true); return }
     if (id === 'nooiomy') { setNooimy(true);   return }
@@ -348,6 +356,7 @@ export default function App() {
         <ErrorBoundary>
           {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (!pendingPopup) setActivePopup({ type: 'share' }) }} />}
           {tab === 'bidsaam' && <BidSaam />}
+          {tab === 'bidnou'  && <BidNou />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
         </ErrorBoundary>
       </div>
