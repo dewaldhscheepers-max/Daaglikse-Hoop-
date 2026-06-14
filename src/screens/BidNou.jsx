@@ -147,7 +147,8 @@ export default function BidNou() {
     <div className="bidnou-screen">
       <div className="bidnou-header bidnou-header-main">
         <h1 className="bidnou-heading">Bid Nou</h1>
-        <p className="bidnou-sub">Kies 'n gebed vir hierdie oomblik</p>
+        <p className="bidnou-sub">Wanneer jy nie weet wat om te bid nie, begin hier.</p>
+        <p className="bidnou-desc">Kies hoe jy vandag voel, tik op die onderwerp, en bid die gebed dadelik saam.</p>
       </div>
 
       <div className="bidnou-body">
@@ -159,7 +160,7 @@ export default function BidNou() {
           <input
             className="bidnou-search"
             type="search"
-            placeholder="Soek gebed…"
+            placeholder="Soek bv. angs, slaap, kind, geld…"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -183,7 +184,7 @@ export default function BidNou() {
           <>
             {/* Categories */}
             <section>
-              <h2 className="bidnou-section-label">Waarvoor wil jy bid?</h2>
+              <h2 className="bidnou-section-label">Kies jou gebed</h2>
               <div className="bidnou-cat-grid">
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} className="bidnou-cat-btn" onClick={() => setCategory(cat.id)}>
