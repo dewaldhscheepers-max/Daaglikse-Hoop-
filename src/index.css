@@ -115,6 +115,43 @@ body {
   stroke-width: 1.8;
 }
 
+.nav-tab-center {
+  color: var(--purple);
+  padding-top: 0;
+  justify-content: flex-start;
+  padding-bottom: 6px;
+}
+
+.nav-tab-center-bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 4px 16px rgba(109, 40, 217, 0.30);
+  margin-top: -20px;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.nav-tab-center-bubble svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.nav-tab-center.active .nav-tab-center-bubble {
+  background: var(--purple-dark, #5b21b6);
+  box-shadow: 0 4px 20px rgba(109, 40, 217, 0.45);
+}
+
+.nav-tab-center:active .nav-tab-center-bubble {
+  background: var(--purple-dark, #5b21b6);
+}
+
 
 /* ─── Shared Header ─── */
 .screen-header {
