@@ -108,6 +108,8 @@ body {
 }
 
 .nav-tab.active { color: var(--purple); }
+.nav-tab-bidnou { color: var(--gold); }
+.nav-tab-bidnou.active { color: var(--gold); }
 
 .nav-tab svg {
   width: 22px;

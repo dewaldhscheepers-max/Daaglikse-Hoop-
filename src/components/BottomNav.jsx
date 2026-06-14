@@ -59,7 +59,7 @@ export default function BottomNav({ active, onChange }) {
       {tabs.map(t => (
         <button
           key={t.id}
-          className={`nav-tab${active === t.id ? ' active' : ''}`}
+          className={`nav-tab${t.id === 'bidnou' ? ' nav-tab-bidnou' : ''}${active === t.id ? ' active' : ''}`}
           onClick={() => onChange(t.id)}
         >
           {t.icon}
