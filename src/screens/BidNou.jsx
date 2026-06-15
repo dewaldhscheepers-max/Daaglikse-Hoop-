@@ -64,8 +64,12 @@ export default function BidNou() {
 
         <div className="bidnou-prayer-body">
           <div className="bidnou-prayer-card">
+            <h2 className="bidnou-prayer-title">{selectedGebed.title}</h2>
             <div className="bidnou-prayer-text">
-              {selectedGebed.text.split('\n').map((line, i) => (
+              {(selectedGebed.text.startsWith(selectedGebed.title)
+                ? selectedGebed.text.slice(selectedGebed.title.length).trimStart()
+                : selectedGebed.text
+              ).split('\n').map((line, i) => (
                 line.trim()
                   ? <p key={i} className={line.startsWith('In Jesus') || line === 'Amen.' ? 'bidnou-prayer-amen' : ''}>{line}</p>
                   : null
