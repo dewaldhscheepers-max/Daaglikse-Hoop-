@@ -7,7 +7,7 @@
 
 /* ─── Header ─── */
 .bidnou-header {
-  padding: 16px 16px 12px;
+  padding: 16px 20px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -16,11 +16,10 @@
 }
 
 .bidnou-header-main {
+  padding: 24px 20px 0;
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  border-bottom: none;
-  padding-bottom: 0;
+  gap: 14px;
 }
 
 .bidnou-back {
@@ -38,29 +37,35 @@
   flex-shrink: 0;
 }
 
-.bidnou-cat-heading {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0;
-}
-
 .bidnou-heading {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 800;
-  color: var(--text-dark);
+  color: var(--text);
   margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
-.bidnou-sub {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin: 0;
+/* ─── Info card ─── */
+.bidnou-info-card {
+  background: linear-gradient(135deg, #FEF0E6 0%, #EDE8F8 100%);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.bidnou-desc {
+.bidnou-info-sub {
   font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bidnou-info-desc {
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.55;
   margin: 0;
@@ -68,10 +73,10 @@
 
 /* ─── Body ─── */
 .bidnou-body {
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 /* ─── Search ─── */
@@ -81,7 +86,7 @@
 
 .bidnou-search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
@@ -90,28 +95,27 @@
 
 .bidnou-search {
   width: 100%;
-  padding: 12px 14px 12px 38px;
+  padding: 13px 14px 13px 42px;
   border: 1.5px solid var(--cream-dark);
-  border-radius: 12px;
+  border-radius: 14px;
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--text);
   background: white;
   outline: none;
   box-sizing: border-box;
+  box-shadow: 0 1px 6px rgba(92, 78, 142, 0.05);
   transition: border-color 0.2s;
 }
 
 .bidnou-search:focus { border-color: var(--purple); }
 
-/* ─── Section labels ─── */
+/* ─── Section label ─── */
 .bidnou-section-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0 0 10px;
+  color: var(--text);
+  margin: 0 0 12px;
 }
 
 /* ─── Category grid ─── */
@@ -125,128 +129,162 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
-  padding: 14px;
+  gap: 10px;
+  padding: 16px;
   background: white;
-  border: 1.5px solid var(--cream-dark);
+  border: none;
   border-radius: 16px;
   cursor: pointer;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
-  transition: border-color 0.2s, background 0.2s;
+  box-shadow: 0 2px 12px rgba(92, 78, 142, 0.08);
+  transition: transform 0.13s, box-shadow 0.13s;
 }
 
 .bidnou-cat-btn:active {
-  background: var(--lavender-soft);
-  border-color: var(--lavender);
+  transform: scale(0.96);
+  box-shadow: 0 1px 4px rgba(92, 78, 142, 0.06);
 }
 
-.bidnou-cat-emoji {
-  font-size: 24px;
-  line-height: 1;
+.bidnou-cat-btn-wide {
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.bidnou-cat-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lavender-soft);
+  border-radius: 10px;
+  flex-shrink: 0;
+  color: var(--purple);
+}
+
+.bidnou-cat-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .bidnou-cat-label {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text);
   line-height: 1.3;
+}
+
+.bidnou-cat-heading {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
 }
 
 /* ─── Daily card ─── */
 .bidnou-daily-card {
   width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, var(--lavender-soft) 0%, #f5f0fc 100%);
-  border: 1.5px solid var(--lavender);
-  border-radius: 20px;
+  padding: 18px 20px;
+  background: var(--lavender-soft);
+  border: none;
+  border-radius: 18px;
   cursor: pointer;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s;
+  box-shadow: 0 2px 14px rgba(92, 78, 142, 0.10);
+  transition: transform 0.13s, box-shadow 0.13s;
 }
 
-.bidnou-daily-card:active { background: var(--lavender-soft); }
-
-.bidnou-daily-top {
-  display: flex;
-  align-items: center;
-}
-
-.bidnou-daily-badge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--purple);
-  background: white;
-  border-radius: 20px;
-  padding: 4px 10px;
+.bidnou-daily-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 6px rgba(92, 78, 142, 0.08);
 }
 
 .bidnou-daily-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--text);
   margin: 0;
+  line-height: 1.3;
 }
 
 .bidnou-daily-preview {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.55;
   margin: 0;
 }
 
 .bidnou-daily-cta {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--purple);
+  margin-top: 2px;
+  display: block;
 }
 
-/* ─── List items ─── */
+/* ─── List ─── */
 .bidnou-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 16px;
+  gap: 7px;
+  padding: 16px 20px;
 }
 
 .bidnou-list-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 15px 16px;
   background: white;
-  border: 1.5px solid var(--cream-dark);
+  border: none;
   border-radius: 14px;
   cursor: pointer;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
-  transition: border-color 0.15s, background 0.15s;
+  box-shadow: 0 1px 8px rgba(92, 78, 142, 0.07);
+  transition: transform 0.12s;
   gap: 12px;
 }
 
-.bidnou-list-item:active {
-  background: var(--lavender-soft);
-  border-color: var(--lavender);
+.bidnou-list-item:active { transform: scale(0.98); }
+
+.bidnou-list-item-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 16px;
+  background: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 1px 8px rgba(92, 78, 142, 0.07);
+  transition: transform 0.12s;
+  gap: 12px;
 }
+
+.bidnou-list-item-inline:active { transform: scale(0.98); }
 
 .bidnou-list-title {
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 500;
-  color: var(--text-dark);
+  color: var(--text);
   flex: 1;
 }
 
 /* ─── Prayer detail ─── */
 .bidnou-prayer-body {
-  padding: 16px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -254,18 +292,19 @@
 
 .bidnou-prayer-card {
   background: white;
-  border: 1.5px solid var(--cream-dark);
+  border: none;
   border-radius: 20px;
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 2px 18px rgba(92, 78, 142, 0.08);
 }
 
 .bidnou-prayer-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--text);
   margin: 0;
   line-height: 1.3;
 }
@@ -278,7 +317,7 @@
 
 .bidnou-prayer-text p {
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.8;
   color: var(--text);
   margin: 0;
 }
@@ -298,7 +337,7 @@
 
 .bidnou-prayed-btn {
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   background: var(--purple);
   color: white;
   border: none;
@@ -308,10 +347,13 @@
   font-weight: 700;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
-.bidnou-prayed-btn:active { background: var(--purple-dark); }
+.bidnou-prayed-btn:active {
+  background: var(--purple-dark);
+  transform: scale(0.98);
+}
 
 .bidnou-share-btn {
   display: flex;
@@ -319,7 +361,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 13px;
+  padding: 14px;
   background: transparent;
   border: 1.5px solid var(--lavender);
   border-radius: 16px;
@@ -340,7 +382,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 13px;
+  padding: 14px;
   background: transparent;
   border: 1.5px solid var(--cream-dark);
   border-radius: 16px;
@@ -355,7 +397,7 @@
 
 .bidnou-bidsaam-btn:active { background: var(--cream-dark); }
 
-/* ─── Empty state ─── */
+/* ─── Empty ─── */
 .bidnou-empty {
   text-align: center;
   font-size: 14px;
@@ -379,6 +421,6 @@
   text-align: center;
   max-width: calc(100% - 32px);
   z-index: 300;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.20);
   white-space: nowrap;
 }

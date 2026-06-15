@@ -2,13 +2,82 @@ import { useState, useEffect, useRef } from 'react'
 import './BidNou.css'
 
 const CATEGORIES = [
-  { id: 'emosies',    label: 'Hoe ek voel',     emoji: '😔' },
-  { id: 'seer',       label: 'Seer & Verlies',   emoji: '💔' },
-  { id: 'familie',    label: 'Familie',           emoji: '🏠' },
-  { id: 'werk',       label: 'Werk & Geld',       emoji: '💼' },
-  { id: 'gesondheid', label: 'Gesondheid',        emoji: '🌿' },
-  { id: 'geloof',     label: 'Geloof & Gees',     emoji: '🙏' },
-  { id: 'alledaags',  label: 'Alledaags',         emoji: '✨' },
+  {
+    id: 'emosies',
+    label: 'Gedagtes & emosies',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="9" y1="18" x2="15" y2="18"/>
+        <line x1="10" y1="22" x2="14" y2="22"/>
+        <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+      </svg>
+    )
+  },
+  {
+    id: 'seer',
+    label: 'Seer & verlies',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    )
+  },
+  {
+    id: 'familie',
+    label: 'Familie',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    )
+  },
+  {
+    id: 'werk',
+    label: 'Werk & geld',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    )
+  },
+  {
+    id: 'gesondheid',
+    label: 'Gesondheid',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+    )
+  },
+  {
+    id: 'geloof',
+    label: 'Geloof & gees',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="2" x2="12" y2="22"/>
+        <line x1="5" y1="8" x2="19" y2="8"/>
+      </svg>
+    )
+  },
+  {
+    id: 'alledaags',
+    label: 'Alledaags',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    )
+  },
 ]
 
 let cachedGebede = null
@@ -49,6 +118,12 @@ export default function BidNou() {
     }
   }
 
+  function stripTitle(g) {
+    return g.text.startsWith(g.title)
+      ? g.text.slice(g.title.length).trimStart()
+      : g.text
+  }
+
   // ── Prayer detail view ──
   if (selectedGebed) {
     return (
@@ -66,10 +141,7 @@ export default function BidNou() {
           <div className="bidnou-prayer-card">
             <h2 className="bidnou-prayer-title">{selectedGebed.title}</h2>
             <div className="bidnou-prayer-text">
-              {(selectedGebed.text.startsWith(selectedGebed.title)
-                ? selectedGebed.text.slice(selectedGebed.title.length).trimStart()
-                : selectedGebed.text
-              ).split('\n').map((line, i) => (
+              {stripTitle(selectedGebed).split('\n').map((line, i) => (
                 line.trim()
                   ? <p key={i} className={line.startsWith('In Jesus') || line === 'Amen.' ? 'bidnou-prayer-amen' : ''}>{line}</p>
                   : null
@@ -89,7 +161,6 @@ export default function BidNou() {
               Deel die app
             </button>
             <button className="bidnou-bidsaam-btn" onClick={() => {
-              window.__bidNouNavTarget = 'bidsaam'
               window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
             }}>
               ✍️ Plaas 'n gebedsversoek
@@ -98,9 +169,7 @@ export default function BidNou() {
         </div>
 
         {prayedToast && (
-          <div className="bidnou-toast">
-            🙏 Goed gedaan. God hoor jou gebed.
-          </div>
+          <div className="bidnou-toast">🙏 Goed gedaan. God hoor jou gebed.</div>
         )}
       </div>
     )
@@ -119,14 +188,14 @@ export default function BidNou() {
             </svg>
             Terug
           </button>
-          <h2 className="bidnou-cat-heading">{cat.emoji} {cat.label}</h2>
+          <h2 className="bidnou-cat-heading">{cat.label}</h2>
         </div>
 
         <div className="bidnou-list">
           {filtered.map(g => (
             <button key={g.id} className="bidnou-list-item" onClick={() => setSelected(g)}>
               <span className="bidnou-list-title">{g.title}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15" style={{flexShrink:0,color:'var(--text-muted)'}}>
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </button>
@@ -146,16 +215,19 @@ export default function BidNou() {
     ? gebede[new Date().getDate() % gebede.length]
     : null
 
+  const dailyPreview = daily ? stripTitle(daily).slice(0, 110).trim() : ''
+
   return (
     <div className="bidnou-screen">
-      <div className="bidnou-header bidnou-header-main">
+      <div className="bidnou-header-main">
         <h1 className="bidnou-heading">Bid Nou</h1>
-        <p className="bidnou-sub">Wanneer jy nie weet wat om te bid nie, begin hier.</p>
-        <p className="bidnou-desc">Kies hoe jy vandag voel, tik op die onderwerp, en bid die gebed dadelik saam.</p>
+        <div className="bidnou-info-card">
+          <p className="bidnou-info-sub">Wanneer jy nie weet wat om te bid nie, begin hier.</p>
+          <p className="bidnou-info-desc">Kies hoe jy vandag voel, tik op die onderwerp, en bid die gebed dadelik saam.</p>
+        </div>
       </div>
 
       <div className="bidnou-body">
-        {/* Search */}
         <div className="bidnou-search-wrap">
           <svg className="bidnou-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -170,46 +242,43 @@ export default function BidNou() {
         </div>
 
         {searchTrimmed.length >= 2 ? (
-          <div className="bidnou-list">
+          <>
             {searchResults.length === 0
               ? <p className="bidnou-empty">Geen gebede gevind vir "{search}"</p>
               : searchResults.map(g => (
-                <button key={g.id} className="bidnou-list-item" onClick={() => setSelected(g)}>
+                <button key={g.id} className="bidnou-list-item bidnou-list-item-inline" onClick={() => setSelected(g)}>
                   <span className="bidnou-list-title">{g.title}</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15" style={{flexShrink:0,color:'var(--text-muted)'}}>
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
                 </button>
               ))
             }
-          </div>
+          </>
         ) : (
           <>
-            {/* Categories */}
             <section>
               <h2 className="bidnou-section-label">Kies jou gebed</h2>
               <div className="bidnou-cat-grid">
-                {CATEGORIES.map(cat => (
-                  <button key={cat.id} className="bidnou-cat-btn" onClick={() => setCategory(cat.id)}>
-                    <span className="bidnou-cat-emoji">{cat.emoji}</span>
+                {CATEGORIES.map((cat, idx) => (
+                  <button
+                    key={cat.id}
+                    className={`bidnou-cat-btn${idx === CATEGORIES.length - 1 && CATEGORIES.length % 2 !== 0 ? ' bidnou-cat-btn-wide' : ''}`}
+                    onClick={() => setCategory(cat.id)}
+                  >
+                    <span className="bidnou-cat-icon">{cat.icon}</span>
                     <span className="bidnou-cat-label">{cat.label}</span>
                   </button>
                 ))}
               </div>
             </section>
 
-            {/* Gebed van die dag */}
             {daily && (
               <section>
                 <h2 className="bidnou-section-label">Gebed van die dag</h2>
                 <button className="bidnou-daily-card" onClick={() => setSelected(daily)}>
-                  <div className="bidnou-daily-top">
-                    <span className="bidnou-daily-badge">Gebed van die dag</span>
-                  </div>
                   <p className="bidnou-daily-title">{daily.title}</p>
-                  <p className="bidnou-daily-preview">
-                    {daily.text.slice(0, 120).trim()}…
-                  </p>
+                  <p className="bidnou-daily-preview">{dailyPreview}…</p>
                   <span className="bidnou-daily-cta">Lees gebed →</span>
                 </button>
               </section>
