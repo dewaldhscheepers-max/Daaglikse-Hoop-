@@ -44,13 +44,14 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  const url = event.notification.data?.url || self.registration.scope
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url.startsWith(self.registration.scope) && 'focus' in client) return client.focus()
+        if (client.url.startsWith(self.registration.scope) && 'focus' in client) {
+          return client.focus()
+        }
       }
-      return clients.openWindow(url)
+      return clients.openWindow(self.registration.scope)
     })
   )
 })
