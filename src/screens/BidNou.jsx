@@ -64,7 +64,6 @@ export default function BidNou() {
 
         <div className="bidnou-prayer-body">
           <div className="bidnou-prayer-card">
-            <h2 className="bidnou-prayer-title">{selectedGebed.title}</h2>
             <div className="bidnou-prayer-text">
               {selectedGebed.text.split('\n').map((line, i) => (
                 line.trim()
