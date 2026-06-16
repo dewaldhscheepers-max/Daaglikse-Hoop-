@@ -15,6 +15,19 @@ import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
+function shouldShowSharePopup() {
+  const today        = new Date().toISOString().slice(0, 10)
+  const appOpenDays  = JSON.parse(localStorage.getItem('appOpenDays') || '[]')
+  const lastShown    = localStorage.getItem('sharePopupLastShownDate')
+  const sharedAt     = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
+  const laterAt      = parseInt(localStorage.getItem('sharePopupLaterAt')  || '0')
+  if (appOpenDays.length < 2)                              return false
+  if (lastShown === today)                                 return false
+  if (Date.now() - sharedAt <= 10 * 24 * 60 * 60 * 1000) return false
+  if (Date.now() - laterAt  <=  3 * 24 * 60 * 60 * 1000) return false
+  return true
+}
+
 function getSkenkWindow() {
   const now   = new Date()
   const day   = now.getDate()
@@ -141,21 +154,11 @@ export default function App() {
         if (!paid && chance === 2 && !c2) donationDue = true
       }
 
-      const completedListens = parseInt(localStorage.getItem('completedListens') || '0')
-      const shareSharedAt    = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
-      const shareLaterAt     = parseInt(localStorage.getItem('sharePopupLaterAt') || '0')
-      const hasReceivedValue = appOpenDays.length >= 2 || completedListens >= 2
-      const shareDue = hasReceivedValue &&
-        Date.now() - shareSharedAt > 10 * 24 * 60 * 60 * 1000 &&
-        Date.now() - shareLaterAt  >  3 * 24 * 60 * 60 * 1000
-
       let popup = null
       if (donationDue) {
         popup = { type: 'donation' }
       } else if (unseenBook) {
         popup = { type: 'ebook', book: unseenBook }
-      } else if (shareDue) {
-        popup = { type: 'share' }
       }
 
       if (!popup) return
@@ -171,20 +174,22 @@ export default function App() {
   }, [isInstalled])
 
   function dismissPopup() {
-    const today     = new Date().toISOString().slice(0, 10)
-    const thisMonth = new Date().toISOString().slice(0, 7)
-    localStorage.setItem('lastPopupDate', today)
+    const today = new Date().toISOString().slice(0, 10)
 
     if (activePopup?.type === 'ebook') {
+      localStorage.setItem('lastPopupDate', today)
       const seen = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
       seen.push(activePopup.book.id)
       localStorage.setItem('seenEbooks', JSON.stringify(seen))
     } else if (activePopup?.type === 'donation') {
+      localStorage.setItem('lastPopupDate', today)
       const sw = getSkenkWindow()
       if (sw) {
         const key = sw.chance === 1 ? 'skenkChance1' : 'skenkChance2'
         localStorage.setItem(key, sw.cycleId)
       }
+    } else if (activePopup?.type === 'share') {
+      localStorage.setItem('sharePopupLastShownDate', today)
     }
     setActivePopup(null)
   }
@@ -392,7 +397,7 @@ export default function App() {
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
           <div style={tab !== 'luister' ? {display:'none'} : undefined}>
-            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (!pendingPopup) setActivePopup({ type: 'share' }) }} />
+            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (shouldShowSharePopup()) setActivePopup({ type: 'share' }) }} />
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
