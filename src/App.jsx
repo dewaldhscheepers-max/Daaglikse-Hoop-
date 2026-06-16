@@ -15,6 +15,22 @@ import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
+function getSkenkWindow() {
+  const now   = new Date()
+  const day   = now.getDate()
+  const year  = now.getFullYear()
+  const month = now.getMonth()
+  if (day >= 25) {
+    return { cycleId: `${year}-${String(month + 1).padStart(2, '0')}`, chance: 1 }
+  }
+  if (day === 2 || day === 3) {
+    const pm = month === 0 ? 11 : month - 1
+    const py = month === 0 ? year - 1 : year
+    return { cycleId: `${py}-${String(pm + 1).padStart(2, '0')}`, chance: 2 }
+  }
+  return null
+}
+
 export default function App() {
   const [tab, setTab]               = useState('luister')
   const [showDonation, setDonation] = useState(false)
@@ -111,9 +127,19 @@ export default function App() {
       // Don't show ebook/donation to someone who only opened the app once
       if (appOpenDays.length < 2) return
 
-      const seenEbooks  = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
-      const unseenBook  = BOOKS.find(b => !seenEbooks.includes(b.id))
-      const donationDue = localStorage.getItem('donationPopupMonth') !== thisMonth
+      const seenEbooks = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
+      const unseenBook = BOOKS.find(b => !seenEbooks.includes(b.id))
+
+      const sw = getSkenkWindow()
+      let donationDue = false
+      if (sw) {
+        const { cycleId, chance } = sw
+        const paid = localStorage.getItem('skenkPaid') === cycleId
+        const c1   = localStorage.getItem('skenkChance1') === cycleId
+        const c2   = localStorage.getItem('skenkChance2') === cycleId
+        if (!paid && chance === 1 && !c1) donationDue = true
+        if (!paid && chance === 2 && !c2) donationDue = true
+      }
 
       const completedListens = parseInt(localStorage.getItem('completedListens') || '0')
       const shareSharedAt    = parseInt(localStorage.getItem('sharePopupSharedAt') || '0')
@@ -124,10 +150,10 @@ export default function App() {
         Date.now() - shareLaterAt  >  3 * 24 * 60 * 60 * 1000
 
       let popup = null
-      if (unseenBook) {
-        popup = { type: 'ebook', book: unseenBook }
-      } else if (donationDue) {
+      if (donationDue) {
         popup = { type: 'donation' }
+      } else if (unseenBook) {
+        popup = { type: 'ebook', book: unseenBook }
       } else if (shareDue) {
         popup = { type: 'share' }
       }
@@ -154,7 +180,11 @@ export default function App() {
       seen.push(activePopup.book.id)
       localStorage.setItem('seenEbooks', JSON.stringify(seen))
     } else if (activePopup?.type === 'donation') {
-      localStorage.setItem('donationPopupMonth', thisMonth)
+      const sw = getSkenkWindow()
+      if (sw) {
+        const key = sw.chance === 1 ? 'skenkChance1' : 'skenkChance2'
+        localStorage.setItem(key, sw.cycleId)
+      }
     }
     setActivePopup(null)
   }
@@ -249,6 +279,10 @@ export default function App() {
     if (status === 'success') {
       setTab('meer')
       window.history.replaceState({}, '', '/')
+      if (type === 'donation') {
+        const sw = getSkenkWindow()
+        if (sw) localStorage.setItem('skenkPaid', sw.cycleId)
+      }
       if (type === 'ebook' && bookIds.length > 0) {
         // Trigger immediate email delivery and get download tokens
         const deliverPromise = email
