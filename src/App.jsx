@@ -352,16 +352,21 @@ export default function App() {
     return () => window.removeEventListener('open-daevrede', onOpen)
   }, [])
 
-  // ── Auto-reload when SW updates (skip if audio playing) ──
+  // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
-    function onMessage(e) {
-      if (e.data?.type === 'SW_UPDATED' && !isPlayingRef.current) {
-        window.location.reload()
-      }
+    let refreshing = false
+    function doRefresh() {
+      if (!refreshing && !isPlayingRef.current) { refreshing = true; window.location.reload() }
     }
-    navigator.serviceWorker.addEventListener('message', onMessage)
-    return () => navigator.serviceWorker.removeEventListener('message', onMessage)
+    function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') doRefresh() }
+    function onControllerChange()                                      { doRefresh() }
+    navigator.serviceWorker.addEventListener('message',          onMessage)
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
+    return () => {
+      navigator.serviceWorker.removeEventListener('message',          onMessage)
+      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
+    }
   }, [])
 
   function handleNav(id) {
