@@ -83,31 +83,20 @@ const CATEGORIES = [
 let cachedGebede = null
 
 export default function BidNou() {
-  const [gebede, setGebede]           = useState(cachedGebede || [])
-  const [loading, setLoading]         = useState(!cachedGebede)
-  const [category, setCategory]       = useState(null)
-  const [selectedGebed, setSelected]  = useState(null)
-  const [prayedToast, setPrayedToast] = useState(false)
-  const [search, setSearch]           = useState('')
-  const toastTimer = useRef(null)
+  const [gebede, setGebede]             = useState(cachedGebede || [])
+  const [loading, setLoading]           = useState(!cachedGebede)
+  const [category, setCategory]         = useState(null)
+  const [selectedGebed, setSelected]    = useState(null)
+  const [showPrayedModal, setShowModal] = useState(false)
+  const [search, setSearch]             = useState('')
 
   useEffect(() => {
     if (cachedGebede) return
     fetch('/gebede.json')
       .then(r => r.json())
-      .then(data => {
-        cachedGebede = data
-        setGebede(data)
-        setLoading(false)
-      })
+      .then(data => { cachedGebede = data; setGebede(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
-
-  function handlePrayed() {
-    clearTimeout(toastTimer.current)
-    setPrayedToast(true)
-    toastTimer.current = setTimeout(() => setPrayedToast(false), 2500)
-  }
 
   async function handleShare() {
     const msg = 'Daaglikse Hoop – elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nhttps://dewaldscheepers.com/go'
@@ -118,11 +107,38 @@ export default function BidNou() {
     }
   }
 
+  function goToBidSaam() {
+    setShowModal(false)
+    window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
+  }
+
   function stripTitle(g) {
     return g.text.startsWith(g.title)
       ? g.text.slice(g.title.length).trimStart()
       : g.text
   }
+
+  // ── Post-prayer modal ──
+  const PrayedModal = showPrayedModal ? (
+    <div className="bidnou-modal-backdrop" onClick={() => setShowModal(false)}>
+      <div className="bidnou-modal" onClick={e => e.stopPropagation()}>
+        <p className="bidnou-modal-eyebrow">Hoop vir nou</p>
+        <h3 className="bidnou-modal-title">God het jou gehoor</h3>
+        <div className="bidnou-modal-body">
+          <p>Jy het nie net woorde gelees nie. Jy het met jou Vader gepraat.</p>
+          <p>Moenie dieselfde las dadelik weer optel nie. Gee vandag net die volgende tree.</p>
+          <p className="bidnou-modal-highlight">Haal asem. Drink water. Sê stadig: <em>"Here, help my deur vandag."</em></p>
+          <p>Jy het vandag jou las by God neergesit.</p>
+        </div>
+        <button className="bidnou-modal-cta" onClick={goToBidSaam}>
+          Wil jy hê ons moet saam met jou bid?
+        </button>
+        <button className="bidnou-modal-dismiss" onClick={() => setShowModal(false)}>
+          Maak toe
+        </button>
+      </div>
+    </div>
+  ) : null
 
   // ── Prayer detail view ──
   if (selectedGebed) {
@@ -138,6 +154,8 @@ export default function BidNou() {
         </div>
 
         <div className="bidnou-prayer-body">
+          <p className="bidnou-read-tip">Lees stadig. Moenie jaag nie. Hierdie is jou oomblik saam met God.</p>
+
           <div className="bidnou-prayer-card">
             <h2 className="bidnou-prayer-title">{selectedGebed.title}</h2>
             <div className="bidnou-prayer-text">
@@ -150,7 +168,7 @@ export default function BidNou() {
           </div>
 
           <div className="bidnou-actions">
-            <button className="bidnou-prayed-btn" onClick={handlePrayed}>
+            <button className="bidnou-prayed-btn" onClick={() => setShowModal(true)}>
               🙏 Ek het hierdie gebed gebid
             </button>
             <button className="bidnou-share-btn" onClick={handleShare}>
@@ -160,17 +178,10 @@ export default function BidNou() {
               </svg>
               Deel die app
             </button>
-            <button className="bidnou-bidsaam-btn" onClick={() => {
-              window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
-            }}>
-              ✍️ Plaas 'n gebedsversoek
-            </button>
           </div>
         </div>
 
-        {prayedToast && (
-          <div className="bidnou-toast">🙏 Goed gedaan. God hoor jou gebed.</div>
-        )}
+        {PrayedModal}
       </div>
     )
   }
@@ -224,6 +235,12 @@ export default function BidNou() {
         <div className="bidnou-info-card">
           <p className="bidnou-info-sub">Wanneer jy nie weet wat om te bid nie, begin hier.</p>
           <p className="bidnou-info-desc">Kies hoe jy vandag voel, tik op die onderwerp, en bid die gebed dadelik saam.</p>
+        </div>
+        <div className="bidnou-breath-card">
+          <span className="bidnou-breath-dot">🌬</span>
+          <p className="bidnou-breath-text">
+            Haal eers asem. Jy is nie hier per toeval nie — kies net hoe jy voel en bring dit voor God.
+          </p>
         </div>
       </div>
 

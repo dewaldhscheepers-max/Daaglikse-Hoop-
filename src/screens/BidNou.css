@@ -406,6 +406,140 @@
   margin: 0;
 }
 
+/* ─── Breath card (main page) ─── */
+.bidnou-breath-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(242, 196, 160, 0.18);
+  border-radius: 14px;
+  border-left: 3px solid var(--peach);
+}
+
+.bidnou-breath-dot {
+  font-size: 16px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.bidnou-breath-text {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─── Read tip (prayer detail) ─── */
+.bidnou-read-tip {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+  line-height: 1.6;
+  padding: 0 8px;
+}
+
+/* ─── Post-prayer modal ─── */
+.bidnou-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 40, 0.45);
+  z-index: 250;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bidnou-modal {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px calc(var(--safe-bottom) + 28px);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bidnou-modal-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin: 0 0 8px;
+}
+
+.bidnou-modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.bidnou-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.bidnou-modal-body p {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.bidnou-modal-highlight {
+  background: var(--lavender-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px !important;
+  color: var(--text) !important;
+}
+
+.bidnou-modal-highlight em {
+  font-style: italic;
+  color: var(--purple);
+}
+
+.bidnou-modal-cta {
+  width: 100%;
+  padding: 16px;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+  margin-bottom: 10px;
+}
+
+.bidnou-modal-cta:active { background: var(--purple-dark); }
+
+.bidnou-modal-dismiss {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ─── Toast ─── */
 .bidnou-toast {
   position: fixed;
