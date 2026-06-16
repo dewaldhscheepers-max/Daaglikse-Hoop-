@@ -1,0 +1,498 @@
+/* ─── Overlay ─── */
+.dvv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dvv-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ─── Shared header ─── */
+.dvv-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 12px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--cream-dark);
+  flex-shrink: 0;
+}
+
+.dvv-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--purple);
+  cursor: pointer;
+  padding: 4px 0;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.dvv-header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dvv-header-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Close for full-page screens (opening, closing) */
+.dvv-overlay-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0,0,0,0.06);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Buttons ─── */
+.dvv-primary-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, transform 0.1s;
+}
+.dvv-primary-btn:active { background: var(--purple-dark); transform: scale(0.98); }
+
+.dvv-secondary-btn {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 1.5px solid var(--lavender);
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--purple);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+.dvv-secondary-btn:active { background: var(--lavender-soft); }
+
+.dvv-koop-btn {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: #C4724A;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Opening screen ─── */
+.dvv-opening {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 64px 28px 40px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.dvv-opening-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #C4724A;
+  background: rgba(196, 114, 74, 0.10);
+  padding: 5px 14px;
+  border-radius: 20px;
+}
+
+.dvv-opening-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.dvv-opening-sub {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin: 0;
+  font-style: italic;
+}
+
+.dvv-opening-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 340px;
+}
+
+.dvv-opening-desc em {
+  color: var(--text);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.dvv-opening-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.dvv-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--cream-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dvv-progress-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.dvv-progress-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ─── List screen ─── */
+.dvv-list-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dvv-continue-card {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--lavender-soft);
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--purple);
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 20px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dvv-sleutel-group {
+  margin-bottom: 20px;
+}
+
+.dvv-sleutel-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.dvv-dag-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  background: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 6px;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 1px 8px rgba(92, 78, 142, 0.07);
+  transition: transform 0.12s;
+}
+.dvv-dag-row:active { transform: scale(0.98); }
+
+.dvv-dag-row.dvv-dag-done {
+  background: var(--cream);
+  box-shadow: none;
+}
+
+.dvv-dag-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--lavender-soft);
+  color: var(--purple);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dvv-dag-num-done {
+  background: var(--purple);
+  color: white;
+}
+
+.dvv-dag-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dvv-dag-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dvv-dag-ref {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ─── Day screen ─── */
+.dvv-day-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dvv-day-sleutel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #C4724A;
+}
+
+.dvv-verse-card {
+  background: var(--lavender-soft);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dvv-verse-text {
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0;
+}
+
+.dvv-verse-ref {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple);
+  margin: 0;
+}
+
+/* ─── Sections ─── */
+.dvv-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dvv-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dvv-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dvv-section-body p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  margin: 0;
+}
+
+.dvv-opdrag {
+  background: #FEF7F0;
+  border-left: 3px solid #C4724A;
+  border-radius: 0 12px 12px 0;
+  padding: 16px 16px 16px 18px;
+}
+
+.dvv-gebed {
+  background: var(--lavender-soft);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.dvv-gebed-text p {
+  font-style: italic;
+  color: var(--purple-dark);
+  line-height: 1.8;
+}
+
+.dvv-joernaal {
+  border-top: 1px solid var(--cream-dark);
+  padding-top: 20px;
+}
+
+.dvv-joernaal-q {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0;
+}
+
+.dvv-done-btn {
+  margin-top: 4px;
+}
+
+/* ─── Closing screen ─── */
+.dvv-closing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 72px 28px 48px;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.dvv-closing-icon {
+  font-size: 48px;
+}
+
+.dvv-closing-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.dvv-closing-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 340px;
+}
+
+.dvv-closing-body em {
+  color: var(--text);
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* ─── Entry button (lives in Luister) ─── */
+.dvv-entry-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #FEF0E6 0%, #EDE8F8 100%);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.13s;
+  margin-bottom: 4px;
+}
+.dvv-entry-btn:active { transform: scale(0.98); }
+
+.dvv-entry-title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dvv-entry-sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+}

@@ -13,6 +13,7 @@ import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, db } from './firebase'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
+import DaeVanVrede from './screens/DaeVanVrede'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -64,8 +65,9 @@ export default function App() {
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
-  const [showAdmin, setShowAdmin] = useState(false)
+  const [showAdmin, setShowAdmin]       = useState(false)
   const [targetBookId, setTargetBookId] = useState(null)
+  const [showJourney, setShowJourney]   = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -343,6 +345,13 @@ export default function App() {
     return () => window.removeEventListener('bidnou-navigate', onBidNouNav)
   }, [])
 
+  // ── 11 Dae van Vrede journey ──
+  useEffect(() => {
+    function onOpen() { setShowJourney(true) }
+    window.addEventListener('open-daevrede', onOpen)
+    return () => window.removeEventListener('open-daevrede', onOpen)
+  }, [])
+
   function handleNav(id) {
     if (id === 'skenk')   { setDonation(true); return }
     if (id === 'nooiomy') { setNooimy(true);   return }
@@ -444,6 +453,17 @@ export default function App() {
 
       {showInstallHelp && (
         <InstallHelp onClose={() => setShowInstallHelp(false)} />
+      )}
+
+      {showJourney && (
+        <DaeVanVrede
+          onClose={() => setShowJourney(false)}
+          onBuyBook={() => {
+            setShowJourney(false)
+            setTab('meer')
+            if (screenRef.current) screenRef.current.scrollTop = 0
+          }}
+        />
       )}
 
       {showNotifBanner && (

@@ -3,6 +3,7 @@ import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import '../components/PopupStyles.css'
 import './Luister.css'
+import './DaeVanVrede.css'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -597,6 +598,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
         {installBanner}
+
+        <button className="dvv-entry-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-daevrede'))}>
+          <span className="dvv-entry-title">11 Dae van Vrede ✨</span>
+          <span className="dvv-entry-sub">gratis · begin enige tyd · geen slotjies</span>
+        </button>
 
         {/* ── Search bar ── */}
         <div className="search-bar">
