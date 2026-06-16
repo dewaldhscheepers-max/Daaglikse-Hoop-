@@ -296,7 +296,10 @@ export default function App() {
 
   // ── BidNou → BidSaam navigation ──
   useEffect(() => {
-    function onBidNouNav(e) { setTab(e.detail) }
+    function onBidNouNav(e) {
+      setTab(e.detail)
+      if (screenRef.current) screenRef.current.scrollTop = 0
+    }
     window.addEventListener('bidnou-navigate', onBidNouNav)
     return () => window.removeEventListener('bidnou-navigate', onBidNouNav)
   }, [])

@@ -91,6 +91,11 @@ export default function BidNou() {
   const [search, setSearch]             = useState('')
 
   useEffect(() => {
+    const screen = document.querySelector('.screen')
+    if (screen) screen.scrollTop = 0
+  }, [category, selectedGebed])
+
+  useEffect(() => {
     if (cachedGebede) return
     fetch('/gebede.json')
       .then(r => r.json())
