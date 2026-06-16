@@ -352,6 +352,18 @@ export default function App() {
     return () => window.removeEventListener('open-daevrede', onOpen)
   }, [])
 
+  // ── Auto-reload when SW updates (skip if audio playing) ──
+  useEffect(() => {
+    if (!navigator.serviceWorker) return
+    function onMessage(e) {
+      if (e.data?.type === 'SW_UPDATED' && !isPlayingRef.current) {
+        window.location.reload()
+      }
+    }
+    navigator.serviceWorker.addEventListener('message', onMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage)
+  }, [])
+
   function handleNav(id) {
     if (id === 'skenk')   { setDonation(true); return }
     if (id === 'nooiomy') { setNooimy(true);   return }

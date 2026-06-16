@@ -5,7 +5,15 @@ import { ExpirationPlugin } from 'workbox-expiration'
 
 
 self.addEventListener('install', () => self.skipWaiting())
-self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    self.clients.claim().then(() =>
+      self.clients.matchAll({ type: 'window' }).then(clients =>
+        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }))
+      )
+    )
+  )
+})
 
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
