@@ -108,6 +108,15 @@
   background: #2E7D32;
 }
 
+.nuut-badge {
+  background: #C4724A;
+}
+
+.book-card-featured {
+  border: 2px solid #C4724A;
+  box-shadow: 0 4px 20px rgba(196, 114, 74, 0.18);
+}
+
 /* ─── Book info ─── */
 .book-info {
   flex: 1;

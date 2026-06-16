@@ -104,12 +104,13 @@ function CartBar({ count, total, onClick }) {
 /* ── Book card ── */
 function BookCard({ book, inCart, onToggle }) {
   return (
-    <div className={`book-card${inCart ? ' in-cart' : ''}`}>
+    <div className={`book-card${inCart ? ' in-cart' : ''}${book._new ? ' book-card-featured' : ''}`}>
       <div className="book-cover" style={{ background: book.coverUrl ? 'transparent' : book.color }}>
         {book.coverUrl
           ? <img src={book.coverUrl} className="book-cover-img" alt={book.title} />
           : <span className="book-emoji">{book.emoji}</span>}
-        {book.price === 105 && !inCart && <span className="book-badge">Gewild</span>}
+        {book._new && !inCart && <span className="book-badge nuut-badge">Nuut</span>}
+        {!book._new && book.price === 105 && !inCart && <span className="book-badge">Gewild</span>}
         {inCart && <span className="book-badge cart-check">✓</span>}
       </div>
       <div className="book-info">
@@ -184,13 +185,13 @@ export default function Meer({ targetBookId, onScrolled }) {
   }, [])
 
   const BOOKS = [
+    ...Object.entries(bookOverrides)
+      .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
+      .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, _new: true, ...d })),
     ...STATIC_BOOKS.map(b => {
       const ov = bookOverrides[b.id] || {}
       return { ...b, pdfUrl: ov.pdfUrl ?? b.pdfUrl ?? null, coverUrl: ov.coverUrl ?? null }
     }),
-    ...Object.entries(bookOverrides)
-      .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
-      .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, ...d }))
   ]
   const paid = BOOKS.filter(b => !b.free)
   const free = BOOKS.filter(b => b.free)
