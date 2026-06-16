@@ -357,7 +357,9 @@ export default function App() {
     <div className="app">
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
-          {tab === 'luister' && <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (!pendingPopup) setActivePopup({ type: 'share' }) }} />}
+          <div style={tab !== 'luister' ? {display:'none'} : undefined}>
+            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (!pendingPopup) setActivePopup({ type: 'share' }) }} />
+          </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
