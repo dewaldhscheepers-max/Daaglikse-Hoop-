@@ -307,6 +307,20 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     fetchNotes()
   }, [])
 
+  // ── Real-time: silently refetch when a new note is uploaded ──
+  useEffect(() => {
+    const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(1))
+    const unsub = onSnapshot(q, snap => {
+      if (!snap.docs.length) return
+      const latestId = snap.docs[0].id
+      setNotes(prev => {
+        if (prev.length > 0 && prev[0].id !== latestId) fetchNotes(true)
+        return prev
+      })
+    }, () => {})
+    return unsub
+  }, [fetchNotes])
+
   // ── Deep-link: ?note=id from a shared URL ──
   useEffect(() => {
     if (notes.length === 0) return
