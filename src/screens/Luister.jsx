@@ -666,7 +666,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             <div className="leesplan-info">
               <div className="leesplan-title">Dinge Wat Jou Lewe Kan Verander</div>
               <div className="leesplan-desc">Dag-vir-dag waarhede wat jou help om anders te dink, bid en leef.</div>
-              <div className="leesplan-meta">gratis</div>
+              <div className="leesplan-meta">24 dae · gratis</div>
             </div>
             <div className="leesplan-right">
               <button

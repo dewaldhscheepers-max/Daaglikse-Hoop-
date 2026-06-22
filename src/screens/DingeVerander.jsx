@@ -152,7 +152,7 @@ export default function DingeVerander({ onClose }) {
                     </div>
                     <div className="dvv-dag-info">
                       <span className="dvv-dag-title">Dag {dag.dag}</span>
-                      {dag.versRef && <span className="dvv-dag-ref">{dag.versRef}</span>}
+                      {dag.titel && <span className="dvv-dag-ref">{dag.titel}</span>}
                     </div>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15" style={{ flexShrink: 0, color: 'var(--text-muted)' }}>
                       <polyline points="9 18 15 12 9 6"/>
@@ -190,7 +190,7 @@ export default function DingeVerander({ onClose }) {
           </div>
 
           <div className="dvv-day-body" ref={bodyRef}>
-            {d.afdeling && <div className="dvv-day-sleutel">{d.afdeling}</div>}
+            {d.titel && <div className="dvv-day-sleutel">{d.titel}</div>}
 
             <div className="dvv-verse-card">
               <p className="dvv-verse-text">"{d.vers}"</p>
@@ -278,7 +278,7 @@ export default function DingeVerander({ onClose }) {
               Jy het deur al {totalDae} dae gestap. Dag-vir-dag het jy waarhede ontvang en toegepas wat jou denke, jou gebed en jou lewe begin verander het.
             </p>
             <p className="dvv-closing-body">
-              Hierdie is nie die einde nie — dit is die begin van 'n nuwe manier om te leef.
+              Jy het deur onderwerpe gestap wat jou gedagtes, jou hart, jou verhoudings en jou finansies raak. Dit was nie net leesstof nie — dit was 'n verandering van binne af.
             </p>
             <button className="dvv-secondary-btn" onClick={() => setView('list')}>
               Gaan terug na daglys
