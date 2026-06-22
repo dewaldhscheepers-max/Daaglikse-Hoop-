@@ -14,6 +14,7 @@ import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, db
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
+import DingeVerander from './screens/DingeVerander'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -68,6 +69,7 @@ export default function App() {
   const [showAdmin, setShowAdmin]       = useState(false)
   const [targetBookId, setTargetBookId] = useState(null)
   const [showJourney, setShowJourney]   = useState(false)
+  const [showDingeVerander, setShowDingeVerander] = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -352,6 +354,13 @@ export default function App() {
     return () => window.removeEventListener('open-daevrede', onOpen)
   }, [])
 
+  // ── Dinge Wat Jou Lewe Kan Verander journey ──
+  useEffect(() => {
+    function onOpen() { setShowDingeVerander(true) }
+    window.addEventListener('open-dinge-verander', onOpen)
+    return () => window.removeEventListener('open-dinge-verander', onOpen)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -481,6 +490,10 @@ export default function App() {
             if (screenRef.current) screenRef.current.scrollTop = 0
           }}
         />
+      )}
+
+      {showDingeVerander && (
+        <DingeVerander onClose={() => setShowDingeVerander(false)} />
       )}
 
       {showNotifBanner && (

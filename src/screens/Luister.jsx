@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, startAfter, getDocs, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, startAfter, getDocs, getDoc, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
@@ -232,6 +232,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [loadingAll, setLoadingAll]   = useState(false)
   const fetchedAllRef                 = useRef(false)
   const [playCounts, setPlayCounts] = useState({})
+  const [planLikes, setPlanLikes]   = useState({})
+  const [likedPlans, setLikedPlans] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('likedPlans') || '{}') } catch { return {} }
+  })
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -354,6 +358,26 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     return unsub
   }, [])
 
+
+  // ── Fetch reading plan like counts ──
+  useEffect(() => {
+    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander']
+    Promise.all(PLAN_IDS.map(id => getDoc(doc(db, 'readingPlanLikes', id)))).then(docs => {
+      const counts = {}
+      docs.forEach((d, i) => { counts[PLAN_IDS[i]] = d.exists() ? (d.data().count || 0) : 0 })
+      setPlanLikes(counts)
+    }).catch(() => {})
+  }, [])
+
+  function handlePlanLike(planId) {
+    const alreadyLiked = likedPlans[planId]
+    const delta = alreadyLiked ? -1 : 1
+    const newLiked = { ...likedPlans, [planId]: !alreadyLiked }
+    setLikedPlans(newLiked)
+    try { localStorage.setItem('likedPlans', JSON.stringify(newLiked)) } catch {}
+    setPlanLikes(prev => ({ ...prev, [planId]: Math.max(0, (prev[planId] || 0) + delta) }))
+    setDoc(doc(db, 'readingPlanLikes', planId), { count: increment(delta) }, { merge: true }).catch(() => {})
+  }
 
   // ── MediaSession API ──
   useEffect(() => {
@@ -613,10 +637,49 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       <div className="luister-body">
         {installBanner}
 
-        <button className="dvv-entry-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-daevrede'))}>
-          <span className="dvv-entry-title">11 Dae van Vrede ✨</span>
-          <span className="dvv-entry-sub">gratis · begin enige tyd · geen slotjies</span>
-        </button>
+        {/* ── Leesplanne ── */}
+        <div className="leesplanne-section">
+          <p className="leesplanne-heading">Leesplanne</p>
+          <p className="leesplanne-sub">Kort Bybelse leesplanne wat jy dag vir dag kan volg.</p>
+
+          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-daevrede'))}>
+            <span className="leesplan-icon">🕊️</span>
+            <div className="leesplan-info">
+              <div className="leesplan-title">11 Dae van Vrede</div>
+              <div className="leesplan-desc">'n Kort leesplan vir wanneer jou gedagtes raas en jou hart moeg is.</div>
+              <div className="leesplan-meta">11 dae · gratis</div>
+            </div>
+            <div className="leesplan-right">
+              <button
+                className={`leesplan-like-btn${likedPlans['11-dae-vrede'] ? ' liked' : ''}`}
+                onClick={e => { e.stopPropagation(); handlePlanLike('11-dae-vrede') }}
+              >
+                <span className="leesplan-like-icon">{likedPlans['11-dae-vrede'] ? '♥' : '♡'}</span>
+                <span className="leesplan-like-count">{planLikes['11-dae-vrede'] || ''}</span>
+              </button>
+              <span className="leesplan-arrow">›</span>
+            </div>
+          </button>
+
+          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-dinge-verander'))}>
+            <span className="leesplan-icon">✨</span>
+            <div className="leesplan-info">
+              <div className="leesplan-title">Dinge Wat Jou Lewe Kan Verander</div>
+              <div className="leesplan-desc">Dag-vir-dag waarhede wat jou help om anders te dink, bid en leef.</div>
+              <div className="leesplan-meta">gratis</div>
+            </div>
+            <div className="leesplan-right">
+              <button
+                className={`leesplan-like-btn${likedPlans['dinge-verander'] ? ' liked' : ''}`}
+                onClick={e => { e.stopPropagation(); handlePlanLike('dinge-verander') }}
+              >
+                <span className="leesplan-like-icon">{likedPlans['dinge-verander'] ? '♥' : '♡'}</span>
+                <span className="leesplan-like-count">{planLikes['dinge-verander'] || ''}</span>
+              </button>
+              <span className="leesplan-arrow">›</span>
+            </div>
+          </button>
+        </div>
 
         {/* ── Search bar ── */}
         <div className="search-bar">
