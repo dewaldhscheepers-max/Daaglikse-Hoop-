@@ -361,7 +361,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   // ── Fetch reading plan like counts ──
   useEffect(() => {
-    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander']
+    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander', 'seer-na-vryheid']
     Promise.all(PLAN_IDS.map(id => getDoc(doc(db, 'readingPlanLikes', id)))).then(docs => {
       const counts = {}
       docs.forEach((d, i) => { counts[PLAN_IDS[i]] = d.exists() ? (d.data().count || 0) : 0 })
@@ -675,6 +675,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               >
                 <span className="leesplan-like-icon">{likedPlans['dinge-verander'] ? '♥' : '♡'}</span>
                 <span className="leesplan-like-count">{planLikes['dinge-verander'] || ''}</span>
+              </button>
+              <span className="leesplan-arrow">›</span>
+            </div>
+          </button>
+
+          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-seer-na-vryheid'))}>
+            <span className="leesplan-icon">💙</span>
+            <div className="leesplan-info">
+              <div className="leesplan-title">'N Reis van Seer na Vryheid</div>
+              <div className="leesplan-desc">Wanneer mense jou seermaak — genees jou hart, herwin jou lewe, loop vry.</div>
+              <div className="leesplan-meta">14 dae · gratis</div>
+            </div>
+            <div className="leesplan-right">
+              <button
+                className={`leesplan-like-btn${likedPlans['seer-na-vryheid'] ? ' liked' : ''}`}
+                onClick={e => { e.stopPropagation(); handlePlanLike('seer-na-vryheid') }}
+              >
+                <span className="leesplan-like-icon">{likedPlans['seer-na-vryheid'] ? '♥' : '♡'}</span>
+                <span className="leesplan-like-count">{planLikes['seer-na-vryheid'] || ''}</span>
               </button>
               <span className="leesplan-arrow">›</span>
             </div>

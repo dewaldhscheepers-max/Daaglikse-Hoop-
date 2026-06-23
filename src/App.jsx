@@ -15,6 +15,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
+import SeerNaVryheid from './screens/SeerNaVryheid'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -70,6 +71,7 @@ export default function App() {
   const [targetBookId, setTargetBookId] = useState(null)
   const [showJourney, setShowJourney]   = useState(false)
   const [showDingeVerander, setShowDingeVerander] = useState(false)
+  const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -361,6 +363,13 @@ export default function App() {
     return () => window.removeEventListener('open-dinge-verander', onOpen)
   }, [])
 
+  // ── Seer na Vryheid journey ──
+  useEffect(() => {
+    function onOpen() { setShowSeerNaVryheid(true) }
+    window.addEventListener('open-seer-na-vryheid', onOpen)
+    return () => window.removeEventListener('open-seer-na-vryheid', onOpen)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -494,6 +503,10 @@ export default function App() {
 
       {showDingeVerander && (
         <DingeVerander onClose={() => setShowDingeVerander(false)} />
+      )}
+
+      {showSeerNaVryheid && (
+        <SeerNaVryheid onClose={() => setShowSeerNaVryheid(false)} />
       )}
 
       {showNotifBanner && (
