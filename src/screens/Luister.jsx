@@ -649,7 +649,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               <div className="leesplan-desc">'n Kort leesplan vir wanneer jou gedagtes raas en jou hart moeg is.</div>
               <div className="leesplan-meta">11 dae · gratis</div>
               {(planLikes['11-dae-vrede'] || 0) > 0 && (
-                <div className="leesplan-loves">❤️ {planLikes['11-dae-vrede']} mense het hierdie plan gehou</div>
+                <div className="leesplan-loves">❤️ {planLikes['11-dae-vrede']} mense het van hierdie plan gehou</div>
               )}
             </div>
             <div className="leesplan-right">
@@ -670,7 +670,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               <div className="leesplan-desc">Dag-vir-dag waarhede wat jou help om anders te dink, bid en leef.</div>
               <div className="leesplan-meta">24 dae · gratis</div>
               {(planLikes['dinge-verander'] || 0) > 0 && (
-                <div className="leesplan-loves">❤️ {planLikes['dinge-verander']} mense het hierdie plan gehou</div>
+                <div className="leesplan-loves">❤️ {planLikes['dinge-verander']} mense het van hierdie plan gehou</div>
               )}
             </div>
             <div className="leesplan-right">
@@ -691,7 +691,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               <div className="leesplan-desc">Wanneer mense jou seermaak — genees jou hart, herwin jou lewe, loop vry.</div>
               <div className="leesplan-meta">14 dae · gratis</div>
               {(planLikes['seer-na-vryheid'] || 0) > 0 && (
-                <div className="leesplan-loves">❤️ {planLikes['seer-na-vryheid']} mense het hierdie plan gehou</div>
+                <div className="leesplan-loves">❤️ {planLikes['seer-na-vryheid']} mense het van hierdie plan gehou</div>
               )}
             </div>
             <div className="leesplan-right">
