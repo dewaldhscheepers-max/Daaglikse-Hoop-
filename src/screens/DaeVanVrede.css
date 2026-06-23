@@ -567,6 +567,14 @@
 .leesplan-like-icon  { font-size: 19px; line-height: 1; }
 .leesplan-like-count { font-size: 10px; font-weight: 600; font-family: var(--font-body); }
 
+.leesplan-loves {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: #E05C5C;
+  margin-top: 6px;
+}
+
 .leesplan-arrow {
   font-size: 20px;
   color: var(--text-muted);
