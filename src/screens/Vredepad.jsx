@@ -544,6 +544,17 @@ export default function Vredepad({ onClose }) {
           <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
           </button>
+          {level > 1 && (
+            <button className="vp-reset-link" onClick={() => {
+              if (window.confirm('Begin weer van voor af? Jou vordering word uitgevee.')) {
+                localStorage.removeItem('vredepad_data')
+                setStreak(0); setBest(0)
+                pendingLevel.current = 1
+              }
+            }}>
+              Begin van voor af
+            </button>
+          )}
         </div>
       </div>
     )

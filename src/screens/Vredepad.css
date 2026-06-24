@@ -527,6 +527,18 @@
 }
 .vp-share-btn:active { background: rgba(0, 0, 0, 0.05); }
 
+.vp-reset-link {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.5;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 0;
+}
+
 .vp-back-link {
   background: none;
   border: none;
