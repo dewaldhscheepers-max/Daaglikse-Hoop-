@@ -308,14 +308,18 @@ function drawFlower(ctx, x, y, r, alpha, t) {
 }
 
 function drawSeed(ctx, x, y, pulse, t) {
-  const r = 8 + Math.sin(pulse) * 1.5
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.4)
-  g.addColorStop(0, t.seedGlow); g.addColorStop(1, 'rgba(255,215,0,0)')
-  ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2)
-  ctx.fillStyle = g; ctx.globalAlpha = 0.65; ctx.fill(); ctx.globalAlpha = 1
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = '#FFD700'; ctx.fill()
-  ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
+  const r = 9 + Math.sin(pulse) * 2
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 4)
+  glow.addColorStop(0,   'rgba(255,235,0,0.95)')
+  glow.addColorStop(0.35,'rgba(255,215,0,0.55)')
+  glow.addColorStop(1,   'rgba(255,215,0,0)')
+  ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2)
+  ctx.fillStyle = glow; ctx.globalAlpha = 0.92; ctx.fill(); ctx.globalAlpha = 1
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2)
+  ctx.fillStyle = '#FFE000'; ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 2.5; ctx.stroke()
+  ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.32, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.82)'; ctx.fill()
 }
 
 function drawWeed(ctx, x, y, pulse, t) {
