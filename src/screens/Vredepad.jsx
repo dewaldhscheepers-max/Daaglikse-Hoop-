@@ -247,7 +247,7 @@ export default function Vredepad({ onClose }) {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const wrap = canvas.parentElement
+    const canvasWrap = canvas.parentElement
     let ro
     let initRafId
 
@@ -267,7 +267,7 @@ export default function Vredepad({ onClose }) {
 
     // defer canvas setup to after first paint so getBoundingClientRect() is reliable
     initRafId = requestAnimationFrame(() => {
-      const rect = wrap.getBoundingClientRect()
+      const rect = canvasWrap.getBoundingClientRect()
       canvas.width  = rect.width  > 0 ? rect.width  : window.innerWidth
       canvas.height = rect.height > 0 ? rect.height : window.innerHeight - 100
 
@@ -276,12 +276,12 @@ export default function Vredepad({ onClose }) {
       setTruth(TRUTHS[gameRef.current.truthIdx])
 
       ro = new ResizeObserver(() => {
-        const r = wrap.getBoundingClientRect()
+        const r = canvasWrap.getBoundingClientRect()
         if (r.width > 0)  canvas.width  = r.width
         if (r.height > 0) canvas.height = r.height
         if (gameRef.current) { gameRef.current.W = canvas.width; gameRef.current.H = canvas.height }
       })
-      ro.observe(wrap)
+      ro.observe(canvasWrap)
 
       rafRef.current = requestAnimationFrame(loop)
     })
