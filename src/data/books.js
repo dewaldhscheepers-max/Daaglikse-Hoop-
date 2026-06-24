@@ -111,16 +111,6 @@ export const BOOKS = [
   },
   // ── Free books ──────────────────────────────────────────────
   {
-    id: 'jesus-se-hart',
-    title: 'Jesus se Hart',
-    desc: "'n Kragtige e-boek oor die karakter en liefde van Jesus Christus.",
-    price: 0,
-    free: true,
-    pdfUrl: null,
-    color: '#FDE8E8',
-    emoji: '❤️‍🔥'
-  },
-  {
     id: '7-leuens',
     title: '7 Leuens van die Duiwel & 7 Waarhede van God',
     desc: "Herken die vyand se stem en kies die Here se waarheid.",
