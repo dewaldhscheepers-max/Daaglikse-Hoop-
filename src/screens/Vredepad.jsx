@@ -64,14 +64,7 @@ const MOOD_TRUTHS = {
   ],
 }
 
-const MOODS = [
-  { id: 'angs',       label: 'Angs',       emoji: '😰', desc: 'My hart raas' },
-  { id: 'oordink',    label: 'Oor-dink',   emoji: '🌀', desc: 'Gedagtes klop' },
-  { id: 'moegheid',   label: 'Moegheid',   emoji: '😔', desc: 'Ek is uitgeput' },
-  { id: 'vrees',      label: 'Vrees',      emoji: '😨', desc: 'Ek is bang' },
-  { id: 'alleenheid', label: 'Alleenheid', emoji: '🌑', desc: 'Ek voel alleen' },
-  { id: 'druk',       label: 'Druk',       emoji: '💨', desc: 'Te veel op my' },
-]
+const ALL_TRUTHS = Object.values(MOOD_TRUTHS).flat()
 
 const THEMES = [
   {
@@ -237,7 +230,6 @@ export default function Vredepad({ onClose }) {
   const rafRef       = useRef(null)
   const touchRef     = useRef({ x: 0, y: 0 })
   const pendingLevel = useRef(1)
-  const pendingMood  = useRef('angs')
   const isReplayRef  = useRef(false)
 
   const [screen, setScreen]         = useState('intro')
@@ -259,14 +251,14 @@ export default function Vredepad({ onClose }) {
     return () => clearTimeout(t)
   }, [screen, countdown])
 
-  function buildGame(level, W, H, mood) {
+  function buildGame(level, W, H) {
     const t  = THEMES[(level - 1) % THEMES.length]
     const sc = 3 + Math.min(Math.floor((level - 1) / 5), 3)
     const wc = 2 + Math.min(Math.floor((level - 1) / 3), 6)
     const sp = 1.5 + Math.min((level - 1) * 0.08, 1.5)
     const mid = { x: W / 2, y: H / 2 }
 
-    const truths = shuffleArray(MOOD_TRUTHS[mood] || MOOD_TRUTHS.angs)
+    const truths = shuffleArray(ALL_TRUTHS)
 
     const seeds = []
     for (let i = 0; i < sc; i++)
@@ -290,7 +282,7 @@ export default function Vredepad({ onClose }) {
     }))
 
     gameRef.current = {
-      W, H, t, level, mood,
+      W, H, t, level,
       player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp, trail: [] },
       seeds, weeds, parts,
       flowers: [],
@@ -318,10 +310,10 @@ export default function Vredepad({ onClose }) {
       const ns   = last === yday ? (save.streak || 0) + 1 : last === today ? (save.streak || 0) : 1
       saveSave({ level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, streak: ns, best: nb })
       setStreak(ns); setBest(nb)
-      setEndData({ score: g.score, level: g.level, streak: ns, bestScore: nb, lastTruth, mood: g.mood })
+      setEndData({ score: g.score, level: g.level, streak: ns, bestScore: nb, lastTruth })
     } else {
       if (nb > (save.best || 0)) { saveSave({ ...save, best: nb }); setBest(nb) }
-      setEndData({ score: g.score, level: g.level, streak: save.streak || 0, bestScore: nb, lastTruth, mood: g.mood })
+      setEndData({ score: g.score, level: g.level, streak: save.streak || 0, bestScore: nb, lastTruth })
     }
     setScreen('levelup')
   }
@@ -362,7 +354,7 @@ export default function Vredepad({ onClose }) {
       canvas.width  = rect.width  > 0 ? rect.width  : window.innerWidth
       canvas.height = rect.height > 0 ? rect.height : window.innerHeight - 100
 
-      buildGame(pendingLevel.current, canvas.width, canvas.height, pendingMood.current)
+      buildGame(pendingLevel.current, canvas.width, canvas.height)
       setScore(0); setTime(60)
 
       ro = new ResizeObserver(() => {
@@ -420,12 +412,12 @@ export default function Vredepad({ onClose }) {
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
-          // Keep bubble fully on-screen: clamp by half bubble width/height
-          const bHalfW = 126  // half of 252px max-width
-          const bH     = 90   // estimated bubble height
-          const leftPx = Math.max(bHalfW, Math.min(g.W - bHalfW, p.x))
-          const topPx  = Math.max(10, Math.min(g.H - bH, p.y + 20))
-          setSeedBubble({ text: truth, leftPx, topPx, id: g.score })
+          // Compute LEFT EDGE of bubble (no CSS transform needed)
+          const bW   = 252
+          const bH   = 90
+          const left = Math.max(4, Math.min(g.W - bW - 4, p.x - bW / 2))
+          const top  = Math.max(10, Math.min(g.H - bH, p.y + 20))
+          setSeedBubble({ text: truth, left, top, id: g.score })
           return false
         }
         return true
@@ -484,8 +476,7 @@ export default function Vredepad({ onClose }) {
     }
   }, [screen])
 
-  function startWithMood(mood) {
-    pendingMood.current  = mood
+  function startGame() {
     pendingLevel.current = loadSave().level || 1
     isReplayRef.current  = false
     setCountdown(3)
@@ -497,7 +488,7 @@ export default function Vredepad({ onClose }) {
     pendingLevel.current = loadSave().level || 1
     isReplayRef.current  = false
     setCountdown(3)
-    setScreen('mood')
+    setScreen('countdown')
   }
 
   function replayLevel() {
@@ -505,7 +496,7 @@ export default function Vredepad({ onClose }) {
     pendingLevel.current = endData?.level || 1
     isReplayRef.current  = true
     setCountdown(3)
-    setScreen('mood')
+    setScreen('countdown')
   }
 
   async function handleShare() {
@@ -560,35 +551,9 @@ export default function Vredepad({ onClose }) {
             <span>📱 Swiep om te beweeg</span>
             <span>⌨️ WASD / Pyltjies</span>
           </div>
-          <button className="vp-start-btn" style={{ background: t.player }} onClick={() => setScreen('mood')}>
+          <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
           </button>
-        </div>
-      </div>
-    )
-  }
-
-  /* ── Mood selection ── */
-  if (screen === 'mood') {
-    const save  = loadSave()
-    const level = save.level || 1
-    const t     = THEMES[(level - 1) % THEMES.length]
-    return (
-      <div className="vp-overlay" style={{ background: t.bg0 }}>
-        <button className="vp-close" onClick={() => setScreen('intro')}>✕</button>
-        <div className="vp-mood-screen">
-          <div className="vp-mood-icon">🌬️</div>
-          <h2 className="vp-mood-title">Wat raas vandag die hardste in jou gedagtes?</h2>
-          <p className="vp-mood-sub">Kies een — jou waarhede sal daarby pas.</p>
-          <div className="vp-mood-grid">
-            {MOODS.map(m => (
-              <button key={m.id} className="vp-mood-btn" onClick={() => startWithMood(m.id)}>
-                <span className="vp-mood-emoji">{m.emoji}</span>
-                <span className="vp-mood-label">{m.label}</span>
-                <span className="vp-mood-desc">{m.desc}</span>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     )
@@ -633,7 +598,7 @@ export default function Vredepad({ onClose }) {
             <div
               className="vp-seed-bubble"
               key={seedBubble.id}
-              style={{ left: `${seedBubble.leftPx}px`, top: `${seedBubble.topPx}px` }}
+              style={{ left: `${seedBubble.left}px`, top: `${seedBubble.top}px` }}
               onAnimationEnd={() => setSeedBubble(null)}
             >
               <span className="vp-seed-bubble-icon">✦</span>
