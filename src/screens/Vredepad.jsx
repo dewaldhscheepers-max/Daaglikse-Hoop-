@@ -248,20 +248,8 @@ export default function Vredepad({ onClose }) {
     if (!canvas) return
 
     const wrap = canvas.parentElement
-    const rect = wrap.getBoundingClientRect()
-    canvas.width  = rect.width  || window.innerWidth
-    canvas.height = rect.height || window.innerHeight - 110
-
-    buildGame(pendingLevel.current, canvas.width, canvas.height)
-    setScore(0); setTime(60)
-    setTruth(TRUTHS[gameRef.current.truthIdx])
-
-    const ro = new ResizeObserver(() => {
-      const r = wrap.getBoundingClientRect()
-      canvas.width = r.width; canvas.height = r.height
-      if (gameRef.current) { gameRef.current.W = r.width; gameRef.current.H = r.height }
-    })
-    ro.observe(wrap)
+    let ro
+    let initRafId
 
     function onKey(e) {
       if (!gameRef.current) return
@@ -276,6 +264,27 @@ export default function Vredepad({ onClose }) {
     }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup',   onKeyUp)
+
+    // defer canvas setup to after first paint so getBoundingClientRect() is reliable
+    initRafId = requestAnimationFrame(() => {
+      const rect = wrap.getBoundingClientRect()
+      canvas.width  = rect.width  > 0 ? rect.width  : window.innerWidth
+      canvas.height = rect.height > 0 ? rect.height : window.innerHeight - 100
+
+      buildGame(pendingLevel.current, canvas.width, canvas.height)
+      setScore(0); setTime(60)
+      setTruth(TRUTHS[gameRef.current.truthIdx])
+
+      ro = new ResizeObserver(() => {
+        const r = wrap.getBoundingClientRect()
+        if (r.width > 0)  canvas.width  = r.width
+        if (r.height > 0) canvas.height = r.height
+        if (gameRef.current) { gameRef.current.W = canvas.width; gameRef.current.H = canvas.height }
+      })
+      ro.observe(wrap)
+
+      rafRef.current = requestAnimationFrame(loop)
+    })
 
     function loop(ts) {
       const g = gameRef.current
@@ -357,11 +366,10 @@ export default function Vredepad({ onClose }) {
       rafRef.current = requestAnimationFrame(loop)
     }
 
-    rafRef.current = requestAnimationFrame(loop)
-
     return () => {
+      cancelAnimationFrame(initRafId)
       cancelAnimationFrame(rafRef.current)
-      ro.disconnect()
+      ro?.disconnect()
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup',   onKeyUp)
     }
