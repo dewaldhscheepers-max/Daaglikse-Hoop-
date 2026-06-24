@@ -89,7 +89,7 @@ async function getWebPushSubscriptions(accessToken) {
 }
 
 // ── Send one FCM message ───────────────────────────────────────────────────
-async function sendFcm(token, title, body, accessToken) {
+async function sendFcm(token, title, body, accessToken, includeImage = true) {
   const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -98,8 +98,8 @@ async function sendFcm(token, title, body, accessToken) {
         token,
         notification: { title, body },
         data: {
-          image: 'https://dewaldscheepers.com/notification-image.jpg',
-          url:   'https://dewaldscheepers.com/',
+          ...(includeImage ? { image: 'https://dewaldscheepers.com/notification-image.jpg' } : {}),
+          url: 'https://dewaldscheepers.com/',
         },
         webpush: {
           headers: { Urgency: 'high', TTL: '86400' },
@@ -115,12 +115,12 @@ async function sendFcm(token, title, body, accessToken) {
 }
 
 // ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
-async function sendWebPush(subscription, title, body, accessToken) {
+async function sendWebPush(subscription, title, body, accessToken, includeImage = true) {
   // Samsung Internet on Android uses FCM as its push backend.
   // Extract the registration token and send via FCM v1 API.
   if (subscription.endpoint.startsWith('https://fcm.googleapis.com/')) {
     const token = subscription.endpoint.split('/').pop()
-    return sendFcm(token, title, body, accessToken)
+    return sendFcm(token, title, body, accessToken, includeImage)
   }
   // Genuine non-Google web push endpoint (e.g. Mozilla)
   try {
@@ -151,6 +151,7 @@ module.exports = async function handler(req, res) {
   const body = req.body || {}
   const customTitle = body.title?.trim()
   const customBody  = body.body?.trim()
+  const isCustom    = !!(customTitle || customBody)
 
   try {
     const accessToken = await getAccessToken()
@@ -160,17 +161,18 @@ module.exports = async function handler(req, res) {
       getWebPushSubscriptions(accessToken),
     ])
 
-    const notifTitle = todayTitle || 'Daaglikse Hoop'
-    const notifBody  = customBody || 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
+    const notifTitle   = todayTitle || 'Daaglikse Hoop'
+    const notifBody    = customBody || 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
+    const includeImage = !isCustom
 
     let fcmSent = 0
     for (const token of fcmTokens) {
-      if (await sendFcm(token, notifTitle, notifBody, accessToken)) fcmSent++
+      if (await sendFcm(token, notifTitle, notifBody, accessToken, includeImage)) fcmSent++
     }
 
     let wpSent = 0
     for (const sub of webPushSubs) {
-      if (await sendWebPush(sub, notifTitle, notifBody, accessToken)) wpSent++
+      if (await sendWebPush(sub, notifTitle, notifBody, accessToken, includeImage)) wpSent++
     }
 
     const result = { fcm: { sent: fcmSent, total: fcmTokens.length }, webpush: { sent: wpSent, total: webPushSubs.length } }
