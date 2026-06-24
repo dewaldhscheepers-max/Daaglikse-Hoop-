@@ -240,7 +240,6 @@ export default function Vredepad({ onClose }) {
   const [breathing, setBreathing]   = useState(false)
   const [breathPhase, setPhase]     = useState('inhale')
   const [endData, setEndData]       = useState(null)
-  const [streak, setStreak]         = useState(() => loadSave().streak || 0)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
 
   // ── Countdown ──
@@ -305,15 +304,12 @@ export default function Vredepad({ onClose }) {
 
     if (!isReplayRef.current) {
       const newLevel = (save.level || 1) + 1
-      const yday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
-      const last = save.lastDay || ''
-      const ns   = last === yday ? (save.streak || 0) + 1 : last === today ? (save.streak || 0) : 1
-      saveSave({ level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, streak: ns, best: nb })
-      setStreak(ns); setBest(nb)
-      setEndData({ score: g.score, level: g.level, streak: ns, bestScore: nb, lastTruth })
+      saveSave({ level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
+      setBest(nb)
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth })
     } else {
       if (nb > (save.best || 0)) { saveSave({ ...save, best: nb }); setBest(nb) }
-      setEndData({ score: g.score, level: g.level, streak: save.streak || 0, bestScore: nb, lastTruth })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth })
     }
     setScreen('levelup')
   }
@@ -496,7 +492,7 @@ export default function Vredepad({ onClose }) {
 
   async function handleShare() {
     const d   = endData
-    const msg = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! Vrede-reeks: ${d.streak} dag(e) 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
+    const msg = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
     if (navigator.share) {
       try { await navigator.share({ title: 'Vredepad', text: msg }) } catch {}
     } else {
@@ -538,7 +534,6 @@ export default function Vredepad({ onClose }) {
           {level > 1 && (
             <div className="vp-stats-row">
               <div className="vp-stat"><span className="vp-stat-val">{level}</span><span className="vp-stat-lbl">Vredepad</span></div>
-              <div className="vp-stat"><span className="vp-stat-val">{streak}</span><span className="vp-stat-lbl">Vrede-reeks</span></div>
               <div className="vp-stat"><span className="vp-stat-val">{bestScore}</span><span className="vp-stat-lbl">Beste</span></div>
             </div>
           )}
@@ -631,10 +626,6 @@ export default function Vredepad({ onClose }) {
             <div className="vp-stat">
               <span className="vp-stat-val">{d.bestScore}</span>
               <span className="vp-stat-lbl">Beste</span>
-            </div>
-            <div className="vp-stat">
-              <span className="vp-stat-val">{d.streak}</span>
-              <span className="vp-stat-lbl">Vrede-reeks</span>
             </div>
           </div>
 
