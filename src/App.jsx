@@ -10,7 +10,7 @@ import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
-import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, db } from './firebase'
+import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, isFacebookBrowser, db } from './firebase'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
@@ -409,6 +409,32 @@ export default function App() {
   )
   const chromeIntentUrl = `intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;end`
 
+  // ── Facebook in-app browser → open externally banner ──
+  const [fbBannerDismissed, setFbBannerDismissed] = useState(
+    () => !!localStorage.getItem('fbBannerDismissed')
+  )
+  const isiOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  const fbBanner = isFacebookBrowser && !fbBannerDismissed ? (
+    <div className="fb-browser-banner">
+      <div className="fb-browser-text">
+        <strong>Daaglikse Hoop werk nie in Facebook se browser nie.</strong>
+        {isiOS
+          ? <span>Tik op <strong>···</strong> regs bo en kies <strong>"Open in Safari"</strong>.</span>
+          : <span>Maak die app oop in Chrome vir die beste ervaring.</span>
+        }
+      </div>
+      {!isiOS && (
+        <a className="fb-browser-btn" href={`intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;end`}>
+          Maak in Chrome oop
+        </a>
+      )}
+      <button className="fb-browser-close" onClick={() => {
+        setFbBannerDismissed(true)
+        localStorage.setItem('fbBannerDismissed', '1')
+      }}>✕</button>
+    </div>
+  ) : null
+
   const samsungOpenInChromeBanner = isSamsungBrowser && !samsungChromeDismissed ? (
     <div className="samsung-chrome-banner">
       <div className="samsung-chrome-text">
@@ -447,6 +473,7 @@ export default function App() {
 
   return (
     <div className="app">
+      {fbBanner}
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
           <div style={tab !== 'luister' ? {display:'none'} : undefined}>

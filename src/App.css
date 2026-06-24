@@ -42,6 +42,62 @@
   cursor: pointer;
 }
 
+/* ── Facebook in-app browser banner ── */
+.fb-browser-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1877f2;
+  padding: 14px 14px 14px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.fb-browser-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.fb-browser-text strong {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+.fb-browser-text span {
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.4;
+}
+.fb-browser-text span strong {
+  font-size: 12px;
+}
+.fb-browser-btn {
+  background: #fff;
+  color: #1877f2;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.fb-browser-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.75);
+  font-size: 16px;
+  padding: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .payment-popup-backdrop {
   position: fixed;
   inset: 0;

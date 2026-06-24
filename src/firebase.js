@@ -14,7 +14,8 @@ const firebaseConfig = {
 
 const FCM_VAPID_KEY = 'BBG0lF3YGD7BRhdveAO3ufCkT4ze1EaAbncl2r2nfUZwQ-p77uijz3UMts3KYlbqK5U3Hn7OoD01XacY3j7JhPk'
 
-export const isSamsungBrowser = /SamsungBrowser/i.test(navigator.userAgent)
+export const isSamsungBrowser  = /SamsungBrowser/i.test(navigator.userAgent)
+export const isFacebookBrowser = /FBAN|FBAV|FBIOS|FB_IAB/.test(navigator.userAgent)
 
 const app        = initializeApp(firebaseConfig)
 export const db  = getFirestore(app)
