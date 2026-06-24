@@ -1,7 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import DonationCard from '../components/DonationCard'
 import { playCollect, playHit, playLevelComplete, startAmbient, stopAmbient, toggleMute, isMuted } from '../utils/sound'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
 import './Vredepad.css'
+
+const FREE_REWARD_BOOKS = [
+  { id: 'jesus-se-hart',  emoji: '❤️‍🔥', title: 'Jesus se Hart' },
+  { id: '7-leuens',       emoji: '📘',    title: '7 Leuens van die Duiwel' },
+  { id: 'bybel-hulpbron', emoji: '📗',    title: 'Die Bybel Maklik Gemaak' },
+]
+
+const MILESTONE_BOOKS = [
+  { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7  },
+  { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20 },
+  { id: 'dink-nuut-leef-nuut',   emoji: '🌱', title: 'Dink Nuut, Leef Nuut',  level: 50 },
+]
 
 const MOOD_TRUTHS = {
   angs: [
@@ -384,6 +398,15 @@ export default function Vredepad({ onClose }) {
   const [breathPhase, setPhase]     = useState('inhale')
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
+  const [bookPdfs, setBookPdfs]     = useState({})
+
+  useEffect(() => {
+    getDocs(collection(db, 'books')).then(snap => {
+      const pdfs = {}
+      snap.docs.forEach(d => { const data = d.data(); if (data.pdfUrl) pdfs[d.id] = data.pdfUrl })
+      setBookPdfs(pdfs)
+    }).catch(() => {})
+  }, [])
 
   // ── Countdown ──
   useEffect(() => {
@@ -454,13 +477,19 @@ export default function Vredepad({ onClose }) {
     const isNewRecord  = g.score > (save.best || 0)
     if (!isReplayRef.current) {
       const newLevel = (save.level || 1) + 1
-      saveSave({ ...save, level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
+      const oldTotal = save.totalLevels || 0
+      const newTotal = oldTotal + 1
+      let newUnlock = null
+      if (oldTotal < 7  && newTotal >= 7)  newUnlock = MILESTONE_BOOKS[0]
+      if (oldTotal < 20 && newTotal >= 20) newUnlock = MILESTONE_BOOKS[1]
+      if (oldTotal < 50 && newTotal >= 50) newUnlock = MILESTONE_BOOKS[2]
+      saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock })
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null })
     }
     setCombo(0)
     setScreen('levelup')
@@ -701,10 +730,11 @@ export default function Vredepad({ onClose }) {
 
   /* ── Intro ── */
   if (screen === 'intro') {
-    const save    = loadSave()
-    const level   = save.level || 1
-    const t       = THEMES[(level - 1) % THEMES.length]
-    const streak  = save.streak || 0
+    const save        = loadSave()
+    const level       = save.level || 1
+    const totalLevels = save.totalLevels || 0
+    const t           = THEMES[(level - 1) % THEMES.length]
+    const streak      = save.streak || 0
     const hasDays = (save.playedDays?.length || 0) > 0
     const last7   = hasDays ? Array.from({ length: 7 }, (_, i) => {
       const date = new Date(Date.now() - (6 - i) * 86400000).toISOString().slice(0, 10)
@@ -757,6 +787,39 @@ export default function Vredepad({ onClose }) {
               Begin van voor af
             </button>
           )}
+          <div className="vp-rewards">
+            <p className="vp-rewards-title">📚 Gratis eBoeke</p>
+            {FREE_REWARD_BOOKS.map(b => (
+              <div key={b.id} className="vp-reward-row">
+                <span className="vp-reward-emoji">{b.emoji}</span>
+                <span className="vp-reward-name">{b.title}</span>
+                <button
+                  className="vp-reward-btn"
+                  disabled={!bookPdfs[b.id]}
+                  onClick={() => bookPdfs[b.id] && window.open(bookPdfs[b.id], '_blank')}
+                >Aflaai</button>
+              </div>
+            ))}
+            <div className="vp-reward-divider" />
+            {MILESTONE_BOOKS.map(b => {
+              const unlocked = totalLevels >= b.level
+              return (
+                <div key={b.id} className={`vp-reward-row${unlocked ? '' : ' locked'}`}>
+                  <span className="vp-reward-emoji">{b.emoji}</span>
+                  <span className="vp-reward-name">{b.title}</span>
+                  {unlocked
+                    ? <button
+                        className="vp-reward-btn"
+                        disabled={!bookPdfs[b.id]}
+                        onClick={() => bookPdfs[b.id] && window.open(bookPdfs[b.id], '_blank')}
+                      >Aflaai</button>
+                    : <span className="vp-reward-lock">🔒 Vlak {b.level}</span>
+                  }
+                </div>
+              )
+            })}
+          </div>
+
           <div className="vp-donation-wrap">
             <DonationCard />
           </div>
@@ -875,6 +938,18 @@ export default function Vredepad({ onClose }) {
 
           {d.isNewRecord && (
             <div className="vp-new-record">🏆 Nuwe Rekord!</div>
+          )}
+          {d.newUnlock && (
+            <div className="vp-new-unlock">
+              <p className="vp-unlock-label">🎁 Gratis eBoek verdien!</p>
+              <p className="vp-unlock-title">{d.newUnlock.emoji} {d.newUnlock.title}</p>
+              <button
+                className="vp-unlock-btn"
+                disabled={!bookPdfs[d.newUnlock.id]}
+                onClick={() => bookPdfs[d.newUnlock.id] && window.open(bookPdfs[d.newUnlock.id], '_blank')}
+              >Aflaai nou</button>
+              <p className="vp-unlock-hint">Ook beskikbaar op die tuisskerm</p>
+            </div>
           )}
           {d.streak >= 2 && (
             <div className="vp-end-streak">🔥 {d.streak} dae op 'n ry</div>
