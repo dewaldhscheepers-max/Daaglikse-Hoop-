@@ -17,6 +17,7 @@ import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
 import Vredepad from './screens/Vredepad'
+import HoopVennoot from './screens/HoopVennoot'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -74,6 +75,7 @@ export default function App() {
   const [showDingeVerander, setShowDingeVerander] = useState(false)
   const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
   const [showVredepad, setShowVredepad]           = useState(false)
+  const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -290,7 +292,7 @@ export default function App() {
     localStorage.removeItem('pendingPurchase')
     localStorage.removeItem('pendingEmail')
     if (status === 'success') {
-      setTab('meer')
+      if (type !== 'subscription') setTab('meer')
       window.history.replaceState({}, '', '/')
       if (type === 'donation') {
         const sw = getSkenkWindow()
@@ -334,7 +336,7 @@ export default function App() {
       }
     } else if (status === 'cancel') {
       setPayment({ status: 'cancel' })
-      setTab('meer')
+      if (type !== 'subscription') setTab('meer')
       window.history.replaceState({}, '', '/')
     }
   }, [])
@@ -377,6 +379,13 @@ export default function App() {
     function onOpen() { setDonation(true) }
     window.addEventListener('open-donation', onOpen)
     return () => window.removeEventListener('open-donation', onOpen)
+  }, [])
+
+  // ── Maandelikse Hoop-Vennoot CTA ──
+  useEffect(() => {
+    function onOpen() { setShowHoopVennoot(true) }
+    window.addEventListener('open-hoop-vennoot', onOpen)
+    return () => window.removeEventListener('open-hoop-vennoot', onOpen)
   }, [])
 
   // ── Auto-reload when new service worker takes control ──
@@ -549,6 +558,10 @@ export default function App() {
         <Vredepad onClose={() => setShowVredepad(false)} />
       )}
 
+      {showHoopVennoot && (
+        <HoopVennoot onClose={() => setShowHoopVennoot(false)} />
+      )}
+
       {showNotifBanner && (
         <div className="notif-banner">
           <div className="notif-banner-text">
@@ -572,6 +585,15 @@ export default function App() {
                   <strong>Mag God jou oorvloedig seën.</strong>
                 </p>
                 <p className="payment-popup-note">"Elke gewer wat vrolik gee, is vir God aangenaam." — 2 Kor. 9:7</p>
+              </>
+            ) : paymentResult.type === 'subscription' ? (
+              <>
+                <div className="payment-popup-icon">🌿</div>
+                <div className="payment-popup-title">Dankie dat jy 'n Hoop-Vennoot geword het</div>
+                <p className="payment-popup-msg">
+                  Jou maandelikse bydrae help ons om Daaglikse Hoop gratis beskikbaar te hou vir mense wat hoop, gebed en God se Woord nodig het.
+                </p>
+                <p className="payment-popup-note">Mag die Here jou ryklik seën.</p>
               </>
             ) : (
               <>

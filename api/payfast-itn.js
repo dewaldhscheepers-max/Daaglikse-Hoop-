@@ -40,6 +40,36 @@ async function fsWrite(projectId, token, path, fields) {
   } catch {}
 }
 
+// ── Log subscription ITN to Firestore ─────────────────────────────────────
+async function handleSubscriptionItn(data, projectId) {
+  let token = null
+  try { token = await getAccessToken() } catch (e) { console.error('Sub auth failed:', e.message) }
+
+  const docId = `${Date.now()}_${(data.pf_payment_id || 'unknown').replace(/\W/g, '')}`
+  const fields = {
+    pf_payment_id:  { stringValue: data.pf_payment_id  || '' },
+    payment_status: { stringValue: data.payment_status  || '' },
+    amount_gross:   { stringValue: data.amount_gross    || '' },
+    amount_fee:     { stringValue: data.amount_fee      || '' },
+    amount_net:     { stringValue: data.amount_net      || '' },
+    name_first:     { stringValue: data.name_first      || '' },
+    name_last:      { stringValue: data.name_last       || '' },
+    email_address:  { stringValue: data.email_address   || '' },
+    item_name:      { stringValue: data.item_name       || '' },
+    token:          { stringValue: data.token           || '' },
+    billing_date:   { stringValue: data.billing_date    || '' },
+    success:        { booleanValue: data.payment_status === 'COMPLETE' },
+    timestamp:      { timestampValue: new Date().toISOString() },
+  }
+
+  if (token) {
+    await fsWrite(projectId, token, `payfast_itn/${docId}`, fields)
+    console.log('payfast-itn sub logged:', data.pf_payment_id, data.payment_status, data.token)
+  } else {
+    console.log('payfast-itn sub (no auth):', JSON.stringify(data))
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
 
@@ -52,7 +82,15 @@ module.exports = async function handler(req, res) {
   // Respond 200 immediately so PayFast doesn't time out waiting for us
   res.status(200).send('OK')
 
-  if (!data || data.payment_status !== 'COMPLETE') return
+  if (!data) return
+
+  // ── Subscription ITN (has a recurring token, no bookIds) ──────────────────
+  if (data.token) {
+    await handleSubscriptionItn(data, process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop')
+    return
+  }
+
+  if (data.payment_status !== 'COMPLETE') return
 
   const email   = data.custom_str1
   const bookIds = (data.custom_str2 || '').split(',').filter(Boolean).filter(id => id !== 'skenking')

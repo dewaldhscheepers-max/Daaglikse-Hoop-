@@ -1,8 +1,12 @@
 import './DonationCard.css'
 
 export default function DonationCard() {
-  function handleClick() {
+  function handleOnce() {
     window.dispatchEvent(new CustomEvent('open-donation'))
+  }
+
+  function handleMonthly() {
+    window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))
   }
 
   return (
@@ -12,8 +16,11 @@ export default function DonationCard() {
       <p className="donation-card-text">
         Jou bydrae help met stemboodskappe, app-kostes, advertensies en gratis geestelike hulpbronne.
       </p>
-      <button className="donation-card-btn" onClick={handleClick}>
-        Ondersteun die Bediening
+      <button className="donation-card-btn-monthly" onClick={handleMonthly}>
+        Word 'n Maandelikse Hoop-Vennoot
+      </button>
+      <button className="donation-card-btn-once" onClick={handleOnce}>
+        Eenmalige bydrae
       </button>
     </div>
   )

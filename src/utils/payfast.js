@@ -76,3 +76,29 @@ export function checkoutCart(books, email) {
     custom_str2:   books.map(b => b.id).join(','),
   })
 }
+
+export function checkoutSubscription(amountRand) {
+  const amount = Number(amountRand).toFixed(2)
+
+  // Next billing date = same day next month, capped to last day of that month
+  const today = new Date()
+  const lastDayNext = new Date(today.getFullYear(), today.getMonth() + 2, 0).getDate()
+  const billingDay  = Math.min(today.getDate(), lastDayNext)
+  const billingDate = new Date(today.getFullYear(), today.getMonth() + 1, billingDay)
+    .toISOString().slice(0, 10)
+
+  submitForm({
+    merchant_id:       MERCHANT_ID,
+    merchant_key:      MERCHANT_KEY,
+    return_url:        `${window.location.origin}/?payment=success&type=subscription`,
+    cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription`,
+    notify_url:        ITN_URL,
+    amount,
+    item_name:         'Maandelikse Hoop-Vennoot',
+    subscription_type: '1',
+    billing_date:      billingDate,
+    recurring_amount:  amount,
+    frequency:         '3',
+    cycles:            '0',
+  })
+}
