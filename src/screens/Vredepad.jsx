@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import DonationCard from '../components/DonationCard'
+import { playCollect, playHit, playLevelComplete, startAmbient, stopAmbient, toggleMute, isMuted } from '../utils/sound'
 import './Vredepad.css'
 
 const MOOD_TRUTHS = {
@@ -348,6 +349,20 @@ function drawPlayer(ctx, p, tick, t) {
 function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
 function saveSave(d) { try { localStorage.setItem('vredepad_data', JSON.stringify(d)) } catch {} }
 
+function updateStreak(save) {
+  const today = new Date().toISOString().slice(0, 10)
+  const days  = save.playedDays || []
+  if (days[0] === today) return save
+  const newDays = [today, ...days].slice(0, 60)
+  let streak = 1
+  for (let i = 1; i < newDays.length; i++) {
+    const expected = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
+    if (newDays[i] === expected) streak++
+    else break
+  }
+  return { ...save, playedDays: newDays, streak }
+}
+
 export default function Vredepad({ onClose }) {
   const canvasRef    = useRef(null)
   const gameRef      = useRef(null)
@@ -358,6 +373,7 @@ export default function Vredepad({ onClose }) {
 
   const [screen, setScreen]         = useState('intro')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [soundOn, setSoundOn]       = useState(() => !isMuted())
   const [countdown, setCountdown]   = useState(3)
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
@@ -420,26 +436,31 @@ export default function Vredepad({ onClose }) {
   }
 
   function endLevel(g) {
-    const save  = loadSave()
+    const save  = updateStreak(loadSave())
     const today = new Date().toISOString().slice(0, 10)
     const nb    = Math.max(save.best || 0, g.score)
     const lastTruth = g.collectedTruths.length > 0
       ? g.collectedTruths[Math.floor(Math.random() * g.collectedTruths.length)]
       : g.truths[0]
 
+    stopAmbient()
+    playLevelComplete()
+
     if (!isReplayRef.current) {
       const newLevel = (save.level || 1) + 1
-      saveSave({ level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
+      saveSave({ ...save, level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1 })
     } else {
-      if (nb > (save.best || 0)) { saveSave({ ...save, best: nb }); setBest(nb) }
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth })
+      saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
+      if (nb > (save.best || 0)) setBest(nb)
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1 })
     }
     setScreen('levelup')
   }
 
   function triggerBreathing() {
+    playHit()
     setBreathing(true); setPhase('inhale')
     setTimeout(() => setPhase('exhale'), 2500)
     setTimeout(() => {
@@ -477,6 +498,7 @@ export default function Vredepad({ onClose }) {
 
       buildGame(pendingLevel.current, canvas.width, canvas.height)
       setScore(0); setTime(60)
+      startAmbient()
 
       ro = new ResizeObserver(() => {
         const r = canvasWrap.getBoundingClientRect()
@@ -534,6 +556,7 @@ export default function Vredepad({ onClose }) {
           g.collectedTruths.push(truth)
           g.truthIdx++
           setSeedBubble({ text: truth, id: g.score })
+          playCollect(g.score - 1)
           return false
         }
         return true
@@ -589,6 +612,7 @@ export default function Vredepad({ onClose }) {
       ro?.disconnect()
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup',   onKeyUp)
+      stopAmbient()
     }
   }, [screen])
 
@@ -643,9 +667,15 @@ export default function Vredepad({ onClose }) {
 
   /* ── Intro ── */
   if (screen === 'intro') {
-    const save  = loadSave()
-    const level = save.level || 1
-    const t     = THEMES[(level - 1) % THEMES.length]
+    const save    = loadSave()
+    const level   = save.level || 1
+    const t       = THEMES[(level - 1) % THEMES.length]
+    const streak  = save.streak || 0
+    const hasDays = (save.playedDays?.length || 0) > 0
+    const last7   = hasDays ? Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(Date.now() - (6 - i) * 86400000).toISOString().slice(0, 10)
+      return { date, played: save.playedDays.includes(date), isToday: i === 6 }
+    }) : []
     return (
       <div className="vp-overlay" style={{ background: t.bg0 }}>
         <button className="vp-close" onClick={onClose}>✕</button>
@@ -660,6 +690,25 @@ export default function Vredepad({ onClose }) {
             <div className="vp-stats-row">
               <div className="vp-stat"><span className="vp-stat-val">{level}</span><span className="vp-stat-lbl">Vredepad</span></div>
               <div className="vp-stat"><span className="vp-stat-val">{bestScore}</span><span className="vp-stat-lbl">Beste</span></div>
+            </div>
+          )}
+          {hasDays && (
+            <div className="vp-streak-row">
+              <span className="vp-streak-label" style={{ color: streak >= 2 ? '#E67E22' : 'var(--text-muted)' }}>
+                {streak >= 2 ? `🔥 ${streak} dae op 'n ry` : streak === 1 ? '🌱 Kom môre terug' : '🌿 Jou pad wag'}
+              </span>
+              <div className="vp-streak-dots">
+                {last7.map((d, i) => (
+                  <div
+                    key={i}
+                    className={`vp-streak-dot${d.played ? ' played' : ''}${d.isToday ? ' today' : ''}`}
+                    style={d.played ? {
+                      background: t.player,
+                      boxShadow: d.isToday ? `0 0 8px 2px ${t.player}` : 'none',
+                    } : {}}
+                  />
+                ))}
+              </div>
             </div>
           )}
           <div className="vp-hint-row">
@@ -725,7 +774,10 @@ export default function Vredepad({ onClose }) {
           <span className="vp-hud-time" style={{ color: displayTime <= 10 ? '#C0392B' : 'var(--text)' }}>
             {displayTime}s
           </span>
-          <button className="vp-hud-close" onClick={() => { cancelAnimationFrame(rafRef.current); setScreen('intro') }}>
+          <button className="vp-hud-mute" onClick={() => { const m = toggleMute(); setSoundOn(!m) }}>
+            {soundOn ? '🔊' : '🔇'}
+          </button>
+          <button className="vp-hud-close" onClick={() => { stopAmbient(); cancelAnimationFrame(rafRef.current); setScreen('intro') }}>
             ✕
           </button>
         </div>
@@ -778,6 +830,10 @@ export default function Vredepad({ onClose }) {
               <span className="vp-stat-lbl">Beste</span>
             </div>
           </div>
+
+          {d.streak >= 2 && (
+            <div className="vp-end-streak">🔥 {d.streak} dae op 'n ry</div>
+          )}
 
           {d.lastTruth && (
             <div className="vp-end-truth">
