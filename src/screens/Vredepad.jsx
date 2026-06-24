@@ -232,7 +232,7 @@ export default function Vredepad({ onClose }) {
   const pendingLevel = useRef(1)
   const isReplayRef  = useRef(false)
 
-  const [screen, setScreen]         = useState('intro')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [countdown, setCountdown]   = useState(3)
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
@@ -545,17 +545,28 @@ export default function Vredepad({ onClose }) {
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
           </button>
           {level > 1 && (
-            <button className="vp-reset-link" onClick={() => {
-              if (window.confirm('Begin weer van voor af? Jou vordering word uitgevee.')) {
-                localStorage.removeItem('vredepad_data')
-                setStreak(0); setBest(0)
-                pendingLevel.current = 1
-              }
-            }}>
+            <button className="vp-reset-link" onClick={() => setShowResetConfirm(true)}>
               Begin van voor af
             </button>
           )}
         </div>
+
+        {showResetConfirm && (
+          <div className="vp-confirm-backdrop" onClick={() => setShowResetConfirm(false)}>
+            <div className="vp-confirm-modal" onClick={e => e.stopPropagation()}>
+              <p className="vp-confirm-text">Begin weer van voor af? Jou vordering word uitgevee.</p>
+              <div className="vp-confirm-btns">
+                <button className="vp-confirm-cancel" onClick={() => setShowResetConfirm(false)}>Kanselleer</button>
+                <button className="vp-confirm-ok" onClick={() => {
+                  localStorage.removeItem('vredepad_data')
+                  setBest(0)
+                  pendingLevel.current = 1
+                  setShowResetConfirm(false)
+                }}>Ja, begin oor</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }

@@ -550,3 +550,68 @@
   text-underline-offset: 3px;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ─── Reset confirm modal ─── */
+.vp-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.vp-confirm-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  max-width: 300px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.vp-confirm-text {
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+
+.vp-confirm-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.vp-confirm-cancel {
+  flex: 1;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vp-confirm-ok {
+  flex: 1;
+  padding: 12px;
+  background: #d9534f;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
