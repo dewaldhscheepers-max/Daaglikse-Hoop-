@@ -495,16 +495,8 @@ export default function Vredepad({ onClose }) {
     function onKeyUp() {
       if (gameRef.current) { gameRef.current.player.dx = 0; gameRef.current.player.dy = 0 }
     }
-    function onTouchMove(e) {
-      e.preventDefault()
-      if (!gameRef.current) return
-      const t    = e.touches[0]
-      const rect = canvas.getBoundingClientRect()
-      gameRef.current.touchTarget = { x: t.clientX - rect.left, y: t.clientY - rect.top }
-    }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup',   onKeyUp)
-    canvasWrap.addEventListener('touchmove', onTouchMove, { passive: false })
 
     initRafId = requestAnimationFrame(() => {
       const rect    = canvasWrap.getBoundingClientRect()
@@ -541,17 +533,7 @@ export default function Vredepad({ onClose }) {
       }
 
       const p = g.player
-      if (g.touchTarget) {
-        const tdx  = g.touchTarget.x - p.x
-        const tdy  = g.touchTarget.y - p.y
-        const dist = Math.sqrt(tdx * tdx + tdy * tdy)
-        if (dist > 5) {
-          p.trail.push({ x: p.x, y: p.y })
-          if (p.trail.length > 14) p.trail.shift()
-          p.x = wrapVal(p.x + (tdx / dist) * p.sp * dt, g.W)
-          p.y = wrapVal(p.y + (tdy / dist) * p.sp * dt, g.H)
-        } else { if (p.trail.length > 0) p.trail.shift() }
-      } else if (p.dx !== 0 || p.dy !== 0) {
+      if (p.dx !== 0 || p.dy !== 0) {
         p.trail.push({ x: p.x, y: p.y })
         if (p.trail.length > 14) p.trail.shift()
         const len = Math.sqrt(p.dx ** 2 + p.dy ** 2)
@@ -664,7 +646,6 @@ export default function Vredepad({ onClose }) {
       ro?.disconnect()
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup',   onKeyUp)
-      canvasWrap.removeEventListener('touchmove', onTouchMove)
       stopAmbient()
     }
   }, [screen])
@@ -703,14 +684,19 @@ export default function Vredepad({ onClose }) {
   }
 
   function onTouchStart(e) {
-    if (!gameRef.current || !canvasRef.current) return
-    const t    = e.touches[0]
-    const rect = canvasRef.current.getBoundingClientRect()
-    gameRef.current.touchTarget = { x: t.clientX - rect.left, y: t.clientY - rect.top }
+    const t = e.touches[0]
+    touchRef.current = { x: t.clientX, y: t.clientY }
   }
 
-  function onTouchEnd() {
-    if (gameRef.current) gameRef.current.touchTarget = null
+  function onTouchEnd(e) {
+    if (!gameRef.current) return
+    const t  = e.changedTouches[0]
+    const dx = t.clientX - touchRef.current.x
+    const dy = t.clientY - touchRef.current.y
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+    const p = gameRef.current.player
+    if (Math.abs(dx) >= Math.abs(dy)) { p.dx = dx > 0 ? 1 : -1; p.dy = 0 }
+    else                               { p.dx = 0; p.dy = dy > 0 ? 1 : -1 }
   }
 
   /* ── Intro ── */
