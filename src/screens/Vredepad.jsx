@@ -432,8 +432,9 @@ export default function Vredepad({ onClose }) {
       })
       if (g.seeds.length === 0) {
         const sc = 3 + Math.min(Math.floor((g.level - 1) / 5), 3)
+        // Avoid only sibling seeds + player (not weeds — they move, so any position is eventually reachable)
         for (let i = 0; i < sc; i++)
-          g.seeds.push({ ...freePos(g.W, g.H, [...g.seeds, ...g.weeds], 55), pulse: Math.random() * Math.PI * 2 })
+          g.seeds.push({ ...freePos(g.W, g.H, [...g.seeds, p], 50), pulse: Math.random() * Math.PI * 2 })
       }
 
       if (g.hitCooldown > 0) g.hitCooldown -= dt
