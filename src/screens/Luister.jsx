@@ -4,6 +4,7 @@ import { collection, query, orderBy, limit, startAfter, getDocs, getDoc, doc, se
 import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
+import DonationCard from '../components/DonationCard'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -798,6 +799,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           </div>
         )}
 
+        <DonationCard />
         <SocialLinks />
 
       </div>

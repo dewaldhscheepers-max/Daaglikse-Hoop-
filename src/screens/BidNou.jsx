@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './BidNou.css'
+import DonationCard from '../components/DonationCard'
 
 const CATEGORIES = [
   {
@@ -309,6 +310,7 @@ export default function BidNou() {
             {loading && <p className="bidnou-empty">Laai gebede…</p>}
           </>
         )}
+        <DonationCard />
       </div>
     </div>
   )

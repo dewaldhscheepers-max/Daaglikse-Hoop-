@@ -6,6 +6,7 @@ import {
   increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
 import './BidSaam.css'
+import DonationCard from '../components/DonationCard'
 
 function timeLabel(ts) {
   if (!ts) return 'Nou net'
@@ -547,6 +548,7 @@ export default function BidSaam() {
           </div>
         )}
 
+        <DonationCard />
       </div>
 
       {prayedToast && (

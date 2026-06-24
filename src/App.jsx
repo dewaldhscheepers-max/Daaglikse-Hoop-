@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
+import Vredepad from './screens/Vredepad'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -72,6 +73,7 @@ export default function App() {
   const [showJourney, setShowJourney]   = useState(false)
   const [showDingeVerander, setShowDingeVerander] = useState(false)
   const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
+  const [showVredepad, setShowVredepad]           = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -370,6 +372,13 @@ export default function App() {
     return () => window.removeEventListener('open-seer-na-vryheid', onOpen)
   }, [])
 
+  // ── Donation card CTA ──
+  useEffect(() => {
+    function onOpen() { setDonation(true) }
+    window.addEventListener('open-donation', onOpen)
+    return () => window.removeEventListener('open-donation', onOpen)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -388,8 +397,8 @@ export default function App() {
   }, [])
 
   function handleNav(id) {
-    if (id === 'skenk')   { setDonation(true); return }
-    if (id === 'nooiomy') { setNooimy(true);   return }
+    if (id === 'vredepad') { setShowVredepad(true); return }
+    if (id === 'nooiomy')  { setNooimy(true);       return }
     setTab(id)
     if (screenRef.current) screenRef.current.scrollTop = 0
   }
@@ -507,6 +516,10 @@ export default function App() {
 
       {showSeerNaVryheid && (
         <SeerNaVryheid onClose={() => setShowSeerNaVryheid(false)} />
+      )}
+
+      {showVredepad && (
+        <Vredepad onClose={() => setShowVredepad(false)} />
       )}
 
       {showNotifBanner && (

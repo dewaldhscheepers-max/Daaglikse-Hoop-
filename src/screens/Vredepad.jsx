@@ -1,0 +1,502 @@
+import { useState, useEffect, useRef } from 'react'
+import './Vredepad.css'
+
+const TRUTHS = [
+  '"Ek kan alles doen deur Christus wat my krag gee." — Fil. 4:13',
+  '"Die Here is my herder; niks sal my ontbreek nie." — Ps. 23:1',
+  '"Want Ek ken die planne wat Ek vir julle beplan." — Jer. 29:11',
+  '"Kom na My toe, almal wat vermoeid is." — Matt. 11:28',
+  '"Wees sterk en moedig; moenie bang wees nie." — Jos. 1:9',
+  '"Die Here sal jou bewaar van alle kwaad." — Ps. 121:7',
+  '"Ek het jou lief met \'n ewige liefde." — Jer. 31:3',
+  '"God is ons toevlug en sterkte." — Ps. 46:2',
+  '"Vrede laat Ek julle na; my vrede gee Ek julle." — Joh. 14:27',
+  '"Vertrou op die Here met jou hele hart." — Spr. 3:5',
+  '"Ek sal jou nooit verlaat nie." — Heb. 13:5',
+  '"Julle is die lig van die wêreld." — Matt. 5:14',
+  '"Sy liefde is vir altyd." — Ps. 136:1',
+  '"Nader tot God en Hy sal tot julle nader." — Jak. 4:8',
+]
+
+const THEMES = [
+  {
+    name: 'Rus en Kalmte',
+    verse: '"Die Here gee rus." — Eks. 33:14',
+    bg0: '#E8F4F8', bg1: '#D0EAF0', bg2: '#B8E0E8',
+    player: '#5B9BD5',
+    playerGlow: 'rgba(91,155,213,0.4)',
+    seedGlow: 'rgba(255,215,0,0.5)',
+    weed: '#3D6B72',
+    petals: ['#87CEEB', '#ADD8E6', '#B0E0E6'],
+    petal0: '#FFD700',
+    particle: 'rgba(91,155,213,0.22)',
+  },
+  {
+    name: 'Beskerming en Veiligheid',
+    verse: '"Die Here is my skild." — Ps. 18:3',
+    bg0: '#EDF7EE', bg1: '#C8E6C9', bg2: '#A5D6A7',
+    player: '#388E3C',
+    playerGlow: 'rgba(56,142,60,0.4)',
+    seedGlow: 'rgba(255,215,0,0.5)',
+    weed: '#37474F',
+    petals: ['#A5D6A7', '#C8E6C9', '#DCEDC8'],
+    petal0: '#FF8F00',
+    particle: 'rgba(56,142,60,0.22)',
+  },
+  {
+    name: 'Identiteit en Liefde',
+    verse: '"Jy is geliefd." — Jer. 31:3',
+    bg0: '#F5F0FA', bg1: '#E1BEE7', bg2: '#CE93D8',
+    player: '#8E44AD',
+    playerGlow: 'rgba(142,68,173,0.4)',
+    seedGlow: 'rgba(255,215,0,0.5)',
+    weed: '#4A235A',
+    petals: ['#CE93D8', '#F48FB1', '#F8BBD0'],
+    petal0: '#FFD700',
+    particle: 'rgba(142,68,173,0.22)',
+  },
+  {
+    name: 'Krag en Volharding',
+    verse: '"Ek kan alles doen." — Fil. 4:13',
+    bg0: '#FFF8F0', bg1: '#FFE0B2', bg2: '#FFCC80',
+    player: '#E67E22',
+    playerGlow: 'rgba(230,126,34,0.4)',
+    seedGlow: 'rgba(255,215,0,0.5)',
+    weed: '#4E342E',
+    petals: ['#FFCC80', '#FFAB40', '#FFA726'],
+    petal0: '#E65100',
+    particle: 'rgba(230,126,34,0.22)',
+  },
+]
+
+const UNLOCKS = [
+  { level: 3,  msg: 'Jy groei! Bly op die pad van vrede.' },
+  { level: 5,  msg: '"Hy lei my op die regte paaie." — Ps. 23:3' },
+  { level: 10, msg: 'Tien vlakke! Jy is sterker as jy dink.' },
+  { level: 20, msg: '"Bly sterk in die Here." — Ef. 6:10' },
+]
+
+function getUnlock(level) {
+  if (level > 20 && (level - 20) % 10 === 0) return `Vlak ${level}! Volhard in vrede.`
+  return UNLOCKS.find(u => u.level === level)?.msg || null
+}
+
+function d2(a, b) { return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) }
+
+function wrap(v, max) { return ((v % max) + max) % max }
+
+function freePos(W, H, avoid, minD) {
+  for (let i = 0; i < 80; i++) {
+    const x = 30 + Math.random() * (W - 60)
+    const y = 30 + Math.random() * (H - 60)
+    if (avoid.every(o => d2({ x, y }, o) > minD)) return { x, y }
+  }
+  return { x: 30 + Math.random() * (W - 60), y: 30 + Math.random() * (H - 60) }
+}
+
+/* ── Canvas draw helpers ── */
+function drawBg(ctx, W, H, t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H)
+  g.addColorStop(0, t.bg0); g.addColorStop(0.55, t.bg1); g.addColorStop(1, t.bg2)
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+}
+
+function drawParticles(ctx, parts, t) {
+  for (const p of parts) {
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+    ctx.fillStyle = t.particle; ctx.globalAlpha = p.alpha; ctx.fill(); ctx.globalAlpha = 1
+  }
+}
+
+function drawFlower(ctx, x, y, r, alpha, t) {
+  ctx.globalAlpha = alpha
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2
+    ctx.save(); ctx.translate(x + Math.cos(a) * r * 1.3, y + Math.sin(a) * r * 1.3); ctx.rotate(a)
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2)
+    ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
+  }
+  ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
+  ctx.globalAlpha = 1
+}
+
+function drawSeed(ctx, x, y, pulse, t) {
+  const r = 8 + Math.sin(pulse) * 1.5
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.4)
+  g.addColorStop(0, t.seedGlow); g.addColorStop(1, 'rgba(255,215,0,0)')
+  ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2)
+  ctx.fillStyle = g; ctx.globalAlpha = 0.65; ctx.fill(); ctx.globalAlpha = 1
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = '#FFD700'; ctx.fill()
+  ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
+}
+
+function drawWeed(ctx, x, y, pulse, t) {
+  const r = 13 + Math.sin(pulse * 0.7) * 1.5
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 1.6)
+  g.addColorStop(0, t.weed); g.addColorStop(0.55, t.weed + 'BB'); g.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.beginPath(); ctx.arc(x, y, r * 1.6, 0, Math.PI * 2)
+  ctx.fillStyle = g; ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 + pulse * 0.25
+    ctx.beginPath()
+    ctx.moveTo(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5)
+    ctx.lineTo(x + Math.cos(a) * (r + 5), y + Math.sin(a) * (r + 5))
+    ctx.strokeStyle = t.weed; ctx.lineWidth = 1.8; ctx.globalAlpha = 0.42; ctx.stroke(); ctx.globalAlpha = 1
+  }
+}
+
+function drawPlayer(ctx, x, y, tick, t) {
+  const r = 13; const pulse = Math.sin(tick * 0.06) * 3
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.6 + pulse)
+  g.addColorStop(0, t.playerGlow); g.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.beginPath(); ctx.arc(x, y, r * 2.6 + pulse, 0, Math.PI * 2)
+  ctx.fillStyle = g; ctx.globalAlpha = 0.68; ctx.fill(); ctx.globalAlpha = 1
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = t.player; ctx.fill()
+  ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.33, r * 0.32, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill()
+}
+
+function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
+function saveSave(d) { try { localStorage.setItem('vredepad_data', JSON.stringify(d)) } catch {} }
+
+export default function Vredepad({ onClose }) {
+  const canvasRef     = useRef(null)
+  const gameRef       = useRef(null)
+  const rafRef        = useRef(null)
+  const touchRef      = useRef({ x: 0, y: 0 })
+  const pendingLevel  = useRef(1)
+
+  const [screen, setScreen]       = useState('intro')
+  const [displayScore, setScore]  = useState(0)
+  const [displayTime, setTime]    = useState(60)
+  const [currentTruth, setTruth]  = useState(TRUTHS[0])
+  const [breathing, setBreathing] = useState(false)
+  const [breathPhase, setPhase]   = useState('inhale')
+  const [endData, setEndData]     = useState(null)
+  const [unlock, setUnlock]       = useState(null)
+  const [streak, setStreak]       = useState(() => loadSave().streak || 0)
+  const [bestScore, setBest]      = useState(() => loadSave().best || 0)
+
+  function buildGame(level, W, H) {
+    const t = THEMES[(level - 1) % THEMES.length]
+    const sc = 3 + Math.min(Math.floor((level - 1) / 5), 3)
+    const wc = 2 + Math.min(Math.floor((level - 1) / 3), 8)
+    const sp = 2.5 + Math.min((level - 1) * 0.12, 2.8)
+    const mid = { x: W / 2, y: H / 2 }
+
+    const seeds = []
+    for (let i = 0; i < sc; i++)
+      seeds.push({ ...freePos(W, H, [...seeds, mid], 60), pulse: Math.random() * Math.PI * 2 })
+
+    const weeds = []
+    for (let i = 0; i < wc; i++)
+      weeds.push({
+        ...freePos(W, H, [...seeds, ...weeds, mid], 65),
+        pulse: Math.random() * Math.PI * 2,
+        dx: (Math.random() - 0.5) * 0.7,
+        dy: (Math.random() - 0.5) * 0.7,
+      })
+
+    const parts = Array.from({ length: 20 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: 2 + Math.random() * 3,
+      dx: (Math.random() - 0.5) * 0.32,
+      dy: -0.14 - Math.random() * 0.32,
+      alpha: 0.08 + Math.random() * 0.2,
+    }))
+
+    gameRef.current = {
+      W, H, t, level,
+      player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp },
+      seeds, weeds, parts, flowers: [],
+      score: 0, timeLeft: 60,
+      tick: 0, lastTime: null,
+      hitCooldown: 0, breathingActive: false,
+      truthIdx: Math.floor(Math.random() * TRUTHS.length),
+      bgFlash: 0,
+    }
+  }
+
+  function endLevel(g) {
+    const save = loadSave()
+    const newLevel = (save.level || 1) + 1
+    const today = new Date().toISOString().slice(0, 10)
+    const yday  = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    const last  = save.lastDay || ''
+    const ns = last === yday ? (save.streak || 0) + 1 : last === today ? (save.streak || 0) : 1
+    const nb = Math.max(save.best || 0, g.score)
+    saveSave({ level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, streak: ns, best: nb })
+    setStreak(ns); setBest(nb)
+    setUnlock(getUnlock(newLevel))
+    setEndData({ score: g.score, level: g.level, newLevel, streak: ns })
+    setScreen('levelup')
+  }
+
+  function triggerBreathing() {
+    setBreathing(true); setPhase('inhale')
+    setTimeout(() => setPhase('exhale'), 2500)
+    setTimeout(() => {
+      setBreathing(false)
+      if (gameRef.current) gameRef.current.breathingActive = false
+    }, 5000)
+  }
+
+  useEffect(() => {
+    if (screen !== 'playing') return
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const wrap = canvas.parentElement
+    const rect = wrap.getBoundingClientRect()
+    canvas.width  = rect.width  || window.innerWidth
+    canvas.height = rect.height || window.innerHeight - 110
+
+    buildGame(pendingLevel.current, canvas.width, canvas.height)
+    setScore(0); setTime(60)
+    setTruth(TRUTHS[gameRef.current.truthIdx])
+
+    const ro = new ResizeObserver(() => {
+      const r = wrap.getBoundingClientRect()
+      canvas.width = r.width; canvas.height = r.height
+      if (gameRef.current) { gameRef.current.W = r.width; gameRef.current.H = r.height }
+    })
+    ro.observe(wrap)
+
+    function onKey(e) {
+      if (!gameRef.current) return
+      const p = gameRef.current.player
+      if (e.key === 'ArrowUp'    || e.key === 'w') { p.dx = 0;  p.dy = -1 }
+      if (e.key === 'ArrowDown'  || e.key === 's') { p.dx = 0;  p.dy = 1  }
+      if (e.key === 'ArrowLeft'  || e.key === 'a') { p.dx = -1; p.dy = 0  }
+      if (e.key === 'ArrowRight' || e.key === 'd') { p.dx = 1;  p.dy = 0  }
+    }
+    function onKeyUp() {
+      if (gameRef.current) { gameRef.current.player.dx = 0; gameRef.current.player.dy = 0 }
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('keyup',   onKeyUp)
+
+    function loop(ts) {
+      const g = gameRef.current
+      if (!g) return
+
+      if (!g.lastTime) g.lastTime = ts
+      const dt = Math.min((ts - g.lastTime) / 16.67, 3)
+      g.lastTime = ts
+      g.tick += dt
+
+      if (!g.breathingActive) {
+        g.timeLeft -= dt / 60
+        if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
+      }
+
+      const p = g.player
+      if (p.dx !== 0 || p.dy !== 0) {
+        const len = Math.sqrt(p.dx ** 2 + p.dy ** 2)
+        p.x = wrap(p.x + (p.dx / len) * p.sp * dt, g.W)
+        p.y = wrap(p.y + (p.dy / len) * p.sp * dt, g.H)
+      }
+
+      for (const s of g.seeds) s.pulse += 0.05 * dt
+      for (const w of g.weeds) {
+        w.pulse += 0.04 * dt
+        w.x = wrap(w.x + w.dx * dt, g.W)
+        w.y = wrap(w.y + w.dy * dt, g.H)
+      }
+      for (const pt of g.parts) {
+        pt.x = wrap(pt.x + pt.dx * dt, g.W)
+        pt.y += pt.dy * dt
+        if (pt.y < -10) { pt.y = g.H + 5; pt.x = Math.random() * g.W }
+      }
+
+      g.seeds = g.seeds.filter(s => {
+        if (d2(p, s) < 22) { g.score++; g.flowers.push({ x: s.x, y: s.y, life: 0, maxLife: 150, r: 10 }); return false }
+        return true
+      })
+      if (g.seeds.length === 0) {
+        const sc = 3 + Math.min(Math.floor((g.level - 1) / 5), 3)
+        for (let i = 0; i < sc; i++)
+          g.seeds.push({ ...freePos(g.W, g.H, [...g.seeds, ...g.weeds], 55), pulse: Math.random() * Math.PI * 2 })
+      }
+
+      if (g.hitCooldown > 0) g.hitCooldown -= dt
+      if (g.bgFlash > 0) g.bgFlash -= dt
+
+      if (g.hitCooldown <= 0 && !g.breathingActive) {
+        for (const w of g.weeds) {
+          if (d2(p, w) < 27) {
+            g.hitCooldown = 180; g.breathingActive = true; g.bgFlash = 18
+            triggerBreathing(); break
+          }
+        }
+      }
+
+      g.flowers = g.flowers.filter(f => { f.life += dt; return f.life < f.maxLife })
+
+      if (Math.floor(g.tick / 300) > Math.floor((g.tick - dt) / 300)) {
+        g.truthIdx = (g.truthIdx + 1) % TRUTHS.length
+        setTruth(TRUTHS[g.truthIdx])
+      }
+
+      setScore(g.score)
+      setTime(Math.ceil(g.timeLeft))
+
+      const ctx = canvas.getContext('2d')
+      drawBg(ctx, g.W, g.H, g.t)
+      if (g.bgFlash > 0) {
+        ctx.fillStyle = 'rgba(255,70,70,0.2)'; ctx.globalAlpha = g.bgFlash / 18
+        ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
+      }
+      drawParticles(ctx, g.parts, g.t)
+      for (const f of g.flowers) drawFlower(ctx, f.x, f.y, f.r * (1 + f.life / f.maxLife * 0.6), 1 - f.life / f.maxLife, g.t)
+      for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
+      for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
+      drawPlayer(ctx, p.x, p.y, g.tick, g.t)
+
+      rafRef.current = requestAnimationFrame(loop)
+    }
+
+    rafRef.current = requestAnimationFrame(loop)
+
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      ro.disconnect()
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keyup',   onKeyUp)
+    }
+  }, [screen])
+
+  function startGame() {
+    pendingLevel.current = loadSave().level || 1
+    setScreen('playing')
+  }
+
+  function nextLevel() {
+    cancelAnimationFrame(rafRef.current)
+    pendingLevel.current = loadSave().level || 1
+    setUnlock(null)
+    setScreen('playing')
+  }
+
+  async function handleShare() {
+    const d = endData
+    const msg = `Ek het ${d.score} Waarheid-saadjies versamel op Vredepad (Vlak ${d.level})! Daagstreep: ${d.streak} 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Vredepad', text: msg }) } catch {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+    }
+  }
+
+  function onTouchStart(e) {
+    const t = e.touches[0]
+    touchRef.current = { x: t.clientX, y: t.clientY }
+  }
+
+  function onTouchEnd(e) {
+    if (!gameRef.current) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - touchRef.current.x
+    const dy = t.clientY - touchRef.current.y
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+    const p = gameRef.current.player
+    if (Math.abs(dx) >= Math.abs(dy)) { p.dx = dx > 0 ? 1 : -1; p.dy = 0 }
+    else                               { p.dx = 0; p.dy = dy > 0 ? 1 : -1 }
+  }
+
+  /* ── Intro ── */
+  if (screen === 'intro') {
+    const save = loadSave()
+    const level = save.level || 1
+    const t = THEMES[(level - 1) % THEMES.length]
+    return (
+      <div className="vp-overlay" style={{ background: t.bg0 }}>
+        <button className="vp-close" onClick={onClose}>✕</button>
+        <div className="vp-intro">
+          <div className="vp-intro-icon">🌿</div>
+          <h1 className="vp-intro-title">Vredepad</h1>
+          <p className="vp-intro-verse">{t.verse}</p>
+          <p className="vp-intro-desc">
+            Versamel <strong>Waarheid-saadjies</strong>. Vermy <strong>Gedagte-onkruid</strong>. 60 sekondes per vlak.
+          </p>
+          <span className="vp-theme-badge" style={{ background: t.player + '22', color: t.player }}>
+            {t.name}
+          </span>
+          {level > 1 && (
+            <div className="vp-stats-row">
+              <div className="vp-stat"><span className="vp-stat-val">{level}</span><span className="vp-stat-lbl">Vlak</span></div>
+              <div className="vp-stat"><span className="vp-stat-val">{streak}</span><span className="vp-stat-lbl">Streep</span></div>
+              <div className="vp-stat"><span className="vp-stat-val">{bestScore}</span><span className="vp-stat-lbl">Beste</span></div>
+            </div>
+          )}
+          <div className="vp-hint-row">
+            <span>📱 Swiep om te beweeg</span>
+            <span>⌨️ WASD / Pyltjies</span>
+          </div>
+          <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
+            {level > 1 ? `Speel Vlak ${level}` : 'Begin speel'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Playing ── */
+  if (screen === 'playing') {
+    return (
+      <div className="vp-overlay vp-playing">
+        <div className="vp-hud">
+          <span className="vp-hud-score">🌟 {displayScore}</span>
+          <span className="vp-hud-time" style={{ color: displayTime <= 10 ? '#E05C5C' : 'var(--text)' }}>
+            {displayTime}s
+          </span>
+          <button className="vp-hud-close" onClick={() => { cancelAnimationFrame(rafRef.current); setScreen('intro') }}>
+            ✕
+          </button>
+        </div>
+        <div className="vp-truth-bar">
+          <span className="vp-truth-text">{currentTruth}</span>
+        </div>
+        <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+          <canvas ref={canvasRef} className="vp-canvas" />
+        </div>
+        {breathing && (
+          <div className="vp-breathing-overlay">
+            <div className={`vp-breath-circle vp-breath-${breathPhase}`} />
+            <p className="vp-breath-label">{breathPhase === 'inhale' ? 'Asem in...' : 'Asem uit...'}</p>
+            <p className="vp-breath-verse">"Hy het in sy neus die asem van die lewe geblaas." — Gen. 2:7</p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  /* ── Level up ── */
+  if (screen === 'levelup' && endData) {
+    const d = endData
+    const t = THEMES[(d.level - 1) % THEMES.length]
+    return (
+      <div className="vp-overlay vp-end" style={{ background: t.bg0 }}>
+        <div className="vp-end-body">
+          <div className="vp-end-icon">🌿</div>
+          <h2 className="vp-end-title">Vlak {d.level} Voltooi!</h2>
+          {unlock && <div className="vp-unlock">{unlock}</div>}
+          <div className="vp-stats-row">
+            <div className="vp-stat"><span className="vp-stat-val">{d.score}</span><span className="vp-stat-lbl">Saadjies</span></div>
+            <div className="vp-stat"><span className="vp-stat-val">{d.streak}</span><span className="vp-stat-lbl">Daagstreep</span></div>
+            <div className="vp-stat"><span className="vp-stat-val">{d.newLevel}</span><span className="vp-stat-lbl">Volgende</span></div>
+          </div>
+          <p className="vp-end-verse">{t.verse}</p>
+          <button className="vp-start-btn" style={{ background: t.player }} onClick={nextLevel}>
+            Vlak {d.newLevel} begin
+          </button>
+          <button className="vp-share-btn" onClick={handleShare}>Deel my vordering 🌿</button>
+          <button className="vp-back-link" onClick={onClose}>Terug</button>
+        </div>
+      </div>
+    )
+  }
+
+  return null
+}

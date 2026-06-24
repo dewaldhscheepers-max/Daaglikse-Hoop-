@@ -6,6 +6,7 @@ import { db } from '../firebase'
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
+import DonationCard from '../components/DonationCard'
 
 function validate(e) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
@@ -212,6 +213,7 @@ export default function Meer({ targetBookId, onScrolled }) {
       </div>
 
       <div className="meer-body">
+        <DonationCard />
         <div className="meer-section">
           <div className="section-header">
             <h3 className="section-title">🎁 Gratis Aflaai</h3>
