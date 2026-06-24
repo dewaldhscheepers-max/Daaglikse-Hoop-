@@ -301,47 +301,45 @@
   height: 100%;
 }
 
-/* ─── Seed truth bubble (near player) ─── */
+/* ─── Seed truth bubble (bottom of screen, out of the way) ─── */
 .vp-seed-bubble {
   position: absolute;
-  top: 50%;
+  bottom: 18px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 20;
-  width: 252px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 14px;
-  padding: 10px 14px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1);
+  width: 88%;
+  max-width: 320px;
+  background: rgba(255, 255, 255, 0.38);
+  border-radius: 12px;
+  padding: 7px 12px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  text-align: center;
-  animation: vp-bubble-show 3.5s ease forwards;
+  gap: 6px;
+  text-align: left;
+  animation: vp-bubble-show 3.2s ease forwards;
 }
 
 @keyframes vp-bubble-show {
   0%   { opacity: 0; }
-  10%  { opacity: 1; }
-  72%  { opacity: 1; }
+  12%  { opacity: 1; }
+  70%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
 .vp-seed-bubble-icon {
-  font-size: 14px;
+  font-size: 13px;
   color: #FFB300;
+  flex-shrink: 0;
   line-height: 1;
 }
 
 .vp-seed-bubble-text {
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-style: italic;
-  color: rgba(0, 0, 0, 0.78);
-  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.45;
   margin: 0;
   overflow: hidden;
   display: -webkit-box;
@@ -681,4 +679,31 @@
   line-height: 1;
   -webkit-tap-highlight-color: transparent;
   opacity: 0.7;
+}
+
+/* ─── Collected verses on end screen ─── */
+.vp-end-collected {
+  width: 100%;
+  text-align: left;
+}
+
+.vp-end-collected-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-right: 4px;
+}
+
+.vp-end-collected-item {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 8px;
 }

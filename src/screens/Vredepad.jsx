@@ -446,15 +446,16 @@ export default function Vredepad({ onClose }) {
     stopAmbient()
     playLevelComplete()
 
+    const collected = [...g.collectedTruths]
     if (!isReplayRef.current) {
       const newLevel = (save.level || 1) + 1
       saveSave({ ...save, level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1 })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected })
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1 })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected })
     }
     setScreen('levelup')
   }
@@ -835,10 +836,14 @@ export default function Vredepad({ onClose }) {
             <div className="vp-end-streak">🔥 {d.streak} dae op 'n ry</div>
           )}
 
-          {d.lastTruth && (
-            <div className="vp-end-truth">
-              <p className="vp-end-truth-label">Neem hierdie waarheid saam:</p>
-              <p className="vp-end-truth-text">{d.lastTruth}</p>
+          {d.collected?.length > 0 && (
+            <div className="vp-end-collected">
+              <p className="vp-end-truth-label">Waarhede wat jy ontvang het:</p>
+              <div className="vp-end-collected-list">
+                {d.collected.map((v, i) => (
+                  <p key={i} className="vp-end-collected-item">✦ {v}</p>
+                ))}
+              </div>
             </div>
           )}
 
