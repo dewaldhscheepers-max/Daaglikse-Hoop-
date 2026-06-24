@@ -8,7 +8,7 @@ export default function DonationCard() {
   return (
     <div className="donation-card">
       <div className="donation-card-heart">♥</div>
-      <h3 className="donation-card-title">Help hou Daaglikse Hoop gratis</h3>
+      <h3 className="donation-card-title">Help om Daaglikse Hoop gratis te hou.</h3>
       <p className="donation-card-text">
         Jou bydrae help met stemboodskappe, app-kostes, advertensies en gratis geestelike hulpbronne.
       </p>

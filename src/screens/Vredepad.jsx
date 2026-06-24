@@ -529,7 +529,7 @@ export default function Vredepad({ onClose }) {
           <h1 className="vp-intro-title">Vredepad</h1>
           <p className="vp-intro-verse">{t.verse}</p>
           <p className="vp-intro-desc">
-            'n Stil oomblik om jou gedagtes te stilmaak. Versamel <strong>waarhede</strong>, laat <strong>intrinsieke gedagtes</strong> verbygaan.
+            'n Stil oomblik om jou gedagtes tot rus te bring. Versamel God se <strong>waarhede</strong> en laat <strong>indringende gedagtes</strong> verbygaan.
           </p>
           {level > 1 && (
             <div className="vp-stats-row">
@@ -538,8 +538,8 @@ export default function Vredepad({ onClose }) {
             </div>
           )}
           <div className="vp-hint-row">
-            <span>📱 Swiep om te beweeg</span>
-            <span>⌨️ WASD / Pyltjies</span>
+            <span>Gly jou vinger oor die skerm</span>
+            <span>Lei die liggie na die waarhede</span>
           </div>
           <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
