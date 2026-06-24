@@ -171,6 +171,7 @@ export default function Vredepad({ onClose }) {
   const [displayScore, setScore]  = useState(0)
   const [displayTime, setTime]    = useState(60)
   const [currentTruth, setTruth]  = useState(TRUTHS[0])
+  const [seedVerse, setSeedVerse] = useState(null)
   const [breathing, setBreathing] = useState(false)
   const [breathPhase, setPhase]   = useState('inhale')
   const [endData, setEndData]     = useState(null)
@@ -320,7 +321,14 @@ export default function Vredepad({ onClose }) {
       }
 
       g.seeds = g.seeds.filter(s => {
-        if (d2(p, s) < 22) { g.score++; g.flowers.push({ x: s.x, y: s.y, life: 0, maxLife: 150, r: 10 }); return false }
+        if (d2(p, s) < 22) {
+          g.score++
+          g.flowers.push({ x: s.x, y: s.y, life: 0, maxLife: 150, r: 10 })
+          setSeedVerse({ text: TRUTHS[g.truthIdx], id: g.score })
+          g.truthIdx = (g.truthIdx + 1) % TRUTHS.length
+          setTruth(TRUTHS[g.truthIdx])
+          return false
+        }
         return true
       })
       if (g.seeds.length === 0) {
@@ -342,11 +350,6 @@ export default function Vredepad({ onClose }) {
       }
 
       g.flowers = g.flowers.filter(f => { f.life += dt; return f.life < f.maxLife })
-
-      if (Math.floor(g.tick / 300) > Math.floor((g.tick - dt) / 300)) {
-        g.truthIdx = (g.truthIdx + 1) % TRUTHS.length
-        setTruth(TRUTHS[g.truthIdx])
-      }
 
       setScore(g.score)
       setTime(Math.ceil(g.timeLeft))
@@ -469,11 +472,19 @@ export default function Vredepad({ onClose }) {
         <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
         </div>
+        {seedVerse && (
+          <div className="vp-verse-popup" key={seedVerse.id}>
+            <div className="vp-verse-popup-card">
+              <span className="vp-verse-popup-icon">✦</span>
+              <p className="vp-verse-popup-text">{seedVerse.text}</p>
+            </div>
+          </div>
+        )}
         {breathing && (
           <div className="vp-breathing-overlay">
             <div className={`vp-breath-circle vp-breath-${breathPhase}`} />
             <p className="vp-breath-label">{breathPhase === 'inhale' ? 'Asem in...' : 'Asem uit...'}</p>
-            <p className="vp-breath-verse">"Hy het in sy neus die asem van die lewe geblaas." — Gen. 2:7</p>
+            <p className="vp-breath-verse">"Wees stil en weet dat Ek God is." — Ps. 46:11</p>
           </div>
         )}
       </div>

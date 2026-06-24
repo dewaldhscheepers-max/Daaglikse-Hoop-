@@ -206,6 +206,52 @@
   height: 100%;
 }
 
+/* ─── Seed verse popup ─── */
+.vp-verse-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 15;
+  padding: 24px;
+  animation: vp-verse-show 3s ease forwards;
+}
+
+@keyframes vp-verse-show {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.92); }
+  12%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  70%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.96); }
+}
+
+.vp-verse-popup-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 22px 26px;
+  text-align: center;
+  max-width: 300px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vp-verse-popup-icon {
+  font-size: 18px;
+  color: #FFD700;
+  line-height: 1;
+}
+
+.vp-verse-popup-text {
+  font-size: 16px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
 /* ─── Breathing overlay ─── */
 .vp-breathing-overlay {
   position: fixed;
