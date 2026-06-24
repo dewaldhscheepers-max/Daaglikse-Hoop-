@@ -407,7 +407,15 @@ export default function Vredepad({ onClose }) {
   useEffect(() => {
     getDocs(collection(db, 'books')).then(snap => {
       const pdfs = {}
-      snap.docs.forEach(d => { const data = d.data(); if (data.pdfUrl) pdfs[d.id] = data.pdfUrl })
+      snap.docs.forEach(d => {
+        const data = d.data()
+        if (!data.pdfUrl) return
+        pdfs[d.id] = data.pdfUrl
+        if (data.title) {
+          const slug = data.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+          if (!pdfs[slug]) pdfs[slug] = data.pdfUrl
+        }
+      })
       setBookPdfs(pdfs)
     }).catch(() => {})
   }, [])
