@@ -32,16 +32,17 @@ function bell(c, freq, vol, decay, t) {
 // C major pentatonic — always consonant, always pleasant
 const PENTA = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66, 1318.51]
 
-export function playCollect(idx = 0) {
+export function playCollect(idx = 0, combo = 1) {
   if (_muted) return
   try {
-    const c = getCtx(), now = c.currentTime
+    const c   = getCtx(), now = c.currentTime
     const freq = PENTA[idx % PENTA.length]
-    // Fundamental + two bell harmonics = rich, warm, addictive chime
-    bell(c, freq,         0.36, 1.4, now)
-    bell(c, freq * 2.756, 0.10, 0.7, now + 0.003)
-    bell(c, freq * 2,     0.05, 0.5, now + 0.005)
-    if (navigator.vibrate) navigator.vibrate(28)
+    const vol  = Math.min(0.36 + (combo - 1) * 0.03, 0.55)
+    bell(c, freq,         vol,       1.4, now)
+    bell(c, freq * 2.756, vol * 0.28, 0.7, now + 0.003)
+    bell(c, freq * 2,     vol * 0.14, 0.5, now + 0.005)
+    if (combo >= 5) bell(c, freq * 4, vol * 0.07, 0.35, now + 0.07)
+    if (navigator.vibrate) navigator.vibrate(combo >= 5 ? 45 : 28)
   } catch {}
 }
 

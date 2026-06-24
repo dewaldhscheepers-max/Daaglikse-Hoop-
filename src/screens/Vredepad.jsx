@@ -374,6 +374,8 @@ export default function Vredepad({ onClose }) {
   const [screen, setScreen]         = useState('intro')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [soundOn, setSoundOn]       = useState(() => !isMuted())
+  const [combo, setCombo]           = useState(0)
+  const [bonusFlash, setBonusFlash] = useState(false)
   const [countdown, setCountdown]   = useState(3)
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
@@ -432,6 +434,8 @@ export default function Vredepad({ onClose }) {
       truths, truthIdx: 0,
       collectedTruths: [],
       bgFlash: 0,
+      touchTarget: null,
+      combo: 0, comboLastTick: 0,
     }
   }
 
@@ -446,17 +450,19 @@ export default function Vredepad({ onClose }) {
     stopAmbient()
     playLevelComplete()
 
-    const collected = [...g.collectedTruths]
+    const collected    = [...g.collectedTruths]
+    const isNewRecord  = g.score > (save.best || 0)
     if (!isReplayRef.current) {
       const newLevel = (save.level || 1) + 1
       saveSave({ ...save, level: newLevel, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord })
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord })
     }
+    setCombo(0)
     setScreen('levelup')
   }
 
@@ -489,8 +495,16 @@ export default function Vredepad({ onClose }) {
     function onKeyUp() {
       if (gameRef.current) { gameRef.current.player.dx = 0; gameRef.current.player.dy = 0 }
     }
+    function onTouchMove(e) {
+      e.preventDefault()
+      if (!gameRef.current) return
+      const t    = e.touches[0]
+      const rect = canvas.getBoundingClientRect()
+      gameRef.current.touchTarget = { x: t.clientX - rect.left, y: t.clientY - rect.top }
+    }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup',   onKeyUp)
+    canvasWrap.addEventListener('touchmove', onTouchMove, { passive: false })
 
     initRafId = requestAnimationFrame(() => {
       const rect    = canvasWrap.getBoundingClientRect()
@@ -527,9 +541,19 @@ export default function Vredepad({ onClose }) {
       }
 
       const p = g.player
-      if (p.dx !== 0 || p.dy !== 0) {
+      if (g.touchTarget) {
+        const tdx  = g.touchTarget.x - p.x
+        const tdy  = g.touchTarget.y - p.y
+        const dist = Math.sqrt(tdx * tdx + tdy * tdy)
+        if (dist > 5) {
+          p.trail.push({ x: p.x, y: p.y })
+          if (p.trail.length > 14) p.trail.shift()
+          p.x = wrapVal(p.x + (tdx / dist) * p.sp * dt, g.W)
+          p.y = wrapVal(p.y + (tdy / dist) * p.sp * dt, g.H)
+        } else { if (p.trail.length > 0) p.trail.shift() }
+      } else if (p.dx !== 0 || p.dy !== 0) {
         p.trail.push({ x: p.x, y: p.y })
-        if (p.trail.length > 10) p.trail.shift()
+        if (p.trail.length > 14) p.trail.shift()
         const len = Math.sqrt(p.dx ** 2 + p.dy ** 2)
         p.x = wrapVal(p.x + (p.dx / len) * p.sp * dt, g.W)
         p.y = wrapVal(p.y + (p.dy / len) * p.sp * dt, g.H)
@@ -549,6 +573,11 @@ export default function Vredepad({ onClose }) {
         if (pt.y < -10) { pt.y = g.H + 5; pt.x = Math.random() * g.W }
       }
 
+      // Reset combo if no collection in ~3 seconds
+      if (g.combo > 0 && (g.tick - g.comboLastTick) > 200) {
+        g.combo = 0; setCombo(0)
+      }
+
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
@@ -556,8 +585,20 @@ export default function Vredepad({ onClose }) {
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
+
+          const gap = g.tick - g.comboLastTick
+          g.combo = gap < 200 ? g.combo + 1 : 1
+          g.comboLastTick = g.tick
+          setCombo(g.combo)
+
+          if ([5, 10, 15, 20, 25].includes(g.combo)) {
+            g.timeLeft = Math.min(g.timeLeft + 5, 90)
+            setBonusFlash(true)
+            setTimeout(() => setBonusFlash(false), 1800)
+          }
+
           setSeedBubble({ text: truth, id: g.score })
-          playCollect(g.score - 1)
+          playCollect(g.score - 1, g.combo)
           return false
         }
         return true
@@ -575,6 +616,7 @@ export default function Vredepad({ onClose }) {
       if (g.hitCooldown <= 0 && !g.breathingActive) {
         for (const w of g.weeds) {
           if (d2(p, w) < 27) {
+            g.combo = 0; setCombo(0)
             g.hitCooldown = 180; g.breathingActive = true; g.bgFlash = 14
             triggerBreathing(); break
           }
@@ -599,6 +641,15 @@ export default function Vredepad({ onClose }) {
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
         drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t)
+        if (f.life < 28) {
+          const bp = f.life / 28
+          ctx.beginPath()
+          ctx.arc(f.x, f.y, 6 + bp * 36, 0, Math.PI * 2)
+          ctx.strokeStyle = `rgba(255,215,0,${(1 - bp) * 0.9})`
+          ctx.lineWidth = 3 - bp * 2
+          ctx.stroke()
+        }
+        if (f.life < 60) f.life += dt
       }
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
@@ -613,6 +664,7 @@ export default function Vredepad({ onClose }) {
       ro?.disconnect()
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup',   onKeyUp)
+      canvasWrap.removeEventListener('touchmove', onTouchMove)
       stopAmbient()
     }
   }, [screen])
@@ -651,19 +703,14 @@ export default function Vredepad({ onClose }) {
   }
 
   function onTouchStart(e) {
-    const t = e.touches[0]
-    touchRef.current = { x: t.clientX, y: t.clientY }
+    if (!gameRef.current || !canvasRef.current) return
+    const t    = e.touches[0]
+    const rect = canvasRef.current.getBoundingClientRect()
+    gameRef.current.touchTarget = { x: t.clientX - rect.left, y: t.clientY - rect.top }
   }
 
-  function onTouchEnd(e) {
-    if (!gameRef.current) return
-    const t  = e.changedTouches[0]
-    const dx = t.clientX - touchRef.current.x
-    const dy = t.clientY - touchRef.current.y
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
-    const p = gameRef.current.player
-    if (Math.abs(dx) >= Math.abs(dy)) { p.dx = dx > 0 ? 1 : -1; p.dy = 0 }
-    else                               { p.dx = 0; p.dy = dy > 0 ? 1 : -1 }
+  function onTouchEnd() {
+    if (gameRef.current) gameRef.current.touchTarget = null
   }
 
   /* ── Intro ── */
@@ -787,6 +834,14 @@ export default function Vredepad({ onClose }) {
         </div>
         <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
+          {combo >= 2 && (
+            <div className={`vp-combo-badge${combo >= 5 ? ' vp-combo-hot' : ''}`}>
+              {combo >= 5 ? `⚡ ${combo}×` : `${combo}×`}
+            </div>
+          )}
+          {bonusFlash && (
+            <div className="vp-bonus-flash">+5 sekondes ⚡</div>
+          )}
           {seedBubble && (
             <div
               className="vp-seed-bubble"
@@ -832,6 +887,9 @@ export default function Vredepad({ onClose }) {
             </div>
           </div>
 
+          {d.isNewRecord && (
+            <div className="vp-new-record">🏆 Nuwe Rekord!</div>
+          )}
           {d.streak >= 2 && (
             <div className="vp-end-streak">🔥 {d.streak} dae op 'n ry</div>
           )}

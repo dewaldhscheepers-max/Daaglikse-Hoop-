@@ -707,3 +707,57 @@
   background: rgba(0,0,0,0.04);
   border-radius: 8px;
 }
+
+/* ─── Combo badge ─── */
+.vp-combo-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 8;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.45);
+  background: rgba(255,255,255,0.42);
+  padding: 4px 9px;
+  border-radius: 10px;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s, background 0.2s;
+}
+.vp-combo-hot {
+  color: #E67E22;
+  background: rgba(255, 215, 0, 0.32);
+}
+
+/* ─── Bonus flash ─── */
+.vp-bonus-flash {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 800;
+  color: #FFB300;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: vp-bonus-pop 1.8s ease forwards;
+  z-index: 25;
+}
+@keyframes vp-bonus-pop {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
+  14%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  65%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -65%) scale(0.9); }
+}
+
+/* ─── New record badge ─── */
+.vp-new-record {
+  font-size: 16px;
+  font-weight: 800;
+  color: #B8860B;
+  background: rgba(255, 215, 0, 0.18);
+  border: 2px solid rgba(255, 215, 0, 0.45);
+  border-radius: 20px;
+  padding: 6px 20px;
+}
