@@ -615,3 +615,17 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ─── Compact donation card on intro ─── */
+.vp-donation-wrap {
+  width: 100%;
+  margin-top: 6px;
+}
+.vp-donation-wrap .donation-card {
+  padding: 14px 14px 12px;
+}
+.vp-donation-wrap .donation-card-heart { font-size: 20px; }
+.vp-donation-wrap .donation-card-title { font-size: 13px; }
+.vp-donation-wrap .donation-card-text  { font-size: 11.5px; margin-bottom: 10px; }
+.vp-donation-wrap .donation-card-btn-monthly { font-size: 12.5px; padding: 10px 12px; margin-bottom: 6px; }
+.vp-donation-wrap .donation-card-btn-once    { font-size: 11.5px; padding: 8px 12px; }

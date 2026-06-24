@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import DonationCard from '../components/DonationCard'
 import './Vredepad.css'
 
 const MOOD_TRUTHS = {
@@ -550,6 +551,9 @@ export default function Vredepad({ onClose }) {
               Begin van voor af
             </button>
           )}
+          <div className="vp-donation-wrap">
+            <DonationCard />
+          </div>
         </div>
 
         {showResetConfirm && (
