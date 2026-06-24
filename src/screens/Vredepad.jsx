@@ -232,6 +232,7 @@ export default function Vredepad({ onClose }) {
   const pendingLevel = useRef(1)
   const isReplayRef  = useRef(false)
 
+  const [screen, setScreen]         = useState('intro')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [countdown, setCountdown]   = useState(3)
   const [displayScore, setScore]    = useState(0)
