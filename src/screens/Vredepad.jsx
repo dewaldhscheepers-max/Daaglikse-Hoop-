@@ -412,12 +412,7 @@ export default function Vredepad({ onClose }) {
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
-          // Compute LEFT EDGE of bubble (no CSS transform needed)
-          const bW   = 252
-          const bH   = 90
-          const left = Math.max(4, Math.min(g.W - bW - 4, p.x - bW / 2))
-          const top  = Math.max(10, Math.min(g.H - bH, p.y + 20))
-          setSeedBubble({ text: truth, left, top, id: g.score })
+          setSeedBubble({ text: truth, id: g.score })
           return false
         }
         return true
@@ -598,7 +593,6 @@ export default function Vredepad({ onClose }) {
             <div
               className="vp-seed-bubble"
               key={seedBubble.id}
-              style={{ left: `${seedBubble.left}px`, top: `${seedBubble.top}px` }}
               onAnimationEnd={() => setSeedBubble(null)}
             >
               <span className="vp-seed-bubble-icon">✦</span>
