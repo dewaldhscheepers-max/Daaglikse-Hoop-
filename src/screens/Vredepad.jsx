@@ -443,6 +443,65 @@ function drawFloats(ctx, floats) {
   ctx.restore()
 }
 
+function drawGenadeKruis(ctx, kruis, tick) {
+  const { x, y, life, maxLife } = kruis
+  const fadeIn  = Math.min(life / 30, 1)
+  const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
+  const alpha   = fadeIn * fadeOut
+  const pulse   = 1 + Math.sin(tick * 0.038) * 0.08
+
+  ctx.save()
+
+  // Soft outer golden glow
+  const glowR = 52 * pulse
+  const glow  = ctx.createRadialGradient(x, y, 0, x, y, glowR)
+  glow.addColorStop(0,   `rgba(255,240,180,${alpha * 0.35})`)
+  glow.addColorStop(0.5, `rgba(255,235,160,${alpha * 0.14})`)
+  glow.addColorStop(1,   'rgba(255,235,160,0)')
+  ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
+  ctx.fillStyle = glow; ctx.fill()
+
+  // Glow at junction
+  const jGlow = ctx.createRadialGradient(x, y - 8, 0, x, y - 8, 20)
+  jGlow.addColorStop(0, `rgba(255,252,225,${alpha * 0.88})`)
+  jGlow.addColorStop(1, 'rgba(255,252,225,0)')
+  ctx.beginPath(); ctx.arc(x, y - 8, 20, 0, Math.PI * 2)
+  ctx.fillStyle = jGlow; ctx.fill()
+
+  // Cross arms
+  ctx.globalAlpha = alpha * 0.78
+  ctx.fillStyle   = 'rgba(255,250,218,0.92)'
+  ctx.fillRect(x - 4, y - 36, 8, 64)    // vertical
+  ctx.fillRect(x - 21, y - 18, 42, 8)   // horizontal
+
+  ctx.restore()
+}
+
+function drawVredekring(ctx, ring, tick) {
+  const { x, y, life } = ring
+  const expandDur = 90, holdDur = 30, fadeDur = 80
+  const radius = Math.min(life / expandDur, 1) * 72
+  let alpha
+  if      (life < expandDur)                      alpha = life / expandDur
+  else if (life < expandDur + holdDur)            alpha = 1
+  else alpha = Math.max(0, 1 - (life - expandDur - holdDur) / fadeDur)
+
+  ctx.save()
+  const grad = ctx.createRadialGradient(x, y, 0, x, y, radius)
+  grad.addColorStop(0,   `rgba(160,215,255,${alpha * 0.07})`)
+  grad.addColorStop(0.7, `rgba(160,215,255,${alpha * 0.04})`)
+  grad.addColorStop(1,   'rgba(160,215,255,0)')
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2)
+  ctx.fillStyle = grad; ctx.fill()
+
+  const pulse = 1 + Math.sin(tick * 0.04) * 0.04
+  ctx.beginPath(); ctx.arc(x, y, radius * pulse, 0, Math.PI * 2)
+  ctx.strokeStyle = `rgba(160,215,255,${alpha * 0.65})`
+  ctx.lineWidth   = 2
+  ctx.stroke()
+  ctx.restore()
+}
+
 function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
 function saveSave(d) { try { localStorage.setItem('vredepad_data', JSON.stringify(d)) } catch {} }
 
@@ -477,6 +536,7 @@ export default function Vredepad({ onClose }) {
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
   const [seedBubble, setSeedBubble] = useState(null)
+  const [genadeFlash, setGenadeFlash] = useState(false)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -567,6 +627,9 @@ export default function Vredepad({ onClose }) {
       bgFlash: 0, hitFlash: 0,
       justHit: false,
       combo: 0, comboLastTick: 0,
+      truthStreak: 0,
+      genadeKruis: null, genadeUsed: false, genadeActive: 0,
+      weedHitsRound: 0, vredekring: null, vredekringUsed: false,
     }
   }
 
@@ -747,10 +810,44 @@ export default function Vredepad({ onClose }) {
       }
 
       for (const s of g.seeds) s.pulse += 0.05 * dt
+      const weedSpd = g.genadeActive > 0 ? 0.22 : 1
       for (const w of g.weeds) {
         w.pulse += 0.04 * dt
-        w.x = wrapVal(w.x + w.dx * dt, g.W)
-        w.y = wrapVal(w.y + w.dy * dt, g.H)
+        w.x = wrapVal(w.x + w.dx * dt * weedSpd, g.W)
+        w.y = wrapVal(w.y + w.dy * dt * weedSpd, g.H)
+      }
+
+      // Genade-Kruis
+      if (g.genadeActive > 0) g.genadeActive -= dt
+      if (g.genadeKruis) {
+        g.genadeKruis.life += dt
+        if (g.genadeKruis.life > g.genadeKruis.maxLife) {
+          g.genadeKruis = null
+        } else if (d2(p, g.genadeKruis) < 30) {
+          const kx = g.genadeKruis.x, ky = g.genadeKruis.y
+          g.genadeKruis = null
+          g.genadeActive = 300
+          g.weeds = g.weeds.filter(w => d2(w, { x: kx, y: ky }) > 110)
+          const gTruths = ['God is naby.', 'Jy is nie alleen nie.', 'Vrede is moontlik.']
+          gTruths.forEach((t, i) => {
+            g.floats.push({ id: g.tick + 200 + i, x: kx + (i - 1) * 58, y: ky - 15, text: t, age: 0, maxAge: 190, isWeed: false })
+          })
+          g.score += 100; setScore(g.score)
+          setGenadeFlash(true); setTimeout(() => setGenadeFlash(false), 2600)
+        }
+      }
+
+      // Vredekring
+      if (g.vredekring) {
+        g.vredekring.life += dt
+        if (!g.vredekring.healed && g.vredekring.life >= 90) {
+          g.vredekring.healed = true
+          g.justHit = false
+          p.hitAnim = 0
+          g.floats.push({ id: g.tick + 300, x: g.vredekring.x, y: g.vredekring.y - 35,
+            text: 'Haal asem. Kom terug na vrede.', age: 0, maxAge: 200, isWeed: false })
+        }
+        if (g.vredekring.life > 200) g.vredekring = null
       }
       for (const pt of g.parts) {
         pt.x = wrapVal(pt.x + pt.dx * dt, g.W)
@@ -788,6 +885,13 @@ export default function Vredepad({ onClose }) {
           g.justHit = false
           g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
+          g.truthStreak++
+          if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed) {
+            const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 80)
+            g.genadeKruis = { x: pos.x, y: pos.y, life: 0, maxLife: 360 }
+            g.genadeUsed  = true
+            g.truthStreak = 0
+          }
           playCollect(g.score - 1, g.combo)
           return false
         }
@@ -812,8 +916,15 @@ export default function Vredepad({ onClose }) {
             g.hitFlash = 14
             p.hitAnim = 1.0
             g.justHit = true
+            g.truthStreak = 0
+            g.weedHitsRound++
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
             g.floats.push({ id: g.tick + Math.random(), x: w.x, y: w.y - 10, text: ww, age: 0, maxAge: 130, isWeed: true })
+            if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
+              g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
+              g.vredekringUsed = true
+              g.weedHitsRound  = 0
+            }
             playHit()
             break
           }
@@ -845,6 +956,7 @@ export default function Vredepad({ onClose }) {
         ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
       }
       drawParticles(ctx, g.parts, g.t)
+      if (g.vredekring) drawVredekring(ctx, g.vredekring, g.tick)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
         drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t)
@@ -858,9 +970,18 @@ export default function Vredepad({ onClose }) {
         }
         if (f.life < 60) f.life += dt
       }
+      if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick)
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
+      if (g.genadeActive > 0) {
+        const gFrac = Math.min(g.genadeActive / 300, 1)
+        const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 55)
+        gr.addColorStop(0, `rgba(255,240,180,${gFrac * 0.45})`)
+        gr.addColorStop(1, 'rgba(255,240,180,0)')
+        ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
+        ctx.fillStyle = gr; ctx.fill()
+      }
       drawFloats(ctx, g.floats)
 
       rafRef.current = requestAnimationFrame(loop)
@@ -1117,6 +1238,9 @@ export default function Vredepad({ onClose }) {
           )}
           {bonusFlash && (
             <div className="vp-bonus-flash">+5 sekondes ⚡</div>
+          )}
+          {genadeFlash && (
+            <div className="vp-genade-flash">✦ Genade Oomblik ✦</div>
           )}
         </div>
       </div>

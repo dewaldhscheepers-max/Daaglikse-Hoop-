@@ -1144,3 +1144,26 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ─── Genade flash ─── */
+.vp-genade-flash {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(200,170,80,0.95);
+  text-shadow: 0 1px 10px rgba(255,240,160,0.55);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+  animation: vp-genade-rise 2.6s ease forwards;
+  z-index: 25;
+}
+@keyframes vp-genade-rise {
+  0%   { opacity: 0; transform: translate(-50%, -20%) scale(0.88); }
+  16%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  68%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -70%) scale(0.96); }
+}
