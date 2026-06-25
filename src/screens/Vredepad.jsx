@@ -443,33 +443,34 @@ function drawFloats(ctx, floats) {
   ctx.restore()
 }
 
-function drawGenadeKruis(ctx, kruis, tick) {
+function drawGenadeKruis(ctx, kruis, tick, playerX, playerY) {
   const { x, y, life, maxLife } = kruis
   const fadeIn  = Math.min(life / 30, 1)
   const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
   const alpha   = fadeIn * fadeOut
   const pulse   = 1 + Math.sin(tick * 0.038) * 0.08
+  const nearFrac = playerX != null ? Math.max(0, 1 - Math.sqrt((playerX - x) ** 2 + (playerY - y) ** 2) / 90) : 0
 
   ctx.save()
 
-  // Soft outer golden glow
-  const glowR = 52 * pulse
+  // Soft outer golden glow (brightens as player approaches)
+  const glowR = (52 + nearFrac * 22) * pulse
   const glow  = ctx.createRadialGradient(x, y, 0, x, y, glowR)
-  glow.addColorStop(0,   `rgba(255,240,180,${alpha * 0.35})`)
-  glow.addColorStop(0.5, `rgba(255,235,160,${alpha * 0.14})`)
+  glow.addColorStop(0,   `rgba(255,240,180,${alpha * (0.35 + nearFrac * 0.3)})`)
+  glow.addColorStop(0.5, `rgba(255,235,160,${alpha * (0.14 + nearFrac * 0.12)})`)
   glow.addColorStop(1,   'rgba(255,235,160,0)')
   ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
   ctx.fillStyle = glow; ctx.fill()
 
   // Glow at junction
-  const jGlow = ctx.createRadialGradient(x, y - 8, 0, x, y - 8, 20)
-  jGlow.addColorStop(0, `rgba(255,252,225,${alpha * 0.88})`)
+  const jGlow = ctx.createRadialGradient(x, y - 8, 0, x, y - 8, 20 + nearFrac * 10)
+  jGlow.addColorStop(0, `rgba(255,252,225,${alpha * (0.88 + nearFrac * 0.12)})`)
   jGlow.addColorStop(1, 'rgba(255,252,225,0)')
-  ctx.beginPath(); ctx.arc(x, y - 8, 20, 0, Math.PI * 2)
+  ctx.beginPath(); ctx.arc(x, y - 8, 20 + nearFrac * 10, 0, Math.PI * 2)
   ctx.fillStyle = jGlow; ctx.fill()
 
   // Cross arms
-  ctx.globalAlpha = alpha * 0.78
+  ctx.globalAlpha = alpha * (0.78 + nearFrac * 0.22)
   ctx.fillStyle   = 'rgba(255,250,218,0.92)'
   ctx.fillRect(x - 4, y - 36, 8, 64)    // vertical
   ctx.fillRect(x - 21, y - 18, 42, 8)   // horizontal
@@ -823,15 +824,21 @@ export default function Vredepad({ onClose }) {
         g.genadeKruis.life += dt
         if (g.genadeKruis.life > g.genadeKruis.maxLife) {
           g.genadeKruis = null
-        } else if (d2(p, g.genadeKruis) < 30) {
-          const kx = g.genadeKruis.x, ky = g.genadeKruis.y
+        } else if (d2(p, g.genadeKruis) < 42) {
           g.genadeKruis = null
           g.genadeActive = 300
-          g.weeds = g.weeds.filter(w => d2(w, { x: kx, y: ky }) > 110)
-          const gTruths = ['God is naby.', 'Jy is nie alleen nie.', 'Vrede is moontlik.']
-          gTruths.forEach((t, i) => {
-            g.floats.push({ id: g.tick + 200 + i, x: kx + (i - 1) * 58, y: ky - 15, text: t, age: 0, maxAge: 190, isWeed: false })
-          })
+          g.justHit = false
+          p.hitAnim = 0
+          // scatter weeds away from player
+          for (const w of g.weeds) {
+            const ang = Math.atan2(w.y - p.y, w.x - p.x)
+            w.dx = Math.cos(ang) * 0.6
+            w.dy = Math.sin(ang) * 0.6
+          }
+          g.bgFlash = 18
+          const genadeTruth = ['God is naby.', 'Jy is veilig.', 'Vrede is moontlik.', 'Genade is hier.', 'Hy hou jou vas.'][Math.floor(Math.random() * 5)]
+          g.floats.push({ id: g.tick + 200, x: g.W / 2, y: g.H * 0.38, text: genadeTruth, age: 0, maxAge: 220, isWeed: false })
+          g.floats.push({ id: g.tick + 201, x: g.W / 2, y: g.H * 0.38 + 30, text: '+100 Genade', age: 0, maxAge: 180, isWeed: false })
           g.score += 100; setScore(g.score)
           setGenadeFlash(true); setTimeout(() => setGenadeFlash(false), 2600)
         }
@@ -970,7 +977,7 @@ export default function Vredepad({ onClose }) {
         }
         if (f.life < 60) f.life += dt
       }
-      if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick)
+      if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
