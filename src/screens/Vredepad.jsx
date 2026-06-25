@@ -18,6 +18,20 @@ const MILESTONE_BOOKS = [
   { id: 'rustelose-gedagtes',    emoji: '🌙', title: 'Rustelose Gedagtes',    level: 120 },
 ]
 
+const SHORT_TRUTHS = [
+  'God is lief vir jou', 'Jy is nie alleen nie', 'God is naby', 'Laat gaan',
+  'Haal asem', 'Jy is veilig hier', 'God dra jou', 'Vrede vir jou',
+  'Hou moed', 'God sien jou', 'Jy behoort aan Hom', "Een tree op 'n slag",
+  'Die Here is by jou', 'Jy kan weer asemhaal',
+]
+const WEED_WORDS = [
+  'Vrees', 'Oordink', 'Skuld', 'Verwerping', 'Moeg',
+  'Paniek', 'Bitterheid', 'Ek is alleen', 'Wat as?', 'Ek kan nie', 'Te veel', 'Geen hoop',
+]
+const RECOVERY_TRUTHS = [
+  'Vrede herstel', 'God is naby', 'Haal asem', 'Jy is veilig', 'Laat gaan',
+]
+
 function sortLeaderboard(entries) {
   return [...entries]
     .sort((a, b) =>
@@ -362,7 +376,8 @@ function drawWeed(ctx, x, y, pulse, t) {
 
 function drawPlayer(ctx, p, tick, t) {
   const { x, y } = p
-  const r = 13
+  const hitFrac = p.hitAnim || 0
+  const r = 13 * (1 - hitFrac * 0.22)
 
   // Soft trail
   for (let i = 0; i < p.trail.length; i++) {
@@ -383,8 +398,27 @@ function drawPlayer(ctx, p, tick, t) {
 
   // Main dot
   ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = t.player; ctx.fill()
+  if (hitFrac > 0) {
+    ctx.beginPath(); ctx.arc(x, y, r * 1.5, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(120,20,60,${hitFrac * 0.28})`; ctx.fill()
+  }
   ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.33, r * 0.32, 0, Math.PI * 2)
   ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
+}
+
+function drawFloats(ctx, floats) {
+  ctx.save()
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  for (const f of floats) {
+    const prog = f.age / f.maxAge
+    const alpha = prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8)
+    ctx.globalAlpha = alpha * (f.isWeed ? 0.62 : 0.78)
+    ctx.font = f.isWeed ? 'bold 13px system-ui,sans-serif' : '12px system-ui,sans-serif'
+    ctx.fillStyle = f.isWeed ? '#9B3A52' : '#FFFFFF'
+    ctx.fillText(f.text, f.x, f.y - prog * 52)
+  }
+  ctx.restore()
 }
 
 function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
@@ -421,8 +455,6 @@ export default function Vredepad({ onClose }) {
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
   const [seedBubble, setSeedBubble] = useState(null)
-  const [breathing, setBreathing]   = useState(false)
-  const [breathPhase, setPhase]     = useState('inhale')
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -502,16 +534,16 @@ export default function Vredepad({ onClose }) {
 
     gameRef.current = {
       W, H, t, level,
-      player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp, trail: [] },
+      player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp, trail: [], hitAnim: 0 },
       seeds, weeds, parts,
-      flowers: [],
+      flowers: [], floats: [],
       score: 0, timeLeft: 60,
       tick: 0, lastTime: null,
-      hitCooldown: 0, breathingActive: false,
+      hitCooldown: 0,
       truths, truthIdx: 0,
       collectedTruths: [],
-      bgFlash: 0,
-      touchTarget: null,
+      bgFlash: 0, hitFlash: 0,
+      justHit: false,
       combo: 0, comboLastTick: 0,
     }
   }
@@ -614,25 +646,15 @@ export default function Vredepad({ onClose }) {
       const newTotalScore = (save.totalScore || 0) + g.score
       saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock, totalScore: newTotalScore })
       checkAndUpdateLeaderboard(newTotal, newTotalScore).catch(() => {})
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null, totalScore: save.totalScore || 0 })
     }
     setCombo(0)
     setScreen('levelup')
-  }
-
-  function triggerBreathing() {
-    playHit()
-    setBreathing(true); setPhase('inhale')
-    setTimeout(() => setPhase('exhale'), 2500)
-    setTimeout(() => {
-      setBreathing(false)
-      if (gameRef.current) gameRef.current.breathingActive = false
-    }, 5000)
   }
 
   useEffect(() => {
@@ -686,18 +708,18 @@ export default function Vredepad({ onClose }) {
       g.lastTime = ts
       g.tick += dt
 
-      if (!g.breathingActive) {
-        g.timeLeft -= dt / 60
-        if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
-      }
+      g.timeLeft -= dt / 60
+      if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
 
       const p = g.player
+      if (p.hitAnim > 0) p.hitAnim = Math.max(0, p.hitAnim - dt / 60)
       if (p.dx !== 0 || p.dy !== 0) {
         p.trail.push({ x: p.x, y: p.y })
         if (p.trail.length > 14) p.trail.shift()
         const len = Math.sqrt(p.dx ** 2 + p.dy ** 2)
-        p.x = wrapVal(p.x + (p.dx / len) * p.sp * dt, g.W)
-        p.y = wrapVal(p.y + (p.dy / len) * p.sp * dt, g.H)
+        const sp = p.sp * (1 - p.hitAnim * 0.55)
+        p.x = wrapVal(p.x + (p.dx / len) * sp * dt, g.W)
+        p.y = wrapVal(p.y + (p.dy / len) * sp * dt, g.H)
       } else {
         if (p.trail.length > 0) p.trail.shift()
       }
@@ -738,7 +760,12 @@ export default function Vredepad({ onClose }) {
             setTimeout(() => setBonusFlash(false), 1800)
           }
 
-          setSeedBubble({ text: truth, id: g.score })
+          const floatText = g.justHit
+            ? RECOVERY_TRUTHS[Math.floor(Math.random() * RECOVERY_TRUTHS.length)]
+            : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
+          g.justHit = false
+          g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 90, isWeed: false })
+          g.bgFlash = 6
           playCollect(g.score - 1, g.combo)
           return false
         }
@@ -753,16 +780,25 @@ export default function Vredepad({ onClose }) {
 
       if (g.hitCooldown > 0) g.hitCooldown -= dt
       if (g.bgFlash    > 0) g.bgFlash    -= dt
+      if (g.hitFlash   > 0) g.hitFlash   -= dt
 
-      if (g.hitCooldown <= 0 && !g.breathingActive) {
+      if (g.hitCooldown <= 0) {
         for (const w of g.weeds) {
           if (d2(p, w) < 27) {
             g.combo = 0; setCombo(0)
-            g.hitCooldown = 180; g.breathingActive = true; g.bgFlash = 14
-            triggerBreathing(); break
+            g.hitCooldown = 75
+            g.hitFlash = 14
+            p.hitAnim = 1.0
+            g.justHit = true
+            const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
+            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: w.y - 10, text: ww, age: 0, maxAge: 70, isWeed: true })
+            playHit()
+            break
           }
         }
       }
+
+      g.floats = g.floats.filter(f => { f.age += dt; return f.age < f.maxAge })
 
       // Flowers grow to full size (60 frames) then stay permanently
       for (const f of g.flowers) {
@@ -774,8 +810,12 @@ export default function Vredepad({ onClose }) {
 
       const ctx = canvas.getContext('2d')
       drawBg(ctx, g.W, g.H, g.t)
+      if (g.hitFlash > 0) {
+        ctx.fillStyle = 'rgba(50,15,70,0.22)'; ctx.globalAlpha = g.hitFlash / 14
+        ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
+      }
       if (g.bgFlash > 0) {
-        ctx.fillStyle = 'rgba(255,180,100,0.25)'; ctx.globalAlpha = g.bgFlash / 14
+        ctx.fillStyle = 'rgba(255,220,80,0.12)'; ctx.globalAlpha = g.bgFlash / 6
         ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
       }
       drawParticles(ctx, g.parts, g.t)
@@ -795,6 +835,7 @@ export default function Vredepad({ onClose }) {
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
+      drawFloats(ctx, g.floats)
 
       rafRef.current = requestAnimationFrame(loop)
     }
@@ -1016,6 +1057,7 @@ export default function Vredepad({ onClose }) {
             {countdown > 0 ? countdown : '🌿'}
           </div>
           <p className="vp-countdown-sub">Vredepad {level}</p>
+          <p className="vp-countdown-goal">Versamel waarhede · Vermy swaar gedagtes</p>
         </div>
       </div>
     )
@@ -1050,25 +1092,7 @@ export default function Vredepad({ onClose }) {
           {bonusFlash && (
             <div className="vp-bonus-flash">+5 sekondes ⚡</div>
           )}
-          {seedBubble && (
-            <div
-              className="vp-seed-bubble"
-              key={seedBubble.id}
-              onAnimationEnd={() => setSeedBubble(null)}
-            >
-              <span className="vp-seed-bubble-icon">✦</span>
-              <p className="vp-seed-bubble-text">{seedBubble.text}</p>
-            </div>
-          )}
         </div>
-        {breathing && (
-          <div className="vp-breathing-overlay">
-            <div className={`vp-breath-circle vp-breath-${breathPhase}`} />
-            <p className="vp-breath-prompt">Haal diep asem. Laat die gedagte gaan.</p>
-            <p className="vp-breath-label">{breathPhase === 'inhale' ? 'Inasem...' : 'Uitasem...'}</p>
-            <p className="vp-breath-verse">"Wees stil en weet dat Ek God is." — Ps. 46:11</p>
-          </div>
-        )}
       </div>
     )
   }
@@ -1108,6 +1132,14 @@ export default function Vredepad({ onClose }) {
             </div>
           )}
 
+          {!lbCelebration && leaderboard.length >= 5 && (() => {
+            const myRank = leaderboard.findIndex(e => e.userId === myUid)
+            if (myRank >= 0) return null
+            const last = leaderboard[leaderboard.length - 1]
+            const gap = (last.score || 0) - (d.totalScore || 0)
+            if (gap <= 0) return null
+            return <p className="vp-end-lb-gap">Nog {gap.toLocaleString('af')} punte om {last.displayName} te klop en die Top 5 te bereik 🏅</p>
+          })()}
           {d.newUnlock && (
             <div className="vp-new-unlock">
               <p className="vp-unlock-label">🎁 Gratis eBoek verdien!</p>
