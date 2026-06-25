@@ -19,14 +19,28 @@ const MILESTONE_BOOKS = [
 ]
 
 const SHORT_TRUTHS = [
-  'God is lief vir jou', 'Jy is nie alleen nie', 'God is naby', 'Laat gaan',
-  'Haal asem', 'Jy is veilig hier', 'God dra jou', 'Vrede vir jou',
-  'Hou moed', 'God sien jou', 'Jy behoort aan Hom', "Een tree op 'n slag",
-  'Die Here is by jou', 'Jy kan weer asemhaal',
+  'God is lief vir jou.', 'Jy is nie alleen nie.', 'God is naby.', 'God sien jou.',
+  'Jy is geliefd.', 'Jy is waardevol.', 'Jy behoort aan Hom.', 'God hou jou vas.',
+  'Jy is veilig by Hom.', 'Vrede is moontlik.', 'Hoop is nog hier.', 'Genade is hier.',
+  'God werk nog.', 'Die Here is by jou.', 'Jy mag weer asemhaal.', "Een tree op 'n slag.",
+  'Jy hoef nie bang te wees nie.', 'God verstaan jou pyn.', 'Jou storie is nie klaar nie.',
+  'Jy kan weer opstaan.', 'God gee nuwe krag.', 'Die Here is jou vrede.',
+  'Jy is in Sy hand.', 'Lig is sterker as donker.', 'Waarheid is sterker as vrees.',
+  'Jy is nie jou gedagtes nie.', 'Laat gaan.', 'Haal asem.', 'God dra jou hart.',
+  'Jy is nie vergete nie.', 'God is getrou.', 'Jy kan rus.', 'Sy vrede is hier.',
+  'Jy is kosbaar.', 'God hoor jou.', 'God ken jou naam.', 'Hy is steeds goed.',
+  'Jy hoef nie alles vandag te dra nie.', "Die Here maak 'n pad.", 'Jy is nie te ver nie.',
+  'God gee wysheid.', 'Jy is onder genade.', 'Hou moed.', 'Jou hart mag stil word.',
+  'God bring herstel.', 'Jy kan weer hoop.', 'God los jou nie.', 'Sy liefde bly.',
+  'Jy is sterker as wat jy voel.', 'Die Here stap saam.',
 ]
 const WEED_WORDS = [
-  'Vrees', 'Oordink', 'Skuld', 'Verwerping', 'Moeg',
-  'Paniek', 'Bitterheid', 'Ek is alleen', 'Wat as?', 'Ek kan nie', 'Te veel', 'Geen hoop',
+  'Vrees', 'Oordink', 'Skuld', 'Skaamte', 'Verwerping', 'Paniek', 'Moegheid',
+  'Bitterheid', 'Twyfel', 'Alleen', 'Wat as?', 'Ek kan nie', 'Geen hoop', 'Te veel',
+  'Ek is moeg', 'Niemand sien nie', 'Ek is vas', 'Ek is bang',
+  'Dit gaan nooit verander nie', 'Ek is nie genoeg nie', 'Alles is verkeerd',
+  'Ek gaan breek', 'God hoor my nie', 'Ek is vergete', 'Dit is my skuld',
+  'Ek kan nie rus nie', 'My gedagtes raas', 'Ek voel leeg', 'Ek is oorweldig', 'Ek verloor moed',
 ]
 const RECOVERY_TRUTHS = [
   'Vrede herstel', 'God is naby', 'Haal asem', 'Jy is veilig', 'Laat gaan',
@@ -416,9 +430,9 @@ function drawFloats(ctx, floats) {
     const alpha = prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8)
     const y = f.y - prog * 52
     ctx.globalAlpha = alpha
-    ctx.font = `bold ${f.isWeed ? 15 : 13}px system-ui,sans-serif`
-    ctx.lineWidth = 3.5
-    ctx.strokeStyle = f.isWeed ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.38)'
+    ctx.font = `bold ${f.isWeed ? 16 : 15}px system-ui,sans-serif`
+    ctx.lineWidth = 4
+    ctx.strokeStyle = f.isWeed ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.42)'
     ctx.strokeText(f.text, f.x, y)
     ctx.fillStyle = f.isWeed ? '#FF8FA8' : '#FFFFFF'
     ctx.fillText(f.text, f.x, y)
