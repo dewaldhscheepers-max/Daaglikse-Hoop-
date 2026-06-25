@@ -410,15 +410,12 @@ function drawFloats(ctx, floats) {
   ctx.save()
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.shadowBlur = 4
-  ctx.shadowOffsetY = 1
   for (const f of floats) {
     const prog = f.age / f.maxAge
     const alpha = prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8)
-    ctx.globalAlpha = alpha * (f.isWeed ? 0.94 : 0.97)
-    ctx.shadowColor = 'rgba(0,0,0,0.6)'
+    ctx.globalAlpha = alpha * (f.isWeed ? 0.88 : 0.95)
     ctx.font = `bold ${f.isWeed ? 15 : 13}px system-ui,sans-serif`
-    ctx.fillStyle = f.isWeed ? '#8B1A2E' : '#FFFDE7'
+    ctx.fillStyle = f.isWeed ? '#8B1A2E' : '#FFFFFF'
     ctx.fillText(f.text, f.x, f.y - prog * 52)
   }
   ctx.restore()
