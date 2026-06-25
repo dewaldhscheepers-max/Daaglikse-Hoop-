@@ -786,7 +786,7 @@ export default function Vredepad({ onClose }) {
             ? RECOVERY_TRUTHS[Math.floor(Math.random() * RECOVERY_TRUTHS.length)]
             : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
           g.justHit = false
-          g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 90, isWeed: false })
+          g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
           playCollect(g.score - 1, g.combo)
           return false
@@ -813,7 +813,7 @@ export default function Vredepad({ onClose }) {
             p.hitAnim = 1.0
             g.justHit = true
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
-            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: w.y - 10, text: ww, age: 0, maxAge: 70, isWeed: true })
+            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: w.y - 10, text: ww, age: 0, maxAge: 130, isWeed: true })
             playHit()
             break
           }
