@@ -523,6 +523,12 @@ function drawStormOverlay(ctx, storm, W, H) {
   // Soft grey-blue tint
   ctx.fillStyle = `rgba(75, 100, 130, ${storm.overlay})`
   ctx.fillRect(0, 0, W, H)
+  // Soft distant lightning — light flash, not dark
+  if (storm.lightningFlash > 0) {
+    const lf = Math.min(storm.lightningFlash / 22, 1)
+    ctx.fillStyle = `rgba(210, 228, 250, ${lf * 0.22})`
+    ctx.fillRect(0, 0, W, H)
+  }
   // Wind lines
   ctx.save()
   for (const wl of storm.windLines) {
@@ -546,15 +552,15 @@ function drawStormDrift(ctx, storm) {
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
   ctx.lineJoin = 'round'
-  ctx.font = '500 13px system-ui,sans-serif'
+  ctx.font = 'bold 14px system-ui,sans-serif'
   for (const dw of storm.driftWords) {
     const prog = dw.age / dw.maxAge
-    const a = prog < 0.15 ? prog / 0.15 : (prog > 0.72 ? Math.max(0, (1 - prog) / 0.28) : 1)
+    const a = prog < 0.12 ? prog / 0.12 : (prog > 0.75 ? Math.max(0, (1 - prog) / 0.25) : 1)
     ctx.globalAlpha = dw.baseAlpha * a
-    ctx.lineWidth = 3
-    ctx.strokeStyle = 'rgba(40, 60, 90, 0.32)'
+    ctx.lineWidth = 5
+    ctx.strokeStyle = 'rgba(20, 40, 75, 0.55)'
     ctx.strokeText(dw.text, dw.x, dw.y)
-    ctx.fillStyle = 'rgba(150, 180, 220, 0.95)'
+    ctx.fillStyle = 'rgba(240, 245, 255, 0.97)'
     ctx.fillText(dw.text, dw.x, dw.y)
   }
   ctx.restore()
@@ -947,10 +953,12 @@ export default function Vredepad({ onClose }) {
           })),
           driftWords: [],
           nextDrift: g.tick + 50,
+          lightningFlash: 0,
+          lightningTimer: 90 + Math.random() * 80,
         }
         g.stormUsed = true
         setStormAnnounce("'n Storm van gedagtes kom…")
-        setTimeout(() => setStormAnnounce(null), 2700)
+        setTimeout(() => setStormAnnounce(null), 4200)
       }
 
       if (g.storm) {
@@ -975,12 +983,19 @@ export default function Vredepad({ onClose }) {
               x: -20, y: 70 + Math.random() * (g.H - 140),
               text: STORM_DRIFT_WORDS[Math.floor(Math.random() * STORM_DRIFT_WORDS.length)],
               dx: 0.5 + Math.random() * 0.4, dy: -(0.08 + Math.random() * 0.12),
-              age: 0, maxAge: 260, baseAlpha: 0.18 + Math.random() * 0.12,
+              age: 0, maxAge: 260, baseAlpha: 0.52 + Math.random() * 0.22,
             })
             st.nextDrift = g.tick + 60 + Math.random() * 50
           }
           for (const dw of st.driftWords) { dw.x += dw.dx * dt; dw.y += dw.dy * dt; dw.age += dt }
           st.driftWords = st.driftWords.filter(dw => dw.age < dw.maxAge && dw.x < g.W + 60)
+          // Soft distant lightning
+          if (st.lightningFlash > 0) st.lightningFlash -= dt * 1.8
+          st.lightningTimer -= dt
+          if (st.lightningTimer <= 0) {
+            st.lightningFlash = 22
+            st.lightningTimer = 110 + Math.random() * 130
+          }
           if (st.truthsThisStorm >= st.needed || st.life > 720) {
             st.phase = 'breaking'; st.life = 0; st.driftWords = []
             g.weeds = g.weeds.filter(w => !w.isStorm)
