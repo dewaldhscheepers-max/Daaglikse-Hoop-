@@ -605,7 +605,6 @@ export default function Vredepad({ onClose }) {
   const [seedBubble, setSeedBubble] = useState(null)
   const [genadeFlash, setGenadeFlash] = useState(false)
   const [stormAnnounce, setStormAnnounce] = useState(null)
-  const [stormFlash, setStormFlash]       = useState(false)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -928,7 +927,7 @@ export default function Vredepad({ onClose }) {
       }
 
       // Storm van Gedagtes — level 10+, triggers once per level at score 10
-      if (!g.stormUsed && g.level >= 10 && g.score >= 10 && !g.storm) {
+      if (!g.stormUsed && g.level >= 10 && g.score >= 10 && !g.storm && !g.genadeKruis && g.genadeActive <= 0) {
         const extras = []
         for (let i = 0; i < 2; i++) {
           if (g.weeds.length + extras.length < 8) {
@@ -1006,7 +1005,6 @@ export default function Vredepad({ onClose }) {
             g.bgFlash = 16
             g.timeLeft = Math.min(g.timeLeft + 8, 90)
             g.score += 150; setScore(g.score)
-            setStormFlash(true); setTimeout(() => setStormFlash(false), 2400)
             setStormAnnounce('Die storm gaan verby.')
             setTimeout(() => setStormAnnounce(null), 4200)
           }
@@ -1057,7 +1055,7 @@ export default function Vredepad({ onClose }) {
           g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
           g.truthStreak++
-          if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed) {
+          if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed && !g.storm) {
             const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 80)
             g.genadeKruis = { x: pos.x, y: pos.y, life: 0, maxLife: 360 }
             g.genadeUsed  = true
@@ -1417,9 +1415,6 @@ export default function Vredepad({ onClose }) {
           )}
           {stormAnnounce && (
             <div key={stormAnnounce} className="vp-storm-announce">{stormAnnounce}</div>
-          )}
-          {stormFlash && (
-            <div className="vp-storm-flash">+150 Storm Oorleef ✦</div>
           )}
         </div>
       </div>
