@@ -410,12 +410,15 @@ function drawFloats(ctx, floats) {
   ctx.save()
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
+  ctx.shadowBlur = 4
+  ctx.shadowOffsetY = 1
   for (const f of floats) {
     const prog = f.age / f.maxAge
     const alpha = prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8)
-    ctx.globalAlpha = alpha * (f.isWeed ? 0.62 : 0.78)
-    ctx.font = f.isWeed ? 'bold 13px system-ui,sans-serif' : '12px system-ui,sans-serif'
-    ctx.fillStyle = f.isWeed ? '#9B3A52' : '#FFFFFF'
+    ctx.globalAlpha = alpha * (f.isWeed ? 0.94 : 0.97)
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'
+    ctx.font = `bold ${f.isWeed ? 15 : 13}px system-ui,sans-serif`
+    ctx.fillStyle = f.isWeed ? '#8B1A2E' : '#FFFDE7'
     ctx.fillText(f.text, f.x, f.y - prog * 52)
   }
   ctx.restore()
@@ -717,7 +720,7 @@ export default function Vredepad({ onClose }) {
         p.trail.push({ x: p.x, y: p.y })
         if (p.trail.length > 14) p.trail.shift()
         const len = Math.sqrt(p.dx ** 2 + p.dy ** 2)
-        const sp = p.sp * (1 - p.hitAnim * 0.55)
+        const sp = g.justHit ? p.sp * 0.42 : p.sp * (1 - p.hitAnim * 0.3)
         p.x = wrapVal(p.x + (p.dx / len) * sp * dt, g.W)
         p.y = wrapVal(p.y + (p.dy / len) * sp * dt, g.H)
       } else {
@@ -813,6 +816,10 @@ export default function Vredepad({ onClose }) {
       if (g.hitFlash > 0) {
         ctx.fillStyle = 'rgba(50,15,70,0.22)'; ctx.globalAlpha = g.hitFlash / 14
         ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
+      }
+      if (g.justHit) {
+        ctx.fillStyle = 'rgba(30,10,55,0.30)'
+        ctx.fillRect(0, 0, g.W, g.H)
       }
       if (g.bgFlash > 0) {
         ctx.fillStyle = 'rgba(255,220,80,0.12)'; ctx.globalAlpha = g.bgFlash / 6
