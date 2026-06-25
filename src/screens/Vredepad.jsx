@@ -354,26 +354,73 @@ function drawParticles(ctx, parts, t) {
   }
 }
 
-function drawFlower(ctx, x, y, r, alpha, t) {
+function drawFlower(ctx, x, y, r, alpha, t, tier) {
+  const tv = tier || 0
+  const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
   ctx.globalAlpha = Math.min(alpha, 1)
-  for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2
-    ctx.save(); ctx.translate(x + Math.cos(a) * r * 1.3, y + Math.sin(a) * r * 1.3); ctx.rotate(a)
+
+  // Warm aura at tier 2+
+  if (tv >= 2) {
+    const aura = ctx.createRadialGradient(x, y, 0, x, y, r * 3.4)
+    aura.addColorStop(0, `rgba(255,225,100,${Math.min(alpha, 1) * 0.24})`)
+    aura.addColorStop(1, 'rgba(255,225,100,0)')
+    ctx.fillStyle = aura
+    ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, Math.PI * 2); ctx.fill()
+  }
+
+  // Inner petal ring at tier 2+
+  if (tv >= 2) {
+    for (let i = 0; i < petalCount; i++) {
+      const a = (i / petalCount) * Math.PI * 2 + Math.PI / petalCount
+      ctx.save()
+      ctx.translate(x + Math.cos(a) * r * 0.88, y + Math.sin(a) * r * 0.88); ctx.rotate(a)
+      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.3, r * 0.5, 0, 0, Math.PI * 2)
+      ctx.fillStyle = t.petals[(i + 2) % t.petals.length]; ctx.fill(); ctx.restore()
+    }
+  }
+
+  // Main petals
+  for (let i = 0; i < petalCount; i++) {
+    const a = (i / petalCount) * Math.PI * 2
+    ctx.save()
+    ctx.translate(x + Math.cos(a) * r * 1.3, y + Math.sin(a) * r * 1.3); ctx.rotate(a)
     ctx.beginPath(); ctx.ellipse(0, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2)
     ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
   }
+
+  // Centre
   ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
+  // Centre highlight tier 1+
+  if (tv >= 1) {
+    ctx.beginPath(); ctx.arc(x, y, r * 0.26, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,215,0.82)'; ctx.fill()
+  }
+  // Centre sparkle tier 3+
+  if (tv >= 3) {
+    ctx.beginPath(); ctx.arc(x, y, r * 0.12, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill()
+  }
   ctx.globalAlpha = 1
 }
 
-function drawSeed(ctx, x, y, pulse, t) {
-  const r = 9 + Math.sin(pulse) * 2
-  const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 4)
+function drawSeed(ctx, x, y, pulse, t, tier) {
+  const tv = tier || 0
+  const r = 9 + Math.sin(pulse) * 2 + tv * 1.2
+  const glowR = r * (4 + tv * 0.5)
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, glowR)
   glow.addColorStop(0,   'rgba(255,235,0,0.95)')
   glow.addColorStop(0.35,'rgba(255,215,0,0.55)')
   glow.addColorStop(1,   'rgba(255,215,0,0)')
-  ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2)
+  ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
   ctx.fillStyle = glow; ctx.globalAlpha = 0.92; ctx.fill(); ctx.globalAlpha = 1
+  // Extra warm halo at higher tiers
+  if (tv >= 2) {
+    const halo = ctx.createRadialGradient(x, y, r, x, y, glowR * 1.4)
+    halo.addColorStop(0, `rgba(255,200,80,${0.18 + tv * 0.06})`)
+    halo.addColorStop(1, 'rgba(255,200,80,0)')
+    ctx.beginPath(); ctx.arc(x, y, glowR * 1.4, 0, Math.PI * 2)
+    ctx.fillStyle = halo; ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1
+  }
   ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2)
   ctx.fillStyle = '#FFE000'; ctx.fill()
   ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 2.5; ctx.stroke()
@@ -708,7 +755,8 @@ export default function Vredepad({ onClose }) {
         dy: (Math.random() - 0.5) * 0.4,
       })
 
-    const parts = Array.from({ length: 20 }, () => ({
+    const lvlTierBuild = Math.floor((level - 1) / 10)
+    const parts = Array.from({ length: Math.min(20 + lvlTierBuild * 8, 52) }, () => ({
       x: Math.random() * W, y: Math.random() * H,
       r: 2 + Math.random() * 3,
       dx: (Math.random() - 0.5) * 0.22,
@@ -955,7 +1003,7 @@ export default function Vredepad({ onClose }) {
             const consumeR = 195
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11 })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10) })
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -969,7 +1017,7 @@ export default function Vredepad({ onClose }) {
             // L40+: Consume all within large radius, max slow
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14 })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10) })
                 return false
               }
               return true
@@ -1108,7 +1156,7 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10 })
+          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10) })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
@@ -1206,13 +1254,15 @@ export default function Vredepad({ onClose }) {
       }
       drawParticles(ctx, g.parts, g.t)
       if (g.vredekring) drawVredekring(ctx, g.vredekring, g.tick)
+      const lvlTier = Math.floor((g.level - 1) / 10)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
-        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t)
+        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0)
         if (f.life < 28) {
           const bp = f.life / 28
+          const bRing = 6 + bp * (36 + (f.tier || 0) * 12)
           ctx.beginPath()
-          ctx.arc(f.x, f.y, 6 + bp * 36, 0, Math.PI * 2)
+          ctx.arc(f.x, f.y, bRing, 0, Math.PI * 2)
           ctx.strokeStyle = `rgba(255,215,0,${(1 - bp) * 0.9})`
           ctx.lineWidth = 3 - bp * 2
           ctx.stroke()
@@ -1220,7 +1270,7 @@ export default function Vredepad({ onClose }) {
         if (f.life < 60) f.life += dt
       }
       if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
-      for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t)
+      for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
       if (g.genadeActive > 0) {
