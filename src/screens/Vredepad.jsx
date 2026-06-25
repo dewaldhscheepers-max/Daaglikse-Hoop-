@@ -28,7 +28,7 @@ function sortLeaderboard(entries) {
     .slice(0, 5)
 }
 
-const BLOCKED_NAMES = ['admin', 'daaglikse', 'daagliksehoop', 'dewald', 'pastoor', 'official', 'moderator']
+const BLOCKED_NAMES = ['admin', 'daaglikse', 'daagliksehoop', 'pastoor', 'official', 'moderator']
 
 function validateDisplayName(name) {
   const t = name.trim()
