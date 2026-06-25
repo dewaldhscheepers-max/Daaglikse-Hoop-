@@ -45,6 +45,14 @@ const WEED_WORDS = [
 const RECOVERY_TRUTHS = [
   'Vrede herstel', 'God is naby', 'Haal asem', 'Jy is veilig', 'Laat gaan',
 ]
+const STORM_DRIFT_WORDS = [
+  'Wat as?', 'Ek kan nie', 'Te veel', 'Ek is bang', 'Geen hoop',
+  'Ek is moeg', 'Ek is alleen', 'My gedagtes raas', 'Ek gaan breek', 'Niemand sien nie',
+]
+const STORM_TRUTHS = [
+  'God is naby.', 'Jy is nie alleen nie.', 'Haal asem.', 'Vrede is moontlik.',
+  'God hou jou vas.', 'Waarheid is sterker as vrees.', 'Die storm gaan verby.',
+]
 
 function sortLeaderboard(entries) {
   return [...entries]
@@ -510,6 +518,48 @@ function drawVredekring(ctx, ring, tick) {
   ctx.restore()
 }
 
+function drawStormOverlay(ctx, storm, W, H) {
+  if (!storm || storm.overlay <= 0) return
+  // Soft grey-blue tint
+  ctx.fillStyle = `rgba(75, 100, 130, ${storm.overlay})`
+  ctx.fillRect(0, 0, W, H)
+  // Wind lines
+  ctx.save()
+  for (const wl of storm.windLines) {
+    const a = wl.alpha * Math.min(storm.overlay / 0.08, 1)
+    if (a < 0.02) continue
+    ctx.globalAlpha = a * 0.65
+    ctx.strokeStyle = 'rgba(185, 210, 240, 0.9)'
+    ctx.lineWidth = wl.width
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(wl.x, wl.y)
+    ctx.lineTo(wl.x + wl.len, wl.y + wl.lean)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+function drawStormDrift(ctx, storm) {
+  if (!storm || !storm.driftWords.length) return
+  ctx.save()
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'middle'
+  ctx.lineJoin = 'round'
+  ctx.font = '500 13px system-ui,sans-serif'
+  for (const dw of storm.driftWords) {
+    const prog = dw.age / dw.maxAge
+    const a = prog < 0.15 ? prog / 0.15 : (prog > 0.72 ? Math.max(0, (1 - prog) / 0.28) : 1)
+    ctx.globalAlpha = dw.baseAlpha * a
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(40, 60, 90, 0.32)'
+    ctx.strokeText(dw.text, dw.x, dw.y)
+    ctx.fillStyle = 'rgba(150, 180, 220, 0.95)'
+    ctx.fillText(dw.text, dw.x, dw.y)
+  }
+  ctx.restore()
+}
+
 function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
 function saveSave(d) { try { localStorage.setItem('vredepad_data', JSON.stringify(d)) } catch {} }
 
@@ -545,6 +595,8 @@ export default function Vredepad({ onClose }) {
   const [displayTime, setTime]      = useState(60)
   const [seedBubble, setSeedBubble] = useState(null)
   const [genadeFlash, setGenadeFlash] = useState(false)
+  const [stormAnnounce, setStormAnnounce] = useState(null)
+  const [stormFlash, setStormFlash]       = useState(false)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -638,6 +690,7 @@ export default function Vredepad({ onClose }) {
       truthStreak: 0,
       genadeKruis: null, genadeUsed: false, genadeActive: 0,
       weedHitsRound: 0, vredekring: null, vredekringUsed: false,
+      storm: null, stormUsed: false,
     }
   }
 
@@ -818,7 +871,7 @@ export default function Vredepad({ onClose }) {
       }
 
       for (const s of g.seeds) s.pulse += 0.05 * dt
-      const weedSpd = g.genadeActive > 0 ? 0.22 : 1
+      const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? 1.38 : 1)
       for (const w of g.weeds) {
         w.pulse += 0.04 * dt
         w.x = wrapVal(w.x + w.dx * dt * weedSpd, g.W)
@@ -864,6 +917,89 @@ export default function Vredepad({ onClose }) {
         }
         if (g.vredekring.life > 200) g.vredekring = null
       }
+
+      // Storm van Gedagtes — level 10+, triggers once per level at score 10
+      if (!g.stormUsed && g.level >= 10 && g.score >= 10 && !g.storm) {
+        const extras = []
+        for (let i = 0; i < 2; i++) {
+          if (g.weeds.length + extras.length < 8) {
+            extras.push({
+              ...freePos(g.W, g.H, [...g.seeds, ...g.weeds, ...extras, p], 70),
+              pulse: Math.random() * Math.PI * 2,
+              dx: (Math.random() - 0.5) * 0.55,
+              dy: (Math.random() - 0.5) * 0.55,
+              isStorm: true,
+            })
+          }
+        }
+        g.weeds = [...g.weeds, ...extras]
+        g.storm = {
+          phase: 'building', life: 0,
+          overlay: 0, truthsThisStorm: 0, needed: 4,
+          windLines: Array.from({ length: 10 }, () => ({
+            x: Math.random() * g.W,
+            y: 30 + Math.random() * (g.H - 60),
+            len: 45 + Math.random() * 55,
+            lean: (Math.random() - 0.3) * 12,
+            dx: 1.1 + Math.random() * 0.7,
+            alpha: 0.28 + Math.random() * 0.32,
+            width: 0.7 + Math.random() * 0.9,
+          })),
+          driftWords: [],
+          nextDrift: g.tick + 50,
+        }
+        g.stormUsed = true
+        setStormAnnounce("'n Storm van gedagtes kom…")
+        setTimeout(() => setStormAnnounce(null), 2700)
+      }
+
+      if (g.storm) {
+        const st = g.storm
+        st.life += dt
+        if (st.phase === 'building') {
+          st.overlay = Math.min(st.life / 120, 1) * 0.25
+          for (const wl of st.windLines) {
+            wl.x += wl.dx * dt * Math.min(st.life / 60, 1)
+            if (wl.x > g.W + 80) wl.x = -80 - wl.len
+          }
+          if (st.life >= 150) { st.phase = 'active'; st.life = 0 }
+        } else if (st.phase === 'active') {
+          const target = Math.max(0.06, 0.25 - st.truthsThisStorm * 0.05)
+          st.overlay += (target - st.overlay) * 0.035 * dt
+          for (const wl of st.windLines) {
+            wl.x += wl.dx * dt
+            if (wl.x > g.W + 80) wl.x = -80 - wl.len
+          }
+          if (g.tick >= st.nextDrift && st.driftWords.length < 4) {
+            st.driftWords.push({
+              x: -20, y: 70 + Math.random() * (g.H - 140),
+              text: STORM_DRIFT_WORDS[Math.floor(Math.random() * STORM_DRIFT_WORDS.length)],
+              dx: 0.5 + Math.random() * 0.4, dy: -(0.08 + Math.random() * 0.12),
+              age: 0, maxAge: 260, baseAlpha: 0.18 + Math.random() * 0.12,
+            })
+            st.nextDrift = g.tick + 60 + Math.random() * 50
+          }
+          for (const dw of st.driftWords) { dw.x += dw.dx * dt; dw.y += dw.dy * dt; dw.age += dt }
+          st.driftWords = st.driftWords.filter(dw => dw.age < dw.maxAge && dw.x < g.W + 60)
+          if (st.truthsThisStorm >= st.needed || st.life > 720) {
+            st.phase = 'breaking'; st.life = 0; st.driftWords = []
+            g.weeds = g.weeds.filter(w => !w.isStorm)
+            g.justHit = false; p.hitAnim = 0
+            g.bgFlash = 16
+            g.timeLeft = Math.min(g.timeLeft + 8, 90)
+            g.score += 150; setScore(g.score)
+            setStormFlash(true); setTimeout(() => setStormFlash(false), 2400)
+            setStormAnnounce('Die storm gaan verby.')
+            setTimeout(() => setStormAnnounce('Waarheid is sterker as vrees.'), 2400)
+            setTimeout(() => setStormAnnounce(null), 5000)
+          }
+        } else if (st.phase === 'breaking') {
+          st.overlay = Math.max(0, st.overlay - 0.004 * dt)
+          for (const wl of st.windLines) wl.alpha = Math.max(0, wl.alpha - 0.01 * dt)
+          if (st.life >= 260) g.storm = null
+        }
+      }
+
       for (const pt of g.parts) {
         pt.x = wrapVal(pt.x + pt.dx * dt, g.W)
         pt.y += pt.dy * dt
@@ -894,9 +1030,12 @@ export default function Vredepad({ onClose }) {
             setTimeout(() => setBonusFlash(false), 1800)
           }
 
+          if (g.storm?.phase === 'active') g.storm.truthsThisStorm++
           const floatText = g.justHit
             ? RECOVERY_TRUTHS[Math.floor(Math.random() * RECOVERY_TRUTHS.length)]
-            : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
+            : g.storm?.phase === 'active'
+              ? STORM_TRUTHS[Math.floor(Math.random() * STORM_TRUTHS.length)]
+              : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
           g.justHit = false
           g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
@@ -958,6 +1097,7 @@ export default function Vredepad({ onClose }) {
 
       const ctx = canvas.getContext('2d')
       drawBg(ctx, g.W, g.H, g.t)
+      if (g.storm) drawStormOverlay(ctx, g.storm, g.W, g.H)
       if (g.hitFlash > 0) {
         ctx.fillStyle = 'rgba(50,15,70,0.22)'; ctx.globalAlpha = g.hitFlash / 14
         ctx.fillRect(0, 0, g.W, g.H); ctx.globalAlpha = 1
@@ -997,6 +1137,7 @@ export default function Vredepad({ onClose }) {
         ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
         ctx.fillStyle = gr; ctx.fill()
       }
+      if (g.storm) drawStormDrift(ctx, g.storm)
       drawFloats(ctx, g.floats)
 
       rafRef.current = requestAnimationFrame(loop)
@@ -1256,6 +1397,12 @@ export default function Vredepad({ onClose }) {
           )}
           {genadeFlash && (
             <div className="vp-genade-flash">✦ Genade Oomblik ✦</div>
+          )}
+          {stormAnnounce && (
+            <div key={stormAnnounce} className="vp-storm-announce">{stormAnnounce}</div>
+          )}
+          {stormFlash && (
+            <div className="vp-storm-flash">+150 Storm Oorleef ✦</div>
           )}
         </div>
       </div>
