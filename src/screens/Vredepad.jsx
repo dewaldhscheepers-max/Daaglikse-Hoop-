@@ -552,10 +552,10 @@ function drawStormDrift(ctx, storm) {
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
   ctx.lineJoin = 'round'
-  ctx.font = 'bold 14px system-ui,sans-serif'
+  ctx.font = 'bold 19px system-ui,sans-serif'
   for (const dw of storm.driftWords) {
     const prog = dw.age / dw.maxAge
-    const a = prog < 0.12 ? prog / 0.12 : (prog > 0.75 ? Math.max(0, (1 - prog) / 0.25) : 1)
+    const a = prog < 0.1 ? prog / 0.1 : (prog > 0.72 ? Math.max(0, (1 - prog) / 0.28) : 1)
     ctx.globalAlpha = dw.baseAlpha * a
     ctx.lineWidth = 5
     ctx.strokeStyle = 'rgba(20, 40, 75, 0.55)'
@@ -978,14 +978,14 @@ export default function Vredepad({ onClose }) {
             wl.x += wl.dx * dt
             if (wl.x > g.W + 80) wl.x = -80 - wl.len
           }
-          if (g.tick >= st.nextDrift && st.driftWords.length < 4) {
+          if (g.tick >= st.nextDrift && st.driftWords.length < 1) {
             st.driftWords.push({
-              x: -20, y: 70 + Math.random() * (g.H - 140),
+              x: -20, y: 90 + Math.random() * (g.H - 180),
               text: STORM_DRIFT_WORDS[Math.floor(Math.random() * STORM_DRIFT_WORDS.length)],
-              dx: 0.5 + Math.random() * 0.4, dy: -(0.08 + Math.random() * 0.12),
-              age: 0, maxAge: 260, baseAlpha: 0.52 + Math.random() * 0.22,
+              dx: 0.28 + Math.random() * 0.22, dy: -(0.05 + Math.random() * 0.08),
+              age: 0, maxAge: 370, baseAlpha: 0.65 + Math.random() * 0.18,
             })
-            st.nextDrift = g.tick + 60 + Math.random() * 50
+            st.nextDrift = g.tick + 130 + Math.random() * 80
           }
           for (const dw of st.driftWords) { dw.x += dw.dx * dt; dw.y += dw.dy * dt; dw.age += dt }
           st.driftWords = st.driftWords.filter(dw => dw.age < dw.maxAge && dw.x < g.W + 60)
