@@ -12,9 +12,10 @@ const FREE_REWARD_BOOKS = [
 ]
 
 const MILESTONE_BOOKS = [
-  { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7  },
-  { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20 },
-  { id: 'dink-nuut-leef-nuut',   emoji: '🌱', title: 'Dink Nuut, Leef Nuut',  level: 50 },
+  { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
+  { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20  },
+  { id: 'dink-nuut-leef-nuut',   emoji: '🌱', title: 'Dink Nuut, Leef Nuut',  level: 50  },
+  { id: 'rustelose-gedagtes',    emoji: '🌙', title: 'Rustelose Gedagtes',    level: 120 },
 ]
 
 const MOOD_TRUTHS = {
@@ -492,9 +493,10 @@ export default function Vredepad({ onClose }) {
       const oldTotal = save.totalLevels || 0
       const newTotal = oldTotal + 1
       let newUnlock = null
-      if (oldTotal < 7  && newTotal >= 7)  newUnlock = MILESTONE_BOOKS[0]
-      if (oldTotal < 20 && newTotal >= 20) newUnlock = MILESTONE_BOOKS[1]
-      if (oldTotal < 50 && newTotal >= 50) newUnlock = MILESTONE_BOOKS[2]
+      if (oldTotal < 7   && newTotal >= 7)   newUnlock = MILESTONE_BOOKS[0]
+      if (oldTotal < 20  && newTotal >= 20)  newUnlock = MILESTONE_BOOKS[1]
+      if (oldTotal < 50  && newTotal >= 50)  newUnlock = MILESTONE_BOOKS[2]
+      if (oldTotal < 120 && newTotal >= 120) newUnlock = MILESTONE_BOOKS[3]
       saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
       setBest(nb)
       setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock })
