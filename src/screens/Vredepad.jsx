@@ -431,11 +431,14 @@ function drawFloats(ctx, floats) {
     const y = f.y - prog * 52
     ctx.globalAlpha = alpha
     ctx.font = `bold ${f.isWeed ? 16 : 15}px system-ui,sans-serif`
+    const tw = ctx.measureText(f.text).width
+    const pad = 10
+    const cx = Math.min(Math.max(f.x, tw / 2 + pad), ctx.canvas.width - tw / 2 - pad)
     ctx.lineWidth = 4
     ctx.strokeStyle = f.isWeed ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.42)'
-    ctx.strokeText(f.text, f.x, y)
+    ctx.strokeText(f.text, cx, y)
     ctx.fillStyle = f.isWeed ? '#FF8FA8' : '#FFFFFF'
-    ctx.fillText(f.text, f.x, y)
+    ctx.fillText(f.text, cx, y)
   }
   ctx.restore()
 }
