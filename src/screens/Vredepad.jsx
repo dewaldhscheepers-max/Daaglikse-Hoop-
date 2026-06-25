@@ -1160,14 +1160,9 @@ export default function Vredepad({ onClose }) {
             <div className="vp-end-streak">🔥 {d.streak} dae op 'n ry</div>
           )}
 
-          {d.collected?.length > 0 && (
-            <div className="vp-end-collected">
-              <p className="vp-end-truth-label">Waarhede wat jy ontvang het:</p>
-              <div className="vp-end-collected-list">
-                {d.collected.map((v, i) => (
-                  <p key={i} className="vp-end-collected-item">✦ {v}</p>
-                ))}
-              </div>
+          {d.lastTruth && (
+            <div className="vp-end-verse">
+              <p className="vp-end-verse-text">{d.lastTruth}</p>
             </div>
           )}
 
