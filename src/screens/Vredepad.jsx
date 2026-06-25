@@ -427,15 +427,18 @@ function drawFloats(ctx, floats) {
   ctx.lineJoin = 'round'
   for (const f of floats) {
     const prog = f.age / f.maxAge
-    const alpha = prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8)
+    const alpha = f.startFull
+      ? (prog > 0.72 ? Math.max(0, (1 - prog) / 0.28) : 1)
+      : (prog < 0.2 ? prog / 0.2 : Math.max(0, (1 - prog) / 0.8))
     const y = f.y - prog * 52
     ctx.globalAlpha = alpha
-    ctx.font = `bold ${f.isWeed ? 16 : 15}px system-ui,sans-serif`
+    const fs = f.fontSize || (f.isWeed ? 16 : 15)
+    ctx.font = `bold ${fs}px system-ui,sans-serif`
     const tw = ctx.measureText(f.text).width
     const pad = 10
     const cx = Math.min(Math.max(f.x, tw / 2 + pad), ctx.canvas.width - tw / 2 - pad)
-    ctx.lineWidth = 4
-    ctx.strokeStyle = f.isWeed ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.42)'
+    ctx.lineWidth = 5
+    ctx.strokeStyle = f.isWeed ? 'rgba(0,0,0,0.58)' : 'rgba(0,0,0,0.52)'
     ctx.strokeText(f.text, cx, y)
     ctx.fillStyle = f.isWeed ? '#FF8FA8' : '#FFFFFF'
     ctx.fillText(f.text, cx, y)
@@ -445,35 +448,39 @@ function drawFloats(ctx, floats) {
 
 function drawGenadeKruis(ctx, kruis, tick, playerX, playerY) {
   const { x, y, life, maxLife } = kruis
-  const fadeIn  = Math.min(life / 30, 1)
+  const fadeIn  = Math.min(life / 14, 1)
   const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
   const alpha   = fadeIn * fadeOut
-  const pulse   = 1 + Math.sin(tick * 0.038) * 0.08
+  const pulse   = 1 + Math.sin(tick * 0.038) * 0.1
   const nearFrac = playerX != null ? Math.max(0, 1 - Math.sqrt((playerX - x) ** 2 + (playerY - y) ** 2) / 90) : 0
 
   ctx.save()
 
-  // Soft outer golden glow (brightens as player approaches)
-  const glowR = (52 + nearFrac * 22) * pulse
+  // Wide outer glow — visible from across screen
+  const glowR = (74 + nearFrac * 26) * pulse
   const glow  = ctx.createRadialGradient(x, y, 0, x, y, glowR)
-  glow.addColorStop(0,   `rgba(255,240,180,${alpha * (0.35 + nearFrac * 0.3)})`)
-  glow.addColorStop(0.5, `rgba(255,235,160,${alpha * (0.14 + nearFrac * 0.12)})`)
-  glow.addColorStop(1,   'rgba(255,235,160,0)')
+  glow.addColorStop(0,   `rgba(255,240,160,${alpha * (0.55 + nearFrac * 0.3)})`)
+  glow.addColorStop(0.45,`rgba(255,230,130,${alpha * (0.22 + nearFrac * 0.15)})`)
+  glow.addColorStop(1,   'rgba(255,230,130,0)')
   ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
   ctx.fillStyle = glow; ctx.fill()
 
-  // Glow at junction
-  const jGlow = ctx.createRadialGradient(x, y - 8, 0, x, y - 8, 20 + nearFrac * 10)
-  jGlow.addColorStop(0, `rgba(255,252,225,${alpha * (0.88 + nearFrac * 0.12)})`)
-  jGlow.addColorStop(1, 'rgba(255,252,225,0)')
-  ctx.beginPath(); ctx.arc(x, y - 8, 20 + nearFrac * 10, 0, Math.PI * 2)
+  // Bright junction glow
+  const jr = 28 + nearFrac * 14
+  const jGlow = ctx.createRadialGradient(x, y - 10, 0, x, y - 10, jr)
+  jGlow.addColorStop(0, `rgba(255,255,230,${alpha * 0.98})`)
+  jGlow.addColorStop(1, 'rgba(255,255,230,0)')
+  ctx.beginPath(); ctx.arc(x, y - 10, jr, 0, Math.PI * 2)
   ctx.fillStyle = jGlow; ctx.fill()
 
-  // Cross arms
-  ctx.globalAlpha = alpha * (0.78 + nearFrac * 0.22)
-  ctx.fillStyle   = 'rgba(255,250,218,0.92)'
-  ctx.fillRect(x - 4, y - 36, 8, 64)    // vertical
-  ctx.fillRect(x - 21, y - 18, 42, 8)   // horizontal
+  // Cross arms — bigger and more opaque
+  ctx.globalAlpha = alpha * (0.92 + nearFrac * 0.08)
+  ctx.fillStyle   = 'rgba(255,252,210,0.97)'
+  ctx.shadowColor = 'rgba(255,240,120,0.7)'
+  ctx.shadowBlur  = 12
+  ctx.fillRect(x - 6, y - 46, 12, 82)   // vertical
+  ctx.fillRect(x - 28, y - 21, 56, 12)  // horizontal
+  ctx.shadowBlur  = 0
 
   ctx.restore()
 }
@@ -829,16 +836,17 @@ export default function Vredepad({ onClose }) {
           g.genadeActive = 300
           g.justHit = false
           p.hitAnim = 0
-          // scatter weeds away from player
+          // teleport all weeds far from player
           for (const w of g.weeds) {
-            const ang = Math.atan2(w.y - p.y, w.x - p.x)
-            w.dx = Math.cos(ang) * 0.6
-            w.dy = Math.sin(ang) * 0.6
+            const pos = freePos(g.W, g.H, [p, ...g.seeds], 150)
+            w.x = pos.x; w.y = pos.y
           }
-          g.bgFlash = 18
-          const genadeTruth = ['God is naby.', 'Jy is veilig.', 'Vrede is moontlik.', 'Genade is hier.', 'Hy hou jou vas.'][Math.floor(Math.random() * 5)]
-          g.floats.push({ id: g.tick + 200, x: g.W / 2, y: g.H * 0.38, text: genadeTruth, age: 0, maxAge: 220, isWeed: false })
-          g.floats.push({ id: g.tick + 201, x: g.W / 2, y: g.H * 0.38 + 30, text: '+100 Genade', age: 0, maxAge: 180, isWeed: false })
+          g.bgFlash = 20
+          // clear existing floats so nothing overlaps
+          g.floats = []
+          const genadeTruths = ['God is naby.', 'Jy is veilig.', 'Vrede is moontlik.', 'Genade is hier.', 'Hy hou jou vas.']
+          const gt = genadeTruths[Math.floor(Math.random() * genadeTruths.length)]
+          g.floats.push({ id: g.tick + 200, x: g.W / 2, y: g.H * 0.42, text: gt, age: 0, maxAge: 260, isWeed: false, startFull: true, fontSize: 20 })
           g.score += 100; setScore(g.score)
           setGenadeFlash(true); setTimeout(() => setGenadeFlash(false), 2600)
         }
