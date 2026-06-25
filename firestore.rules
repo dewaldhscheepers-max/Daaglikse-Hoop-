@@ -86,21 +86,17 @@ service cloud.firestore {
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;
-      allow create: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.consent == true
+      allow create: if request.resource.data.consent == true
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() >= 1
         && request.resource.data.displayName.size() <= 20
         && request.resource.data.level is number
         && request.resource.data.score is number;
-      allow update: if request.auth != null
-        && request.auth.uid == userId
-        && (
-          request.resource.data.level > resource.data.level
-          || (request.resource.data.level == resource.data.level
-              && request.resource.data.score >= resource.data.score)
-        );
+      allow update: if (
+        request.resource.data.level > resource.data.level
+        || (request.resource.data.level == resource.data.level
+            && request.resource.data.score >= resource.data.score)
+      );
     }
   }
 }

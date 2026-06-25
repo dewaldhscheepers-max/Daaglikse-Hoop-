@@ -24,9 +24,18 @@ export const storage = getStorage(app)
 export const auth = getAuth(app)
 
 export async function getOrCreateAnonUid() {
-  if (auth.currentUser) return auth.currentUser.uid
-  const { user } = await signInAnonymously(auth)
-  return user.uid
+  try {
+    if (auth.currentUser) return auth.currentUser.uid
+    const { user } = await signInAnonymously(auth)
+    return user.uid
+  } catch {
+    let uid = localStorage.getItem('vp_anon_uid')
+    if (!uid) {
+      uid = 'loc-' + Math.random().toString(36).slice(2) + Date.now().toString(36)
+      localStorage.setItem('vp_anon_uid', uid)
+    }
+    return uid
+  }
 }
 
 export const messaging = (async () => {
