@@ -520,22 +520,25 @@ function drawVredekring(ctx, ring, tick) {
 
 function drawStormOverlay(ctx, storm, W, H) {
   if (!storm || storm.overlay <= 0) return
-  // Soft grey-blue tint
-  ctx.fillStyle = `rgba(75, 100, 130, ${storm.overlay})`
+  // Vignette: darker at edges, lighter at centre
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.08, W / 2, H / 2, H * 0.85)
+  vg.addColorStop(0, `rgba(70, 95, 125, ${storm.overlay * 0.35})`)
+  vg.addColorStop(1, `rgba(45, 65, 105, ${Math.min(storm.overlay * 1.35, 0.52)})`)
+  ctx.fillStyle = vg
   ctx.fillRect(0, 0, W, H)
   // Soft distant lightning — light flash, not dark
   if (storm.lightningFlash > 0) {
     const lf = Math.min(storm.lightningFlash / 22, 1)
-    ctx.fillStyle = `rgba(210, 228, 250, ${lf * 0.22})`
+    ctx.fillStyle = `rgba(215, 232, 255, ${lf * 0.28})`
     ctx.fillRect(0, 0, W, H)
   }
   // Wind lines
   ctx.save()
   for (const wl of storm.windLines) {
-    const a = wl.alpha * Math.min(storm.overlay / 0.08, 1)
-    if (a < 0.02) continue
-    ctx.globalAlpha = a * 0.65
-    ctx.strokeStyle = 'rgba(185, 210, 240, 0.9)'
+    const a = wl.alpha * Math.min(storm.overlay / 0.06, 1)
+    if (a < 0.03) continue
+    ctx.globalAlpha = a
+    ctx.strokeStyle = 'rgba(215, 235, 255, 0.92)'
     ctx.lineWidth = wl.width
     ctx.lineCap = 'round'
     ctx.beginPath()
@@ -942,14 +945,14 @@ export default function Vredepad({ onClose }) {
         g.storm = {
           phase: 'building', life: 0,
           overlay: 0, truthsThisStorm: 0, needed: 4,
-          windLines: Array.from({ length: 10 }, () => ({
+          windLines: Array.from({ length: 22 }, () => ({
             x: Math.random() * g.W,
-            y: 30 + Math.random() * (g.H - 60),
-            len: 45 + Math.random() * 55,
-            lean: (Math.random() - 0.3) * 12,
-            dx: 1.1 + Math.random() * 0.7,
-            alpha: 0.28 + Math.random() * 0.32,
-            width: 0.7 + Math.random() * 0.9,
+            y: 20 + Math.random() * (g.H - 40),
+            len: 60 + Math.random() * 80,
+            lean: (Math.random() - 0.2) * 18,
+            dx: 1.6 + Math.random() * 1.2,
+            alpha: 0.42 + Math.random() * 0.38,
+            width: 0.8 + Math.random() * 1.1,
           })),
           driftWords: [],
           nextDrift: g.tick + 50,
@@ -965,18 +968,18 @@ export default function Vredepad({ onClose }) {
         const st = g.storm
         st.life += dt
         if (st.phase === 'building') {
-          st.overlay = Math.min(st.life / 120, 1) * 0.25
+          st.overlay = Math.min(st.life / 120, 1) * 0.38
           for (const wl of st.windLines) {
             wl.x += wl.dx * dt * Math.min(st.life / 60, 1)
-            if (wl.x > g.W + 80) wl.x = -80 - wl.len
+            if (wl.x > g.W + 100) wl.x = -100 - wl.len
           }
           if (st.life >= 150) { st.phase = 'active'; st.life = 0 }
         } else if (st.phase === 'active') {
-          const target = Math.max(0.06, 0.25 - st.truthsThisStorm * 0.05)
+          const target = Math.max(0.08, 0.38 - st.truthsThisStorm * 0.07)
           st.overlay += (target - st.overlay) * 0.035 * dt
           for (const wl of st.windLines) {
             wl.x += wl.dx * dt
-            if (wl.x > g.W + 80) wl.x = -80 - wl.len
+            if (wl.x > g.W + 100) wl.x = -100 - wl.len
           }
           if (g.tick >= st.nextDrift && st.driftWords.length < 1) {
             st.driftWords.push({
@@ -1005,8 +1008,7 @@ export default function Vredepad({ onClose }) {
             g.score += 150; setScore(g.score)
             setStormFlash(true); setTimeout(() => setStormFlash(false), 2400)
             setStormAnnounce('Die storm gaan verby.')
-            setTimeout(() => setStormAnnounce('Waarheid is sterker as vrees.'), 2400)
-            setTimeout(() => setStormAnnounce(null), 5000)
+            setTimeout(() => setStormAnnounce(null), 4200)
           }
         } else if (st.phase === 'breaking') {
           st.overlay = Math.max(0, st.overlay - 0.004 * dt)
