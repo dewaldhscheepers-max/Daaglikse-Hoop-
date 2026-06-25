@@ -519,7 +519,7 @@ export default function Vredepad({ onClose }) {
   async function checkAndUpdateLeaderboard(lbLevel, lbScore) {
     if (!anonUidRef.current) return
     const uid = anonUidRef.current
-    const alreadyAsked = localStorage.getItem('vp_lb_asked') === '1'
+    const alreadyAsked = localStorage.getItem('vp_lb_submitted') === '1'
     try {
       const snap = await getDocs(collection(db, 'leaderboard'))
       const all  = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
@@ -553,7 +553,6 @@ export default function Vredepad({ onClose }) {
         setShowNameConsent(true)
       }
     } catch {
-      // Firestore rules may not be deployed yet — still show modal once
       if (!alreadyAsked) {
         pendingLbRef.current = { level: lbLevel, score: lbScore }
         setShowNameConsent(true)
@@ -569,12 +568,12 @@ export default function Vredepad({ onClose }) {
       if (!consentChecked) { setConsentError('Merk asseblief die toestemmingsblokkie.'); return }
     }
     const displayName = isAnonymous ? 'Anonieme Speler' : consentName.trim()
-    localStorage.setItem('vp_lb_asked', '1')
     try {
       await setDoc(doc(db, 'leaderboard', anonUidRef.current), {
         displayName, level: pendingLbRef.current.level, score: pendingLbRef.current.score,
         consent: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
       })
+      localStorage.setItem('vp_lb_submitted', '1')
       const snap = await getDocs(collection(db, 'leaderboard'))
       const all  = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
       const sorted = sortLeaderboard(all)
