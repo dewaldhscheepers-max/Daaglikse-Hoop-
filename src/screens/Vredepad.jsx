@@ -456,6 +456,7 @@ function drawFloats(ctx, floats) {
 
 function drawGenadeKruis(ctx, kruis, tick, playerX, playerY) {
   const { x, y, life, maxLife } = kruis
+  const tier = kruis.tier || 0
   const fadeIn  = Math.min(life / 14, 1)
   const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
   const alpha   = fadeIn * fadeOut
@@ -464,30 +465,50 @@ function drawGenadeKruis(ctx, kruis, tick, playerX, playerY) {
 
   ctx.save()
 
-  // Wide outer glow — visible from across screen
-  const glowR = (74 + nearFrac * 26) * pulse
+  // Rotating light rays at tier 2+ (L30+)
+  if (tier >= 2) {
+    const rayCount = 8
+    const rayLen = 52 + tier * 16
+    for (let i = 0; i < rayCount; i++) {
+      const ang = (i / rayCount) * Math.PI * 2 + tick * 0.005
+      ctx.globalAlpha = alpha * Math.min((tier - 1) * 0.22, 0.44)
+      ctx.strokeStyle = 'rgba(255,248,185,0.92)'
+      ctx.lineWidth = 1.5
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.moveTo(x + Math.cos(ang) * 22, y + Math.sin(ang) * 22)
+      ctx.lineTo(x + Math.cos(ang) * rayLen, y + Math.sin(ang) * rayLen)
+      ctx.stroke()
+    }
+  }
+
+  // Wide outer glow — grows with tier
+  const glowR = (74 + tier * 18 + nearFrac * 26) * pulse
   const glow  = ctx.createRadialGradient(x, y, 0, x, y, glowR)
-  glow.addColorStop(0,   `rgba(255,240,160,${alpha * (0.55 + nearFrac * 0.3)})`)
-  glow.addColorStop(0.45,`rgba(255,230,130,${alpha * (0.22 + nearFrac * 0.15)})`)
+  glow.addColorStop(0,   `rgba(255,240,160,${alpha * (0.55 + tier * 0.1 + nearFrac * 0.25)})`)
+  glow.addColorStop(0.45,`rgba(255,230,130,${alpha * (0.22 + tier * 0.06 + nearFrac * 0.12)})`)
   glow.addColorStop(1,   'rgba(255,230,130,0)')
   ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
   ctx.fillStyle = glow; ctx.fill()
 
   // Bright junction glow
-  const jr = 28 + nearFrac * 14
+  const jr = 28 + nearFrac * 14 + tier * 5
   const jGlow = ctx.createRadialGradient(x, y - 10, 0, x, y - 10, jr)
   jGlow.addColorStop(0, `rgba(255,255,230,${alpha * 0.98})`)
   jGlow.addColorStop(1, 'rgba(255,255,230,0)')
   ctx.beginPath(); ctx.arc(x, y - 10, jr, 0, Math.PI * 2)
   ctx.fillStyle = jGlow; ctx.fill()
 
-  // Cross arms — bigger and more opaque
+  // Cross arms — scale with tier
+  const aw = 6 + tier * 1.5
+  const ah = 82 + tier * 8
+  const cw = 56 + tier * 7
   ctx.globalAlpha = alpha * (0.92 + nearFrac * 0.08)
-  ctx.fillStyle   = 'rgba(255,252,210,0.97)'
-  ctx.shadowColor = 'rgba(255,240,120,0.7)'
-  ctx.shadowBlur  = 12
-  ctx.fillRect(x - 6, y - 46, 12, 82)   // vertical
-  ctx.fillRect(x - 28, y - 21, 56, 12)  // horizontal
+  ctx.fillStyle   = `rgba(255,252,${Math.max(200, 210 - tier * 8)},0.97)`
+  ctx.shadowColor = `rgba(255,240,120,${0.7 + tier * 0.06})`
+  ctx.shadowBlur  = 12 + tier * 4
+  ctx.fillRect(x - aw / 2, y - ah / 2 + 5, aw, ah)
+  ctx.fillRect(x - cw / 2, y - aw / 2 - 9, cw, aw + 2)
   ctx.shadowBlur  = 0
 
   ctx.restore()
@@ -567,6 +588,19 @@ function drawStormDrift(ctx, storm) {
     ctx.fillText(dw.text, dw.x, dw.y)
   }
   ctx.restore()
+}
+
+function findFloatY(floats, baseY, x) {
+  let y = baseY
+  for (let i = 0; i < 6; i++) {
+    const clear = floats.every(ef => {
+      const efCurY = ef.y - (ef.age / ef.maxAge) * 52
+      return Math.abs(ef.x - x) > 92 || Math.abs(efCurY - y) > 26
+    })
+    if (clear) return y
+    y -= 30
+  }
+  return y
 }
 
 function loadSave() { try { return JSON.parse(localStorage.getItem('vredepad_data') || '{}') } catch { return {} } }
@@ -879,7 +913,7 @@ export default function Vredepad({ onClose }) {
       }
 
       for (const s of g.seeds) s.pulse += 0.05 * dt
-      const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? 1.38 : 1)
+      const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? 1.38 + (g.storm.tier || 0) * 0.18 : 1)
       for (const w of g.weeds) {
         w.pulse += 0.04 * dt
         w.x = wrapVal(w.x + w.dx * dt * weedSpd, g.W)
@@ -941,15 +975,18 @@ export default function Vredepad({ onClose }) {
           }
         }
         g.weeds = [...g.weeds, ...extras]
+        const stormTier = Math.max(0, Math.floor((g.level - 20) / 10))
+        const stormLineCount = Math.min(22 + stormTier * 7, 50)
         g.storm = {
           phase: 'building', life: 0,
-          overlay: 0, truthsThisStorm: 0, needed: 4,
-          windLines: Array.from({ length: 22 }, () => ({
+          tier: stormTier,
+          overlay: 0, truthsThisStorm: 0, needed: 4 + stormTier,
+          windLines: Array.from({ length: stormLineCount }, () => ({
             x: Math.random() * g.W,
             y: 20 + Math.random() * (g.H - 40),
             len: 60 + Math.random() * 80,
             lean: (Math.random() - 0.2) * 18,
-            dx: 1.6 + Math.random() * 1.2,
+            dx: (1.6 + stormTier * 0.35) + Math.random() * (1.2 + stormTier * 0.2),
             alpha: 0.42 + Math.random() * 0.38,
             width: 0.8 + Math.random() * 1.1,
           })),
@@ -967,14 +1004,16 @@ export default function Vredepad({ onClose }) {
         const st = g.storm
         st.life += dt
         if (st.phase === 'building') {
-          st.overlay = Math.min(st.life / 120, 1) * 0.38
+          const maxOverlay = 0.38 + (st.tier || 0) * 0.07
+          st.overlay = Math.min(st.life / 120, 1) * maxOverlay
           for (const wl of st.windLines) {
             wl.x += wl.dx * dt * Math.min(st.life / 60, 1)
             if (wl.x > g.W + 100) wl.x = -100 - wl.len
           }
           if (st.life >= 150) { st.phase = 'active'; st.life = 0 }
         } else if (st.phase === 'active') {
-          const target = Math.max(0.08, 0.38 - st.truthsThisStorm * 0.07)
+          const maxOv = 0.38 + (st.tier || 0) * 0.07
+          const target = Math.max(0.08, maxOv - st.truthsThisStorm * 0.07)
           st.overlay += (target - st.overlay) * 0.035 * dt
           for (const wl of st.windLines) {
             wl.x += wl.dx * dt
@@ -998,7 +1037,7 @@ export default function Vredepad({ onClose }) {
             st.lightningFlash = 22
             st.lightningTimer = 110 + Math.random() * 130
           }
-          if (st.truthsThisStorm >= st.needed || st.life > 720) {
+          if (st.truthsThisStorm >= st.needed || st.life > 720 + (st.tier || 0) * 120) {
             st.phase = 'breaking'; st.life = 0; st.driftWords = []
             g.weeds = g.weeds.filter(w => !w.isStorm)
             g.justHit = false; p.hitAnim = 0
@@ -1052,12 +1091,12 @@ export default function Vredepad({ onClose }) {
               ? STORM_TRUTHS[Math.floor(Math.random() * STORM_TRUTHS.length)]
               : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
           g.justHit = false
-          g.floats.push({ id: g.tick + g.score, x: s.x, y: s.y - 8, text: floatText, age: 0, maxAge: 150, isWeed: false })
+          g.floats.push({ id: g.tick + g.score, x: s.x, y: findFloatY(g.floats, s.y - 8, s.x), text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
           g.truthStreak++
           if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed && !g.storm) {
             const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 80)
-            g.genadeKruis = { x: pos.x, y: pos.y, life: 0, maxLife: 360 }
+            g.genadeKruis = { x: pos.x, y: pos.y, life: 0, maxLife: 360, tier: Math.max(0, Math.floor((g.level - 20) / 10)) }
             g.genadeUsed  = true
             g.truthStreak = 0
           }
@@ -1088,7 +1127,7 @@ export default function Vredepad({ onClose }) {
             g.truthStreak = 0
             g.weedHitsRound++
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
-            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: w.y - 10, text: ww, age: 0, maxAge: 130, isWeed: true })
+            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 130, isWeed: true })
             if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
               g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
               g.vredekringUsed = true
