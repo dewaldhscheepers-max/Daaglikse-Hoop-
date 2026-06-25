@@ -637,7 +637,7 @@ export default function Vredepad({ onClose }) {
   const [displayScore, setScore]    = useState(0)
   const [displayTime, setTime]      = useState(60)
   const [seedBubble, setSeedBubble] = useState(null)
-  const [genadeFlash, setGenadeFlash] = useState(false)
+  const [genadeFlash, setGenadeFlash] = useState('')
   const [stormAnnounce, setStormAnnounce] = useState(null)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
@@ -927,23 +927,63 @@ export default function Vredepad({ onClose }) {
         if (g.genadeKruis.life > g.genadeKruis.maxLife) {
           g.genadeKruis = null
         } else if (d2(p, g.genadeKruis) < 42) {
+          const kTier = g.genadeKruis.tier || 0
           g.genadeKruis = null
-          g.genadeActive = 300
           g.justHit = false
           p.hitAnim = 0
-          // teleport all weeds far from player
-          for (const w of g.weeds) {
-            const pos = freePos(g.W, g.H, [p, ...g.seeds], 150)
-            w.x = pos.x; w.y = pos.y
-          }
           g.bgFlash = 20
-          // clear existing floats so nothing overlaps
           g.floats = []
+
+          if (kTier === 0) {
+            // L1-19: Teleport weeds far away, brief slow
+            for (const w of g.weeds) {
+              const pos = freePos(g.W, g.H, [p, ...g.seeds], 150)
+              w.x = pos.x; w.y = pos.y
+            }
+            g.genadeActive = 300
+          } else if (kTier === 1) {
+            // L20-29: Push — weeds burst outward at high speed
+            for (const w of g.weeds) {
+              const ang = Math.atan2(w.y - p.y, w.x - p.x)
+              const force = 2.8 + 110 / Math.max(18, d2(w, p))
+              w.dx = Math.cos(ang) * force
+              w.dy = Math.sin(ang) * force
+            }
+            g.genadeActive = 320
+          } else if (kTier === 2) {
+            // L30-39: Consume nearby (→ flowers), push distant weeds
+            const consumeR = 195
+            g.weeds = g.weeds.filter(w => {
+              if (d2(w, p) <= consumeR) {
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11 })
+                return false
+              }
+              const ang = Math.atan2(w.y - p.y, w.x - p.x)
+              const force = 1.8 + 70 / Math.max(18, d2(w, p))
+              w.dx = Math.cos(ang) * force
+              w.dy = Math.sin(ang) * force
+              return true
+            })
+            g.genadeActive = 360
+          } else {
+            // L40+: Consume all within large radius, max slow
+            g.weeds = g.weeds.filter(w => {
+              if (d2(w, p) <= 270) {
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14 })
+                return false
+              }
+              return true
+            })
+            g.genadeActive = 460
+          }
+
           const genadeTruths = ['God is naby.', 'Jy is veilig.', 'Vrede is moontlik.', 'Genade is hier.', 'Hy hou jou vas.']
           const gt = genadeTruths[Math.floor(Math.random() * genadeTruths.length)]
           g.floats.push({ id: g.tick + 200, x: g.W / 2, y: g.H * 0.42, text: gt, age: 0, maxAge: 260, isWeed: false, startFull: true, fontSize: 20 })
           g.score += 100; setScore(g.score)
-          setGenadeFlash(true); setTimeout(() => setGenadeFlash(false), 2600)
+          const flashMsgs = ['✦ Genade Oomblik ✦', '✦ Gedagtes Weggestoot ✦', '✦ Waarheid Verslind Twyfel ✦', '✦ Vrede Oorwin Alles ✦']
+          setGenadeFlash(flashMsgs[Math.min(kTier, 3)])
+          setTimeout(() => setGenadeFlash(''), 2600)
         }
       }
 
@@ -1450,7 +1490,7 @@ export default function Vredepad({ onClose }) {
             <div className="vp-bonus-flash">+5 sekondes ⚡</div>
           )}
           {genadeFlash && (
-            <div className="vp-genade-flash">✦ Genade Oomblik ✦</div>
+            <div className="vp-genade-flash">{genadeFlash}</div>
           )}
           {stormAnnounce && (
             <div key={stormAnnounce} className="vp-storm-announce">{stormAnnounce}</div>
