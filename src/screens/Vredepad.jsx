@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import DonationCard from '../components/DonationCard'
 import { playCollect, playHit, playLevelComplete, startAmbient, stopAmbient, toggleMute, isMuted } from '../utils/sound'
-import { db } from '../firebase'
-import { collection, getDocs } from 'firebase/firestore'
+import { db, getOrCreateAnonUid } from '../firebase'
+import { collection, getDocs, setDoc, doc, serverTimestamp } from 'firebase/firestore'
 import './Vredepad.css'
 
 const FREE_REWARD_BOOKS = [
@@ -17,6 +17,28 @@ const MILESTONE_BOOKS = [
   { id: 'dink-nuut-leef-nuut',   emoji: '🌱', title: 'Dink Nuut, Leef Nuut',  level: 50  },
   { id: 'rustelose-gedagtes',    emoji: '🌙', title: 'Rustelose Gedagtes',    level: 120 },
 ]
+
+function sortLeaderboard(entries) {
+  return [...entries]
+    .sort((a, b) =>
+      b.level - a.level ||
+      b.score - a.score ||
+      ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0))
+    )
+    .slice(0, 5)
+}
+
+const BLOCKED_NAMES = ['admin', 'daaglikse', 'daagliksehoop', 'dewald', 'pastoor', 'official', 'moderator']
+
+function validateDisplayName(name) {
+  const t = name.trim()
+  if (!t) return 'Voer asseblief \'n naam in.'
+  if (t.length > 20) return 'Naam moet korter as 21 karakters wees.'
+  if (/^[\s\W\d]+$/.test(t)) return 'Kies asseblief \'n ander naam.'
+  const lower = t.toLowerCase()
+  if (BLOCKED_NAMES.some(b => lower.includes(b))) return 'Kies asseblief \'n ander naam.'
+  return null
+}
 
 const MOOD_TRUTHS = {
   angs: [
@@ -404,6 +426,15 @@ export default function Vredepad({ onClose }) {
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
+  const [leaderboard, setLeaderboard]         = useState([])
+  const [myUid, setMyUid]                     = useState(null)
+  const [showNameConsent, setShowNameConsent] = useState(false)
+  const [consentName, setConsentName]         = useState('')
+  const [consentChecked, setConsentChecked]   = useState(false)
+  const [consentError, setConsentError]       = useState('')
+  const [lbCelebration, setLbCelebration]     = useState(null)
+  const anonUidRef = useRef(null)
+  const pendingLbRef = useRef(null)
 
   useEffect(() => {
     getDocs(collection(db, 'books')).then(snap => {
@@ -418,6 +449,16 @@ export default function Vredepad({ onClose }) {
         }
       })
       setBookPdfs(pdfs)
+    }).catch(() => {})
+
+    getDocs(collection(db, 'leaderboard')).then(snap => {
+      const all = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
+      setLeaderboard(sortLeaderboard(all))
+    }).catch(() => {})
+
+    getOrCreateAnonUid().then(uid => {
+      anonUidRef.current = uid
+      setMyUid(uid)
     }).catch(() => {})
   }, [])
 
@@ -475,6 +516,72 @@ export default function Vredepad({ onClose }) {
     }
   }
 
+  async function checkAndUpdateLeaderboard(lbLevel, lbScore) {
+    if (!anonUidRef.current) return
+    const uid = anonUidRef.current
+    try {
+      const snap = await getDocs(collection(db, 'leaderboard'))
+      const all  = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
+      const sorted = sortLeaderboard(all)
+      setLeaderboard(sorted)
+
+      const existing = all.find(e => e.userId === uid)
+      if (existing) {
+        const improved = lbLevel > existing.level ||
+          (lbLevel === existing.level && lbScore > existing.score)
+        if (!improved) return
+        await setDoc(doc(db, 'leaderboard', uid), {
+          displayName: existing.displayName, level: lbLevel,
+          score: lbScore, consent: true, updatedAt: serverTimestamp()
+        }, { merge: true })
+        const s2   = await getDocs(collection(db, 'leaderboard'))
+        const all2 = s2.docs.map(d => ({ userId: d.id, ...d.data() }))
+        const sorted2 = sortLeaderboard(all2)
+        setLeaderboard(sorted2)
+        const rank = sorted2.findIndex(e => e.userId === uid) + 1
+        if (rank > 0) setLbCelebration({ rank, isNew: false, level: lbLevel, score: lbScore })
+        return
+      }
+
+      const last = sorted[sorted.length - 1]
+      const qualifies = sorted.length < 5 ||
+        lbLevel > last.level ||
+        (lbLevel === last.level && lbScore > last.score)
+      if (qualifies) {
+        pendingLbRef.current = { level: lbLevel, score: lbScore }
+        setShowNameConsent(true)
+      }
+    } catch {}
+  }
+
+  async function submitLeaderboardEntry(isAnonymous) {
+    if (!anonUidRef.current || !pendingLbRef.current) return
+    if (!isAnonymous) {
+      const err = validateDisplayName(consentName)
+      if (err) { setConsentError(err); return }
+      if (!consentChecked) { setConsentError('Merk asseblief die toestemmingsblokkie.'); return }
+    }
+    const displayName = isAnonymous ? 'Anonieme Speler' : consentName.trim()
+    try {
+      await setDoc(doc(db, 'leaderboard', anonUidRef.current), {
+        displayName, level: pendingLbRef.current.level, score: pendingLbRef.current.score,
+        consent: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      })
+      const snap = await getDocs(collection(db, 'leaderboard'))
+      const all  = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
+      const sorted = sortLeaderboard(all)
+      setLeaderboard(sorted)
+      const rank = sorted.findIndex(e => e.userId === anonUidRef.current) + 1
+      setShowNameConsent(false)
+      setConsentName(''); setConsentChecked(false); setConsentError('')
+      setLbCelebration({ rank: rank > 0 ? rank : 5, isNew: true,
+        level: pendingLbRef.current.level, score: pendingLbRef.current.score })
+      pendingLbRef.current = null
+    } catch {
+      setConsentError('Iets het skeef gegaan. Probeer asseblief weer.')
+    }
+  }
+
   function endLevel(g) {
     const save  = updateStreak(loadSave())
     const today = new Date().toISOString().slice(0, 10)
@@ -497,9 +604,11 @@ export default function Vredepad({ onClose }) {
       if (oldTotal < 20  && newTotal >= 20)  newUnlock = MILESTONE_BOOKS[1]
       if (oldTotal < 50  && newTotal >= 50)  newUnlock = MILESTONE_BOOKS[2]
       if (oldTotal < 120 && newTotal >= 120) newUnlock = MILESTONE_BOOKS[3]
-      saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: (save.totalScore || 0) + g.score, lastDay: today, best: nb })
+      const newTotalScore = (save.totalScore || 0) + g.score
+      saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
       setBest(nb)
       setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock })
+      checkAndUpdateLeaderboard(newTotal, newTotalScore).catch(() => {})
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
@@ -702,6 +811,7 @@ export default function Vredepad({ onClose }) {
 
   function nextLevel() {
     cancelAnimationFrame(rafRef.current)
+    setShowNameConsent(false); setLbCelebration(null)
     pendingLevel.current = loadSave().level || 1
     isReplayRef.current  = false
     setCountdown(3)
@@ -710,6 +820,7 @@ export default function Vredepad({ onClose }) {
 
   function replayLevel() {
     cancelAnimationFrame(rafRef.current)
+    setShowNameConsent(false); setLbCelebration(null)
     pendingLevel.current = endData?.level || 1
     isReplayRef.current  = true
     setCountdown(3)
@@ -801,6 +912,33 @@ export default function Vredepad({ onClose }) {
               Begin van voor af
             </button>
           )}
+          <div className="vp-leaderboard">
+            <p className="vp-lb-title">Vredepad Top 5</p>
+            <p className="vp-lb-sub">Hier is die mense wat die verste op die Vredepad gestap het.</p>
+            {leaderboard.length === 0 ? (
+              <p className="vp-lb-empty">Nog niemand op die Top 5 nie. Jy kan die eerste wees!</p>
+            ) : (
+              leaderboard.map((entry, i) => (
+                <div key={entry.userId} className={`vp-lb-row${entry.userId === myUid ? ' mine' : ''}`}>
+                  <span className="vp-lb-rank">{i + 1}</span>
+                  <span className="vp-lb-name">{entry.displayName}</span>
+                  <div className="vp-lb-stats">
+                    <span className="vp-lb-level">Vlak {entry.level}</span>
+                    <span className="vp-lb-score">{(entry.score || 0).toLocaleString('af')} pt</span>
+                  </div>
+                </div>
+              ))
+            )}
+            {(() => {
+              const myRank = leaderboard.findIndex(e => e.userId === myUid)
+              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 5. ✨</p>
+              const last = leaderboard[leaderboard.length - 1]
+              const close = last && leaderboard.length >= 5 && (last.level - totalLevels) <= 15
+              return <p className="vp-lb-motivation">{close ? 'Jy is naby aan die Vredepad Top 5. Hou aan stap!' : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 5.'}</p>
+            })()}
+            <p className="vp-lb-120">🌙 Bereik Vlak 120 en ontsluit Rustelose Gedagtes gratis.</p>
+          </div>
+
           <div className="vp-rewards">
             <p className="vp-rewards-title">📚 Gratis eBoeke</p>
             {FREE_REWARD_BOOKS.map(b => (
@@ -953,6 +1091,16 @@ export default function Vredepad({ onClose }) {
           {d.isNewRecord && (
             <div className="vp-new-record">🏆 Nuwe Rekord!</div>
           )}
+          {lbCelebration && (
+            <div className="vp-lb-cel">
+              <p className="vp-lb-cel-title">
+                {lbCelebration.isNew ? '🎖️ Jy het die Vredepad Top 5 bereik!' : '✨ Jy het jou rekord verbeter!'}
+              </p>
+              <p className="vp-lb-cel-rank">Jy is nommer {lbCelebration.rank} op die Top 5</p>
+              <p className="vp-lb-cel-stats">Vlak {lbCelebration.level} · {(lbCelebration.score || 0).toLocaleString('af')} punte</p>
+            </div>
+          )}
+
           {d.newUnlock && (
             <div className="vp-new-unlock">
               <p className="vp-unlock-label">🎁 Gratis eBoek verdien!</p>
@@ -991,6 +1139,39 @@ export default function Vredepad({ onClose }) {
           <button className="vp-share-btn" onClick={handleShare}>Deel my vrede 🌿</button>
           <button className="vp-back-link" onClick={onClose}>Terug na tuis</button>
         </div>
+
+        {showNameConsent && (
+          <div className="vp-consent-backdrop">
+            <div className="vp-consent-modal">
+              <div className="vp-consent-icon">🎖️</div>
+              <h3 className="vp-consent-title">Jy het die Vredepad Top 5 bereik!</h3>
+              <p className="vp-consent-sub">Kies die naam wat jy op die lys wil wys.</p>
+              <input
+                className="vp-consent-input"
+                placeholder="Byvoorbeeld: HoopSoeker, Maria K."
+                maxLength={20}
+                value={consentName}
+                onChange={e => { setConsentName(e.target.value); setConsentError('') }}
+              />
+              <p className="vp-consent-privacy">Moenie jou volle naam gebruik as jy dit nie publiek wil wys nie.</p>
+              <label className="vp-consent-check-row">
+                <input
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={e => { setConsentChecked(e.target.checked); setConsentError('') }}
+                />
+                <span>Ek verstaan dat hierdie naam, my vlak en my punte publiek op die Vredepad Top 5 gewys sal word totdat iemand my plek verbysteek.</span>
+              </label>
+              {consentError && <p className="vp-consent-error">{consentError}</p>}
+              <button className="vp-consent-submit" onClick={() => submitLeaderboardEntry(false)}>
+                Plaas my op die Top 5
+              </button>
+              <button className="vp-consent-anon" onClick={() => submitLeaderboardEntry(true)}>
+                Bly anoniem
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     )
   }

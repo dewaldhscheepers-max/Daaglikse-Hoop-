@@ -1,6 +1,7 @@
 import { initializeApp }              from 'firebase/app'
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getStorage }                 from 'firebase/storage'
+import { getAuth, signInAnonymously } from 'firebase/auth'
 import { getMessaging, isSupported, getToken, onMessage } from 'firebase/messaging'
 
 const firebaseConfig = {
@@ -20,6 +21,13 @@ export const isFacebookBrowser = /FBAN|FBAV|FBIOS|FB_IAB/.test(navigator.userAge
 const app        = initializeApp(firebaseConfig)
 export const db  = getFirestore(app)
 export const storage = getStorage(app)
+export const auth = getAuth(app)
+
+export async function getOrCreateAnonUid() {
+  if (auth.currentUser) return auth.currentUser.uid
+  const { user } = await signInAnonymously(auth)
+  return user.uid
+}
 
 export const messaging = (async () => {
   const supported = await isSupported()

@@ -878,3 +878,261 @@
   color: rgba(0,0,0,0.4);
   margin: 0;
 }
+
+/* ─── Leaderboard (intro screen) ─── */
+.vp-leaderboard {
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 16px;
+  background: rgba(255,255,255,0.38);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+.vp-lb-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 0 0 3px;
+}
+
+.vp-lb-sub {
+  font-size: 12px;
+  color: rgba(0,0,0,0.45);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.vp-lb-empty {
+  font-size: 13px;
+  color: rgba(0,0,0,0.45);
+  margin: 0 0 10px;
+  font-style: italic;
+}
+
+.vp-lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+  background: rgba(255,255,255,0.3);
+}
+
+.vp-lb-row.mine {
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.8);
+}
+
+.vp-lb-rank {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.5);
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.vp-lb-row:nth-child(1) .vp-lb-rank { color: #C9A227; }
+.vp-lb-row:nth-child(2) .vp-lb-rank { color: #8C8C8C; }
+.vp-lb-row:nth-child(3) .vp-lb-rank { color: #9C6B3C; }
+
+.vp-lb-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vp-lb-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.vp-lb-level {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.7);
+}
+
+.vp-lb-score {
+  font-size: 11px;
+  color: rgba(0,0,0,0.45);
+}
+
+.vp-lb-my-rank {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.6);
+  margin: 10px 0 4px;
+  text-align: center;
+}
+
+.vp-lb-motivation {
+  font-size: 12px;
+  color: rgba(0,0,0,0.45);
+  margin: 10px 0 4px;
+  text-align: center;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.vp-lb-120 {
+  font-size: 12px;
+  color: rgba(0,0,0,0.5);
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+/* ─── Leaderboard celebration (end screen) ─── */
+.vp-lb-cel {
+  background: linear-gradient(135deg, rgba(200,170,80,0.18), rgba(180,140,40,0.1));
+  border: 1.5px solid rgba(200,170,80,0.45);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.vp-lb-cel-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.75);
+  margin: 0 0 4px;
+}
+
+.vp-lb-cel-rank {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9A7B20;
+  margin: 0 0 2px;
+}
+
+.vp-lb-cel-stats {
+  font-size: 12px;
+  color: rgba(0,0,0,0.45);
+  margin: 0;
+}
+
+/* ─── Name consent overlay ─── */
+.vp-consent-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.vp-consent-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 340px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+}
+
+.vp-consent-icon {
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.vp-consent-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2D2040;
+  text-align: center;
+  margin: 0 0 6px;
+}
+
+.vp-consent-sub {
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.vp-consent-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #DDD;
+  border-radius: 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  outline: none;
+}
+
+.vp-consent-input:focus { border-color: #9B59B6; }
+
+.vp-consent-privacy {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.vp-consent-check-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.vp-consent-check-row input { margin-top: 3px; flex-shrink: 0; }
+
+.vp-consent-check-row span {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.vp-consent-error {
+  font-size: 13px;
+  color: #C0392B;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.vp-consent-submit {
+  width: 100%;
+  padding: 13px;
+  background: #6C3FC0;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.vp-consent-anon {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: #888;
+  border: 1.5px solid #DDD;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
