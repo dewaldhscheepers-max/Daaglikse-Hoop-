@@ -699,6 +699,7 @@ export default function Vredepad({ onClose }) {
   const [genadeFlash, setGenadeFlash] = useState('')
   const [stormAnnounce, setStormAnnounce] = useState(null)
   const [lastTruthText, setLastTruthText] = useState('')
+  const [tutorialActive, setTutorialActive] = useState(false)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -752,6 +753,16 @@ export default function Vredepad({ onClose }) {
     const t = setTimeout(() => setScreen('levelup'), 2800)
     return () => clearTimeout(t)
   }, [screen])
+
+  // ── Tutorial auto-dismiss ──
+  useEffect(() => {
+    if (!tutorialActive) return
+    const t = setTimeout(() => {
+      setTutorialActive(false)
+      try { localStorage.setItem('vp_tutorial_done', '1') } catch {}
+    }, 8500)
+    return () => clearTimeout(t)
+  }, [tutorialActive])
 
   function buildGame(level, W, H) {
     const t  = THEMES[(level - 1) % THEMES.length]
@@ -951,6 +962,9 @@ export default function Vredepad({ onClose }) {
 
       buildGame(pendingLevel.current, canvas.width, canvas.height)
       setScore(0); setTime(60)
+      if (pendingLevel.current === 1 && !localStorage.getItem('vp_tutorial_done')) {
+        setTutorialActive(true)
+      }
       startAmbient()
 
       ro = new ResizeObserver(() => {
@@ -1390,6 +1404,10 @@ export default function Vredepad({ onClose }) {
 
   function onTouchStart(e) {
     e.preventDefault()
+    if (tutorialActive) {
+      setTutorialActive(false)
+      try { localStorage.setItem('vp_tutorial_done', '1') } catch {}
+    }
     getTouchDir(e.touches[0].clientX, e.touches[0].clientY)
   }
 
@@ -1598,6 +1616,31 @@ export default function Vredepad({ onClose }) {
         </div>
         <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
+          {tutorialActive && (
+            <div className="vp-tutorial-overlay">
+              <div className="vp-tut-step vp-tut-s1">
+                <div className="vp-tut-ring-wrap">
+                  <div className="vp-tut-ring" />
+                  <div className="vp-tut-dot" />
+                </div>
+                <span className="vp-tut-lbl">Tik hier...</span>
+              </div>
+              <div className="vp-tut-step vp-tut-s2">
+                <div className="vp-tut-ring-wrap">
+                  <div className="vp-tut-ring" />
+                  <div className="vp-tut-dot" />
+                </div>
+                <span className="vp-tut-lbl">...of hier</span>
+              </div>
+              <div className="vp-tut-step vp-tut-s3">
+                <span className="vp-tut-lbl">Sleep jou vinger — die bal volg</span>
+                <div className="vp-tut-drag-track">
+                  <div className="vp-tut-drag-dot" />
+                </div>
+              </div>
+              <p className="vp-tut-hint">Tik enige plek om te begin</p>
+            </div>
+          )}
           {combo >= 2 && (
             <div className={`vp-combo-badge${combo >= 5 ? ' vp-combo-hot' : ''}`}>
               {combo >= 5 ? `⚡ ${combo}×` : `${combo}×`}

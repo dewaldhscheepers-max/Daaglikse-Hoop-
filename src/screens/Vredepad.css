@@ -1283,3 +1283,153 @@
   border-radius: 10px;
   border-left: 3px solid rgba(91, 155, 213, 0.4);
 }
+
+/* ─── Tutorial Overlay ─── */
+.vp-tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  z-index: 20;
+  pointer-events: none;
+  animation: vp-tut-overlay 8.5s ease forwards;
+}
+
+@keyframes vp-tut-overlay {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  86%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Each step is absolutely positioned on the canvas */
+.vp-tut-step {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+}
+
+/* Step 1: top-left area, appears 0.5s–2.9s */
+.vp-tut-s1 {
+  top: 34%;
+  left: 26%;
+  transform: translate(-50%, -50%);
+  animation: vp-tut-step 2.4s 0.5s ease both;
+}
+
+/* Step 2: bottom-right area, appears 3.0s–5.4s */
+.vp-tut-s2 {
+  top: 62%;
+  left: 68%;
+  transform: translate(-50%, -50%);
+  animation: vp-tut-step 2.4s 3.0s ease both;
+}
+
+/* Step 3: center, appears 5.6s–7.8s */
+.vp-tut-s3 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  gap: 14px;
+  animation: vp-tut-step 2.2s 5.6s ease both;
+}
+
+@keyframes vp-tut-step {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
+  14%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  78%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Tap indicator: ring + dot */
+.vp-tut-ring-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.vp-tut-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.92);
+  animation: vp-tut-ring-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes vp-tut-ring-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.9; }
+  50%       { transform: scale(1.32); opacity: 0.4; }
+}
+
+.vp-tut-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Step label text */
+.vp-tut-lbl {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.97);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* Drag demonstration track */
+.vp-tut-drag-track {
+  width: 150px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 3px;
+  position: relative;
+  overflow: visible;
+}
+
+.vp-tut-drag-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: vp-tut-drag-move 1.6s ease-in-out infinite;
+}
+
+@keyframes vp-tut-drag-move {
+  0%   { left: 0; }
+  50%  { left: calc(100% - 22px); }
+  100% { left: 0; }
+}
+
+/* Bottom "tap to start" hint */
+.vp-tut-hint {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  margin: 0;
+  animation: vp-tut-hint-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes vp-tut-hint-pulse {
+  0%, 100% { opacity: 0.65; }
+  50%       { opacity: 1; }
+}
