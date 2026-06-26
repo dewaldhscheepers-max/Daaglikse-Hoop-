@@ -842,6 +842,7 @@ export default function Vredepad({ onClose }) {
       weedHitsRound: 0, vredekring: null, vredekringUsed: false,
       storm: null, stormUsed: false, stormBeaten: false,
       promiseSeed: null, promiseSeedSpawned: false, promisePause: 0,
+      gardenMode: false, gardenTime: 0,
     }
   }
 
@@ -1028,8 +1029,14 @@ export default function Vredepad({ onClose }) {
 
       if (!g.promisePause) {
 
-      g.timeLeft -= dt / 60
-      if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
+      if (!g.gardenMode) {
+        g.timeLeft -= dt / 60
+        if (g.timeLeft <= 0) {
+          g.timeLeft = 0; g.gardenMode = true; g.gardenTime = 0
+          g.seeds = []; g.weeds = []; g.storm = null; g.genadeKruis = null; g.promiseSeed = null
+          p.trail = []; p.dx = 0; p.dy = 0
+        }
+      }
       if (p.dx !== 0 || p.dy !== 0) {
         p.trail.push({ x: p.x, y: p.y })
         if (p.trail.length > 14) p.trail.shift()
@@ -1349,13 +1356,28 @@ export default function Vredepad({ onClose }) {
 
       } // end if (!g.promisePause)
 
+      // Garden moment — fill canvas with flowers, then end level
+      if (g.gardenMode) {
+        g.gardenTime += dt
+        if (g.flowers.length < 110 && Math.random() < 0.38) {
+          g.flowers.push({
+            x: 14 + Math.random() * (g.W - 28),
+            y: 14 + Math.random() * (g.H - 28),
+            life: 0, r: 7 + Math.random() * 10,
+            tier: Math.floor((g.level - 1) / 10),
+            plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)]
+          })
+        }
+        if (g.gardenTime >= 108) { endLevel(g); return }
+      }
+
       g.floats = g.floats.filter(f => { f.age += dt; return f.age < f.maxAge })
 
       // Flowers grow to full size (60 frames) then stay permanently
       for (const f of g.flowers) {
         if (f.life < 60) f.life += dt
       }
-      if (g.flowers.length > 60) g.flowers.splice(0, g.flowers.length - 60)
+      if (!g.gardenMode && g.flowers.length > 60) g.flowers.splice(0, g.flowers.length - 60)
 
       setScore(g.score)
       setTime(Math.ceil(g.timeLeft))
@@ -1391,20 +1413,22 @@ export default function Vredepad({ onClose }) {
           ctx.stroke()
         }
       }
-      if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
-      for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
-      if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
-      for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
-      drawPlayer(ctx, p, g.tick, g.t)
-      if (g.genadeActive > 0) {
-        const gFrac = Math.min(g.genadeActive / 300, 1)
-        const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 55)
-        gr.addColorStop(0, `rgba(255,240,180,${gFrac * 0.45})`)
-        gr.addColorStop(1, 'rgba(255,240,180,0)')
-        ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
-        ctx.fillStyle = gr; ctx.fill()
+      if (!g.gardenMode) {
+        if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
+        for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
+        if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
+        for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
+        drawPlayer(ctx, p, g.tick, g.t)
+        if (g.genadeActive > 0) {
+          const gFrac = Math.min(g.genadeActive / 300, 1)
+          const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 55)
+          gr.addColorStop(0, `rgba(255,240,180,${gFrac * 0.45})`)
+          gr.addColorStop(1, 'rgba(255,240,180,0)')
+          ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
+          ctx.fillStyle = gr; ctx.fill()
+        }
+        if (g.storm) drawStormDrift(ctx, g.storm)
       }
-      if (g.storm) drawStormDrift(ctx, g.storm)
       drawFloats(ctx, g.floats)
 
       rafRef.current = requestAnimationFrame(loop)
