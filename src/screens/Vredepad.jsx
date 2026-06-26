@@ -54,6 +54,17 @@ const STORM_TRUTHS = [
   'God hou jou vas.', 'Waarheid is sterker as vrees.', 'Die storm gaan verby.',
 ]
 
+const COUNTDOWN_PHRASES = [
+  'Haal diep asem. Jy is veilig hier.',
+  'Laat jou gedagtes stil word.',
+  'God is hier by jou.',
+  'Bring net jouself. Dit is genoeg.',
+  'Een oomblik op \'n slag.',
+  'Jy is geliefd soos jy is.',
+]
+
+function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
+
 function sortLeaderboard(entries) {
   return [...entries]
     .sort((a, b) =>
@@ -354,8 +365,9 @@ function drawParticles(ctx, parts, t) {
   }
 }
 
-function drawFlower(ctx, x, y, r, alpha, t, tier) {
+function drawFlower(ctx, x, y, r, alpha, t, tier, tick) {
   const tv = tier || 0
+  if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.1
   const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
   ctx.globalAlpha = Math.min(alpha, 1)
 
@@ -686,6 +698,7 @@ export default function Vredepad({ onClose }) {
   const [seedBubble, setSeedBubble] = useState(null)
   const [genadeFlash, setGenadeFlash] = useState('')
   const [stormAnnounce, setStormAnnounce] = useState(null)
+  const [lastTruthText, setLastTruthText] = useState('')
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -732,6 +745,13 @@ export default function Vredepad({ onClose }) {
     const t = setTimeout(() => setCountdown(c => c - 1), 1000)
     return () => clearTimeout(t)
   }, [screen, countdown])
+
+  // ── Stil Oomblik ──
+  useEffect(() => {
+    if (screen !== 'stiloomblik') return
+    const t = setTimeout(() => setScreen('levelup'), 2800)
+    return () => clearTimeout(t)
+  }, [screen])
 
   function buildGame(level, W, H) {
     const t  = THEMES[(level - 1) % THEMES.length]
@@ -780,7 +800,7 @@ export default function Vredepad({ onClose }) {
       truthStreak: 0,
       genadeKruis: null, genadeUsed: false, genadeActive: 0,
       weedHitsRound: 0, vredekring: null, vredekringUsed: false,
-      storm: null, stormUsed: false,
+      storm: null, stormUsed: false, stormBeaten: false,
     }
   }
 
@@ -864,9 +884,17 @@ export default function Vredepad({ onClose }) {
     const lastTruth = g.collectedTruths.length > 0
       ? g.collectedTruths[Math.floor(Math.random() * g.collectedTruths.length)]
       : g.truths[0]
+    const endTitle = g.stormBeaten
+      ? 'Jy het die storm deurstaan.'
+      : g.score >= 18
+        ? 'Jy het diep in die waarheid gewandel.'
+        : g.score >= 9
+          ? 'Jy het plek gemaak vir vrede.'
+          : 'Elke tree op die pad tel.'
 
     stopAmbient()
     playLevelComplete()
+    haptic([50, 30, 80])
 
     const collected    = [...g.collectedTruths]
     const isNewRecord  = g.score > (save.best || 0)
@@ -882,15 +910,16 @@ export default function Vredepad({ onClose }) {
       const newTotalScore = (save.totalScore || 0) + g.score
       saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
       setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock, totalScore: newTotalScore })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock, totalScore: newTotalScore, endTitle })
       checkAndUpdateLeaderboard(newTotal, newTotalScore).catch(() => {})
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null, totalScore: save.totalScore || 0 })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null, totalScore: save.totalScore || 0, endTitle })
     }
     setCombo(0)
-    setScreen('levelup')
+    setLastTruthText('')
+    setScreen('stiloomblik')
   }
 
   useEffect(() => {
@@ -1029,6 +1058,7 @@ export default function Vredepad({ onClose }) {
           const gt = genadeTruths[Math.floor(Math.random() * genadeTruths.length)]
           g.floats.push({ id: g.tick + 200, x: g.W / 2, y: g.H * 0.42, text: gt, age: 0, maxAge: 260, isWeed: false, startFull: true, fontSize: 20 })
           g.score += 100; setScore(g.score)
+          haptic([35, 25, 35, 25, 70])
           const flashMsgs = ['✦ Genade Oomblik ✦', '✦ Gedagtes Weggestoot ✦', '✦ Waarheid Verslind Twyfel ✦', '✦ Vrede Oorwin Alles ✦']
           setGenadeFlash(flashMsgs[Math.min(kTier, 3)])
           setTimeout(() => setGenadeFlash(''), 2600)
@@ -1048,8 +1078,9 @@ export default function Vredepad({ onClose }) {
         if (g.vredekring.life > 200) g.vredekring = null
       }
 
-      // Storm van Gedagtes — level 10+, triggers once per level at score 10
-      if (!g.stormUsed && g.level >= 10 && g.score >= 10 && !g.storm && !g.genadeKruis && g.genadeActive <= 0) {
+      // Storm van Gedagtes — level 10+, triggers at score 10 (and again at L30+ after first clears)
+      const stormTriggerScore = g.storm2Trigger || 10
+      if (!g.stormUsed && g.level >= 10 && g.score >= stormTriggerScore && !g.storm && !g.genadeKruis && g.genadeActive <= 0) {
         const extras = []
         for (let i = 0; i < 2; i++) {
           if (g.weeds.length + extras.length < 8) {
@@ -1132,13 +1163,23 @@ export default function Vredepad({ onClose }) {
             g.bgFlash = 16
             g.timeLeft = Math.min(g.timeLeft + 8, 90)
             g.score += 150; setScore(g.score)
+            g.stormBeaten = true
+            haptic([20, 15, 20, 15, 60])
             setStormAnnounce('Die storm gaan verby.')
             setTimeout(() => setStormAnnounce(null), 4200)
           }
         } else if (st.phase === 'breaking') {
           st.overlay = Math.max(0, st.overlay - 0.004 * dt)
           for (const wl of st.windLines) wl.alpha = Math.max(0, wl.alpha - 0.01 * dt)
-          if (st.life >= 260) g.storm = null
+          if (st.life >= 260) {
+            g.storm = null
+            // Allow a second storm at L30+ — triggers 25 points after current score
+            if (g.level >= 30 && !g.storm2Used) {
+              g.stormUsed = false
+              g.storm2Trigger = g.score + 25
+              g.storm2Used = true
+            }
+          }
         }
       }
 
@@ -1181,6 +1222,8 @@ export default function Vredepad({ onClose }) {
           g.justHit = false
           g.floats.push({ id: g.tick + g.score, x: s.x, y: findFloatY(g.floats, s.y - 8, s.x), text: floatText, age: 0, maxAge: 150, isWeed: false })
           g.bgFlash = 6
+          setLastTruthText(floatText)
+          haptic(35)
           g.truthStreak++
           if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed && !g.storm) {
             const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 80)
@@ -1216,6 +1259,7 @@ export default function Vredepad({ onClose }) {
             g.weedHitsRound++
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
             g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 130, isWeed: true })
+            haptic([55, 20, 55])
             if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
               g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
               g.vredekringUsed = true
@@ -1233,6 +1277,7 @@ export default function Vredepad({ onClose }) {
       for (const f of g.flowers) {
         if (f.life < 60) f.life += dt
       }
+      if (g.flowers.length > 60) g.flowers.splice(0, g.flowers.length - 60)
 
       setScore(g.score)
       setTime(Math.ceil(g.timeLeft))
@@ -1257,7 +1302,7 @@ export default function Vredepad({ onClose }) {
       const lvlTier = Math.floor((g.level - 1) / 10)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
-        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0)
+        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, f.life >= 60 ? g.tick : 0)
         if (f.life < 28) {
           const bp = f.life / 28
           const bRing = 6 + bp * (36 + (f.tier || 0) * 12)
@@ -1267,7 +1312,6 @@ export default function Vredepad({ onClose }) {
           ctx.lineWidth = 3 - bp * 2
           ctx.stroke()
         }
-        if (f.life < 60) f.life += dt
       }
       if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
@@ -1332,20 +1376,30 @@ export default function Vredepad({ onClose }) {
     }
   }
 
-  function onTouchStart(e) {
-    const t = e.touches[0]
-    touchRef.current = { x: t.clientX, y: t.clientY }
+  function getTouchDir(clientX, clientY) {
+    if (!gameRef.current || !canvasRef.current) return
+    const rect = canvasRef.current.getBoundingClientRect()
+    const tx = clientX - rect.left
+    const ty = clientY - rect.top
+    const p  = gameRef.current.player
+    const vx = tx - p.x
+    const vy = ty - p.y
+    const dist = Math.sqrt(vx * vx + vy * vy)
+    if (dist > 12) { p.dx = vx / dist; p.dy = vy / dist }
   }
 
-  function onTouchEnd(e) {
-    if (!gameRef.current) return
-    const t  = e.changedTouches[0]
-    const dx = t.clientX - touchRef.current.x
-    const dy = t.clientY - touchRef.current.y
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
-    const p = gameRef.current.player
-    if (Math.abs(dx) >= Math.abs(dy)) { p.dx = dx > 0 ? 1 : -1; p.dy = 0 }
-    else                               { p.dx = 0; p.dy = dy > 0 ? 1 : -1 }
+  function onTouchStart(e) {
+    e.preventDefault()
+    getTouchDir(e.touches[0].clientX, e.touches[0].clientY)
+  }
+
+  function onTouchMove(e) {
+    e.preventDefault()
+    getTouchDir(e.touches[0].clientX, e.touches[0].clientY)
+  }
+
+  function onTouchEnd() {
+    // keep last direction — player continues gliding until next touch
   }
 
   /* ── Intro ── */
@@ -1428,8 +1482,9 @@ export default function Vredepad({ onClose }) {
               const myRank = leaderboard.findIndex(e => e.userId === myUid)
               if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 5. ✨</p>
               const last = leaderboard[leaderboard.length - 1]
-              const close = last && leaderboard.length >= 5 && (last.level - totalLevels) <= 15
-              return <p className="vp-lb-motivation">{close ? 'Jy is naby aan die Vredepad Top 5. Hou aan stap!' : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 5.'}</p>
+              const gap = last ? last.level - totalLevels : 999
+              const close = leaderboard.length >= 5 && gap <= 12
+              return <p className="vp-lb-motivation">{close ? `Nog ${gap} ${gap === 1 ? 'vlak' : 'vlakke'} om ${last.displayName} te klop! 🏅` : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 5.'}</p>
             })()}
             <p className="vp-lb-120">🌙 Bereik Vlak 120 en ontsluit Rustelose Gedagtes gratis.</p>
           </div>
@@ -1492,14 +1547,26 @@ export default function Vredepad({ onClose }) {
     )
   }
 
+  /* ── Stil Oomblik — brief pause before end screen ── */
+  if (screen === 'stiloomblik' && endData) {
+    const d = endData
+    const t = THEMES[(d.level - 1) % THEMES.length]
+    return (
+      <div className="vp-stiloomblik" style={{ background: t.bg0 }}>
+        <p className="vp-stilte-truth">"{d.lastTruth}"</p>
+      </div>
+    )
+  }
+
   /* ── Countdown ── */
   if (screen === 'countdown') {
-    const level = pendingLevel.current
-    const t     = THEMES[(level - 1) % THEMES.length]
+    const level  = pendingLevel.current
+    const t      = THEMES[(level - 1) % THEMES.length]
+    const phrase = COUNTDOWN_PHRASES[(level - 1) % COUNTDOWN_PHRASES.length]
     return (
       <div className="vp-overlay vp-countdown-screen" style={{ background: t.bg0 }}>
         <div className="vp-countdown-body">
-          <p className="vp-countdown-prompt">Haal diep asem. Jy is veilig hier.</p>
+          <p className="vp-countdown-prompt">{phrase}</p>
           <div className="vp-countdown-num" style={{ color: t.player }}>
             {countdown > 0 ? countdown : '🌿'}
           </div>
@@ -1527,9 +1594,9 @@ export default function Vredepad({ onClose }) {
           </button>
         </div>
         <div className="vp-truth-bar">
-          <span className="vp-truth-text">Haal asem. Laat die gedagte gaan. Jy is veilig hier.</span>
+          <span className="vp-truth-text">{lastTruthText || 'Haal asem. Laat die gedagte gaan. Jy is veilig hier.'}</span>
         </div>
-        <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
           {combo >= 2 && (
             <div className={`vp-combo-badge${combo >= 5 ? ' vp-combo-hot' : ''}`}>
@@ -1558,7 +1625,7 @@ export default function Vredepad({ onClose }) {
       <div className="vp-overlay vp-end" style={{ background: t.bg0 }}>
         <div className="vp-end-body">
           <div className="vp-end-icon">🌿</div>
-          <h2 className="vp-end-title">Jy het plek gemaak vir vrede.</h2>
+          <h2 className="vp-end-title">{d.endTitle || 'Jy het plek gemaak vir vrede.'}</h2>
           <p className="vp-end-level">Vredepad {d.level} voltooi</p>
 
           <div className="vp-stats-row">
@@ -1589,9 +1656,11 @@ export default function Vredepad({ onClose }) {
             const myRank = leaderboard.findIndex(e => e.userId === myUid)
             if (myRank >= 0) return null
             const last = leaderboard[leaderboard.length - 1]
-            const gap = (last.score || 0) - (d.totalScore || 0)
+            const save = loadSave()
+            const myLevels = save.totalLevels || 0
+            const gap = (last.level || 0) - myLevels
             if (gap <= 0) return null
-            return <p className="vp-end-lb-gap">Nog {gap.toLocaleString('af')} punte om {last.displayName} te klop en die Top 5 te bereik 🏅</p>
+            return <p className="vp-end-lb-gap">Nog {gap} {gap === 1 ? 'vlak' : 'vlakke'} om {last.displayName} se plek te bereik 🏅</p>
           })()}
           {d.newUnlock && (
             <div className="vp-new-unlock">
@@ -1612,6 +1681,17 @@ export default function Vredepad({ onClose }) {
           {d.lastTruth && (
             <div className="vp-end-verse">
               <p className="vp-end-verse-text">{d.lastTruth}</p>
+            </div>
+          )}
+
+          {d.collected && d.collected.length > 0 && (
+            <div className="vp-ct-section">
+              <p className="vp-ct-heading">Vandag het God vir jou gesê:</p>
+              <div className="vp-ct-list">
+                {d.collected.slice(0, 7).map((tr, i) => (
+                  <p key={i} className="vp-ct-item">"{tr}"</p>
+                ))}
+              </div>
             </div>
           )}
 

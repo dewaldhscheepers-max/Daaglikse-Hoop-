@@ -1207,3 +1207,79 @@
   animation: vp-bonus-pop 2.4s ease forwards;
   z-index: 25;
 }
+
+/* ─── Stil Oomblik (brief pause between game and end screen) ─── */
+.vp-stiloomblik {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 36px;
+  animation: vp-stilte-in 2.8s ease forwards;
+}
+
+@keyframes vp-stilte-in {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  72%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.vp-stilte-truth {
+  font-size: clamp(19px, 5vw, 26px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.55;
+  text-align: center;
+  font-style: italic;
+  max-width: 340px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* ─── Dynamic truth bar ─── */
+.vp-truth-text {
+  transition: opacity 0.4s ease;
+}
+
+/* ─── Collected Truths (end screen) ─── */
+.vp-ct-section {
+  width: 100%;
+  max-width: 340px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 18px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vp-ct-heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+.vp-ct-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vp-ct-item {
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  border-left: 3px solid rgba(91, 155, 213, 0.4);
+}
