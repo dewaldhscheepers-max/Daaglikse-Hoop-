@@ -1109,7 +1109,7 @@ export default function Vredepad({ onClose }) {
             const consumeR = 195
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -1123,7 +1123,7 @@ export default function Vredepad({ onClose }) {
             // L40+: Consume all within large radius, max slow
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 26, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
                 return false
               }
               return true
@@ -1274,7 +1274,7 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
@@ -1362,8 +1362,8 @@ export default function Vredepad({ onClose }) {
         ps.pulse += 0.05 * dt
         if (d2(p, ps) < 28) {
           g.score++
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 28, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 32, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
           const bt = ps.truth
           g.promiseSeed = null
           g.promisePause = 90
@@ -1381,7 +1381,7 @@ export default function Vredepad({ onClose }) {
           g.flowers.push({
             x: 14 + Math.random() * (g.W - 28),
             y: 14 + Math.random() * (g.H - 28),
-            life: 0, r: 15 + Math.random() * 20,
+            life: 0, r: 22 + Math.random() * 18,
             tier: Math.floor((g.level - 1) / 10),
             type: Math.floor(Math.random() * flowerImages.length)
           })
