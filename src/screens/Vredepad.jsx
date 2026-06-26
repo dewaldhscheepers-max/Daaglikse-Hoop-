@@ -12,6 +12,7 @@ const FREE_REWARD_BOOKS = [
 ]
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
+const FLOWER_PLANTS  = ['🌸', '🌻', '🌿', '🌷', '🌺', '🌼', '🌱', '🍀', '🌾', '🍃']
 
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
@@ -367,7 +368,7 @@ function drawParticles(ctx, parts, t) {
   }
 }
 
-function drawFlower(ctx, x, y, r, alpha, t, tier, tick) {
+function drawFlower(ctx, x, y, r, alpha, t, tier, tick, plant) {
   const tv = tier || 0
   if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.1
   const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
@@ -402,17 +403,22 @@ function drawFlower(ctx, x, y, r, alpha, t, tier, tick) {
     ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
   }
 
-  // Centre
-  ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
-  // Centre highlight tier 1+
-  if (tv >= 1) {
-    ctx.beginPath(); ctx.arc(x, y, r * 0.26, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,215,0.82)'; ctx.fill()
-  }
-  // Centre sparkle tier 3+
-  if (tv >= 3) {
-    ctx.beginPath(); ctx.arc(x, y, r * 0.12, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill()
+  // Centre — emoji plant or plain circle
+  if (plant) {
+    ctx.font = `${Math.max(8, Math.round(r * 0.98))}px serif`
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.globalAlpha = Math.min(alpha * 1.4, 1)
+    ctx.fillText(plant, x, y + 1)
+  } else {
+    ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
+    if (tv >= 1) {
+      ctx.beginPath(); ctx.arc(x, y, r * 0.26, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,215,0.82)'; ctx.fill()
+    }
+    if (tv >= 3) {
+      ctx.beginPath(); ctx.arc(x, y, r * 0.12, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill()
+    }
   }
   ctx.globalAlpha = 1
 }
@@ -1081,7 +1087,7 @@ export default function Vredepad({ onClose }) {
             const consumeR = 195
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -1095,7 +1101,7 @@ export default function Vredepad({ onClose }) {
             // L40+: Consume all within large radius, max slow
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
                 return false
               }
               return true
@@ -1246,7 +1252,7 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10) })
+          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
@@ -1334,8 +1340,8 @@ export default function Vredepad({ onClose }) {
         ps.pulse += 0.05 * dt
         if (d2(p, ps) < 28) {
           g.score++
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10) })
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
           const bt = ps.truth
           g.promiseSeed = null
           g.promisePause = 90
@@ -1377,7 +1383,7 @@ export default function Vredepad({ onClose }) {
       const lvlTier = Math.floor((g.level - 1) / 10)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
-        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, f.life >= 60 ? g.tick : 0)
+        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, f.life >= 60 ? g.tick : 0, f.plant)
         if (f.life < 28) {
           const bp = f.life / 28
           const bRing = 6 + bp * (36 + (f.tier || 0) * 12)
