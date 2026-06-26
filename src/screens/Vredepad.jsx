@@ -370,20 +370,15 @@ function drawParticles(ctx, parts, t) {
 
 function drawFlower(ctx, x, y, r, alpha, t, tier, tick, plant) {
   const tv = tier || 0
-  if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.1
+  if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.045
   const a = Math.min(alpha, 1)
   ctx.globalAlpha = a
 
   if (plant) {
-    // Emoji-plant: sagte gloed + emoji, geen canvas-petals nie
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8)
-    glow.addColorStop(0, `rgba(255,230,120,${a * 0.45})`)
-    glow.addColorStop(1, 'rgba(255,230,120,0)')
-    ctx.fillStyle = glow
-    ctx.beginPath(); ctx.arc(x, y, r * 2.8, 0, Math.PI * 2); ctx.fill()
+    // Emoji-plant: geen gloed, net die emoji
     ctx.font = `${Math.max(10, Math.round(r * 1.55))}px serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.globalAlpha = Math.min(a * 1.3, 1)
+    ctx.globalAlpha = Math.min(a, 1)
     ctx.fillText(plant, x, y + 1)
   } else {
     // Original canvas-petal flower
@@ -1365,11 +1360,11 @@ export default function Vredepad({ onClose }) {
       // Garden moment — fill canvas with flowers, then end level
       if (g.gardenMode) {
         g.gardenTime += dt
-        if (g.flowers.length < 110 && Math.random() < 0.38) {
+        if (g.flowers.length < 55 && Math.random() < 0.38) {
           g.flowers.push({
             x: 14 + Math.random() * (g.W - 28),
             y: 14 + Math.random() * (g.H - 28),
-            life: 0, r: 7 + Math.random() * 10,
+            life: 0, r: 15 + Math.random() * 20,
             tier: Math.floor((g.level - 1) / 10),
             plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)]
           })
@@ -1412,7 +1407,7 @@ export default function Vredepad({ onClose }) {
       const lvlTier = Math.floor((g.level - 1) / 10)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
-        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, f.life >= 60 ? g.tick : 0, f.plant)
+        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, !g.gardenMode && f.life >= 60 ? g.tick : 0, f.plant)
         if (f.life < 28) {
           const bp = f.life / 28
           const bRing = 6 + bp * (36 + (f.tier || 0) * 12)
