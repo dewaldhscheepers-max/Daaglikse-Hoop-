@@ -1239,7 +1239,7 @@ export default function Vredepad({ onClose }) {
           g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 32, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
           const bt = ps.truth
           g.promiseSeed = null
-          g.promisePause = 90
+          g.promisePause = 210
           setPromiseMoment(bt)
           haptic([30, 20, 30, 20, 30, 20, 80])
         }
