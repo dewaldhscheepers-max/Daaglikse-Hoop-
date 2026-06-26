@@ -20,7 +20,7 @@ const flowerImages = Array.from({ length: 11 }, (_, i) => {
   return img
 })
 
-const bgImages = Array.from({ length: 10 }, (_, i) => {
+const bgImages = Array.from({ length: 15 }, (_, i) => {
   const img = new Image()
   img.src = `/bg/bg${i}.webp`
   return img
@@ -804,7 +804,7 @@ export default function Vredepad({ onClose }) {
 
   function buildGame(level, W, H) {
     const t  = THEMES[(level - 1) % THEMES.length]
-    const bgIdx = Math.floor((loadSave().totalLevels || 0) / 5) % 10
+    const bgIdx = Math.floor((loadSave().totalLevels || 0) / 5) % 15
     const sc = 3 + Math.min(Math.floor((level - 1) / 5), 3)
     const wc = 2 + Math.min(Math.floor((level - 1) / 3), 6)
     const sp = 1.5 + Math.min((level - 1) * 0.08, 1.5)
