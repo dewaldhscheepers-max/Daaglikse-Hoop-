@@ -12,7 +12,16 @@ const FREE_REWARD_BOOKS = [
 ]
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
-const FLOWER_PLANTS  = ['🌸', '🌻', '🌿', '🌷', '🌺', '🌼', '🌱', '🍀', '🌾', '🍃']
+const GARDEN_FLOWERS = [
+  { n: 14, pw: 0.22, pl: 1.12, p1: '#FFFFFF', p2: '#EEE0CC', c1: '#FFD700', c2: '#E89800' }, // white daisy
+  { n: 20, pw: 0.24, pl: 1.22, p1: '#FFE500', p2: '#D87800', c1: '#3D1800', c2: '#6D3800' }, // sunflower
+  { n: 12, pw: 0.32, pl: 1.02, p1: '#FFB8D0', p2: '#FF3878', c1: '#FFE000', c2: '#FFB000' }, // pink gerbera
+  { n:  8, pw: 0.48, pl: 0.88, p1: '#DDB8F0', p2: '#8840C0', c1: '#FFFFF8', c2: '#EEE0FF' }, // lavender
+  { n:  8, pw: 0.52, pl: 0.90, p1: '#FF9090', p2: '#CC0030', c1: '#FFD700', c2: '#E89800' }, // red
+  { n: 16, pw: 0.26, pl: 1.08, p1: '#FFB800', p2: '#E85000', c1: '#6B3800', c2: '#4A2600' }, // orange marigold
+  { n:  8, pw: 0.36, pl: 0.96, p1: '#A0D8FF', p2: '#1870D8', c1: '#FFFFFF', c2: '#D8EEFF' }, // blue cornflower
+  { n:  5, pw: 0.62, pl: 0.84, p1: '#FFD8E8', p2: '#FF80B0', c1: '#FFE000', c2: '#FFCCEE' }, // cherry blossom
+]
 
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
@@ -368,50 +377,54 @@ function drawParticles(ctx, parts, t) {
   }
 }
 
-function drawFlower(ctx, x, y, r, alpha, t, tier, tick, plant) {
+function drawFlower(ctx, x, y, r, alpha, t, tier, tick, flowerType) {
   const tv = tier || 0
   if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.045
   const a = Math.min(alpha, 1)
+  const fi = ((flowerType ?? 0)) % GARDEN_FLOWERS.length
+  const fd = GARDEN_FLOWERS[fi]
+
   ctx.globalAlpha = a
 
-  if (plant) {
-    // Emoji-plant: geen gloed, net die emoji
-    ctx.font = `${Math.max(10, Math.round(r * 1.55))}px serif`
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.globalAlpha = Math.min(a, 1)
-    ctx.fillText(plant, x, y + 1)
-  } else {
-    // Original canvas-petal flower
-    const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
-    if (tv >= 2) {
-      const aura = ctx.createRadialGradient(x, y, 0, x, y, r * 3.4)
-      aura.addColorStop(0, `rgba(255,225,100,${a * 0.24})`); aura.addColorStop(1, 'rgba(255,225,100,0)')
-      ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, Math.PI * 2); ctx.fill()
+  // Inner offset petal ring at tier 2+ (gives double-layer depth)
+  if (tv >= 2) {
+    const offAng = Math.PI / fd.n
+    for (let i = 0; i < fd.n; i++) {
+      const ang = (i / fd.n) * Math.PI * 2 + offAng
+      ctx.save()
+      ctx.translate(x + Math.cos(ang) * r * fd.pl * 0.7, y + Math.sin(ang) * r * fd.pl * 0.7)
+      ctx.rotate(ang)
+      ctx.beginPath()
+      ctx.ellipse(0, 0, r * fd.pw * 0.7, r * fd.pl * 0.7, 0, 0, Math.PI * 2)
+      ctx.fillStyle = fd.p2; ctx.globalAlpha = a * 0.72; ctx.fill()
+      ctx.restore()
     }
-    if (tv >= 2) {
-      for (let i = 0; i < petalCount; i++) {
-        const ang = (i / petalCount) * Math.PI * 2 + Math.PI / petalCount
-        ctx.save(); ctx.translate(x + Math.cos(ang) * r * 0.88, y + Math.sin(ang) * r * 0.88); ctx.rotate(ang)
-        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.3, r * 0.5, 0, 0, Math.PI * 2)
-        ctx.fillStyle = t.petals[(i + 2) % t.petals.length]; ctx.fill(); ctx.restore()
-      }
-    }
-    for (let i = 0; i < petalCount; i++) {
-      const ang = (i / petalCount) * Math.PI * 2
-      ctx.save(); ctx.translate(x + Math.cos(ang) * r * 1.3, y + Math.sin(ang) * r * 1.3); ctx.rotate(ang)
-      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2)
-      ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
-    }
-    ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
-    if (tv >= 1) {
-      ctx.beginPath(); ctx.arc(x, y, r * 0.26, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255,255,215,0.82)'; ctx.fill()
-    }
-    if (tv >= 3) {
-      ctx.beginPath(); ctx.arc(x, y, r * 0.12, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill()
-    }
+    ctx.globalAlpha = a
   }
+
+  // Outer petals with tip-to-base gradient
+  for (let i = 0; i < fd.n; i++) {
+    const ang = (i / fd.n) * Math.PI * 2
+    ctx.save()
+    ctx.translate(x + Math.cos(ang) * r * fd.pl, y + Math.sin(ang) * r * fd.pl)
+    ctx.rotate(ang)
+    const pg = ctx.createLinearGradient(0, r * fd.pl * 0.3, 0, -r * fd.pl * 0.6)
+    pg.addColorStop(0, fd.p2); pg.addColorStop(1, fd.p1)
+    ctx.beginPath(); ctx.ellipse(0, 0, r * fd.pw, r * fd.pl, 0, 0, Math.PI * 2)
+    ctx.fillStyle = pg; ctx.globalAlpha = a; ctx.fill()
+    ctx.restore()
+  }
+
+  // Center with radial gradient
+  const cg = ctx.createRadialGradient(x - r * 0.14, y - r * 0.14, r * 0.04, x, y, r * 0.5)
+  cg.addColorStop(0, fd.c2); cg.addColorStop(1, fd.c1)
+  ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, Math.PI * 2)
+  ctx.fillStyle = cg; ctx.globalAlpha = a; ctx.fill()
+
+  // Center highlight
+  ctx.beginPath(); ctx.arc(x - r * 0.18, y - r * 0.2, r * 0.17, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill()
+
   ctx.globalAlpha = 1
 }
 
@@ -1092,7 +1105,7 @@ export default function Vredepad({ onClose }) {
             const consumeR = 195
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -1106,7 +1119,7 @@ export default function Vredepad({ onClose }) {
             // L40+: Consume all within large radius, max slow
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
                 return false
               }
               return true
@@ -1257,7 +1270,7 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
+          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
@@ -1345,8 +1358,8 @@ export default function Vredepad({ onClose }) {
         ps.pulse += 0.05 * dt
         if (d2(p, ps) < 28) {
           g.score++
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)] })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
           const bt = ps.truth
           g.promiseSeed = null
           g.promisePause = 90
@@ -1366,7 +1379,7 @@ export default function Vredepad({ onClose }) {
             y: 14 + Math.random() * (g.H - 28),
             life: 0, r: 15 + Math.random() * 20,
             tier: Math.floor((g.level - 1) / 10),
-            plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)]
+            type: Math.floor(Math.random() * GARDEN_FLOWERS.length)
           })
         }
         if (g.gardenTime >= 90 && !g._verseShown) {
@@ -1407,7 +1420,7 @@ export default function Vredepad({ onClose }) {
       const lvlTier = Math.floor((g.level - 1) / 10)
       for (const f of g.flowers) {
         const growFrac = Math.min(f.life / 60, 1)
-        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, !g.gardenMode && f.life >= 60 ? g.tick : 0, f.plant)
+        drawFlower(ctx, f.x, f.y, f.r * (1 + growFrac * 0.8), growFrac, g.t, f.tier || 0, !g.gardenMode && f.life >= 60 ? g.tick : 0, f.type)
         if (f.life < 28) {
           const bp = f.life / 28
           const bRing = 6 + bp * (36 + (f.tier || 0) * 12)
