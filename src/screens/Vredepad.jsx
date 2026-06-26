@@ -95,16 +95,20 @@ function sortLeaderboard(entries) {
       b.score - a.score ||
       ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0))
     )
-    .slice(0, 5)
+    .slice(0, 10)
 }
 
-const BLOCKED_NAMES = ['admin', 'daaglikse', 'daagliksehoop', 'pastoor', 'official', 'moderator']
+const BLOCKED_NAMES = [
+  'admin', 'daaglikse', 'daagliksehoop', 'pastoor', 'official', 'moderator',
+  'fok', 'fokof', 'poef', 'kak', 'poes', 'moer', 'doos', 'bliksem', 'naai', 'slet', 'hoer', 'teef',
+  'fuck', 'shit', 'bitch', 'cunt', 'dick', 'cock', 'pussy', 'asshole', 'bastard', 'whore', 'slut',
+  'nigger', 'nigga', 'faggot',
+]
 
 function validateDisplayName(name) {
   const t = name.trim()
   if (!t) return 'Voer asseblief \'n naam in.'
   if (t.length > 20) return 'Naam moet korter as 21 karakters wees.'
-  if (/^[\s\W\d]+$/.test(t)) return 'Kies asseblief \'n ander naam.'
   const lower = t.toLowerCase()
   if (BLOCKED_NAMES.some(b => lower.includes(b))) return 'Kies asseblief \'n ander naam.'
   return null
@@ -777,7 +781,7 @@ export default function Vredepad({ onClose }) {
       }
 
       const last = sorted[sorted.length - 1]
-      const qualifies = sorted.length < 5 ||
+      const qualifies = sorted.length < 10 ||
         lbLevel > last.level ||
         (lbLevel === last.level && lbScore > last.score)
       if (qualifies && !alreadyAsked) {
@@ -813,7 +817,7 @@ export default function Vredepad({ onClose }) {
       const rank = sorted.findIndex(e => e.userId === anonUidRef.current) + 1
       setShowNameConsent(false)
       setConsentName(''); setConsentChecked(false); setConsentError('')
-      setLbCelebration({ rank: rank > 0 ? rank : 5, isNew: true,
+      setLbCelebration({ rank: rank > 0 ? rank : 10, isNew: true,
         level: pendingLbRef.current.level, score: pendingLbRef.current.score })
       pendingLbRef.current = null
     } catch {
@@ -1510,10 +1514,10 @@ export default function Vredepad({ onClose }) {
             Begin van voor af
           </button>
           <div className="vp-leaderboard">
-            <p className="vp-lb-title">Vredepad Top 5</p>
+            <p className="vp-lb-title">Vredepad Top 10</p>
             <p className="vp-lb-sub">Hier is die mense wat die verste op die Vredepad gestap het.</p>
             {leaderboard.length === 0 ? (
-              <p className="vp-lb-empty">Nog niemand op die Top 5 nie. Jy kan die eerste wees!</p>
+              <p className="vp-lb-empty">Nog niemand op die Top 10 nie. Jy kan die eerste wees!</p>
             ) : (
               leaderboard.map((entry, i) => (
                 <div key={entry.userId} className={`vp-lb-row${entry.userId === myUid ? ' mine' : ''}`}>
@@ -1528,11 +1532,11 @@ export default function Vredepad({ onClose }) {
             )}
             {(() => {
               const myRank = leaderboard.findIndex(e => e.userId === myUid)
-              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 5. ✨</p>
+              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 10. ✨</p>
               const last = leaderboard[leaderboard.length - 1]
               const gap = last ? last.level - totalLevels : 999
-              const close = leaderboard.length >= 5 && gap <= 12
-              return <p className="vp-lb-motivation">{close ? `Nog ${gap} ${gap === 1 ? 'vlak' : 'vlakke'} om ${last.displayName} te klop! 🏅` : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 5.'}</p>
+              const close = leaderboard.length >= 10 && gap <= 12
+              return <p className="vp-lb-motivation">{close ? `Nog ${gap} ${gap === 1 ? 'vlak' : 'vlakke'} om ${last.displayName} te klop! 🏅` : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 10.'}</p>
             })()}
             <p className="vp-lb-120">🌙 Bereik Vlak 120 en ontsluit Rustelose Gedagtes gratis.</p>
           </div>
@@ -1734,14 +1738,14 @@ export default function Vredepad({ onClose }) {
           {lbCelebration && (
             <div className="vp-lb-cel">
               <p className="vp-lb-cel-title">
-                {lbCelebration.isNew ? '🎖️ Jy het die Vredepad Top 5 bereik!' : '✨ Jy het jou rekord verbeter!'}
+                {lbCelebration.isNew ? '🎖️ Jy het die Vredepad Top 10 bereik!' : '✨ Jy het jou rekord verbeter!'}
               </p>
-              <p className="vp-lb-cel-rank">Jy is nommer {lbCelebration.rank} op die Top 5</p>
+              <p className="vp-lb-cel-rank">Jy is nommer {lbCelebration.rank} op die Top 10</p>
               <p className="vp-lb-cel-stats">Vlak {lbCelebration.level} · {(lbCelebration.score || 0).toLocaleString('af')} punte</p>
             </div>
           )}
 
-          {!lbCelebration && leaderboard.length >= 5 && (() => {
+          {!lbCelebration && leaderboard.length >= 10 && (() => {
             const myRank = leaderboard.findIndex(e => e.userId === myUid)
             if (myRank >= 0) return null
             const last = leaderboard[leaderboard.length - 1]
@@ -1812,7 +1816,7 @@ export default function Vredepad({ onClose }) {
           <div className="vp-consent-backdrop">
             <div className="vp-consent-modal">
               <div className="vp-consent-icon">🎖️</div>
-              <h3 className="vp-consent-title">Jy het die Vredepad Top 5 bereik!</h3>
+              <h3 className="vp-consent-title">Jy het die Vredepad Top 10 bereik!</h3>
               <p className="vp-consent-sub">Kies die naam wat jy op die lys wil wys.</p>
               <input
                 className="vp-consent-input"
@@ -1828,11 +1832,11 @@ export default function Vredepad({ onClose }) {
                   checked={consentChecked}
                   onChange={e => { setConsentChecked(e.target.checked); setConsentError('') }}
                 />
-                <span>Ek verstaan dat hierdie naam, my vlak en my punte publiek op die Vredepad Top 5 gewys sal word totdat iemand my plek verbysteek.</span>
+                <span>Ek verstaan dat hierdie naam, my vlak en my punte publiek op die Vredepad Top 10 gewys sal word totdat iemand my plek verbysteek.</span>
               </label>
               {consentError && <p className="vp-consent-error">{consentError}</p>}
               <button className="vp-consent-submit" onClick={() => submitLeaderboardEntry(false)}>
-                Plaas my op die Top 5
+                Plaas my op die Top 10
               </button>
               <button className="vp-consent-anon" onClick={() => submitLeaderboardEntry(true)}>
                 Bly anoniem
