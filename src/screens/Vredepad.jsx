@@ -948,7 +948,17 @@ export default function Vredepad({ onClose }) {
       }
 
       // Genade-Kruis
-      if (g.genadeActive > 0) g.genadeActive -= dt
+      if (g.genadeActive > 0) {
+        g.genadeActive -= dt
+        if (g.genadeActive <= 0) {
+          g.genadeActive = 0
+          // Reset pushed weed velocities so they don't fly at full speed after grace expires
+          for (const w of g.weeds) {
+            w.dx = (Math.random() - 0.5) * 0.4
+            w.dy = (Math.random() - 0.5) * 0.4
+          }
+        }
+      }
       if (g.genadeKruis) {
         g.genadeKruis.life += dt
         if (g.genadeKruis.life > g.genadeKruis.maxLife) {
