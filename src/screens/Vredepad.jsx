@@ -13,8 +13,8 @@ const FREE_REWARD_BOOKS = [
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 
-// 10 watercolour botanical flowers (f0–f9.webp, transparent bg)
-const flowerImages = Array.from({ length: 10 }, (_, i) => {
+// 11 watercolour top-down blooms (f0–f10.webp, transparent bg)
+const flowerImages = Array.from({ length: 11 }, (_, i) => {
   const img = new Image()
   img.src = `/flowers/f${i}.webp`
   return img
@@ -415,11 +415,10 @@ function drawFlower(ctx, x, y, r, alpha, t, tier, tick, flowerType) {
   const a = Math.min(alpha, 1)
   const img = flowerImages[(flowerType ?? 0) % flowerImages.length]
   if (!img.complete) return
-  // Each image is flower-head (top ~45%) + stem+leaves (bottom ~55%)
-  // Draw so the flower HEAD is centred at (x, y); stem hangs below
-  const iw = r * 2          // image draw width
-  const ih = r * 2 * 1.55   // image draw height (taller for stem)
-  const iy = y - r * 0.82   // shift up so head (~45% down image) lands at y
+  // Square top-down blooms — centred at (x, y)
+  const iw = r * 2
+  const ih = r * 2
+  const iy = y - r
   // Warm glow halo around the flower head
   const haloR = r * 1.5
   const halo = ctx.createRadialGradient(x, y, r * 0.18, x, y, haloR)
