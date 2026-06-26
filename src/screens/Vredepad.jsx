@@ -13,8 +13,8 @@ const FREE_REWARD_BOOKS = [
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 const FLOWER_SVGS = [
-  // 0: White daisy — 12 narrow white petals, golden centre
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="a1" cx="36%" cy="32%"><stop offset="0%" stop-color="#FFF9C4"/><stop offset="65%" stop-color="#FFD600"/><stop offset="100%" stop-color="#F9A825"/></radialGradient></defs><g fill="#FFFDE7" stroke="#DDD0A8" stroke-width="0.6"><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(0)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(30)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(60)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(90)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(120)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(150)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(180)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(210)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(240)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(270)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(300)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(330)"/></g><circle r="13" fill="url(#a1)"/><circle r="6" cx="-4" cy="-4" fill="#FFFF88" opacity="0.45"/></svg>`,
+  // 0: White daisy — 8 wide soft white petals, warm golden centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><filter id="f0"><feGaussianBlur stdDeviation="0.9"/></filter><radialGradient id="c0" cx="42%" cy="38%"><stop offset="0%" stop-color="#FFF9CC"/><stop offset="52%" stop-color="#FFCA28"/><stop offset="100%" stop-color="#E67C00"/></radialGradient><linearGradient id="p0" x1="0" y1="2" x2="0" y2="-42" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#EED8BE"/><stop offset="45%" stop-color="#F8F2EC"/><stop offset="100%" stop-color="#FEFEFE"/></linearGradient></defs><g filter="url(#f0)" fill="url(#p0)" stroke="#D8C8A8" stroke-width="0.5"><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(0)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(45)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(90)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(135)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(180)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(225)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(270)"/><path d="M -9,0 C -14,-14 -10,-32 0,-41 C 10,-32 14,-14 9,0 Z" transform="rotate(315)"/></g><circle r="14" fill="url(#c0)"/><circle r="6" cx="-4" cy="-4" fill="#FFFBE0" opacity="0.55"/></svg>`,
   // 1: Sunflower — 16 pointed yellow petals, dark brown centre
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="b1" cx="38%" cy="34%"><stop offset="0%" stop-color="#5A3800"/><stop offset="100%" stop-color="#2E1800"/></radialGradient></defs><g fill="#FFD600" stroke="#E8A000" stroke-width="0.4"><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(0)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(22.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(45)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(67.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(90)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(112.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(135)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(157.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(180)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(202.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(225)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(247.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(270)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(292.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(315)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(337.5)"/></g><circle r="16" fill="url(#b1)"/><circle r="8" cx="-4" cy="-4" fill="#7A4800" opacity="0.3"/></svg>`,
   // 2: Pink gerbera — 11 outer + 11 inner petals, yellow centre
@@ -379,9 +379,27 @@ function shuffleArray(arr) {
 
 /* ── Canvas draw helpers ── */
 function drawBg(ctx, W, H, t) {
-  const g = ctx.createLinearGradient(0, 0, 0, H)
-  g.addColorStop(0, t.bg0); g.addColorStop(0.55, t.bg1); g.addColorStop(1, t.bg2)
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+  // Painterly garden — warm sage green base
+  ctx.fillStyle = '#829858'
+  ctx.fillRect(0, 0, W, H)
+  // Golden sunlight haze from upper-centre
+  const sun = ctx.createRadialGradient(W * 0.5, H * 0.1, 0, W * 0.5, H * 0.1, H * 0.82)
+  sun.addColorStop(0,    'rgba(255,255,210,0.44)')
+  sun.addColorStop(0.26, 'rgba(230,248,178,0.24)')
+  sun.addColorStop(0.62, 'rgba(155,210,100,0.09)')
+  sun.addColorStop(1,    'rgba(80,120,40,0)')
+  ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H)
+  // Soft central brightness
+  const ctr = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, H * 0.5)
+  ctr.addColorStop(0,   'rgba(215,240,160,0.22)')
+  ctr.addColorStop(0.6, 'rgba(155,210,100,0.07)')
+  ctr.addColorStop(1,   'rgba(80,120,40,0)')
+  ctx.fillStyle = ctr; ctx.fillRect(0, 0, W, H)
+  // Edge vignette for depth
+  const vg = ctx.createRadialGradient(W * 0.5, H * 0.5, H * 0.18, W * 0.5, H * 0.5, H * 0.85)
+  vg.addColorStop(0, 'rgba(0,0,0,0)')
+  vg.addColorStop(1, 'rgba(28,48,10,0.40)')
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H)
 }
 
 function drawParticles(ctx, parts, t) {
@@ -396,6 +414,15 @@ function drawFlower(ctx, x, y, r, alpha, t, tier, tick, flowerType) {
   const a = Math.min(alpha, 1)
   const img = flowerImages[((flowerType ?? 0)) % flowerImages.length]
   if (!img.complete) return
+  // Soft luminous halo — warm sunlight glowing through petals
+  const haloR = r * 1.72
+  const halo = ctx.createRadialGradient(x, y, r * 0.22, x, y, haloR)
+  halo.addColorStop(0,    'rgba(255,255,220,0.38)')
+  halo.addColorStop(0.42, 'rgba(255,248,185,0.16)')
+  halo.addColorStop(1,    'rgba(255,240,160,0)')
+  ctx.globalAlpha = a * 0.9
+  ctx.fillStyle = halo
+  ctx.beginPath(); ctx.arc(x, y, haloR, 0, Math.PI * 2); ctx.fill()
   ctx.globalAlpha = a
   ctx.drawImage(img, x - r, y - r, r * 2, r * 2)
   ctx.globalAlpha = 1
@@ -445,18 +472,55 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
 }
 
 function drawWeed(ctx, x, y, pulse, t) {
-  const r = 13 + Math.sin(pulse * 0.7) * 1.5
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 1.6)
-  g.addColorStop(0, t.weed); g.addColorStop(0.55, t.weed + 'BB'); g.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.beginPath(); ctx.arc(x, y, r * 1.6, 0, Math.PI * 2)
-  ctx.fillStyle = g; ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 + pulse * 0.25
+  const r = 12 + Math.sin(pulse * 0.7) * 1.2
+  ctx.save()
+  ctx.translate(x, y)
+  // Ground shadow
+  const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2)
+  shadow.addColorStop(0,    'rgba(18,25,8,0.50)')
+  shadow.addColorStop(0.52, 'rgba(18,25,8,0.20)')
+  shadow.addColorStop(1,    'rgba(18,25,8,0)')
+  ctx.fillStyle = shadow
+  ctx.beginPath(); ctx.arc(0, 0, r * 2.2, 0, Math.PI * 2); ctx.fill()
+  // Outer sharp spines — alternating long/short
+  for (let i = 0; i < 10; i++) {
+    const ang = (i / 10) * Math.PI * 2 + pulse * 0.1
+    const tipLen = r * (i % 2 === 0 ? 1.75 : 1.1)
+    const hw = r * 0.19
+    ctx.save()
+    ctx.rotate(ang)
     ctx.beginPath()
-    ctx.moveTo(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5)
-    ctx.lineTo(x + Math.cos(a) * (r + 5), y + Math.sin(a) * (r + 5))
-    ctx.strokeStyle = t.weed; ctx.lineWidth = 1.8; ctx.globalAlpha = 0.42; ctx.stroke(); ctx.globalAlpha = 1
+    ctx.moveTo(-hw, r * 0.28)
+    ctx.lineTo(0, -tipLen)
+    ctx.lineTo(hw, r * 0.28)
+    ctx.closePath()
+    ctx.fillStyle = i % 2 === 0 ? '#282E18' : '#32381E'
+    ctx.globalAlpha = 0.90
+    ctx.fill()
+    ctx.restore()
   }
+  // Inner shorter spines offset between outer
+  for (let i = 0; i < 8; i++) {
+    const ang = ((i + 0.5) / 8) * Math.PI * 2 + pulse * 0.08
+    const tipLen = r * 0.88
+    const hw = r * 0.13
+    ctx.save()
+    ctx.rotate(ang)
+    ctx.beginPath()
+    ctx.moveTo(-hw, r * 0.1)
+    ctx.lineTo(0, -tipLen)
+    ctx.lineTo(hw, r * 0.1)
+    ctx.closePath()
+    ctx.fillStyle = '#3C4228'
+    ctx.globalAlpha = 0.72
+    ctx.fill()
+    ctx.restore()
+  }
+  // Dark centre core
+  ctx.globalAlpha = 1
+  ctx.fillStyle = '#1A1E0E'
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2); ctx.fill()
+  ctx.restore()
 }
 
 function drawPlayer(ctx, p, tick, t) {
