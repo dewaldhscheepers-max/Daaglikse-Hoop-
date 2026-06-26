@@ -13,10 +13,10 @@ const FREE_REWARD_BOOKS = [
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 
-// 10 glowing illustrated blooms (f0–f9.webp, transparent bg)
-const flowerImages = Array.from({ length: 10 }, (_, i) => {
+// 9 glowing illustrated blooms (f0–f8.webp, transparent bg)
+const flowerImages = Array.from({ length: 9 }, (_, i) => {
   const img = new Image()
-  img.src = `/flowers/f${i}.webp?v=6`
+  img.src = `/flowers/f${i}.webp?v=7`
   return img
 })
 
