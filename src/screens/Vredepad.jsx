@@ -459,54 +459,54 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
 }
 
 function drawWeed(ctx, x, y, pulse, t) {
-  const r = 12 + Math.sin(pulse * 0.7) * 1.2
+  const r = 11 + Math.sin(pulse * 0.7) * 1.0
   ctx.save()
   ctx.translate(x, y)
-  // Ground shadow
-  const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2)
-  shadow.addColorStop(0,    'rgba(18,25,8,0.50)')
-  shadow.addColorStop(0.52, 'rgba(18,25,8,0.20)')
-  shadow.addColorStop(1,    'rgba(18,25,8,0)')
+  // Soft dark earth shadow
+  const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.0)
+  shadow.addColorStop(0,    'rgba(45,30,10,0.50)')
+  shadow.addColorStop(0.55, 'rgba(45,30,10,0.18)')
+  shadow.addColorStop(1,    'rgba(45,30,10,0)')
   ctx.fillStyle = shadow
-  ctx.beginPath(); ctx.arc(0, 0, r * 2.2, 0, Math.PI * 2); ctx.fill()
-  // Outer sharp spines — alternating long/short
+  ctx.beginPath(); ctx.arc(0, 0, r * 2.0, 0, Math.PI * 2); ctx.fill()
+  // Outer thorn spines — warm dark brown, alternating lengths
   for (let i = 0; i < 10; i++) {
     const ang = (i / 10) * Math.PI * 2 + pulse * 0.1
-    const tipLen = r * (i % 2 === 0 ? 1.75 : 1.1)
-    const hw = r * 0.19
+    const tipLen = r * (i % 2 === 0 ? 1.65 : 1.05)
+    const hw = r * 0.17
     ctx.save()
     ctx.rotate(ang)
     ctx.beginPath()
-    ctx.moveTo(-hw, r * 0.28)
+    ctx.moveTo(-hw, r * 0.25)
     ctx.lineTo(0, -tipLen)
-    ctx.lineTo(hw, r * 0.28)
+    ctx.lineTo(hw, r * 0.25)
     ctx.closePath()
-    ctx.fillStyle = i % 2 === 0 ? '#282E18' : '#32381E'
-    ctx.globalAlpha = 0.90
+    ctx.fillStyle = i % 2 === 0 ? '#4A3520' : '#574028'
+    ctx.globalAlpha = 0.82
     ctx.fill()
     ctx.restore()
   }
-  // Inner shorter spines offset between outer
+  // Inner shorter spines
   for (let i = 0; i < 8; i++) {
     const ang = ((i + 0.5) / 8) * Math.PI * 2 + pulse * 0.08
-    const tipLen = r * 0.88
-    const hw = r * 0.13
+    const tipLen = r * 0.82
+    const hw = r * 0.12
     ctx.save()
     ctx.rotate(ang)
     ctx.beginPath()
-    ctx.moveTo(-hw, r * 0.1)
+    ctx.moveTo(-hw, r * 0.08)
     ctx.lineTo(0, -tipLen)
-    ctx.lineTo(hw, r * 0.1)
+    ctx.lineTo(hw, r * 0.08)
     ctx.closePath()
-    ctx.fillStyle = '#3C4228'
-    ctx.globalAlpha = 0.72
+    ctx.fillStyle = '#5E4832'
+    ctx.globalAlpha = 0.65
     ctx.fill()
     ctx.restore()
   }
-  // Dark centre core
+  // Dark warm centre
   ctx.globalAlpha = 1
-  ctx.fillStyle = '#1A1E0E'
-  ctx.beginPath(); ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = '#3A2810'
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.48, 0, Math.PI * 2); ctx.fill()
   ctx.restore()
 }
 
