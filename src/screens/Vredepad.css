@@ -1288,16 +1288,16 @@
 .vp-tutorial-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.48);
   z-index: 20;
-  pointer-events: none;
-  animation: vp-tut-overlay 8.5s ease forwards;
+  pointer-events: all;
+  animation: vp-tut-overlay 11s ease forwards;
 }
 
 @keyframes vp-tut-overlay {
   0%   { opacity: 0; }
-  6%   { opacity: 1; }
-  86%  { opacity: 1; }
+  5%   { opacity: 1; }
+  88%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
@@ -1414,22 +1414,54 @@
   100% { left: 0; }
 }
 
-/* Bottom "tap to start" hint */
-.vp-tut-hint {
+/* "Kyk hoe dit werk..." — visible during steps, fades before Begin Speel appears */
+.vp-tut-wait-lbl {
   position: absolute;
-  bottom: 12%;
+  bottom: 16%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.7);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
   margin: 0;
-  animation: vp-tut-hint-pulse 1.9s ease-in-out infinite;
+  animation: vp-tut-wait-fade 8.5s ease forwards;
 }
 
-@keyframes vp-tut-hint-pulse {
-  0%, 100% { opacity: 0.65; }
-  50%       { opacity: 1; }
+@keyframes vp-tut-wait-fade {
+  0%   { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* "Begin Speel →" button — appears after all steps complete */
+.vp-tut-begin-btn {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(255, 255, 255, 0.97);
+  border: none;
+  border-radius: 16px;
+  padding: 15px 34px;
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e3a5f;
+  cursor: pointer;
+  pointer-events: all;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  animation: vp-tut-begin-appear 0.7s 8s ease forwards;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+}
+
+.vp-tut-begin-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+@keyframes vp-tut-begin-appear {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

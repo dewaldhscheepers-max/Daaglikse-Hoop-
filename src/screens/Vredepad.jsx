@@ -754,13 +754,10 @@ export default function Vredepad({ onClose }) {
     return () => clearTimeout(t)
   }, [screen])
 
-  // ── Tutorial auto-dismiss ──
+  // ── Tutorial auto-dismiss (fallback if Begin Speel not tapped) ──
   useEffect(() => {
     if (!tutorialActive) return
-    const t = setTimeout(() => {
-      setTutorialActive(false)
-      try { localStorage.setItem('vp_tutorial_done', '1') } catch {}
-    }, 8500)
+    const t = setTimeout(dismissTutorial, 11000)
     return () => clearTimeout(t)
   }, [tutorialActive])
 
@@ -1402,12 +1399,14 @@ export default function Vredepad({ onClose }) {
     if (dist > 12) { p.dx = vx / dist; p.dy = vy / dist }
   }
 
+  function dismissTutorial() {
+    setTutorialActive(false)
+    try { localStorage.setItem('vp_tutorial_done', '1') } catch {}
+  }
+
   function onTouchStart(e) {
     e.preventDefault()
-    if (tutorialActive) {
-      setTutorialActive(false)
-      try { localStorage.setItem('vp_tutorial_done', '1') } catch {}
-    }
+    if (tutorialActive) return
     getTouchDir(e.touches[0].clientX, e.touches[0].clientY)
   }
 
@@ -1468,17 +1467,15 @@ export default function Vredepad({ onClose }) {
             </div>
           )}
           <div className="vp-hint-row">
-            <span>Gly jou vinger oor die skerm</span>
+            <span>Tik enige plek op die skerm</span>
             <span>Lei die liggie na die waarhede</span>
           </div>
           <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
           </button>
-          {level > 1 && (
-            <button className="vp-reset-link" onClick={() => setShowResetConfirm(true)}>
-              Begin van voor af
-            </button>
-          )}
+          <button className="vp-reset-link" onClick={() => setShowResetConfirm(true)}>
+            Begin van voor af
+          </button>
           <div className="vp-leaderboard">
             <p className="vp-lb-title">Vredepad Top 5</p>
             <p className="vp-lb-sub">Hier is die mense wat die verste op die Vredepad gestap het.</p>
@@ -1553,6 +1550,8 @@ export default function Vredepad({ onClose }) {
                 <button className="vp-confirm-cancel" onClick={() => setShowResetConfirm(false)}>Kanselleer</button>
                 <button className="vp-confirm-ok" onClick={() => {
                   localStorage.removeItem('vredepad_data')
+                  localStorage.removeItem('vp_tutorial_done')
+                  localStorage.removeItem('vp_lb_submitted')
                   setBest(0)
                   pendingLevel.current = 1
                   setShowResetConfirm(false)
@@ -1638,7 +1637,10 @@ export default function Vredepad({ onClose }) {
                   <div className="vp-tut-drag-dot" />
                 </div>
               </div>
-              <p className="vp-tut-hint">Tik enige plek om te begin</p>
+              <p className="vp-tut-wait-lbl">Kyk hoe dit werk...</p>
+              <button className="vp-tut-begin-btn" onClick={dismissTutorial}>
+                Begin Speel →
+              </button>
             </div>
           )}
           {combo >= 2 && (
