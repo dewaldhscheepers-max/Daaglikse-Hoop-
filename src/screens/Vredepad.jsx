@@ -959,7 +959,7 @@ export default function Vredepad({ onClose }) {
 
       buildGame(pendingLevel.current, canvas.width, canvas.height)
       setScore(0); setTime(60)
-      if (pendingLevel.current === 1 && !localStorage.getItem('vp_tutorial_done')) {
+      if (!localStorage.getItem('vp_tutorial_done')) {
         setTutorialActive(true)
       }
       startAmbient()
