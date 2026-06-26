@@ -26,6 +26,13 @@ const bgImages = Array.from({ length: 10 }, (_, i) => {
   return img
 })
 
+// 9 illustrated thorn/weed sprites (w0–w8.webp, transparent bg)
+const weedImages = Array.from({ length: 9 }, (_, i) => {
+  const img = new Image()
+  img.src = `/weeds/w${i}.webp`
+  return img
+})
+
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
   { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20  },
@@ -458,56 +465,22 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
   }
 }
 
-function drawWeed(ctx, x, y, pulse, t) {
-  const r = 11 + Math.sin(pulse * 0.7) * 1.0
-  ctx.save()
-  ctx.translate(x, y)
-  // Soft dark earth shadow
-  const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.0)
-  shadow.addColorStop(0,    'rgba(45,30,10,0.50)')
-  shadow.addColorStop(0.55, 'rgba(45,30,10,0.18)')
-  shadow.addColorStop(1,    'rgba(45,30,10,0)')
+function drawWeed(ctx, x, y, pulse, t, weedType) {
+  const img = weedImages[(weedType ?? 0) % weedImages.length]
+  const r = 28 + Math.sin(pulse * 0.7) * 1.5
+  const iw = r * 2
+  const ih = r * 2
+  const shadow = ctx.createRadialGradient(x, y + r * 0.3, 0, x, y + r * 0.3, r * 1.4)
+  shadow.addColorStop(0,    'rgba(30,15,5,0.38)')
+  shadow.addColorStop(0.6,  'rgba(30,15,5,0.12)')
+  shadow.addColorStop(1,    'rgba(30,15,5,0)')
   ctx.fillStyle = shadow
-  ctx.beginPath(); ctx.arc(0, 0, r * 2.0, 0, Math.PI * 2); ctx.fill()
-  // Outer thorn spines — warm dark brown, alternating lengths
-  for (let i = 0; i < 10; i++) {
-    const ang = (i / 10) * Math.PI * 2 + pulse * 0.1
-    const tipLen = r * (i % 2 === 0 ? 1.65 : 1.05)
-    const hw = r * 0.17
-    ctx.save()
-    ctx.rotate(ang)
-    ctx.beginPath()
-    ctx.moveTo(-hw, r * 0.25)
-    ctx.lineTo(0, -tipLen)
-    ctx.lineTo(hw, r * 0.25)
-    ctx.closePath()
-    ctx.fillStyle = i % 2 === 0 ? '#4A3520' : '#574028'
-    ctx.globalAlpha = 0.82
-    ctx.fill()
-    ctx.restore()
+  ctx.beginPath(); ctx.arc(x, y + r * 0.3, r * 1.4, 0, Math.PI * 2); ctx.fill()
+  if (img && img.complete && img.naturalWidth > 0) {
+    ctx.globalAlpha = 0.92
+    ctx.drawImage(img, x - r, y - r, iw, ih)
+    ctx.globalAlpha = 1
   }
-  // Inner shorter spines
-  for (let i = 0; i < 8; i++) {
-    const ang = ((i + 0.5) / 8) * Math.PI * 2 + pulse * 0.08
-    const tipLen = r * 0.82
-    const hw = r * 0.12
-    ctx.save()
-    ctx.rotate(ang)
-    ctx.beginPath()
-    ctx.moveTo(-hw, r * 0.08)
-    ctx.lineTo(0, -tipLen)
-    ctx.lineTo(hw, r * 0.08)
-    ctx.closePath()
-    ctx.fillStyle = '#5E4832'
-    ctx.globalAlpha = 0.65
-    ctx.fill()
-    ctx.restore()
-  }
-  // Dark warm centre
-  ctx.globalAlpha = 1
-  ctx.fillStyle = '#3A2810'
-  ctx.beginPath(); ctx.arc(0, 0, r * 0.48, 0, Math.PI * 2); ctx.fill()
-  ctx.restore()
 }
 
 function drawPlayer(ctx, p, tick, t) {
@@ -837,6 +810,7 @@ export default function Vredepad({ onClose }) {
       weeds.push({
         ...freePos(W, H, [...seeds, ...weeds, mid], 65),
         pulse: Math.random() * Math.PI * 2,
+        type: Math.floor(Math.random() * weedImages.length),
         dx: (Math.random() - 0.5) * 0.4,
         dy: (Math.random() - 0.5) * 0.4,
       })
@@ -1453,7 +1427,7 @@ export default function Vredepad({ onClose }) {
         if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
         for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
         if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
-        for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
+        for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t, w.type)
         drawPlayer(ctx, p, g.tick, g.t)
         if (g.genadeActive > 0) {
           const gFrac = Math.min(g.genadeActive / 300, 1)
