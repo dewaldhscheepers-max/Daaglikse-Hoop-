@@ -26,10 +26,10 @@ const bgImages = Array.from({ length: 15 }, (_, i) => {
   return img
 })
 
-// 9 illustrated thorn/weed sprites (w0–w8.webp, transparent bg)
-const weedImages = Array.from({ length: 9 }, (_, i) => {
+// 2 spiky thorn sprites (w0–w1.webp, transparent bg)
+const weedImages = Array.from({ length: 2 }, (_, i) => {
   const img = new Image()
-  img.src = `/weeds/w${i}.webp?v=5`
+  img.src = `/weeds/w${i}.webp?v=7`
   return img
 })
 
