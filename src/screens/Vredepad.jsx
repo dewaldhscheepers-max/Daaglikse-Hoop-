@@ -374,6 +374,18 @@ function shuffleArray(arr) {
 }
 
 /* ── Canvas draw helpers ── */
+function drawVignette(ctx, W, H) {
+  const cx = W / 2, cy = H / 2
+  const r = Math.max(W, H) * 0.78
+  const grad = ctx.createRadialGradient(cx, cy * 0.82, r * 0.18, cx, cy * 0.82, r)
+  grad.addColorStop(0,    'rgba(0,0,0,0)')
+  grad.addColorStop(0.52, 'rgba(18,9,2,0.07)')
+  grad.addColorStop(0.76, 'rgba(22,10,2,0.26)')
+  grad.addColorStop(1,    'rgba(28,12,2,0.52)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, H)
+}
+
 function drawBg(ctx, W, H, bgImg) {
   if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
     // Cover canvas — crop to fill while keeping aspect ratio, centred
@@ -467,7 +479,7 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
 
 function drawWeed(ctx, x, y, pulse, t, weedType) {
   const img = weedImages[(weedType ?? 0) % weedImages.length]
-  const r = 28 + Math.sin(pulse * 0.7) * 1.5
+  const r = 36 + Math.sin(pulse * 0.7) * 1.8
   const iw = r * 2
   const ih = r * 2
   const shadow = ctx.createRadialGradient(x, y + r * 0.3, 0, x, y + r * 0.3, r * 1.4)
@@ -1440,6 +1452,7 @@ export default function Vredepad({ onClose }) {
         if (g.storm) drawStormDrift(ctx, g.storm)
       }
       drawFloats(ctx, g.floats)
+      drawVignette(ctx, g.W, g.H)
 
       rafRef.current = requestAnimationFrame(loop)
     }
