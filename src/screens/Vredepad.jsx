@@ -11,6 +11,8 @@ const FREE_REWARD_BOOKS = [
   { id: 'bybel-hulpbron', emoji: '📗',    title: 'Die Bybel Maklik Gemaak' },
 ]
 
+const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
+
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
   { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20  },
@@ -440,7 +442,7 @@ function drawSeed(ctx, x, y, pulse, t, tier) {
   ctx.fillStyle = 'rgba(255,255,255,0.82)'; ctx.fill()
 }
 
-function drawPromiseSeed(ctx, x, y, pulse) {
+function drawPromiseSeed(ctx, x, y, pulse, plant) {
   const r = 14 + Math.sin(pulse) * 2.5
   const halo = ctx.createRadialGradient(x, y, r, x, y, r * 5.5)
   halo.addColorStop(0, 'rgba(255,215,60,0.28)'); halo.addColorStop(1, 'rgba(255,215,60,0)')
@@ -456,8 +458,14 @@ function drawPromiseSeed(ctx, x, y, pulse) {
   ctx.beginPath(); ctx.arc(x, y, r + 5 + Math.sin(pulse) * 3, 0, Math.PI * 2); ctx.stroke()
   ctx.strokeStyle = `rgba(255,200,50,${ra * 0.4})`; ctx.lineWidth = 1.5
   ctx.beginPath(); ctx.arc(x, y, r + 12 + Math.sin(pulse * 0.7) * 4, 0, Math.PI * 2); ctx.stroke()
-  ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill()
+  if (plant) {
+    ctx.font = `${Math.round(r * 1.25)}px serif`
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillText(plant, x, y + 1)
+  } else {
+    ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill()
+  }
 }
 
 function drawWeed(ctx, x, y, pulse, t) {
@@ -1316,7 +1324,8 @@ export default function Vredepad({ onClose }) {
       if (!g.promiseSeedSpawned && g.timeLeft < 45 && !g.storm && g.genadeActive <= 0) {
         g.promiseSeedSpawned = true
         const bp = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 70)
-        g.promiseSeed = { x: bp.x, y: bp.y, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.5, pulse: 0, truth: g.truths[(g.truthIdx + 3) % g.truths.length] }
+        const plant = PROMISE_PLANTS[Math.floor((g.level - 1) / 10) % PROMISE_PLANTS.length]
+        g.promiseSeed = { x: bp.x, y: bp.y, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.5, pulse: 0, truth: g.truths[(g.truthIdx + 3) % g.truths.length], plant }
       }
       if (g.promiseSeed) {
         const ps = g.promiseSeed
@@ -1381,7 +1390,7 @@ export default function Vredepad({ onClose }) {
       }
       if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
-      if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse)
+      if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
       if (g.genadeActive > 0) {
