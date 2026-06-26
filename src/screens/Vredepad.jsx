@@ -1729,20 +1729,32 @@ export default function Vredepad({ onClose }) {
             </div>
           )}
 
-          {d.collected && d.collected.length > 0 && (
-            <div className="vp-ct-section">
-              <p className="vp-ct-heading">Vandag het God vir jou gesê:</p>
-              <div className="vp-ct-list">
-                {d.collected.slice(0, 7).map((tr, i) => (
-                  <p key={i} className="vp-ct-item">{tr}</p>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div className="vp-end-prayer">
             <p>Here, maak my gedagtes stil en lei my in U vrede. Amen.</p>
           </div>
+
+          {(() => {
+            const save = loadSave()
+            const total = save.totalLevels || 0
+            const next = MILESTONE_BOOKS.find(b => total < b.level)
+            if (!next) return null
+            const prev = [...MILESTONE_BOOKS].reverse().find(b => b.level <= total)
+            const from = prev ? prev.level : 0
+            const pct = Math.min(98, Math.round(((total - from) / (next.level - from)) * 100))
+            const remaining = next.level - total
+            return (
+              <div className="vp-book-teaser">
+                <p className="vp-book-teaser-lbl">🎁 Volgende gratis eBoek</p>
+                <div className="vp-book-teaser-book">{next.emoji} {next.title}</div>
+                <div className="vp-book-teaser-bar-wrap">
+                  <div className="vp-book-teaser-bar" style={{ width: `${pct}%` }} />
+                </div>
+                <p className="vp-book-teaser-cta">
+                  Nog <strong>{remaining}</strong> {remaining === 1 ? 'vlak' : 'vlakke'} en jy kry dit gratis!
+                </p>
+              </div>
+            )
+          })()}
 
           <button className="vp-start-btn" style={{ background: t.player }} onClick={nextLevel}>
             Volgende Vredepad →
