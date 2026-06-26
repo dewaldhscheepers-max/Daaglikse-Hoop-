@@ -440,6 +440,26 @@ function drawSeed(ctx, x, y, pulse, t, tier) {
   ctx.fillStyle = 'rgba(255,255,255,0.82)'; ctx.fill()
 }
 
+function drawPromiseSeed(ctx, x, y, pulse) {
+  const r = 14 + Math.sin(pulse) * 2.5
+  const halo = ctx.createRadialGradient(x, y, r, x, y, r * 5.5)
+  halo.addColorStop(0, 'rgba(255,215,60,0.28)'); halo.addColorStop(1, 'rgba(255,215,60,0)')
+  ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(x, y, r * 5.5, 0, Math.PI * 2); ctx.fill()
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 2.2)
+  glow.addColorStop(0, 'rgba(255,240,120,0.55)'); glow.addColorStop(1, 'rgba(255,200,40,0)')
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, r * 2.2, 0, Math.PI * 2); ctx.fill()
+  const body = ctx.createRadialGradient(x - r * 0.25, y - r * 0.25, r * 0.1, x, y, r)
+  body.addColorStop(0, '#FFFDE0'); body.addColorStop(0.45, '#F8C832'); body.addColorStop(1, '#C88010')
+  ctx.fillStyle = body; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill()
+  const ra = 0.55 + Math.sin(pulse * 1.8) * 0.35
+  ctx.strokeStyle = `rgba(255,225,80,${ra})`; ctx.lineWidth = 2.5
+  ctx.beginPath(); ctx.arc(x, y, r + 5 + Math.sin(pulse) * 3, 0, Math.PI * 2); ctx.stroke()
+  ctx.strokeStyle = `rgba(255,200,50,${ra * 0.4})`; ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.arc(x, y, r + 12 + Math.sin(pulse * 0.7) * 4, 0, Math.PI * 2); ctx.stroke()
+  ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill()
+}
+
 function drawWeed(ctx, x, y, pulse, t) {
   const r = 13 + Math.sin(pulse * 0.7) * 1.5
   const g = ctx.createRadialGradient(x, y, 0, x, y, r * 1.6)
@@ -700,6 +720,7 @@ export default function Vredepad({ onClose }) {
   const [stormAnnounce, setStormAnnounce] = useState(null)
   const [lastTruthText, setLastTruthText] = useState('')
   const [tutorialActive, setTutorialActive] = useState(false)
+  const [promiseMoment, setPromiseMoment] = useState(null)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -809,6 +830,7 @@ export default function Vredepad({ onClose }) {
       genadeKruis: null, genadeUsed: false, genadeActive: 0,
       weedHitsRound: 0, vredekring: null, vredekringUsed: false,
       storm: null, stormUsed: false, stormBeaten: false,
+      promiseSeed: null, promiseSeedSpawned: false, promisePause: 0,
     }
   }
 
@@ -984,11 +1006,19 @@ export default function Vredepad({ onClose }) {
       g.lastTime = ts
       g.tick += dt
 
-      g.timeLeft -= dt / 60
-      if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
+      // Belofte-saad pause countdown
+      if (g.promisePause > 0) {
+        g.promisePause -= dt
+        if (g.promisePause <= 0) { g.promisePause = 0; setPromiseMoment(null) }
+      }
 
       const p = g.player
       if (p.hitAnim > 0) p.hitAnim = Math.max(0, p.hitAnim - dt / 60)
+
+      if (!g.promisePause) {
+
+      g.timeLeft -= dt / 60
+      if (g.timeLeft <= 0) { g.timeLeft = 0; endLevel(g); return }
       if (p.dx !== 0 || p.dy !== 0) {
         p.trail.push({ x: p.x, y: p.y })
         if (p.trail.length > 14) p.trail.shift()
@@ -1282,6 +1312,31 @@ export default function Vredepad({ onClose }) {
         }
       }
 
+      // Belofte-saad: spawn once after 15s, outside storm
+      if (!g.promiseSeedSpawned && g.timeLeft < 45 && !g.storm && g.genadeActive <= 0) {
+        g.promiseSeedSpawned = true
+        const bp = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 70)
+        g.promiseSeed = { x: bp.x, y: bp.y, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.5, pulse: 0, truth: g.truths[(g.truthIdx + 3) % g.truths.length] }
+      }
+      if (g.promiseSeed) {
+        const ps = g.promiseSeed
+        ps.x = wrapVal(ps.x + ps.dx * dt, g.W)
+        ps.y = wrapVal(ps.y + ps.dy * dt, g.H)
+        ps.pulse += 0.05 * dt
+        if (d2(p, ps) < 28) {
+          g.score++
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10) })
+          const bt = ps.truth
+          g.promiseSeed = null
+          g.promisePause = 90
+          setPromiseMoment(bt)
+          haptic([30, 20, 30, 20, 30, 20, 80])
+        }
+      }
+
+      } // end if (!g.promisePause)
+
       g.floats = g.floats.filter(f => { f.age += dt; return f.age < f.maxAge })
 
       // Flowers grow to full size (60 frames) then stay permanently
@@ -1326,6 +1381,7 @@ export default function Vredepad({ onClose }) {
       }
       if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
       for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
+      if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse)
       for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t)
       drawPlayer(ctx, p, g.tick, g.t)
       if (g.genadeActive > 0) {
@@ -1614,6 +1670,11 @@ export default function Vredepad({ onClose }) {
         </div>
         <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
+          {promiseMoment && (
+            <div className="vp-promise-overlay">
+              <p className="vp-promise-truth">{promiseMoment}</p>
+            </div>
+          )}
           {tutorialActive && (
             <div className="vp-tutorial-overlay">
               <div className="vp-tut-step vp-tut-s1">
