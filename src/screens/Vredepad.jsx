@@ -371,45 +371,42 @@ function drawParticles(ctx, parts, t) {
 function drawFlower(ctx, x, y, r, alpha, t, tier, tick, plant) {
   const tv = tier || 0
   if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.1
-  const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
-  ctx.globalAlpha = Math.min(alpha, 1)
+  const a = Math.min(alpha, 1)
+  ctx.globalAlpha = a
 
-  // Warm aura at tier 2+
-  if (tv >= 2) {
-    const aura = ctx.createRadialGradient(x, y, 0, x, y, r * 3.4)
-    aura.addColorStop(0, `rgba(255,225,100,${Math.min(alpha, 1) * 0.24})`)
-    aura.addColorStop(1, 'rgba(255,225,100,0)')
-    ctx.fillStyle = aura
-    ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, Math.PI * 2); ctx.fill()
-  }
-
-  // Inner petal ring at tier 2+
-  if (tv >= 2) {
-    for (let i = 0; i < petalCount; i++) {
-      const a = (i / petalCount) * Math.PI * 2 + Math.PI / petalCount
-      ctx.save()
-      ctx.translate(x + Math.cos(a) * r * 0.88, y + Math.sin(a) * r * 0.88); ctx.rotate(a)
-      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.3, r * 0.5, 0, 0, Math.PI * 2)
-      ctx.fillStyle = t.petals[(i + 2) % t.petals.length]; ctx.fill(); ctx.restore()
-    }
-  }
-
-  // Main petals
-  for (let i = 0; i < petalCount; i++) {
-    const a = (i / petalCount) * Math.PI * 2
-    ctx.save()
-    ctx.translate(x + Math.cos(a) * r * 1.3, y + Math.sin(a) * r * 1.3); ctx.rotate(a)
-    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2)
-    ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
-  }
-
-  // Centre — emoji plant or plain circle
   if (plant) {
-    ctx.font = `${Math.max(8, Math.round(r * 0.98))}px serif`
+    // Emoji-plant: sagte gloed + emoji, geen canvas-petals nie
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8)
+    glow.addColorStop(0, `rgba(255,230,120,${a * 0.45})`)
+    glow.addColorStop(1, 'rgba(255,230,120,0)')
+    ctx.fillStyle = glow
+    ctx.beginPath(); ctx.arc(x, y, r * 2.8, 0, Math.PI * 2); ctx.fill()
+    ctx.font = `${Math.max(10, Math.round(r * 1.55))}px serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.globalAlpha = Math.min(alpha * 1.4, 1)
+    ctx.globalAlpha = Math.min(a * 1.3, 1)
     ctx.fillText(plant, x, y + 1)
   } else {
+    // Original canvas-petal flower
+    const petalCount = tv >= 4 ? 10 : tv >= 3 ? 8 : tv >= 2 ? 6 : 5
+    if (tv >= 2) {
+      const aura = ctx.createRadialGradient(x, y, 0, x, y, r * 3.4)
+      aura.addColorStop(0, `rgba(255,225,100,${a * 0.24})`); aura.addColorStop(1, 'rgba(255,225,100,0)')
+      ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, Math.PI * 2); ctx.fill()
+    }
+    if (tv >= 2) {
+      for (let i = 0; i < petalCount; i++) {
+        const ang = (i / petalCount) * Math.PI * 2 + Math.PI / petalCount
+        ctx.save(); ctx.translate(x + Math.cos(ang) * r * 0.88, y + Math.sin(ang) * r * 0.88); ctx.rotate(ang)
+        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.3, r * 0.5, 0, 0, Math.PI * 2)
+        ctx.fillStyle = t.petals[(i + 2) % t.petals.length]; ctx.fill(); ctx.restore()
+      }
+    }
+    for (let i = 0; i < petalCount; i++) {
+      const ang = (i / petalCount) * Math.PI * 2
+      ctx.save(); ctx.translate(x + Math.cos(ang) * r * 1.3, y + Math.sin(ang) * r * 1.3); ctx.rotate(ang)
+      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2)
+      ctx.fillStyle = t.petals[i % t.petals.length]; ctx.fill(); ctx.restore()
+    }
     ctx.beginPath(); ctx.arc(x, y, r * 0.48, 0, Math.PI * 2); ctx.fillStyle = t.petal0; ctx.fill()
     if (tv >= 1) {
       ctx.beginPath(); ctx.arc(x, y, r * 0.26, 0, Math.PI * 2)
