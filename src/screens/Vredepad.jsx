@@ -13,23 +13,23 @@ const FREE_REWARD_BOOKS = [
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 
-// 11 watercolour top-down blooms (f0–f10.webp, transparent bg)
-const flowerImages = Array.from({ length: 11 }, (_, i) => {
+// 5 glowing illustrated blooms (f0–f4.webp, transparent bg)
+const flowerImages = Array.from({ length: 5 }, (_, i) => {
   const img = new Image()
-  img.src = `/flowers/f${i}.webp?v=4`
+  img.src = `/flowers/f${i}.webp?v=5`
   return img
 })
 
 const bgImages = Array.from({ length: 15 }, (_, i) => {
   const img = new Image()
-  img.src = `/bg/bg${i}.webp?v=4`
+  img.src = `/bg/bg${i}.webp?v=5`
   return img
 })
 
 // 9 illustrated thorn/weed sprites (w0–w8.webp, transparent bg)
 const weedImages = Array.from({ length: 9 }, (_, i) => {
   const img = new Image()
-  img.src = `/weeds/w${i}.webp?v=4`
+  img.src = `/weeds/w${i}.webp?v=5`
   return img
 })
 
