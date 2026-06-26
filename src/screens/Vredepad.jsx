@@ -37,6 +37,12 @@ const flowerImages = FLOWER_SVGS.map(svg => {
   return img
 })
 
+const bgImages = Array.from({ length: 10 }, (_, i) => {
+  const img = new Image()
+  img.src = `/bg/bg${i}.webp`
+  return img
+})
+
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
   { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20  },
@@ -378,28 +384,21 @@ function shuffleArray(arr) {
 }
 
 /* ── Canvas draw helpers ── */
-function drawBg(ctx, W, H, t) {
-  // Painterly garden — warm sage green base
-  ctx.fillStyle = '#829858'
-  ctx.fillRect(0, 0, W, H)
-  // Golden sunlight haze from upper-centre
-  const sun = ctx.createRadialGradient(W * 0.5, H * 0.1, 0, W * 0.5, H * 0.1, H * 0.82)
-  sun.addColorStop(0,    'rgba(255,255,210,0.44)')
-  sun.addColorStop(0.26, 'rgba(230,248,178,0.24)')
-  sun.addColorStop(0.62, 'rgba(155,210,100,0.09)')
-  sun.addColorStop(1,    'rgba(80,120,40,0)')
-  ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H)
-  // Soft central brightness
-  const ctr = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, H * 0.5)
-  ctr.addColorStop(0,   'rgba(215,240,160,0.22)')
-  ctr.addColorStop(0.6, 'rgba(155,210,100,0.07)')
-  ctr.addColorStop(1,   'rgba(80,120,40,0)')
-  ctx.fillStyle = ctr; ctx.fillRect(0, 0, W, H)
-  // Edge vignette for depth
-  const vg = ctx.createRadialGradient(W * 0.5, H * 0.5, H * 0.18, W * 0.5, H * 0.5, H * 0.85)
-  vg.addColorStop(0, 'rgba(0,0,0,0)')
-  vg.addColorStop(1, 'rgba(28,48,10,0.40)')
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H)
+function drawBg(ctx, W, H, bgImg) {
+  if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+    // Cover canvas — crop to fill while keeping aspect ratio, centred
+    const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight
+    const scale = Math.max(W / iw, H / ih)
+    const sw = W / scale, sh = H / scale
+    const sx = (iw - sw) / 2, sy = (ih - sh) / 2
+    ctx.drawImage(bgImg, sx, sy, sw, sh, 0, 0, W, H)
+  } else {
+    // Fallback gradient while image loads
+    ctx.fillStyle = '#829858'; ctx.fillRect(0, 0, W, H)
+    const sun = ctx.createRadialGradient(W * 0.5, H * 0.1, 0, W * 0.5, H * 0.1, H * 0.82)
+    sun.addColorStop(0, 'rgba(255,255,210,0.44)'); sun.addColorStop(1, 'rgba(80,120,40,0)')
+    ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H)
+  }
 }
 
 function drawParticles(ctx, parts, t) {
@@ -833,6 +832,7 @@ export default function Vredepad({ onClose }) {
 
   function buildGame(level, W, H) {
     const t  = THEMES[(level - 1) % THEMES.length]
+    const bgIdx = Math.floor((loadSave().totalLevels || 0) / 5) % 10
     const sc = 3 + Math.min(Math.floor((level - 1) / 5), 3)
     const wc = 2 + Math.min(Math.floor((level - 1) / 3), 6)
     const sp = 1.5 + Math.min((level - 1) * 0.08, 1.5)
@@ -881,6 +881,7 @@ export default function Vredepad({ onClose }) {
       storm: null, stormUsed: false, stormBeaten: false,
       promiseSeed: null, promiseSeedSpawned: false, promisePause: 0,
       gardenMode: false, gardenTime: 0,
+      bgIdx,
     }
   }
 
@@ -1430,7 +1431,7 @@ export default function Vredepad({ onClose }) {
       setTime(Math.ceil(g.timeLeft))
 
       const ctx = canvas.getContext('2d')
-      drawBg(ctx, g.W, g.H, g.t)
+      drawBg(ctx, g.W, g.H, bgImages[g.bgIdx ?? 0])
       if (g.storm) drawStormOverlay(ctx, g.storm, g.W, g.H)
       if (g.hitFlash > 0) {
         ctx.fillStyle = 'rgba(50,15,70,0.22)'; ctx.globalAlpha = g.hitFlash / 14
