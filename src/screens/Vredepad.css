@@ -1367,13 +1367,13 @@
   pointer-events: none;
   z-index: 12;
   background: radial-gradient(ellipse at center, rgba(255,230,100,0.2) 0%, rgba(255,230,100,0) 70%);
-  animation: vp-promise-appear 1.6s ease forwards;
+  animation: vp-promise-appear 3.4s ease forwards;
 }
 
 @keyframes vp-promise-appear {
   0%   { opacity: 0; }
-  16%  { opacity: 1; }
-  70%  { opacity: 1; }
+  8%   { opacity: 1; }
+  82%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
