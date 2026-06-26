@@ -1587,3 +1587,38 @@
   0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
   100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
+/* ─── Garden verse bubble ─── */
+.vp-garden-verse {
+  position: absolute;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 14;
+  width: 82%;
+  max-width: 300px;
+  animation: vp-garden-verse-appear 4s ease forwards;
+}
+
+@keyframes vp-garden-verse-appear {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  18%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  72%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+}
+
+.vp-garden-verse-text {
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 600;
+  color: #3D2800;
+  text-align: center;
+  line-height: 1.65;
+  padding: 22px 24px;
+  margin: 0;
+  background: rgba(255, 252, 220, 0.94);
+  border-radius: 20px;
+  border: 1.5px solid rgba(200, 155, 35, 0.5);
+  box-shadow: 0 8px 40px rgba(196, 145, 60, 0.35), 0 2px 12px rgba(0, 0, 0, 0.08);
+}

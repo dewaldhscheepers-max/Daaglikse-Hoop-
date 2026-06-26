@@ -732,6 +732,7 @@ export default function Vredepad({ onClose }) {
   const [lastTruthText, setLastTruthText] = useState('')
   const [tutorialActive, setTutorialActive] = useState(false)
   const [promiseMoment, setPromiseMoment] = useState(null)
+  const [gardenVerse, setGardenVerse] = useState(null)
   const [endData, setEndData]       = useState(null)
   const [bestScore, setBest]        = useState(() => loadSave().best || 0)
   const [bookPdfs, setBookPdfs]     = useState({})
@@ -919,7 +920,7 @@ export default function Vredepad({ onClose }) {
     }
   }
 
-  function endLevel(g) {
+  function endLevel(g, skipStiloomblik = false) {
     const save  = updateStreak(loadSave())
     const today = new Date().toISOString().slice(0, 10)
     const nb    = Math.max(save.best || 0, g.score)
@@ -961,7 +962,8 @@ export default function Vredepad({ onClose }) {
     }
     setCombo(0)
     setLastTruthText('')
-    setScreen('stiloomblik')
+    setGardenVerse(null)
+    setScreen(skipStiloomblik ? 'levelup' : 'stiloomblik')
   }
 
   useEffect(() => {
@@ -1035,6 +1037,10 @@ export default function Vredepad({ onClose }) {
           g.timeLeft = 0; g.gardenMode = true; g.gardenTime = 0
           g.seeds = []; g.weeds = []; g.storm = null; g.genadeKruis = null; g.promiseSeed = null
           p.trail = []; p.dx = 0; p.dy = 0
+          g._gardenVerse = g.collectedTruths.length > 0
+            ? g.collectedTruths[Math.floor(Math.random() * g.collectedTruths.length)]
+            : g.truths[0]
+          g._verseShown = false
         }
       }
       if (p.dx !== 0 || p.dy !== 0) {
@@ -1368,7 +1374,11 @@ export default function Vredepad({ onClose }) {
             plant: FLOWER_PLANTS[Math.floor(Math.random() * FLOWER_PLANTS.length)]
           })
         }
-        if (g.gardenTime >= 108) { endLevel(g); return }
+        if (g.gardenTime >= 90 && !g._verseShown) {
+          g._verseShown = true
+          setGardenVerse(g._gardenVerse)
+        }
+        if (g.gardenTime >= 270) { endLevel(g, true); return }
       }
 
       g.floats = g.floats.filter(f => { f.age += dt; return f.age < f.maxAge })
@@ -1709,6 +1719,11 @@ export default function Vredepad({ onClose }) {
           {promiseMoment && (
             <div className="vp-promise-overlay">
               <p className="vp-promise-truth">{promiseMoment}</p>
+            </div>
+          )}
+          {gardenVerse && (
+            <div className="vp-garden-verse">
+              <p className="vp-garden-verse-text">{gardenVerse}</p>
             </div>
           )}
           {tutorialActive && (
