@@ -478,17 +478,25 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
 
 function drawWeed(ctx, x, y, pulse, t, weedType) {
   const img = weedImages[(weedType ?? 0) % weedImages.length]
-  const r = 36 + Math.sin(pulse * 0.7) * 1.8
+  const r = 58 + Math.sin(pulse * 0.7) * 2.5
   const iw = r * 2
   const ih = r * 2
-  const shadow = ctx.createRadialGradient(x, y + r * 0.3, 0, x, y + r * 0.3, r * 1.4)
-  shadow.addColorStop(0,    'rgba(30,15,5,0.38)')
-  shadow.addColorStop(0.6,  'rgba(30,15,5,0.12)')
-  shadow.addColorStop(1,    'rgba(30,15,5,0)')
+  // Offset drop shadow for 3D depth
+  const shadow = ctx.createRadialGradient(x + r * 0.18, y + r * 0.28, 0, x + r * 0.18, y + r * 0.28, r * 1.1)
+  shadow.addColorStop(0,   'rgba(0,0,0,0.45)')
+  shadow.addColorStop(0.5, 'rgba(0,0,0,0.15)')
+  shadow.addColorStop(1,   'rgba(0,0,0,0)')
   ctx.fillStyle = shadow
-  ctx.beginPath(); ctx.arc(x, y + r * 0.3, r * 1.4, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.arc(x + r * 0.18, y + r * 0.28, r * 1.1, 0, Math.PI * 2); ctx.fill()
+  // Subtle glow around spikes
+  const glow = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 1.35)
+  glow.addColorStop(0,   'rgba(180,160,120,0)')
+  glow.addColorStop(0.7, 'rgba(160,140,100,0.12)')
+  glow.addColorStop(1,   'rgba(120,100,60,0)')
+  ctx.fillStyle = glow
+  ctx.beginPath(); ctx.arc(x, y, r * 1.35, 0, Math.PI * 2); ctx.fill()
   if (img && img.complete && img.naturalWidth > 0) {
-    ctx.globalAlpha = 0.92
+    ctx.globalAlpha = 0.96
     ctx.drawImage(img, x - r, y - r, iw, ih)
     ctx.globalAlpha = 1
   }
