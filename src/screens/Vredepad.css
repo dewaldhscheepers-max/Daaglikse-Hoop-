@@ -1290,7 +1290,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.48);
   z-index: 20;
-  pointer-events: all;
+  pointer-events: none;
   animation: vp-tut-overlay 11s ease forwards;
 }
 
@@ -1386,32 +1386,45 @@
   letter-spacing: 0.01em;
 }
 
-/* Drag demonstration track */
-.vp-tut-drag-track {
-  width: 150px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.28);
-  border-radius: 3px;
+/* Ball drag demonstration */
+.vp-tut-ball-demo {
   position: relative;
-  overflow: visible;
+  width: 140px;
+  height: 110px;
 }
 
-.vp-tut-drag-dot {
+.vp-tut-demo-ball {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 36%, #fff9e8 0%, #f5c842 60%, #e8a820 100%);
+  box-shadow: 0 0 18px rgba(245, 200, 66, 0.75), 0 2px 6px rgba(0,0,0,0.18);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: vp-tut-ball-roam 2.4s ease-in-out infinite;
+}
+
+@keyframes vp-tut-ball-roam {
+  0%   { transform: translate(-50%, -50%); }
+  25%  { transform: translate(calc(-50% + 44px), calc(-50% - 28px)); }
+  50%  { transform: translate(calc(-50% + 18px), calc(-50% + 36px)); }
+  75%  { transform: translate(calc(-50% - 40px), calc(-50% + 12px)); }
+  100% { transform: translate(-50%, -50%); }
+}
+
+.vp-tut-demo-finger {
+  position: absolute;
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-  position: absolute;
+  border: 2.5px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.22);
   top: 50%;
-  transform: translateY(-50%);
-  animation: vp-tut-drag-move 1.6s ease-in-out infinite;
-}
-
-@keyframes vp-tut-drag-move {
-  0%   { left: 0; }
-  50%  { left: calc(100% - 22px); }
-  100% { left: 0; }
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: vp-tut-ball-roam 2.4s ease-in-out infinite;
 }
 
 /* "Kyk hoe dit werk..." — visible during steps, fades before Begin Speel appears */

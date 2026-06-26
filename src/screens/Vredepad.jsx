@@ -1406,7 +1406,6 @@ export default function Vredepad({ onClose }) {
 
   function onTouchStart(e) {
     e.preventDefault()
-    if (tutorialActive) return
     getTouchDir(e.touches[0].clientX, e.touches[0].clientY)
   }
 
@@ -1632,9 +1631,10 @@ export default function Vredepad({ onClose }) {
                 <span className="vp-tut-lbl">...of hier</span>
               </div>
               <div className="vp-tut-step vp-tut-s3">
-                <span className="vp-tut-lbl">Sleep jou vinger — die bal volg</span>
-                <div className="vp-tut-drag-track">
-                  <div className="vp-tut-drag-dot" />
+                <span className="vp-tut-lbl">Sleep die bal met jou vinger</span>
+                <div className="vp-tut-ball-demo">
+                  <div className="vp-tut-demo-ball" />
+                  <div className="vp-tut-demo-finger" />
                 </div>
               </div>
               <p className="vp-tut-wait-lbl">Kyk hoe dit werk...</p>
