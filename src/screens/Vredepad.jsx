@@ -13,8 +13,8 @@ const FREE_REWARD_BOOKS = [
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 
-// 24 real illustrated botanical flowers (f0–f23.webp, transparent bg)
-const flowerImages = Array.from({ length: 24 }, (_, i) => {
+// 10 watercolour botanical flowers (f0–f9.webp, transparent bg)
+const flowerImages = Array.from({ length: 10 }, (_, i) => {
   const img = new Image()
   img.src = `/flowers/f${i}.webp`
   return img
