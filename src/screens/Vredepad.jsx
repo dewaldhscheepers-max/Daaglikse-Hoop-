@@ -12,16 +12,30 @@ const FREE_REWARD_BOOKS = [
 ]
 
 const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
-const GARDEN_FLOWERS = [
-  { n: 14, pw: 0.22, pl: 1.12, p1: '#FFFFFF', p2: '#EEE0CC', c1: '#FFD700', c2: '#E89800' }, // white daisy
-  { n: 20, pw: 0.24, pl: 1.22, p1: '#FFE500', p2: '#D87800', c1: '#3D1800', c2: '#6D3800' }, // sunflower
-  { n: 12, pw: 0.32, pl: 1.02, p1: '#FFB8D0', p2: '#FF3878', c1: '#FFE000', c2: '#FFB000' }, // pink gerbera
-  { n:  8, pw: 0.48, pl: 0.88, p1: '#DDB8F0', p2: '#8840C0', c1: '#FFFFF8', c2: '#EEE0FF' }, // lavender
-  { n:  8, pw: 0.52, pl: 0.90, p1: '#FF9090', p2: '#CC0030', c1: '#FFD700', c2: '#E89800' }, // red
-  { n: 16, pw: 0.26, pl: 1.08, p1: '#FFB800', p2: '#E85000', c1: '#6B3800', c2: '#4A2600' }, // orange marigold
-  { n:  8, pw: 0.36, pl: 0.96, p1: '#A0D8FF', p2: '#1870D8', c1: '#FFFFFF', c2: '#D8EEFF' }, // blue cornflower
-  { n:  5, pw: 0.62, pl: 0.84, p1: '#FFD8E8', p2: '#FF80B0', c1: '#FFE000', c2: '#FFCCEE' }, // cherry blossom
+const FLOWER_SVGS = [
+  // 0: White daisy — 12 narrow white petals, golden centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="a1" cx="36%" cy="32%"><stop offset="0%" stop-color="#FFF9C4"/><stop offset="65%" stop-color="#FFD600"/><stop offset="100%" stop-color="#F9A825"/></radialGradient></defs><g fill="#FFFDE7" stroke="#DDD0A8" stroke-width="0.6"><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(0)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(30)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(60)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(90)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(120)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(150)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(180)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(210)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(240)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(270)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(300)"/><path d="M -3,-13 Q -6,-27 0,-42 Q 6,-27 3,-13 Z" transform="rotate(330)"/></g><circle r="13" fill="url(#a1)"/><circle r="6" cx="-4" cy="-4" fill="#FFFF88" opacity="0.45"/></svg>`,
+  // 1: Sunflower — 16 pointed yellow petals, dark brown centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="b1" cx="38%" cy="34%"><stop offset="0%" stop-color="#5A3800"/><stop offset="100%" stop-color="#2E1800"/></radialGradient></defs><g fill="#FFD600" stroke="#E8A000" stroke-width="0.4"><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(0)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(22.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(45)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(67.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(90)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(112.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(135)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(157.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(180)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(202.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(225)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(247.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(270)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(292.5)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(315)"/><path d="M -5,-14 Q -9,-25 0,-40 Q 9,-25 5,-14 Z" transform="rotate(337.5)"/></g><circle r="16" fill="url(#b1)"/><circle r="8" cx="-4" cy="-4" fill="#7A4800" opacity="0.3"/></svg>`,
+  // 2: Pink gerbera — 11 outer + 11 inner petals, yellow centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="c1" cx="38%" cy="34%"><stop offset="0%" stop-color="#FFE082"/><stop offset="100%" stop-color="#FFB300"/></radialGradient></defs><g fill="#FF80AB" stroke="#C2185B" stroke-width="0.4"><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(0)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(32.7)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(65.4)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(98.1)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(130.8)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(163.5)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(196.2)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(228.9)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(261.6)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(294.3)"/><path d="M -7,-13 Q -11,-24 0,-40 Q 11,-24 7,-13 Z" transform="rotate(327)"/></g><g fill="#F06292" stroke="none" opacity="0.5"><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(16.35)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(49.05)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(81.75)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(114.45)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(147.15)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(179.85)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(212.55)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(245.25)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(277.95)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(310.65)"/><path d="M -4,-13 Q -6,-21 0,-32 Q 6,-21 4,-13 Z" transform="rotate(343.35)"/></g><circle r="13" fill="url(#c1)"/><circle r="6" cx="-3" cy="-3" fill="#FFF9C4" opacity="0.5"/></svg>`,
+  // 3: Purple anemone — 6 wide petals, very dark centre with stamens
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="d1" cx="40%" cy="36%"><stop offset="0%" stop-color="#1A0040"/><stop offset="100%" stop-color="#0A0020"/></radialGradient></defs><g fill="#CE93D8" stroke="#7B1FA2" stroke-width="0.5"><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(0)"/><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(60)"/><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(120)"/><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(180)"/><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(240)"/><path d="M -10,-12 Q -17,-22 0,-38 Q 17,-22 10,-12 Z" transform="rotate(300)"/></g><circle r="13" fill="url(#d1)"/><g fill="white" opacity="0.85"><circle r="2.2" cx="0" cy="-8"/><circle r="2.2" cx="6.9" cy="-4"/><circle r="2.2" cx="6.9" cy="4"/><circle r="2.2" cx="0" cy="8"/><circle r="2.2" cx="-6.9" cy="4"/><circle r="2.2" cx="-6.9" cy="-4"/></g></svg>`,
+  // 4: Red poppy — 4 large red petals + 4 inner, dark seed centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="e1" cx="38%" cy="34%"><stop offset="0%" stop-color="#1C1C00"/><stop offset="100%" stop-color="#0A0A00"/></radialGradient></defs><g fill="#EF5350" stroke="#B71C1C" stroke-width="0.5"><path d="M -14,-12 Q -22,-20 0,-39 Q 22,-20 14,-12 Z" transform="rotate(0)"/><path d="M -14,-12 Q -22,-20 0,-39 Q 22,-20 14,-12 Z" transform="rotate(90)"/><path d="M -14,-12 Q -22,-20 0,-39 Q 22,-20 14,-12 Z" transform="rotate(180)"/><path d="M -14,-12 Q -22,-20 0,-39 Q 22,-20 14,-12 Z" transform="rotate(270)"/></g><g fill="#C62828" opacity="0.65"><path d="M -10,-12 Q -16,-20 0,-34 Q 16,-20 10,-12 Z" transform="rotate(45)"/><path d="M -10,-12 Q -16,-20 0,-34 Q 16,-20 10,-12 Z" transform="rotate(135)"/><path d="M -10,-12 Q -16,-20 0,-34 Q 16,-20 10,-12 Z" transform="rotate(225)"/><path d="M -10,-12 Q -16,-20 0,-34 Q 16,-20 10,-12 Z" transform="rotate(315)"/></g><circle r="12" fill="url(#e1)"/><g fill="#69F0AE" opacity="0.8"><circle r="2" cx="0" cy="-8"/><circle r="2" cx="5.7" cy="-5.7"/><circle r="2" cx="8" cy="0"/><circle r="2" cx="5.7" cy="5.7"/><circle r="2" cx="0" cy="8"/><circle r="2" cx="-5.7" cy="5.7"/><circle r="2" cx="-8" cy="0"/><circle r="2" cx="-5.7" cy="-5.7"/></g></svg>`,
+  // 5: Orange marigold — 14 outer + 14 inner petals, warm centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="f1" cx="38%" cy="34%"><stop offset="0%" stop-color="#FF8F00"/><stop offset="100%" stop-color="#E65100"/></radialGradient></defs><g fill="#FFB300" stroke="#E65100" stroke-width="0.3"><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(0)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(25.7)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(51.4)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(77.1)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(102.8)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(128.5)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(154.2)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(180)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(205.7)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(231.4)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(257.1)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(282.8)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(308.5)"/><path d="M -6,-13 Q -9,-22 0,-37 Q 9,-22 6,-13 Z" transform="rotate(334.2)"/></g><g fill="#E65100" opacity="0.5"><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(12.8)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(38.5)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(64.2)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(89.9)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(115.6)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(141.3)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(167)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(192.7)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(218.4)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(244.1)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(269.8)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(295.5)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(321.2)"/><path d="M -4,-13 Q -6,-20 0,-31 Q 6,-20 4,-13 Z" transform="rotate(346.9)"/></g><circle r="13" fill="url(#f1)"/><circle r="6" cx="-3" cy="-3" fill="#FFE082" opacity="0.45"/></svg>`,
+  // 6: Blue cornflower — 8 pointed blue petals, golden centre
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="g1" cx="38%" cy="34%"><stop offset="0%" stop-color="#FFF9C4"/><stop offset="100%" stop-color="#F9A825"/></radialGradient></defs><g fill="#42A5F5" stroke="#1565C0" stroke-width="0.5"><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(0)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(45)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(90)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(135)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(180)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(225)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(270)"/><path d="M -8,-12 Q -14,-23 0,-40 Q 14,-23 8,-12 Z" transform="rotate(315)"/></g><circle r="12" fill="url(#g1)"/><circle r="5" cx="-3" cy="-3" fill="#FFFF88" opacity="0.45"/></svg>`,
+  // 7: Cherry blossom — 5 wide notched pink petals, warm centre + stamens
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><defs><radialGradient id="h1" cx="38%" cy="34%"><stop offset="0%" stop-color="#FFE082"/><stop offset="100%" stop-color="#FF9800"/></radialGradient></defs><g fill="#F8BBD0" stroke="#E91E63" stroke-width="0.4"><path d="M -12,-12 Q -19,-20 -2,-34 Q 0,-37 2,-34 Q 19,-20 12,-12 Z" transform="rotate(0)"/><path d="M -12,-12 Q -19,-20 -2,-34 Q 0,-37 2,-34 Q 19,-20 12,-12 Z" transform="rotate(72)"/><path d="M -12,-12 Q -19,-20 -2,-34 Q 0,-37 2,-34 Q 19,-20 12,-12 Z" transform="rotate(144)"/><path d="M -12,-12 Q -19,-20 -2,-34 Q 0,-37 2,-34 Q 19,-20 12,-12 Z" transform="rotate(216)"/><path d="M -12,-12 Q -19,-20 -2,-34 Q 0,-37 2,-34 Q 19,-20 12,-12 Z" transform="rotate(288)"/></g><circle r="11" fill="url(#h1)"/><g fill="#FF4081" opacity="0.9"><circle r="2.8" cx="0" cy="-7.5"/><circle r="2.8" cx="7.1" cy="-2.3"/><circle r="2.8" cx="4.4" cy="6.1"/><circle r="2.8" cx="-4.4" cy="6.1"/><circle r="2.8" cx="-7.1" cy="-2.3"/></g></svg>`,
 ]
+
+const flowerImages = FLOWER_SVGS.map(svg => {
+  const img = new Image()
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+  return img
+})
 
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
@@ -378,53 +392,12 @@ function drawParticles(ctx, parts, t) {
 }
 
 function drawFlower(ctx, x, y, r, alpha, t, tier, tick, flowerType) {
-  const tv = tier || 0
   if (tick) y = y + Math.sin(tick * 0.016 + x * 0.009) * r * 0.045
   const a = Math.min(alpha, 1)
-  const fi = ((flowerType ?? 0)) % GARDEN_FLOWERS.length
-  const fd = GARDEN_FLOWERS[fi]
-
+  const img = flowerImages[((flowerType ?? 0)) % flowerImages.length]
+  if (!img.complete) return
   ctx.globalAlpha = a
-
-  // Inner offset petal ring at tier 2+ (gives double-layer depth)
-  if (tv >= 2) {
-    const offAng = Math.PI / fd.n
-    for (let i = 0; i < fd.n; i++) {
-      const ang = (i / fd.n) * Math.PI * 2 + offAng
-      ctx.save()
-      ctx.translate(x + Math.cos(ang) * r * fd.pl * 0.7, y + Math.sin(ang) * r * fd.pl * 0.7)
-      ctx.rotate(ang)
-      ctx.beginPath()
-      ctx.ellipse(0, 0, r * fd.pw * 0.7, r * fd.pl * 0.7, 0, 0, Math.PI * 2)
-      ctx.fillStyle = fd.p2; ctx.globalAlpha = a * 0.72; ctx.fill()
-      ctx.restore()
-    }
-    ctx.globalAlpha = a
-  }
-
-  // Outer petals with tip-to-base gradient
-  for (let i = 0; i < fd.n; i++) {
-    const ang = (i / fd.n) * Math.PI * 2
-    ctx.save()
-    ctx.translate(x + Math.cos(ang) * r * fd.pl, y + Math.sin(ang) * r * fd.pl)
-    ctx.rotate(ang)
-    const pg = ctx.createLinearGradient(0, r * fd.pl * 0.3, 0, -r * fd.pl * 0.6)
-    pg.addColorStop(0, fd.p2); pg.addColorStop(1, fd.p1)
-    ctx.beginPath(); ctx.ellipse(0, 0, r * fd.pw, r * fd.pl, 0, 0, Math.PI * 2)
-    ctx.fillStyle = pg; ctx.globalAlpha = a; ctx.fill()
-    ctx.restore()
-  }
-
-  // Center with radial gradient
-  const cg = ctx.createRadialGradient(x - r * 0.14, y - r * 0.14, r * 0.04, x, y, r * 0.5)
-  cg.addColorStop(0, fd.c2); cg.addColorStop(1, fd.c1)
-  ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, Math.PI * 2)
-  ctx.fillStyle = cg; ctx.globalAlpha = a; ctx.fill()
-
-  // Center highlight
-  ctx.beginPath(); ctx.arc(x - r * 0.18, y - r * 0.2, r * 0.17, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill()
-
+  ctx.drawImage(img, x - r, y - r, r * 2, r * 2)
   ctx.globalAlpha = 1
 }
 
@@ -1105,7 +1078,7 @@ export default function Vredepad({ onClose }) {
             const consumeR = 195
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 11, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * FLOWER_SVGS.length) })
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -1119,7 +1092,7 @@ export default function Vredepad({ onClose }) {
             // L40+: Consume all within large radius, max slow
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
-                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
+                g.flowers.push({ x: w.x, y: w.y, life: 0, r: 14, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * FLOWER_SVGS.length) })
                 return false
               }
               return true
@@ -1270,7 +1243,7 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
+          g.flowers.push({ x: s.x, y: s.y, life: 0, r: 10, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * FLOWER_SVGS.length) })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
           g.truthIdx++
@@ -1358,8 +1331,8 @@ export default function Vredepad({ onClose }) {
         ps.pulse += 0.05 * dt
         if (d2(p, ps) < 28) {
           g.score++
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
-          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * GARDEN_FLOWERS.length) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 18, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * FLOWER_SVGS.length) })
+          g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * FLOWER_SVGS.length) })
           const bt = ps.truth
           g.promiseSeed = null
           g.promisePause = 90
@@ -1379,7 +1352,7 @@ export default function Vredepad({ onClose }) {
             y: 14 + Math.random() * (g.H - 28),
             life: 0, r: 15 + Math.random() * 20,
             tier: Math.floor((g.level - 1) / 10),
-            type: Math.floor(Math.random() * GARDEN_FLOWERS.length)
+            type: Math.floor(Math.random() * FLOWER_SVGS.length)
           })
         }
         if (g.gardenTime >= 90 && !g._verseShown) {
