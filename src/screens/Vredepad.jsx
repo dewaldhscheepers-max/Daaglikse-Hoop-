@@ -1466,8 +1466,8 @@ export default function Vredepad({ onClose }) {
             </div>
           )}
           <div className="vp-hint-row">
-            <span>Tik enige plek op die skerm</span>
-            <span>Lei die liggie na die waarhede</span>
+            <span>Tik waar jy wil hê die bal moet gaan</span>
+            <span>Sleep jou vinger om die bal te lei</span>
           </div>
           <button className="vp-start-btn" style={{ background: t.player }} onClick={startGame}>
             {level > 1 ? `Begin Vredepad ${level}` : 'Begin my pad van vrede'}
@@ -1569,7 +1569,7 @@ export default function Vredepad({ onClose }) {
     const t = THEMES[(d.level - 1) % THEMES.length]
     return (
       <div className="vp-stiloomblik" style={{ background: t.bg0 }}>
-        <p className="vp-stilte-truth">"{d.lastTruth}"</p>
+        <p className="vp-stilte-truth">{d.lastTruth}</p>
       </div>
     )
   }
@@ -1734,7 +1734,7 @@ export default function Vredepad({ onClose }) {
               <p className="vp-ct-heading">Vandag het God vir jou gesê:</p>
               <div className="vp-ct-list">
                 {d.collected.slice(0, 7).map((tr, i) => (
-                  <p key={i} className="vp-ct-item">"{tr}"</p>
+                  <p key={i} className="vp-ct-item">{tr}</p>
                 ))}
               </div>
             </div>

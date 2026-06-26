@@ -71,9 +71,11 @@
 .vp-stats-row {
   display: flex;
   gap: 24px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 252, 240, 0.8);
   border-radius: 16px;
-  padding: 14px 24px;
+  padding: 14px 28px;
+  box-shadow: 0 2px 12px rgba(196, 145, 60, 0.09);
+  border: 1px solid rgba(196, 145, 60, 0.1);
 }
 
 .vp-stat {
@@ -238,7 +240,7 @@
 
 /* ─── Playing ─── */
 .vp-playing {
-  background: #E8F4F8;
+  background: #F5EDE3;
 }
 
 .vp-hud {
@@ -246,8 +248,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 251, 244, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(196, 145, 60, 0.12);
   flex-shrink: 0;
   position: relative;
   z-index: 5;
@@ -284,9 +287,10 @@
 
 .vp-truth-bar {
   padding: 7px 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 249, 238, 0.9);
   text-align: center;
   flex-shrink: 0;
+  border-bottom: 1px solid rgba(196, 145, 60, 0.1);
 }
 
 .vp-truth-text {
@@ -423,7 +427,7 @@
 
 /* ─── End screen ─── */
 .vp-end {
-  background: #E8F4F8;
+  background: linear-gradient(160deg, #FDF6EC 0%, #F5EAD8 100%);
 }
 
 .vp-end-body {
@@ -461,13 +465,16 @@
 }
 
 .vp-end-truth {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 252, 242, 0.9);
   border-radius: 16px;
   padding: 16px 20px;
   max-width: 300px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 7px;
+  border-left: 4px solid rgba(196, 145, 60, 0.55);
+  box-shadow: 0 2px 16px rgba(196, 145, 60, 0.1);
 }
 
 .vp-end-truth-label {
@@ -488,10 +495,11 @@
 }
 
 .vp-end-prayer {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 252, 240, 0.7);
   border-radius: 12px;
   padding: 13px 20px;
   max-width: 300px;
+  width: 100%;
   font-size: 13.5px;
   color: var(--text-muted);
   font-style: italic;
@@ -503,8 +511,8 @@
   width: 100%;
   max-width: 300px;
   padding: 13px;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 252, 240, 0.8);
+  border: 1.5px solid rgba(196, 145, 60, 0.2);
   border-radius: 14px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -521,7 +529,7 @@
   max-width: 300px;
   padding: 13px;
   background: transparent;
-  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border: 1.5px solid rgba(196, 145, 60, 0.22);
   border-radius: 14px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -661,11 +669,11 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.12);
-  transition: background 0.3s, box-shadow 0.3s;
+  background: rgba(0,0,0,0.1);
+  transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
 }
 .vp-streak-dot.played { opacity: 1; }
-.vp-streak-dot.today  { width: 14px; height: 14px; }
+.vp-streak-dot.today  { width: 14px; height: 14px; transform: scale(1.15); }
 
 /* ─── End screen streak badge ─── */
 .vp-end-streak {
@@ -691,11 +699,13 @@
 
 /* ─── Single verse on end screen ─── */
 .vp-end-verse {
-  background: rgba(255,255,255,0.65);
+  background: rgba(255, 252, 242, 0.88);
   border-radius: 16px;
   padding: 20px 22px;
   max-width: 300px;
   width: 100%;
+  border-left: 4px solid rgba(196, 145, 60, 0.55);
+  box-shadow: 0 2px 16px rgba(196, 145, 60, 0.1);
 }
 
 .vp-end-verse-text {
@@ -704,7 +714,7 @@
   color: var(--text);
   line-height: 1.7;
   margin: 0;
-  text-align: center;
+  text-align: left;
 }
 
 /* ─── Combo badge ─── */
@@ -1248,12 +1258,13 @@
 .vp-ct-section {
   width: 100%;
   max-width: 340px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 250, 238, 0.88);
   border-radius: 18px;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: 0 2px 20px rgba(196, 145, 60, 0.08);
 }
 
 .vp-ct-heading {
@@ -1279,9 +1290,9 @@
   line-height: 1.6;
   margin: 0;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.55);
   border-radius: 10px;
-  border-left: 3px solid rgba(91, 155, 213, 0.4);
+  border-left: 3px solid rgba(196, 145, 60, 0.45);
 }
 
 /* ─── Tutorial Overlay ─── */
