@@ -33,12 +33,6 @@ const weedImages = Array.from({ length: 2 }, (_, i) => {
   return img
 })
 
-// 5 golden orb player sprites: p0=normal, p1=collect, p2=genade, p3=promise, p4=hit
-const playerImages = Array.from({ length: 5 }, (_, i) => {
-  const img = new Image()
-  img.src = `/player/p${i}.webp?v=1`
-  return img
-})
 
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
@@ -374,48 +368,36 @@ function drawWeed(ctx, x, y, pulse, t, weedType) {
   }
 }
 
-function drawPlayer(ctx, p, tick, t, g) {
+function drawPlayer(ctx, p, tick, t) {
   const { x, y } = p
-  const hitFrac   = p.hitAnim     || 0
-  const collectFr = p.collectAnim || 0
-  const genade    = (g?.genadeActive || 0) > 0
-  const promise   = !!g?.promiseSeed
+  const hitFrac = p.hitAnim || 0
+  const r = 13 * (1 - hitFrac * 0.22)
 
-  // State → sprite index
-  let si = 0
-  if (hitFrac > 0.05)  si = 4
-  else if (genade)     si = 2
-  else if (collectFr > 0) si = 1
-  else if (promise)    si = 3
+  // Soft trail
+  for (let i = 0; i < p.trail.length; i++) {
+    const tr = p.trail[i]
+    const frac = (i + 1) / p.trail.length
+    ctx.beginPath(); ctx.arc(tr.x, tr.y, r * 0.55 * frac, 0, Math.PI * 2)
+    ctx.fillStyle = t.player; ctx.globalAlpha = 0.09 * frac; ctx.fill(); ctx.globalAlpha = 1
+  }
 
-  const img  = playerImages[si]
-  const size = 108
-  // Ball sits at ~42% from left, ~58% from top in each cropped sprite
-  const bx   = 0.42
-  const by   = 0.58
-
-  // Warm glow behind sprite
+  // Warm golden glow
   const pulse = Math.sin(tick * 0.05) * 3
-  const glowR = 36 + pulse
-  const gw = ctx.createRadialGradient(x, y, 0, x, y, glowR)
-  gw.addColorStop(0,    'rgba(255,210,80,0.65)')
-  gw.addColorStop(0.45, 'rgba(255,160,30,0.22)')
-  gw.addColorStop(1,    'rgba(0,0,0,0)')
-  ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
-  ctx.fillStyle = gw; ctx.globalAlpha = 0.82; ctx.fill(); ctx.globalAlpha = 1
+  const gw = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8 + pulse)
+  gw.addColorStop(0, t.playerWarm)
+  gw.addColorStop(0.45, t.playerGlow)
+  gw.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.beginPath(); ctx.arc(x, y, r * 2.8 + pulse, 0, Math.PI * 2)
+  ctx.fillStyle = gw; ctx.globalAlpha = 0.72; ctx.fill(); ctx.globalAlpha = 1
 
-  // Red flash on weed hit
+  // Main dot
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = t.player; ctx.fill()
   if (hitFrac > 0) {
-    ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(160,20,50,${hitFrac * 0.32})`; ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, r * 1.5, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(120,20,60,${hitFrac * 0.28})`; ctx.fill()
   }
-
-  // Draw sprite (ball part aligned to player x,y)
-  if (img && img.complete && img.naturalWidth > 0) {
-    ctx.globalAlpha = hitFrac > 0 ? Math.max(0.6, 1 - hitFrac * 0.25) : 1
-    ctx.drawImage(img, x - size * bx, y - size * by, size, size)
-    ctx.globalAlpha = 1
-  }
+  ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.33, r * 0.32, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
 }
 
 function drawFloats(ctx, floats) {
@@ -729,7 +711,7 @@ export default function Vredepad({ onClose }) {
 
     gameRef.current = {
       W, H, t, level,
-      player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp, trail: [], hitAnim: 0, collectAnim: 0 },
+      player: { x: W / 2, y: H / 2, dx: 0, dy: 0, sp, trail: [], hitAnim: 0 },
       seeds, weeds, parts,
       flowers: [], floats: [],
       score: 0, timeLeft: 60,
@@ -931,7 +913,6 @@ export default function Vredepad({ onClose }) {
 
       const p = g.player
       if (p.hitAnim > 0) p.hitAnim = Math.max(0, p.hitAnim - dt / 60)
-      if (p.collectAnim > 0) p.collectAnim = Math.max(0, p.collectAnim - dt)
 
       if (!g.promisePause) {
 
@@ -1166,7 +1147,6 @@ export default function Vredepad({ onClose }) {
       g.seeds = g.seeds.filter(s => {
         if (d2(p, s) < 22) {
           g.score++
-          p.collectAnim = 28
           g.flowers.push({ x: s.x, y: s.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
           const truth = g.truths[g.truthIdx % g.truths.length]
           g.collectedTruths.push(truth)
@@ -1333,7 +1313,7 @@ export default function Vredepad({ onClose }) {
         for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
         if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
         for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t, w.type)
-        drawPlayer(ctx, p, g.tick, g.t, g)
+        drawPlayer(ctx, p, g.tick, g.t)
         if (g.genadeActive > 0) {
           const gFrac = Math.min(g.genadeActive / 300, 1)
           const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 55)
