@@ -513,19 +513,21 @@ function drawVredekring(ctx, ring, tick) {
 
 function drawStormOverlay(ctx, storm, W, H) {
   if (!storm || storm.overlay <= 0) return
-  // Vignette: darker at edges, lighter at centre
   const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.08, W / 2, H / 2, H * 0.85)
   vg.addColorStop(0, `rgba(70, 95, 125, ${storm.overlay * 0.35})`)
   vg.addColorStop(1, `rgba(45, 65, 105, ${Math.min(storm.overlay * 1.35, 0.52)})`)
   ctx.fillStyle = vg
   ctx.fillRect(0, 0, W, H)
-  // Soft distant lightning — light flash, not dark
   if (storm.lightningFlash > 0) {
     const lf = Math.min(storm.lightningFlash / 22, 1)
     ctx.fillStyle = `rgba(215, 232, 255, ${lf * 0.28})`
     ctx.fillRect(0, 0, W, H)
   }
-  // Wind lines
+  if (storm.lightningFlash2 > 0) {
+    const lf2 = Math.min(storm.lightningFlash2 / 18, 1)
+    ctx.fillStyle = `rgba(200, 225, 255, ${lf2 * 0.18})`
+    ctx.fillRect(0, 0, W, H)
+  }
   ctx.save()
   for (const wl of storm.windLines) {
     const a = wl.alpha * Math.min(storm.overlay / 0.06, 1)
@@ -539,6 +541,20 @@ function drawStormOverlay(ctx, storm, W, H) {
     ctx.lineTo(wl.x + wl.len, wl.y + wl.lean)
     ctx.stroke()
   }
+  if (storm.rainDrops) {
+    for (const rd of storm.rainDrops) {
+      const a = rd.alpha * Math.min(storm.overlay / 0.06, 1)
+      if (a < 0.02) continue
+      ctx.globalAlpha = a
+      ctx.strokeStyle = 'rgba(190, 220, 255, 0.88)'
+      ctx.lineWidth = rd.width
+      ctx.lineCap = 'round'
+      ctx.beginPath()
+      ctx.moveTo(rd.x, rd.y)
+      ctx.lineTo(rd.x + rd.dx * 3.5, rd.y + rd.dy * 3.5)
+      ctx.stroke()
+    }
+  }
   ctx.restore()
 }
 
@@ -548,11 +564,11 @@ function drawStormDrift(ctx, storm) {
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
   ctx.lineJoin = 'round'
-  ctx.font = 'bold 19px system-ui,sans-serif'
   for (const dw of storm.driftWords) {
     const prog = dw.age / dw.maxAge
     const a = prog < 0.1 ? prog / 0.1 : (prog > 0.72 ? Math.max(0, (1 - prog) / 0.28) : 1)
     ctx.globalAlpha = dw.baseAlpha * a
+    ctx.font = `bold ${dw.fontSize || 19}px system-ui,sans-serif`
     ctx.lineWidth = 5
     ctx.strokeStyle = 'rgba(20, 40, 75, 0.55)'
     ctx.strokeText(dw.text, dw.x, dw.y)
@@ -1055,7 +1071,7 @@ export default function Vredepad({ onClose }) {
         }
         g.weeds = [...g.weeds, ...extras]
         const stormTier = Math.max(0, Math.floor((g.level - 20) / 10))
-        const stormLineCount = Math.min(22 + stormTier * 7, 50)
+        const stormLineCount = Math.min(55 + stormTier * 18, 110)
         g.storm = {
           phase: 'building', life: 0,
           tier: stormTier,
@@ -1063,16 +1079,25 @@ export default function Vredepad({ onClose }) {
           windLines: Array.from({ length: stormLineCount }, () => ({
             x: Math.random() * g.W,
             y: 20 + Math.random() * (g.H - 40),
-            len: 60 + Math.random() * 80,
-            lean: (Math.random() - 0.2) * 18,
-            dx: (1.6 + stormTier * 0.35) + Math.random() * (1.2 + stormTier * 0.2),
-            alpha: 0.42 + Math.random() * 0.38,
-            width: 0.8 + Math.random() * 1.1,
+            len: 55 + Math.random() * 90,
+            lean: (Math.random() - 0.2) * 22,
+            dx: (1.8 + stormTier * 0.4) + Math.random() * (1.5 + stormTier * 0.25),
+            alpha: 0.38 + Math.random() * 0.42,
+            width: 0.7 + Math.random() * 1.3,
+          })),
+          rainDrops: Array.from({ length: Math.min(90 + stormTier * 35, 180) }, () => ({
+            x: Math.random() * g.W,
+            y: Math.random() * g.H,
+            dx: (2.4 + stormTier * 0.5) + Math.random() * 1.4,
+            dy: 3.8 + Math.random() * 3.0,
+            alpha: 0.10 + Math.random() * 0.22,
+            width: 0.4 + Math.random() * 0.7,
           })),
           driftWords: [],
-          nextDrift: g.tick + 50,
+          nextDrift: g.tick + 30,
           lightningFlash: 0,
-          lightningTimer: 90 + Math.random() * 80,
+          lightningTimer: 50 + Math.random() * 55,
+          lightningFlash2: 0,
         }
         g.stormUsed = true
         setStormAnnounce("'n Storm van gedagtes kom…")
@@ -1098,23 +1123,34 @@ export default function Vredepad({ onClose }) {
             wl.x += wl.dx * dt
             if (wl.x > g.W + 100) wl.x = -100 - wl.len
           }
-          if (g.tick >= st.nextDrift && st.driftWords.length < 1) {
+          if (g.tick >= st.nextDrift && st.driftWords.length < 4) {
             st.driftWords.push({
-              x: -20, y: 90 + Math.random() * (g.H - 180),
+              x: -30, y: 70 + Math.random() * (g.H - 140),
               text: STORM_DRIFT_WORDS[Math.floor(Math.random() * STORM_DRIFT_WORDS.length)],
-              dx: 0.28 + Math.random() * 0.22, dy: -(0.05 + Math.random() * 0.08),
-              age: 0, maxAge: 370, baseAlpha: 0.65 + Math.random() * 0.18,
+              dx: 0.30 + Math.random() * 0.28, dy: -(0.04 + Math.random() * 0.10),
+              age: 0, maxAge: 320 + Math.random() * 80,
+              baseAlpha: 0.60 + Math.random() * 0.25,
+              fontSize: 15 + Math.floor(Math.random() * 11),
             })
-            st.nextDrift = g.tick + 130 + Math.random() * 80
+            st.nextDrift = g.tick + 38 + Math.random() * 45
           }
           for (const dw of st.driftWords) { dw.x += dw.dx * dt; dw.y += dw.dy * dt; dw.age += dt }
-          st.driftWords = st.driftWords.filter(dw => dw.age < dw.maxAge && dw.x < g.W + 60)
-          // Soft distant lightning
-          if (st.lightningFlash > 0) st.lightningFlash -= dt * 1.8
+          st.driftWords = st.driftWords.filter(dw => dw.age < dw.maxAge && dw.x < g.W + 80)
+          // Rain drops movement
+          for (const rd of (st.rainDrops || [])) {
+            rd.x += rd.dx * dt; rd.y += rd.dy * dt
+            if (rd.x > g.W + 20 || rd.y > g.H + 20) { rd.x = Math.random() * g.W - 30; rd.y = -12 }
+          }
+          // Lightning — main flash + quick second flicker
+          if (st.lightningFlash  > 0) st.lightningFlash  -= dt * 2.0
+          if (st.lightningFlash2 > 0) st.lightningFlash2 -= dt * 3.5
           st.lightningTimer -= dt
           if (st.lightningTimer <= 0) {
-            st.lightningFlash = 22
-            st.lightningTimer = 110 + Math.random() * 130
+            st.lightningFlash  = 30
+            st.lightningFlash2 = 0
+            st.lightningTimer  = 45 + Math.random() * 65
+            // Schedule a second flicker ~12 ticks later
+            setTimeout(() => { if (st.lightningFlash < 5) st.lightningFlash2 = 18 }, 200)
           }
           if (st.truthsThisStorm >= st.needed || st.life > 720 + (st.tier || 0) * 120) {
             st.phase = 'breaking'; st.life = 0; st.driftWords = []
