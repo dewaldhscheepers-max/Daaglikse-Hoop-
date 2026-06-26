@@ -348,7 +348,7 @@ function drawPromiseSeed(ctx, x, y, pulse, plant) {
 
 function drawWeed(ctx, x, y, pulse, t, weedType) {
   const img = weedImages[(weedType ?? 0) % weedImages.length]
-  const r = 58 + Math.sin(pulse * 0.7) * 2.5
+  const r = 46 + Math.sin(pulse * 0.7) * 2.5
   const iw = r * 2
   const ih = r * 2
   // Offset drop shadow for 3D depth
