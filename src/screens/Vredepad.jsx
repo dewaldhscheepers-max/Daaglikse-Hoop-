@@ -16,20 +16,20 @@ const PROMISE_PLANTS = ['🌱', '🌻', '🌾', '🌿', '🌸', '🍇']
 // 11 watercolour top-down blooms (f0–f10.webp, transparent bg)
 const flowerImages = Array.from({ length: 11 }, (_, i) => {
   const img = new Image()
-  img.src = `/flowers/f${i}.webp`
+  img.src = `/flowers/f${i}.webp?v=2`
   return img
 })
 
 const bgImages = Array.from({ length: 15 }, (_, i) => {
   const img = new Image()
-  img.src = `/bg/bg${i}.webp`
+  img.src = `/bg/bg${i}.webp?v=2`
   return img
 })
 
 // 9 illustrated thorn/weed sprites (w0–w8.webp, transparent bg)
 const weedImages = Array.from({ length: 9 }, (_, i) => {
   const img = new Image()
-  img.src = `/weeds/w${i}.webp`
+  img.src = `/weeds/w${i}.webp?v=2`
   return img
 })
 
