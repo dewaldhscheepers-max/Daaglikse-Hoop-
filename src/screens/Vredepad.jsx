@@ -100,9 +100,15 @@ const COUNTDOWN_PHRASES = [
 function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
 
 function minScoreForLevel(level) {
-  if (level <= 5)  return 10
-  if (level <= 15) return 15
-  return 20
+  if (level <= 3)  return 8
+  if (level <= 6)  return 12
+  if (level <= 10) return 15
+  if (level <= 15) return 20
+  if (level <= 20) return 25
+  if (level <= 30) return 30
+  if (level <= 40) return 35
+  if (level <= 60) return 40
+  return 45
 }
 
 function sortLeaderboard(entries) {
