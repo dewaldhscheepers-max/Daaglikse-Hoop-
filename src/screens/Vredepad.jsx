@@ -1651,7 +1651,7 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
-    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
+    const message = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.`
     const lvl = gameRef.current?.level || endData?.level || 1
     const sc = gameRef.current?.score || endData?.score || null
     try {
@@ -1660,18 +1660,18 @@ export default function Vredepad({ onClose }) {
       const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: message, url: APP_URL })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
           try {
-            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: message + '\n\n' + APP_URL })
             return
           } catch (e2) { if (e2?.name === 'AbortError') return }
         }
       }
     } catch {}
-    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(message + '\n\n' + APP_URL)}`, '_blank')
   }
 
   async function handleShare() {
@@ -1679,8 +1679,7 @@ export default function Vredepad({ onClose }) {
     if (!d) return
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
-    // Caption: verse first, then compelling CTA, then link on its own line
-    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
+    const message = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.`
 
     try {
       const cv = buildShareCanvas(d)
@@ -1688,20 +1687,20 @@ export default function Vredepad({ onClose }) {
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: message, url: APP_URL })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
           // Some browsers reject url+files together — retry without url
           try {
-            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: message + '\n\n' + APP_URL })
             return
           } catch (e2) { if (e2?.name === 'AbortError') return }
         }
       }
     } catch {}
     // Fallback: WhatsApp direct (always works, URL on own line = clickable)
-    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(message + '\n\n' + APP_URL)}`, '_blank')
   }
 
   function getTouchDir(clientX, clientY) {
