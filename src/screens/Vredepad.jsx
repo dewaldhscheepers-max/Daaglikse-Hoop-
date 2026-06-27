@@ -1663,22 +1663,6 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
-    const lvl = gameRef.current?.level || endData?.level || 1
-    const sc = gameRef.current?.score || endData?.score || null
-    try {
-      const cv = buildShareCanvas({ lastTruth: verse, score: sc, level: lvl })
-      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
-      const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: APP_URL })
-          return
-        } catch (e) {
-          if (e?.name === 'AbortError') return
-        }
-      }
-    } catch {}
-    // Fallback: share URL as text only — always clickable in WhatsApp
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
@@ -1696,20 +1680,6 @@ export default function Vredepad({ onClose }) {
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
 
-    try {
-      const cv = buildShareCanvas(d)
-      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
-      const file = new File([blob], 'vredepad.png', { type: 'image/png' })
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: APP_URL })
-          return
-        } catch (e) {
-          if (e?.name === 'AbortError') return
-        }
-      }
-    } catch {}
-    // Fallback: share URL as text only — always clickable in WhatsApp
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
