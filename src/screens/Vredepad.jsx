@@ -33,6 +33,13 @@ const weedImages = Array.from({ length: 2 }, (_, i) => {
   return img
 })
 
+// 8 heart-light player stages (p0–p7.webp, transparent bg)
+const playerImages = Array.from({ length: 8 }, (_, i) => {
+  const img = new Image()
+  img.src = `/player/p${i}.webp?v=1`
+  return img
+})
+
 
 const MILESTONE_BOOKS = [
   { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
@@ -372,36 +379,62 @@ function drawWeed(ctx, x, y, pulse, t, weedType) {
   }
 }
 
-function drawPlayer(ctx, p, tick, t) {
+function getPlayerStage(level) {
+  if (level >= 80) return 7
+  if (level >= 50) return 6
+  if (level >= 35) return 5
+  if (level >= 20) return 4
+  if (level >= 15) return 3
+  if (level >= 10) return 2
+  if (level >= 5)  return 1
+  return 0
+}
+
+function drawPlayer(ctx, p, tick, t, level) {
   const { x, y } = p
   const hitFrac = p.hitAnim || 0
   const r = 13 * (1 - hitFrac * 0.22)
+  const stage = getPlayerStage(level || 1)
+  const img = playerImages[stage]
+  const spriteR = 30
+  const pulse = Math.sin(tick * 0.05) * 2.5
 
-  // Soft trail
+  // Soft green trail
   for (let i = 0; i < p.trail.length; i++) {
     const tr = p.trail[i]
     const frac = (i + 1) / p.trail.length
-    ctx.beginPath(); ctx.arc(tr.x, tr.y, r * 0.55 * frac, 0, Math.PI * 2)
-    ctx.fillStyle = t.player; ctx.globalAlpha = 0.09 * frac; ctx.fill(); ctx.globalAlpha = 1
+    ctx.beginPath(); ctx.arc(tr.x, tr.y, r * 0.5 * frac, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(160,255,140,1)'; ctx.globalAlpha = 0.08 * frac; ctx.fill(); ctx.globalAlpha = 1
   }
 
-  // Warm golden glow
-  const pulse = Math.sin(tick * 0.05) * 3
-  const gw = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8 + pulse)
-  gw.addColorStop(0, t.playerWarm)
-  gw.addColorStop(0.45, t.playerGlow)
-  gw.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.beginPath(); ctx.arc(x, y, r * 2.8 + pulse, 0, Math.PI * 2)
-  ctx.fillStyle = gw; ctx.globalAlpha = 0.72; ctx.fill(); ctx.globalAlpha = 1
+  // Bright white outer glow
+  const glowR = spriteR * 1.55 + pulse
+  const glow = ctx.createRadialGradient(x, y, spriteR * 0.4, x, y, glowR)
+  glow.addColorStop(0,    'rgba(255,255,255,0.65)')
+  glow.addColorStop(0.38, 'rgba(220,255,200,0.28)')
+  glow.addColorStop(1,    'rgba(255,255,255,0)')
+  ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2)
+  ctx.fillStyle = glow; ctx.globalAlpha = 0.88; ctx.fill(); ctx.globalAlpha = 1
 
-  // Main dot
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = t.player; ctx.fill()
+  // Heart sprite
+  if (img && img.complete && img.naturalWidth > 0) {
+    ctx.globalAlpha = hitFrac > 0 ? 0.68 : 0.97
+    ctx.drawImage(img, x - spriteR, y - spriteR, spriteR * 2, spriteR * 2)
+    ctx.globalAlpha = 1
+  } else {
+    // Fallback circle while sprite loads
+    const gw = ctx.createRadialGradient(x, y, 0, x, y, r * 2.8 + pulse)
+    gw.addColorStop(0, t.playerWarm); gw.addColorStop(0.45, t.playerGlow); gw.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.beginPath(); ctx.arc(x, y, r * 2.8 + pulse, 0, Math.PI * 2)
+    ctx.fillStyle = gw; ctx.globalAlpha = 0.72; ctx.fill(); ctx.globalAlpha = 1
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = t.player; ctx.fill()
+  }
+
+  // Red flash on hit
   if (hitFrac > 0) {
-    ctx.beginPath(); ctx.arc(x, y, r * 1.5, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(120,20,60,${hitFrac * 0.28})`; ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, spriteR * 0.75, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(180,20,60,${hitFrac * 0.32})`; ctx.fill()
   }
-  ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.33, r * 0.32, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fill()
 }
 
 function drawFloats(ctx, floats) {
@@ -1363,7 +1396,7 @@ export default function Vredepad({ onClose }) {
         for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
         if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
         for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t, w.type)
-        drawPlayer(ctx, p, g.tick, g.t)
+        drawPlayer(ctx, p, g.tick, g.t, g.level)
         if (g.genadeActive > 0) {
           const gFrac = Math.min(g.genadeActive / 300, 1)
           const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 55)
