@@ -1455,7 +1455,7 @@ export default function Vredepad({ onClose }) {
           g._verseShown = true
           setGardenVerse(g._gardenVerse)
         }
-        if (g.gardenTime >= 270) { endLevel(g, true); return }
+        if (g.gardenTime >= 390) { endLevel(g, true); return }
       }
 
       g.floats = g.floats.filter(f => { f.age += dt; return f.age < f.maxAge })
@@ -1963,6 +1963,9 @@ export default function Vredepad({ onClose }) {
           {gardenVerse && (
             <div className="vp-garden-verse">
               <p className="vp-garden-verse-text">{gardenVerse}</p>
+              <button className="vp-garden-verse-share" onClick={() => shareVerse(gardenVerse)}>
+                Deel hierdie vers 🌿
+              </button>
             </div>
           )}
           {tutorialActive && (
