@@ -774,10 +774,10 @@ export default function Vredepad({ onClose }) {
     return () => clearTimeout(t)
   }, [screen, countdown])
 
-  // ── Stil Oomblik ──
+  // ── Stil Oomblik → Vers Oomblik ──
   useEffect(() => {
     if (screen !== 'stiloomblik') return
-    const t = setTimeout(() => setScreen('levelup'), 2800)
+    const t = setTimeout(() => setScreen('versmoment'), 2800)
     return () => clearTimeout(t)
   }, [screen])
 
@@ -1529,7 +1529,7 @@ export default function Vredepad({ onClose }) {
   }
 
   function buildShareCanvas(d) {
-    const W = 420, H = 300, SC = 2
+    const W = 420, H = 340, SC = 2
     const cv = document.createElement('canvas')
     cv.width = W * SC; cv.height = H * SC
     const ctx = cv.getContext('2d')
@@ -1538,38 +1538,43 @@ export default function Vredepad({ onClose }) {
     const bg = ctx.createLinearGradient(0, 0, W, H)
     bg.addColorStop(0, '#162a1e'); bg.addColorStop(1, '#1f3d2a')
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
-    // Soft inner glow
-    const glow = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, W*0.55)
-    glow.addColorStop(0, 'rgba(255,220,80,0.10)'); glow.addColorStop(1, 'rgba(0,0,0,0)')
+    // Centre glow behind verse
+    const glow = ctx.createRadialGradient(W/2, H*0.45, 0, W/2, H*0.45, W*0.52)
+    glow.addColorStop(0, 'rgba(255,220,80,0.12)'); glow.addColorStop(1, 'rgba(0,0,0,0)')
     ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H)
-    // Header
+    // Top label
     ctx.textAlign = 'center'
-    ctx.fillStyle = 'rgba(255,224,100,0.55)'
-    ctx.font = '11px sans-serif'
-    ctx.fillText('DAAGLIKSE HOOP · VREDEPAD', W/2, 28)
+    ctx.fillStyle = 'rgba(255,224,100,0.45)'
+    ctx.font = '10px sans-serif'
+    ctx.fillText('DAAGLIKSE HOOP', W/2, 26)
     // Divider
-    ctx.strokeStyle = 'rgba(255,224,100,0.18)'; ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(40, 38); ctx.lineTo(W - 40, 38); ctx.stroke()
-    // Verse
+    ctx.strokeStyle = 'rgba(255,224,100,0.15)'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(W/2 - 40, 34); ctx.lineTo(W/2 + 40, 34); ctx.stroke()
+    // Verse — hero text
     const verse = d.lastTruth || 'Vrede van God wat alle verstand oortref.'
+    const fontSize = verse.length > 80 ? 16 : verse.length > 50 ? 18 : 21
     ctx.fillStyle = '#FFFDE0'
-    ctx.font = `italic ${verse.length > 70 ? 15 : 17}px Georgia, serif`
-    const words = verse.split(' '), maxW = W - 72
-    let line = '', y = 82
+    ctx.font = `italic ${fontSize}px Georgia, serif`
+    const words = `"${verse}"`.split(' ')
+    const maxW = W - 80
+    let line = '', y = 80, lineH = fontSize + 9
     for (const w of words) {
       const test = line ? line + ' ' + w : w
-      if (ctx.measureText(`"${test}"`).width > maxW && line) {
-        ctx.fillText(`"${line}${line === words[0] ? '' : ''}`, W/2, y); line = w; y += 26
+      if (ctx.measureText(test).width > maxW && line) {
+        ctx.fillText(line, W/2, y); line = w; y += lineH
       } else line = test
     }
-    ctx.fillText(line.startsWith('"') ? `${line}"` : `"${line}"`, W/2, y)
-    // Stats bar
-    y += 38
-    ctx.fillStyle = 'rgba(255,224,100,0.22)'; roundRect(ctx, 60, y - 18, W - 120, 30, 8); ctx.fill()
-    ctx.fillStyle = '#FFE066'; ctx.font = 'bold 14px sans-serif'
-    ctx.fillText(`Vlak ${d.level}  ·  ${d.score} waarhede`, W/2, y + 4)
+    ctx.fillText(line, W/2, y)
+    // Spacer line
+    y += 32
+    ctx.strokeStyle = 'rgba(255,224,100,0.12)'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 60, y); ctx.stroke()
+    // Stats
+    y += 22
+    ctx.fillStyle = 'rgba(255,220,100,0.60)'; ctx.font = 'bold 13px sans-serif'
+    ctx.fillText(`Vredepad ${d.level}  ·  ${d.score} waarhede`, W/2, y)
     // Footer
-    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.font = '10px sans-serif'
+    ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.font = '10px sans-serif'
     ctx.fillText('dewaldscheepers.com/go', W/2, H - 14)
     return cv
   }
@@ -1792,6 +1797,27 @@ export default function Vredepad({ onClose }) {
     return (
       <div className="vp-stiloomblik" style={{ background: t.bg0 }}>
         <p className="vp-stilte-truth">{d.lastTruth}</p>
+      </div>
+    )
+  }
+
+  if (screen === 'versmoment' && endData) {
+    const d = endData
+    const t = THEMES[(d.level - 1) % THEMES.length]
+    return (
+      <div className="vp-overlay vp-versmoment" style={{ background: t.bg0 }}>
+        <div className="vp-versmoment-body">
+          <p className="vp-versmoment-label">Vredepad {d.level}</p>
+          <p className="vp-versmoment-verse">"{d.lastTruth || 'Vrede van God wat alle verstand oortref.'}"</p>
+          <div className="vp-versmoment-btns">
+            <button className="vp-versmoment-share" onClick={handleShare}>
+              Deel hierdie woord 🌿
+            </button>
+            <button className="vp-versmoment-skip" onClick={() => setScreen('levelup')}>
+              Sien my telling →
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
