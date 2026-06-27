@@ -1678,6 +1678,15 @@ export default function Vredepad({ onClose }) {
         }
       }
     } catch {}
+    // Fallback: share URL as text only — always clickable in WhatsApp
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
+        return
+      } catch (e) {
+        if (e?.name === 'AbortError') return
+      }
+    }
     window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
   }
 
@@ -1700,6 +1709,15 @@ export default function Vredepad({ onClose }) {
         }
       }
     } catch {}
+    // Fallback: share URL as text only — always clickable in WhatsApp
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
+        return
+      } catch (e) {
+        if (e?.name === 'AbortError') return
+      }
+    }
     window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
   }
 
