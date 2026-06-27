@@ -1589,7 +1589,8 @@ export default function Vredepad({ onClose }) {
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Daaglikse Hoop' })
+        const shareText = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
+        await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: shareText })
         return
       }
     } catch {}
