@@ -1617,11 +1617,11 @@ export default function Vredepad({ onClose }) {
     ctx.fillRect(0, H - bandH, W, bandH)
     ctx.strokeStyle = 'rgba(255,224,80,0.20)'; ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(0, H - bandH); ctx.lineTo(W, H - bandH); ctx.stroke()
-    ctx.fillStyle = 'rgba(255,255,255,0.50)'
+    ctx.fillStyle = 'rgba(255,255,255,0.55)'
     ctx.font = '10px sans-serif'
-    ctx.fillText('SPEEL GRATIS OP', W/2, H - bandH + 16)
+    ctx.fillText('SPEEL VREDEPAD — KRY JOU EIE VERS + GRATIS EBOEKE', W/2, H - bandH + 15)
     ctx.fillStyle = '#FFE066'
-    ctx.font = 'bold 16px sans-serif'
+    ctx.font = 'bold 15px sans-serif'
     ctx.fillText('dewaldscheepers.com/go', W/2, H - bandH + 36)
     return cv
   }
@@ -1636,35 +1636,29 @@ export default function Vredepad({ onClose }) {
 
   async function handleShare() {
     const d = endData
+    if (!d) return
     const APP_URL = 'https://dewaldscheepers.com/go'
-    const caption = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel gratis: ${APP_URL}`
+    const verse = d.lastTruth || ''
+    // Caption: verse first, then compelling CTA, then link on its own line
+    const caption = verse
+      ? `🌿 "${verse}"\n\nSpeel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
+      : `🌿 Speel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
+
     try {
       const cv = buildShareCanvas(d)
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        // Try with url field (Android Chrome supports both files + url)
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: caption, url: APP_URL })
-          return
-        } catch (e) {
-          if (e?.name === 'AbortError') return
-        }
-        // Retry without url field (iOS Safari only supports files + text)
-        try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: caption })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
         }
       }
     } catch {}
-    // Fallback: share text + url only (desktop / unsupported)
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop', text: caption, url: APP_URL }) } catch {}
-    } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
-    }
+    // Fallback: WhatsApp direct (always works, URL on own line = clickable)
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
   }
 
   function getTouchDir(clientX, clientY) {
