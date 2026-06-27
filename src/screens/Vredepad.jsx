@@ -1626,6 +1626,18 @@ export default function Vredepad({ onClose }) {
     y += 36
     ctx.fillStyle = 'rgba(255,220,100,0.55)'; ctx.font = 'bold 12px sans-serif'
     ctx.fillText(d.score ? `${d.score} waarhede versamel` : `Vredepad ${d.level}`, W/2, y)
+    // CTA message above band
+    y += 22
+    ctx.fillStyle = 'rgba(255,255,255,0.70)'; ctx.font = '11px sans-serif'
+    const ctaWords = 'As jy sukkel met rustelose gedagtes — hierdie speletjie het my gehelp.'.split(' ')
+    let ctaLine = '', ctaY = y, ctaH = 15
+    for (const w of ctaWords) {
+      const test = ctaLine ? ctaLine + ' ' + w : w
+      if (ctx.measureText(test).width > W - 60 && ctaLine) {
+        ctx.fillText(ctaLine, W/2, ctaY); ctaLine = w; ctaY += ctaH
+      } else ctaLine = test
+    }
+    ctx.fillText(ctaLine, W/2, ctaY)
     // CTA band at bottom — prominent, always visible
     const bandH = 52
     ctx.fillStyle = 'rgba(255,224,80,0.13)'
@@ -1651,7 +1663,6 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
-    const text = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
     const lvl = gameRef.current?.level || endData?.level || 1
     const sc = gameRef.current?.score || endData?.score || null
     try {
@@ -1660,14 +1671,14 @@ export default function Vredepad({ onClose }) {
       const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: APP_URL })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
         }
       }
     } catch {}
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
   }
 
   async function handleShare() {
@@ -1675,7 +1686,6 @@ export default function Vredepad({ onClose }) {
     if (!d) return
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
-    const text = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
 
     try {
       const cv = buildShareCanvas(d)
@@ -1683,14 +1693,14 @@ export default function Vredepad({ onClose }) {
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: APP_URL })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
         }
       }
     } catch {}
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
   }
 
   function getTouchDir(clientX, clientY) {
