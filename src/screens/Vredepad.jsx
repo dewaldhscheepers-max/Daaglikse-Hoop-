@@ -733,6 +733,8 @@ export default function Vredepad({ onClose }) {
   const [consentChecked, setConsentChecked]   = useState(false)
   const [consentError, setConsentError]       = useState('')
   const [lbCelebration, setLbCelebration]     = useState(null)
+  const [weeklyLb, setWeeklyLb]               = useState([])
+  const [lbTab, setLbTab]                     = useState('week')
   const anonUidRef = useRef(null)
   const pendingLbRef = useRef(null)
 
@@ -754,6 +756,8 @@ export default function Vredepad({ onClose }) {
     getDocs(collection(db, 'leaderboard')).then(snap => {
       const all = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
       setLeaderboard(sortLeaderboard(all))
+      const weekAgo = Date.now() / 1000 - 7 * 24 * 3600
+      setWeeklyLb(sortLeaderboard(all.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > weekAgo)))
     }).catch(() => {})
 
     getOrCreateAnonUid().then(uid => {
@@ -863,6 +867,8 @@ export default function Vredepad({ onClose }) {
         const all2 = s2.docs.map(d => ({ userId: d.id, ...d.data() }))
         const sorted2 = sortLeaderboard(all2)
         setLeaderboard(sorted2)
+        const wa2 = Date.now() / 1000 - 7 * 24 * 3600
+        setWeeklyLb(sortLeaderboard(all2.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > wa2)))
         const rank = sorted2.findIndex(e => e.userId === uid) + 1
         if (rank > 0) setLbCelebration({ rank, isNew: false, level: lbLevel, score: lbScore })
         return
@@ -902,6 +908,8 @@ export default function Vredepad({ onClose }) {
       const all  = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
       const sorted = sortLeaderboard(all)
       setLeaderboard(sorted)
+      const wa3 = Date.now() / 1000 - 7 * 24 * 3600
+      setWeeklyLb(sortLeaderboard(all.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > wa3)))
       const rank = sorted.findIndex(e => e.userId === anonUidRef.current) + 1
       setShowNameConsent(false)
       setConsentName(''); setConsentChecked(false); setConsentError('')
@@ -1391,7 +1399,7 @@ export default function Vredepad({ onClose }) {
           g.flowers.push({ x: ps.x, y: ps.y, life: 0, r: 32, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
           const bt = ps.truth
           g.promiseSeed = null
-          g.promisePause = 210
+          g.promisePause = 330
           setPromiseMoment(bt)
           haptic([30, 20, 30, 20, 30, 20, 80])
         }
@@ -1520,9 +1528,73 @@ export default function Vredepad({ onClose }) {
     setScreen('countdown')
   }
 
+  function buildShareCanvas(d) {
+    const W = 420, H = 300, SC = 2
+    const cv = document.createElement('canvas')
+    cv.width = W * SC; cv.height = H * SC
+    const ctx = cv.getContext('2d')
+    ctx.scale(SC, SC)
+    // Background
+    const bg = ctx.createLinearGradient(0, 0, W, H)
+    bg.addColorStop(0, '#162a1e'); bg.addColorStop(1, '#1f3d2a')
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
+    // Soft inner glow
+    const glow = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, W*0.55)
+    glow.addColorStop(0, 'rgba(255,220,80,0.10)'); glow.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H)
+    // Header
+    ctx.textAlign = 'center'
+    ctx.fillStyle = 'rgba(255,224,100,0.55)'
+    ctx.font = '11px sans-serif'
+    ctx.fillText('DAAGLIKSE HOOP · VREDEPAD', W/2, 28)
+    // Divider
+    ctx.strokeStyle = 'rgba(255,224,100,0.18)'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(40, 38); ctx.lineTo(W - 40, 38); ctx.stroke()
+    // Verse
+    const verse = d.lastTruth || 'Vrede van God wat alle verstand oortref.'
+    ctx.fillStyle = '#FFFDE0'
+    ctx.font = `italic ${verse.length > 70 ? 15 : 17}px Georgia, serif`
+    const words = verse.split(' '), maxW = W - 72
+    let line = '', y = 82
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w
+      if (ctx.measureText(`"${test}"`).width > maxW && line) {
+        ctx.fillText(`"${line}${line === words[0] ? '' : ''}`, W/2, y); line = w; y += 26
+      } else line = test
+    }
+    ctx.fillText(line.startsWith('"') ? `${line}"` : `"${line}"`, W/2, y)
+    // Stats bar
+    y += 38
+    ctx.fillStyle = 'rgba(255,224,100,0.22)'; roundRect(ctx, 60, y - 18, W - 120, 30, 8); ctx.fill()
+    ctx.fillStyle = '#FFE066'; ctx.font = 'bold 14px sans-serif'
+    ctx.fillText(`Vlak ${d.level}  ·  ${d.score} waarhede`, W/2, y + 4)
+    // Footer
+    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.font = '10px sans-serif'
+    ctx.fillText('dewaldscheepers.com/go', W/2, H - 14)
+    return cv
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x+r,y)
+    ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r)
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h)
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r)
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath()
+  }
+
   async function handleShare() {
-    const d   = endData
-    const msg = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
+    const d = endData
+    try {
+      const cv = buildShareCanvas(d)
+      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
+      const file = new File([blob], 'vredepad.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Daaglikse Hoop' })
+        return
+      }
+    } catch {}
+    const verse = d.lastTruth ? `\n\n"${d.lastTruth}"` : ''
+    const msg = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿${verse}\n\nSpeel ook: https://dewaldscheepers.com/go`
     if (navigator.share) {
       try { await navigator.share({ title: 'Vredepad', text: msg }) } catch {}
     } else {
@@ -1620,11 +1692,16 @@ export default function Vredepad({ onClose }) {
           </button>
           <div className="vp-leaderboard">
             <p className="vp-lb-title">Vredepad Top 10</p>
-            <p className="vp-lb-sub">Hier is die mense wat die verste op die Vredepad gestap het.</p>
-            {leaderboard.length === 0 ? (
-              <p className="vp-lb-empty">Nog niemand op die Top 10 nie. Jy kan die eerste wees!</p>
-            ) : (
-              leaderboard.map((entry, i) => (
+            <div className="vp-lb-tabs">
+              <button className={`vp-lb-tab${lbTab === 'week' ? ' active' : ''}`} onClick={() => setLbTab('week')}>Hierdie Week</button>
+              <button className={`vp-lb-tab${lbTab === 'alltyd' ? ' active' : ''}`} onClick={() => setLbTab('alltyd')}>Aller-tye</button>
+            </div>
+            {(() => {
+              const list = lbTab === 'week' ? weeklyLb : leaderboard
+              if (list.length === 0) return (
+                <p className="vp-lb-empty">{lbTab === 'week' ? 'Niemand het hierdie week gespeel nie. Jy kan eerste wees!' : 'Nog niemand op die Top 10 nie. Jy kan die eerste wees!'}</p>
+              )
+              return list.map((entry, i) => (
                 <div key={entry.userId} className={`vp-lb-row${entry.userId === myUid ? ' mine' : ''}`}>
                   <span className="vp-lb-rank">{i + 1}</span>
                   <span className="vp-lb-name">{entry.displayName}</span>
@@ -1634,13 +1711,14 @@ export default function Vredepad({ onClose }) {
                   </div>
                 </div>
               ))
-            )}
+            })()}
             {(() => {
-              const myRank = leaderboard.findIndex(e => e.userId === myUid)
-              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 10. ✨</p>
-              const last = leaderboard[leaderboard.length - 1]
+              const list = lbTab === 'week' ? weeklyLb : leaderboard
+              const myRank = list.findIndex(e => e.userId === myUid)
+              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die {lbTab === 'week' ? 'weeklikse' : 'Vredepad'} Top 10. ✨</p>
+              const last = list[list.length - 1]
               const gap = last ? last.level - totalLevels : 999
-              const close = leaderboard.length >= 10 && gap <= 12
+              const close = list.length >= 10 && gap <= 12
               return <p className="vp-lb-motivation">{close ? `Nog ${gap} ${gap === 1 ? 'vlak' : 'vlakke'} om ${last.displayName} te klop! 🏅` : 'Hou aan stap. Jou volgende tree kan jou nader bring aan die Top 10.'}</p>
             })()}
             <p className="vp-lb-120">🌙 Bereik Vlak 120 en ontsluit Rustelose Gedagtes gratis.</p>
