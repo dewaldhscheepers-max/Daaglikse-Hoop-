@@ -1612,7 +1612,7 @@ export default function Vredepad({ onClose }) {
     // Stats
     y += 36
     ctx.fillStyle = 'rgba(255,220,100,0.55)'; ctx.font = 'bold 12px sans-serif'
-    ctx.fillText(`${d.score} waarhede versamel`, W/2, y)
+    ctx.fillText(d.score ? `${d.score} waarhede versamel` : `Vredepad ${d.level}`, W/2, y)
     // CTA band at bottom — prominent, always visible
     const bandH = 52
     ctx.fillStyle = 'rgba(255,224,80,0.13)'
@@ -1638,10 +1638,11 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
-    const caption = `🌿 "${verse}"\n\nSpeel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
-    const lvl = gameRef.current?.level || 1
+    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
+    const lvl = gameRef.current?.level || endData?.level || 1
+    const sc = gameRef.current?.score || endData?.score || null
     try {
-      const cv = buildShareCanvas({ lastTruth: verse, score: '', level: lvl })
+      const cv = buildShareCanvas({ lastTruth: verse, score: sc, level: lvl })
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
@@ -1666,9 +1667,7 @@ export default function Vredepad({ onClose }) {
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
     // Caption: verse first, then compelling CTA, then link on its own line
-    const caption = verse
-      ? `🌿 "${verse}"\n\nSpeel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
-      : `🌿 Speel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
+    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
 
     try {
       const cv = buildShareCanvas(d)
