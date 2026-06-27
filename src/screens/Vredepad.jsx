@@ -751,6 +751,7 @@ export default function Vredepad({ onClose }) {
   const [lbCelebration, setLbCelebration]     = useState(null)
   const [weeklyLb, setWeeklyLb]               = useState([])
   const [lbTab, setLbTab]                     = useState('week')
+  const [shareToast, setShareToast]           = useState(false)
   const [gameMinScore, setGameMinScore]        = useState(10)
   const anonUidRef = useRef(null)
   const pendingLbRef = useRef(null)
@@ -1663,15 +1664,19 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
-        return
-      } catch (e) {
-        if (e?.name === 'AbortError') return
+    const lvl = gameRef.current?.level || endData?.level || 1
+    const sc  = gameRef.current?.score  || endData?.score  || null
+    try {
+      const cv   = buildShareCanvas({ lastTruth: verse, score: sc, level: lvl })
+      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
+      const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad' }) } catch (e) { if (e?.name === 'AbortError') return }
       }
-    }
-    window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
+    } catch {}
+    try { await navigator.clipboard.writeText(APP_URL) } catch {}
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 4000)
   }
 
   async function handleShare() {
@@ -1680,15 +1685,17 @@ export default function Vredepad({ onClose }) {
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Daaglikse Hoop – Vredepad', url: APP_URL })
-        return
-      } catch (e) {
-        if (e?.name === 'AbortError') return
+    try {
+      const cv   = buildShareCanvas(d)
+      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
+      const file = new File([blob], 'vredepad.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad' }) } catch (e) { if (e?.name === 'AbortError') return }
       }
-    }
-    window.open(`https://wa.me/?text=${encodeURIComponent(APP_URL)}`, '_blank')
+    } catch {}
+    try { await navigator.clipboard.writeText(APP_URL) } catch {}
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 4000)
   }
 
   function getTouchDir(clientX, clientY) {
@@ -1967,6 +1974,11 @@ export default function Vredepad({ onClose }) {
               </button>
             </div>
           )}
+          {shareToast && (
+            <div className="vp-share-toast">
+              🔗 Link gekopieer — plak dit ook in WhatsApp!
+            </div>
+          )}
           {tutorialActive && (
             <div className="vp-tutorial-overlay">
               <div className="vp-tut-step vp-tut-s1">
@@ -2145,6 +2157,12 @@ export default function Vredepad({ onClose }) {
             </>
           )}
         </div>
+
+        {shareToast && (
+          <div className="vp-share-toast">
+            🔗 Link gekopieer — plak dit ook in WhatsApp!
+          </div>
+        )}
 
         {showNameConsent && (
           <div className="vp-consent-backdrop">
