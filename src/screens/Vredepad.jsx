@@ -101,16 +101,18 @@ function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
 
 function minScoreForLevel(level) {
   // Thresholds require catching the Genade Kruis (+100) — seeds alone won't cut it
+  // At level 50+ you need cross + storm + good seeds
   if (level <= 3)  return 50
   if (level <= 5)  return 60
   if (level <= 8)  return 70
   if (level <= 12) return 80
   if (level <= 18) return 90
   if (level <= 25) return 100
-  if (level <= 35) return 110
-  if (level <= 50) return 120
-  if (level <= 75) return 130
-  return 140
+  if (level <= 35) return 120
+  if (level <= 42) return 150
+  if (level <= 52) return 220
+  if (level <= 65) return 260
+  return 300
 }
 
 function sortLeaderboard(entries) {
