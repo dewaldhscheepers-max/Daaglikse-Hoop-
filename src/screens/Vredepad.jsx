@@ -770,11 +770,24 @@ export default function Vredepad({ onClose }) {
       setBookPdfs(pdfs)
     }).catch(() => {})
 
+    // Show cached leaderboard instantly, then refresh from Firestore in background
+    try {
+      const cached = JSON.parse(localStorage.getItem('vp_lb_cache') || 'null')
+      if (cached?.length) {
+        setLeaderboard(sortLeaderboard(cached))
+        const weekAgo = Date.now() / 1000 - 7 * 24 * 3600
+        setWeeklyLb(sortLeaderboard(cached.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > weekAgo)))
+      }
+    } catch {}
     getDocs(collection(db, 'leaderboard')).then(snap => {
-      const all = snap.docs.map(d => ({ userId: d.id, ...d.data() }))
+      const all = snap.docs.map(d => {
+        const r = d.data()
+        return { userId: d.id, ...r, createdAt: r.createdAt?.seconds ? { seconds: r.createdAt.seconds } : null, updatedAt: r.updatedAt?.seconds ? { seconds: r.updatedAt.seconds } : null }
+      })
       setLeaderboard(sortLeaderboard(all))
       const weekAgo = Date.now() / 1000 - 7 * 24 * 3600
       setWeeklyLb(sortLeaderboard(all.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > weekAgo)))
+      try { localStorage.setItem('vp_lb_cache', JSON.stringify(all)) } catch {}
     }).catch(() => {})
 
     getOrCreateAnonUid().then(uid => {
