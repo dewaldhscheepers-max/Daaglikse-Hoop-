@@ -99,6 +99,12 @@ const COUNTDOWN_PHRASES = [
 
 function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
 
+function minScoreForLevel(level) {
+  if (level <= 5)  return 10
+  if (level <= 15) return 15
+  return 20
+}
+
 function sortLeaderboard(entries) {
   return [...entries]
     .sort((a, b) =>
@@ -735,6 +741,7 @@ export default function Vredepad({ onClose }) {
   const [lbCelebration, setLbCelebration]     = useState(null)
   const [weeklyLb, setWeeklyLb]               = useState([])
   const [lbTab, setLbTab]                     = useState('week')
+  const [gameMinScore, setGameMinScore]        = useState(10)
   const anonUidRef = useRef(null)
   const pendingLbRef = useRef(null)
 
@@ -842,6 +849,7 @@ export default function Vredepad({ onClose }) {
       gardenMode: false, gardenTime: 0,
       bgIdx,
     }
+    setGameMinScore(minScoreForLevel(level))
   }
 
   async function checkAndUpdateLeaderboard(lbLevel, lbScore) {
@@ -940,26 +948,39 @@ export default function Vredepad({ onClose }) {
     playLevelComplete()
     haptic([50, 30, 80])
 
-    const collected    = [...g.collectedTruths]
-    const isNewRecord  = g.score > (save.best || 0)
+    const collected   = [...g.collectedTruths]
+    const isNewRecord = g.score > (save.best || 0)
+    const minScore    = minScoreForLevel(g.level)
+    const attemptKey  = `vp_attempts_${g.level}`
+    const attempts    = parseInt(localStorage.getItem(attemptKey) || '0')
+    const passed      = g.score >= minScore || isReplayRef.current || attempts >= 2
+
     if (!isReplayRef.current) {
-      const newLevel = (save.level || 1) + 1
-      const oldTotal = save.totalLevels || 0
-      const newTotal = oldTotal + 1
-      let newUnlock = null
-      if (oldTotal < 7   && newTotal >= 7)   newUnlock = MILESTONE_BOOKS[0]
-      if (oldTotal < 20  && newTotal >= 20)  newUnlock = MILESTONE_BOOKS[1]
-      if (oldTotal < 50  && newTotal >= 50)  newUnlock = MILESTONE_BOOKS[2]
-      if (oldTotal < 120 && newTotal >= 120) newUnlock = MILESTONE_BOOKS[3]
-      const newTotalScore = (save.totalScore || 0) + g.score
-      saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
-      setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock, totalScore: newTotalScore, endTitle })
-      checkAndUpdateLeaderboard(newTotal, newTotalScore).catch(() => {})
+      if (passed) {
+        localStorage.removeItem(attemptKey)
+        const newLevel = (save.level || 1) + 1
+        const oldTotal = save.totalLevels || 0
+        const newTotal = oldTotal + 1
+        let newUnlock = null
+        if (oldTotal < 7   && newTotal >= 7)   newUnlock = MILESTONE_BOOKS[0]
+        if (oldTotal < 20  && newTotal >= 20)  newUnlock = MILESTONE_BOOKS[1]
+        if (oldTotal < 50  && newTotal >= 50)  newUnlock = MILESTONE_BOOKS[2]
+        if (oldTotal < 120 && newTotal >= 120) newUnlock = MILESTONE_BOOKS[3]
+        const newTotalScore = (save.totalScore || 0) + g.score
+        saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
+        setBest(nb)
+        setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock, totalScore: newTotalScore, endTitle, minScore, failed: false })
+        checkAndUpdateLeaderboard(newTotal, newTotalScore).catch(() => {})
+      } else {
+        localStorage.setItem(attemptKey, String(attempts + 1))
+        saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
+        if (nb > (save.best || 0)) setBest(nb)
+        setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord: false, newUnlock: null, totalScore: save.totalScore || 0, endTitle, minScore, failed: true, attemptsLeft: 2 - attempts })
+      }
     } else {
       saveSave({ ...save, ...(nb > (save.best || 0) ? { best: nb } : {}) })
       if (nb > (save.best || 0)) setBest(nb)
-      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null, totalScore: save.totalScore || 0, endTitle })
+      setEndData({ score: g.score, level: g.level, bestScore: nb, lastTruth, streak: save.streak || 1, collected, isNewRecord, newUnlock: null, totalScore: save.totalScore || 0, endTitle, minScore, failed: false })
     }
     setCombo(0)
     setLastTruthText('')
@@ -1366,6 +1387,7 @@ export default function Vredepad({ onClose }) {
             g.justHit = true
             g.truthStreak = 0
             g.weedHitsRound++
+            g.score = Math.max(0, g.score - 3); setScore(g.score)
             if (g.storm?.phase === 'active') g.storm.survivalBar = Math.max(0, (g.storm.survivalBar ?? 1) - STORM_BAR_WEED)
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
             g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 190, isWeed: true })
@@ -1524,6 +1546,15 @@ export default function Vredepad({ onClose }) {
     setShowNameConsent(false); setLbCelebration(null)
     pendingLevel.current = endData?.level || 1
     isReplayRef.current  = true
+    setCountdown(3)
+    setScreen('countdown')
+  }
+
+  function retryLevel() {
+    cancelAnimationFrame(rafRef.current)
+    setShowNameConsent(false); setLbCelebration(null)
+    pendingLevel.current = endData?.level || 1
+    isReplayRef.current  = false
     setCountdown(3)
     setScreen('countdown')
   }
@@ -1846,7 +1877,11 @@ export default function Vredepad({ onClose }) {
     return (
       <div className="vp-overlay vp-playing">
         <div className="vp-hud">
-          <span className="vp-hud-score">Waarhede: {displayScore}</span>
+          <span className="vp-hud-score">
+            <span className="vp-hud-score-num" style={{ color: displayScore >= gameMinScore ? '#4CAF50' : 'var(--text)' }}>{displayScore}</span>
+            <span className="vp-hud-score-sep"> / </span>
+            <span className="vp-hud-score-min">{gameMinScore}</span>
+          </span>
           <span className="vp-hud-time" style={{ color: displayTime <= 10 ? '#C0392B' : 'var(--text)' }}>
             {displayTime}s
           </span>
@@ -1935,10 +1970,21 @@ export default function Vredepad({ onClose }) {
     return (
       <div className="vp-overlay vp-end" style={{ background: t.bg0 }}>
         <div className="vp-end-body">
-          <div className="vp-end-icon">🌿</div>
-          <h2 className="vp-end-title">{d.endTitle || 'Jy het plek gemaak vir vrede.'}</h2>
-          <p className="vp-end-level">Vredepad {d.level} voltooi</p>
+          <div className="vp-end-icon">{d.failed ? '🌱' : '🌿'}</div>
+          <h2 className="vp-end-title">{d.failed ? 'Bly gefokus op die waarheid.' : (d.endTitle || 'Jy het plek gemaak vir vrede.')}</h2>
+          <p className="vp-end-level">Vredepad {d.level} {d.failed ? '' : 'voltooi'}</p>
 
+          {d.failed && (
+            <div className="vp-end-retry-msg">
+              <span className="vp-retry-score">{d.score}</span>
+              <span className="vp-retry-sep"> van </span>
+              <span className="vp-retry-min">{d.minScore}</span>
+              <span className="vp-retry-lbl"> waarhede benodig</span>
+              {d.attemptsLeft > 0 && <p className="vp-retry-hint">Nog {d.attemptsLeft} poging{d.attemptsLeft === 1 ? '' : 's'}. Vermy die donker onkruid!</p>}
+            </div>
+          )}
+
+          {!d.failed && (
           <div className="vp-stats-row">
             <div className="vp-stat">
               <span className="vp-stat-val">{d.score}</span>
@@ -1949,6 +1995,7 @@ export default function Vredepad({ onClose }) {
               <span className="vp-stat-lbl">Beste</span>
             </div>
           </div>
+          )}
 
           {d.isNewRecord && (
             <div className="vp-new-record">🏆 Nuwe Rekord!</div>
@@ -2022,12 +2069,23 @@ export default function Vredepad({ onClose }) {
             )
           })()}
 
-          <button className="vp-start-btn" style={{ background: t.player }} onClick={nextLevel}>
-            Volgende Vredepad →
-          </button>
-          <button className="vp-secondary-btn" onClick={replayLevel}>Speel weer</button>
-          <button className="vp-share-btn" onClick={handleShare}>Deel my vrede 🌿</button>
-          <button className="vp-back-link" onClick={onClose}>Terug na tuis</button>
+          {d.failed ? (
+            <>
+              <button className="vp-start-btn" style={{ background: t.player }} onClick={retryLevel}>
+                Probeer weer →
+              </button>
+              <button className="vp-back-link" onClick={onClose}>Terug na tuis</button>
+            </>
+          ) : (
+            <>
+              <button className="vp-start-btn" style={{ background: t.player }} onClick={nextLevel}>
+                Volgende Vredepad →
+              </button>
+              <button className="vp-secondary-btn" onClick={replayLevel}>Speel weer</button>
+              <button className="vp-share-btn" onClick={handleShare}>Deel my vrede 🌿</button>
+              <button className="vp-back-link" onClick={onClose}>Terug na tuis</button>
+            </>
+          )}
         </div>
 
         {showNameConsent && (

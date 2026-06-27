@@ -257,10 +257,27 @@
 }
 
 .vp-hud-score {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
   flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.vp-hud-score-num {
+  font-size: 20px;
+  font-weight: 800;
+  transition: color 0.3s;
+}
+.vp-hud-score-sep {
+  font-size: 13px;
+  opacity: 0.5;
+}
+.vp-hud-score-min {
+  font-size: 13px;
+  opacity: 0.55;
+  font-weight: 700;
 }
 
 .vp-hud-time {
@@ -778,6 +795,38 @@
   border: 2px solid rgba(255, 215, 0, 0.45);
   border-radius: 20px;
   padding: 6px 20px;
+}
+
+.vp-end-retry-msg {
+  text-align: center;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.07);
+  border-radius: 14px;
+  margin: 4px 0;
+}
+.vp-retry-score {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+}
+.vp-retry-sep,
+.vp-retry-min,
+.vp-retry-lbl {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.65;
+}
+.vp-retry-min {
+  font-size: 20px;
+  font-weight: 800;
+  opacity: 0.85;
+}
+.vp-retry-hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.55;
 }
 
 /* ─── Rewards section (intro screen) ─── */
