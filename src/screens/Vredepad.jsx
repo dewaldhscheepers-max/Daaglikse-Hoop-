@@ -100,15 +100,17 @@ const COUNTDOWN_PHRASES = [
 function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
 
 function minScoreForLevel(level) {
-  if (level <= 3)  return 8
-  if (level <= 6)  return 12
-  if (level <= 10) return 15
-  if (level <= 15) return 20
-  if (level <= 20) return 25
-  if (level <= 30) return 30
-  if (level <= 40) return 35
-  if (level <= 60) return 40
-  return 45
+  // Thresholds require catching the Genade Kruis (+100) — seeds alone won't cut it
+  if (level <= 3)  return 50
+  if (level <= 5)  return 60
+  if (level <= 8)  return 70
+  if (level <= 12) return 80
+  if (level <= 18) return 90
+  if (level <= 25) return 100
+  if (level <= 35) return 110
+  if (level <= 50) return 120
+  if (level <= 75) return 130
+  return 140
 }
 
 function sortLeaderboard(entries) {
