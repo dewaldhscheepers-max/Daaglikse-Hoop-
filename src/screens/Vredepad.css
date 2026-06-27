@@ -1828,6 +1828,27 @@
   100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* ─── Spiritual titles (L80+) ─── */
+.vp-intro-spiritual-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.70;
+  margin: -4px 0 0;
+}
+
+.vp-countdown-spiritual {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: -8px 0 0;
+  opacity: 0.60;
+}
+
 /* ─── Garden verse bubble ─── */
 .vp-garden-verse {
   position: absolute;

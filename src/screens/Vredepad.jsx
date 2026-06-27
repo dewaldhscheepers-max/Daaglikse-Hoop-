@@ -247,6 +247,24 @@ const THEMES = [
   },
 ]
 
+const SPIRITUAL_TITLES = [
+  { level: 80,   title: 'Soeker' },
+  { level: 100,  title: 'Pelgrim' },
+  { level: 150,  title: 'Wagter' },
+  { level: 200,  title: 'Sieraad' },
+  { level: 250,  title: 'Hoop-Draer' },
+  { level: 300,  title: 'Anker' },
+  { level: 350,  title: 'Seiler' },
+  { level: 400,  title: 'Klimmer' },
+  { level: 450,  title: 'Berg-top' },
+  { level: 500,  title: 'Tuinier' },
+  { level: 600,  title: 'Deurbreker' },
+  { level: 700,  title: 'Ligdraer' },
+  { level: 800,  title: 'Sterresoeker' },
+  { level: 900,  title: 'Daeraad-kind' },
+  { level: 1000, title: 'Oorwinnaar' },
+]
+
 function d2(a, b) { return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) }
 function wrapVal(v, max) { return ((v % max) + max) % max }
 
@@ -266,6 +284,29 @@ function shuffleArray(arr) {
     [a[i], a[j]] = [a[j], a[i]]
   }
   return a
+}
+
+function getSpiritualTitle(level) {
+  let title = null
+  for (const t of SPIRITUAL_TITLES) {
+    if (level >= t.level) title = t.title
+    else break
+  }
+  return title
+}
+
+function getWorldOverlayColor(level) {
+  if (level >= 1000) return 'rgba(255,255,240,0.09)'
+  if (level >= 900)  return 'rgba(255,160,80,0.08)'
+  if (level >= 800)  return 'rgba(10,5,60,0.12)'
+  if (level >= 700)  return 'rgba(200,215,230,0.11)'
+  if (level >= 600)  return 'rgba(140,40,0,0.09)'
+  if (level >= 500)  return 'rgba(80,180,60,0.08)'
+  if (level >= 400)  return 'rgba(90,90,130,0.10)'
+  if (level >= 300)  return 'rgba(20,80,160,0.10)'
+  if (level >= 200)  return 'rgba(200,130,30,0.10)'
+  if (level >= 100)  return 'rgba(50,80,160,0.10)'
+  return null
 }
 
 /* ── Canvas draw helpers ── */
@@ -684,6 +725,55 @@ function drawStormBar(ctx, storm, W, H) {
   ctx.restore()
 }
 
+function drawDuif(ctx, duif, tick) {
+  const { x, y, life, maxLife } = duif
+  const fadeIn  = Math.min(life / 20, 1)
+  const fadeOut = life > maxLife - 40 ? (maxLife - life) / 40 : 1
+  const alpha   = fadeIn * fadeOut
+  const flap    = Math.sin(tick * 0.14) * 12
+  ctx.save()
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, 38)
+  glow.addColorStop(0, `rgba(240,248,255,${alpha * 0.50})`)
+  glow.addColorStop(1, 'rgba(240,248,255,0)')
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, 38, 0, Math.PI * 2); ctx.fill()
+  ctx.globalAlpha = alpha
+  ctx.fillStyle = 'rgba(235,245,255,0.94)'
+  ctx.beginPath(); ctx.ellipse(x - 14, y - 3 + flap, 17, 7, -0.38, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(x + 14, y - 3 - flap, 17, 7,  0.38, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = 'rgba(255,255,255,0.97)'
+  ctx.beginPath(); ctx.ellipse(x, y, 11, 8, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.arc(x + 10, y - 3, 5.5, 0, Math.PI * 2); ctx.fill()
+  ctx.restore()
+}
+
+function drawWarrelwind(ctx, wrl, tick) {
+  const { x, y, life, maxLife } = wrl
+  const fadeIn  = Math.min(life / 20, 1)
+  const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
+  const alpha   = fadeIn * fadeOut
+  const spin    = tick * 0.055
+  ctx.save()
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, 44)
+  glow.addColorStop(0, `rgba(155,215,255,${alpha * 0.40})`)
+  glow.addColorStop(1, 'rgba(155,215,255,0)')
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, 44, 0, Math.PI * 2); ctx.fill()
+  for (let i = 0; i < 3; i++) {
+    const off = (i / 3) * Math.PI * 2
+    ctx.globalAlpha = alpha * 0.68
+    ctx.strokeStyle = 'rgba(130,205,255,0.90)'
+    ctx.lineWidth = 2; ctx.lineCap = 'round'
+    ctx.beginPath()
+    for (let a = 0; a <= Math.PI * 1.75; a += 0.14) {
+      const r  = 6 + a * 9
+      const px = x + Math.cos(a + spin + off) * r
+      const py = y + Math.sin(a + spin + off) * r * 0.55
+      a === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)
+    }
+    ctx.stroke()
+  }
+  ctx.globalAlpha = 1; ctx.restore()
+}
+
 function findFloatY(floats, baseY, x) {
   let y = baseY
   for (let i = 0; i < 6; i++) {
@@ -869,6 +959,15 @@ export default function Vredepad({ onClose }) {
       promiseSeed: null, promiseSeedSpawned: false, promisePause: 0,
       gardenMode: false, gardenTime: 0,
       bgIdx,
+      duif: null, duifSpawned: false, duifActive: 0,
+      warrelwind: null, warrelwindSpawned: false,
+      snowFlakes: (level >= 100 && level < 200) ? Array.from({ length: 30 }, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        r: 0.8 + Math.random() * 1.8,
+        speed: 0.30 + Math.random() * 0.55,
+        drift: (Math.random() - 0.5) * 0.15,
+        alpha: 0.22 + Math.random() * 0.36,
+      })) : [],
     }
     setGameMinScore(minScoreForLevel(level))
   }
@@ -1095,6 +1194,12 @@ export default function Vredepad({ onClose }) {
         p.y = wrapVal(p.y + (p.dy / len) * sp * dt, g.H)
       } else {
         if (p.trail.length > 0) p.trail.shift()
+      }
+
+      // Storm wind push (L60+) — gentle horizontal force during active storm
+      if (g.level >= 60 && g.storm?.phase === 'active') {
+        const windStr = 0.18 + Math.min((g.level - 60) / 80, 1) * 0.22
+        p.x = wrapVal(p.x + windStr * dt, g.W)
       }
 
       for (const s of g.seeds) s.pulse += 0.05 * dt
@@ -1331,10 +1436,96 @@ export default function Vredepad({ onClose }) {
         }
       }
 
+      // Duif — Dove (L65+): appears once per level after 25s, outside storm
+      if (g.level >= 65 && !g.duifSpawned && g.timeLeft < 35 && !g.storm && !g.duif) {
+        g.duifSpawned = true
+        const startY = g.H * (0.22 + Math.random() * 0.56)
+        g.duif = {
+          x: -22, y: startY, baseY: startY,
+          dx: 0.52 + Math.random() * 0.18,
+          life: 0, maxLife: 500,
+          amplitude: 18 + Math.random() * 22,
+        }
+        if (!localStorage.getItem('vp_duif_seen')) {
+          localStorage.setItem('vp_duif_seen', '1')
+          setStormAnnounce("🕊️ 'n Duif! Vang haar...")
+          setTimeout(() => setStormAnnounce(null), 3500)
+        }
+      }
+      if (g.duif) {
+        const dv = g.duif
+        dv.life += dt
+        dv.x += dv.dx * dt
+        dv.y = dv.baseY + Math.sin(dv.life * 0.024) * dv.amplitude
+        if (dv.x > g.W + 28 || dv.life > dv.maxLife) {
+          g.duif = null
+        } else if (d2(p, dv) < 34) {
+          g.duif = null
+          const flightDur = g.level >= 75 ? 480 : 300
+          g.duifActive = flightDur
+          const transformR = 160
+          g.weeds = g.weeds.filter(w => {
+            if (d2(w, p) <= transformR) {
+              g.flowers.push({ x: w.x, y: w.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+              return false
+            }
+            return true
+          })
+          g.score += 10; setScore(g.score)
+          g.floats.push({ id: g.tick + 400, x: g.W / 2, y: g.H * 0.38, text: "Vry soos 'n duif...", age: 0, maxAge: 220, isWeed: false, startFull: true, fontSize: 18 })
+          haptic([20, 15, 20, 15, 50])
+        }
+      }
+      if (g.duifActive > 0) { g.duifActive -= dt; if (g.duifActive < 0) g.duifActive = 0 }
+
+      // Warrelwind (L70+): appears once per level after 20s, transforms nearby weeds to flowers
+      if (g.level >= 70 && !g.warrelwindSpawned && g.timeLeft < 40 && !g.storm) {
+        g.warrelwindSpawned = true
+        const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 70)
+        g.warrelwind = {
+          x: pos.x, y: pos.y,
+          dx: (Math.random() - 0.5) * 0.28,
+          dy: (Math.random() - 0.5) * 0.18,
+          life: 0, maxLife: 380,
+        }
+        if (!localStorage.getItem('vp_ww_seen')) {
+          localStorage.setItem('vp_ww_seen', '1')
+          setStormAnnounce('🌀 Warrelwind! Raak dit aan...')
+          setTimeout(() => setStormAnnounce(null), 3500)
+        }
+      }
+      if (g.warrelwind) {
+        const wrl = g.warrelwind
+        wrl.life += dt
+        wrl.x = wrapVal(wrl.x + wrl.dx * dt, g.W)
+        wrl.y = wrapVal(wrl.y + wrl.dy * dt, g.H)
+        if (wrl.life > wrl.maxLife) {
+          g.warrelwind = null
+        } else if (d2(p, wrl) < 38) {
+          const transformR = 130
+          g.weeds = g.weeds.filter(w => {
+            if (d2(w, wrl) <= transformR) {
+              g.flowers.push({ x: w.x, y: w.y, life: 0, r: 20, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+              return false
+            }
+            return true
+          })
+          g.warrelwind = null
+          g.floats.push({ id: g.tick + 500, x: g.W / 2, y: g.H * 0.40, text: 'Gedagtes verfris!', age: 0, maxAge: 200, isWeed: false, startFull: true })
+          haptic([25, 15, 25])
+        }
+      }
+
       for (const pt of g.parts) {
         pt.x = wrapVal(pt.x + pt.dx * dt, g.W)
         pt.y += pt.dy * dt
         if (pt.y < -10) { pt.y = g.H + 5; pt.x = Math.random() * g.W }
+      }
+      for (const sf of g.snowFlakes) {
+        sf.y += sf.speed * dt; sf.x += sf.drift * dt
+        if (sf.y > g.H + 5) { sf.y = -5; sf.x = Math.random() * g.W }
+        if (sf.x < -5) sf.x = g.W + 5
+        if (sf.x > g.W + 5) sf.x = -5
       }
 
       // Reset combo if no collection in ~3 seconds
@@ -1400,24 +1591,32 @@ export default function Vredepad({ onClose }) {
       if (g.hitCooldown <= 0) {
         for (const w of g.weeds) {
           if (d2(p, w) < 27) {
-            g.combo = 0; setCombo(0)
-            g.hitCooldown = 75
-            g.hitFlash = 14
-            p.hitAnim = 1.0
-            g.justHit = true
-            g.truthStreak = 0
-            g.weedHitsRound++
-            g.score = Math.max(0, g.score - 3); setScore(g.score)
-            if (g.storm?.phase === 'active') g.storm.survivalBar = Math.max(0, (g.storm.survivalBar ?? 1) - STORM_BAR_WEED)
-            const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
-            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 190, isWeed: true })
-            haptic([55, 20, 55])
-            if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
-              g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
-              g.vredekringUsed = true
-              g.weedHitsRound  = 0
+            if (g.duifActive > 0) {
+              // Flight mode — weed transforms to flower instead of hurting
+              g.flowers.push({ x: w.x, y: w.y, life: 0, r: 20, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+              g.weeds = g.weeds.filter(fw => fw !== w)
+              haptic(15)
+              g.hitCooldown = 30
+            } else {
+              g.combo = 0; setCombo(0)
+              g.hitCooldown = 75
+              g.hitFlash = 14
+              p.hitAnim = 1.0
+              g.justHit = true
+              g.truthStreak = 0
+              g.weedHitsRound++
+              g.score = Math.max(0, g.score - 3); setScore(g.score)
+              if (g.storm?.phase === 'active') g.storm.survivalBar = Math.max(0, (g.storm.survivalBar ?? 1) - STORM_BAR_WEED)
+              const weedWord = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
+              g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: weedWord, age: 0, maxAge: 190, isWeed: true })
+              haptic([55, 20, 55])
+              if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
+                g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
+                g.vredekringUsed = true
+                g.weedHitsRound  = 0
+              }
+              playHit()
             }
-            playHit()
             break
           }
         }
@@ -1481,6 +1680,17 @@ export default function Vredepad({ onClose }) {
 
       const ctx = canvas.getContext('2d')
       drawBg(ctx, g.W, g.H, bgImages[g.bgIdx ?? 0])
+      const worldColor = getWorldOverlayColor(g.level)
+      if (worldColor) { ctx.fillStyle = worldColor; ctx.fillRect(0, 0, g.W, g.H) }
+      if (g.snowFlakes.length) {
+        ctx.save()
+        for (const sf of g.snowFlakes) {
+          ctx.globalAlpha = sf.alpha
+          ctx.beginPath(); ctx.arc(sf.x, sf.y, sf.r, 0, Math.PI * 2)
+          ctx.fillStyle = 'rgba(220,235,255,1)'; ctx.fill()
+        }
+        ctx.restore()
+      }
       if (g.storm) drawStormOverlay(ctx, g.storm, g.W, g.H)
       if (g.hitFlash > 0) {
         ctx.fillStyle = 'rgba(50,15,70,0.22)'; ctx.globalAlpha = g.hitFlash / 14
@@ -1515,6 +1725,8 @@ export default function Vredepad({ onClose }) {
         for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
         if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
         for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t, w.type)
+        if (g.warrelwind) drawWarrelwind(ctx, g.warrelwind, g.tick)
+        if (g.duif)       drawDuif(ctx, g.duif, g.tick)
         drawPlayer(ctx, p, g.tick, g.t, g.level)
         if (g.genadeActive > 0) {
           const gFrac = Math.min(g.genadeActive / 300, 1)
@@ -1523,6 +1735,14 @@ export default function Vredepad({ onClose }) {
           gr.addColorStop(1, 'rgba(255,240,180,0)')
           ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
           ctx.fillStyle = gr; ctx.fill()
+        }
+        if (g.duifActive > 0) {
+          const fFrac = Math.min(g.duifActive / 300, 1)
+          const fr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 52)
+          fr.addColorStop(0, `rgba(210,240,255,${fFrac * 0.44})`)
+          fr.addColorStop(1, 'rgba(210,240,255,0)')
+          ctx.beginPath(); ctx.arc(p.x, p.y, 52, 0, Math.PI * 2)
+          ctx.fillStyle = fr; ctx.fill()
         }
         if (g.storm) {
           drawStormBar(ctx, g.storm, g.W, g.H)
@@ -1763,6 +1983,9 @@ export default function Vredepad({ onClose }) {
         <div className="vp-intro">
           <div className="vp-intro-icon">🌿</div>
           <h1 className="vp-intro-title">Vredepad</h1>
+          {getSpiritualTitle(level) && (
+            <p className="vp-intro-spiritual-title">✦ {getSpiritualTitle(level)} ✦</p>
+          )}
           <p className="vp-intro-verse">{t.verse}</p>
           <p className="vp-intro-desc">
             'n Stil oomblik om jou gedagtes tot rus te bring. Versamel God se <strong>waarhede</strong> en laat <strong>indringende gedagtes</strong> verbygaan.
@@ -1941,6 +2164,9 @@ export default function Vredepad({ onClose }) {
             {countdown > 0 ? countdown : '🌿'}
           </div>
           <p className="vp-countdown-sub">Vredepad {level}</p>
+          {getSpiritualTitle(level) && (
+            <p className="vp-countdown-spiritual">✦ {getSpiritualTitle(level)} ✦</p>
+          )}
           <p className="vp-countdown-goal">Versamel waarhede · Vermy swaar gedagtes</p>
         </div>
       </div>
