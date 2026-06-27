@@ -1547,6 +1547,7 @@ export default function Vredepad({ onClose }) {
   function startGame() {
     pendingLevel.current = loadSave().level || 1
     isReplayRef.current  = false
+    setPromiseMoment(null); setGardenVerse(null); setLastTruthText('')
     setCountdown(3)
     setScreen('countdown')
   }
@@ -1554,6 +1555,7 @@ export default function Vredepad({ onClose }) {
   function nextLevel() {
     cancelAnimationFrame(rafRef.current)
     setShowNameConsent(false); setLbCelebration(null)
+    setPromiseMoment(null); setGardenVerse(null); setLastTruthText('')
     pendingLevel.current = loadSave().level || 1
     isReplayRef.current  = false
     setCountdown(3)
@@ -1563,6 +1565,7 @@ export default function Vredepad({ onClose }) {
   function replayLevel() {
     cancelAnimationFrame(rafRef.current)
     setShowNameConsent(false); setLbCelebration(null)
+    setPromiseMoment(null); setGardenVerse(null); setLastTruthText('')
     pendingLevel.current = endData?.level || 1
     isReplayRef.current  = true
     setCountdown(3)
@@ -1572,6 +1575,7 @@ export default function Vredepad({ onClose }) {
   function retryLevel() {
     cancelAnimationFrame(rafRef.current)
     setShowNameConsent(false); setLbCelebration(null)
+    setPromiseMoment(null); setGardenVerse(null); setLastTruthText('')
     pendingLevel.current = endData?.level || 1
     isReplayRef.current  = false
     setCountdown(3)
@@ -1962,8 +1966,8 @@ export default function Vredepad({ onClose }) {
             ✕
           </button>
         </div>
-        <div className="vp-truth-bar">
-          <span key={lastTruthText} className="vp-truth-text vp-truth-fadein">
+        <div className="vp-truth-bar" translate="no">
+          <span key={lastTruthText} className="vp-truth-text vp-truth-fadein" translate="no">
             {lastTruthText || 'Haal asem. Laat die gedagte gaan. Jy is veilig hier.'}
           </span>
         </div>
