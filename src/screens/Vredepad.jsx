@@ -1972,7 +1972,7 @@ export default function Vredepad({ onClose }) {
           {promiseMoment && (
             <div className="vp-promise-overlay">
               <div className="vp-promise-card">
-                <button className="vp-promise-close" onClick={() => setPromiseMoment(null)}>✕</button>
+                <button className="vp-promise-close" onClick={() => { if (gameRef.current) gameRef.current.promisePause = 0; setPromiseMoment(null) }}>✕</button>
                 <p className="vp-promise-truth">{promiseMoment}</p>
                 <button className="vp-promise-share-btn" onClick={() => shareVerse(promiseMoment)}>
                   Deel hierdie vers 🌿
