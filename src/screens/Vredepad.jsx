@@ -1560,7 +1560,7 @@ export default function Vredepad({ onClose }) {
   }
 
   function buildShareCanvas(d) {
-    const W = 420, H = 340, SC = 2
+    const W = 420, H = 360, SC = 2
     const cv = document.createElement('canvas')
     cv.width = W * SC; cv.height = H * SC
     const ctx = cv.getContext('2d')
@@ -1569,26 +1569,29 @@ export default function Vredepad({ onClose }) {
     const bg = ctx.createLinearGradient(0, 0, W, H)
     bg.addColorStop(0, '#162a1e'); bg.addColorStop(1, '#1f3d2a')
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
-    // Centre glow behind verse
-    const glow = ctx.createRadialGradient(W/2, H*0.45, 0, W/2, H*0.45, W*0.52)
+    // Centre glow
+    const glow = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, W*0.52)
     glow.addColorStop(0, 'rgba(255,220,80,0.12)'); glow.addColorStop(1, 'rgba(0,0,0,0)')
     ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H)
     // Top label
     ctx.textAlign = 'center'
-    ctx.fillStyle = 'rgba(255,224,100,0.45)'
+    ctx.fillStyle = 'rgba(255,224,100,0.50)'
+    ctx.font = 'bold 11px sans-serif'
+    ctx.fillText('DAAGLIKSE HOOP', W/2, 28)
+    ctx.fillStyle = 'rgba(255,224,100,0.25)'
     ctx.font = '10px sans-serif'
-    ctx.fillText('DAAGLIKSE HOOP', W/2, 26)
+    ctx.fillText('🌿  Vredepad ' + d.level, W/2, 44)
     // Divider
-    ctx.strokeStyle = 'rgba(255,224,100,0.15)'; ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(W/2 - 40, 34); ctx.lineTo(W/2 + 40, 34); ctx.stroke()
+    ctx.strokeStyle = 'rgba(255,224,100,0.12)'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(W/2 - 50, 52); ctx.lineTo(W/2 + 50, 52); ctx.stroke()
     // Verse — hero text
     const verse = d.lastTruth || 'Vrede van God wat alle verstand oortref.'
-    const fontSize = verse.length > 80 ? 16 : verse.length > 50 ? 18 : 21
+    const fontSize = verse.length > 90 ? 15 : verse.length > 60 ? 17 : verse.length > 40 ? 19 : 21
     ctx.fillStyle = '#FFFDE0'
     ctx.font = `italic ${fontSize}px Georgia, serif`
     const words = `"${verse}"`.split(' ')
     const maxW = W - 80
-    let line = '', y = 80, lineH = fontSize + 9
+    let line = '', y = 84, lineH = fontSize + 10
     for (const w of words) {
       const test = line ? line + ' ' + w : w
       if (ctx.measureText(test).width > maxW && line) {
@@ -1596,17 +1599,22 @@ export default function Vredepad({ onClose }) {
       } else line = test
     }
     ctx.fillText(line, W/2, y)
-    // Spacer line
-    y += 32
-    ctx.strokeStyle = 'rgba(255,224,100,0.12)'; ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W - 60, y); ctx.stroke()
     // Stats
-    y += 22
-    ctx.fillStyle = 'rgba(255,220,100,0.60)'; ctx.font = 'bold 13px sans-serif'
-    ctx.fillText(`Vredepad ${d.level}  ·  ${d.score} waarhede`, W/2, y)
-    // Footer
-    ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.font = '10px sans-serif'
-    ctx.fillText('dewaldscheepers.com/go', W/2, H - 14)
+    y += 36
+    ctx.fillStyle = 'rgba(255,220,100,0.55)'; ctx.font = 'bold 12px sans-serif'
+    ctx.fillText(`${d.score} waarhede versamel`, W/2, y)
+    // CTA band at bottom — prominent, always visible
+    const bandH = 52
+    ctx.fillStyle = 'rgba(255,224,80,0.13)'
+    ctx.fillRect(0, H - bandH, W, bandH)
+    ctx.strokeStyle = 'rgba(255,224,80,0.20)'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(0, H - bandH); ctx.lineTo(W, H - bandH); ctx.stroke()
+    ctx.fillStyle = 'rgba(255,255,255,0.50)'
+    ctx.font = '10px sans-serif'
+    ctx.fillText('SPEEL GRATIS OP', W/2, H - bandH + 16)
+    ctx.fillStyle = '#FFE066'
+    ctx.font = 'bold 16px sans-serif'
+    ctx.fillText('dewaldscheepers.com/go', W/2, H - bandH + 36)
     return cv
   }
 
@@ -1620,22 +1628,34 @@ export default function Vredepad({ onClose }) {
 
   async function handleShare() {
     const d = endData
+    const APP_URL = 'https://dewaldscheepers.com/go'
+    const caption = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel gratis: ${APP_URL}`
     try {
       const cv = buildShareCanvas(d)
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        const shareText = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿\n\nSpeel ook: https://dewaldscheepers.com/go`
-        await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: shareText })
-        return
+        // Try with url field (Android Chrome supports both files + url)
+        try {
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: caption, url: APP_URL })
+          return
+        } catch (e) {
+          if (e?.name === 'AbortError') return
+        }
+        // Retry without url field (iOS Safari only supports files + text)
+        try {
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop', text: caption })
+          return
+        } catch (e) {
+          if (e?.name === 'AbortError') return
+        }
       }
     } catch {}
-    const verse = d.lastTruth ? `\n\n"${d.lastTruth}"` : ''
-    const msg = `Ek het ${d.score} waarhede ontvang op Vredepad ${d.level}! 🌿${verse}\n\nSpeel ook: https://dewaldscheepers.com/go`
+    // Fallback: share text + url only (desktop / unsupported)
     if (navigator.share) {
-      try { await navigator.share({ title: 'Vredepad', text: msg }) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: caption, url: APP_URL }) } catch {}
     } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+      window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
     }
   }
 
