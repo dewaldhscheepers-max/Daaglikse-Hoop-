@@ -751,7 +751,6 @@ export default function Vredepad({ onClose }) {
   const [lbCelebration, setLbCelebration]     = useState(null)
   const [weeklyLb, setWeeklyLb]               = useState([])
   const [lbTab, setLbTab]                     = useState('week')
-  const [shareToast, setShareToast]           = useState(false)
   const [gameMinScore, setGameMinScore]        = useState(10)
   const anonUidRef = useRef(null)
   const pendingLbRef = useRef(null)
@@ -1664,6 +1663,7 @@ export default function Vredepad({ onClose }) {
 
   async function shareVerse(verse) {
     const APP_URL = 'https://dewaldscheepers.com/go'
+    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
     const lvl = gameRef.current?.level || endData?.level || 1
     const sc  = gameRef.current?.score  || endData?.score  || null
     try {
@@ -1671,12 +1671,19 @@ export default function Vredepad({ onClose }) {
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        try { await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad' }) } catch (e) { if (e?.name === 'AbortError') return }
+        try {
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
+          return
+        } catch (e) {
+          if (e?.name === 'AbortError') return
+          try {
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            return
+          } catch (e2) { if (e2?.name === 'AbortError') return }
+        }
       }
     } catch {}
-    try { await navigator.clipboard.writeText(APP_URL) } catch {}
-    setShareToast(true)
-    setTimeout(() => setShareToast(false), 4000)
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
   }
 
   async function handleShare() {
@@ -1684,18 +1691,26 @@ export default function Vredepad({ onClose }) {
     if (!d) return
     const APP_URL = 'https://dewaldscheepers.com/go'
     const verse = d.lastTruth || ''
+    const caption = `🌿 As jy sukkel met rustelose gedagtes of angs — hierdie speletjie het my gehelp. Speel Vredepad, kry jou eie daaglikse vers + gratis eBoeke. Van Dewald Scheepers, gratis vir jou.\n\n${APP_URL}`
 
     try {
       const cv   = buildShareCanvas(d)
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        try { await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad' }) } catch (e) { if (e?.name === 'AbortError') return }
+        try {
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
+          return
+        } catch (e) {
+          if (e?.name === 'AbortError') return
+          try {
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            return
+          } catch (e2) { if (e2?.name === 'AbortError') return }
+        }
       }
     } catch {}
-    try { await navigator.clipboard.writeText(APP_URL) } catch {}
-    setShareToast(true)
-    setTimeout(() => setShareToast(false), 4000)
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
   }
 
   function getTouchDir(clientX, clientY) {
@@ -1974,11 +1989,6 @@ export default function Vredepad({ onClose }) {
               </button>
             </div>
           )}
-          {shareToast && (
-            <div className="vp-share-toast">
-              🔗 Link gekopieer — plak dit ook in WhatsApp!
-            </div>
-          )}
           {tutorialActive && (
             <div className="vp-tutorial-overlay">
               <div className="vp-tut-step vp-tut-s1">
@@ -2157,12 +2167,6 @@ export default function Vredepad({ onClose }) {
             </>
           )}
         </div>
-
-        {shareToast && (
-          <div className="vp-share-toast">
-            🔗 Link gekopieer — plak dit ook in WhatsApp!
-          </div>
-        )}
 
         {showNameConsent && (
           <div className="vp-consent-backdrop">
