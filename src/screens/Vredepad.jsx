@@ -725,7 +725,7 @@ export default function Vredepad({ onClose }) {
   // ── Tutorial auto-dismiss (fallback if Begin Speel not tapped) ──
   useEffect(() => {
     if (!tutorialActive) return
-    const t = setTimeout(dismissTutorial, 11000)
+    const t = setTimeout(dismissTutorial, 14000)
     return () => clearTimeout(t)
   }, [tutorialActive])
 
@@ -1253,7 +1253,7 @@ export default function Vredepad({ onClose }) {
               ? STORM_TRUTHS[Math.floor(Math.random() * STORM_TRUTHS.length)]
               : SHORT_TRUTHS[Math.floor(Math.random() * SHORT_TRUTHS.length)]
           g.justHit = false
-          g.floats.push({ id: g.tick + g.score, x: s.x, y: findFloatY(g.floats, s.y - 8, s.x), text: floatText, age: 0, maxAge: 150, isWeed: false })
+          g.floats.push({ id: g.tick + g.score, x: s.x, y: findFloatY(g.floats, s.y - 8, s.x), text: floatText, age: 0, maxAge: 280, isWeed: false })
           g.bgFlash = 6
           setLastTruthText(floatText)
           haptic(35)
@@ -1291,7 +1291,7 @@ export default function Vredepad({ onClose }) {
             g.truthStreak = 0
             g.weedHitsRound++
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
-            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 130, isWeed: true })
+            g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 190, isWeed: true })
             haptic([55, 20, 55])
             if (g.weedHitsRound >= 3 && !g.vredekring && !g.vredekringUsed) {
               g.vredekring     = { x: p.x, y: p.y, life: 0, healed: false }
@@ -1681,7 +1681,9 @@ export default function Vredepad({ onClose }) {
           </button>
         </div>
         <div className="vp-truth-bar">
-          <span className="vp-truth-text">{lastTruthText || 'Haal asem. Laat die gedagte gaan. Jy is veilig hier.'}</span>
+          <span key={lastTruthText} className="vp-truth-text vp-truth-fadein">
+            {lastTruthText || 'Haal asem. Laat die gedagte gaan. Jy is veilig hier.'}
+          </span>
         </div>
         <div className="vp-canvas-wrap" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <canvas ref={canvasRef} className="vp-canvas" />
@@ -1716,6 +1718,12 @@ export default function Vredepad({ onClose }) {
                 <div className="vp-tut-ball-demo">
                   <div className="vp-tut-demo-ball" />
                   <div className="vp-tut-demo-finger" />
+                </div>
+              </div>
+              <div className="vp-tut-step vp-tut-s4">
+                <div className="vp-tut-goals">
+                  <span className="vp-tut-goal-catch">✦ Vang die goue sade</span>
+                  <span className="vp-tut-goal-avoid">✦ Vermy die donker stekels</span>
                 </div>
               </div>
               <p className="vp-tut-wait-lbl">Kyk hoe dit werk...</p>
