@@ -84,6 +84,10 @@ const STORM_TRUTHS = [
   'God hou jou vas.', 'Waarheid is sterker as vrees.', 'Die storm gaan verby.',
 ]
 
+const STORM_BAR_DRAIN = 0.00145  // bar depletion per dt tick
+const STORM_BAR_WEED  = 0.10     // extra drain when weed hit during storm
+const STORM_BAR_TRUTH = 0.22     // bar refill when truth caught during storm
+
 const COUNTDOWN_PHRASES = [
   'Haal diep asem. Jy is veilig hier.',
   'Laat jou gedagtes stil word.',
@@ -615,6 +619,57 @@ function drawStormDrift(ctx, storm) {
   ctx.restore()
 }
 
+function fillRoundRect(ctx, x, y, w, h, r) {
+  if (w <= 0) return
+  const rx = Math.min(r, w / 2, h / 2)
+  ctx.beginPath()
+  ctx.moveTo(x + rx, y)
+  ctx.arcTo(x + w, y, x + w, y + h, rx)
+  ctx.arcTo(x + w, y + h, x, y + h, rx)
+  ctx.arcTo(x, y + h, x, y, rx)
+  ctx.arcTo(x, y, x + w, y, rx)
+  ctx.closePath()
+  ctx.fill()
+}
+
+function drawStormBar(ctx, storm, W, H) {
+  if (!storm || storm.phase !== 'active') return
+  const bar = storm.survivalBar ?? 1
+  const bW = W * 0.60
+  const bH = 9
+  const bX = (W - bW) / 2
+  const bY = H * 0.87
+
+  ctx.save()
+  // Label
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'bottom'
+  ctx.font = 'bold 11px system-ui,sans-serif'
+  ctx.shadowColor = 'rgba(0,0,0,0.55)'
+  ctx.shadowBlur = 4
+  ctx.fillStyle = 'rgba(255,255,255,0.88)'
+  ctx.fillText('Staan vas in die waarheid', W / 2, bY - 5)
+  ctx.shadowBlur = 0
+
+  // Track
+  ctx.fillStyle = 'rgba(0,0,0,0.40)'
+  fillRoundRect(ctx, bX - 2, bY - 2, bW + 4, bH + 4, 6)
+
+  // Bar — green when high, yellow→red when low
+  const red   = Math.round(60 + 195 * (1 - bar))
+  const green = Math.round(200 * bar + 25)
+  ctx.fillStyle = `rgb(${red},${green},70)`
+  fillRoundRect(ctx, bX, bY, bW * bar, bH, 5)
+
+  // Shine stripe
+  ctx.globalAlpha = 0.40
+  ctx.fillStyle = 'rgba(255,255,255,0.65)'
+  fillRoundRect(ctx, bX, bY, bW * bar, bH * 0.40, 5)
+  ctx.globalAlpha = 1
+
+  ctx.restore()
+}
+
 function findFloatY(floats, baseY, x) {
   let y = baseY
   for (let i = 0; i < 6; i++) {
@@ -1135,6 +1190,7 @@ export default function Vredepad({ onClose }) {
           lightningFlash: 0,
           lightningTimer: 50 + Math.random() * 55,
           lightningFlash2: 0,
+          survivalBar: 1.0,
         }
         g.stormUsed = true
         setStormAnnounce("'n Storm van gedagtes kom…")
@@ -1189,7 +1245,16 @@ export default function Vredepad({ onClose }) {
             // Schedule a second flicker ~12 ticks later
             setTimeout(() => { if (st.lightningFlash < 5) st.lightningFlash2 = 18 }, 200)
           }
-          if (st.truthsThisStorm >= st.needed || st.life > 720 + (st.tier || 0) * 120) {
+          // Drain survival bar; weed hits also drain (handled in weed section below)
+          st.survivalBar = Math.max(0, (st.survivalBar ?? 1) - STORM_BAR_DRAIN * dt)
+          if (st.survivalBar <= 0) {
+            st.phase = 'breaking'; st.life = 0; st.driftWords = []
+            g.weeds = g.weeds.filter(w => !w.isStorm)
+            g.bgFlash = 8
+            g.timeLeft = Math.max(g.timeLeft - 5, 5)
+            setStormAnnounce('Die storm het jou oorweldig.')
+            setTimeout(() => setStormAnnounce(null), 4200)
+          } else if (st.truthsThisStorm >= st.needed || st.life > 720 + (st.tier || 0) * 120) {
             st.phase = 'breaking'; st.life = 0; st.driftWords = []
             g.weeds = g.weeds.filter(w => !w.isStorm)
             g.justHit = false; p.hitAnim = 0
@@ -1246,7 +1311,10 @@ export default function Vredepad({ onClose }) {
             setTimeout(() => setBonusFlash(false), 1800)
           }
 
-          if (g.storm?.phase === 'active') g.storm.truthsThisStorm++
+          if (g.storm?.phase === 'active') {
+            g.storm.truthsThisStorm++
+            g.storm.survivalBar = Math.min(1, (g.storm.survivalBar ?? 1) + STORM_BAR_TRUTH)
+          }
           const floatText = g.justHit
             ? RECOVERY_TRUTHS[Math.floor(Math.random() * RECOVERY_TRUTHS.length)]
             : g.storm?.phase === 'active'
@@ -1290,6 +1358,7 @@ export default function Vredepad({ onClose }) {
             g.justHit = true
             g.truthStreak = 0
             g.weedHitsRound++
+            if (g.storm?.phase === 'active') g.storm.survivalBar = Math.max(0, (g.storm.survivalBar ?? 1) - STORM_BAR_WEED)
             const ww = WEED_WORDS[Math.floor(Math.random() * WEED_WORDS.length)]
             g.floats.push({ id: g.tick + Math.random(), x: w.x, y: findFloatY(g.floats, w.y - 10, w.x), text: ww, age: 0, maxAge: 190, isWeed: true })
             haptic([55, 20, 55])
@@ -1405,7 +1474,10 @@ export default function Vredepad({ onClose }) {
           ctx.beginPath(); ctx.arc(p.x, p.y, 55, 0, Math.PI * 2)
           ctx.fillStyle = gr; ctx.fill()
         }
-        if (g.storm) drawStormDrift(ctx, g.storm)
+        if (g.storm) {
+          drawStormBar(ctx, g.storm, g.W, g.H)
+          drawStormDrift(ctx, g.storm)
+        }
       }
       drawFloats(ctx, g.floats)
       drawVignette(ctx, g.W, g.H)
