@@ -1636,6 +1636,30 @@ export default function Vredepad({ onClose }) {
     ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath()
   }
 
+  async function shareVerse(verse) {
+    const APP_URL = 'https://dewaldscheepers.com/go'
+    const caption = `🌿 "${verse}"\n\nSpeel Vredepad en kry jou eie daaglikse vers + gratis eBoeke!\n\n${APP_URL}`
+    const lvl = gameRef.current?.level || 1
+    try {
+      const cv = buildShareCanvas({ lastTruth: verse, score: '', level: lvl })
+      const blob = await new Promise(res => cv.toBlob(res, 'image/png'))
+      const file = new File([blob], 'vredepad-vers.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
+          return
+        } catch (e) {
+          if (e?.name === 'AbortError') return
+          try {
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            return
+          } catch (e2) { if (e2?.name === 'AbortError') return }
+        }
+      }
+    } catch {}
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank')
+  }
+
   async function handleShare() {
     const d = endData
     if (!d) return
@@ -1652,10 +1676,15 @@ export default function Vredepad({ onClose }) {
       const file = new File([blob], 'vredepad.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+          await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption, url: APP_URL })
           return
         } catch (e) {
           if (e?.name === 'AbortError') return
+          // Some browsers reject url+files together — retry without url
+          try {
+            await navigator.share({ files: [file], title: 'Daaglikse Hoop – Vredepad', text: caption })
+            return
+          } catch (e2) { if (e2?.name === 'AbortError') return }
         }
       }
     } catch {}
@@ -1926,6 +1955,9 @@ export default function Vredepad({ onClose }) {
           {promiseMoment && (
             <div className="vp-promise-overlay">
               <p className="vp-promise-truth">{promiseMoment}</p>
+              <button className="vp-promise-share-btn" onClick={() => shareVerse(promiseMoment)}>
+                Deel hierdie vers 🌿
+              </button>
             </div>
           )}
           {gardenVerse && (
