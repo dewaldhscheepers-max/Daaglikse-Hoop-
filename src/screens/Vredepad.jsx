@@ -1975,6 +1975,7 @@ export default function Vredepad({ onClose }) {
           <canvas ref={canvasRef} className="vp-canvas" />
           {promiseMoment && (
             <div className="vp-promise-overlay">
+              <button className="vp-promise-close" onClick={() => setPromiseMoment(null)}>✕</button>
               <p className="vp-promise-truth">{promiseMoment}</p>
               <button className="vp-promise-share-btn" onClick={() => shareVerse(promiseMoment)}>
                 Deel hierdie vers 🌿
