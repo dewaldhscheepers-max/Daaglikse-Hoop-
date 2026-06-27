@@ -102,12 +102,14 @@ function haptic(ms) { try { navigator.vibrate?.(ms) } catch {} }
 function minScoreForLevel(level) {
   if (level <= 5)  return 20
   if (level <= 10) return 25
-  if (level <= 18) return 80
-  if (level <= 25) return 100
-  if (level <= 35) return 120
-  if (level <= 42) return 150
-  if (level <= 52) return 220
-  if (level <= 65) return 260
+  if (level <= 14) return 35
+  if (level <= 18) return 50
+  if (level <= 22) return 70
+  if (level <= 28) return 90
+  if (level <= 35) return 110
+  if (level <= 42) return 140
+  if (level <= 52) return 200
+  if (level <= 65) return 250
   return 300
 }
 
@@ -1374,10 +1376,9 @@ export default function Vredepad({ onClose }) {
           setLastTruthText(floatText)
           haptic(35)
           g.truthStreak++
-          if (g.truthStreak >= 7 && !g.genadeKruis && !g.genadeUsed && !g.storm) {
+          if (g.truthStreak >= 7 && !g.genadeKruis && !g.storm) {
             const pos = freePos(g.W, g.H, [...g.seeds, ...g.weeds, p], 80)
             g.genadeKruis = { x: pos.x, y: pos.y, life: 0, maxLife: 360, tier: Math.max(0, Math.floor((g.level - 20) / 10)) }
-            g.genadeUsed  = true
             g.truthStreak = 0
           }
           playCollect(g.score - 1, g.combo)
