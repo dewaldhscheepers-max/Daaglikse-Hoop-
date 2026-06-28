@@ -42,10 +42,19 @@ const playerImages = Array.from({ length: 8 }, (_, i) => {
 
 
 const MILESTONE_BOOKS = [
-  { id: 'wanneer-angs-toeslaan', emoji: '🌅', title: 'Wanneer Angs Toeslaan', level: 7   },
-  { id: 'angs-detox',            emoji: '🕊️', title: 'Angs Detox',            level: 20  },
-  { id: 'dink-nuut-leef-nuut',   emoji: '🌱', title: 'Dink Nuut, Leef Nuut',  level: 50  },
-  { id: 'rustelose-gedagtes',    emoji: '🌙', title: 'Rustelose Gedagtes',    level: 120 },
+  { id: 'wanneer-angs-toeslaan',    emoji: '🌅', title: 'Wanneer Angs Toeslaan',            level: 7    },
+  { id: 'angs-detox',               emoji: '🕊️', title: 'Angs Detox',                       level: 20   },
+  { id: 'dink-nuut-leef-nuut',      emoji: '🌱', title: 'Dink Nuut, Leef Nuut',             level: 50   },
+  { id: 'rustelose-gedagtes',       emoji: '🌙', title: 'Rustelose Gedagtes',               level: 120  },
+  { id: 'verander-jou-hart',        emoji: '❤️', title: 'Verander Jou Hart',                level: 200  },
+  { id: 'toksies',                  emoji: '🌿', title: 'TOKSIES',                          level: 300  },
+  { id: 'wanneer-mense-jou-seermaak', emoji: '💛', title: 'Wanneer Mense Jou Seermaak',   level: 400  },
+  { id: 'as-alles-wegval',          emoji: '📖', title: 'As Alles Wegval (Job)',            level: 500  },
+  { id: 'deursoek-my',              emoji: '✝️', title: 'Deursoek my · Breek my · Stuur my', level: 600 },
+  { id: 'die-duiwel-is-n-leuenaar', emoji: '🔥', title: "Die Duiwel is 'n Leuenaar",       level: 700  },
+  { id: 'bid-nou',                  emoji: '🙏', title: 'BID NOU',                          level: 800  },
+  { id: 'narsistiese-verhoudings',  emoji: '💜', title: 'Narsistiese Verhoudings',          level: 900  },
+  { id: 'wen-die-oorlog',           emoji: '⚔️', title: 'Wen die Oorlog in Jou Gedagtes',  level: 1000 },
 ]
 
 const SHORT_TRUTHS = [
@@ -1082,10 +1091,9 @@ export default function Vredepad({ onClose }) {
         const oldTotal = save.totalLevels || 0
         const newTotal = oldTotal + 1
         let newUnlock = null
-        if (oldTotal < 7   && newTotal >= 7)   newUnlock = MILESTONE_BOOKS[0]
-        if (oldTotal < 20  && newTotal >= 20)  newUnlock = MILESTONE_BOOKS[1]
-        if (oldTotal < 50  && newTotal >= 50)  newUnlock = MILESTONE_BOOKS[2]
-        if (oldTotal < 120 && newTotal >= 120) newUnlock = MILESTONE_BOOKS[3]
+        for (const mb of MILESTONE_BOOKS) {
+          if (oldTotal < mb.level && newTotal >= mb.level) { newUnlock = mb; break }
+        }
         const newTotalScore = (save.totalScore || 0) + g.score
         saveSave({ ...save, level: newLevel, totalLevels: newTotal, totalScore: newTotalScore, lastDay: today, best: nb })
         setBest(nb)
