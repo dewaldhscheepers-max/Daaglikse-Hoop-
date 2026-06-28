@@ -170,82 +170,98 @@ function EveningPrayerPlayer({ prayer }) {
   )
 }
 
-/* ── Community prayer flow — full-screen 3-at-a-time ── */
+/* ── Community prayer flow — full-screen, one by one ── */
 function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
+  const [queueIdx,     setQueueIdx]     = useState(0)
   const [prayedInFlow, setPrayedInFlow] = useState(new Set())
-  const [stepIdx,      setStepIdx]      = useState(0)
-  const [batchDone,    setBatchDone]    = useState(false)
+  const [done,         setDone]         = useState(false)
 
-  const allPrayed = new Set([...prayed, ...prayedInFlow])
-  const queue = [...prayers]
-    .filter(p => !p.reported && !allPrayed.has(p.id))
-    .sort((a, b) => {
-      const cd = (a.prayedCount || 0) - (b.prayedCount || 0)
-      if (cd !== 0) return cd
-      return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
-    })
-
-  const batch   = queue.slice(0, 3)
-  const current = batch[stepIdx]
+  const queueRef = useRef(null)
+  if (!queueRef.current) {
+    queueRef.current = [...prayers]
+      .filter(p => !p.reported && !prayed.has(p.id))
+      .sort((a, b) => {
+        const cd = (a.prayedCount || 0) - (b.prayedCount || 0)
+        if (cd !== 0) return cd
+        return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+      })
+  }
+  const queue   = queueRef.current
+  const total   = queue.length
+  const current = queue[queueIdx]
 
   function handlePray() {
     if (!current) return
     onPray(current.id)
     setPrayedInFlow(s => new Set([...s, current.id]))
-    if (stepIdx < 2 && stepIdx < batch.length - 1) {
-      setStepIdx(s => s + 1)
+    if (queueIdx + 1 >= total) {
+      setDone(true)
     } else {
-      setBatchDone(true)
+      setQueueIdx(i => i + 1)
     }
   }
 
-  if (!current && !batchDone) {
+  if (total === 0) {
     return (
       <div className="sg-overlay">
-        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
+        <button className="sg-close-btn" onClick={onClose} aria-label="Maak toe">✕</button>
         <div className="sg-done-body">
-          <div className="sg-done-icon">🙏</div>
-          <p className="sg-done-title">Jy het al vir almal gebid.</p>
-          <p className="sg-done-sub">Kom môre terug vir nuwe versoeke.</p>
+          <div className="sg-done-cross">✦</div>
+          <p className="sg-done-title">Geen nuwe versoeke tans.</p>
+          <p className="sg-done-sub">Kom later terug — God hoor elke gebed.</p>
+          <button className="sg-back-btn" onClick={onClose}>Terug</button>
+        </div>
+      </div>
+    )
+  }
+
+  if (done) {
+    return (
+      <div className="sg-overlay">
+        <button className="sg-close-btn" onClick={onClose} aria-label="Maak toe">✕</button>
+        <div className="sg-done-body">
+          <div className="sg-done-cross">✦</div>
+          <p className="sg-done-eyebrow">Saamgebed voltooi</p>
+          <p className="sg-done-title">Jy het vir {prayedInFlow.size} {prayedInFlow.size === 1 ? 'persoon' : 'mense'} gebid.</p>
+          <p className="sg-done-sub">Geen versoek staan vandag alleen nie.<br/>God het jou stem gehoor.</p>
           <button className="sg-back-btn" onClick={onClose}>Terug na Gebedsmuur</button>
         </div>
       </div>
     )
   }
 
-  if (batchDone) {
-    return (
-      <div className="sg-overlay sg-done-screen">
-        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
-        <div className="sg-done-body">
-          <div className="sg-done-icon">🙏</div>
-          <p className="sg-done-title">Dankie. Jy het vandag help dra.</p>
-          <p className="sg-done-sub">Geen versoek staan alleen nie.</p>
-          {queue.length > 0 && (
-            <button className="sg-bid-meer-btn" onClick={() => { setBatchDone(false); setStepIdx(0) }}>
-              Bid vir nog 3
-            </button>
-          )}
-          <button className="sg-back-btn" onClick={onClose}>Terug na Gebedsmuur</button>
-        </div>
-      </div>
-    )
-  }
+  const progress = total > 0 ? ((queueIdx) / total) * 100 : 0
 
   return (
     <div className="sg-overlay">
-      <div className="sg-header">
-        <span className="sg-progress">{stepIdx + 1} van {Math.min(3, batch.length)}</span>
-        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
+      <div className="sg-top-bar">
+        <div className="sg-progress-track">
+          <div className="sg-progress-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="sg-top-row">
+          <span className="sg-progress-label">{queueIdx + 1} van {total}</span>
+          <button className="sg-close-btn" onClick={onClose} aria-label="Maak toe">✕</button>
+        </div>
       </div>
+
       <div className="sg-body">
-        <p className="sg-prompt">Neem 'n oomblik en bid vir hierdie persoon.</p>
+        <p className="sg-eyebrow">Neem 'n oomblik. Bid vir hierdie persoon.</p>
+
         <div className="sg-prayer-card-inner">
+          <div className="sg-card-accent" />
           <p className="sg-prayer-text">{current.text}</p>
           <span className="sg-prayer-meta">Anoniem · {timeLabel(current.createdAt)}</span>
         </div>
-        <p className="sg-verse">"Dra mekaar se laste." — Galasiërs 6:2</p>
-        <button className="sg-prayed-btn" onClick={handlePray}>🙏 Ek het gebid</button>
+
+        <p className="sg-verse">"Dra mekaar se laste, en vervul so die wet van Christus."</p>
+        <p className="sg-verse-ref">Galasiërs 6:2</p>
+
+        <button className="sg-prayed-btn" onClick={handlePray}>
+          <span className="sg-prayed-icon">🙏</span>
+          Ek het gebid
+        </button>
+
+        <button className="sg-stop-btn" onClick={onClose}>Ek wil ophou</button>
       </div>
     </div>
   )
