@@ -295,6 +295,19 @@ function shuffleArray(arr) {
   return a
 }
 
+function spawnChasingWeed(g, p) {
+  let x = 30 + Math.random() * (g.W - 60)
+  let y = 30 + Math.random() * (g.H - 60)
+  for (let i = 0; i < 50; i++) {
+    const cx = 30 + Math.random() * (g.W - 60)
+    const cy = 30 + Math.random() * (g.H - 60)
+    if ((cx - p.x) ** 2 + (cy - p.y) ** 2 > 180 * 180) { x = cx; y = cy; break }
+  }
+  const ang = Math.atan2(p.y - y, p.x - x)
+  const spd = 0.22
+  return { x, y, pulse: Math.random() * Math.PI * 2, type: Math.floor(Math.random() * weedImages.length), dx: Math.cos(ang) * spd, dy: Math.sin(ang) * spd, chasing: true }
+}
+
 function getSpiritualTitle(level) {
   let title = null
   for (const t of SPIRITUAL_TITLES) {
@@ -1214,8 +1227,17 @@ export default function Vredepad({ onClose }) {
       const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? 1.38 + (g.storm.tier || 0) * 0.18 : 1)
       for (const w of g.weeds) {
         w.pulse += 0.04 * dt
-        w.x = wrapVal(w.x + w.dx * dt * weedSpd, g.W)
-        w.y = wrapVal(w.y + w.dy * dt * weedSpd, g.H)
+        if (w.chasing) {
+          const ang = Math.atan2(p.y - w.y, p.x - w.x)
+          const spd = 0.22 + Math.min((g.level - 30) / 300, 0.13)
+          w.dx = Math.cos(ang) * spd
+          w.dy = Math.sin(ang) * spd
+          w.x = wrapVal(w.x + w.dx * dt, g.W)
+          w.y = wrapVal(w.y + w.dy * dt, g.H)
+        } else {
+          w.x = wrapVal(w.x + w.dx * dt * weedSpd, g.W)
+          w.y = wrapVal(w.y + w.dy * dt * weedSpd, g.H)
+        }
       }
 
       // Genade-Kruis
@@ -1225,6 +1247,7 @@ export default function Vredepad({ onClose }) {
           g.genadeActive = 0
           // Reset pushed weed velocities so they don't fly at full speed after grace expires
           for (const w of g.weeds) {
+            if (w.chasing) continue
             w.dx = (Math.random() - 0.5) * 0.4
             w.dy = (Math.random() - 0.5) * 0.4
           }
@@ -1259,11 +1282,13 @@ export default function Vredepad({ onClose }) {
             }
             g.genadeActive = 320
           } else if (kTier === 2) {
-            // L30-39: Consume nearby (→ flowers), push distant weeds
+            // L30-39: Consume nearby (→ flowers), push distant weeds; replaced by slow chasers
             const consumeR = 195
+            let converted2 = 0
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= consumeR) {
                 g.flowers.push({ x: w.x, y: w.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+                converted2++
                 return false
               }
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
@@ -1272,16 +1297,20 @@ export default function Vredepad({ onClose }) {
               w.dy = Math.sin(ang) * force
               return true
             })
+            for (let i = 0; i < converted2; i++) g.weeds.push(spawnChasingWeed(g, p))
             g.genadeActive = 360
           } else {
-            // L40+: Consume all within large radius, max slow
+            // L40+: Consume all within large radius; replaced by slow chasers
+            let converted3 = 0
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
                 g.flowers.push({ x: w.x, y: w.y, life: 0, r: 26, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+                converted3++
                 return false
               }
               return true
             })
+            for (let i = 0; i < converted3; i++) g.weeds.push(spawnChasingWeed(g, p))
             g.genadeActive = 460
           }
 
@@ -1472,13 +1501,16 @@ export default function Vredepad({ onClose }) {
           const flightDur = g.level >= 75 ? 480 : 300
           g.duifActive = flightDur
           const transformR = 160
+          let convertedDuif = 0
           g.weeds = g.weeds.filter(w => {
             if (d2(w, p) <= transformR) {
               g.flowers.push({ x: w.x, y: w.y, life: 0, r: 22, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+              convertedDuif++
               return false
             }
             return true
           })
+          for (let i = 0; i < convertedDuif; i++) g.weeds.push(spawnChasingWeed(g, p))
           g.score += 10; setScore(g.score)
           g.floats.push({ id: g.tick + 400, x: g.W / 2, y: g.H * 0.38, text: "Vry soos 'n duif...", age: 0, maxAge: 220, isWeed: false, startFull: true, fontSize: 18 })
           haptic([20, 15, 20, 15, 50])
@@ -1511,13 +1543,16 @@ export default function Vredepad({ onClose }) {
           g.warrelwind = null
         } else if (d2(p, wrl) < 38) {
           const transformR = 130
+          let convertedWrl = 0
           g.weeds = g.weeds.filter(w => {
             if (d2(w, wrl) <= transformR) {
               g.flowers.push({ x: w.x, y: w.y, life: 0, r: 20, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
+              convertedWrl++
               return false
             }
             return true
           })
+          for (let i = 0; i < convertedWrl; i++) g.weeds.push(spawnChasingWeed(g, p))
           g.warrelwind = null
           g.floats.push({ id: g.tick + 500, x: g.W / 2, y: g.H * 0.40, text: 'Gedagtes verfris!', age: 0, maxAge: 200, isWeed: false, startFull: true })
           haptic([25, 15, 25])
@@ -1600,9 +1635,10 @@ export default function Vredepad({ onClose }) {
         for (const w of g.weeds) {
           if (d2(p, w) < 27) {
             if (g.duifActive > 0) {
-              // Flight mode — weed transforms to flower instead of hurting
+              // Flight mode — weed becomes flower, a slow chaser spawns in its place
               g.flowers.push({ x: w.x, y: w.y, life: 0, r: 20, tier: Math.floor((g.level - 1) / 10), type: Math.floor(Math.random() * flowerImages.length) })
               g.weeds = g.weeds.filter(fw => fw !== w)
+              g.weeds.push(spawnChasingWeed(g, p))
               haptic(15)
               g.hitCooldown = 30
             } else {
