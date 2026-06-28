@@ -520,11 +520,13 @@ export default function BidSaam() {
 
         {/* ── Community prayer card ── */}
         <div className="community-prayer-card card">
-          <h3 className="community-prayer-title">🤲 Help vandag bid vir 3 mense</h3>
+          <h3 className="community-prayer-title">Bid vandag vir 3 mense</h3>
           <p className="community-prayer-verse">"Dra mekaar se laste…" — Galasiërs 6:2</p>
+          <p className="community-prayer-verse">"Bid vir mekaar…" — Jakobus 5:16</p>
           <p className="community-prayer-desc">
-            Wanneer jy vir iemand anders bid, staan hulle versoek nie meer alleen nie. Jy hoef nie mooi woorde te hê nie — lees die versoek en sê eenvoudig: <em>"Here, wees naby aan hierdie persoon."</em>
+            Wanneer jy iemand anders in gebed dra, staan daardie persoon nie meer alleen nie — en jou eie hart word ook dikwels ligter.
           </p>
+          <p className="community-prayer-tagline">Geen versoek staan alleen nie.</p>
           <button className="community-prayer-btn btn-primary" onClick={() => setSaamgebedOpen(true)}>
             Begin Saamgebed
           </button>
