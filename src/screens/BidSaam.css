@@ -657,6 +657,13 @@
   margin: 0;
 }
 
+.community-prayer-tagline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  margin: 0;
+}
+
 .community-prayer-btn {
   align-self: flex-start;
   padding: 11px 20px;
