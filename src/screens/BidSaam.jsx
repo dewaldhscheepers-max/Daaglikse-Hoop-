@@ -31,8 +31,6 @@ function formatSASTDate(dateStr) {
 
 function getPrayedMilestone(count) {
   if (!count || count < 1) return null
-  if (count >= 15) return 'Baie mense staan saam in gebed'
-  if (count >= 7)  return 'Hierdie versoek is in gebed gedra'
   if (count === 1) return '1 persoon het saam gebid'
   return `${count} mense het saam gebid`
 }
