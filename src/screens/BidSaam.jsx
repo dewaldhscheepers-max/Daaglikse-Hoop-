@@ -20,6 +20,22 @@ function timeLabel(ts) {
   return `${Math.floor(diff / 86400000)} dae gelede`
 }
 
+function getTodaySAST() {
+  return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10)
+}
+
+function formatSASTDate(dateStr) {
+  if (!dateStr) return ''
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('af-ZA', { day: 'numeric', month: 'long' })
+}
+
+function getPrayedMilestone(count) {
+  if (!count || count < 3) return null
+  if (count >= 15) return 'Baie mense staan saam in gebed'
+  if (count >= 7)  return 'Hierdie versoek is in gebed gedra'
+  return `${count} mense het saam gebid`
+}
+
 function PrayingHandsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="15" height="15">
@@ -108,7 +124,7 @@ function EveningPrayerPlayer({ prayer }) {
   async function share() {
     const text = `Luister hoe daar vanaand saam met ons gebid is:\nhttps://dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://dewaldscheepers.com/go' }) }
+      try { await navigator.share({ title: 'Daaglikse Hoop Saamgebed', text, url: 'https://dewaldscheepers.com/go' }) }
       catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
@@ -154,6 +170,87 @@ function EveningPrayerPlayer({ prayer }) {
   )
 }
 
+/* ── Community prayer flow — full-screen 3-at-a-time ── */
+function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
+  const [prayedInFlow, setPrayedInFlow] = useState(new Set())
+  const [stepIdx,      setStepIdx]      = useState(0)
+  const [batchDone,    setBatchDone]    = useState(false)
+
+  const allPrayed = new Set([...prayed, ...prayedInFlow])
+  const queue = [...prayers]
+    .filter(p => !p.reported && !allPrayed.has(p.id))
+    .sort((a, b) => {
+      const cd = (a.prayedCount || 0) - (b.prayedCount || 0)
+      if (cd !== 0) return cd
+      return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+    })
+
+  const batch   = queue.slice(0, 3)
+  const current = batch[stepIdx]
+
+  function handlePray() {
+    if (!current) return
+    onPray(current.id)
+    setPrayedInFlow(s => new Set([...s, current.id]))
+    if (stepIdx < 2 && stepIdx < batch.length - 1) {
+      setStepIdx(s => s + 1)
+    } else {
+      setBatchDone(true)
+    }
+  }
+
+  if (!current && !batchDone) {
+    return (
+      <div className="sg-overlay">
+        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
+        <div className="sg-done-body">
+          <div className="sg-done-icon">🙏</div>
+          <p className="sg-done-title">Jy het al vir almal gebid.</p>
+          <p className="sg-done-sub">Kom môre terug vir nuwe versoeke.</p>
+          <button className="sg-back-btn" onClick={onClose}>Terug na Gebedsmuur</button>
+        </div>
+      </div>
+    )
+  }
+
+  if (batchDone) {
+    return (
+      <div className="sg-overlay sg-done-screen">
+        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
+        <div className="sg-done-body">
+          <div className="sg-done-icon">🙏</div>
+          <p className="sg-done-title">Dankie. Jy het vandag help dra.</p>
+          <p className="sg-done-sub">Geen versoek staan alleen nie.</p>
+          {queue.length > 0 && (
+            <button className="sg-bid-meer-btn" onClick={() => { setBatchDone(false); setStepIdx(0) }}>
+              Bid vir nog 3
+            </button>
+          )}
+          <button className="sg-back-btn" onClick={onClose}>Terug na Gebedsmuur</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="sg-overlay">
+      <div className="sg-header">
+        <span className="sg-progress">{stepIdx + 1} van {Math.min(3, batch.length)}</span>
+        <button className="sg-close-btn sg-close-top" onClick={onClose}>✕</button>
+      </div>
+      <div className="sg-body">
+        <p className="sg-prompt">Neem 'n oomblik en bid vir hierdie persoon.</p>
+        <div className="sg-prayer-card-inner">
+          <p className="sg-prayer-text">{current.text}</p>
+          <span className="sg-prayer-meta">Anoniem · {timeLabel(current.createdAt)}</span>
+        </div>
+        <p className="sg-verse">"Dra mekaar se laste." — Galasiërs 6:2</p>
+        <button className="sg-prayed-btn" onClick={handlePray}>🙏 Ek het gebid</button>
+      </div>
+    </div>
+  )
+}
+
 export default function BidSaam() {
   const [prayers, setPrayers] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cachedPrayers') || '[]') }
@@ -192,9 +289,8 @@ export default function BidSaam() {
   })
 
   const [todayPrayer, setTodayPrayer] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null')
-    } catch { return null }
+    try { return JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null') }
+    catch { return null }
   })
   const [prevPrayers, setPrevPrayers] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cachedPrevPrayers') || '[]') } catch { return [] }
@@ -204,14 +300,13 @@ export default function BidSaam() {
   const archiveAudioRef = useRef(null)
   const [archivePlaying, setArchivePlaying] = useState(false)
   const [showScrollHint, setShowScrollHint] = useState(true)
+  const [saamgebedOpen,  setSaamgebedOpen]  = useState(false)
 
   useEffect(() => {
     return () => {
       if (archiveAudioRef.current) { archiveAudioRef.current.pause(); archiveAudioRef.current = null }
     }
   }, [])
-
-  const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
     function onScroll() { if (window.scrollY > 30) setShowScrollHint(false) }
@@ -267,7 +362,7 @@ export default function BidSaam() {
       () => {}
     )
     return unsub
-  }, [today])
+  }, [])
 
   async function submit() {
     if (!text.trim()) return
@@ -341,9 +436,7 @@ export default function BidSaam() {
     next.add(id)
     setReported(next)
     localStorage.setItem('reportedPrayers', JSON.stringify([...next]))
-    try {
-      await updateDoc(doc(db, 'prayers', id), { reported: true })
-    } catch {}
+    try { await updateDoc(doc(db, 'prayers', id), { reported: true }) } catch {}
   }
 
   function toggleArchivePlayer(prayer) {
@@ -365,13 +458,35 @@ export default function BidSaam() {
   }
 
   async function shareArchivePrayer(prayer) {
-    const text = `Luister hoe daar op ${formatDate(prayer.date)} saam gebid is:\nhttps://dewaldscheepers.com/go`
+    const dateLabel = prayer.coveredFrom && prayer.coveredTo && prayer.coveredFrom !== prayer.coveredTo
+      ? `${formatSASTDate(prayer.coveredFrom)} tot ${formatSASTDate(prayer.coveredTo)}`
+      : formatDate(prayer.coveredTo || prayer.date)
+    const text = `Luister hoe daar op ${dateLabel} saam gebid is:\nhttps://dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Aandgebed', text, url: 'https://dewaldscheepers.com/go' }) }
+      try { await navigator.share({ title: 'Daaglikse Hoop Saamgebed', text, url: 'https://dewaldscheepers.com/go' }) }
       catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
     }
+  }
+
+  // Compute live prayer count from already-loaded prayers state
+  const todaySAST = getTodaySAST()
+  function getLivePrayerCount(prayer) {
+    if (!prayer) return 0
+    const from = prayer.coveredFrom || prayer.date
+    const to   = prayer.coveredTo   || prayer.date
+    if (to !== todaySAST) return prayer.prayerCount || 0
+    const fromMs     = from ? new Date(from + 'T00:00:00+02:00').getTime() : 0
+    const toMs       = new Date(to + 'T23:59:59+02:00').getTime()
+    const windowDays = (Date.now() - fromMs) / 86400000
+    if (windowDays > 7) return prayer.prayerCount || 0
+    const live = prayers.filter(p => {
+      if (p.reported) return false
+      const ts = (p.createdAt?.seconds || 0) * 1000
+      return ts >= fromMs && ts <= toMs
+    }).length
+    return Math.max(live, prayer.prayerCount || 0)
   }
 
   return (
@@ -381,24 +496,56 @@ export default function BidSaam() {
         <p>Jy hoef nie jou gebed mooi te laat klink nie. Skryf net wat regtig in jou hart is.</p>
         <p className="bidsaam-scripture">"Stort julle hart uit voor sy aangesig! God is 'n toevlug vir ons."</p>
         <p className="bidsaam-scripture-ref">Psalm 62:9</p>
+        <p className="bidsaam-community-note">Ander mense bid ook hierdie oomblik vir versoeke op die muur.</p>
       </div>
 
       <div className="bidsaam-body">
 
-        {todayPrayer && (
-          <div className="ep-card">
-            <div className="ep-card-top">
-              <span className="ep-card-label">Aandgebed</span>
-              <span className="ep-card-date">{formatDate(todayPrayer.date)}</span>
-            </div>
-            <p className="ep-card-title">Gebed vir {formatDate(todayPrayer.date)} se versoeke</p>
-            <p className="ep-card-desc">
-              Dewald het op {formatDate(todayPrayer.date)} oor <strong>{todayPrayer.prayerCount}</strong> gebedsversoeke gebid.
-            </p>
-            <EveningPrayerPlayer prayer={todayPrayer} />
-          </div>
-        )}
+        {/* ── Community prayer card ── */}
+        <div className="community-prayer-card card">
+          <h3 className="community-prayer-title">🤲 Help vandag bid vir 3 mense</h3>
+          <p className="community-prayer-verse">"Dra mekaar se laste…" — Galasiërs 6:2</p>
+          <p className="community-prayer-desc">
+            Wanneer jy vir iemand anders bid, staan hulle se versoek nie meer alleen nie. Jy hoef nie mooi woorde te hê nie — lees die versoek en sê eenvoudig: <em>"Here, wees naby aan hierdie persoon."</em>
+          </p>
+          <button className="community-prayer-btn btn-primary" onClick={() => setSaamgebedOpen(true)}>
+            Begin Saamgebed
+          </button>
+        </div>
 
+        {/* ── Latest Saamgebed / Aandgebed ── */}
+        {todayPrayer && (() => {
+          const from      = todayPrayer.coveredFrom || todayPrayer.date
+          const to        = todayPrayer.coveredTo   || todayPrayer.date
+          const isSameDay = from === to
+          const isOld     = to !== todaySAST
+          const count     = getLivePrayerCount(todayPrayer)
+          const label     = isOld ? 'Laaste Saamgebed' : (isSameDay ? 'Aandgebed' : 'Saamgebed')
+          const title     = isSameDay
+            ? `Gebed vir ${formatSASTDate(to)} se versoeke`
+            : `Saamgebed vir ${formatSASTDate(from)} tot ${formatSASTDate(to)}`
+          const dateLabel = isSameDay
+            ? formatDate(to)
+            : `${formatSASTDate(from)} – ${formatSASTDate(to)}`
+          return (
+            <div className="ep-card">
+              <div className="ep-card-top">
+                <span className="ep-card-label">{label}</span>
+                <span className="ep-card-date">{dateLabel}</span>
+              </div>
+              <p className="ep-card-title">{title}</p>
+              <p className="ep-card-desc">
+                {isSameDay
+                  ? <>Dewald het oor <strong>{count}</strong> gebedsversoeke gebid.</>
+                  : <>Hierdie gebed dra <strong>{count}</strong> gebedsversoeke van hierdie tydperk.</>
+                }
+              </p>
+              <EveningPrayerPlayer prayer={todayPrayer} />
+            </div>
+          )
+        })()}
+
+        {/* ── Prayer input ── */}
         <div className="card prayer-input-card">
           <div className="anon-badge">🔒 Anoniem — geen name word gestoor nie</div>
           <textarea
@@ -416,7 +563,7 @@ export default function BidSaam() {
             </button>
           </div>
           {submitted && (
-            <div className="submitted-msg">🙏 Jou gebedsversoek is gedeel. Jy is nie alleen nie.</div>
+            <div className="submitted-msg">🙏 Jou gebedsversoek is gedeel. Ander mense bid ook vir jou. Jy is nie alleen nie.</div>
           )}
         </div>
 
@@ -429,30 +576,36 @@ export default function BidSaam() {
         )}
 
         <div className="prayer-list">
-          {prayers.filter(p => !p.reported).slice(0, visibleCount).map(prayer => (
-            <div key={prayer.id} className="prayer-card card">
-              <div className="prayer-icon">🙏</div>
-              <div className="prayer-content">
-                <p className="prayer-text">{prayer.text}</p>
-                <span className="prayer-meta">Anoniem · {timeLabel(prayer.createdAt)}</span>
-                <div className="prayer-actions">
-                  <button
-                    className={`prayed-btn${prayed.has(prayer.id) ? ' prayed' : ''}`}
-                    onClick={() => togglePrayed(prayer.id)}
-                  >
-                    <PrayingHandsIcon />
-                    {prayed.has(prayer.id) ? 'Gebid' : 'Ek het gebid'}
-                    <span className="prayed-count">{prayer.prayedCount || 0}</span>
-                  </button>
-                  {!reported.has(prayer.id) && (
-                    <button className="report-btn" onClick={() => reportPrayer(prayer.id)}>
-                      Rapporteer
+          {prayers.filter(p => !p.reported).slice(0, visibleCount).map(prayer => {
+            const milestone = getPrayedMilestone(prayer.prayedCount)
+            return (
+              <div key={prayer.id} className="prayer-card card">
+                <div className="prayer-icon">🙏</div>
+                <div className="prayer-content">
+                  <p className="prayer-text">{prayer.text}</p>
+                  <span className="prayer-meta">Anoniem · {timeLabel(prayer.createdAt)}</span>
+                  <div className="prayer-actions">
+                    <button
+                      className={`prayed-btn${prayed.has(prayer.id) ? ' prayed' : ''}`}
+                      onClick={() => togglePrayed(prayer.id)}
+                    >
+                      <PrayingHandsIcon />
+                      {prayed.has(prayer.id) ? 'Gebid' : 'Ek het gebid'}
+                      <span className="prayed-count">{prayer.prayedCount || 0}</span>
                     </button>
-                  )}
+                    {milestone && (
+                      <span className="prayer-milestone">{milestone}</span>
+                    )}
+                    {!reported.has(prayer.id) && (
+                      <button className="report-btn" onClick={() => reportPrayer(prayer.id)}>
+                        Rapporteer
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         {prayers.filter(p => !p.reported).length > visibleCount && (
           <button className="load-more-btn" onClick={() => setVisibleCount(v => v + 10)}>
@@ -520,29 +673,36 @@ export default function BidSaam() {
         {prevPrayers.length > 0 && (
           <div className="ep-archive">
             <button className="ep-archive-toggle" onClick={() => setShowArchive(v => !v)}>
-              Vorige Aandgebede {showArchive ? '▲' : '▼'}
+              Vorige Saamgebede {showArchive ? '▲' : '▼'}
             </button>
             {showArchive && (
               <div className="ep-archive-list">
-                {prevPrayers.map(p => (
-                  <div key={p.id} className="ep-archive-item">
-                    <div className="ep-archive-info">
-                      <span className="ep-archive-date">{formatDate(p.date)}</span>
-                      <span className="ep-archive-count">Gebed oor {p.prayerCount} versoeke</span>
+                {prevPrayers.map(p => {
+                  const from   = p.coveredFrom || p.date
+                  const to     = p.coveredTo   || p.date
+                  const label  = from !== to
+                    ? `${formatSASTDate(from)} – ${formatSASTDate(to)}`
+                    : formatDate(to)
+                  return (
+                    <div key={p.id} className="ep-archive-item">
+                      <div className="ep-archive-info">
+                        <span className="ep-archive-date">{label}</span>
+                        <span className="ep-archive-count">Gebed oor {p.prayerCount} versoeke</span>
+                      </div>
+                      <div className="ep-archive-btns">
+                        <button className="ep-archive-share" onClick={() => shareArchivePrayer(p)}>
+                          <ShareIcon />
+                        </button>
+                        <button
+                          className={`ep-archive-play${archivePlayer?.id === p.id && archivePlaying ? ' playing' : ''}`}
+                          onClick={() => toggleArchivePlayer(p)}
+                        >
+                          {archivePlayer?.id === p.id && archivePlaying ? <PauseIcon /> : <PlayIcon />}
+                        </button>
+                      </div>
                     </div>
-                    <div className="ep-archive-btns">
-                      <button className="ep-archive-share" onClick={() => shareArchivePrayer(p)}>
-                        <ShareIcon />
-                      </button>
-                      <button
-                        className={`ep-archive-play${archivePlayer?.id === p.id && archivePlaying ? ' playing' : ''}`}
-                        onClick={() => toggleArchivePlayer(p)}
-                      >
-                        {archivePlayer?.id === p.id && archivePlaying ? <PauseIcon /> : <PlayIcon />}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -550,6 +710,16 @@ export default function BidSaam() {
 
         <DonationCard />
       </div>
+
+      {/* ── Community prayer flow overlay ── */}
+      {saamgebedOpen && (
+        <SaamgebedFlow
+          prayers={prayers}
+          prayed={prayed}
+          onClose={() => setSaamgebedOpen(false)}
+          onPray={togglePrayed}
+        />
+      )}
 
       {prayedToast && (
         <div className="prayed-toast">Dankie. Iemand weet nou hulle dra dit nie alleen nie. 🙏</div>
