@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
@@ -15,8 +15,10 @@ export default function Admin({ onClose }) {
   const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed'
 
   // ── Aandgebed state ──
-  const [apDate,       setApDate]       = useState(new Date().toISOString().slice(0, 10))
-  const [apCount,      setApCount]      = useState('')
+  const [apCoveredFrom,   setApCoveredFrom]   = useState('')
+  const [apCoveredTo,     setApCoveredTo]     = useState('')
+  const [apCountCalc,     setApCountCalc]     = useState(null)
+  const [apCountLoading,  setApCountLoading]  = useState(false)
   const [apAudioFile,  setApAudioFile]  = useState(null)
   const [apRecUrl,     setApRecUrl]     = useState(null)
   const [apRecBlob,    setApRecBlob]    = useState(null)
@@ -187,6 +189,36 @@ export default function Admin({ onClose }) {
   const [addingBook, setAddingBook] = useState(false)
   const [bookAdded, setBookAdded] = useState(false)
 
+  function getAdminTodaySAST() {
+    return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10)
+  }
+
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr + 'T12:00:00')
+    d.setDate(d.getDate() + n)
+    return d.toISOString().slice(0, 10)
+  }
+
+  async function calcPrayerCount(from, to) {
+    if (!from || !to) return
+    setApCountLoading(true)
+    try {
+      const fromTs = Timestamp.fromDate(new Date(from + 'T00:00:00+02:00'))
+      const toTs   = Timestamp.fromDate(new Date(to   + 'T23:59:59+02:00'))
+      const q = query(
+        collection(db, 'prayers'),
+        where('createdAt', '>=', fromTs),
+        where('createdAt', '<=', toTs)
+      )
+      const snap = await getDocs(q)
+      const count = snap.docs.filter(d => !d.data().reported).length
+      setApCountCalc(count)
+    } catch {
+      setApCountCalc(null)
+    }
+    setApCountLoading(false)
+  }
+
   useEffect(() => {
     if (!unlocked) return
     loadNotes()
@@ -203,9 +235,23 @@ export default function Admin({ onClose }) {
     try {
       const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(10))
       const snap = await getDocs(q)
-      setApList(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      setApList(list)
+      const todaySAST = getAdminTodaySAST()
+      const latestTo  = list.length > 0 ? (list[0].coveredTo || list[0].date) : null
+      const from      = latestTo ? addDays(latestTo, 1) : todaySAST
+      const safeFrom  = from <= todaySAST ? from : todaySAST
+      setApCoveredFrom(prev => prev || safeFrom)
+      setApCoveredTo(prev => prev || todaySAST)
     } catch {}
   }
+
+  useEffect(() => {
+    if (apCoveredFrom && apCoveredTo && apCoveredFrom <= apCoveredTo) {
+      calcPrayerCount(apCoveredFrom, apCoveredTo)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apCoveredFrom, apCoveredTo])
 
   async function loadNotes() {
     setNotesLoading(true)
@@ -302,14 +348,24 @@ export default function Admin({ onClose }) {
 
   async function handleApSave() {
     setApError('')
-    if (!apAudioFile)     { setApError('Kies of neem eers oudio op'); return }
-    if (!apCount || isNaN(Number(apCount))) { setApError('Voer die aantal gebedsversoeke in'); return }
+    if (!apAudioFile)             { setApError('Kies of neem eers oudio op'); return }
+    if (!apCoveredFrom || !apCoveredTo) { setApError('Stel die datum-reeks in'); return }
+    if (apCoveredFrom > apCoveredTo)    { setApError('"Van" datum moet voor "Tot" datum wees'); return }
+
+    const prayerCount = apCountCalc ?? 0
+    const spanDays    = Math.round((new Date(apCoveredTo + 'T12:00:00') - new Date(apCoveredFrom + 'T12:00:00')) / 86400000)
+    const type        = spanDays === 0 ? 'daily' : spanDays >= 6 ? 'weekly' : 'catchup'
+    const fmtSAST     = s => new Date(s + 'T12:00:00').toLocaleDateString('af-ZA', { day: 'numeric', month: 'long' })
+    const title       = spanDays === 0
+      ? `Gebed vir ${fmtSAST(apCoveredTo)} se versoeke`
+      : `Saamgebed vir ${fmtSAST(apCoveredFrom)} tot ${fmtSAST(apCoveredTo)}`
+    const docId       = apCoveredTo
 
     setApUploading(true); setApProgress(0)
     let audioUrl = ''
     try {
       const ext  = apAudioFile.name.split('.').pop().toLowerCase()
-      const sRef = ref(storage, `aandgebede/${apDate}.${ext}`)
+      const sRef = ref(storage, `aandgebede/${docId}.${ext}`)
       await new Promise((resolve, reject) => {
         const task = uploadBytesResumable(sRef, apAudioFile)
         task.on('state_changed',
@@ -322,13 +378,20 @@ export default function Admin({ onClose }) {
 
     setApUploading(false)
     try {
-      await setDoc(doc(db, 'aandgebede', apDate), {
-        date: apDate, audioUrl, prayerCount: Number(apCount),
-        publishedAt: new Date(apDate + 'T20:00:00')
+      await setDoc(doc(db, 'aandgebede', docId), {
+        date: apCoveredTo,
+        coveredFrom: apCoveredFrom,
+        coveredTo:   apCoveredTo,
+        audioUrl,
+        prayerCount,
+        type,
+        title,
+        uploadedAt:  serverTimestamp(),
+        publishedAt: new Date(apCoveredTo + 'T20:00:00+02:00')
       })
       setApSaved(true); setTimeout(() => setApSaved(false), 3000)
       setApAudioFile(null); setApRecUrl(null); setApRecBlob(null); setApRecSecs(0)
-      setApCount(''); setApDate(new Date().toISOString().slice(0, 10))
+      setApCountCalc(null)
       if (apFileRef.current) apFileRef.current.value = ''
       await loadAandgebede()
     } catch (e) { setApError('Kon nie stoor nie: ' + e.message) }
@@ -876,25 +939,31 @@ export default function Admin({ onClose }) {
           {activeTab === 'aandgebed' && (
             <>
               <div className="admin-section">
-                <div className="admin-section-title">Laai aandgebed op</div>
+                <div className="admin-section-title">Laai Saamgebed op</div>
 
-                <label className="admin-label">Datum</label>
+                <label className="admin-label">Van datum</label>
                 <input
                   type="date"
                   className="admin-input"
-                  value={apDate}
-                  onChange={e => setApDate(e.target.value)}
+                  value={apCoveredFrom}
+                  onChange={e => setApCoveredFrom(e.target.value)}
                 />
 
-                <label className="admin-label">Aantal gebedsversoeke vandag</label>
+                <label className="admin-label">Tot datum</label>
                 <input
-                  type="number"
+                  type="date"
                   className="admin-input"
-                  placeholder="bv. 47"
-                  value={apCount}
-                  onChange={e => setApCount(e.target.value)}
-                  min="0"
+                  value={apCoveredTo}
+                  onChange={e => setApCoveredTo(e.target.value)}
                 />
+
+                <div style={{ fontSize: 13, background: 'var(--lavender-soft)', borderRadius: 10, padding: '10px 12px', marginBottom: 4 }}>
+                  {apCountLoading
+                    ? '⏳ Tel versoeke...'
+                    : apCountCalc !== null
+                    ? `🙏 ${apCountCalc} gebedsversoeke in hierdie tydperk`
+                    : 'Stel datums in om versoeke te tel'}
+                </div>
 
                 <label className="admin-label">Oudio</label>
                 <div className="record-row">
@@ -940,25 +1009,29 @@ export default function Admin({ onClose }) {
                 )}
 
                 {apError && <div className="admin-error">{apError}</div>}
-                {apSaved  && <div className="admin-success">✅ Aandgebed gestoor!</div>}
+                {apSaved  && <div className="admin-success">✅ Saamgebed gestoor!</div>}
 
                 <button
                   className="admin-save-btn"
                   onClick={handleApSave}
                   disabled={apUploading || apRecording}
                 >
-                  {apUploading ? 'Besig...' : 'Stoor Aandgebed'}
+                  {apUploading ? 'Besig...' : 'Stoor Saamgebed'}
                 </button>
               </div>
 
               {apList.length > 0 && (
                 <div className="admin-section">
-                  <div className="admin-section-title">Vorige Aandgebede</div>
-                  {apList.map(ap => (
+                  <div className="admin-section-title">Vorige Saamgebede</div>
+                  {apList.map(ap => {
+                    const from = ap.coveredFrom || ap.date
+                    const to   = ap.coveredTo   || ap.date
+                    const dateLabel = from !== to ? `${from} – ${to}` : to
+                    return (
                     <div key={ap.id} className="admin-note-row" style={{ justifyContent: 'space-between' }}>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{ap.date}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.prayerCount} versoeke</div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{dateLabel}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.prayerCount} versoeke · {ap.type || 'daily'}</div>
                       </div>
                       <button
                         className="admin-delete-btn"
@@ -973,7 +1046,8 @@ export default function Admin({ onClose }) {
                         🗑
                       </button>
                     </div>
-                  ))}
+                  )
+                })}
                 </div>
               )}
             </>
