@@ -178,8 +178,9 @@ function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
 
   const queueRef = useRef(null)
   if (!queueRef.current) {
+    const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000
     queueRef.current = [...prayers]
-      .filter(p => !p.reported && !prayed.has(p.id))
+      .filter(p => !p.reported && !prayed.has(p.id) && (p.createdAt?.seconds || 0) * 1000 >= twoDaysAgo)
       .sort((a, b) => {
         const cd = (a.prayedCount || 0) - (b.prayedCount || 0)
         if (cd !== 0) return cd
