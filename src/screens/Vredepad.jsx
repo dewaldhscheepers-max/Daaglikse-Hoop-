@@ -132,19 +132,10 @@ function sortLeaderboard(entries) {
     .slice(0, 10)
 }
 
-const BLOCKED_NAMES = [
-  'admin', 'daaglikse', 'daagliksehoop', 'pastoor', 'official', 'moderator',
-  'fok', 'fokof', 'poef', 'kak', 'poes', 'moer', 'doos', 'bliksem', 'naai', 'slet', 'hoer', 'teef',
-  'fuck', 'shit', 'bitch', 'cunt', 'dick', 'cock', 'pussy', 'asshole', 'bastard', 'whore', 'slut',
-  'nigger', 'nigga', 'faggot',
-]
-
 function validateDisplayName(name) {
   const t = name.trim()
   if (!t) return 'Voer asseblief \'n naam in.'
   if (t.length > 20) return 'Naam moet korter as 21 karakters wees.'
-  const lower = t.toLowerCase()
-  if (BLOCKED_NAMES.some(b => lower.includes(b))) return 'Kies asseblief \'n ander naam.'
   return null
 }
 
@@ -856,7 +847,6 @@ export default function Vredepad({ onClose }) {
   const [myUid, setMyUid]                     = useState(null)
   const [showNameConsent, setShowNameConsent] = useState(false)
   const [consentName, setConsentName]         = useState('')
-  const [consentChecked, setConsentChecked]   = useState(false)
   const [consentError, setConsentError]       = useState('')
   const [lbCelebration, setLbCelebration]     = useState(null)
   const [weeklyLb, setWeeklyLb]               = useState([])
@@ -1045,7 +1035,6 @@ export default function Vredepad({ onClose }) {
     if (!isAnonymous) {
       const err = validateDisplayName(consentName)
       if (err) { setConsentError(err); return }
-      if (!consentChecked) { setConsentError('Merk asseblief die toestemmingsblokkie.'); return }
     }
     const displayName = isAnonymous ? 'Anonieme Speler' : consentName.trim()
     try {
@@ -1062,7 +1051,7 @@ export default function Vredepad({ onClose }) {
       setWeeklyLb(sortLeaderboard(all.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > wa3)))
       const rank = sorted.findIndex(e => e.userId === anonUidRef.current) + 1
       setShowNameConsent(false)
-      setConsentName(''); setConsentChecked(false); setConsentError('')
+      setConsentName(''); setConsentError('')
       setLbCelebration({ rank: rank > 0 ? rank : 10, isNew: true,
         level: pendingLbRef.current.level, score: pendingLbRef.current.score })
       pendingLbRef.current = null
@@ -2456,15 +2445,7 @@ export default function Vredepad({ onClose }) {
                 onChange={e => { setConsentName(e.target.value); setConsentError('') }}
               />
               <p className="vp-consent-privacy">Moenie jou volle naam gebruik as jy dit nie publiek wil wys nie.</p>
-              <label className="vp-consent-check-row">
-                <input
-                  type="checkbox"
-                  checked={consentChecked}
-                  onChange={e => { setConsentChecked(e.target.checked); setConsentError('') }}
-                />
-                <span>Ek verstaan dat hierdie naam, my vlak en my punte publiek op die Vredepad Top 10 gewys sal word totdat iemand my plek verbysteek.</span>
-              </label>
-              {consentError && <p className="vp-consent-error">{consentError}</p>}
+                      {consentError && <p className="vp-consent-error">{consentError}</p>}
               <button className="vp-consent-submit" onClick={() => submitLeaderboardEntry(false)}>
                 Plaas my op die Top 10
               </button>
