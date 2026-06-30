@@ -105,7 +105,7 @@ function CartBar({ count, total, onClick }) {
 /* ── Book card ── */
 function BookCard({ book, inCart, onToggle }) {
   return (
-    <div className={`book-card${inCart ? ' in-cart' : ''}${book._new ? ' book-card-featured' : ''}`}>
+    <div className={`book-card${inCart ? ' in-cart' : ''}${book.featured ? ' book-card-featured' : ''}`}>
       <div className="book-cover" style={{ background: book.coverUrl ? 'transparent' : book.color }}>
         {book.coverUrl
           ? <img src={book.coverUrl} className="book-cover-img" alt={book.title} />
