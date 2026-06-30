@@ -797,6 +797,13 @@ export default function Admin({ onClose }) {
                       >
                         {hasPdf ? '↑ PDF' : '↑ PDF'}
                       </button>
+                      <button
+                        className="admin-pdf-btn"
+                        onClick={() => setDoc(doc(db, 'books', book.id), { featured: !book.featured }, { merge: true })}
+                        title="Wys 'n oranje lyn om hierdie boek se kaart"
+                      >
+                        {book.featured ? '★ Uitgelig' : '☆ Lyn'}
+                      </button>
                     </div>
                   </div>
                 )
