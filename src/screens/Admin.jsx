@@ -562,7 +562,7 @@ export default function Admin({ onClose }) {
     setWpUploading(note.id); setWpProgress(0)
     try {
       const ext = file.name.split('.').pop().toLowerCase() || 'jpg'
-      const sRef = ref(storage, `wallpapers/${note.id}.${ext}`)
+      const sRef = ref(storage, `covers/wp_${note.id}.${ext}`)
       await new Promise((resolve, reject) => {
         const task = uploadBytesResumable(sRef, file)
         task.on('state_changed',
