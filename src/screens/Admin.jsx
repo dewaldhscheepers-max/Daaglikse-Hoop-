@@ -51,6 +51,13 @@ export default function Admin({ onClose }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const fileInputRef = useRef(null)
 
+  // ── Wallpaper state ──
+  const [wpUploading, setWpUploading] = useState(null)
+  const [wpProgress,  setWpProgress]  = useState(0)
+  const [wpSaved,     setWpSaved]     = useState(null)
+  const [wpTarget,    setWpTarget]    = useState(null)
+  const wpInputRef = useRef(null)
+
   // ── Recording state ──
   const [recording,    setRecording]    = useState(false)
   const [recordedUrl,  setRecordedUrl]  = useState(null)
@@ -544,6 +551,36 @@ export default function Admin({ onClose }) {
     setCoverUploading(null); setCoverUploadTarget(null)
   }
 
+  // ── Upload wallpaper for a voice note ──
+  function triggerWpUpload(note) { setWpTarget(note); wpInputRef.current?.click() }
+
+  async function handleWpUpload(e) {
+    const file = e.target.files[0]
+    if (!file || !wpTarget) return
+    e.target.value = ''
+    const note = wpTarget
+    setWpUploading(note.id); setWpProgress(0)
+    try {
+      const ext = file.name.split('.').pop().toLowerCase() || 'jpg'
+      const sRef = ref(storage, `wallpapers/${note.id}.${ext}`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, file)
+        task.on('state_changed',
+          s => setWpProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
+          reject,
+          async () => {
+            const wallpaperUrl = await getDownloadURL(task.snapshot.ref)
+            await setDoc(doc(db, 'notes', note.id), { wallpaperUrl }, { merge: true })
+            resolve()
+          }
+        )
+      })
+      setWpSaved(note.id)
+      setTimeout(() => { setWpSaved(null); loadNotes() }, 3000)
+    } catch (err) { alert('Wallpaper upload misluk: ' + err.message) }
+    setWpUploading(null); setWpTarget(null)
+  }
+
   if (!unlocked) {
     return (
       <div className="admin-overlay">
@@ -676,6 +713,7 @@ export default function Admin({ onClose }) {
 
               <div className="admin-section">
                 <div className="admin-section-title">Bestaande notas ({notes.length})</div>
+                <input ref={wpInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleWpUpload} />
                 {notesLoading ? <div className="admin-loading">Laai notas...</div>
                   : notes.map(note => (
                     <div key={note.id} className="admin-note-row">
@@ -684,6 +722,7 @@ export default function Admin({ onClose }) {
                         <div className="admin-note-meta">
                           {[note.scripture, note.series].filter(Boolean).join(' · ') ||
                             new Date((note.publishedAt?.seconds || 0) * 1000).toLocaleDateString('af')}
+                          {note.wallpaperUrl && ' · 🖼 ✓'}
                         </div>
                       </div>
                       {deleteConfirm === note.id ? (
@@ -692,7 +731,19 @@ export default function Admin({ onClose }) {
                           <button className="admin-delete-no" onClick={() => setDeleteConfirm(null)}>Nee</button>
                         </div>
                       ) : (
-                        <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button
+                            className="admin-pdf-btn"
+                            onClick={() => triggerWpUpload(note)}
+                            disabled={wpUploading === note.id}
+                            title="Laai wallpaper op"
+                          >
+                            {wpUploading === note.id ? `🖼 ${wpProgress}%`
+                             : wpSaved === note.id ? '✅'
+                             : note.wallpaperUrl ? '🖼 ↑' : '🖼 +'}
+                          </button>
+                          <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
+                        </div>
                       )}
                     </div>
                   ))}
