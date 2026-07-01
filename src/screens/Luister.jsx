@@ -636,6 +636,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
       <div className="luister-body">
+        {today.wallpaperUrl && (
+          <div className="wp-card">
+            <div className="wp-card-label">📱 Vandag se wallpaper</div>
+            <img src={today.wallpaperUrl} className="wp-card-img" alt="Wallpaper" />
+            <a href={today.wallpaperUrl} target="_blank" rel="noreferrer" className="wp-card-btn">
+              Maak oop &amp; stoor op jou foon
+            </a>
+          </div>
+        )}
         {installBanner}
 
         {/* ── Leesplanne ── */}
