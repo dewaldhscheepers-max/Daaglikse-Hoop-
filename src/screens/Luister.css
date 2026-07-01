@@ -250,19 +250,6 @@
   object-fit: cover;
 }
 
-.wp-card-btn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background: var(--primary, #6B5FA6);
-  color: #fff;
-  text-align: center;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  box-sizing: border-box;
-}
 
 /* ─── Note row bookmark button ─── */
 .note-bookmark-btn {
