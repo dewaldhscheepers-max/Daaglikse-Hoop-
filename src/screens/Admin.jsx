@@ -91,6 +91,17 @@ export default function Admin({ onClose }) {
       .catch(() => {})
   }, [unlocked])
 
+  // ── Bulk email state ──
+  const [emailCount,     setEmailCount]     = useState(null)
+  const [activeCampaign, setActiveCampaign] = useState(null)
+  const [bulkSubject,    setBulkSubject]    = useState('')
+  const [bulkBody,       setBulkBody]       = useState('')
+  const [bulkSending,    setBulkSending]    = useState(false)
+  const [bulkResult,     setBulkResult]     = useState(null)
+  const [bulkImporting,  setBulkImporting]  = useState(false)
+  const [bulkImported,   setBulkImported]   = useState(false)
+  const [processResult,  setProcessResult]  = useState(null)
+
   // ── Email test state ──
   const [testEmailAddr,    setTestEmailAddr]    = useState('dewald.h.scheepers@gmail.com')
   const [testEmailBookId,  setTestEmailBookId]  = useState('')
@@ -235,6 +246,11 @@ export default function Admin({ onClose }) {
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
       setBookOverrides(overrides)
     })
+    // Load email subscriber count and active campaign
+    getDocs(collection(db, 'emailList')).then(snap => setEmailCount(snap.size)).catch(() => {})
+    getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
+      .then(snap => { if (!snap.empty) setActiveCampaign({ id: snap.docs[0].id, ...snap.docs[0].data() }) })
+      .catch(() => {})
     return unsub
   }, [unlocked])
 
@@ -551,6 +567,52 @@ export default function Admin({ onClose }) {
     setCoverUploading(null); setCoverUploadTarget(null)
   }
 
+  // ── Bulk email handlers ──
+  async function handleImportEmails() {
+    setBulkImporting(true)
+    try {
+      const r = await fetch('/api/import-emails', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: '2025' }),
+      })
+      const data = await r.json()
+      if (r.ok) { setBulkImported(true); setEmailCount(data.imported) }
+      else alert('Fout: ' + (data.error || 'Onbekend'))
+    } catch (e) { alert('Fout: ' + e.message) }
+    setBulkImporting(false)
+  }
+
+  async function handleBulkSend() {
+    if (!bulkSubject.trim() || !bulkBody.trim()) { alert('Onderwerp en boodskap is verpligtend'); return }
+    setBulkSending(true); setBulkResult(null)
+    try {
+      const r = await fetch('/api/send-bulk-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: '2025', subject: bulkSubject, body: bulkBody }),
+      })
+      const data = await r.json()
+      if (r.ok) {
+        setBulkResult(data); setBulkSubject(''); setBulkBody('')
+        const snap = await getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
+        setActiveCampaign(snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() })
+      } else {
+        alert('Fout: ' + (data.error || 'Onbekend'))
+      }
+    } catch (e) { alert('Fout: ' + e.message) }
+    setBulkSending(false)
+  }
+
+  async function handleProcessQueue() {
+    setProcessResult(null)
+    try {
+      const r = await fetch('/api/process-email-queue?secret=DaaglikseHoop2025Cron')
+      const data = await r.json()
+      setProcessResult(data)
+      const snap = await getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
+      setActiveCampaign(snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() })
+    } catch (e) { alert('Fout: ' + e.message) }
+  }
+
   // ── Upload wallpaper for a voice note ──
   function triggerWpUpload(note) { setWpTarget(note); wpInputRef.current?.click() }
 
@@ -628,6 +690,9 @@ export default function Admin({ onClose }) {
           </button>
           <button className={`admin-tab ${activeTab === 'aandgebed' ? 'active' : ''}`} onClick={() => setActiveTab('aandgebed')}>
             🙏 Gebed
+          </button>
+          <button className={`admin-tab ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
+            ✉️ E-pos
           </button>
         </div>
 
@@ -1109,6 +1174,105 @@ export default function Admin({ onClose }) {
                 </div>
               )}
             </>
+          )}
+
+          {/* ── EMAIL TAB ── */}
+          {activeTab === 'email' && (
+            <div className="admin-section">
+              <div className="admin-section-title">
+                ✉️ E-pos Inskrywers
+                {emailCount !== null && (
+                  <span style={{ fontWeight: 400, fontSize: 13, color: 'var(--text-muted)', marginLeft: 8 }}>
+                    ({emailCount} inskrywers)
+                  </span>
+                )}
+              </div>
+
+              {/* Import existing list */}
+              {!bulkImported && (emailCount === 0 || emailCount === null) && (
+                <div style={{ marginBottom: 20 }}>
+                  <div className="admin-books-note">Geen inskrywers gevind nie. Laai die 836 bestaande adresse eenmalig op:</div>
+                  <button className="admin-save-btn" onClick={handleImportEmails} disabled={bulkImporting}>
+                    {bulkImporting ? 'Besig om in te voer...' : '⬆ Voer 836 e-posadresse in'}
+                  </button>
+                </div>
+              )}
+              {bulkImported && <div className="admin-success">✅ {emailCount} adresse ingevoer!</div>}
+
+              {/* Active campaign progress */}
+              {activeCampaign && (
+                <div style={{ background: '#f8f5ff', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>
+                    Aktiewe kampanje: "{activeCampaign.subject}"
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
+                    {activeCampaign.sentCount} / {activeCampaign.total} gestuur
+                    {activeCampaign.pendingEmails?.length > 0 &&
+                      ` · nog ${Math.ceil(activeCampaign.pendingEmails.length / 100)} dae oor`}
+                  </div>
+                  <div style={{ background: '#e8e4f0', borderRadius: 8, height: 8, overflow: 'hidden', marginBottom: 14 }}>
+                    <div style={{
+                      background: '#5C4E8E', height: '100%',
+                      width: `${Math.round(((activeCampaign.sentCount || 0) / (activeCampaign.total || 1)) * 100)}%`,
+                      transition: 'width 0.3s',
+                    }} />
+                  </div>
+                  <button className="admin-save-btn" style={{ background: '#27713f', marginTop: 0 }} onClick={handleProcessQueue}>
+                    Stuur volgende 100 nou
+                  </button>
+                  {processResult && (
+                    <div className="admin-success" style={{ marginTop: 8 }}>
+                      ✅ {processResult.sent} gestuur · {processResult.remaining} oor
+                      {processResult.message === 'Kampanje voltooi!' && ' 🎉 Klaar!'}
+                    </div>
+                  )}
+                  <div className="admin-books-note" style={{ marginTop: 8 }}>
+                    Die stelsel stuur ook outomaties elke oggend om 9:00 die volgende 100.
+                  </div>
+                </div>
+              )}
+
+              {/* Compose form — only when no active campaign */}
+              {!activeCampaign && emailCount > 0 && (
+                <>
+                  <div className="admin-section-title" style={{ marginTop: 8 }}>Nuwe e-pos stuur</div>
+                  <div className="admin-field">
+                    <label>Onderwerp</label>
+                    <input
+                      value={bulkSubject}
+                      onChange={e => setBulkSubject(e.target.value)}
+                      placeholder="bv. 'n Boodskap van Dewald"
+                    />
+                  </div>
+                  <div className="admin-field">
+                    <label>Boodskap</label>
+                    <textarea
+                      value={bulkBody}
+                      onChange={e => setBulkBody(e.target.value)}
+                      placeholder="Skryf jou boodskap hier...&#10;&#10;Gebruik 'n leë reël tussen paragrawe."
+                      rows={9}
+                      style={{
+                        resize: 'vertical', fontFamily: 'inherit', fontSize: 14,
+                        padding: '10px 12px', borderRadius: 10, border: '1px solid #DDD5EC',
+                        width: '100%', boxSizing: 'border-box', lineHeight: 1.6,
+                      }}
+                    />
+                  </div>
+                  {bulkResult && (
+                    <div className="admin-success">
+                      ✅ {bulkResult.sentCount} e-posse gestuur
+                      {bulkResult.remaining > 0 && ` · ${bulkResult.remaining} oor (${bulkResult.daysLeft} dae)`}
+                    </div>
+                  )}
+                  <button className="admin-save-btn" onClick={handleBulkSend} disabled={bulkSending}>
+                    {bulkSending ? 'Besig om te stuur...' : `Stuur na alle ${emailCount} inskrywers`}
+                  </button>
+                  <div className="admin-books-note">
+                    Die eerste 100 gaan dadelik uit. Die res gaan outomaties elke dag 100 uit.
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
         </div>

@@ -123,6 +123,16 @@ module.exports = async function handler(req, res) {
   const booksNoPdf   = bookDocs.filter(b => !b.pdfUrl)
   const titles       = bookDocs.map(b => b.title).join(', ')
 
+  // ── Save buyer email to emailList ──
+  if (token && email) {
+    const emailId = Buffer.from(email.toLowerCase()).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
+    fsWrite(projectId, token, `emailList/${emailId}`, {
+      email:   { stringValue: email.toLowerCase() },
+      source:  { stringValue: 'purchase' },
+      addedAt: { timestampValue: new Date().toISOString() },
+    }).catch(() => {})
+  }
+
   // ── Log purchase to Firestore so admin can see it regardless of email outcome ──
   const purchaseId = `${Date.now()}`
   if (token) {

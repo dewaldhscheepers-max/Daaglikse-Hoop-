@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/process-email-queue?secret=DaaglikseHoop2025Cron",
+      "schedule": "0 7 * * *"
+    }
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/go", "dest": "/go.html" },
