@@ -246,10 +246,10 @@ export default function Admin({ onClose }) {
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
       setBookOverrides(overrides)
     })
-    // Load email subscriber count and active campaign
-    getDocs(collection(db, 'emailList')).then(snap => setEmailCount(snap.size)).catch(() => {})
-    getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
-      .then(snap => { if (!snap.empty) setActiveCampaign({ id: snap.docs[0].id, ...snap.docs[0].data() }) })
+    // Load email subscriber count and active campaign via API (avoids Firestore permission errors)
+    fetch('/api/email-status')
+      .then(r => r.json())
+      .then(d => { setEmailCount(d.emailCount || 0); if (d.activeCampaign) setActiveCampaign(d.activeCampaign) })
       .catch(() => {})
     return unsub
   }, [unlocked])
@@ -593,8 +593,9 @@ export default function Admin({ onClose }) {
       const data = await r.json()
       if (r.ok) {
         setBulkResult(data); setBulkSubject(''); setBulkBody('')
-        const snap = await getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
-        setActiveCampaign(snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() })
+        if (data.remaining > 0) {
+          setActiveCampaign({ id: data.campaignId, subject: bulkSubject.trim(), sentCount: data.sentCount, total: data.total, remaining: data.remaining })
+        }
       } else {
         alert('Fout: ' + (data.error || 'Onbekend'))
       }
@@ -608,8 +609,11 @@ export default function Admin({ onClose }) {
       const r = await fetch('/api/process-email-queue?secret=DaaglikseHoop2025Cron')
       const data = await r.json()
       setProcessResult(data)
-      const snap = await getDocs(query(collection(db, 'emailCampaigns'), where('status', '==', 'active'), limit(1)))
-      setActiveCampaign(snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() })
+      if (data.remaining > 0) {
+        setActiveCampaign(prev => prev ? { ...prev, sentCount: data.totalSent, remaining: data.remaining } : null)
+      } else {
+        setActiveCampaign(null)
+      }
     } catch (e) { alert('Fout: ' + e.message) }
   }
 
@@ -1207,8 +1211,8 @@ export default function Admin({ onClose }) {
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
                     {activeCampaign.sentCount} / {activeCampaign.total} gestuur
-                    {activeCampaign.pendingEmails?.length > 0 &&
-                      ` · nog ${Math.ceil(activeCampaign.pendingEmails.length / 100)} dae oor`}
+                    {activeCampaign.remaining > 0 &&
+                      ` · nog ${Math.ceil(activeCampaign.remaining / 100)} dae oor`}
                   </div>
                   <div style={{ background: '#e8e4f0', borderRadius: 8, height: 8, overflow: 'hidden', marginBottom: 14 }}>
                     <div style={{
