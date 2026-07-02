@@ -265,10 +265,11 @@
 
         if (isIOS) {
           showState('ios')
-        } else if (isAndroid && !isChrome) {
+        } else if (!isChrome) {
+          // Any non-Chrome browser (Samsung, Edge, Opera, in-app, etc.) — show open-in-Chrome prompt
           showState('samsung')
         } else {
-          // Chrome or desktop — go straight to the app
+          // Chrome — go straight to the app
           window.location.replace('/')
         }
       })()
