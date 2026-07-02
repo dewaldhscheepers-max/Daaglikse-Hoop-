@@ -263,14 +263,18 @@
         var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
         var isIOS     = /iPhone|iPad|iPod/i.test(ua)
 
+        var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
         if (isIOS) {
           showState('ios')
-        } else if (!isChrome) {
-          // Any non-Chrome browser (Samsung, Edge, Opera, in-app, etc.) — show open-in-Chrome prompt
+        } else if (isMobile && !isChrome) {
+          // Mobile non-Chrome (Samsung, Edge, in-app, spoofed UA) — show open-in-Chrome prompt
           showState('samsung')
-        } else {
-          // Chrome — go straight to the app
+        } else if (!isMobile) {
+          // Desktop — go straight to the app
           window.location.replace('/')
+        } else {
+          // Mobile Chrome — show open button (don't auto-redirect, some browsers spoof Chrome UA)
+          showState('open')
         }
       })()
 
