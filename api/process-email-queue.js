@@ -80,8 +80,7 @@ function buildHtml(body) {
       <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
         ${paragraphs}
         <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
-        <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 6px;text-align:center;">Steun die bediening 🙏</p>
-        <p style="font-size:13px;color:#888;margin:0 0 18px;text-align:center;line-height:1.5;">Jou bydrae help dat daaglikse hoop, gebed en God se Woord gratis uitgestuur kan word.</p>
+        <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Indien jy die bediening wil ondersteun:</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td style="padding:0 4px 10px 0;" width="50%">
