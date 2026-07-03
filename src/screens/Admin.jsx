@@ -101,11 +101,6 @@ export default function Admin({ onClose }) {
   const [bulkImporting,  setBulkImporting]  = useState(false)
   const [bulkImported,   setBulkImported]   = useState(false)
   const [processResult,  setProcessResult]  = useState(null)
-  const [resendEmails,   setResendEmails]   = useState('')
-  const [resendBusy,     setResendBusy]     = useState(false)
-  const [resendResult,   setResendResult]   = useState(null)
-  const [addCampBusy,    setAddCampBusy]    = useState(false)
-  const [addCampResult,  setAddCampResult]  = useState(null)
 
   // ── Email test state ──
   const [testEmailAddr,    setTestEmailAddr]    = useState('dewald.h.scheepers@gmail.com')
@@ -620,38 +615,6 @@ export default function Admin({ onClose }) {
         setActiveCampaign(null)
       }
     } catch (e) { alert('Fout: ' + e.message) }
-  }
-
-  async function handleResendToList() {
-    const emails = resendEmails.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean)
-    if (emails.length === 0) { alert('Plak die e-posadresse in'); return }
-    setResendBusy(true); setResendResult(null)
-    try {
-      const r = await fetch('/api/resend-to-emails', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: '2025', emails }),
-      })
-      const data = await r.json()
-      if (r.ok) { setResendResult(data); setResendEmails('') }
-      else alert('Fout: ' + (data.error || 'Onbekend'))
-    } catch (e) { alert('Fout: ' + e.message) }
-    setResendBusy(false)
-  }
-
-  async function handleAddToCampaign() {
-    const emails = resendEmails.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean)
-    if (emails.length === 0) { alert('Plak die e-posadresse in'); return }
-    setAddCampBusy(true); setAddCampResult(null)
-    try {
-      const r = await fetch('/api/add-to-campaign', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: '2025', emails }),
-      })
-      const data = await r.json()
-      if (r.ok) { setAddCampResult(data); setResendEmails('') }
-      else alert('Fout: ' + (data.error || 'Onbekend'))
-    } catch (e) { alert('Fout: ' + e.message) }
-    setAddCampBusy(false)
   }
 
   // ── Upload wallpaper for a voice note ──
@@ -1316,37 +1279,6 @@ export default function Admin({ onClose }) {
             </div>
           )}
 
-          {/* Resend last email to specific addresses / add to campaign */}
-          <div className="admin-section">
-            <div className="admin-section-title">📨 Spesifieke e-posadresse</div>
-            <div className="admin-books-note" style={{ marginBottom: 10 }}>Plak e-posadresse hieronder (een per reël of komma-geskei).</div>
-            <textarea
-              className="admin-textarea"
-              rows={4}
-              placeholder={'iemand@gmail.com\nnogeen@gmail.com'}
-              value={resendEmails}
-              onChange={e => setResendEmails(e.target.value)}
-            />
-            {resendResult && (
-              <div className="admin-success" style={{ marginBottom: 8 }}>
-                ✅ {resendResult.sent} e-pos{resendResult.sent !== 1 ? 'se' : ''} gestuur
-              </div>
-            )}
-            {addCampResult && (
-              <div className="admin-success" style={{ marginBottom: 8 }}>
-                ✅ {addCampResult.added} bygevoeg · {addCampResult.skipped} reeds in lys · totaal {addCampResult.newTotal}
-              </div>
-            )}
-            <button className="admin-save-btn" onClick={handleResendToList} disabled={resendBusy || addCampBusy}>
-              {resendBusy ? 'Besig...' : '📧 Stuur laaste e-pos nou'}
-            </button>
-            <button className="admin-save-btn" style={{ background: '#27713f', marginTop: 8 }} onClick={handleAddToCampaign} disabled={resendBusy || addCampBusy}>
-              {addCampBusy ? 'Besig...' : '➕ Voeg by aktiewe kampanje'}
-            </button>
-            <div className="admin-books-note" style={{ marginTop: 6 }}>
-              "Stuur nou" stuur dadelik die laaste e-pos. "Voeg by kampanje" voeg hulle by die ry — hulle kry die e-pos in die volgende batch.
-            </div>
-          </div>
 
         </div>
       </div>
