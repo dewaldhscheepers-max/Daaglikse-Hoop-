@@ -101,6 +101,9 @@ export default function Admin({ onClose }) {
   const [bulkImporting,  setBulkImporting]  = useState(false)
   const [bulkImported,   setBulkImported]   = useState(false)
   const [processResult,  setProcessResult]  = useState(null)
+  const [resendEmails,   setResendEmails]   = useState('')
+  const [resendBusy,     setResendBusy]     = useState(false)
+  const [resendResult,   setResendResult]   = useState(null)
 
   // ── Email test state ──
   const [testEmailAddr,    setTestEmailAddr]    = useState('dewald.h.scheepers@gmail.com')
@@ -615,6 +618,22 @@ export default function Admin({ onClose }) {
         setActiveCampaign(null)
       }
     } catch (e) { alert('Fout: ' + e.message) }
+  }
+
+  async function handleResendToList() {
+    const emails = resendEmails.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean)
+    if (emails.length === 0) { alert('Plak die e-posadresse in'); return }
+    setResendBusy(true); setResendResult(null)
+    try {
+      const r = await fetch('/api/resend-to-emails', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: '2025', emails }),
+      })
+      const data = await r.json()
+      if (r.ok) { setResendResult(data); setResendEmails('') }
+      else alert('Fout: ' + (data.error || 'Onbekend'))
+    } catch (e) { alert('Fout: ' + e.message) }
+    setResendBusy(false)
   }
 
   // ── Upload wallpaper for a voice note ──
@@ -1278,6 +1297,27 @@ export default function Admin({ onClose }) {
               )}
             </div>
           )}
+
+          {/* Resend last email to specific addresses */}
+          <div className="admin-section">
+            <div className="admin-section-title">📨 Stuur laaste e-pos aan spesifieke adresse</div>
+            <div className="admin-books-note" style={{ marginBottom: 10 }}>Plak e-posadresse hieronder (een per reël of komma-geskei). Dit stuur dieselfde e-pos as die laaste kampanje.</div>
+            <textarea
+              className="admin-textarea"
+              rows={4}
+              placeholder={'iemand@gmail.com\nnogeen@gmail.com'}
+              value={resendEmails}
+              onChange={e => setResendEmails(e.target.value)}
+            />
+            {resendResult && (
+              <div className="admin-success" style={{ marginBottom: 8 }}>
+                ✅ {resendResult.sent} e-pos{resendResult.sent !== 1 ? 'se' : ''} gestuur
+              </div>
+            )}
+            <button className="admin-save-btn" onClick={handleResendToList} disabled={resendBusy}>
+              {resendBusy ? 'Besig...' : 'Stuur nou'}
+            </button>
+          </div>
 
         </div>
       </div>
