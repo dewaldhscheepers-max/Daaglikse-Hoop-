@@ -2,6 +2,9 @@ const crypto = require('crypto')
 
 const INITIAL_EMAILS = [
   'njordaan51@gmail.com',
+  'dellie.vandeventer@gmail.com','magdamarx45@gmail.com','adele.potgieter75@gmail.com',
+  'kiewietbruwer4@gmail.com','helga.welgemoed.smith@gmail.com','pietersenjelwine@gmail.com',
+  'monicakabouter55@gmail.com',
   '0626054767s@gmail.com','23136014@nwu.ac.za','2giddi@gmail.com','316vdm@gmail.com',
   '67smit@gmail.com','69pikkie@gmail.com','AMeyer1952@gmail.com','Alettam.ludick@gmail.com',
   'Amanda.duPlooy@outlook.com','Anneliekruger01@gmail.com','Anzuette.goosen@gmail.com',
