@@ -65,6 +65,16 @@ async function handleSubscriptionItn(data, projectId) {
   if (token) {
     await fsWrite(projectId, token, `payfast_itn/${docId}`, fields)
     console.log('payfast-itn sub logged:', data.pf_payment_id, data.payment_status, data.token)
+    // Save subscriber email to emailList
+    const subEmail = (data.email_address || '').toLowerCase().trim()
+    if (subEmail) {
+      const emailId = Buffer.from(subEmail).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
+      fsWrite(projectId, token, `emailList/${emailId}`, {
+        email:   { stringValue: subEmail },
+        source:  { stringValue: 'subscription' },
+        addedAt: { timestampValue: new Date().toISOString() },
+      }).catch(() => {})
+    }
   } else {
     console.log('payfast-itn sub (no auth):', JSON.stringify(data))
   }
@@ -94,6 +104,23 @@ module.exports = async function handler(req, res) {
 
   const email   = data.custom_str1
   const bookIds = (data.custom_str2 || '').split(',').filter(Boolean).filter(id => id !== 'skenking')
+
+  // Save donation email even if no bookIds (once-off donations use id 'skenking')
+  if (email && bookIds.length === 0) {
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
+    let token = null
+    try { token = await getAccessToken() } catch {}
+    if (token) {
+      const emailId = Buffer.from(email.toLowerCase()).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
+      fsWrite(projectId, token, `emailList/${emailId}`, {
+        email:   { stringValue: email.toLowerCase() },
+        source:  { stringValue: 'donation' },
+        addedAt: { timestampValue: new Date().toISOString() },
+      }).catch(() => {})
+    }
+    return
+  }
+
   if (!email || bookIds.length === 0) return
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
