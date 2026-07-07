@@ -210,7 +210,7 @@ function SocialLinks() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished }) {
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
@@ -362,7 +362,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   // ── Fetch reading plan like counts ──
   useEffect(() => {
-    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander', 'seer-na-vryheid']
+    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander', 'seer-na-vryheid', 'leuens-duiwel']
     Promise.all(PLAN_IDS.map(id => getDoc(doc(db, 'readingPlanLikes', id)))).then(docs => {
       const counts = {}
       docs.forEach((d, i) => { counts[PLAN_IDS[i]] = d.exists() ? (d.data().count || 0) : 0 })
@@ -636,6 +636,48 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
       <div className="luister-body">
+
+        {/* ── Vandag vir jou ── */}
+        <div className="vandaag-section">
+          <div className="vandaag-heading">Vandag vir jou</div>
+          <div className="vandaag-steps">
+            <button className="vandaag-step" onClick={() => toggle(today)}>
+              <span className="vandaag-icon">🎧</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Luister na vandag se boodskap</div>
+                <div className="vandaag-desc">{today.title}</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+            {today.wallpaperUrl && (
+              <a className="vandaag-step" href={today.wallpaperUrl} target="_blank" rel="noopener noreferrer">
+                <span className="vandaag-icon">📱</span>
+                <div className="vandaag-text">
+                  <div className="vandaag-title">Laai vandag se wallpaper af</div>
+                  <div className="vandaag-desc">Hou jou vinger op die foto en kies "Download"</div>
+                </div>
+                <span className="vandaag-arrow">›</span>
+              </a>
+            )}
+            <button className="vandaag-step" onClick={() => onNavigate?.('bidsaam')}>
+              <span className="vandaag-icon">🙏</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Bid saam met ander</div>
+                <div className="vandaag-desc">Stuur 'n gebedsversoek en bid vir mekaar</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+            <button className="vandaag-step" onClick={() => onNavigate?.('vredepad')}>
+              <span className="vandaag-icon">✨</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Speel Vredepad vir 60 sekondes</div>
+                <div className="vandaag-desc">Kalmeer jou gedagtes en versamel God se waarhede</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+          </div>
+        </div>
+
         {today.wallpaperUrl && (
           <div className="wp-card">
             <div className="wp-card-label">📱 Vandag se wallpaper — hou jou vinger op die foto vir 2 sek en kies "Download image"</div>
@@ -698,6 +740,24 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                 onClick={e => { e.stopPropagation(); handlePlanLike('seer-na-vryheid') }}
               >
                 <span className="leesplan-like-icon">{likedPlans['seer-na-vryheid'] ? '♥' : '♡'}</span>
+              </button>
+              <span className="leesplan-arrow">›</span>
+            </div>
+          </button>
+
+          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-leuens-duiwel'))}>
+            <span className="leesplan-icon">⚔️</span>
+            <div className="leesplan-info">
+              <div className="leesplan-title">7 Leuens van die Duiwel</div>
+              <div className="leesplan-desc">Herken die vyand se stem en kies God se waarheid elke dag.</div>
+              <div className="leesplan-meta">7 dae · gratis</div>
+            </div>
+            <div className="leesplan-right">
+              <button
+                className={`leesplan-like-btn${likedPlans['leuens-duiwel'] ? ' liked' : ''}`}
+                onClick={e => { e.stopPropagation(); handlePlanLike('leuens-duiwel') }}
+              >
+                <span className="leesplan-like-icon">{likedPlans['leuens-duiwel'] ? '♥' : '♡'}</span>
               </button>
               <span className="leesplan-arrow">›</span>
             </div>

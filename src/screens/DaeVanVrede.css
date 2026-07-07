@@ -465,6 +465,26 @@
   font-weight: 600;
 }
 
+.dvv-closing-truths {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 340px;
+  width: 100%;
+}
+.dvv-closing-truths p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+}
+.dvv-closing-truths p strong {
+  color: var(--purple);
+}
+
 /* ─── Leesplanne section (lives in Luister) ─── */
 .leesplanne-section {
   margin-bottom: 4px;
