@@ -1755,7 +1755,7 @@ export default function Vredepad({ onClose }) {
       }
       if (!g.gardenMode) {
         if (g.genadeKruis) drawGenadeKruis(ctx, g.genadeKruis, g.tick, p.x, p.y)
-        for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, lvlTier)
+        for (const s of g.seeds) drawSeed(ctx, s.x, s.y, s.pulse, g.t, Math.min(lvlTier, 12))
         if (g.promiseSeed) drawPromiseSeed(ctx, g.promiseSeed.x, g.promiseSeed.y, g.promiseSeed.pulse, g.promiseSeed.plant)
         for (const w of g.weeds) drawWeed(ctx, w.x, w.y, w.pulse, g.t, w.type)
         if (g.warrelwind) drawWarrelwind(ctx, g.warrelwind, g.tick)
