@@ -230,12 +230,25 @@ export default function LeuensDuiwel({ onClose }) {
           <button className="dvv-overlay-close" onClick={onClose}>✕</button>
           <div className="dvv-closing">
             <div className="dvv-closing-icon">⚔️</div>
-            <h1 className="dvv-closing-title">Jy het die 7 dae voltooi</h1>
+            <h1 className="dvv-closing-title">Die duiwel is 'n leuenaar</h1>
             <p className="dvv-closing-body">
-              Jy het 7 leuens van die vyand teëgestaan met God se waarheid. Jy is nie 'n fout nie. Jy is nie vergete nie. Jou verlede definieer jou nie. God maak alles nuut. Jy is nie alleen nie. Jy kan verander. En jy is beslis nie klaar nie.
+              Hy het probeer om jou vas te vang in skaamte, in stilte, in jou verlede, in jou pyn, in die gedagte dat niks ooit sal verander nie.
+            </p>
+            <p className="dvv-closing-body">Maar God se waarheid is sterker. Onthou dit:</p>
+            <div className="dvv-closing-truths">
+              <p>Jy is nie 'n fout nie. <strong>Jy behoort aan God.</strong></p>
+              <p>Jy is nie vergete nie. <strong>Hy is by jou.</strong></p>
+              <p>Jy is nie jou verlede nie. <strong>Jy is nuut in Christus.</strong></p>
+              <p>Jy is nie te stukkend nie. <strong>God kan herstel.</strong></p>
+              <p>Jy is nie alleen nie. <strong>Hy bly by jou.</strong></p>
+              <p>Jy is nie vas nie. <strong>Verandering is moontlik.</strong></p>
+              <p>Jy is nie klaar nie. <strong>Jou storie leef nog.</strong></p>
+            </div>
+            <p className="dvv-closing-body">
+              Hou aan om God se waarheid oor jou lewe te spreek. Nie net wanneer jy dit voel nie. Ook wanneer jy dit moet glo terwyl jou gedagtes nog baklei.
             </p>
             <p className="dvv-closing-body">
-              Hou aan om hierdie waarhede oor jou lewe te spreek. Dit is jou swaard, jou skild, jou lied. Die duiwel is 'n leuenaar — maar God se Woord bly vir ewig.
+              Want waarheid breek kettings. En die waarheid van God sal harder praat as elke leuen.
             </p>
             <button className="dvv-secondary-btn" onClick={() => setView('list')}>
               Gaan terug na daglys
