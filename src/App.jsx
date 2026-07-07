@@ -486,7 +486,7 @@ export default function App() {
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
           <div style={tab !== 'luister' ? {display:'none'} : undefined}>
-            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (shouldShowSharePopup()) setActivePopup({ type: 'share' }) }} />
+            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (shouldShowSharePopup()) setActivePopup({ type: 'share' }) }} onNavigate={handleNav} />
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}

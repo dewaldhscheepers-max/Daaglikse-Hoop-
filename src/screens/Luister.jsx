@@ -210,7 +210,7 @@ function SocialLinks() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished }) {
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
@@ -636,6 +636,48 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
       <div className="luister-body">
+
+        {/* ── Vandag vir jou ── */}
+        <div className="vandaag-section">
+          <div className="vandaag-heading">Vandag vir jou</div>
+          <div className="vandaag-steps">
+            <button className="vandaag-step" onClick={() => toggle(today)}>
+              <span className="vandaag-icon">🎧</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Luister na vandag se boodskap</div>
+                <div className="vandaag-desc">{today.title}</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+            {today.wallpaperUrl && (
+              <a className="vandaag-step" href={today.wallpaperUrl} target="_blank" rel="noopener noreferrer">
+                <span className="vandaag-icon">📱</span>
+                <div className="vandaag-text">
+                  <div className="vandaag-title">Laai vandag se wallpaper af</div>
+                  <div className="vandaag-desc">Hou jou vinger op die foto en kies "Download"</div>
+                </div>
+                <span className="vandaag-arrow">›</span>
+              </a>
+            )}
+            <button className="vandaag-step" onClick={() => onNavigate?.('bidsaam')}>
+              <span className="vandaag-icon">🙏</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Bid saam met ander</div>
+                <div className="vandaag-desc">Stuur 'n gebedsversoek en bid vir mekaar</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+            <button className="vandaag-step" onClick={() => onNavigate?.('vredepad')}>
+              <span className="vandaag-icon">✨</span>
+              <div className="vandaag-text">
+                <div className="vandaag-title">Speel Vredepad vir 60 sekondes</div>
+                <div className="vandaag-desc">Kalmeer jou gedagtes en versamel God se waarhede</div>
+              </div>
+              <span className="vandaag-arrow">›</span>
+            </button>
+          </div>
+        </div>
+
         {today.wallpaperUrl && (
           <div className="wp-card">
             <div className="wp-card-label">📱 Vandag se wallpaper — hou jou vinger op die foto vir 2 sek en kies "Download image"</div>
