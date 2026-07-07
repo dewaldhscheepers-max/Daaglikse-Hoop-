@@ -237,13 +237,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [likedPlans, setLikedPlans] = useState(() => {
     try { return JSON.parse(localStorage.getItem('likedPlans') || '{}') } catch { return {} }
   })
-  const [vandaagDone, setVandaagDone] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('vandaagProgress') || '{}')
-      const d = new Date().toISOString().slice(0, 10)
-      return saved.date === d ? (saved.done || {}) : {}
-    } catch { return {} }
-  })
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -259,8 +252,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
   const playCount  = today ? (playCounts[today.id] || 0) : 0
-  const vandaagCount   = ['listen', 'bidsaam', 'vredepad'].filter(k => vandaagDone[k]).length
-  const vandaagAllDone = vandaagCount === 3
 
   // ── Real-time: all likes ──
   useEffect(() => {
@@ -389,21 +380,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     setDoc(doc(db, 'readingPlanLikes', planId), { count: increment(delta) }, { merge: true }).catch(() => {})
   }
 
-  function markVandaagStep(key) {
-    const d = new Date().toISOString().slice(0, 10)
-    setVandaagDone(prev => {
-      if (prev[key]) return prev
-      const next = { ...prev, [key]: true }
-      try { localStorage.setItem('vandaagProgress', JSON.stringify({ date: d, done: next })) } catch {}
-      return next
-    })
-  }
-
-  // ── Auto-mark listen step when today's note starts playing ──
-  useEffect(() => {
-    if (!playing || !today || activeId !== today.id) return
-    markVandaagStep('listen')
-  }, [playing, activeId, today?.id])
 
   // ── MediaSession API ──
   useEffect(() => {
@@ -662,50 +638,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
 
-        {/* ── Vandag vir jou ── */}
-        <div className="vandaag-card">
-          <div className="vandaag-header">
-            <span className="vandaag-label">Vandag vir jou</span>
-            <span className="vandaag-progress-label">{vandaagCount}/3 klaar</span>
-          </div>
-          <div className="vandaag-bar"><div className="vandaag-bar-fill" style={{ width: `${(vandaagCount / 3) * 100}%` }} /></div>
-          {vandaagAllDone ? (
-            <div className="vandaag-complete">
-              <span className="vandaag-complete-icon">🙏</span>
-              <div>
-                <div className="vandaag-complete-title">Klaar vir vandag!</div>
-                <div className="vandaag-complete-sub">Jy het al drie stappe voltooi. Goed gedaan.</div>
-              </div>
-            </div>
-          ) : (
-            <div className="vandaag-steps">
-              {[
-                { key: 'listen',   label: 'Luister na vandag se boodskap', sub: today.title,                                  action: () => { toggle(today); markVandaagStep('listen') } },
-                { key: 'bidsaam',  label: 'Bid saam met ander',             sub: "Stuur 'n gebedsversoek of bid vir iemand",  action: () => { markVandaagStep('bidsaam'); onNavigate?.('bidsaam') } },
-                { key: 'vredepad', label: 'Speel Vredepad vir 60 sekondes', sub: 'Kalmeer jou gedagtes',                      action: () => { markVandaagStep('vredepad'); onNavigate?.('vredepad') } },
-              ].map(step => (
-                <button key={step.key} className="vandaag-step" onClick={step.action}>
-                  <div className={`vandaag-check${vandaagDone[step.key] ? ' done' : ''}`}>
-                    {vandaagDone[step.key] && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    )}
-                  </div>
-                  <div className="vandaag-text">
-                    <div className={`vandaag-step-title${vandaagDone[step.key] ? ' done' : ''}`}>{step.label}</div>
-                    <div className="vandaag-step-sub">{step.sub}</div>
-                  </div>
-                  {!vandaagDone[step.key] && (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
-                      <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
         {today.wallpaperUrl && (
           <div className="wp-card">
