@@ -537,7 +537,7 @@ function drawFloats(ctx, floats) {
 
 function drawGenadeKruis(ctx, kruis, tick, playerX, playerY) {
   const { x, y, life, maxLife } = kruis
-  const tier = kruis.tier || 0
+  const tier = Math.min(kruis.tier || 0, 8)
   const fadeIn  = Math.min(life / 14, 1)
   const fadeOut = life > maxLife - 50 ? (maxLife - life) / 50 : 1
   const alpha   = fadeIn * fadeOut
@@ -822,8 +822,9 @@ export default function Vredepad({ onClose }) {
   const gameRef      = useRef(null)
   const rafRef       = useRef(null)
   const touchRef     = useRef({ x: 0, y: 0 })
-  const pendingLevel = useRef(1)
-  const isReplayRef  = useRef(false)
+  const pendingLevel  = useRef(1)
+  const isReplayRef   = useRef(false)
+  const timeoutsRef   = useRef([])
 
   const [screen, setScreen]         = useState('intro')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -1213,7 +1214,7 @@ export default function Vredepad({ onClose }) {
       }
 
       for (const s of g.seeds) s.pulse += 0.05 * dt
-      const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? 1.38 + (g.storm.tier || 0) * 0.18 : 1)
+      const weedSpd = g.genadeActive > 0 ? 0.22 : (g.storm?.phase === 'active' ? Math.min(1.38 + (g.storm.tier || 0) * 0.18, 3.5) : 1)
       for (const w of g.weeds) {
         w.pulse += 0.04 * dt
         if (w.chasing) {
@@ -1255,14 +1256,14 @@ export default function Vredepad({ onClose }) {
           g.floats = []
 
           if (kTier === 0) {
-            // L1-19: Teleport weeds far away, brief slow
+            // L1-29: Teleport weeds far away, brief slow
             for (const w of g.weeds) {
               const pos = freePos(g.W, g.H, [p, ...g.seeds], 150)
               w.x = pos.x; w.y = pos.y
             }
             g.genadeActive = 300
           } else if (kTier === 1) {
-            // L20-29: Push — weeds burst outward at high speed
+            // L30-39: Push — weeds burst outward at high speed
             for (const w of g.weeds) {
               const ang = Math.atan2(w.y - p.y, w.x - p.x)
               const force = 2.8 + 110 / Math.max(18, d2(w, p))
@@ -1271,7 +1272,7 @@ export default function Vredepad({ onClose }) {
             }
             g.genadeActive = 320
           } else if (kTier === 2) {
-            // L30-39: Consume nearby (→ flowers), push distant weeds; replaced by slow chasers
+            // L40-49: Consume nearby (→ flowers), push distant weeds; replaced by slow chasers
             const consumeR = 195
             let converted2 = 0
             g.weeds = g.weeds.filter(w => {
@@ -1289,7 +1290,7 @@ export default function Vredepad({ onClose }) {
             for (let i = 0; i < converted2; i++) g.weeds.push(spawnChasingWeed(g, p))
             g.genadeActive = 360
           } else {
-            // L40+: Consume all within large radius; replaced by slow chasers
+            // L50+: Consume all within large radius; replaced by slow chasers
             let converted3 = 0
             g.weeds = g.weeds.filter(w => {
               if (d2(w, p) <= 270) {
@@ -1310,7 +1311,7 @@ export default function Vredepad({ onClose }) {
           haptic([35, 25, 35, 25, 70])
           const flashMsgs = ['✦ Genade Oomblik ✦', '✦ Gedagtes Weggestoot ✦', '✦ Waarheid Verslind Twyfel ✦', '✦ Vrede Oorwin Alles ✦']
           setGenadeFlash(flashMsgs[Math.min(kTier, 3)])
-          setTimeout(() => setGenadeFlash(''), 2600)
+          timeoutsRef.current.push(setTimeout(() => setGenadeFlash(''), 2600))
         }
       }
 
@@ -1348,7 +1349,7 @@ export default function Vredepad({ onClose }) {
         g.storm = {
           phase: 'building', life: 0,
           tier: stormTier,
-          overlay: 0, truthsThisStorm: 0, needed: 4 + stormTier,
+          overlay: 0, truthsThisStorm: 0, needed: Math.min(4 + stormTier, 12),
           windLines: Array.from({ length: stormLineCount }, () => ({
             x: Math.random() * g.W,
             y: 20 + Math.random() * (g.H - 40),
@@ -1375,14 +1376,14 @@ export default function Vredepad({ onClose }) {
         }
         g.stormUsed = true
         setStormAnnounce("'n Storm van gedagtes kom…")
-        setTimeout(() => setStormAnnounce(null), 4200)
+        timeoutsRef.current.push(setTimeout(() => setStormAnnounce(null), 4200))
       }
 
       if (g.storm) {
         const st = g.storm
         st.life += dt
         if (st.phase === 'building') {
-          const maxOverlay = 0.38 + (st.tier || 0) * 0.07
+          const maxOverlay = Math.min(0.38 + (st.tier || 0) * 0.07, 0.80)
           st.overlay = Math.min(st.life / 120, 1) * maxOverlay
           for (const wl of st.windLines) {
             wl.x += wl.dx * dt * Math.min(st.life / 60, 1)
@@ -1390,7 +1391,7 @@ export default function Vredepad({ onClose }) {
           }
           if (st.life >= 150) { st.phase = 'active'; st.life = 0 }
         } else if (st.phase === 'active') {
-          const maxOv = 0.38 + (st.tier || 0) * 0.07
+          const maxOv = Math.min(0.38 + (st.tier || 0) * 0.07, 0.80)
           const target = Math.max(0.08, maxOv - st.truthsThisStorm * 0.07)
           st.overlay += (target - st.overlay) * 0.035 * dt
           for (const wl of st.windLines) {
@@ -1424,7 +1425,7 @@ export default function Vredepad({ onClose }) {
             st.lightningFlash2 = 0
             st.lightningTimer  = 45 + Math.random() * 65
             // Schedule a second flicker ~12 ticks later
-            setTimeout(() => { if (st.lightningFlash < 5) st.lightningFlash2 = 18 }, 200)
+            timeoutsRef.current.push(setTimeout(() => { if (st.lightningFlash < 5) st.lightningFlash2 = 18 }, 200))
           }
           // Drain survival bar; weed hits also drain (handled in weed section below)
           st.survivalBar = Math.max(0, (st.survivalBar ?? 1) - STORM_BAR_DRAIN * dt)
@@ -1434,8 +1435,8 @@ export default function Vredepad({ onClose }) {
             g.bgFlash = 8
             g.timeLeft = Math.max(g.timeLeft - 5, 5)
             setStormAnnounce('Die storm het jou oorweldig.')
-            setTimeout(() => setStormAnnounce(null), 4200)
-          } else if (st.truthsThisStorm >= st.needed || st.life > 720 + (st.tier || 0) * 120) {
+            timeoutsRef.current.push(setTimeout(() => setStormAnnounce(null), 4200))
+          } else if (st.truthsThisStorm >= st.needed || st.life > Math.min(720 + (st.tier || 0) * 120, 2400)) {
             st.phase = 'breaking'; st.life = 0; st.driftWords = []
             g.weeds = g.weeds.filter(w => !w.isStorm)
             g.justHit = false; p.hitAnim = 0
@@ -1445,7 +1446,7 @@ export default function Vredepad({ onClose }) {
             g.stormBeaten = true
             haptic([20, 15, 20, 15, 60])
             setStormAnnounce('Die storm gaan verby.')
-            setTimeout(() => setStormAnnounce(null), 4200)
+            timeoutsRef.current.push(setTimeout(() => setStormAnnounce(null), 4200))
           }
         } else if (st.phase === 'breaking') {
           st.overlay = Math.max(0, st.overlay - 0.004 * dt)
@@ -1475,7 +1476,7 @@ export default function Vredepad({ onClose }) {
         if (!localStorage.getItem('vp_duif_seen')) {
           localStorage.setItem('vp_duif_seen', '1')
           setStormAnnounce("🕊️ 'n Duif! Vang haar...")
-          setTimeout(() => setStormAnnounce(null), 3500)
+          timeoutsRef.current.push(setTimeout(() => setStormAnnounce(null), 3500))
         }
       }
       if (g.duif) {
@@ -1520,7 +1521,7 @@ export default function Vredepad({ onClose }) {
         if (!localStorage.getItem('vp_ww_seen')) {
           localStorage.setItem('vp_ww_seen', '1')
           setStormAnnounce('🌀 Warrelwind! Raak dit aan...')
-          setTimeout(() => setStormAnnounce(null), 3500)
+          timeoutsRef.current.push(setTimeout(() => setStormAnnounce(null), 3500))
         }
       }
       if (g.warrelwind) {
@@ -1581,7 +1582,7 @@ export default function Vredepad({ onClose }) {
           if ([5, 10, 15, 20, 25].includes(g.combo)) {
             g.timeLeft = Math.min(g.timeLeft + 5, 90)
             setBonusFlash(true)
-            setTimeout(() => setBonusFlash(false), 1800)
+            timeoutsRef.current.push(setTimeout(() => setBonusFlash(false), 1800))
           }
 
           if (g.storm?.phase === 'active') {
@@ -1795,6 +1796,8 @@ export default function Vredepad({ onClose }) {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup',   onKeyUp)
       stopAmbient()
+      timeoutsRef.current.forEach(clearTimeout)
+      timeoutsRef.current = []
     }
   }, [screen])
 
