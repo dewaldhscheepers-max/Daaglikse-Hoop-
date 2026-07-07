@@ -362,7 +362,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   // ── Fetch reading plan like counts ──
   useEffect(() => {
-    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander', 'seer-na-vryheid']
+    const PLAN_IDS = ['11-dae-vrede', 'dinge-verander', 'seer-na-vryheid', 'leuens-duiwel']
     Promise.all(PLAN_IDS.map(id => getDoc(doc(db, 'readingPlanLikes', id)))).then(docs => {
       const counts = {}
       docs.forEach((d, i) => { counts[PLAN_IDS[i]] = d.exists() ? (d.data().count || 0) : 0 })
@@ -740,6 +740,24 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                 onClick={e => { e.stopPropagation(); handlePlanLike('seer-na-vryheid') }}
               >
                 <span className="leesplan-like-icon">{likedPlans['seer-na-vryheid'] ? '♥' : '♡'}</span>
+              </button>
+              <span className="leesplan-arrow">›</span>
+            </div>
+          </button>
+
+          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-leuens-duiwel'))}>
+            <span className="leesplan-icon">⚔️</span>
+            <div className="leesplan-info">
+              <div className="leesplan-title">7 Leuens van die Duiwel</div>
+              <div className="leesplan-desc">Herken die vyand se stem en kies God se waarheid elke dag.</div>
+              <div className="leesplan-meta">7 dae · gratis</div>
+            </div>
+            <div className="leesplan-right">
+              <button
+                className={`leesplan-like-btn${likedPlans['leuens-duiwel'] ? ' liked' : ''}`}
+                onClick={e => { e.stopPropagation(); handlePlanLike('leuens-duiwel') }}
+              >
+                <span className="leesplan-like-icon">{likedPlans['leuens-duiwel'] ? '♥' : '♡'}</span>
               </button>
               <span className="leesplan-arrow">›</span>
             </div>

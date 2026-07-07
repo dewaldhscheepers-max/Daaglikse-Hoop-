@@ -18,6 +18,7 @@ import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
 import Vredepad from './screens/Vredepad'
 import HoopVennoot from './screens/HoopVennoot'
+import LeuensDuiwel from './screens/LeuensDuiwel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -76,6 +77,7 @@ export default function App() {
   const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
   const [showVredepad, setShowVredepad]           = useState(false)
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
+  const [showLeuensDuiwel, setShowLeuensDuiwel]   = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -388,6 +390,13 @@ export default function App() {
     return () => window.removeEventListener('open-hoop-vennoot', onOpen)
   }, [])
 
+  // ── 7 Leuens van die Duiwel ──
+  useEffect(() => {
+    function onOpen() { setShowLeuensDuiwel(true) }
+    window.addEventListener('open-leuens-duiwel', onOpen)
+    return () => window.removeEventListener('open-leuens-duiwel', onOpen)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -560,6 +569,10 @@ export default function App() {
 
       {showHoopVennoot && (
         <HoopVennoot onClose={() => setShowHoopVennoot(false)} />
+      )}
+
+      {showLeuensDuiwel && (
+        <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
       )}
 
       {showNotifBanner && (
