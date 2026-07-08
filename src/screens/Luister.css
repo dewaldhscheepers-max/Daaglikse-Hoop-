@@ -537,6 +537,12 @@
   gap: 8px;
 }
 
+.series-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .series-label {
   font-size: 11px;
   font-weight: 600;
@@ -544,6 +550,26 @@
   text-transform: uppercase;
   color: var(--purple);
   padding: 0 2px;
+}
+
+.series-gewild-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #B8860B;
+  background: linear-gradient(135deg, #FFF3C4, #FFE680);
+  border: 1px solid #D4A800;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.series-gebaseer {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 0 2px;
+  margin-top: -4px;
+  font-style: italic;
 }
 
 /* ─── Note row ─── */

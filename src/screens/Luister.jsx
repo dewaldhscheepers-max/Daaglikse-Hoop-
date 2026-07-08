@@ -772,7 +772,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                 <h3 className="section-title">Onlangse boodskappe</h3>
                 {Object.entries(bySeries).map(([series, seriesNotes]) => (
                   <div key={series} className="series-group">
-                    <div className="series-label">{series}</div>
+                    <div className="series-label-row">
+                      <span className="series-label">{series}</span>
+                      {series === 'RUSTELOSE GEDAGTES' && (
+                        <span className="series-gewild-badge">GEWILDE REEKS</span>
+                      )}
+                    </div>
+                    {series === 'RUSTELOSE GEDAGTES' && (
+                      <div className="series-gebaseer">Gebaseer op die E-boek Rustelose Gedagtes</div>
+                    )}
                     {seriesNotes.map(note => (
                       <NoteRow
                         key={note.id}
