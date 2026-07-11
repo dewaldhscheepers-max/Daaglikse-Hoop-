@@ -6,13 +6,7 @@ import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
 
-// ── Saturday Video Prayer — set active: false to hide after the weekend ──────
-const SATURDAY_VIDEO = {
-  active: true,
-  videoId: 'LK-kieYHZJA',
-}
-
-function SaturdayVideoCard({ onNavigate }) {
+function SaturdayVideoCard({ videoId, onNavigate }) {
   const [amenSaid, setAmenSaid] = useState(false)
   return (
     <div className="saturday-card">
@@ -21,7 +15,7 @@ function SaturdayVideoCard({ onNavigate }) {
       <p className="saturday-sub">Rustelose Gedagtes Dag 7 gaan Maandag voort. Vandag bid ek net vir jou naweek.</p>
       <div className="saturday-video-wrap">
         <iframe
-          src={`https://www.youtube.com/embed/${SATURDAY_VIDEO.videoId}?rel=0&playsinline=1`}
+          src={`https://www.youtube.com/embed/${videoId}?rel=0&playsinline=1`}
           title="Naweekgebed vir jou"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -251,6 +245,8 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
+  const [satVid, setSatVid] = useState({ active: false, videoId: '' })
+
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -292,6 +288,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const playCount  = today ? (playCounts[today.id] || 0) : 0
 
   // ── Real-time: all likes ──
+  useEffect(() => {
+    getDoc(doc(db, 'config', 'saturdayVideo')).then(d => {
+      if (d.exists()) setSatVid(d.data())
+    }).catch(() => {})
+  }, [])
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'likes'),
       snap => {
@@ -676,7 +678,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
 
-        {SATURDAY_VIDEO.active && <SaturdayVideoCard onNavigate={onNavigate} />}
+        {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} onNavigate={onNavigate} />}
 
         {today.wallpaperUrl && (
           <div className="wp-card">
