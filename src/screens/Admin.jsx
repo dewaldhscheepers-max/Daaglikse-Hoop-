@@ -15,10 +15,12 @@ export default function Admin({ onClose }) {
   const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed' | 'video'
 
   // ── Saturday video state ──
-  const [svActive,  setSvActive]  = useState(false)
-  const [svVideoId, setSvVideoId] = useState('')
-  const [svSaving,  setSvSaving]  = useState(false)
-  const [svSaved,   setSvSaved]   = useState(false)
+  const [svActive,   setSvActive]   = useState(false)
+  const [svVideoId,  setSvVideoId]  = useState('')
+  const [svTitle,    setSvTitle]    = useState('')
+  const [svSubtitle, setSvSubtitle] = useState('')
+  const [svSaving,   setSvSaving]   = useState(false)
+  const [svSaved,    setSvSaved]    = useState(false)
 
   // ── Aandgebed state ──
   const [apCoveredFrom,   setApCoveredFrom]   = useState('')
@@ -95,13 +97,15 @@ export default function Admin({ onClose }) {
       if (d.exists()) {
         setSvActive(d.data().active || false)
         setSvVideoId(d.data().videoId || '')
+        setSvTitle(d.data().title || '')
+        setSvSubtitle(d.data().subtitle || '')
       }
     }).catch(() => {})
   }, [unlocked])
 
   async function handleSvSave() {
     setSvSaving(true)
-    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: svVideoId.trim() })
+    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: svVideoId.trim(), title: svTitle.trim(), subtitle: svSubtitle.trim() })
     setSvSaving(false)
     setSvSaved(true)
     setTimeout(() => setSvSaved(false), 2500)
@@ -1323,6 +1327,22 @@ export default function Admin({ onClose }) {
                   />
                   <span>{svActive ? '✅ Aan — video wys nou' : '⬜ Af — video is versteek'}</span>
                 </label>
+              </div>
+              <div className="admin-field">
+                <label>Titel</label>
+                <input
+                  value={svTitle}
+                  onChange={e => setSvTitle(e.target.value)}
+                  placeholder="bv. Naweekgebed vir jou / Weekgebed / Maandgebed"
+                />
+              </div>
+              <div className="admin-field">
+                <label>Onderskrif</label>
+                <input
+                  value={svSubtitle}
+                  onChange={e => setSvSubtitle(e.target.value)}
+                  placeholder="bv. Rustelose Gedagtes Dag 7 gaan Maandag voort..."
+                />
               </div>
               <div className="admin-field">
                 <label>YouTube Video ID</label>

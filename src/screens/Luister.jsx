@@ -6,13 +6,13 @@ import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
 
-function SaturdayVideoCard({ videoId, onNavigate }) {
+function SaturdayVideoCard({ videoId, title, subtitle, onNavigate }) {
   const [amenSaid, setAmenSaid] = useState(false)
   return (
     <div className="saturday-card">
-      <span className="saturday-badge">🙏 Naweekgebed</span>
-      <h2 className="saturday-title">Naweekgebed vir jou</h2>
-      <p className="saturday-sub">Rustelose Gedagtes Dag 7 gaan Maandag voort. Vandag bid ek net vir jou naweek.</p>
+      <span className="saturday-badge">🙏 Videogebed</span>
+      <h2 className="saturday-title">{title || 'Naweekgebed vir jou'}</h2>
+      {subtitle && <p className="saturday-sub">{subtitle}</p>}
       <div className="saturday-video-wrap">
         <iframe
           src={`https://www.youtube.com/embed/${videoId}?rel=0&playsinline=1`}
@@ -245,7 +245,7 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
-  const [satVid, setSatVid] = useState({ active: true, videoId: 'LK-kieYHZJA' })
+  const [satVid, setSatVid] = useState({ active: true, videoId: 'LK-kieYHZJA', title: '', subtitle: '' })
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
@@ -678,7 +678,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
 
-        {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} onNavigate={onNavigate} />}
+        {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} onNavigate={onNavigate} />}
 
         {today.wallpaperUrl && (
           <div className="wp-card">
