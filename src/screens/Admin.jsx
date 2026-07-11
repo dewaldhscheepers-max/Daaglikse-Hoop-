@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { db, storage } from '../firebase'
-import { collection, query, orderBy, getDocs, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
@@ -12,7 +12,13 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed'
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed' | 'video'
+
+  // ── Saturday video state ──
+  const [svActive,  setSvActive]  = useState(false)
+  const [svVideoId, setSvVideoId] = useState('')
+  const [svSaving,  setSvSaving]  = useState(false)
+  const [svSaved,   setSvSaved]   = useState(false)
 
   // ── Aandgebed state ──
   const [apCoveredFrom,   setApCoveredFrom]   = useState('')
@@ -82,6 +88,24 @@ export default function Admin({ onClose }) {
 
   // ── Install count ──
   const [installCount, setInstallCount] = useState(null)
+
+  useEffect(() => {
+    if (!unlocked) return
+    getDoc(doc(db, 'config', 'saturdayVideo')).then(d => {
+      if (d.exists()) {
+        setSvActive(d.data().active || false)
+        setSvVideoId(d.data().videoId || '')
+      }
+    }).catch(() => {})
+  }, [unlocked])
+
+  async function handleSvSave() {
+    setSvSaving(true)
+    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: svVideoId.trim() })
+    setSvSaving(false)
+    setSvSaved(true)
+    setTimeout(() => setSvSaved(false), 2500)
+  }
 
   useEffect(() => {
     if (!unlocked) return
@@ -698,6 +722,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
             ✉️ E-pos
           </button>
+          <button className={`admin-tab ${activeTab === 'video' ? 'active' : ''}`} onClick={() => setActiveTab('video')}>
+            📹 Video
+          </button>
         </div>
 
         <div className="admin-body">
@@ -1279,6 +1306,41 @@ export default function Admin({ onClose }) {
             </div>
           )}
 
+
+          {activeTab === 'video' && (
+            <div className="admin-section">
+              <div className="admin-section-title">📹 Saterdag Videogebed</div>
+              <p className="admin-books-note">
+                Wys 'n tydelike videogebed bo-aan die Luister bladsy. Skakel aan Saterdag, af Maandag.
+              </p>
+              <div className="admin-field">
+                <label>Wys video</label>
+                <label className="sv-toggle-row">
+                  <input
+                    type="checkbox"
+                    checked={svActive}
+                    onChange={e => setSvActive(e.target.checked)}
+                  />
+                  <span>{svActive ? '✅ Aan — video wys nou' : '⬜ Af — video is versteek'}</span>
+                </label>
+              </div>
+              <div className="admin-field">
+                <label>YouTube Video ID</label>
+                <input
+                  value={svVideoId}
+                  onChange={e => setSvVideoId(e.target.value)}
+                  placeholder="bv. LK-kieYHZJA"
+                />
+                <div className="admin-books-note" style={{ marginTop: 6 }}>
+                  Kopieer net die ID na "?v=" in die YouTube skakel, of die laaste deel van 'n Shorts skakel.
+                </div>
+              </div>
+              {svSaved && <div className="admin-success">✅ Gestoor!</div>}
+              <button className="admin-save-btn" onClick={handleSvSave} disabled={svSaving || !svVideoId.trim()}>
+                {svSaving ? 'Besig om te stoor...' : 'Stoor'}
+              </button>
+            </div>
+          )}
 
         </div>
       </div>
