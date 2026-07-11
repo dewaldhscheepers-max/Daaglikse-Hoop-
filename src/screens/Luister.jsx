@@ -245,7 +245,7 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
-  const [satVid, setSatVid] = useState({ active: false, videoId: '' })
+  const [satVid, setSatVid] = useState({ active: true, videoId: 'LK-kieYHZJA' })
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
