@@ -83,6 +83,12 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // App config — admin writes via panel, Luister reads
+    match /config/{id} {
+      allow read:  if true;
+      allow write: if true;
+    }
+
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;
