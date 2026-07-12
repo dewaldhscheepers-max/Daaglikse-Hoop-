@@ -301,11 +301,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   useEffect(() => {
     if (!CAMPAIGN.active) return
 
-    const unsub = onSnapshot(
-      doc(db, 'counters', 'campaign_huise'),
-      d => { if (d.exists()) setCampaignCount(d.data().total || 0) },
-      () => {}
-    )
+    function fetchCount() {
+      fetch('/api/campaign-count')
+        .then(r => r.json())
+        .then(d => setCampaignCount(d.total || 0))
+        .catch(() => {})
+    }
+
+    fetchCount()
+    window.addEventListener('campaign-submitted', fetchCount)
 
     getDocs(collection(db, 'books')).then(snap => {
       const book = snap.docs
@@ -314,7 +318,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       if (book?.coverUrl) setCampaignCover(book.coverUrl)
     }).catch(() => {})
 
-    return unsub
+    return () => window.removeEventListener('campaign-submitted', fetchCount)
   }, [])
 
   useEffect(() => {
