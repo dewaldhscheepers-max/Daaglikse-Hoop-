@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import './HuiseVanHoop.css'
 
@@ -17,6 +19,16 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
   const [error,        setError]       = useState('')
   const [installDone,  setInstallDone] = useState(false)
   const [shareToast,   setShareToast]  = useState(false)
+  const [ebookUrl,     setEbookUrl]    = useState('')
+
+  useEffect(() => {
+    getDocs(collection(db, 'books')).then(snap => {
+      const book = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .find(b => b.title?.toLowerCase().includes('rustelose') || b.id?.toLowerCase().includes('rustelose'))
+      if (book?.pdfUrl) setEbookUrl(book.pdfUrl)
+    }).catch(() => {})
+  }, [])
 
   async function handleInstall() {
     if (!installPrompt) return
@@ -147,14 +159,20 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
             <h2 className="huise-title">Jou e-boek is gereed 🙏🏻</h2>
             <p className="huise-text">Mag hierdie boek hoop in jou huis bring.</p>
 
-            <a
-              className="huise-btn-primary"
-              href={CAMPAIGN.ebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              📥 Laai e-boek af
-            </a>
+            {ebookUrl ? (
+              <a
+                className="huise-btn-primary"
+                href={ebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                📥 Laai e-boek af
+              </a>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>
+                E-boek word gelaai...
+              </div>
+            )}
 
             <button className="huise-btn-share" onClick={handleShare}>
               {shareToast ? '✓ Gekopieer!' : '🔗 Deel met \'n vriend'}
