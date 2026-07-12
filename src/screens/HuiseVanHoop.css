@@ -259,63 +259,138 @@
 
 /* ── Campaign card on Luister screen ── */
 .huise-card {
-  background: linear-gradient(135deg, #F0EBF8, #EDE8F8);
-  border-radius: 16px;
-  padding: 20px 16px 16px;
+  background: linear-gradient(145deg, #3A2265, #5A3B9A);
+  border-radius: 20px;
+  padding: 22px 20px 20px;
   margin-bottom: 16px;
-  border: 1px solid rgba(124, 111, 175, 0.15);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(58, 34, 101, 0.45);
+}
+
+.huise-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.huise-card::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -30px;
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.huise-card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.huise-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.huise-card-icon {
+  font-size: 38px;
+  line-height: 1;
 }
 
 .huise-card-badge {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  background: #F5C842;
+  color: #1a0a3a;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--purple-dark);
-  margin-bottom: 8px;
+  padding: 5px 12px;
+  border-radius: 20px;
 }
 
 .huise-card-title {
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 26px;
   font-weight: 700;
-  color: var(--text);
-  margin: 0 0 6px;
-  line-height: 1.2;
+  color: #fff;
+  margin: 0 0 4px;
+  line-height: 1.1;
+}
+
+.huise-card-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 10px;
 }
 
 .huise-card-text {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0 0 14px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0 0 18px;
   line-height: 1.5;
 }
 
 .huise-card-progress {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
-.huise-card-count {
-  font-size: 13px;
+.huise-card-count-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.huise-card-number {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.huise-card-goal {
+  font-size: 20px;
   font-weight: 600;
-  color: var(--purple-dark);
-  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.huise-card-count-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 10px;
 }
 
 .huise-card-bar {
   width: 100%;
-  height: 6px;
-  background: rgba(124, 111, 175, 0.20);
-  border-radius: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .huise-card-fill {
   height: 100%;
-  background: var(--purple-dark);
-  border-radius: 3px;
-  transition: width 0.6s ease;
-  min-width: 4px;
+  background: linear-gradient(90deg, #F5C842, #F7A82E);
+  border-radius: 4px;
+  transition: width 0.8s ease;
+  min-width: 6px;
 }
 
 .huise-card-actions {
@@ -325,24 +400,25 @@
 
 .huise-card-btn {
   flex: 1;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   border: none;
-  background: var(--purple-dark);
-  color: #fff;
+  background: #fff;
+  color: #3A2265;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .huise-card-share {
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1.5px solid var(--purple);
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   background: transparent;
-  color: var(--purple-dark);
+  color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;

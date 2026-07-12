@@ -700,24 +700,34 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
         {CAMPAIGN.active && (
           <div className="huise-card">
-            <div className="huise-card-badge">🙏 1000 Huise van Hoop</div>
-            <h3 className="huise-card-title">Rustelose Gedagtes — Gratis</h3>
-            <p className="huise-card-text">Vir almal wie se gedagtes nie stil raak nie. Kry die e-boek gratis.</p>
-            {campaignCount !== null && (
-              <div className="huise-card-progress">
-                <div className="huise-card-count">Reeds {campaignCount} uit {CAMPAIGN.goal} huise van hoop bereik 🙏🏻</div>
-                <div className="huise-card-bar">
-                  <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
-                </div>
+            <div className="huise-card-inner">
+              <div className="huise-card-top">
+                <span className="huise-card-icon">📖</span>
+                <span className="huise-card-badge">GRATIS</span>
               </div>
-            )}
-            <div className="huise-card-actions">
-              <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
-                Kry my gratis e-boek
-              </button>
-              <button className="huise-card-share" onClick={handleCampaignShare}>
-                Deel
-              </button>
+              <h3 className="huise-card-title">Rustelose Gedagtes</h3>
+              <p className="huise-card-sub">1000 Huise van Hoop</p>
+              <p className="huise-card-text">Vir almal wie se gedagtes nie stil raak nie — kry die e-boek heeltemal gratis.</p>
+              {campaignCount !== null && (
+                <div className="huise-card-progress">
+                  <div className="huise-card-count-row">
+                    <span className="huise-card-number">{campaignCount}</span>
+                    <span className="huise-card-goal">/ {CAMPAIGN.goal}</span>
+                  </div>
+                  <div className="huise-card-count-label">huise bereik reeds 🙏🏻</div>
+                  <div className="huise-card-bar">
+                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
+                  </div>
+                </div>
+              )}
+              <div className="huise-card-actions">
+                <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
+                  🎁 Kry my gratis e-boek
+                </button>
+                <button className="huise-card-share" onClick={handleCampaignShare}>
+                  Deel
+                </button>
+              </div>
             </div>
           </div>
         )}
