@@ -301,15 +301,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   useEffect(() => {
     if (!CAMPAIGN.active) return
 
-    function fetchCount() {
-      fetch('/api/campaign-count')
-        .then(r => r.json())
-        .then(d => setCampaignCount(d.total || 0))
-        .catch(() => {})
-    }
-
-    fetchCount()
-    window.addEventListener('campaign-submitted', fetchCount)
+    const unsub = onSnapshot(
+      doc(db, 'counters', 'campaign_huise'),
+      d => { if (d.exists()) setCampaignCount(d.data().total || 0) },
+      () => {}
+    )
 
     getDocs(collection(db, 'books')).then(snap => {
       const book = snap.docs
@@ -318,7 +314,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       if (book?.coverUrl) setCampaignCover(book.coverUrl)
     }).catch(() => {})
 
-    return () => window.removeEventListener('campaign-submitted', fetchCount)
+    return unsub
   }, [])
 
   useEffect(() => {
@@ -738,7 +734,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               {campaignCount > 0 && (
                 <div className="huise-card-progress">
                   <div className="huise-card-count-label">
-                    Hoop gebring na <strong>{campaignCount} huise</strong> — op pad na 1000
+                    Hoop gebring na <strong>{campaignCount} {campaignCount === 1 ? 'huis' : 'huise'}</strong> — op pad na 1000
                   </div>
                   <div className="huise-card-bar">
                     <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
