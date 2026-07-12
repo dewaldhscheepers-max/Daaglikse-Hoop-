@@ -56,6 +56,7 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
         body: JSON.stringify({ name: naam.trim(), email: epos.toLowerCase().trim() }),
       })
       localStorage.setItem('huise_claimed', '1')
+      window.dispatchEvent(new CustomEvent('campaign-submitted'))
       setStep('success')
     } catch {
       setError('Iets het fout gegaan. Probeer asb weer.')

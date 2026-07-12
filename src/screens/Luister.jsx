@@ -300,16 +300,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   useEffect(() => {
     if (!CAMPAIGN.active) return
-    fetch('/api/campaign-count')
-      .then(r => r.json())
-      .then(d => setCampaignCount(d.total || 0))
-      .catch(() => {})
+
+    function fetchCount() {
+      fetch('/api/campaign-count')
+        .then(r => r.json())
+        .then(d => setCampaignCount(d.total || 0))
+        .catch(() => {})
+    }
+
+    fetchCount()
+    window.addEventListener('campaign-submitted', fetchCount)
+
     getDocs(collection(db, 'books')).then(snap => {
       const book = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .find(b => b.title?.toLowerCase().includes('rustelose') || b.id?.toLowerCase().includes('rustelose'))
       if (book?.coverUrl) setCampaignCover(book.coverUrl)
     }).catch(() => {})
+
+    return () => window.removeEventListener('campaign-submitted', fetchCount)
   }, [])
 
   useEffect(() => {
