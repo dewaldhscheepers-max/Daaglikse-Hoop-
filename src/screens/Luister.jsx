@@ -720,16 +720,21 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               <span className="huise-card-badge">GRATIS HIERDIE WEEK</span>
               <div className="huise-card-body-row">
                 {campaignCover && (
-                  <img src={campaignCover} className="huise-card-cover" alt="Rustelose Gedagtes" />
+                  <img
+                    src={campaignCover}
+                    className="huise-card-cover"
+                    alt="Rustelose Gedagtes"
+                    onError={e => { e.currentTarget.style.display = 'none' }}
+                  />
                 )}
                 <div className="huise-card-body-text">
                   <h3 className="huise-card-title">1000 Huise van Hoop</h3>
-                  <p className="huise-card-subtitle">Rustelose Gedagtes gratis</p>
+                  <p className="huise-card-subtitle">Rustelose Gedagtes · Gratis e-boek</p>
                   <div className="huise-card-divider" />
-                  <p className="huise-card-text">Installeer Daaglikse Hoop, vul jou e-pos in, en kry die e-boek gratis.</p>
+                  <p className="huise-card-text">Ons gee 1000 gratis e-boeke weg.</p>
                 </div>
               </div>
-              <p className="huise-card-tagline">Vir almal wie se gedagtes nie stil raak nie.</p>
+              <p className="huise-card-tagline">Bring hoop na jou huis of stuur dit vir iemand wat dit nodig het.</p>
               {campaignCount > 0 && (
                 <div className="huise-card-progress">
                   <div className="huise-card-count-label">
@@ -741,7 +746,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                 </div>
               )}
               <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
-                Kry Rustelose Gedagtes gratis
+                Kry Rustelose Gedagtes Gratis
               </button>
               <button className="huise-card-share" onClick={handleCampaignShare}>
                 Deel met iemand
