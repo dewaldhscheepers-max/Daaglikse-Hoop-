@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { CAMPAIGN } from '../data/campaign'
+import './HuiseVanHoop.css'
 import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, getDoc, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import '../components/PopupStyles.css'
@@ -245,7 +247,8 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
-  const [satVid, setSatVid] = useState({ active: false, videoId: 'LK-kieYHZJA', title: '', subtitle: '' })
+  const [satVid, setSatVid]           = useState({ active: false, videoId: 'LK-kieYHZJA', title: '', subtitle: '' })
+  const [campaignCount, setCampaignCount] = useState(null)
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
@@ -292,6 +295,14 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     getDoc(doc(db, 'config', 'saturdayVideo')).then(d => {
       if (d.exists()) setSatVid(d.data())
     }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (!CAMPAIGN.active) return
+    fetch('/api/campaign-count')
+      .then(r => r.json())
+      .then(d => setCampaignCount(d.total || 0))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -589,6 +600,15 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
+  async function handleCampaignShare() {
+    const msg = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ons soek 1000 huise van hoop:\nhttps://dewaldscheepers.com/go`
+    if (navigator.share) {
+      try { await navigator.share({ text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(msg); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
+    }
+  }
+
   async function handleListenShare() {
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
@@ -677,6 +697,30 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
       <div className="luister-body">
+
+        {CAMPAIGN.active && (
+          <div className="huise-card">
+            <div className="huise-card-badge">🙏 1000 Huise van Hoop</div>
+            <h3 className="huise-card-title">Rustelose Gedagtes — Gratis</h3>
+            <p className="huise-card-text">Vir almal wie se gedagtes nie stil raak nie. Kry die e-boek gratis.</p>
+            {campaignCount !== null && (
+              <div className="huise-card-progress">
+                <div className="huise-card-count">Reeds {campaignCount} uit {CAMPAIGN.goal} huise van hoop bereik 🙏🏻</div>
+                <div className="huise-card-bar">
+                  <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
+                </div>
+              </div>
+            )}
+            <div className="huise-card-actions">
+              <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
+                Kry my gratis e-boek
+              </button>
+              <button className="huise-card-share" onClick={handleCampaignShare}>
+                Deel
+              </button>
+            </div>
+          </div>
+        )}
 
         {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} onNavigate={onNavigate} />}
 

@@ -1,0 +1,389 @@
+.huise-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 20, 0.60);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 500;
+  padding: 0 12px calc(var(--nav-height, 64px) + var(--safe-bottom, 0px) + 12px);
+}
+
+.huise-modal {
+  background: #FDFAF6;
+  border-radius: 24px 24px 20px 20px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 32px 24px 28px;
+  position: relative;
+  box-shadow: 0 8px 40px rgba(10, 5, 20, 0.30);
+  font-family: var(--font-body);
+}
+
+.huise-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.huise-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.huise-emoji {
+  font-size: 40px;
+  margin-bottom: 2px;
+}
+
+.huise-title {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.huise-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 340px;
+}
+
+/* ── Form fields ── */
+.huise-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.huise-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.huise-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--white);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.huise-field input:focus {
+  border-color: var(--purple);
+}
+
+/* ── Consent checkbox ── */
+.huise-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.huise-consent input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--purple-dark);
+  cursor: pointer;
+}
+
+.huise-consent span {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Error ── */
+.huise-error {
+  font-size: 13px;
+  color: #dc3c5a;
+  text-align: center;
+}
+
+/* ── Buttons ── */
+.huise-btn-primary {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--purple-dark);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s;
+}
+
+.huise-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.huise-btn-share {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: 2px solid var(--purple);
+  background: transparent;
+  color: var(--purple-dark);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.huise-btn-ghost {
+  background: none;
+  border: none;
+  color: var(--purple);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Nav links on success ── */
+.huise-nav-links {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--cream-dark);
+  border-bottom: 1px solid var(--cream-dark);
+  padding: 6px 0;
+}
+
+/* ── Donation block ── */
+.huise-donation-block {
+  width: 100%;
+  background: var(--lavender-soft);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+.huise-donation-block p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.huise-donation-row {
+  display: flex;
+  gap: 8px;
+}
+
+.huise-btn-donate {
+  flex: 1;
+  padding: 11px 8px;
+  border-radius: 10px;
+  border: none;
+  background: var(--purple-dark);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.huise-btn-donate-ghost {
+  flex: 1;
+  padding: 11px 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--purple);
+  background: transparent;
+  color: var(--purple-dark);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── iOS install tip ── */
+.huise-ios-tip {
+  background: var(--cream-dark);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+  text-align: center;
+  width: 100%;
+}
+
+.huise-install-done {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2a7a3f;
+}
+
+/* ── Campaign card on Luister screen ── */
+.huise-card {
+  background: linear-gradient(135deg, #F0EBF8, #EDE8F8);
+  border-radius: 16px;
+  padding: 20px 16px 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(124, 111, 175, 0.15);
+}
+
+.huise-card-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-dark);
+  margin-bottom: 8px;
+}
+
+.huise-card-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+
+.huise-card-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.huise-card-progress {
+  margin-bottom: 14px;
+}
+
+.huise-card-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-dark);
+  margin-bottom: 6px;
+}
+
+.huise-card-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(124, 111, 175, 0.20);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.huise-card-fill {
+  height: 100%;
+  background: var(--purple-dark);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  min-width: 4px;
+}
+
+.huise-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.huise-card-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--purple-dark);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.huise-card-share {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--purple);
+  background: transparent;
+  color: var(--purple-dark);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Campaign banner on Meer screen ── */
+.huise-meer-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #F0EBF8, #EDE8F8);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(124, 111, 175, 0.15);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  gap: 12px;
+}
+
+.huise-meer-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.huise-meer-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-dark);
+}
+
+.huise-meer-banner-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.huise-meer-banner-arrow {
+  font-size: 20px;
+  color: var(--purple);
+  flex-shrink: 0;
+}

@@ -7,6 +7,8 @@ const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 import { collection, onSnapshot } from 'firebase/firestore'
 import './Meer.css'
 import DonationCard from '../components/DonationCard'
+import { CAMPAIGN } from '../data/campaign'
+import './HuiseVanHoop.css'
 
 function validate(e) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
@@ -214,6 +216,18 @@ export default function Meer({ targetBookId, onScrolled }) {
 
       <div className="meer-body">
         <DonationCard />
+        {CAMPAIGN.active && (
+          <button
+            className="huise-meer-banner"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}
+          >
+            <div className="huise-meer-banner-text">
+              <span className="huise-meer-banner-title">🎁 Kry Rustelose Gedagtes gratis</span>
+              <span className="huise-meer-banner-sub">1000 Huise van Hoop · Installeer die app en kry dit nou</span>
+            </div>
+            <span className="huise-meer-banner-arrow">›</span>
+          </button>
+        )}
         <div className="meer-section">
           <div className="section-header">
             <h3 className="section-title">🎁 Gratis Aflaai</h3>

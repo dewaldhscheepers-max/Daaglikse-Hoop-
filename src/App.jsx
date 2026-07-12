@@ -19,6 +19,7 @@ import SeerNaVryheid from './screens/SeerNaVryheid'
 import Vredepad from './screens/Vredepad'
 import HoopVennoot from './screens/HoopVennoot'
 import LeuensDuiwel from './screens/LeuensDuiwel'
+import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -78,6 +79,7 @@ export default function App() {
   const [showVredepad, setShowVredepad]           = useState(false)
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
   const [showLeuensDuiwel, setShowLeuensDuiwel]   = useState(false)
+  const [showHuise, setShowHuise]                 = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -397,6 +399,13 @@ export default function App() {
     return () => window.removeEventListener('open-leuens-duiwel', onOpen)
   }, [])
 
+  // ── 1000 Huise van Hoop veldtog ──
+  useEffect(() => {
+    function onOpen() { setShowHuise(true) }
+    window.addEventListener('open-huise-van-hoop', onOpen)
+    return () => window.removeEventListener('open-huise-van-hoop', onOpen)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -573,6 +582,15 @@ export default function App() {
 
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
+      )}
+
+      {showHuise && (
+        <HuiseVanHoop
+          onClose={() => setShowHuise(false)}
+          installPrompt={installPrompt}
+          isInstalled={isInstalled}
+          onNavigate={handleNav}
+        />
       )}
 
       {showNotifBanner && (
