@@ -259,16 +259,16 @@
 
 /* ── Campaign card on Luister screen ── */
 .huise-card {
-  background: linear-gradient(155deg, #0D1C2A 0%, #102333 60%, #0E2030 100%);
+  background: linear-gradient(155deg, #1A0E38 0%, #241448 55%, #1E1040 100%);
   border-radius: 20px;
   margin-bottom: 16px;
-  border: 1px solid rgba(61, 207, 201, 0.14);
+  border: 1px solid rgba(212, 149, 106, 0.18);
   position: relative;
   overflow: hidden;
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.55),
-    0 2px 8px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 8px 32px rgba(26, 14, 56, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .huise-card::before {
@@ -276,7 +276,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #3DCFC9 0%, #2AB8B2 100%);
+  background: linear-gradient(90deg, #D4956A 0%, #E8A878 100%);
   pointer-events: none;
 }
 
@@ -286,9 +286,9 @@
 
 .huise-card-badge {
   display: inline-block;
-  background: rgba(61, 207, 201, 0.12);
-  color: #3DCFC9;
-  border: 1px solid rgba(61, 207, 201, 0.28);
+  background: rgba(212, 149, 106, 0.15);
+  color: #E8A878;
+  border: 1px solid rgba(212, 149, 106, 0.32);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -310,8 +310,8 @@
   min-width: 70px;
   height: 94px;
   object-fit: cover;
-  border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.50);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
 }
 
 .huise-card-body-text {
@@ -321,7 +321,7 @@
 
 .huise-card-title {
   font-family: var(--font-serif);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 4px;
@@ -331,21 +331,21 @@
 .huise-card-subtitle {
   font-size: 13px;
   font-weight: 600;
-  color: #3DCFC9;
+  color: #E8A878;
   margin: 0 0 10px;
 }
 
 .huise-card-divider {
   width: 26px;
   height: 1.5px;
-  background: rgba(61, 207, 201, 0.35);
+  background: rgba(212, 149, 106, 0.35);
   border-radius: 1px;
   margin-bottom: 10px;
 }
 
 .huise-card-text {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(255, 255, 255, 0.65);
   margin: 0;
   line-height: 1.55;
 }
@@ -353,9 +353,42 @@
 .huise-card-tagline {
   font-size: 12px;
   font-style: italic;
-  color: rgba(255, 255, 255, 0.40);
-  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.38);
+  margin: 0 0 16px;
   line-height: 1.5;
+}
+
+/* ── Progress bar (shown when count > 0) ── */
+.huise-card-progress {
+  margin-bottom: 16px;
+}
+
+.huise-card-count-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 7px;
+}
+
+.huise-card-count-label strong {
+  color: #E8A878;
+  font-weight: 700;
+}
+
+.huise-card-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.huise-card-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4956A, #E8A878);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+  min-width: 5px;
 }
 
 .huise-card-btn {
@@ -364,15 +397,15 @@
   padding: 14px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #3DCFC9, #28B8B2);
-  color: #0D1C2A;
+  background: linear-gradient(135deg, #D4956A, #C4804E);
+  color: #fff;
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   margin-bottom: 10px;
-  box-shadow: 0 4px 14px rgba(61, 207, 201, 0.30);
+  box-shadow: 0 4px 14px rgba(212, 149, 106, 0.35);
   box-sizing: border-box;
   text-align: center;
 }
@@ -382,9 +415,9 @@
   width: 100%;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background: transparent;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.50);
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;

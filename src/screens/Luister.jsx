@@ -721,6 +721,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                 </div>
               </div>
               <p className="huise-card-tagline">Vir almal wie se gedagtes nie stil raak nie.</p>
+              {campaignCount > 0 && (
+                <div className="huise-card-progress">
+                  <div className="huise-card-count-label">
+                    Hoop gebring na <strong>{campaignCount} huise</strong> — op pad na 1000
+                  </div>
+                  <div className="huise-card-bar">
+                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
+                  </div>
+                </div>
+              )}
               <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
                 Kry Rustelose Gedagtes gratis
               </button>
