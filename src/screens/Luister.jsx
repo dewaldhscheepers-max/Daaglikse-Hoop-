@@ -249,6 +249,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   const [satVid, setSatVid]           = useState({ active: false, videoId: 'LK-kieYHZJA', title: '', subtitle: '' })
   const [campaignCount, setCampaignCount] = useState(null)
+  const [campaignCover, setCampaignCover] = useState('')
 
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
@@ -303,6 +304,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       .then(r => r.json())
       .then(d => setCampaignCount(d.total || 0))
       .catch(() => {})
+    getDocs(collection(db, 'books')).then(snap => {
+      const book = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .find(b => b.title?.toLowerCase().includes('rustelose') || b.id?.toLowerCase().includes('rustelose'))
+      if (book?.coverUrl) setCampaignCover(book.coverUrl)
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -701,33 +708,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         {CAMPAIGN.active && (
           <div className="huise-card">
             <div className="huise-card-inner">
-              <div className="huise-card-top">
-                <span className="huise-card-icon">📖</span>
-                <span className="huise-card-badge">GRATIS</span>
-              </div>
-              <h3 className="huise-card-title">Rustelose Gedagtes</h3>
-              <p className="huise-card-sub">1000 Huise van Hoop</p>
-              <p className="huise-card-text">Vir almal wie se gedagtes nie stil raak nie — kry die e-boek heeltemal gratis.</p>
-              {campaignCount !== null && (
-                <div className="huise-card-progress">
-                  <div className="huise-card-count-row">
-                    <span className="huise-card-number">{campaignCount}</span>
-                    <span className="huise-card-goal">/ {CAMPAIGN.goal}</span>
-                  </div>
-                  <div className="huise-card-count-label">huise bereik reeds 🙏🏻</div>
-                  <div className="huise-card-bar">
-                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
-                  </div>
+              <span className="huise-card-badge">GRATIS HIERDIE WEEK</span>
+              <div className="huise-card-body-row">
+                {campaignCover && (
+                  <img src={campaignCover} className="huise-card-cover" alt="Rustelose Gedagtes" />
+                )}
+                <div className="huise-card-body-text">
+                  <h3 className="huise-card-title">1000 Huise van Hoop</h3>
+                  <p className="huise-card-subtitle">Rustelose Gedagtes gratis</p>
+                  <div className="huise-card-divider" />
+                  <p className="huise-card-text">Installeer Daaglikse Hoop, vul jou e-pos in, en kry die e-boek gratis.</p>
                 </div>
-              )}
-              <div className="huise-card-actions">
-                <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
-                  🎁 Kry my gratis e-boek
-                </button>
-                <button className="huise-card-share" onClick={handleCampaignShare}>
-                  Deel
-                </button>
               </div>
+              <p className="huise-card-tagline">Vir almal wie se gedagtes nie stil raak nie.</p>
+              <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
+                Kry Rustelose Gedagtes gratis
+              </button>
+              <button className="huise-card-share" onClick={handleCampaignShare}>
+                Deel met iemand
+              </button>
             </div>
           </div>
         )}
