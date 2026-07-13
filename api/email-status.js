@@ -60,22 +60,19 @@ module.exports = async function handler(req, res) {
     }
   } catch {}
 
-  // Get email count
+  // Count emailList documents by paging (more reliable than aggregation query)
   let emailCount = 0
   try {
-    const r = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runAggregationQuery`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ structuredAggregationQuery: {
-          from: [{ collectionId: 'emailList' }],
-          aggregations: [{ count: {}, alias: 'count' }],
-        }}),
-      }
-    )
-    const data = await r.json()
-    emailCount = parseInt(data[0]?.result?.aggregateFields?.count?.integerValue || 0)
+    const base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`
+    let pageToken = null
+    do {
+      let url = `${base}/emailList?pageSize=300&mask.fieldPaths=email`
+      if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`
+      const r   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      const data = await r.json()
+      emailCount += (data.documents || []).length
+      pageToken = data.nextPageToken || null
+    } while (pageToken)
   } catch {}
 
   return res.json({ emailCount, activeCampaign })
