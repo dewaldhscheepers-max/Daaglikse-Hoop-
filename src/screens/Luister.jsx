@@ -714,10 +714,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
 
-        {CAMPAIGN.active && (
+        {CAMPAIGN.active && (() => {
+          const count = campaignCount || 0
+          const goal  = count < 1000 ? 1000 : Math.floor(count / 500) * 500 + 500
+          return (
           <div className="huise-card">
             <div className="huise-card-inner">
-              <span className="huise-card-badge">GRATIS HIERDIE WEEK</span>
+              <span className="huise-card-badge">GRATIS</span>
               <div className="huise-card-body-row">
                 {campaignCover && (
                   <img
@@ -728,20 +731,20 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
                   />
                 )}
                 <div className="huise-card-body-text">
-                  <h3 className="huise-card-title">1000 Huise van Hoop</h3>
+                  <h3 className="huise-card-title">{goal.toLocaleString()} Huise van Hoop</h3>
                   <p className="huise-card-subtitle">Rustelose Gedagtes · Gratis e-boek</p>
                   <div className="huise-card-divider" />
-                  <p className="huise-card-text">Ons gee 1000 gratis e-boeke weg.</p>
+                  <p className="huise-card-text">Ons gee {goal.toLocaleString()} gratis e-boeke weg.</p>
                 </div>
               </div>
               <p className="huise-card-tagline">Bring hoop na jou huis of stuur dit vir iemand wat dit nodig het.</p>
-              {campaignCount > 0 && (
+              {count > 0 && (
                 <div className="huise-card-progress">
                   <div className="huise-card-count-label">
-                    Hoop gebring na <strong>{campaignCount} {campaignCount === 1 ? 'huis' : 'huise'}</strong> — op pad na 1000
+                    Hoop gebring na <strong>{count.toLocaleString()} {count === 1 ? 'huis' : 'huise'}</strong> — op pad na {goal.toLocaleString()}
                   </div>
                   <div className="huise-card-bar">
-                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (campaignCount / CAMPAIGN.goal) * 100)}%` }} />
+                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (count / goal) * 100)}%` }} />
                   </div>
                 </div>
               )}
@@ -753,7 +756,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               </button>
             </div>
           </div>
-        )}
+          )
+        })()}
 
         {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} onNavigate={onNavigate} />}
 
