@@ -64,20 +64,22 @@
 .saturday-actions {
   width: 100%;
   margin-top: 2px;
+  display: flex;
+  justify-content: center;
 }
 
 .saturday-amen-btn {
-  width: 100%;
-  padding: 15px 14px;
-  border-radius: 13px;
+  width: auto;
+  padding: 10px 24px;
+  border-radius: 24px;
   border: none;
   background: var(--purple-dark);
   color: #fff;
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
