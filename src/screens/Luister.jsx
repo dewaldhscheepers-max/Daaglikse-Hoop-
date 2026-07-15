@@ -7,7 +7,6 @@ import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
-import SaturdayVideoCard from '../components/SaturdayVideoCard'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -216,7 +215,6 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
-  const [satVid, setSatVid]           = useState({ active: false, videoId: 'LK-kieYHZJA', title: '', subtitle: '' })
   const [campaignCount, setCampaignCount] = useState(null)
   const [campaignCover, setCampaignCover] = useState('')
 
@@ -260,12 +258,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const todayPlaying = playing && activeId === today?.id
   const playCount  = today ? (playCounts[today.id] || 0) : 0
 
-  // ── Real-time: all likes ──
-  useEffect(() => {
-    getDoc(doc(db, 'config', 'saturdayVideo')).then(d => {
-      if (d.exists()) setSatVid(d.data())
-    }).catch(() => {})
-  }, [])
 
   useEffect(() => {
     if (!CAMPAIGN.active) return
@@ -728,7 +720,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           )
         })()}
 
-        {satVid.active && satVid.videoId && <SaturdayVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} onNavigate={onNavigate} />}
 
         {today.wallpaperUrl && (
           <div className="wp-card">
