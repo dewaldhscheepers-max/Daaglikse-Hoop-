@@ -98,6 +98,17 @@
   color: var(--purple-dark);
 }
 
+.saturday-amen-count {
+  display: inline-block;
+  background: rgba(92, 78, 142, 0.15);
+  color: var(--purple-dark);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
 .saturday-prayer-btn {
   width: 100%;
   padding: 12px;

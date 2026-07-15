@@ -1,8 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './SaturdayVideoCard.css'
+import { db } from '../firebase'
+import { doc, onSnapshot, setDoc, increment } from 'firebase/firestore'
 
 export default function SaturdayVideoCard({ videoId, title, subtitle, onNavigate }) {
-  const [amenSaid, setAmenSaid] = useState(false)
+  const amenKey = `amened_video_${videoId}`
+  const [amenSaid, setAmenSaid] = useState(() => {
+    try { return localStorage.getItem(amenKey) === '1' } catch { return false }
+  })
+  const [amenCount, setAmenCount] = useState(0)
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'config', 'saturdayVideo'), snap => {
+      if (snap.exists()) setAmenCount(snap.data().amenCount || 0)
+    })
+    return unsub
+  }, [])
+
+  async function handleAmen() {
+    if (amenSaid) return
+    setAmenSaid(true)
+    setAmenCount(c => c + 1)
+    try { localStorage.setItem(amenKey, '1') } catch {}
+    try {
+      await setDoc(doc(db, 'config', 'saturdayVideo'), { amenCount: increment(1) }, { merge: true })
+    } catch {}
+  }
+
   return (
     <div className="saturday-card">
       <span className="saturday-badge">🙏 Videogebed</span>
@@ -21,9 +45,10 @@ export default function SaturdayVideoCard({ videoId, title, subtitle, onNavigate
       <div className="saturday-actions">
         <button
           className={`saturday-amen-btn${amenSaid ? ' amen-done' : ''}`}
-          onClick={() => setAmenSaid(true)}
+          onClick={handleAmen}
         >
           {amenSaid ? '🙏 Amen gesê ✓' : '🙏 Amen'}
+          {amenCount > 0 && <span className="saturday-amen-count">{amenCount.toLocaleString()}</span>}
         </button>
         {onNavigate && (
           <button className="saturday-prayer-btn" onClick={() => onNavigate('bidsaam')}>
