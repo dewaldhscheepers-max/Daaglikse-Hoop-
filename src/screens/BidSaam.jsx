@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
+import SaturdayVideoCard from '../components/SaturdayVideoCard'
 
 function timeLabel(ts) {
   if (!ts) return 'Nou net'
@@ -165,38 +166,6 @@ function EveningPrayerPlayer({ prayer }) {
       {duration > 0 && (
         <div className="ep-time">{formatDuration(elapsed)} / {formatDuration(duration)}</div>
       )}
-    </div>
-  )
-}
-
-/* ── Gebed video card (from admin config/saturdayVideo) ── */
-function GebedVideoCard({ videoId, title, subtitle }) {
-  const [amenSaid, setAmenSaid] = useState(false)
-  return (
-    <div className="ep-card">
-      <div className="ep-card-top">
-        <span className="ep-card-label">Gebedspoort</span>
-      </div>
-      {title    && <p className="ep-card-title">{title}</p>}
-      {subtitle && <p className="ep-card-desc">{subtitle}</p>}
-      <div className="gebed-video-wrap">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?rel=0&playsinline=1`}
-          title={title || 'Gebedspoort'}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-      <div className="ep-controls">
-        <button
-          className={`ep-amen-btn${amenSaid ? ' amened' : ''}`}
-          onClick={() => setAmenSaid(true)}
-          style={{ flex: 1 }}
-        >
-          <span className="ep-amen-emoji">🙏</span>
-          <span className="ep-amen-label">{amenSaid ? 'Amen!' : 'Amen'}</span>
-        </button>
-      </div>
     </div>
   )
 }
@@ -572,7 +541,7 @@ export default function BidSaam() {
 
         {/* ── Gebedspoort Video ── */}
         {satVid.active && satVid.videoId && (
-          <GebedVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} />
+          <SaturdayVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} />
         )}
 
         {/* ── Prayer input ── */}
