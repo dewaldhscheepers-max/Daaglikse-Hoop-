@@ -40,8 +40,6 @@ export default function SaturdayVideoCard({ videoId, title, subtitle, onNavigate
           allowFullScreen
         />
       </div>
-      <p className="saturday-body-text">As hierdie week swaar was, as jou gedagtes moeg is, of as jy net vrede nodig het vir die naweek, luister rustig saam. God is naby.</p>
-      <p className="saturday-fallback">Kan die video nie speel nie? Probeer later weer, of plaas jou gebedsversoek op Bid Saam.</p>
       <div className="saturday-actions">
         <button
           className={`saturday-amen-btn${amenSaid ? ' amen-done' : ''}`}
