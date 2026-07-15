@@ -83,93 +83,6 @@ function formatDuration(secs) {
   return `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`
 }
 
-function EveningPrayerPlayer({ prayer }) {
-  const [playing, setPlaying]   = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [elapsed,  setElapsed]  = useState(0)
-  const [duration, setDuration] = useState(0)
-  const audioRef = useRef(null)
-
-  const [amened, setAmened] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('amenedPrayers') || '[]').includes(prayer.id) }
-    catch { return false }
-  })
-  const amenCount = prayer.amenCount || 0
-
-  async function handleAmen() {
-    if (amened) return
-    setAmened(true)
-    try {
-      const list = JSON.parse(localStorage.getItem('amenedPrayers') || '[]')
-      localStorage.setItem('amenedPrayers', JSON.stringify([...list, prayer.id]))
-    } catch {}
-    try { await updateDoc(doc(db, 'aandgebede', prayer.id), { amenCount: increment(1) }) } catch {}
-  }
-
-  function togglePlay() {
-    const a = audioRef.current
-    if (!a) return
-    if (playing) { a.pause() } else { a.play() }
-    setPlaying(p => !p)
-  }
-
-  function seek(e) {
-    const a = audioRef.current
-    if (!a || !a.duration) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    const pct  = (e.clientX - rect.left) / rect.width
-    a.currentTime = pct * a.duration
-  }
-
-  async function share() {
-    const text = `Luister hoe daar vanaand saam met ons gebid is:\nhttps://dewaldscheepers.com/go`
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Saamgebed', text, url: 'https://dewaldscheepers.com/go' }) }
-      catch {}
-    } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
-    }
-  }
-
-  return (
-    <div className="ep-player">
-      <audio
-        ref={audioRef}
-        src={prayer.audioUrl}
-        preload="none"
-        onTimeUpdate={() => {
-          const a = audioRef.current
-          if (!a) return
-          setElapsed(a.currentTime)
-          setProgress(a.duration ? a.currentTime / a.duration * 100 : 0)
-        }}
-        onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-        onEnded={() => { setPlaying(false); setProgress(0); setElapsed(0) }}
-      />
-      <div className="ep-controls">
-        <button className="ep-play-btn" onClick={togglePlay}>
-          {playing ? <PauseIcon /> : <PlayIcon />}
-          <span>{playing ? 'Pouseer' : 'Luister na die gebed'}</span>
-        </button>
-        <button className={`ep-amen-btn${amened ? ' amened' : ''}`} onClick={handleAmen}>
-          <span className="ep-amen-emoji">🙏</span>
-          <span className="ep-amen-label">{amened ? 'Amen!' : 'Amen'}</span>
-          {amenCount > 0 && <span className="ep-amen-count">{amenCount}</span>}
-        </button>
-        <button className="ep-share-btn" onClick={share}>
-          <ShareIcon />
-        </button>
-      </div>
-      <div className="ep-progress-track" onClick={seek}>
-        <div className="ep-progress-fill" style={{ width: `${progress}%` }} />
-      </div>
-      {duration > 0 && (
-        <div className="ep-time">{formatDuration(elapsed)} / {formatDuration(duration)}</div>
-      )}
-    </div>
-  )
-}
-
 /* ── Community prayer flow — full-screen, one by one ── */
 function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
   const [queueIdx,     setQueueIdx]     = useState(0)
@@ -305,17 +218,6 @@ export default function BidSaam() {
     catch { return new Set() }
   })
 
-  const [todayPrayer, setTodayPrayer] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('cachedTodayPrayer') || 'null') }
-    catch { return null }
-  })
-  const [prevPrayers, setPrevPrayers] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('cachedPrevPrayers') || '[]') } catch { return [] }
-  })
-  const [showArchive,   setShowArchive]   = useState(false)
-  const [archivePlayer, setArchivePlayer] = useState(null)
-  const archiveAudioRef = useRef(null)
-  const [archivePlaying, setArchivePlaying] = useState(false)
   const [showScrollHint, setShowScrollHint] = useState(true)
   const [saamgebedOpen,  setSaamgebedOpen]  = useState(false)
   const [satVid,         setSatVid]         = useState({ active: false, videoId: '', title: '', subtitle: '' })
@@ -326,11 +228,6 @@ export default function BidSaam() {
     }).catch(() => {})
   }, [])
 
-  useEffect(() => {
-    return () => {
-      if (archiveAudioRef.current) { archiveAudioRef.current.pause(); archiveAudioRef.current = null }
-    }
-  }, [])
 
   useEffect(() => {
     function onScroll() { if (window.scrollY > 30) setShowScrollHint(false) }
@@ -370,23 +267,6 @@ export default function BidSaam() {
     return unsub
   }, [])
 
-  useEffect(() => {
-    const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(8))
-    const unsub = onSnapshot(q,
-      snap => {
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        if (list.length === 0) return
-        setTodayPrayer(list[0])
-        setPrevPrayers(list.slice(1))
-        try {
-          localStorage.setItem('cachedTodayPrayer', JSON.stringify(list[0]))
-          localStorage.setItem('cachedPrevPrayers', JSON.stringify(list.slice(1)))
-        } catch {}
-      },
-      () => {}
-    )
-    return unsub
-  }, [])
 
   async function submit() {
     if (!text.trim()) return
@@ -463,55 +343,6 @@ export default function BidSaam() {
     try { await updateDoc(doc(db, 'prayers', id), { reported: true }) } catch {}
   }
 
-  function toggleArchivePlayer(prayer) {
-    if (archiveAudioRef.current) {
-      archiveAudioRef.current.pause()
-      archiveAudioRef.current = null
-    }
-    if (archivePlayer?.id === prayer.id && archivePlaying) {
-      setArchivePlaying(false)
-      setArchivePlayer(null)
-      return
-    }
-    const audio = new Audio(prayer.audioUrl)
-    archiveAudioRef.current = audio
-    audio.play()
-    audio.onended = () => { setArchivePlaying(false); setArchivePlayer(null) }
-    setArchivePlayer(prayer)
-    setArchivePlaying(true)
-  }
-
-  async function shareArchivePrayer(prayer) {
-    const dateLabel = prayer.coveredFrom && prayer.coveredTo && prayer.coveredFrom !== prayer.coveredTo
-      ? `${formatSASTDate(prayer.coveredFrom)} tot ${formatSASTDate(prayer.coveredTo)}`
-      : formatDate(prayer.coveredTo || prayer.date)
-    const text = `Luister hoe daar op ${dateLabel} saam gebid is:\nhttps://dewaldscheepers.com/go`
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop Saamgebed', text, url: 'https://dewaldscheepers.com/go' }) }
-      catch {}
-    } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
-    }
-  }
-
-  // Compute live prayer count from already-loaded prayers state
-  const todaySAST = getTodaySAST()
-  function getLivePrayerCount(prayer) {
-    if (!prayer) return 0
-    const from = prayer.coveredFrom || prayer.date
-    const to   = prayer.coveredTo   || prayer.date
-    if (to !== todaySAST) return prayer.prayerCount || 0
-    const fromMs     = from ? new Date(from + 'T00:00:00+02:00').getTime() : 0
-    const toMs       = new Date(to + 'T23:59:59+02:00').getTime()
-    const windowDays = (Date.now() - fromMs) / 86400000
-    if (windowDays > 7) return prayer.prayerCount || 0
-    const live = prayers.filter(p => {
-      if (p.reported) return false
-      const ts = (p.createdAt?.seconds || 0) * 1000
-      return ts >= fromMs && ts <= toMs
-    }).length
-    return Math.max(live, prayer.prayerCount || 0)
-  }
 
   return (
     <div className="bidsaam">
@@ -668,44 +499,6 @@ export default function BidSaam() {
             <div className="prayers-empty">Wees die eerste om te deel wat God gedoen het.</div>
           )}
         </div>
-
-        {prevPrayers.length > 0 && (
-          <div className="ep-archive">
-            <button className="ep-archive-toggle" onClick={() => setShowArchive(v => !v)}>
-              Vorige Saamgebede {showArchive ? '▲' : '▼'}
-            </button>
-            {showArchive && (
-              <div className="ep-archive-list">
-                {prevPrayers.map(p => {
-                  const from   = p.coveredFrom || p.date
-                  const to     = p.coveredTo   || p.date
-                  const label  = from !== to
-                    ? `${formatSASTDate(from)} – ${formatSASTDate(to)}`
-                    : formatDate(to)
-                  return (
-                    <div key={p.id} className="ep-archive-item">
-                      <div className="ep-archive-info">
-                        <span className="ep-archive-date">{label}</span>
-                        <span className="ep-archive-count">Gebed oor {p.prayerCount} versoeke</span>
-                      </div>
-                      <div className="ep-archive-btns">
-                        <button className="ep-archive-share" onClick={() => shareArchivePrayer(p)}>
-                          <ShareIcon />
-                        </button>
-                        <button
-                          className={`ep-archive-play${archivePlayer?.id === p.id && archivePlaying ? ' playing' : ''}`}
-                          onClick={() => toggleArchivePlayer(p)}
-                        >
-                          {archivePlayer?.id === p.id && archivePlaying ? <PauseIcon /> : <PlayIcon />}
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
 
         <DonationCard />
       </div>

@@ -35,25 +35,6 @@ export default function Admin({ onClose }) {
   const [svSaving,   setSvSaving]   = useState(false)
   const [svSaved,    setSvSaved]    = useState(false)
 
-  // ── Aandgebed state ──
-  const [apCoveredFrom,   setApCoveredFrom]   = useState('')
-  const [apCoveredTo,     setApCoveredTo]     = useState('')
-  const [apCountCalc,     setApCountCalc]     = useState(null)
-  const [apCountLoading,  setApCountLoading]  = useState(false)
-  const [apAudioFile,  setApAudioFile]  = useState(null)
-  const [apRecUrl,     setApRecUrl]     = useState(null)
-  const [apRecBlob,    setApRecBlob]    = useState(null)
-  const [apRecording,  setApRecording]  = useState(false)
-  const [apRecSecs,    setApRecSecs]    = useState(0)
-  const [apUploading,  setApUploading]  = useState(false)
-  const [apProgress,   setApProgress]   = useState(0)
-  const [apSaved,      setApSaved]      = useState(false)
-  const [apError,      setApError]      = useState('')
-  const [apList,       setApList]       = useState([])
-  const apFileRef      = useRef(null)
-  const apMrRef        = useRef(null)
-  const apChunksRef    = useRef([])
-  const apTimerRef     = useRef(null)
 
   // ── Notes state ──
   const [title, setTitle]             = useState('')
@@ -258,30 +239,9 @@ export default function Admin({ onClose }) {
     return d.toISOString().slice(0, 10)
   }
 
-  async function calcPrayerCount(from, to) {
-    if (!from || !to) return
-    setApCountLoading(true)
-    try {
-      const fromTs = Timestamp.fromDate(new Date(from + 'T00:00:00+02:00'))
-      const toTs   = Timestamp.fromDate(new Date(to   + 'T23:59:59+02:00'))
-      const q = query(
-        collection(db, 'prayers'),
-        where('createdAt', '>=', fromTs),
-        where('createdAt', '<=', toTs)
-      )
-      const snap = await getDocs(q)
-      const count = snap.docs.filter(d => !d.data().reported).length
-      setApCountCalc(count)
-    } catch {
-      setApCountCalc(null)
-    }
-    setApCountLoading(false)
-  }
-
   useEffect(() => {
     if (!unlocked) return
     loadNotes()
-    loadAandgebede()
     const unsub = onSnapshot(collection(db, 'books'), snap => {
       const overrides = {}
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
@@ -295,27 +255,6 @@ export default function Admin({ onClose }) {
     return unsub
   }, [unlocked])
 
-  async function loadAandgebede() {
-    try {
-      const q    = query(collection(db, 'aandgebede'), orderBy('date', 'desc'), limit(10))
-      const snap = await getDocs(q)
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      setApList(list)
-      const todaySAST = getAdminTodaySAST()
-      const latestTo  = list.length > 0 ? (list[0].coveredTo || list[0].date) : null
-      const from      = latestTo ? addDays(latestTo, 1) : todaySAST
-      const safeFrom  = from <= todaySAST ? from : todaySAST
-      setApCoveredFrom(prev => prev || safeFrom)
-      setApCoveredTo(prev => prev || todaySAST)
-    } catch {}
-  }
-
-  useEffect(() => {
-    if (apCoveredFrom && apCoveredTo && apCoveredFrom <= apCoveredTo) {
-      calcPrayerCount(apCoveredFrom, apCoveredTo)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apCoveredFrom, apCoveredTo])
 
   async function loadNotes() {
     setNotesLoading(true)
@@ -380,86 +319,6 @@ export default function Admin({ onClose }) {
     else { setPinError(true); setPin('') }
   }
 
-  // ── Aandgebed recording ──
-  async function startApRecording() {
-    if (apRecUrl) URL.revokeObjectURL(apRecUrl)
-    setApRecUrl(null); setApRecBlob(null); setApAudioFile(null); setApRecSecs(0)
-    apChunksRef.current = []
-    try {
-      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', ''].find(t => !t || MediaRecorder.isTypeSupported(t))
-      const mr       = new MediaRecorder(stream, mimeType ? { mimeType } : {})
-      apMrRef.current = mr
-      mr.ondataavailable = e => { if (e.data.size > 0) apChunksRef.current.push(e.data) }
-      mr.onstop = () => {
-        stream.getTracks().forEach(t => t.stop())
-        const mime = mr.mimeType || 'audio/webm'
-        const blob = new Blob(apChunksRef.current, { type: mime })
-        const url  = URL.createObjectURL(blob)
-        const ext  = mime.includes('mp4') ? 'm4a' : 'webm'
-        setApRecBlob(blob); setApRecUrl(url)
-        setApAudioFile(new File([blob], `aandgebed_${Date.now()}.${ext}`, { type: mime }))
-      }
-      mr.start(); setApRecording(true)
-      apTimerRef.current = setInterval(() => setApRecSecs(s => s + 1), 1000)
-    } catch { alert('Mikrofoon toegang geweier.') }
-  }
-
-  function stopApRecording() {
-    if (apMrRef.current?.state === 'recording') apMrRef.current.stop()
-    clearInterval(apTimerRef.current); setApRecording(false)
-  }
-
-  async function handleApSave() {
-    setApError('')
-    if (!apAudioFile)             { setApError('Kies of neem eers oudio op'); return }
-    if (!apCoveredFrom || !apCoveredTo) { setApError('Stel die datum-reeks in'); return }
-    if (apCoveredFrom > apCoveredTo)    { setApError('"Van" datum moet voor "Tot" datum wees'); return }
-
-    const prayerCount = apCountCalc ?? 0
-    const spanDays    = Math.round((new Date(apCoveredTo + 'T12:00:00') - new Date(apCoveredFrom + 'T12:00:00')) / 86400000)
-    const type        = spanDays === 0 ? 'daily' : spanDays >= 6 ? 'weekly' : 'catchup'
-    const fmtSAST     = s => new Date(s + 'T12:00:00').toLocaleDateString('af-ZA', { day: 'numeric', month: 'long' })
-    const title       = spanDays === 0
-      ? `Gebed vir ${fmtSAST(apCoveredTo)} se versoeke`
-      : `Saamgebed vir ${fmtSAST(apCoveredFrom)} tot ${fmtSAST(apCoveredTo)}`
-    const docId       = apCoveredTo
-
-    setApUploading(true); setApProgress(0)
-    let audioUrl = ''
-    try {
-      const ext  = apAudioFile.name.split('.').pop().toLowerCase()
-      const sRef = ref(storage, `aandgebede/${docId}.${ext}`)
-      await new Promise((resolve, reject) => {
-        const task = uploadBytesResumable(sRef, apAudioFile)
-        task.on('state_changed',
-          s => setApProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
-          reject,
-          async () => { audioUrl = await getDownloadURL(task.snapshot.ref); resolve() }
-        )
-      })
-    } catch (e) { setApError('Upload misluk: ' + e.message); setApUploading(false); return }
-
-    setApUploading(false)
-    try {
-      await setDoc(doc(db, 'aandgebede', docId), {
-        date: apCoveredTo,
-        coveredFrom: apCoveredFrom,
-        coveredTo:   apCoveredTo,
-        audioUrl,
-        prayerCount,
-        type,
-        title,
-        uploadedAt:  serverTimestamp(),
-        publishedAt: new Date(apCoveredTo + 'T20:00:00+02:00')
-      })
-      setApSaved(true); setTimeout(() => setApSaved(false), 3000)
-      setApAudioFile(null); setApRecUrl(null); setApRecBlob(null); setApRecSecs(0)
-      setApCountCalc(null)
-      if (apFileRef.current) apFileRef.current.value = ''
-      await loadAandgebede()
-    } catch (e) { setApError('Kon nie stoor nie: ' + e.message) }
-  }
 
   // ── Save voice note ──
   async function handleSave() {
@@ -732,9 +591,6 @@ export default function Admin({ onClose }) {
           </button>
           <button className={`admin-tab ${activeTab === 'notif' ? 'active' : ''}`} onClick={() => setActiveTab('notif')}>
             🔔 Notifs
-          </button>
-          <button className={`admin-tab ${activeTab === 'aandgebed' ? 'active' : ''}`} onClick={() => setActiveTab('aandgebed')}>
-            🙏 Gebed
           </button>
           <button className={`admin-tab ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
             ✉️ E-pos
@@ -1104,124 +960,6 @@ export default function Admin({ onClose }) {
                 )
               })()}
             </div>
-          )}
-
-          {/* ── AANDGEBED TAB ── */}
-          {activeTab === 'aandgebed' && (
-            <>
-              <div className="admin-section">
-                <div className="admin-section-title">Laai Saamgebed op</div>
-
-                <label className="admin-label">Van datum</label>
-                <input
-                  type="date"
-                  className="admin-input"
-                  value={apCoveredFrom}
-                  onChange={e => setApCoveredFrom(e.target.value)}
-                />
-
-                <label className="admin-label">Tot datum</label>
-                <input
-                  type="date"
-                  className="admin-input"
-                  value={apCoveredTo}
-                  onChange={e => setApCoveredTo(e.target.value)}
-                />
-
-                <div style={{ fontSize: 13, background: 'var(--lavender-soft)', borderRadius: 10, padding: '10px 12px', marginBottom: 4 }}>
-                  {apCountLoading
-                    ? '⏳ Tel versoeke...'
-                    : apCountCalc !== null
-                    ? `🙏 ${apCountCalc} gebedsversoeke in hierdie tydperk`
-                    : 'Stel datums in om versoeke te tel'}
-                </div>
-
-                <label className="admin-label">Oudio</label>
-                <div className="record-row">
-                  {!apRecording ? (
-                    <button className="record-btn" onClick={startApRecording}>
-                      🎙️ Neem op
-                    </button>
-                  ) : (
-                    <button className="record-btn recording" onClick={stopApRecording}>
-                      ⏹ Stop ({formatTime(apRecSecs)})
-                    </button>
-                  )}
-                  <span className="record-or">of</span>
-                  <label className="file-upload-label">
-                    📁 Kies lêer
-                    <input
-                      ref={apFileRef}
-                      type="file"
-                      accept="audio/*"
-                      style={{ display: 'none' }}
-                      onChange={e => {
-                        const f = e.target.files[0]
-                        if (f) { setApAudioFile(f); setApRecUrl(null) }
-                      }}
-                    />
-                  </label>
-                </div>
-
-                {apRecUrl && (
-                  <audio src={apRecUrl} controls style={{ width: '100%', marginTop: 8 }} />
-                )}
-                {!apRecUrl && apAudioFile && (
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
-                    ✅ {apAudioFile.name}
-                  </div>
-                )}
-
-                {apUploading && (
-                  <div className="upload-progress">
-                    <div className="upload-bar" style={{ width: `${apProgress}%` }} />
-                    <span>{apProgress}%</span>
-                  </div>
-                )}
-
-                {apError && <div className="admin-error">{apError}</div>}
-                {apSaved  && <div className="admin-success">✅ Saamgebed gestoor!</div>}
-
-                <button
-                  className="admin-save-btn"
-                  onClick={handleApSave}
-                  disabled={apUploading || apRecording}
-                >
-                  {apUploading ? 'Besig...' : 'Stoor Saamgebed'}
-                </button>
-              </div>
-
-              {apList.length > 0 && (
-                <div className="admin-section">
-                  <div className="admin-section-title">Vorige Saamgebede</div>
-                  {apList.map(ap => {
-                    const from = ap.coveredFrom || ap.date
-                    const to   = ap.coveredTo   || ap.date
-                    const dateLabel = from !== to ? `${from} – ${to}` : to
-                    return (
-                    <div key={ap.id} className="admin-note-row" style={{ justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{dateLabel}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.prayerCount} versoeke · {ap.type || 'daily'}</div>
-                      </div>
-                      <button
-                        className="admin-delete-btn"
-                        onClick={async () => {
-                          if (!window.confirm('Skrap hierdie aandgebed?')) return
-                          try {
-                            await deleteDoc(doc(db, 'aandgebede', ap.id))
-                            setApList(prev => prev.filter(x => x.id !== ap.id))
-                          } catch { alert('Kon nie skrap nie') }
-                        }}
-                      >
-                        🗑
-                      </button>
-                    </div>
-                  )
-                })}
-                </div>
-              )}
-            </>
           )}
 
           {/* ── EMAIL TAB ── */}
