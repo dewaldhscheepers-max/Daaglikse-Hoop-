@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { db } from '../firebase'
 import {
-  collection, addDoc, updateDoc, doc,
+  collection, addDoc, updateDoc, doc, getDoc,
   serverTimestamp, orderBy, query, where, limit,
   increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
@@ -169,6 +169,38 @@ function EveningPrayerPlayer({ prayer }) {
   )
 }
 
+/* ── Gebed video card (from admin config/saturdayVideo) ── */
+function GebedVideoCard({ videoId, title, subtitle }) {
+  const [amenSaid, setAmenSaid] = useState(false)
+  return (
+    <div className="ep-card">
+      <div className="ep-card-top">
+        <span className="ep-card-label">Gebedspoort</span>
+      </div>
+      {title    && <p className="ep-card-title">{title}</p>}
+      {subtitle && <p className="ep-card-desc">{subtitle}</p>}
+      <div className="gebed-video-wrap">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?rel=0&playsinline=1`}
+          title={title || 'Gebedspoort'}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+      <div className="ep-controls">
+        <button
+          className={`ep-amen-btn${amenSaid ? ' amened' : ''}`}
+          onClick={() => setAmenSaid(true)}
+          style={{ flex: 1 }}
+        >
+          <span className="ep-amen-emoji">🙏</span>
+          <span className="ep-amen-label">{amenSaid ? 'Amen!' : 'Amen'}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ── Community prayer flow — full-screen, one by one ── */
 function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
   const [queueIdx,     setQueueIdx]     = useState(0)
@@ -317,6 +349,13 @@ export default function BidSaam() {
   const [archivePlaying, setArchivePlaying] = useState(false)
   const [showScrollHint, setShowScrollHint] = useState(true)
   const [saamgebedOpen,  setSaamgebedOpen]  = useState(false)
+  const [satVid,         setSatVid]         = useState({ active: false, videoId: '', title: '', subtitle: '' })
+
+  useEffect(() => {
+    getDoc(doc(db, 'config', 'saturdayVideo')).then(d => {
+      if (d.exists()) setSatVid(d.data())
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -531,37 +570,10 @@ export default function BidSaam() {
           </button>
         </div>
 
-        {/* ── Latest Saamgebed / Aandgebed ── */}
-        {todayPrayer && (() => {
-          const from      = todayPrayer.coveredFrom || todayPrayer.date
-          const to        = todayPrayer.coveredTo   || todayPrayer.date
-          const isSameDay = from === to
-          const isOld     = to !== todaySAST
-          const count     = getLivePrayerCount(todayPrayer)
-          const label     = isOld ? 'Laaste Saamgebed' : (isSameDay ? 'Aandgebed' : 'Saamgebed')
-          const title     = isSameDay
-            ? `Gebed vir ${formatSASTDate(to)} se versoeke`
-            : `Saamgebed vir ${formatSASTDate(from)} tot ${formatSASTDate(to)}`
-          const dateLabel = isSameDay
-            ? formatDate(to)
-            : `${formatSASTDate(from)} – ${formatSASTDate(to)}`
-          return (
-            <div className="ep-card">
-              <div className="ep-card-top">
-                <span className="ep-card-label">{label}</span>
-                <span className="ep-card-date">{dateLabel}</span>
-              </div>
-              <p className="ep-card-title">{title}</p>
-              <p className="ep-card-desc">
-                {isSameDay
-                  ? <>Dewald het oor <strong>{count}</strong> gebedsversoeke gebid.</>
-                  : <>Hierdie gebed dra <strong>{count}</strong> gebedsversoeke van hierdie tydperk.</>
-                }
-              </p>
-              <EveningPrayerPlayer prayer={todayPrayer} />
-            </div>
-          )
-        })()}
+        {/* ── Gebedspoort Video ── */}
+        {satVid.active && satVid.videoId && (
+          <GebedVideoCard videoId={satVid.videoId} title={satVid.title} subtitle={satVid.subtitle} />
+        )}
 
         {/* ── Prayer input ── */}
         <div className="card prayer-input-card">
