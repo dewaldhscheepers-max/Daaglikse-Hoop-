@@ -43,7 +43,7 @@
 
 .saturday-video-wrap {
   width: 100%;
-  max-width: 230px;
+  max-width: 200px;
   aspect-ratio: 9 / 16;
   position: relative;
   border-radius: 14px;
@@ -88,8 +88,9 @@
 .saturday-amen-btn:active { opacity: 0.85; }
 
 .saturday-amen-btn.amen-done {
-  background: var(--lavender-soft);
+  background: linear-gradient(135deg, #EAE5F6, #DDD7F0);
   color: var(--purple-dark);
+  border: 1.5px solid rgba(92, 78, 142, 0.22);
 }
 
 .saturday-amen-count {
@@ -106,7 +107,7 @@
 }
 
 .saturday-amen-btn.amen-done .saturday-amen-count {
-  background: rgba(92, 78, 142, 0.18);
+  background: rgba(92, 78, 142, 0.15);
   color: var(--purple-dark);
 }
 
