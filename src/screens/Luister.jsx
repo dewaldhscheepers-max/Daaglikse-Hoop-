@@ -253,7 +253,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
-  const activeNote = notes.find(n => n.id === activeId) || today
+  const activeNote = notes.find(n => n.id === activeId) || allNotes.find(n => n.id === activeId) || today
   const progress   = activeNote?.lengthSeconds ? Math.min(elapsed / activeNote.lengthSeconds, 1) : 0
   const todayPlaying = playing && activeId === today?.id
   const playCount  = today ? (playCounts[today.id] || 0) : 0
