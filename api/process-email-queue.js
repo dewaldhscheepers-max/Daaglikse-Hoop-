@@ -135,50 +135,48 @@ module.exports = async function handler(req, res) {
     return res.json({ ok: true, message: 'Kampanje voltooi!', total: campaign.total })
   }
 
-  const batch     = campaign.pendingEmails.slice(0, 100)
-  const remaining = campaign.pendingEmails.slice(100)
-  const html      = buildHtml(campaign.body)
-
+  const html = buildHtml(campaign.body)
   let sentCount = 0
-  try {
-    const r = await fetch('https://api.resend.com/emails/batch', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(batch.map(to => ({
-        from:     'Daaglikse Hoop <info@dewaldscheepers.com>',
-        to,
-        reply_to: 'info@dewaldscheepers.com',
-        subject:  campaign.subject,
-        html,
-      }))),
-    })
-    if (r.ok) sentCount = batch.length
-    else console.error('Resend error:', await r.text())
-  } catch (e) {
-    console.error('Send error:', e.message)
+
+  for (let i = 0; i < campaign.pendingEmails.length; i += 100) {
+    const chunk = campaign.pendingEmails.slice(i, i + 100)
+    try {
+      const r = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(chunk.map(to => ({
+          from:     'Daaglikse Hoop <info@dewaldscheepers.com>',
+          to,
+          reply_to: 'info@dewaldscheepers.com',
+          subject:  campaign.subject,
+          html,
+        }))),
+      })
+      if (r.ok) sentCount += chunk.length
+      else console.error('Resend error:', await r.text())
+    } catch (e) {
+      console.error('Send error:', e.message)
+    }
   }
 
   const newSentCount = campaign.sentCount + sentCount
-  const isComplete   = remaining.length === 0
 
   await fsWrite(projectId, token, `emailCampaigns/${campaign.id}`, {
-    subject:         { stringValue: campaign.subject },
-    body:            { stringValue: campaign.body },
-    status:          { stringValue: isComplete ? 'completed' : 'active' },
-    total:           { integerValue: String(campaign.total) },
-    sentCount:       { integerValue: String(newSentCount) },
-    pendingEmails:   { arrayValue: { values: remaining.map(e => ({ stringValue: e })) } },
-    lastProcessedAt: { timestampValue: new Date().toISOString() },
-    ...(isComplete ? { completedAt: { timestampValue: new Date().toISOString() } } : {}),
+    subject:       { stringValue: campaign.subject },
+    body:          { stringValue: campaign.body },
+    status:        { stringValue: 'completed' },
+    total:         { integerValue: String(campaign.total) },
+    sentCount:     { integerValue: String(newSentCount) },
+    pendingEmails: { arrayValue: { values: [] } },
+    completedAt:   { timestampValue: new Date().toISOString() },
   })
 
   return res.json({
     ok:        true,
     sent:      sentCount,
-    remaining: remaining.length,
     totalSent: newSentCount,
     total:     campaign.total,
-    daysLeft:  Math.ceil(remaining.length / 100),
-    message:   isComplete ? 'Kampanje voltooi!' : `${remaining.length} e-posse oor`,
+    remaining: 0,
+    message:   'Kampanje voltooi!',
   })
 }
