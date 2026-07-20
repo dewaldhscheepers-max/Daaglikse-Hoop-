@@ -5,6 +5,10 @@
       "schedule": "0 7 * * *"
     }
   ],
+  "functions": {
+    "api/send-bulk-email.js": { "maxDuration": 300 },
+    "api/process-email-queue.js": { "maxDuration": 300 }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/go", "dest": "/go.html" },

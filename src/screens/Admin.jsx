@@ -1054,7 +1054,7 @@ export default function Admin({ onClose }) {
                     {bulkSending ? 'Besig om te stuur...' : `Stuur na alle ${emailCount} inskrywers`}
                   </button>
                   <div className="admin-books-note">
-                    Die eerste 100 gaan dadelik uit. Die res gaan outomaties elke dag 100 uit.
+                    Alle e-posse gaan onmiddellik uit.
                   </div>
                 </>
               )}
