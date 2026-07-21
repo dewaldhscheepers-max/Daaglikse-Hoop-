@@ -223,8 +223,7 @@ export default function Admin({ onClose }) {
   // ── New book form ──
   const [newTitle, setNewTitle]   = useState('')
   const [newDesc, setNewDesc]     = useState('')
-  const [newPrice, setNewPrice]   = useState('')
-  const [newFree, setNewFree]     = useState(false)
+  const [newValue, setNewValue]   = useState('')
   const [newEmoji, setNewEmoji]   = useState('📚')
   const [addingBook, setAddingBook] = useState(false)
   const [bookAdded, setBookAdded] = useState(false)
@@ -419,12 +418,12 @@ export default function Admin({ onClose }) {
       await setDoc(doc(db, 'books', id), {
         title:  newTitle.trim(),
         desc:   newDesc.trim(),
-        price:  newFree ? 0 : (parseFloat(newPrice) || 0),
-        free:   newFree,
+        free:   true,
+        value:  parseFloat(newValue) || 50,
         emoji:  newEmoji || '📚',
         color:  '#EDE8F8',
       })
-      setNewTitle(''); setNewDesc(''); setNewPrice(''); setNewFree(false); setNewEmoji('📚')
+      setNewTitle(''); setNewDesc(''); setNewValue(''); setNewEmoji('📚')
       setBookAdded(true)
       setTimeout(() => setBookAdded(false), 3000)
     } catch (e) { alert('Kon nie boek byvoeg nie: ' + e.message) }
@@ -740,16 +739,11 @@ export default function Admin({ onClose }) {
                 <label>Beskrywing</label>
                 <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Kort beskrywing..." />
               </div>
-              <div className="admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <label style={{ margin: 0 }}>Gratis?</label>
-                <input type="checkbox" checked={newFree} onChange={e => setNewFree(e.target.checked)} style={{ width: 20, height: 20 }} />
+              <div className="admin-field">
+                <label>Rand Waarde vir teller (R)</label>
+                <input type="number" value={newValue} onChange={e => setNewValue(e.target.value)} placeholder="bv. 50" />
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>Watter bedrag tel op in die "hoop weggegee" teller?</span>
               </div>
-              {!newFree && (
-                <div className="admin-field">
-                  <label>Prys (R)</label>
-                  <input type="number" value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="bv. 50" />
-                </div>
-              )}
               <div className="admin-field">
                 <label>Emoji</label>
                 <input value={newEmoji} onChange={e => setNewEmoji(e.target.value)} placeholder="📚" style={{ width: 60 }} />
@@ -786,7 +780,7 @@ export default function Admin({ onClose }) {
                     <div className="admin-note-info">
                       <div className="admin-note-title">{book.title}</div>
                       <div className="admin-note-meta">
-                        {book.free ? '🎁 Gratis' : `💳 R${book.price}`}
+                        {`🎁 Gratis${book.value ? ` · Teller R${book.value}` : book.price ? ` · Teller R${book.price}` : ''}`}
                         {' · '}
                         {isPdfUploading ? `PDF ${pdfProgress}%...`
                           : isCoverUploading ? `Cover ${coverProgress}%...`
