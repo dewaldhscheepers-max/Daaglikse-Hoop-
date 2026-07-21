@@ -5,7 +5,6 @@ import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
-import HuiseVanHoop from './HuiseVanHoop'
 import './Meer.css'
 import './HuiseVanHoop.css'
 
@@ -49,14 +48,13 @@ function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
 }
 
 /* ── Main screen ── */
-export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled, onNavigate }) {
+export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled }) {
   const [bookOverrides, setBookOverrides] = useState({})
   const [rgCount,       setRgCount]       = useState(CAMPAIGN.goal)
   const [liveCount,     setLiveCount]     = useState(0)
   const [liveValue,     setLiveValue]     = useState(0)
   const [activeBook,    setActiveBook]    = useState(null)
   const [claimedMap,    setClaimedMap]    = useState({})
-  const [showHuise,     setShowHuise]     = useState(false)
 
   // Scroll to target book
   useEffect(() => {
@@ -81,17 +79,16 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     return unsub
   }, [])
 
-  // Load rgCount from campaign-count API (reads counters/campaign_huise where historic data lives)
+  // Load rgCount from campaign-count API
+  function fetchRgCount() {
+    fetch('/api/campaign-count')
+      .then(r => r.json())
+      .then(d => { if (d.total) setRgCount(d.total) })
+      .catch(() => {})
+  }
+
   useEffect(() => {
-    function fetchRgCount() {
-      fetch('/api/campaign-count')
-        .then(r => r.json())
-        .then(d => { if (d.total) setRgCount(d.total) })
-        .catch(() => {})
-    }
     fetchRgCount()
-    window.addEventListener('campaign-submitted', fetchRgCount)
-    return () => window.removeEventListener('campaign-submitted', fetchRgCount)
   }, [])
 
   // Load liveCount + liveValue from stats/ebooks_given
@@ -106,18 +103,22 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     return unsub
   }, [])
 
-  // Build claimedMap from localStorage — re-runs when dynamic Firestore books load
-  useEffect(() => {
+  // Build claimedMap from localStorage
+  function buildClaimedMap(overrides) {
     const map = {}
     STATIC_BOOKS.forEach(b => {
       if (localStorage.getItem(`fb_claimed_${b.id}`) === '1') map[b.id] = true
     })
-    Object.keys(bookOverrides).forEach(id => {
+    Object.keys(overrides).forEach(id => {
       if (!STATIC_IDS.has(id) && localStorage.getItem(`fb_claimed_${id}`) === '1') map[id] = true
     })
-    // HuiseVanHoop uses 'huise_claimed' key for RG
+    // Also accept old huise_claimed key for RG (backwards compat)
     if (localStorage.getItem('huise_claimed') === '1') map['rustelose-gedagtes'] = true
-    setClaimedMap(map)
+    return map
+  }
+
+  useEffect(() => {
+    setClaimedMap(buildClaimedMap(bookOverrides))
   }, [bookOverrides])
 
   const BOOKS = [
@@ -161,7 +162,6 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       <div className="meer-body">
         <DonationCard />
 
-
         {/* All books */}
         <div className="meer-section">
           <div className="section-header">
@@ -174,7 +174,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
                 <FreeBookCard
                   book={b}
                   claimed={!!claimedMap[b.id]}
-                  onClaim={() => b.isRG ? setShowHuise(true) : setActiveBook(b)}
+                  onClaim={() => setActiveBook(b)}
                   downloadCount={b.isRG ? rgCount : undefined}
                 />
               </div>
@@ -189,20 +189,11 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           installPrompt={installPrompt}
           isInstalled={isInstalled}
           onClose={() => {
-            const updated = {}
-            BOOKS.forEach(b => { if (localStorage.getItem(`fb_claimed_${b.id}`) === '1') updated[b.id] = true })
-            setClaimedMap(updated)
+            setClaimedMap(buildClaimedMap(bookOverrides))
             setActiveBook(null)
+            // Refresh RG count in case they just downloaded it
+            if (activeBook.isRG) fetchRgCount()
           }}
-        />
-      )}
-
-      {showHuise && (
-        <HuiseVanHoop
-          onClose={() => setShowHuise(false)}
-          installPrompt={installPrompt}
-          isInstalled={isInstalled}
-          onNavigate={onNavigate}
         />
       )}
     </div>
