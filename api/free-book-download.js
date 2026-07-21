@@ -140,8 +140,10 @@ module.exports = async function handler(req, res) {
       { field: 'value', value: bookValue }
     )
 
-    // Special campaign counter for rustelose-gedagtes
-    if (bookId === 'rustelose-gedagtes') {
+    // Special campaign counter for rustelose-gedagtes — match by ID or title
+    const isRustelose = bookId === 'rustelose-gedagtes'
+      || bookTitle.toLowerCase().includes('rustelose')
+    if (isRustelose) {
       await fsIncrement(projectId, token, 'counters/campaign_huise',
         { field: 'total', value: 1 }
       )
