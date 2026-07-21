@@ -24,6 +24,7 @@ function FreeBookCard({ book, claimed, onClaim }) {
         <span className="book-badge free-badge">GRATIS</span>
       </div>
       <div className="book-info">
+        {book.badge && <span className="book-new-badge">{book.badge}</span>}
         <h4 className="book-title">{book.title}</h4>
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
@@ -108,7 +109,11 @@ export default function Meer({ targetBookId, onScrolled }) {
     // Dynamic Firestore books not in static list (featured at top)
     ...Object.entries(bookOverrides)
       .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
-      .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', ...d })),
+      .map(([id, d]) => {
+        const isRG = id === 'rustelose-gedagtes' || (d.title || '').toLowerCase().includes('rustelose')
+        return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT' } : {}) }
+      })
+      .sort((a, b) => { if (a.badge === 'NUUT') return -1; if (b.badge === 'NUUT') return 1; return 0 }),
     // Static books with Firestore overrides for pdfUrl/coverUrl
     ...STATIC_BOOKS.map(b => {
       const ov = bookOverrides[b.id] || {}
@@ -141,21 +146,6 @@ export default function Meer({ targetBookId, onScrolled }) {
       <div className="meer-body">
         <DonationCard />
 
-        {/* Campaign banner for Rustelose Gedagtes */}
-        {CAMPAIGN.active && (
-          <button
-            className="huise-meer-banner"
-            onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}
-          >
-            <div className="huise-meer-banner-book">📖</div>
-            <div className="huise-meer-banner-text">
-              <span className="huise-meer-banner-eyebrow">GRATIS · VLAGSKIP-BOEK</span>
-              <span className="huise-meer-banner-title">Rustelose Gedagtes</span>
-              <span className="huise-meer-banner-sub">Installeer die app & kry gratis</span>
-            </div>
-            <span className="huise-meer-banner-arrow">›</span>
-          </button>
-        )}
 
         {/* All books */}
         <div className="meer-section">
