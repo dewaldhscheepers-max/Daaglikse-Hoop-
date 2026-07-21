@@ -27,10 +27,9 @@ function FreeBookCard({ book, claimed, onClaim }) {
         <h4 className="book-title">{book.title}</h4>
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
-          <span className="book-price free-price">Gratis</span>
           {claimed && pdfUrl
             ? <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-free book-buy-btn">📥 Laai af</a>
-            : <button className="btn-primary book-buy-btn" onClick={onClaim}>Kry gratis</button>
+            : <button className="btn-primary book-buy-btn" onClick={onClaim}>Kry gratis →</button>
           }
         </div>
       </div>
@@ -93,14 +92,17 @@ export default function Meer({ targetBookId, onScrolled }) {
     return unsub
   }, [])
 
-  // Build claimedMap from localStorage
+  // Build claimedMap from localStorage — re-runs when dynamic Firestore books load
   useEffect(() => {
     const map = {}
     STATIC_BOOKS.forEach(b => {
       if (localStorage.getItem(`fb_claimed_${b.id}`) === '1') map[b.id] = true
     })
+    Object.keys(bookOverrides).forEach(id => {
+      if (!STATIC_IDS.has(id) && localStorage.getItem(`fb_claimed_${id}`) === '1') map[id] = true
+    })
     setClaimedMap(map)
-  }, [])
+  }, [bookOverrides])
 
   const BOOKS = [
     // Dynamic Firestore books not in static list (featured at top)
@@ -145,9 +147,11 @@ export default function Meer({ targetBookId, onScrolled }) {
             className="huise-meer-banner"
             onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}
           >
+            <div className="huise-meer-banner-book">📖</div>
             <div className="huise-meer-banner-text">
-              <span className="huise-meer-banner-title">🎁 Kry Rustelose Gedagtes gratis</span>
-              <span className="huise-meer-banner-sub">{fmtNum(rgCount)} huise van hoop · Installeer die app en kry dit nou</span>
+              <span className="huise-meer-banner-eyebrow">GRATIS · VLAGSKIP-BOEK</span>
+              <span className="huise-meer-banner-title">Rustelose Gedagtes</span>
+              <span className="huise-meer-banner-sub">{fmtNum(rgCount)} huise bereik · Installeer & kry gratis</span>
             </div>
             <span className="huise-meer-banner-arrow">›</span>
           </button>

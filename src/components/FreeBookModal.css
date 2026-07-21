@@ -240,3 +240,59 @@
   text-decoration: underline;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ─── Install prompt ─── */
+.fb-install-block {
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fb-install-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fb-install-icon-sm {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.fb-install-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.fb-install-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.fb-btn-install {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--lavender-soft);
+  border: none;
+  color: var(--purple-dark);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.fb-btn-install:active { opacity: 0.75; }

@@ -171,6 +171,22 @@ export default function FreeBookModal({ book, onClose }) {
               </div>
             </div>
 
+            <div className="fb-install-block">
+              <div className="fb-install-inner">
+                <span className="fb-install-icon-sm">📱</span>
+                <div>
+                  <p className="fb-install-title">Daaglikse hoop op jou foon</p>
+                  <p className="fb-install-sub">Installeer die app vir 'n nuwe boodskap elke dag</p>
+                </div>
+              </div>
+              <button className="fb-btn-install" onClick={() => {
+                window.dispatchEvent(new CustomEvent('trigger-install-prompt'))
+                onClose()
+              }}>
+                Installeer die app →
+              </button>
+            </div>
+
             <button className="fb-btn-skip" onClick={onClose}>Nie nou nie</button>
           </>
         )}

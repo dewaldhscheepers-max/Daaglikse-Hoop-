@@ -434,36 +434,60 @@
 .huise-meer-banner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, #F0EBF8, #EDE8F8);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(124, 111, 175, 0.15);
+  background: linear-gradient(135deg, #1E1238 0%, #3D2B6B 60%, #5C4E8E 100%);
+  border-radius: 20px;
+  padding: 20px 18px;
+  margin-bottom: 20px;
+  border: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  box-shadow: 0 8px 28px rgba(30, 18, 56, 0.30);
+  box-sizing: border-box;
+}
+
+.huise-meer-banner-book {
+  font-size: 34px;
+  flex-shrink: 0;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
 }
 
 .huise-meer-banner-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.huise-meer-banner-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.52);
+  text-transform: uppercase;
 }
 
 .huise-meer-banner-title {
-  font-size: 14px;
+  font-family: var(--font-serif);
+  font-size: 18px;
   font-weight: 700;
-  color: var(--purple-dark);
+  color: white;
+  line-height: 1.2;
 }
 
 .huise-meer-banner-sub {
   font-size: 12px;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.68);
+  line-height: 1.4;
 }
 
 .huise-meer-banner-arrow {
-  font-size: 20px;
-  color: var(--purple);
+  font-size: 22px;
+  color: rgba(255,255,255,0.48);
   flex-shrink: 0;
+  line-height: 1;
 }

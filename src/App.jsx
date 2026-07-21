@@ -252,6 +252,13 @@ export default function App() {
 
   function dismissInstallPopup() { setShowInstallPopup(false) }
 
+  // ── Forward install requests from FreeBookModal ──
+  useEffect(() => {
+    function onInstallRequest() { handleInstallCta() }
+    window.addEventListener('trigger-install-prompt', onInstallRequest)
+    return () => window.removeEventListener('trigger-install-prompt', onInstallRequest)
+  }, [installPrompt])
+
   // ── Notification permission banner + silent auto-resubscribe ──
   useEffect(() => {
     if (isSamsungBrowser) return

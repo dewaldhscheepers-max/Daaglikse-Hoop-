@@ -9,6 +9,10 @@ const BOOK_VALUES = {
   '7-leuens': 50, 'bybel-hulpbron': 50, 'rustelose-gedagtes': 110,
 }
 
+function cleanBookTitle(id) {
+  return id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
@@ -96,13 +100,18 @@ module.exports = async function handler(req, res) {
   }
 
   // Get book data from Firestore
-  let bookTitle = bookId
+  let bookTitle = cleanBookTitle(bookId)
   let pdfUrl    = null
+  let bookValue = BOOK_VALUES[bookId] ?? 50
   try {
     const bookDoc = await fsGet(projectId, token, `books/${bookId}`)
     if (bookDoc?.fields) {
-      bookTitle = bookDoc.fields.title?.stringValue  || bookId
+      bookTitle = bookDoc.fields.title?.stringValue  || cleanBookTitle(bookId)
       pdfUrl    = bookDoc.fields.pdfUrl?.stringValue || null
+      // Support explicit value field for dynamic/new books
+      if (bookDoc.fields.value?.integerValue) {
+        bookValue = parseInt(bookDoc.fields.value.integerValue)
+      }
     }
   } catch {}
 
@@ -126,7 +135,6 @@ module.exports = async function handler(req, res) {
     })
 
     // Increment ebooks_given counter
-    const bookValue = BOOK_VALUES[bookId] ?? 50
     await fsIncrement(projectId, token, 'counters/ebooks_given',
       { field: 'count', value: 1 },
       { field: 'value', value: bookValue }
@@ -147,66 +155,92 @@ module.exports = async function handler(req, res) {
     })
   }
 
-  // Send delivery email via Resend (only if pdfUrl exists)
+  // Always send a delivery email — PDF link if available, "coming soon" if not
+  const donateBlock = `
+    <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
+    <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Help sodat die volgende persoon ook gratis hoop kan ontvang:</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="padding:0 4px 10px 0;" width="50%">
+          <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
+            💜 Maandelikse Vennoot
+          </a>
+        </td>
+        <td style="padding:0 0 10px 4px;" width="50%">
+          <a href="https://www.dewaldscheepers.com/go" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
+            🙏 Eenmalige Bydrae
+          </a>
+        </td>
+      </tr>
+    </table>
+    <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
+    <p style="color:#888;font-size:13px;line-height:1.6;">
+      Daaglikse Hoop &middot;
+      <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a><br>
+      Jy ontvang hierdie e-pos omdat jy 'n gratis e-boek afgelaai het. Uitteken: stuur 'n e-pos na info@dewaldscheepers.com
+    </p>
+  `
+
+  const headerBlock = `
+    <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
+      <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
+      <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
+    </div>
+  `
+
+  let emailSubject, html
   if (pdfUrl) {
-    const html = `
+    emailSubject = `Jou gratis e-boek: ${bookTitle} 🎁`
+    html = `
       <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
-        <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
-          <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
-          <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
-        </div>
+        ${headerBlock}
         <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
           <p style="font-size:20px;font-weight:700;margin:0 0 8px;">Jou gratis e-boek is hier! 🎁</p>
           <p style="color:#555;line-height:1.6;margin:0 0 6px;">Hierdie boek is gratis vir jou:</p>
           <p style="color:#2d2d2d;font-weight:700;line-height:1.6;margin:0 0 20px;">${bookTitle}</p>
-          <p style="color:#666;line-height:1.7;margin:0 0 20px;">
-            Klik hieronder om jou gratis e-boek af te laai:
-          </p>
+          <p style="color:#666;line-height:1.7;margin:0 0 20px;">Klik hieronder om jou gratis e-boek af te laai:</p>
           <div style="margin:16px 0;padding:16px;background:#f8f5ff;border-radius:10px;border-left:4px solid #5C4E8E;">
             <p style="margin:0 0 10px;font-weight:700;color:#2d2d2d;font-size:16px;">${bookTitle}</p>
             <a href="${pdfUrl}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;">
               📥 Laai af
             </a>
           </div>
-          <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
-          <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Help sodat die volgende persoon ook gratis hoop kan ontvang:</p>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td style="padding:0 4px 10px 0;" width="50%">
-                <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
-                  💜 Maandelikse Vennoot
-                </a>
-              </td>
-              <td style="padding:0 0 10px 4px;" width="50%">
-                <a href="https://www.dewaldscheepers.com/go" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
-                  🙏 Eenmalige Bydrae
-                </a>
-              </td>
-            </tr>
-          </table>
-          <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
-          <p style="color:#888;font-size:13px;line-height:1.6;">
-            Daaglikse Hoop &middot;
-            <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a><br>
-            Jy ontvang hierdie e-pos omdat jy 'n gratis e-boek afgelaai het. Uitteken: stuur 'n e-pos na info@dewaldscheepers.com
-          </p>
+          ${donateBlock}
         </div>
       </div>
     `
-    try {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
-          to:       cleanEmail,
-          reply_to: 'info@dewaldscheepers.com',
-          subject:  `Jou gratis e-boek: ${bookTitle} 🎁`,
-          html,
-        }),
-      })
-    } catch {}
+  } else {
+    emailSubject = `Jou e-boek kom binnekort: ${bookTitle}`
+    html = `
+      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
+        ${headerBlock}
+        <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
+          <p style="font-size:20px;font-weight:700;margin:0 0 8px;">Ons het jou aanmelding ontvang! 🙏</p>
+          <p style="color:#555;line-height:1.6;margin:0 0 20px;">
+            Ons is besig om <strong>${bookTitle}</strong> voor te berei. Sodra dit gereed is, stuur ons jou onmiddellik 'n aflaai-skakel.
+          </p>
+          <div style="padding:16px;background:#f8f5ff;border-radius:10px;border-left:4px solid #5C4E8E;margin:0 0 20px;">
+            <p style="margin:0;color:#5C4E8E;font-weight:700;">Hou jou e-pos dop — ons laat jou weet!</p>
+          </div>
+          ${donateBlock}
+        </div>
+      </div>
+    `
   }
+
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
+        to:       cleanEmail,
+        reply_to: 'info@dewaldscheepers.com',
+        subject:  emailSubject,
+        html,
+      }),
+    })
+  } catch {}
 
   return res.status(200).json({ ok: true, pdfUrl, title: bookTitle, duplicate: isDuplicate })
 }
