@@ -96,6 +96,7 @@
 
 .book-new-badge {
   display: inline-block;
+  align-self: flex-start;
   background: #C4724A;
   color: white;
   font-size: 9px;
