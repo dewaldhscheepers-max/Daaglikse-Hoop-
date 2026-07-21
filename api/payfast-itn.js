@@ -75,6 +75,52 @@ async function handleSubscriptionItn(data, projectId) {
         addedAt: { timestampValue: new Date().toISOString() },
       }).catch(() => {})
     }
+    // Send welcome email for new successful subscriptions
+    if (data.payment_status === 'COMPLETE' && subEmail) {
+      const welcomeHtml = `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
+          <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
+            <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
+          </div>
+          <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
+            <p style="font-size:20px;font-weight:700;margin:0 0 8px;">Jy is nou 'n Hoop-Vennoot! 🌿</p>
+            <p style="color:#555;line-height:1.7;margin:0 0 16px;">
+              Baie dankie! Jou maandelikse bydrae help ons om gratis hoop te versprei — e-boeke, stemnotas, gebede en meer — aan duisende mense wat dit andersins nie sou kon bekostig nie.
+            </p>
+            <p style="color:#555;line-height:1.7;margin:0 0 16px;">
+              Elke rand wat jy gee, dra 'n ander persoon. Mag God jou oorvloedig seën soos jy ander seën.
+            </p>
+            <p style="color:#555;line-height:1.7;margin:0 0 24px;">
+              — Dewald Scheepers
+            </p>
+            <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;margin-bottom:24px;">
+              📱 Maak die Daaglikse Hoop App oop
+            </a>
+            <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
+            <p style="color:#888;font-size:13px;line-height:1.6;">
+              Daaglikse Hoop &middot;
+              <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
+            </p>
+          </div>
+        </div>
+      `
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
+            to:       subEmail,
+            reply_to: 'info@dewaldscheepers.com',
+            subject:  'Welkom as Hoop-Vennoot! 🌿 — Daaglikse Hoop',
+            html:     welcomeHtml,
+          }),
+        })
+      } catch (e) {
+        console.error('Sub welcome email failed:', e.message)
+      }
+    }
   } else {
     console.log('payfast-itn sub (no auth):', JSON.stringify(data))
   }
@@ -117,6 +163,48 @@ module.exports = async function handler(req, res) {
         source:  { stringValue: 'donation' },
         addedAt: { timestampValue: new Date().toISOString() },
       }).catch(() => {})
+    }
+    // Send thank-you email for once-off donation
+    const donationHtml = `
+      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
+        <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
+          <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
+          <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
+        </div>
+        <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
+          <p style="font-size:20px;font-weight:700;margin:0 0 8px;">Dankie! Jou hart het God geraak. 🙏</p>
+          <p style="color:#555;line-height:1.7;margin:0 0 16px;">
+            "Elkeen moet gee soos hy hom in sy hart voorgeneem het, nie met teensin of uit dwang nie, want God het die blymoedige gewer lief."
+          </p>
+          <p style="color:#888;font-size:13px;font-style:italic;margin:0 0 20px;">— 2 Korintiërs 9:7</p>
+          <p style="color:#555;line-height:1.7;margin:0 0 20px;">
+            Jou bydrae help ons om gratis e-boeke, stemnotas en geestelike hulpbronne aan duisende mense te gee. Dankie dat jy deel is van hierdie bediening.
+          </p>
+          <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;margin-bottom:24px;">
+            📱 Maak die Daaglikse Hoop App oop
+          </a>
+          <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
+          <p style="color:#888;font-size:13px;line-height:1.6;">
+            Daaglikse Hoop &middot;
+            <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
+          </p>
+        </div>
+      </div>
+    `
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from:     'Daaglikse Hoop <noreply@dewaldscheepers.com>',
+          to:       email.toLowerCase(),
+          reply_to: 'info@dewaldscheepers.com',
+          subject:  'Dankie vir jou hart! ❤️ — Daaglikse Hoop',
+          html:     donationHtml,
+        }),
+      })
+    } catch (e) {
+      console.error('Donation thank-you email failed:', e.message)
     }
     return
   }

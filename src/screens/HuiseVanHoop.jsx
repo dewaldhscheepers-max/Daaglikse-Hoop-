@@ -4,8 +4,6 @@ import { collection, getDocs } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import './HuiseVanHoop.css'
 
-const SHARE_MSG = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ons soek 1000 huise van hoop:\nhttps://dewaldscheepers.com/go`
-
 export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNavigate }) {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
   const alreadyClaimed = !!localStorage.getItem('huise_claimed')
@@ -20,6 +18,7 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
   const [installDone,  setInstallDone] = useState(false)
   const [shareToast,   setShareToast]  = useState(false)
   const [ebookUrl,     setEbookUrl]    = useState('')
+  const [liveCount,    setLiveCount]   = useState(CAMPAIGN.goal)
 
   useEffect(() => {
     getDocs(collection(db, 'books')).then(snap => {
@@ -28,6 +27,13 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
         .find(b => b.title?.toLowerCase().includes('rustelose') || b.id?.toLowerCase().includes('rustelose'))
       if (book?.pdfUrl) setEbookUrl(book.pdfUrl)
     }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/campaign-count')
+      .then(r => r.json())
+      .then(d => { if (d.total) setLiveCount(d.total) })
+      .catch(() => {})
   }, [])
 
   async function handleInstall() {
@@ -66,11 +72,12 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
   }
 
   async function handleShare() {
+    const shareMsg = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ${liveCount.toLocaleString('af-ZA')} huise van hoop al:\nhttps://dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ text: SHARE_MSG, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ text: shareMsg, url: 'https://dewaldscheepers.com/go' }) } catch {}
     } else {
       try {
-        await navigator.clipboard.writeText(SHARE_MSG)
+        await navigator.clipboard.writeText(shareMsg)
         setShareToast(true)
         setTimeout(() => setShareToast(false), 2500)
       } catch {}
