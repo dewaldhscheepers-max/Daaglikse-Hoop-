@@ -47,9 +47,9 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Install counter
+    // Counters — clients can read (for live display), only server writes
     match /counters/{id} {
-      allow read:  if false;
+      allow read:  if true;
       allow write: if false;
     }
 

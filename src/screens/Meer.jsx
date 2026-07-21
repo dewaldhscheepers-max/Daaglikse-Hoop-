@@ -70,9 +70,9 @@ export default function Meer({ targetBookId, onScrolled }) {
     return unsub
   }, [])
 
-  // Load rgCount from counters/campaign_huise
+  // Load rgCount from stats/campaign_huise
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'counters', 'campaign_huise'), snap => {
+    const unsub = onSnapshot(doc(db, 'stats', 'campaign_huise'), snap => {
       if (snap.exists()) {
         const data = snap.data()
         setRgCount(data.total ?? CAMPAIGN.goal)
@@ -81,9 +81,9 @@ export default function Meer({ targetBookId, onScrolled }) {
     return unsub
   }, [])
 
-  // Load liveCount + liveValue from counters/ebooks_given
+  // Load liveCount + liveValue from stats/ebooks_given
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'counters', 'ebooks_given'), snap => {
+    const unsub = onSnapshot(doc(db, 'stats', 'ebooks_given'), snap => {
       if (snap.exists()) {
         const data = snap.data()
         setLiveCount(data.count ?? 0)

@@ -130,7 +130,7 @@ module.exports = async function handler(req, res) {
     })
 
     // Increment ebooks_given counter
-    await fsIncrement(projectId, token, 'counters/ebooks_given',
+    await fsIncrement(projectId, token, 'stats/ebooks_given',
       { field: 'count', value: 1 },
       { field: 'value', value: bookValue }
     )
@@ -139,7 +139,7 @@ module.exports = async function handler(req, res) {
     const isRustelose = bookId === 'rustelose-gedagtes'
       || bookTitle.toLowerCase().includes('rustelose')
     if (isRustelose) {
-      await fsIncrement(projectId, token, 'counters/campaign_huise',
+      await fsIncrement(projectId, token, 'stats/campaign_huise',
         { field: 'total', value: 1 }
       )
     }
