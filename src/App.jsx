@@ -515,7 +515,7 @@ export default function App() {
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
-          {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} />}
+          {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} installPrompt={installPrompt} isInstalled={isInstalled} onNavigate={handleNav} />}
         </ErrorBoundary>
       </div>
 

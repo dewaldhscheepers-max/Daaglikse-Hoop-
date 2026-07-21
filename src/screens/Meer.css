@@ -109,6 +109,12 @@
   box-shadow: 0 4px 20px rgba(196, 114, 74, 0.18);
 }
 
+.book-download-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 /* ─── Book info ─── */
 .book-info {
   flex: 1;

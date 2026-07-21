@@ -5,6 +5,7 @@ import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
+import HuiseVanHoop from './HuiseVanHoop'
 import './Meer.css'
 import './HuiseVanHoop.css'
 
@@ -13,7 +14,7 @@ const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 function fmtNum(n) { return n.toLocaleString('af-ZA') }
 
 /* ── Free book card ── */
-function FreeBookCard({ book, claimed, onClaim }) {
+function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
   const pdfUrl = book.pdfUrl
   return (
     <div className="book-card">
@@ -24,7 +25,14 @@ function FreeBookCard({ book, claimed, onClaim }) {
         <span className="book-badge free-badge">GRATIS</span>
       </div>
       <div className="book-info">
-        {book.badge && <span className="book-new-badge">{book.badge}</span>}
+        {book.badge && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span className="book-new-badge">{book.badge}</span>
+            {downloadCount > 0 && (
+              <span className="book-download-count">{downloadCount.toLocaleString('af-ZA')} keer afgelaai</span>
+            )}
+          </div>
+        )}
         <h4 className="book-title">{book.title}</h4>
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
@@ -39,13 +47,14 @@ function FreeBookCard({ book, claimed, onClaim }) {
 }
 
 /* ── Main screen ── */
-export default function Meer({ targetBookId, onScrolled }) {
+export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled, onNavigate }) {
   const [bookOverrides, setBookOverrides] = useState({})
   const [rgCount,       setRgCount]       = useState(CAMPAIGN.goal)
   const [liveCount,     setLiveCount]     = useState(0)
   const [liveValue,     setLiveValue]     = useState(0)
   const [activeBook,    setActiveBook]    = useState(null)
   const [claimedMap,    setClaimedMap]    = useState({})
+  const [showHuise,     setShowHuise]     = useState(false)
 
   // Scroll to target book
   useEffect(() => {
@@ -113,7 +122,7 @@ export default function Meer({ targetBookId, onScrolled }) {
       .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
       .map(([id, d]) => {
         const isRG = id === 'rustelose-gedagtes' || (d.title || '').toLowerCase().includes('rustelose')
-        return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT' } : {}) }
+        return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT', isRG: true } : {}) }
       })
       .sort((a, b) => { if (a.badge === 'NUUT') return -1; if (b.badge === 'NUUT') return 1; return 0 }),
     // Static books with Firestore overrides for pdfUrl/coverUrl
@@ -161,7 +170,8 @@ export default function Meer({ targetBookId, onScrolled }) {
                 <FreeBookCard
                   book={b}
                   claimed={!!claimedMap[b.id]}
-                  onClaim={() => setActiveBook(b)}
+                  onClaim={() => b.isRG ? setShowHuise(true) : setActiveBook(b)}
+                  downloadCount={b.isRG ? rgCount : undefined}
                 />
               </div>
             ))}
@@ -173,12 +183,20 @@ export default function Meer({ targetBookId, onScrolled }) {
         <FreeBookModal
           book={activeBook}
           onClose={() => {
-            // Refresh claimedMap after modal closes
             const updated = {}
             BOOKS.forEach(b => { if (localStorage.getItem(`fb_claimed_${b.id}`) === '1') updated[b.id] = true })
             setClaimedMap(updated)
             setActiveBook(null)
           }}
+        />
+      )}
+
+      {showHuise && (
+        <HuiseVanHoop
+          onClose={() => setShowHuise(false)}
+          installPrompt={installPrompt}
+          isInstalled={isInstalled}
+          onNavigate={onNavigate}
         />
       )}
     </div>

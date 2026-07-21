@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { CAMPAIGN } from '../data/campaign'
-import './HuiseVanHoop.css'
 import { db } from '../firebase'
 import { collection, query, orderBy, limit, startAfter, getDocs, getDoc, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import '../components/PopupStyles.css'
@@ -215,9 +213,6 @@ function SocialLinks() {
 export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
   const { notes: cached } = readCache()
 
-  const [campaignCount, setCampaignCount] = useState(null)
-  const [campaignCover, setCampaignCover] = useState('')
-
   const [notes, setNotes]           = useState(cached)
   const [loading, setLoading]       = useState(cached.length === 0)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -258,29 +253,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const todayPlaying = playing && activeId === today?.id
   const playCount  = today ? (playCounts[today.id] || 0) : 0
 
-
-  useEffect(() => {
-    if (!CAMPAIGN.active) return
-
-    function fetchCount() {
-      fetch('/api/campaign-count')
-        .then(r => r.json())
-        .then(d => setCampaignCount(d.total || 0))
-        .catch(() => {})
-    }
-
-    fetchCount()
-    window.addEventListener('campaign-submitted', fetchCount)
-
-    getDocs(collection(db, 'books')).then(snap => {
-      const book = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .find(b => b.title?.toLowerCase().includes('rustelose') || b.id?.toLowerCase().includes('rustelose'))
-      if (book?.coverUrl) setCampaignCover(book.coverUrl)
-    }).catch(() => {})
-
-    return () => window.removeEventListener('campaign-submitted', fetchCount)
-  }, [])
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'likes'),
@@ -577,15 +549,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
-  async function handleCampaignShare() {
-    const msg = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ons soek 1000 huise van hoop:\nhttps://dewaldscheepers.com/go`
-    if (navigator.share) {
-      try { await navigator.share({ text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
-    } else {
-      try { await navigator.clipboard.writeText(msg); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
-    }
-  }
-
   async function handleListenShare() {
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
@@ -674,52 +637,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
       <div className="luister-body">
-
-        {CAMPAIGN.active && (() => {
-          const count = campaignCount || 0
-          const goal  = count < 1000 ? 1000 : Math.floor(count / 500) * 500 + 500
-          return (
-          <div className="huise-card">
-            <div className="huise-card-inner">
-              <span className="huise-card-badge">GRATIS</span>
-              <div className="huise-card-body-row">
-                {campaignCover && (
-                  <img
-                    src={campaignCover}
-                    className="huise-card-cover"
-                    alt="Rustelose Gedagtes"
-                    onError={e => { e.currentTarget.style.display = 'none' }}
-                  />
-                )}
-                <div className="huise-card-body-text">
-                  <h3 className="huise-card-title">{goal.toLocaleString()} Huise van Hoop</h3>
-                  <p className="huise-card-subtitle">Rustelose Gedagtes · Gratis e-boek</p>
-                  <div className="huise-card-divider" />
-                  <p className="huise-card-text">Ons gee {goal.toLocaleString()} gratis e-boeke weg.</p>
-                </div>
-              </div>
-              <p className="huise-card-tagline">Bring hoop na jou huis of stuur dit vir iemand wat dit nodig het.</p>
-              {count > 0 && (
-                <div className="huise-card-progress">
-                  <div className="huise-card-count-label">
-                    Hoop gebring na <strong>{count.toLocaleString()} {count === 1 ? 'huis' : 'huise'}</strong> — op pad na {goal.toLocaleString()}
-                  </div>
-                  <div className="huise-card-bar">
-                    <div className="huise-card-fill" style={{ width: `${Math.min(100, (count / goal) * 100)}%` }} />
-                  </div>
-                </div>
-              )}
-              <button className="huise-card-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-huise-van-hoop'))}>
-                Kry Rustelose Gedagtes Gratis
-              </button>
-              <button className="huise-card-share" onClick={handleCampaignShare}>
-                Deel met iemand
-              </button>
-            </div>
-          </div>
-          )
-        })()}
-
 
         {today.wallpaperUrl && (
           <div className="wp-card">
