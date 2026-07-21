@@ -36,8 +36,10 @@ function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
         <h4 className="book-title">{book.title}</h4>
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
-          {claimed && pdfUrl
-            ? <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-free book-buy-btn">📥 Laai af</a>
+          {claimed
+            ? pdfUrl
+              ? <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-free book-buy-btn">📥 Laai af</a>
+              : <button className="btn-free book-buy-btn" onClick={onClaim}>📥 Laai af</button>
             : <button className="btn-primary book-buy-btn" onClick={onClaim}>Kry gratis →</button>
           }
         </div>
