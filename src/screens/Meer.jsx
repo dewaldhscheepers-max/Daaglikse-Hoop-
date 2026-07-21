@@ -114,7 +114,7 @@ export default function Meer({ targetBookId, onScrolled }) {
       const ov = bookOverrides[b.id] || {}
       return { ...b, pdfUrl: ov.pdfUrl ?? b.pdfUrl ?? null, coverUrl: ov.coverUrl ?? null }
     }),
-  ].filter(b => !(CAMPAIGN.active && (b.id === 'rustelose-gedagtes' || (b.title || '').toLowerCase().includes('rustelose'))))
+  ]
 
   const totalBooks = rgCount + 3000 + liveCount
   const totalValue = rgCount * 110 + 150000 + liveValue
@@ -151,7 +151,7 @@ export default function Meer({ targetBookId, onScrolled }) {
             <div className="huise-meer-banner-text">
               <span className="huise-meer-banner-eyebrow">GRATIS · VLAGSKIP-BOEK</span>
               <span className="huise-meer-banner-title">Rustelose Gedagtes</span>
-              <span className="huise-meer-banner-sub">{fmtNum(rgCount)} huise bereik · Installeer & kry gratis</span>
+              <span className="huise-meer-banner-sub">Installeer die app & kry gratis</span>
             </div>
             <span className="huise-meer-banner-arrow">›</span>
           </button>
