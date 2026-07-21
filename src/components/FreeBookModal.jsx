@@ -1,18 +1,33 @@
 import { useState, useEffect } from 'react'
 import './FreeBookModal.css'
 
-export default function FreeBookModal({ book, onClose }) {
+export default function FreeBookModal({ book, onClose, installPrompt, isInstalled }) {
   const storageKey = `fb_claimed_${book.id}`
 
-  // If already claimed and pdfUrl is available as prop, skip form
   const alreadyClaimed = localStorage.getItem(storageKey) === '1'
-  const [step,       setStep]       = useState(alreadyClaimed && book.pdfUrl ? 'success' : 'form')
-  const [email,      setEmail]      = useState('')
-  const [consent,    setConsent]    = useState(false)
-  const [busy,       setBusy]       = useState(false)
-  const [error,      setError]      = useState('')
-  const [result,     setResult]     = useState(alreadyClaimed && book.pdfUrl ? { pdfUrl: book.pdfUrl, title: book.title } : null)
-  const [shareToast, setShareToast] = useState(false)
+  const isStandalone   = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+  const skipInstall    = isInstalled || isStandalone || alreadyClaimed
+
+  const [step,        setStep]        = useState(alreadyClaimed && book.pdfUrl ? 'success' : skipInstall ? 'form' : 'install')
+  const [installDone, setInstallDone] = useState(false)
+  const [email,       setEmail]       = useState('')
+  const [consent,     setConsent]     = useState(false)
+  const [busy,        setBusy]        = useState(false)
+  const [error,       setError]       = useState('')
+  const [result,      setResult]      = useState(alreadyClaimed && book.pdfUrl ? { pdfUrl: book.pdfUrl, title: book.title } : null)
+  const [shareToast,  setShareToast]  = useState(false)
+
+  async function handleInstall() {
+    if (!installPrompt) return
+    try {
+      installPrompt.prompt()
+      const { outcome } = await installPrompt.userChoice
+      if (outcome === 'accepted') {
+        setInstallDone(true)
+        setTimeout(() => setStep('form'), 900)
+      }
+    } catch {}
+  }
 
   // Close on backdrop click
   function handleBackdropClick(e) {
@@ -80,6 +95,32 @@ export default function FreeBookModal({ book, onClose }) {
     <div className="fb-backdrop" onClick={handleBackdropClick}>
       <div className="fb-modal" onClick={e => e.stopPropagation()}>
         <button className="fb-close" onClick={onClose} aria-label="Sluit">✕</button>
+
+        {/* ── Install step ── */}
+        {step === 'install' && (
+          <>
+            <div className="fb-book-cover" style={{ background: book.coverUrl ? 'transparent' : book.color }}>
+              {book.coverUrl
+                ? <img src={book.coverUrl} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
+                : <span style={{ fontSize: 36 }}>{book.emoji || '📚'}</span>}
+            </div>
+            <h2 className="fb-title">Installeer eers die app</h2>
+            <p className="fb-sub">Hierdie gratis e-boek is deel van die Daaglikse Hoop-app. Installeer die app sodat jy ook die stemnotas, gebedsmuur en gebede kan gebruik.</p>
+
+            {installDone ? (
+              <div className="fb-install-done">✅ App geïnstalleer!</div>
+            ) : installPrompt ? (
+              <button className="fb-btn-primary" onClick={handleInstall}>📲 Installeer die app</button>
+            ) : (
+              <div className="fb-ios-tip">
+                <strong>Hoe om te installeer:</strong><br />
+                Maak die blaaier se menu oop en kies <em>"Add to Home Screen"</em> of <em>"Install app"</em>.
+              </div>
+            )}
+
+            <button className="fb-btn-skip" onClick={() => setStep('form')}>Ek het reeds die app →</button>
+          </>
+        )}
 
         {/* ── Form step ── */}
         {step === 'form' && (
@@ -171,22 +212,6 @@ export default function FreeBookModal({ book, onClose }) {
                   🙏 Eenmalige Bydrae
                 </button>
               </div>
-            </div>
-
-            <div className="fb-install-block">
-              <div className="fb-install-inner">
-                <span className="fb-install-icon-sm">📱</span>
-                <div>
-                  <p className="fb-install-title">Daaglikse hoop op jou foon</p>
-                  <p className="fb-install-sub">Installeer die app vir 'n nuwe boodskap elke dag</p>
-                </div>
-              </div>
-              <button className="fb-btn-install" onClick={() => {
-                window.dispatchEvent(new CustomEvent('trigger-install-prompt'))
-                onClose()
-              }}>
-                Installeer die app →
-              </button>
             </div>
 
             <button className="fb-btn-skip" onClick={onClose}>Nie nou nie</button>

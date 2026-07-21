@@ -182,6 +182,8 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       {activeBook && (
         <FreeBookModal
           book={activeBook}
+          installPrompt={installPrompt}
+          isInstalled={isInstalled}
           onClose={() => {
             const updated = {}
             BOOKS.forEach(b => { if (localStorage.getItem(`fb_claimed_${b.id}`) === '1') updated[b.id] = true })
