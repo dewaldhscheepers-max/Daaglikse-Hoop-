@@ -76,6 +76,8 @@ export default function Meer({ targetBookId, onScrolled }) {
       if (snap.exists()) {
         const data = snap.data()
         setRgCount(data.total ?? CAMPAIGN.goal)
+      } else {
+        setRgCount(CAMPAIGN.goal)
       }
     })
     return unsub
@@ -137,7 +139,7 @@ export default function Meer({ targetBookId, onScrolled }) {
             <span className="meer-stat-lbl">e-boeke afgelaai</span>
           </div>
           <div className="meer-stat-box">
-            <span className="meer-stat-num">R{Math.floor(totalValue / 10 * 10).toLocaleString('af-ZA')}+</span>
+            <span className="meer-stat-num">R{Math.floor(totalValue).toLocaleString('af-ZA')}+</span>
             <span className="meer-stat-lbl">se hoop weggegee</span>
           </div>
         </div>

@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => r.ok ? r.json() : null)
     const currentTotal = parseInt(counter?.fields?.total?.integerValue ?? '0')
-    await fetch(`${baseUrl}/stats/campaign_huise`, {
+    await fetch(`${baseUrl}/stats/campaign_huise?updateMask.fieldPaths=total`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields: { total: { integerValue: String(currentTotal + 1) } } }),

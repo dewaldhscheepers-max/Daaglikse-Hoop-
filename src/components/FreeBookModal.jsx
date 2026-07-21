@@ -16,6 +16,7 @@ export default function FreeBookModal({ book, onClose }) {
 
   // Close on backdrop click
   function handleBackdropClick(e) {
+    if (busy) return
     if (e.target === e.currentTarget) onClose()
   }
 
@@ -54,24 +55,25 @@ export default function FreeBookModal({ book, onClose }) {
   }
 
   async function handleShare() {
-    const msg = `Ek het sopas "${book.title}" gratis gekry op die Daaglikse Hoop app 🙏\n\nKry ook gratis Bybelse e-boeke:\nhttps://dewaldscheepers.com/go`
+    const shareUrl = 'https://dewaldscheepers.com/go'
+    const msg = `Ek het sopas "${book.title}" gratis gekry op die Daaglikse Hoop app 🙏\n\nKry ook gratis Bybelse e-boeke:`
     if (navigator.share) {
-      try { await navigator.share({ text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ text: msg, url: shareUrl }) } catch {}
     } else {
       try {
-        await navigator.clipboard.writeText(msg)
+        await navigator.clipboard.writeText(`${msg}\n${shareUrl}`)
         setShareToast(true)
         setTimeout(() => setShareToast(false), 2500)
       } catch {
         window.open(
-          `https://wa.me/?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/?text=${encodeURIComponent(`${msg}\n${shareUrl}`)}`,
           '_blank'
         )
       }
     }
   }
 
-  const displayPdfUrl = result?.pdfUrl || book.pdfUrl
+  const displayPdfUrl = result?.pdfUrl ?? book.pdfUrl
   const displayTitle  = result?.title  || book.title
 
   return (

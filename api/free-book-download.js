@@ -60,13 +60,14 @@ async function fsWrite(projectId, token, path, fields) {
 
 async function fsIncrement(projectId, token, docPath, ...fieldIncrements) {
   const current = await fsGet(projectId, token, docPath)
-  const fields = { ...(current?.fields || {}) }
+  const fields = {}
   for (const { field, value } of fieldIncrements) {
-    const cur = parseInt(fields[field]?.integerValue ?? fields[field]?.doubleValue ?? '0')
+    const cur = parseInt(current?.fields?.[field]?.integerValue ?? current?.fields?.[field]?.doubleValue ?? '0')
     fields[field] = { integerValue: String(cur + value) }
   }
+  const mask = fieldIncrements.map(({ field }) => `updateMask.fieldPaths=${encodeURIComponent(field)}`).join('&')
   await fetch(
-    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${docPath}`,
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${docPath}?${mask}`,
     {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -134,15 +135,6 @@ module.exports = async function handler(req, res) {
       { field: 'count', value: 1 },
       { field: 'value', value: bookValue }
     )
-
-    // Special campaign counter for rustelose-gedagtes — match by ID or title
-    const isRustelose = bookId === 'rustelose-gedagtes'
-      || bookTitle.toLowerCase().includes('rustelose')
-    if (isRustelose) {
-      await fsIncrement(projectId, token, 'stats/campaign_huise',
-        { field: 'total', value: 1 }
-      )
-    }
 
     // Log download for deduplication
     await fsWrite(projectId, token, `freeDownloads/${dedupId}`, {
