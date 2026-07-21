@@ -71,6 +71,7 @@ module.exports = async function handler(req, res) {
     })
 
     // Increment campaign counter
+    const counterName = `projects/${projectId}/databases/(default)/documents/counters/campaign_huise`
     await fetch(
       `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`,
       {
@@ -78,10 +79,9 @@ module.exports = async function handler(req, res) {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           writes: [{
-            transform: {
-              document: `projects/${projectId}/databases/(default)/documents/counters/campaign_huise`,
-              fieldTransforms: [{ fieldPath: 'total', increment: { integerValue: '1' } }],
-            },
+            update: { name: counterName, fields: {} },
+            updateMask: { fieldPaths: [] },
+            updateTransforms: [{ fieldPath: 'total', increment: { integerValue: '1' } }],
           }],
         }),
       }
