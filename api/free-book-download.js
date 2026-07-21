@@ -130,11 +130,18 @@ module.exports = async function handler(req, res) {
       addedAt: { timestampValue: new Date().toISOString() },
     })
 
-    // Increment ebooks_given counter
-    await fsIncrement(projectId, token, 'stats/ebooks_given',
-      { field: 'count', value: 1 },
-      { field: 'value', value: bookValue }
-    )
+    const isRustelose = bookId === 'rustelose-gedagtes'
+      || bookTitle.toLowerCase().includes('rustelose')
+    if (isRustelose) {
+      await fsIncrement(projectId, token, 'stats/campaign_huise',
+        { field: 'total', value: 1 }
+      )
+    } else {
+      await fsIncrement(projectId, token, 'stats/ebooks_given',
+        { field: 'count', value: 1 },
+        { field: 'value', value: bookValue }
+      )
+    }
 
     // Log download for deduplication
     await fsWrite(projectId, token, `freeDownloads/${dedupId}`, {
