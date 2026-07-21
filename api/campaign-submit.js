@@ -71,21 +71,15 @@ module.exports = async function handler(req, res) {
     })
 
     // Increment campaign counter
-    const counterName = `projects/${projectId}/databases/(default)/documents/counters/campaign_huise`
-    await fetch(
-      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          writes: [{
-            update: { name: counterName, fields: {} },
-            updateMask: { fieldPaths: [] },
-            updateTransforms: [{ fieldPath: 'total', increment: { integerValue: '1' } }],
-          }],
-        }),
-      }
-    )
+    const counter = await fetch(`${baseUrl}/counters/campaign_huise`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(r => r.ok ? r.json() : null)
+    const currentTotal = parseInt(counter?.fields?.total?.integerValue ?? '0')
+    await fetch(`${baseUrl}/counters/campaign_huise`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { total: { integerValue: String(currentTotal + 1) } } }),
+    })
   }
 
   return res.status(200).json({ success: true })

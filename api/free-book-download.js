@@ -59,22 +59,18 @@ async function fsWrite(projectId, token, path, fields) {
 }
 
 async function fsIncrement(projectId, token, docPath, ...fieldIncrements) {
-  const docName = `projects/${projectId}/databases/(default)/documents/${docPath}`
+  const current = await fsGet(projectId, token, docPath)
+  const fields = { ...(current?.fields || {}) }
+  for (const { field, value } of fieldIncrements) {
+    const cur = parseInt(fields[field]?.integerValue ?? fields[field]?.doubleValue ?? '0')
+    fields[field] = { integerValue: String(cur + value) }
+  }
   await fetch(
-    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`,
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${docPath}`,
     {
-      method: 'POST',
+      method: 'PATCH',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        writes: [{
-          update: { name: docName, fields: {} },
-          updateMask: { fieldPaths: [] },
-          updateTransforms: fieldIncrements.map(({ field, value }) => ({
-            fieldPath: field,
-            increment: { integerValue: String(value) },
-          })),
-        }],
-      }),
+      body: JSON.stringify({ fields }),
     }
   )
 }
