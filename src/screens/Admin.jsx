@@ -419,7 +419,7 @@ export default function Admin({ onClose }) {
         title:  newTitle.trim(),
         desc:   newDesc.trim(),
         free:   true,
-        value:  parseFloat(newValue) || 50,
+        value:  Math.round(parseFloat(newValue) || 50),
         emoji:  newEmoji || '📚',
         color:  '#EDE8F8',
       })

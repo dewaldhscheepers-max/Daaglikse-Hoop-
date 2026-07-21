@@ -108,10 +108,9 @@ module.exports = async function handler(req, res) {
     if (bookDoc?.fields) {
       bookTitle = bookDoc.fields.title?.stringValue  || cleanBookTitle(bookId)
       pdfUrl    = bookDoc.fields.pdfUrl?.stringValue || null
-      // Support explicit value field for dynamic/new books
-      if (bookDoc.fields.value?.integerValue) {
-        bookValue = parseInt(bookDoc.fields.value.integerValue)
-      }
+      // Support explicit value field for dynamic/new books (integer or float)
+      const rawVal = bookDoc.fields.value?.integerValue ?? bookDoc.fields.value?.doubleValue
+      if (rawVal != null) bookValue = Math.round(parseFloat(rawVal))
     }
   } catch {}
 
