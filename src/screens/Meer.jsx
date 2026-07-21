@@ -113,6 +113,8 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     Object.keys(bookOverrides).forEach(id => {
       if (!STATIC_IDS.has(id) && localStorage.getItem(`fb_claimed_${id}`) === '1') map[id] = true
     })
+    // HuiseVanHoop uses 'huise_claimed' key for RG
+    if (localStorage.getItem('huise_claimed') === '1') map['rustelose-gedagtes'] = true
     setClaimedMap(map)
   }, [bookOverrides])
 
