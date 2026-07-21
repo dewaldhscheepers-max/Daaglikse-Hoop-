@@ -133,7 +133,7 @@ module.exports = async function handler(req, res) {
     const isRustelose = bookId === 'rustelose-gedagtes'
       || bookTitle.toLowerCase().includes('rustelose')
     if (isRustelose) {
-      await fsIncrement(projectId, token, 'stats/campaign_huise',
+      await fsIncrement(projectId, token, 'counters/campaign_huise',
         { field: 'total', value: 1 }
       )
     } else {

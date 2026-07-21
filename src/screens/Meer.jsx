@@ -79,17 +79,17 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     return unsub
   }, [])
 
-  // Load rgCount from stats/campaign_huise
+  // Load rgCount from campaign-count API (reads counters/campaign_huise where historic data lives)
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'stats', 'campaign_huise'), snap => {
-      if (snap.exists()) {
-        const data = snap.data()
-        setRgCount(data.total ?? CAMPAIGN.goal)
-      } else {
-        setRgCount(CAMPAIGN.goal)
-      }
-    })
-    return unsub
+    function fetchRgCount() {
+      fetch('/api/campaign-count')
+        .then(r => r.json())
+        .then(d => { if (d.total) setRgCount(d.total) })
+        .catch(() => {})
+    }
+    fetchRgCount()
+    window.addEventListener('campaign-submitted', fetchRgCount)
+    return () => window.removeEventListener('campaign-submitted', fetchRgCount)
   }, [])
 
   // Load liveCount + liveValue from stats/ebooks_given
