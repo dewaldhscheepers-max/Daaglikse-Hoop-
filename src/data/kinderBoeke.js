@@ -1,8 +1,9 @@
 // Static manifest for 5 Afrikaans children's picture books
-// Image assets live at /books/[id]/ — 00-cover.png through 09.png
+// Image assets live at /books/[id]/ — 00-cover.png + numbered pages
 
-function makeBook(id, title, description) {
-  const slugs = ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+function makeBook(id, title, description, extraSlugs) {
+  const defaultSlugs = ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+  const slugs = extraSlugs || defaultSlugs
   return {
     id,
     title,
@@ -39,6 +40,7 @@ export const KINDER_BOEKE = [
   makeBook(
     'lelike-woorde-is-nie-die-waarheid-nie',
     'Lelike woorde is nie die waarheid nie',
-    'Herinner kinders dat slegte woorde wat ander sê nie die waarheid oor hulle is nie.'
+    'Herinner kinders dat slegte woorde wat ander sê nie die waarheid oor hulle is nie.',
+    ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
   ),
 ]
