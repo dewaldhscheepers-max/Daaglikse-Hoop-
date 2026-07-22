@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import KinderBoekLeser from './KinderBoekLeser'
 import './KinderBibloteek.css'
@@ -61,7 +63,28 @@ function BookCard({ book, onRead, onShare }) {
 
 /* ── Main library screen ── */
 export default function KinderBibloteek({ onClose }) {
-  const [activeBook, setActiveBook] = useState(null)
+  const [activeBook, setActiveBook]   = useState(null)
+  const [books, setBooks]             = useState(null)
+  const [fsLoading, setFsLoading]     = useState(true)
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, 'kinderBoeke'),
+      snap => {
+        const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        const published = fetched.filter(b => b.status === 'published')
+        setBooks(published.length > 0 ? published : KINDER_BOEKE)
+        setFsLoading(false)
+      },
+      () => {
+        setBooks(KINDER_BOEKE)
+        setFsLoading(false)
+      }
+    )
+    return unsub
+  }, [])
+
+  const displayBooks = books ?? KINDER_BOEKE
 
   return (
     <div className="kb-library">
@@ -86,16 +109,22 @@ export default function KinderBibloteek({ onClose }) {
       <div className="kb-library-body">
 
         {/* 2-column book grid */}
-        <div className="kb-book-grid">
-          {KINDER_BOEKE.map(book => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onRead={() => setActiveBook(book)}
-              onShare={() => shareBook(book)}
-            />
-          ))}
-        </div>
+        {fsLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)', fontSize: 15 }}>
+            Boeke word gelaai...
+          </div>
+        ) : (
+          <div className="kb-book-grid">
+            {displayBooks.map(book => (
+              <BookCard
+                key={book.id}
+                book={book}
+                onRead={() => setActiveBook(book)}
+                onShare={() => shareBook(book)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Donation callout */}
         <div className="kb-donation-callout">
@@ -106,10 +135,16 @@ export default function KinderBibloteek({ onClose }) {
             As jy wil help, kan jy 'n donasie maak — elke bydrae help ons om meer boeke te skep.
           </p>
           <button
-            className="kb-donation-btn"
+            className="kb-donation-btn kb-donation-btn-primary"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
+          >
+            💜 Maandelikse Hoopdraer
+          </button>
+          <button
+            className="kb-donation-btn kb-donation-btn-ghost"
             onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
           >
-            Maak 'n donasie
+            🙏 Eenmalige bydrae
           </button>
         </div>
       </div>

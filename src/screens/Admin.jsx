@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import KinderAdmin from './KinderAdmin'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
@@ -25,7 +26,7 @@ export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'notif' | 'aandgebed' | 'video'
+  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'kinders' | 'notif' | 'email' | 'video'
 
   // ── Saturday video state ──
   const [svActive,   setSvActive]   = useState(false)
@@ -588,6 +589,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'books' ? 'active' : ''}`} onClick={() => setActiveTab('books')}>
             📚 Boeke
           </button>
+          <button className={`admin-tab ${activeTab === 'kinders' ? 'active' : ''}`} onClick={() => setActiveTab('kinders')}>
+            🧒 Kinders
+          </button>
           <button className={`admin-tab ${activeTab === 'notif' ? 'active' : ''}`} onClick={() => setActiveTab('notif')}>
             🔔 Notifs
           </button>
@@ -1055,6 +1059,9 @@ export default function Admin({ onClose }) {
             </div>
           )}
 
+
+          {/* ── KINDERS TAB ── */}
+          {activeTab === 'kinders' && <KinderAdmin />}
 
           {activeTab === 'video' && (
             <div className="admin-section">
