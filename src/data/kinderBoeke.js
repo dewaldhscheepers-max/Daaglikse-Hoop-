@@ -35,7 +35,8 @@ export const KINDER_BOEKE = [
   makeBook(
     'wanneer-my-gevoelens-te-groot-word',
     'Wanneer my gevoelens te groot word',
-    "Help kinders om groot emosies op 'n eenvoudige manier te verstaan en rustig te raak."
+    "Help kinders om groot emosies op 'n eenvoudige manier te verstaan en rustig te raak.",
+    ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
   ),
   makeBook(
     'lelike-woorde-is-nie-die-waarheid-nie',
