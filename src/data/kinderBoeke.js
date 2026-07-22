@@ -1,9 +1,9 @@
 // Static manifest for 5 Afrikaans children's picture books
 // Image assets live at /books/[id]/ — 00-cover.png + numbered pages
 
-function makeBook(id, title, description, extraSlugs) {
-  const defaultSlugs = ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09']
-  const slugs = extraSlugs || defaultSlugs
+function makeBook(id, title, description, pageSlugs) {
+  // 00-cover is the library thumbnail only — NOT a reading page
+  const slugs = pageSlugs || ['01', '02', '03', '04', '05', '06', '07', '08', '09']
   return {
     id,
     title,
@@ -20,7 +20,8 @@ export const KINDER_BOEKE = [
   makeBook(
     'die-donker-is-nie-te-sterk-nie',
     'Die donker is nie te sterk nie',
-    'Help kinders om nie bang te wees vir die donker nie — want God se lig is altyd sterker.'
+    'Help kinders om nie bang te wees vir die donker nie — want God se lig is altyd sterker.',
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
   ),
   makeBook(
     'foutjies-help-my-groei',
@@ -36,12 +37,12 @@ export const KINDER_BOEKE = [
     'wanneer-my-gevoelens-te-groot-word',
     'Wanneer my gevoelens te groot word',
     "Help kinders om groot emosies op 'n eenvoudige manier te verstaan en rustig te raak.",
-    ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
   ),
   makeBook(
     'lelike-woorde-is-nie-die-waarheid-nie',
     'Lelike woorde is nie die waarheid nie',
     'Herinner kinders dat slegte woorde wat ander sê nie die waarheid oor hulle is nie.',
-    ['00-cover', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
   ),
 ]

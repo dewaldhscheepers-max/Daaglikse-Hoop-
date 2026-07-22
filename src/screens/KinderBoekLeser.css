@@ -171,6 +171,11 @@
 .kbl-arrow-left  { left:  10px; }
 .kbl-arrow-right { right: 10px; }
 
+.kbl-arrow-last {
+  background: rgba(255, 255, 255, 0.28);
+  font-size: 20px;
+}
+
 /* ─── Shared overlay base ─── */
 .kbl-overlay {
   position: absolute;

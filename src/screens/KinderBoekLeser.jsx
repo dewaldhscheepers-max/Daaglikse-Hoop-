@@ -7,7 +7,6 @@ export default function KinderBoekLeser({ book, onClose }) {
   const [resumePage, setResumePage]         = useState(0)
   const [showCompletion, setShowCompletion] = useState(false)
   const scrollRef          = useRef(null)
-  const completionTimer    = useRef(null)
   const lastScrolledPage   = useRef(0)
 
   const totalPages = book.pages.length
@@ -38,14 +37,7 @@ export default function KinderBoekLeser({ book, onClose }) {
     localStorage.setItem(`kb_page_${book.id}`, String(currentPage))
   }, [currentPage, book.id])
 
-  // ── Completion detection (600ms after landing on last page) ──
-  useEffect(() => {
-    clearTimeout(completionTimer.current)
-    if (currentPage === totalPages - 1 && !showCompletion) {
-      completionTimer.current = setTimeout(() => setShowCompletion(true), 600)
-    }
-    return () => clearTimeout(completionTimer.current)
-  }, [currentPage, totalPages, showCompletion])
+  // Completion is triggered by user action (tapping forward on last page), not auto-timer
 
   // ── Scroll helpers ──
   const scrollToPage = useCallback((page, instant = false) => {
@@ -74,6 +66,7 @@ export default function KinderBoekLeser({ book, onClose }) {
 
   function goForward() {
     if (currentPage < totalPages - 1) scrollToPage(currentPage + 1)
+    else setShowCompletion(true)
   }
 
   // ── Tap-zone click navigation (left 35% / right 35%) ──
@@ -188,15 +181,13 @@ export default function KinderBoekLeser({ book, onClose }) {
           ‹
         </button>
       )}
-      {currentPage < totalPages - 1 && (
-        <button
-          className="kbl-arrow kbl-arrow-right"
-          onClick={goForward}
-          aria-label="Volgende bladsy"
-        >
-          ›
-        </button>
-      )}
+      <button
+        className={`kbl-arrow kbl-arrow-right${currentPage === totalPages - 1 ? ' kbl-arrow-last' : ''}`}
+        onClick={goForward}
+        aria-label={currentPage === totalPages - 1 ? 'Klaar' : 'Volgende bladsy'}
+      >
+        {currentPage === totalPages - 1 ? '✓' : '›'}
+      </button>
 
       {/* ── Resume prompt ── */}
       {showResume && (
