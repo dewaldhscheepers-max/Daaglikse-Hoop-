@@ -12,6 +12,18 @@ export default function KinderBoekLeser({ book, onClose }) {
 
   const totalPages = book.pages.length
 
+  // ── On mount: count read once per book per device ──
+  useEffect(() => {
+    const countKey = `kb_counted_${book.id}`
+    if (!localStorage.getItem(countKey)) {
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: book.id }),
+      }).then(() => localStorage.setItem(countKey, '1')).catch(() => {})
+    }
+  }, [book.id])
+
   // ── On mount: check for saved page ──
   useEffect(() => {
     const saved = parseInt(localStorage.getItem(`kb_page_${book.id}`) || '0', 10)
