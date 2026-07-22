@@ -38,7 +38,8 @@ export const KINDER_BOEKE = [
   makeBook(
     'my-woorde-is-saadjies',
     'My woorde is saadjies',
-    'Wys kinders dat woorde krag het — goeie woorde plant hoop en lewe.'
+    'Wys kinders dat woorde krag het — goeie woorde plant hoop en lewe.',
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
   ),
   makeBook(
     'wanneer-my-gevoelens-te-groot-word',
