@@ -8,6 +8,7 @@ import FreeBookModal from '../components/FreeBookModal'
 import './Meer.css'
 import './HuiseVanHoop.css'
 import KinderBibloteek from './KinderBibloteek'
+import { KINDER_BOEKE } from '../data/kinderBoeke'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 
@@ -156,12 +157,14 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           </div>
           <div className="meer-stat-box">
             <span className="meer-stat-num">R{Math.floor(totalValue).toLocaleString('af-ZA')}+</span>
-            <span className="meer-stat-lbl">se hoop weggegee</span>
+            <span className="meer-stat-lbl">se e-boeke gratis weggegee</span>
           </div>
         </div>
       </div>
 
       <div className="meer-body">
+        <DonationCard />
+
         {/* ── Kinder promo card ── */}
         <div
           className="kinder-promo"
@@ -170,17 +173,26 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           onClick={() => setShowKinderBibloteek(true)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowKinderBibloteek(true) }}
         >
-          <span className="kinder-promo-badge">NUUT</span>
-          <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
-          <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2 tot 5 jaar.</p>
-          <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant een groot waarheid op 'n slag.</p>
-          <div className="kinder-promo-count">5 gratis kinderboeke beskikbaar</div>
+          <div className="kinder-promo-row">
+            <div className="kinder-promo-text">
+              <span className="kinder-promo-badge">NUUT</span>
+              <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
+              <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2–5 jaar.</p>
+              <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant God se waarheid in klein hartjies.</p>
+              <div className="kinder-promo-count">5 gratis kinderboeke beskikbaar</div>
+            </div>
+            <div className="kinder-promo-covers" aria-hidden="true">
+              {[KINDER_BOEKE[0], KINDER_BOEKE[3], KINDER_BOEKE[4]].map((b, i) => (
+                <div key={i} className="kinder-promo-cover">
+                  <img src={b.cover} alt="" />
+                </div>
+              ))}
+            </div>
+          </div>
           <button className="kinder-promo-btn" onClick={e => { e.stopPropagation(); setShowKinderBibloteek(true) }}>
             SIEN DIE KINDERBOEKE →
           </button>
         </div>
-
-        <DonationCard />
 
         {/* All books */}
         <div className="meer-section">
