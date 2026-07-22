@@ -234,8 +234,11 @@ export default function KinderBoekLeser({ book, onClose }) {
               <button className="kbl-btn-secondary" onClick={handleReadAgain}>
                 Lees weer
               </button>
+              <button className="kbl-btn-secondary" onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}>
+                💜 Maandelikse Hoopdraer
+              </button>
               <button className="kbl-btn-secondary" onClick={handleDonation}>
-                Maak 'n donasie
+                🙏 Eenmalige bydrae
               </button>
               <button className="kbl-btn-ghost" onClick={onClose}>
                 Terug na kinderboeke

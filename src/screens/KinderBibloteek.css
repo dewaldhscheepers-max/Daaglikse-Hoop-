@@ -250,8 +250,6 @@
 }
 
 .kb-donation-btn {
-  background: #4A2C14;
-  color: white;
   border: none;
   border-radius: 14px;
   padding: 13px 28px;
@@ -262,9 +260,24 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s, transform 0.1s;
   margin-top: 4px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.kb-donation-btn-primary {
+  background: #4A2C14;
+  color: white;
+}
+
+.kb-donation-btn-ghost {
+  background: transparent;
+  color: #4A2C14;
+  border: 2px solid #4A2C14;
 }
 
 .kb-donation-btn:active {
-  background: #2D1B0E;
   transform: scale(0.97);
 }
+
+.kb-donation-btn-primary:active { background: #2D1B0E; }
+.kb-donation-btn-ghost:active   { background: rgba(74,44,20,0.08); }
