@@ -7,6 +7,7 @@ import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
 import './Meer.css'
 import './HuiseVanHoop.css'
+import KinderBibloteek from './KinderBibloteek'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 
@@ -49,12 +50,13 @@ function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
 
 /* ── Main screen ── */
 export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled }) {
-  const [bookOverrides, setBookOverrides] = useState({})
-  const [rgCount,       setRgCount]       = useState(CAMPAIGN.goal)
-  const [liveCount,     setLiveCount]     = useState(0)
-  const [liveValue,     setLiveValue]     = useState(0)
-  const [activeBook,    setActiveBook]    = useState(null)
-  const [claimedMap,    setClaimedMap]    = useState({})
+  const [bookOverrides,       setBookOverrides]       = useState({})
+  const [rgCount,             setRgCount]             = useState(CAMPAIGN.goal)
+  const [liveCount,           setLiveCount]           = useState(0)
+  const [liveValue,           setLiveValue]           = useState(0)
+  const [activeBook,          setActiveBook]          = useState(null)
+  const [claimedMap,          setClaimedMap]          = useState({})
+  const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
 
   // Scroll to target book
   useEffect(() => {
@@ -160,6 +162,24 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       </div>
 
       <div className="meer-body">
+        {/* ── Kinder promo card ── */}
+        <div
+          className="kinder-promo"
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowKinderBibloteek(true)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowKinderBibloteek(true) }}
+        >
+          <span className="kinder-promo-badge">NUUT</span>
+          <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
+          <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2 tot 5 jaar.</p>
+          <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant een groot waarheid op 'n slag.</p>
+          <div className="kinder-promo-count">5 gratis kinderboeke beskikbaar</div>
+          <button className="kinder-promo-btn" onClick={e => { e.stopPropagation(); setShowKinderBibloteek(true) }}>
+            SIEN DIE KINDERBOEKE →
+          </button>
+        </div>
+
         <DonationCard />
 
         {/* All books */}
@@ -182,6 +202,10 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           </div>
         </div>
       </div>
+
+      {showKinderBibloteek && (
+        <KinderBibloteek onClose={() => setShowKinderBibloteek(false)} />
+      )}
 
       {activeBook && (
         <FreeBookModal

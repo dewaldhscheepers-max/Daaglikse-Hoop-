@@ -501,6 +501,116 @@
   font-family: var(--font-serif);
 }
 
+/* ─── Kinder promo card ─── */
+.kinder-promo {
+  background: linear-gradient(145deg, #7B3F00 0%, #C4724A 45%, #E8A95A 80%, #F5D17C 100%);
+  border-radius: 20px;
+  padding: 20px 18px 22px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 22px rgba(196, 114, 74, 0.38);
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.12s;
+  outline: none;
+}
+
+.kinder-promo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='400' height='220' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='320' cy='240' rx='200' ry='120' fill='rgba(255,255,255,0.07)'/%3E%3Cellipse cx='80' cy='10' rx='140' ry='80' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E") center/cover no-repeat;
+  pointer-events: none;
+}
+
+.kinder-promo:active {
+  transform: scale(0.98);
+}
+
+.kinder-promo-badge {
+  position: relative;
+  display: inline-block;
+  align-self: flex-start;
+  background: rgba(90, 40, 0, 0.65);
+  color: #FFD9A0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  border-radius: 8px;
+  padding: 3px 9px;
+  margin-bottom: 4px;
+}
+
+.kinder-promo-title {
+  position: relative;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  margin: 0;
+}
+
+.kinder-promo-subtitle {
+  position: relative;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.kinder-promo-tagline {
+  position: relative;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+  font-style: italic;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.kinder-promo-count {
+  position: relative;
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-top: 2px;
+}
+
+.kinder-promo-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: white;
+  color: #7B3F00;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.kinder-promo-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* ─── Impact header ─── */
 .meer-header {
   text-align: center;

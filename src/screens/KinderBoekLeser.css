@@ -1,0 +1,328 @@
+/* ─── KinderBoekLeser — fullscreen swipe reader ─── */
+
+.kbl-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #1a1a2e;
+  overflow: hidden;
+}
+
+/* ─── Horizontal scroll strip ─── */
+.kbl-scroll {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  /* Hide scrollbar across browsers */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.kbl-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Individual page ─── */
+.kbl-page {
+  width: 100vw;
+  height: 100%;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kbl-page-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Fallback when image fails to load */
+.kbl-page-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2a2850 0%, #1a1a2e 100%);
+  font-size: 72px;
+  pointer-events: none;
+}
+
+.kbl-page-fallback::after {
+  content: '📖';
+}
+
+/* ─── Parent tip banner (page 0 only) ─── */
+.kbl-parent-tip {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 11px 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-family: var(--font-body);
+  line-height: 1.55;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.kbl-parent-tip-label {
+  font-weight: 700;
+  color: #FFD9A0;
+}
+
+/* ─── Top controls bar ─── */
+.kbl-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px 20px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.kbl-ctrl-btn {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.16);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.kbl-ctrl-btn:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.kbl-page-indicator {
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.03em;
+  pointer-events: none;
+}
+
+/* ─── Side navigation arrows ─── */
+.kbl-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.14);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 26px;
+  line-height: 1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+  padding: 0;
+}
+
+.kbl-arrow:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.kbl-arrow-left  { left:  10px; }
+.kbl-arrow-right { right: 10px; }
+
+/* ─── Shared overlay base ─── */
+.kbl-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  background: rgba(20, 18, 40, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.kbl-overlay-dark {
+  background: rgba(8, 8, 18, 0.97);
+}
+
+/* ─── Resume card ─── */
+.kbl-resume-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  padding: 32px 24px 28px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  color: white;
+}
+
+.kbl-resume-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.kbl-resume-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+.kbl-resume-msg {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+/* ─── Completion card ─── */
+.kbl-completion-card {
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  padding: 8px 0;
+}
+
+.kbl-completion-icon {
+  font-size: 68px;
+  line-height: 1;
+}
+
+.kbl-completion-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: white;
+}
+
+.kbl-completion-msg {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  max-width: 280px;
+  margin-bottom: 6px;
+}
+
+.kbl-completion-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ─── Shared button styles ─── */
+.kbl-btn-primary {
+  background: #E8A95A;
+  color: #1A0A00;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, transform 0.1s;
+  width: 100%;
+}
+
+.kbl-btn-primary:active {
+  background: #D4956A;
+  transform: scale(0.97);
+}
+
+.kbl-btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 13px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, transform 0.1s;
+  width: 100%;
+}
+
+.kbl-btn-secondary:active {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(0.97);
+}
+
+.kbl-btn-ghost {
+  background: none;
+  color: rgba(255, 255, 255, 0.55);
+  border: none;
+  border-radius: 14px;
+  padding: 10px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s;
+  width: 100%;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kbl-btn-ghost:active {
+  color: rgba(255, 255, 255, 0.85);
+}
