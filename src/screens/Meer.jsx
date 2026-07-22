@@ -179,7 +179,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
               <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
               <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2–5 jaar.</p>
               <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant God se waarheid in klein hartjies.</p>
-              <div className="kinder-promo-count">5 gratis kinderboeke beskikbaar</div>
+              <div className="kinder-promo-count">{KINDER_BOEKE.length} gratis kinderboeke beskikbaar</div>
             </div>
             <div className="kinder-promo-covers" aria-hidden="true">
               {[KINDER_BOEKE[0], KINDER_BOEKE[3], KINDER_BOEKE[4]].map((b, i) => (

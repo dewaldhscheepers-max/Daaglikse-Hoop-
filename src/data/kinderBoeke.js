@@ -1,4 +1,4 @@
-// Static manifest for 5 Afrikaans children's picture books
+// Static manifest for 6 Afrikaans children's picture books
 // Image assets live at /books/[id]/ — 00-cover.png + numbered pages
 
 function makeBook(id, title, description, pageSlugs) {
@@ -17,6 +17,12 @@ function makeBook(id, title, description, pageSlugs) {
 }
 
 export const KINDER_BOEKE = [
+  makeBook(
+    'klein-leeu',
+    'Klein Leeu',
+    'Groot waarhede vir klein hartjies — God het my gemaak, Jesus is altyd by my, en ek is veilig.',
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09']
+  ),
   makeBook(
     'die-donker-is-nie-te-sterk-nie',
     'Die donker is nie te sterk nie',
