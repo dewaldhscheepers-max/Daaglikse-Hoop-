@@ -25,33 +25,6 @@ async function getAccessToken() {
   return data.access_token
 }
 
-async function fsGet(projectId, token, path) {
-  const r = await fetch(
-    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${path}`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
-  if (!r.ok) return null
-  return r.json()
-}
-
-async function fsIncrement(projectId, token, docPath, ...fieldIncrements) {
-  const current = await fsGet(projectId, token, docPath)
-  const fields = {}
-  for (const { field, value } of fieldIncrements) {
-    const cur = parseInt(current?.fields?.[field]?.integerValue ?? current?.fields?.[field]?.doubleValue ?? '0')
-    fields[field] = { integerValue: String(cur + value) }
-  }
-  const mask = fieldIncrements.map(({ field }) => `updateMask.fieldPaths=${encodeURIComponent(field)}`).join('&')
-  await fetch(
-    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${docPath}?${mask}`,
-    {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields }),
-    }
-  )
-}
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -69,10 +42,31 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Auth failed' })
   }
 
-  await fsIncrement(projectId, token, 'stats/ebooks_given',
-    { field: 'count', value: 1 },
-    { field: 'value', value: 30 }
+  // Atomic server-side increment — no read-then-write race condition
+  const docName = `projects/${projectId}/databases/(default)/documents/stats/ebooks_given`
+  const r = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`,
+    {
+      method:  'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        writes: [{
+          transform: {
+            document: docName,
+            fieldTransforms: [
+              { fieldPath: 'count', increment: { integerValue: '1' } },
+              { fieldPath: 'value', increment: { integerValue: '30' } },
+            ],
+          },
+        }],
+      }),
+    }
   )
+
+  if (!r.ok) {
+    const err = await r.text()
+    return res.status(500).json({ error: 'Firestore increment misluk: ' + err })
+  }
 
   return res.status(200).json({ ok: true })
 }
