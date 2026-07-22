@@ -25,6 +25,19 @@ async function getAccessToken() {
   return data.access_token
 }
 
+function getContentType(filename, isAudio) {
+  const ext = (filename || '').toLowerCase().split('.').pop()
+  if (isAudio) {
+    if (ext === 'm4a') return 'audio/mp4'
+    if (ext === 'ogg') return 'audio/ogg'
+    return 'audio/mpeg'
+  }
+  if (ext === 'png') return 'image/png'
+  if (ext === 'gif') return 'image/gif'
+  if (ext === 'webp') return 'image/webp'
+  return 'image/jpeg'
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -32,11 +45,13 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' })
 
-  const { pin, bookId, filename, imageBase64 } = req.body || {}
+  const { pin, bookId, filename, imageBase64, fileBase64, isAudio } = req.body || {}
 
   if (pin !== '2025') return res.status(401).json({ error: 'Ongemagtig' })
-  if (!bookId || !filename || !imageBase64) {
-    return res.status(400).json({ error: 'bookId, filename en imageBase64 is vereis' })
+
+  const base64Data = fileBase64 || imageBase64
+  if (!bookId || !filename || !base64Data) {
+    return res.status(400).json({ error: 'bookId, filename en lêerdata is vereis' })
   }
 
   let token
@@ -45,15 +60,16 @@ module.exports = async function handler(req, res) {
   }
 
   const bucket      = 'daaglikse-hoop.firebasestorage.app'
-  const storagePath = `kinder-boeke/${bookId}/${filename}`
-  const ext         = filename.toLowerCase().split('.').pop()
-  const contentType = ext === 'png' ? 'image/png' : 'image/jpeg'
+  const storagePath = isAudio
+    ? `kinder-boeke/${bookId}/${filename}`
+    : `kinder-boeke/${bookId}/${filename}`
+  const contentType = getContentType(filename, isAudio)
 
   let buffer
   try {
-    buffer = Buffer.from(imageBase64, 'base64')
+    buffer = Buffer.from(base64Data, 'base64')
   } catch (e) {
-    return res.status(400).json({ error: 'Ongeldige base64: ' + e.message })
+    return res.status(400).json({ error: 'Ongeldige lêerdata: ' + e.message })
   }
 
   try {

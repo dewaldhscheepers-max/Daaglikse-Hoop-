@@ -288,6 +288,59 @@
   font-style: italic;
 }
 
+/* ── Audio section ── */
+.ka-audio-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--cream);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.ka-audio-current {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ka-audio-player {
+  width: 100%;
+  border-radius: 8px;
+  accent-color: var(--purple);
+}
+
+.ka-audio-remove {
+  background: none;
+  border: 1.5px solid #dc3c5a;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc3c5a;
+  font-family: var(--font-body);
+  cursor: pointer;
+  align-self: flex-start;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ka-audio-badge {
+  display: inline-block;
+  background: #f0eafa;
+  color: var(--purple-dark);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ka-book-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 /* ── Danger zone ── */
 .ka-danger {
   margin-top: 8px;

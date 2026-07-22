@@ -7,7 +7,8 @@
   ],
   "functions": {
     "api/send-bulk-email.js": { "maxDuration": 300 },
-    "api/process-email-queue.js": { "maxDuration": 300 }
+    "api/process-email-queue.js": { "maxDuration": 300 },
+    "api/kinder-upload.js": { "maxDuration": 60 }
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },

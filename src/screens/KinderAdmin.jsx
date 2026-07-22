@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { db } from '../firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
+import { KINDER_BOEKE } from '../data/kinderBoeke'
 import './KinderAdmin.css'
 
 const PIN = '2025'
@@ -15,24 +16,60 @@ function readAsBase64(file) {
 }
 
 export default function KinderAdmin() {
-  const [books,         setBooks]         = useState([])
-  const [loading,       setLoading]       = useState(true)
-  const [editingBook,   setEditingBook]   = useState(null)
-  const [saving,        setSaving]        = useState(false)
-  const [uploading,     setUploading]     = useState(false)
-  const [uploadMsg,     setUploadMsg]     = useState('')
-  const [saveMsg,       setSaveMsg]       = useState('')
-  const [deleteConfirm, setDeleteConfirm] = useState(false)
-  const fileInputRef = useRef(null)
+  const [books,          setBooks]          = useState([])
+  const [loading,        setLoading]        = useState(true)
+  const [editingBook,    setEditingBook]    = useState(null)
+  const [saving,         setSaving]         = useState(false)
+  const [uploading,      setUploading]      = useState(false)
+  const [uploadMsg,      setUploadMsg]      = useState('')
+  const [audioUploading, setAudioUploading] = useState(false)
+  const [audioMsg,       setAudioMsg]       = useState('')
+  const [saveMsg,        setSaveMsg]        = useState('')
+  const [deleteConfirm,  setDeleteConfirm]  = useState(false)
+  const fileInputRef  = useRef(null)
+  const audioInputRef = useRef(null)
 
   useEffect(() => { loadBooks() }, [])
+
+  async function seedMissingBooks(fetchedBooks) {
+    const existingIds = new Set(fetchedBooks.map(b => b.id))
+    const missing = KINDER_BOEKE.filter(b => !existingIds.has(b.id))
+    if (!missing.length) return fetchedBooks
+
+    for (const book of missing) {
+      try {
+        await fetch('/api/kinder-boek-save', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pin: PIN,
+            book: {
+              id:          book.id,
+              title:       book.title,
+              description: book.description,
+              ageRange:    book.ageRange,
+              cover:       book.cover,
+              pages:       book.pages,
+              status:      'published',
+              audioUrl:    '',
+            },
+          }),
+        })
+      } catch {}
+    }
+
+    const r    = await fetch('/api/kinder-boeke-list')
+    const data = await r.json()
+    return data.books || fetchedBooks
+  }
 
   async function loadBooks() {
     setLoading(true)
     try {
-      const r    = await fetch('/api/kinder-boeke-list')
-      const data = await r.json()
-      setBooks(data.books || [])
+      const r      = await fetch('/api/kinder-boeke-list')
+      const data   = await r.json()
+      const seeded = await seedMissingBooks(data.books || [])
+      setBooks(seeded)
     } catch {
       setBooks([])
     }
@@ -40,25 +77,27 @@ export default function KinderAdmin() {
   }
 
   function openNewBook() {
-    setEditingBook({ id: '', title: '', description: '', ageRange: '2–5 jaar', pages: [], status: 'draft' })
+    setEditingBook({ id: '', title: '', description: '', ageRange: '2–5 jaar', pages: [], status: 'draft', audioUrl: '' })
     setSaveMsg('')
+    setAudioMsg('')
     setDeleteConfirm(false)
   }
 
   function openEditBook(book) {
-    setEditingBook({ ...book, pages: [...(book.pages || [])] })
+    setEditingBook({ audioUrl: '', ...book, pages: [...(book.pages || [])] })
     setSaveMsg('')
+    setAudioMsg('')
     setDeleteConfirm(false)
   }
 
   function goBack() {
     setEditingBook(null)
     setSaveMsg('')
+    setAudioMsg('')
     setDeleteConfirm(false)
     loadBooks()
   }
 
-  // Derive a temporary bookId for the upload path (before the book is saved)
   function getBookId() {
     if (editingBook.id) return editingBook.id
     return (editingBook.title || '').trim().toLowerCase()
@@ -75,7 +114,10 @@ export default function KinderAdmin() {
     e.target.value = ''
 
     const bookId = getBookId()
+    if (!bookId) { alert('Voer eers die boektitel in'); return }
+
     setUploading(true)
+    setUploadMsg('')
     const uploaded = []
 
     for (let i = 0; i < files.length; i++) {
@@ -83,8 +125,8 @@ export default function KinderAdmin() {
       const file = files[i]
       try {
         const base64   = await readAsBase64(file)
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const filename = `${Date.now()}_${i}_${safeName}`
+        const ext      = file.name.split('.').pop().toLowerCase() || 'jpg'
+        const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.${ext}`
         const r = await fetch('/api/kinder-upload', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -92,14 +134,52 @@ export default function KinderAdmin() {
         })
         const data = await r.json()
         if (data.url) uploaded.push(data.url)
-      } catch {
-        // skip failed uploads silently
-      }
+      } catch {}
     }
 
     setEditingBook(prev => ({ ...prev, pages: [...(prev.pages || []), ...uploaded] }))
     setUploading(false)
-    setUploadMsg('')
+    setUploadMsg(uploaded.length ? `✅ ${uploaded.length} bladsy(e) opgelaai` : 'Geen bladsye opgelaai nie')
+    setTimeout(() => setUploadMsg(''), 4000)
+  }
+
+  async function handleAudioUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    e.target.value = ''
+
+    const bookId = getBookId()
+    if (!bookId) { alert('Voer eers die boektitel in'); return }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setAudioMsg('Lêer is groter as 10MB — gebruik asseblief \'n kleiner MP3.')
+      return
+    }
+
+    setAudioUploading(true)
+    setAudioMsg('Stemopname word opgelaai...')
+
+    try {
+      const base64   = await readAsBase64(file)
+      const ext      = file.name.split('.').pop().toLowerCase() || 'mp3'
+      const filename = `audio.${ext}`
+      const r = await fetch('/api/kinder-upload', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ pin: PIN, bookId, filename, fileBase64: base64, isAudio: true }),
+      })
+      const data = await r.json()
+      if (data.url) {
+        setEditingBook(prev => ({ ...prev, audioUrl: data.url }))
+        setAudioMsg('✅ Opgelaai! Stoor die boek om te bevestig.')
+      } else {
+        setAudioMsg('Fout: ' + (data.error || 'Onbekend'))
+      }
+    } catch (err) {
+      setAudioMsg('Netwerkfout: ' + err.message)
+    }
+
+    setAudioUploading(false)
   }
 
   async function handleSave() {
@@ -163,7 +243,7 @@ export default function KinderAdmin() {
         </div>
 
         {loading ? (
-          <div className="admin-loading">Laai boeke...</div>
+          <div className="admin-loading">Boeke word gelaai en gesinkroniseer...</div>
         ) : books.length === 0 ? (
           <div className="ka-empty">Geen boeke nie. Skep die eerste een.</div>
         ) : (
@@ -177,9 +257,12 @@ export default function KinderAdmin() {
                 )}
                 <div className="ka-book-info">
                   <div className="ka-book-title">{book.title || '(Sonder titel)'}</div>
-                  <span className={`ka-badge ${book.status === 'published' ? 'ka-badge-pub' : 'ka-badge-draft'}`}>
-                    {book.status === 'published' ? 'Gepubliseer' : 'Konsep'}
-                  </span>
+                  <div className="ka-book-meta">
+                    <span className={`ka-badge ${book.status === 'published' ? 'ka-badge-pub' : 'ka-badge-draft'}`}>
+                      {book.status === 'published' ? 'Gepubliseer' : 'Konsep'}
+                    </span>
+                    {book.audioUrl && <span className="ka-audio-badge">🎵 Oudio</span>}
+                  </div>
                 </div>
                 <button className="ka-edit-btn" onClick={() => openEditBook(book)}>Wysig</button>
               </div>
@@ -191,8 +274,9 @@ export default function KinderAdmin() {
   }
 
   /* ── EDIT VIEW ── */
-  const pageCount = (editingBook.pages || []).length
+  const pageCount      = (editingBook.pages || []).length
   const isSaveMsgError = saveMsg.startsWith('Fout') || saveMsg.startsWith('Netwerk')
+  const isAudioError   = audioMsg.startsWith('Fout') || audioMsg.startsWith('Netwerk') || audioMsg.startsWith('Lêer')
 
   return (
     <div className="ka-wrap">
@@ -239,12 +323,52 @@ export default function KinderAdmin() {
         </select>
       </div>
 
-      {/* ── Pages ── */}
+      {/* ── Stemopname / Audio ── */}
+      <div className="ka-audio-section">
+        <div className="ka-pages-header">
+          <span className="ka-pages-title">🎵 Stemopname</span>
+          <span className="ka-pages-hint">MP3 of M4A · maks 10MB</span>
+        </div>
+
+        {editingBook.audioUrl ? (
+          <div className="ka-audio-current">
+            <audio controls src={editingBook.audioUrl} className="ka-audio-player" />
+            <button
+              className="ka-audio-remove"
+              onClick={() => { setEditingBook(prev => ({ ...prev, audioUrl: '' })); setAudioMsg('') }}
+            >
+              Verwyder oudio
+            </button>
+          </div>
+        ) : null}
+
+        <input
+          ref={audioInputRef}
+          type="file"
+          accept="audio/mpeg,audio/mp4,audio/m4a,.mp3,.m4a"
+          style={{ display: 'none' }}
+          onChange={handleAudioUpload}
+        />
+
+        {audioUploading ? (
+          <div className="ka-upload-msg">{audioMsg}</div>
+        ) : (
+          <button className="ka-upload-btn" onClick={() => audioInputRef.current?.click()}>
+            {editingBook.audioUrl ? '↻ Vervang stemopname' : '+ Laai stemopname op'}
+          </button>
+        )}
+
+        {audioMsg && !audioUploading && (
+          <div className={isAudioError ? 'admin-error' : 'admin-success'}>{audioMsg}</div>
+        )}
+      </div>
+
+      {/* ── Bladsye ── */}
       <div className="ka-pages-section">
         <div className="ka-pages-header">
           <span className="ka-pages-title">Bladsye ({pageCount})</span>
           {pageCount > 0 && (
-            <span className="ka-pages-hint">Eerste bladsy = voorblad</span>
+            <span className="ka-pages-hint">Eerste = voorblad · gebruik ↑↓ vir volgorde</span>
           )}
         </div>
 
@@ -253,7 +377,9 @@ export default function KinderAdmin() {
             {(editingBook.pages || []).map((url, idx) => (
               <div key={idx} className="ka-page-item">
                 <img src={url} alt={`Bladsy ${idx + 1}`} className="ka-page-img" />
-                <div className="ka-page-num">{idx + 1}</div>
+                <div className="ka-page-num">
+                  {idx === 0 ? 'Voorblad' : `Bladsy ${idx}`}
+                </div>
                 <div className="ka-page-btns">
                   <button
                     className="ka-pg-btn"
@@ -290,9 +416,12 @@ export default function KinderAdmin() {
         {uploading ? (
           <div className="ka-upload-msg">{uploadMsg}</div>
         ) : (
-          <button className="ka-upload-btn" onClick={() => fileInputRef.current?.click()}>
-            + Voeg bladsye by
-          </button>
+          <>
+            <button className="ka-upload-btn" onClick={() => fileInputRef.current?.click()}>
+              + Voeg bladsye by (in volgorde)
+            </button>
+            {uploadMsg && <div className="admin-success">{uploadMsg}</div>}
+          </>
         )}
       </div>
 
@@ -305,7 +434,7 @@ export default function KinderAdmin() {
       <button
         className="admin-save-btn"
         onClick={handleSave}
-        disabled={saving || uploading}
+        disabled={saving || uploading || audioUploading}
       >
         {saving ? 'Stoor...' : 'Stoor'}
       </button>

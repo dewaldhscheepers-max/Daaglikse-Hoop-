@@ -129,6 +129,18 @@
   background: rgba(255, 255, 255, 0.32);
 }
 
+.kbl-audio-btn {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.kbl-audio-playing {
+  background: rgba(160, 110, 255, 0.5);
+}
+
+.kbl-audio-playing:active {
+  background: rgba(160, 110, 255, 0.7);
+}
+
 .kbl-page-indicator {
   color: white;
   font-size: 13px;

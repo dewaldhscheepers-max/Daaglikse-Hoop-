@@ -37,7 +37,7 @@ module.exports = async function handler(req, res) {
   if (pin !== '2025') return res.status(401).json({ error: 'Ongemagtig' })
   if (!book) return res.status(400).json({ error: 'book is vereis' })
 
-  let { id, title, description, ageRange, pages, status } = book
+  let { id, title, description, ageRange, pages, status, audioUrl } = book
 
   // Generate id from title if not provided
   if (!id || !id.trim()) {
@@ -49,8 +49,8 @@ module.exports = async function handler(req, res) {
     if (!id) id = 'boek-' + Date.now()
   }
 
-  // Cover = first page
-  const cover = Array.isArray(pages) && pages.length > 0 ? pages[0] : ''
+  // Cover = explicit cover field if provided, otherwise first page
+  const cover = (book.cover || '').trim() || (Array.isArray(pages) && pages.length > 0 ? pages[0] : '')
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 
@@ -65,6 +65,7 @@ module.exports = async function handler(req, res) {
     ageRange:    { stringValue: (ageRange || '2–5 jaar').trim() },
     cover:       { stringValue: cover },
     status:      { stringValue: status || 'draft' },
+    audioUrl:    { stringValue: audioUrl || '' },
     pages:       {
       arrayValue: {
         values: (Array.isArray(pages) ? pages : []).map(url => ({ stringValue: url })),

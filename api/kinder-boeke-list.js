@@ -35,6 +35,7 @@ function parseDoc(fsDoc) {
     ageRange:    f.ageRange?.stringValue     || '2–5 jaar',
     cover:       f.cover?.stringValue        || '',
     status:      f.status?.stringValue       || 'draft',
+    audioUrl:    f.audioUrl?.stringValue     || '',
     pages:       (f.pages?.arrayValue?.values || []).map(v => v.stringValue || '').filter(Boolean),
   }
 }

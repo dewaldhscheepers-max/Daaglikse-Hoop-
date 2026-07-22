@@ -6,8 +6,10 @@ export default function KinderBoekLeser({ book, onClose }) {
   const [showResume, setShowResume]         = useState(false)
   const [resumePage, setResumePage]         = useState(0)
   const [showCompletion, setShowCompletion] = useState(false)
+  const [audioPlaying, setAudioPlaying]     = useState(false)
   const scrollRef          = useRef(null)
   const lastScrolledPage   = useRef(0)
+  const audioRef           = useRef(null)
 
   const totalPages = book.pages.length
 
@@ -38,6 +40,17 @@ export default function KinderBoekLeser({ book, onClose }) {
   }, [currentPage, book.id])
 
   // Completion is triggered by user action (tapping forward on last page), not auto-timer
+
+  // ── Stop audio on unmount ──
+  useEffect(() => {
+    return () => { if (audioRef.current) audioRef.current.pause() }
+  }, [])
+
+  function toggleAudio() {
+    const a = audioRef.current
+    if (!a) return
+    if (audioPlaying) { a.pause() } else { a.play().catch(() => {}) }
+  }
 
   // ── Scroll helpers ──
   const scrollToPage = useCallback((page, instant = false) => {
@@ -114,6 +127,17 @@ export default function KinderBoekLeser({ book, onClose }) {
   return (
     <div className="kbl-reader">
 
+      {/* ── Hidden audio element ── */}
+      {book.audioUrl && (
+        <audio
+          ref={audioRef}
+          src={book.audioUrl}
+          onPlay={() => setAudioPlaying(true)}
+          onPause={() => setAudioPlaying(false)}
+          onEnded={() => setAudioPlaying(false)}
+        />
+      )}
+
       {/* ── Horizontal scroll strip ── */}
       <div
         ref={scrollRef}
@@ -159,6 +183,25 @@ export default function KinderBoekLeser({ book, onClose }) {
         </button>
 
         <span className="kbl-page-indicator">{currentPage + 1} van {totalPages}</span>
+
+        {book.audioUrl && (
+          <button
+            className={`kbl-ctrl-btn kbl-audio-btn${audioPlaying ? ' kbl-audio-playing' : ''}`}
+            onClick={toggleAudio}
+            aria-label={audioPlaying ? 'Stop stemopname' : 'Speel stemopname'}
+          >
+            {audioPlaying ? (
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            )}
+          </button>
+        )}
 
         <button className="kbl-ctrl-btn" onClick={handleShare} aria-label="Deel hierdie boek">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
