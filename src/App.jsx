@@ -309,13 +309,6 @@ export default function App() {
         const sw = getSkenkWindow()
         if (sw) localStorage.setItem('skenkPaid', sw.cycleId)
       }
-      if ((type === 'donation' || type === 'subscription') && email) {
-        fetch('/api/send-donation-thanks', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ email, type }),
-        }).catch(() => {})
-      }
       if (type === 'ebook' && bookIds.length > 0) {
         // Trigger immediate email delivery and get download tokens
         const deliverPromise = email
