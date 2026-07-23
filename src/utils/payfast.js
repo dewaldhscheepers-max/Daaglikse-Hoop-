@@ -77,8 +77,10 @@ export function checkoutCart(books, email) {
   })
 }
 
-export function checkoutSubscription(amountRand) {
+export function checkoutSubscription(amountRand, email) {
   const amount = Number(amountRand).toFixed(2)
+
+  if (email) localStorage.setItem('pendingEmail', email)
 
   // Next billing date = same day next month, capped to last day of that month
   const today = new Date()
@@ -87,10 +89,14 @@ export function checkoutSubscription(amountRand) {
   const billingDate = new Date(today.getFullYear(), today.getMonth() + 1, billingDay)
     .toISOString().slice(0, 10)
 
-  submitForm({
+  const returnUrl = email
+    ? `${window.location.origin}/?payment=success&type=subscription&em=${encodeURIComponent(email)}`
+    : `${window.location.origin}/?payment=success&type=subscription`
+
+  const params = {
     merchant_id:       MERCHANT_ID,
     merchant_key:      MERCHANT_KEY,
-    return_url:        `${window.location.origin}/?payment=success&type=subscription`,
+    return_url:        returnUrl,
     cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription`,
     notify_url:        ITN_URL,
     amount,
@@ -100,5 +106,8 @@ export function checkoutSubscription(amountRand) {
     recurring_amount:  amount,
     frequency:         '3',
     cycles:            '0',
-  })
+  }
+  if (email) params.email_address = email
+
+  submitForm(params)
 }

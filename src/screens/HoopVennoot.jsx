@@ -8,6 +8,7 @@ export default function HoopVennoot({ onClose }) {
   const [selected, setSelected]   = useState(50)
   const [custom, setCustom]       = useState('')
   const [showCustom, setShowCustom] = useState(false)
+  const [email, setEmail]         = useState('')
   const [busy, setBusy]           = useState(false)
   const [error, setError]         = useState('')
 
@@ -18,8 +19,12 @@ export default function HoopVennoot({ onClose }) {
       setError('Minimum bedrag is R30 per maand.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Voer asb 'n geldige e-posadres in.")
+      return
+    }
     setBusy(true)
-    checkoutSubscription(amount)
+    checkoutSubscription(amount, email)
   }
 
   return (
@@ -68,6 +73,15 @@ export default function HoopVennoot({ onClose }) {
             onChange={e => { setCustom(e.target.value); setError('') }}
           />
         )}
+
+        <p className="modal-label">Jou e-posadres</p>
+        <input
+          className="modal-input"
+          type="email"
+          placeholder="naam@epos.com"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setError('') }}
+        />
 
         <div className="hv-monthly-note">
           Jou bydrae loop maandeliks en jy kan enige tyd kanselleer.
