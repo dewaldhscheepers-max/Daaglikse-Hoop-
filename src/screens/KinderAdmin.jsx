@@ -134,7 +134,10 @@ export default function KinderAdmin() {
         })
         const data = await r.json()
         if (data.url) uploaded.push(data.url)
-      } catch {}
+        else setUploadMsg(`Fout: ${data.error || 'onbekend'}`)
+      } catch (err) {
+        setUploadMsg(`Fout: ${err.message}`)
+      }
     }
 
     setEditingBook(prev => ({ ...prev, pages: [...(prev.pages || []), ...uploaded] }))
