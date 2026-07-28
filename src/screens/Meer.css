@@ -501,6 +501,97 @@
   font-family: var(--font-serif);
 }
 
+/* ─── Leesplanne promo card ─── */
+.lp-promo {
+  background: linear-gradient(145deg, #3B2068 0%, #6B3FA0 55%, #9B6ED0 100%);
+  border-radius: 20px;
+  padding: 20px 18px 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 22px rgba(107, 63, 160, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: transform 0.12s;
+  outline: none;
+}
+
+.lp-promo:active {
+  transform: scale(0.98);
+}
+
+.lp-promo-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.lp-promo-badge {
+  display: inline-block;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  border-radius: 8px;
+  padding: 3px 9px;
+}
+
+.lp-promo-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  margin: 0;
+}
+
+.lp-promo-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.lp-promo-icons {
+  font-size: 22px;
+  margin-top: 2px;
+  letter-spacing: 4px;
+}
+
+.lp-promo-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: white;
+  color: #3B2068;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.lp-promo-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* ─── Kinder promo card ─── */
 .kinder-promo {
   background: linear-gradient(145deg, #7B3F00 0%, #C4724A 45%, #E8A95A 80%, #F5D17C 100%);

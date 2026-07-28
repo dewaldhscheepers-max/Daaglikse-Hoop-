@@ -80,6 +80,7 @@ export default function App() {
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
   const [showLeuensDuiwel, setShowLeuensDuiwel]   = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
+  const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -413,6 +414,25 @@ export default function App() {
     return () => window.removeEventListener('open-huise-van-hoop', onOpen)
   }, [])
 
+  // ── Leesplanne-verhuis notice (once, only if user has an active plan) ──
+  useEffect(() => {
+    if (localStorage.getItem('leesplan_moved_notice') === '1') return
+    const plans = [
+      { prefix: 'dvv', total: 11 },
+      { prefix: 'dvk', total: 24 },
+      { prefix: 'snv', total: 14 },
+      { prefix: 'ld',  total: 7  },
+    ]
+    const hasActive = plans.some(({ prefix, total }) => {
+      const lastDay   = parseInt(localStorage.getItem(`${prefix}_lastDay`) || '0')
+      const completed = (() => { try { return JSON.parse(localStorage.getItem(`${prefix}_completed`) || '[]') } catch { return [] } })()
+      return lastDay > 0 && completed.length < total
+    })
+    if (!hasActive) return
+    const t = setTimeout(() => setShowLeesplanNotice(true), 4000)
+    return () => clearTimeout(t)
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -598,6 +618,35 @@ export default function App() {
           isInstalled={isInstalled}
           onNavigate={handleNav}
         />
+      )}
+
+      {showLeesplanNotice && (
+        <div className="payment-popup-backdrop" onClick={() => { setShowLeesplanNotice(false); localStorage.setItem('leesplan_moved_notice', '1') }}>
+          <div className="payment-popup" onClick={e => e.stopPropagation()}>
+            <div className="payment-popup-icon">📖</div>
+            <div className="payment-popup-title">Leesplanne is verhuis</div>
+            <p className="payment-popup-msg">
+              Jou leesplanne is nou op die <strong>Meer</strong> skerm. Alle vordering is bewaar.
+            </p>
+            <button
+              className="payment-popup-btn"
+              onClick={() => {
+                setShowLeesplanNotice(false)
+                localStorage.setItem('leesplan_moved_notice', '1')
+                setTab('meer')
+                if (screenRef.current) screenRef.current.scrollTop = 0
+              }}
+            >
+              Gaan na Meer →
+            </button>
+            <button
+              className="payment-popup-cancel"
+              onClick={() => { setShowLeesplanNotice(false); localStorage.setItem('leesplan_moved_notice', '1') }}
+            >
+              Ek verstaan
+            </button>
+          </div>
+        </div>
       )}
 
       {showNotifBanner && (

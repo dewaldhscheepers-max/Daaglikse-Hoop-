@@ -47,6 +47,14 @@ export default function DaeVanVrede({ onClose, onBuyBook }) {
   function openDay(dagNr) {
     const dag = dae.find(d => d.dag === dagNr)
     if (!dag) return
+    if (!lastDay && !localStorage.getItem('rp_counted_dvv')) {
+      localStorage.setItem('rp_counted_dvv', '1')
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: '11-dae-vrede' }),
+      }).catch(() => {})
+    }
     setCurrentDay(dag)
     setLastDay(dagNr)
     localStorage.setItem('dvv_lastDay', String(dagNr))

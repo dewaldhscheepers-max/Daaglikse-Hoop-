@@ -8,6 +8,7 @@ import FreeBookModal from '../components/FreeBookModal'
 import './Meer.css'
 import './HuiseVanHoop.css'
 import KinderBibloteek from './KinderBibloteek'
+import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
@@ -58,6 +59,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   const [activeBook,          setActiveBook]          = useState(null)
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
+  const [showLeesplanne,     setShowLeesplanne]     = useState(false)
 
   // Scroll to target book
   useEffect(() => {
@@ -194,6 +196,25 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           </button>
         </div>
 
+        {/* ── Leesplanne promo card ── */}
+        <div
+          className="lp-promo"
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowLeesplanne(true)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowLeesplanne(true) }}
+        >
+          <div className="lp-promo-left">
+            <span className="lp-promo-badge">4 PLANNE</span>
+            <h2 className="lp-promo-title">Leesplanne</h2>
+            <p className="lp-promo-sub">Dag-vir-dag Bybelse leesplanne. 7 tot 24 dae. Almal gratis.</p>
+            <div className="lp-promo-icons" aria-hidden="true">🕊️ ✨ 💙 ⚔️</div>
+          </div>
+          <button className="lp-promo-btn" onClick={e => { e.stopPropagation(); setShowLeesplanne(true) }}>
+            SIEN PLANNE →
+          </button>
+        </div>
+
         {/* All books */}
         <div className="meer-section">
           <div className="section-header">
@@ -217,6 +238,10 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
       {showKinderBibloteek && (
         <KinderBibloteek onClose={() => setShowKinderBibloteek(false)} />
+      )}
+
+      {showLeesplanne && (
+        <LeesplanneLys onClose={() => setShowLeesplanne(false)} />
       )}
 
       {activeBook && (
