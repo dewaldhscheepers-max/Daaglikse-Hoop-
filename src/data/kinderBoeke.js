@@ -18,6 +18,12 @@ function makeBook(id, title, description, pageSlugs) {
 
 export const KINDER_BOEKE = [
   makeBook(
+    'klein-leeu-leer-luister',
+    'Klein Leeu Leer Luister',
+    'Help kinders om te stop, kyk, luister en doen — vier slim stappe om mooi te gehoorsaam.',
+    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+  ),
+  makeBook(
     'klein-leeu',
     'Klein Leeu',
     'Groot waarhede vir klein hartjies — God het my gemaak, Jesus is altyd by my, en ek is veilig.',
