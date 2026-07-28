@@ -1,18 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
-import { db } from '../firebase'
+import { db, storage, auth } from '../firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { signInAnonymously } from 'firebase/auth'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import './KinderAdmin.css'
 
 const PIN = '2025'
 
-function readAsBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload  = () => resolve(reader.result.split(',')[1])
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
+async function ensureAuth() {
+  if (!auth.currentUser) await signInAnonymously(auth)
 }
 
 function compressImage(file, maxWidth = 1500, quality = 0.82) {
@@ -26,7 +23,7 @@ function compressImage(file, maxWidth = 1500, quality = 0.82) {
       canvas.width  = Math.round(img.width  * ratio)
       canvas.height = Math.round(img.height * ratio)
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
-      resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1])
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality)
     }
     img.onerror = () => { URL.revokeObjectURL(url); resolve(null) }
     img.src = url
@@ -135,31 +132,33 @@ export default function KinderAdmin() {
     if (!bookId) { alert('Voer eers die boektitel in'); return }
 
     setUploading(true)
-    setUploadMsg('')
+    setUploadMsg('Aanmeld...')
     const uploaded = []
     let lastError = ''
+
+    try { await ensureAuth() } catch (err) {
+      setUploading(false)
+      setUploadMsg('Aanmeldfout: ' + err.message)
+      return
+    }
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       try {
         setUploadMsg(`Komprimeer prent ${i + 1} van ${files.length}...`)
-        const base64 = await compressImage(file)
-        if (!base64) { lastError = 'Kon nie prent komprimeer nie'; continue }
-        const sizeKB  = Math.round(base64.length * 0.75 / 1024)
+        const blob = await compressImage(file)
+        if (!blob) { lastError = 'Kon nie prent komprimeer nie'; continue }
+        const sizeKB  = Math.round(blob.size / 1024)
         const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.jpg`
-        setUploadMsg(`Stuur ${sizeKB}KB na bediener... (${i + 1} van ${files.length})`)
-        const r = await fetch('/api/kinder-upload', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ pin: PIN, bookId, filename, imageBase64: base64 }),
+        setUploadMsg(`Stuur ${sizeKB}KB... (${i + 1} van ${files.length})`)
+        const storageRef = ref(storage, `kinder-boeke/${bookId}/${filename}`)
+        await new Promise((resolve, reject) => {
+          uploadBytesResumable(storageRef, blob, { contentType: 'image/jpeg' })
+            .on('state_changed', null, reject, resolve)
         })
-        const text = await r.text()
-        let data
-        try { data = JSON.parse(text) } catch { lastError = `Bediener fout (${r.status}): ${text.slice(0, 120)}`; continue }
-        if (data.url) uploaded.push(data.url)
-        else { lastError = `API fout: ${data.error || text.slice(0, 120)}` }
+        uploaded.push(await getDownloadURL(storageRef))
       } catch (err) {
-        lastError = `Netwerk fout: ${err.message}`
+        lastError = `Upload misluk: ${err.message}`
       }
     }
 
@@ -177,32 +176,22 @@ export default function KinderAdmin() {
     const bookId = getBookId()
     if (!bookId) { alert('Voer eers die boektitel in'); return }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setAudioMsg('Lêer is groter as 10MB — gebruik asseblief \'n kleiner MP3.')
-      return
-    }
-
     setAudioUploading(true)
     setAudioMsg('Stemopname word opgelaai...')
 
     try {
-      const base64   = await readAsBase64(file)
-      const ext      = file.name.split('.').pop().toLowerCase() || 'mp3'
-      const filename = `audio.${ext}`
-      const r = await fetch('/api/kinder-upload', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ pin: PIN, bookId, filename, fileBase64: base64, isAudio: true }),
+      await ensureAuth()
+      const ext        = file.name.split('.').pop().toLowerCase() || 'mp3'
+      const storageRef = ref(storage, `kinder-boeke/${bookId}/audio.${ext}`)
+      await new Promise((resolve, reject) => {
+        uploadBytesResumable(storageRef, file)
+          .on('state_changed', null, reject, resolve)
       })
-      const data = await r.json()
-      if (data.url) {
-        setEditingBook(prev => ({ ...prev, audioUrl: data.url }))
-        setAudioMsg('✅ Opgelaai! Stoor die boek om te bevestig.')
-      } else {
-        setAudioMsg('Fout: ' + (data.error || 'Onbekend'))
-      }
+      const url = await getDownloadURL(storageRef)
+      setEditingBook(prev => ({ ...prev, audioUrl: url }))
+      setAudioMsg('✅ Opgelaai! Stoor die boek om te bevestig.')
     } catch (err) {
-      setAudioMsg('Netwerkfout: ' + err.message)
+      setAudioMsg('Fout: ' + err.message)
     }
 
     setAudioUploading(false)
