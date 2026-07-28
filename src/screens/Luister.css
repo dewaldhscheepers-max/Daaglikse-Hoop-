@@ -731,70 +731,76 @@
 
 /* ── Newsletter signup ── */
 .luister-newsletter {
-  background: linear-gradient(135deg, #3B2068 0%, #6B3FA0 100%);
-  padding: 18px 16px;
+  background: var(--card-bg, #fff);
+  border-bottom: 1px solid var(--border, #e8e4f0);
+  padding: 10px 16px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
 }
 
 .nl-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .nl-from {
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: 0.02em;
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted, #888);
 }
 
 .nl-desc {
-  font-size: 15px;
-  color: white;
+  display: block;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text, #2d2d2d);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nl-form {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .nl-input {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
-  background: rgba(255,255,255,0.15);
-  color: white;
+  width: 130px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border, #ddd);
+  font-size: 13px;
+  background: var(--input-bg, #f5f5f5);
+  color: var(--text, #2d2d2d);
   outline: none;
 }
 
-.nl-input::placeholder { color: rgba(255,255,255,0.5); }
+.nl-input::placeholder { color: var(--text-muted, #aaa); }
 
 .nl-btn {
-  background: white;
-  color: #3B2068;
+  background: #5C4E8E;
+  color: white;
   border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 800;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
 
 .nl-thanks {
-  color: white;
-  font-size: 14px;
+  font-size: 13px;
+  color: #27713f;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .nl-error {
-  color: #ffb3b3;
-  font-size: 13px;
+  font-size: 12px;
+  color: #c0392b;
 }
