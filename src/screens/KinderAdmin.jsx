@@ -6,12 +6,21 @@ import './KinderAdmin.css'
 
 const PIN = '2025'
 
-function readAsBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload  = () => resolve(reader.result.split(',')[1])
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+function compressImage(file, maxWidth = 1500, quality = 0.82) {
+  return new Promise(resolve => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const ratio  = Math.min(1, maxWidth / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width  = Math.round(img.width  * ratio)
+      canvas.height = Math.round(img.height * ratio)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1])
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null) }
+    img.src = url
   })
 }
 
@@ -124,9 +133,9 @@ export default function KinderAdmin() {
       setUploadMsg(`Laai op... (${i + 1} van ${files.length})`)
       const file = files[i]
       try {
-        const base64   = await readAsBase64(file)
-        const ext      = file.name.split('.').pop().toLowerCase() || 'jpg'
-        const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.${ext}`
+        const base64 = await compressImage(file)
+        if (!base64) { setUploadMsg(`Fout: kon nie prent lees nie`); continue }
+        const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.jpg`
         const r = await fetch('/api/kinder-upload', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
