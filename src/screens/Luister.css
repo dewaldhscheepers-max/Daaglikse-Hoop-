@@ -728,3 +728,73 @@
   transition: width 0.9s linear;
 }
 
+
+/* ── Newsletter signup ── */
+.luister-newsletter {
+  background: linear-gradient(135deg, #3B2068 0%, #6B3FA0 100%);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nl-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nl-from {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.02em;
+}
+
+.nl-desc {
+  font-size: 15px;
+  color: white;
+  font-weight: 600;
+}
+
+.nl-form {
+  display: flex;
+  gap: 8px;
+}
+
+.nl-input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  outline: none;
+}
+
+.nl-input::placeholder { color: rgba(255,255,255,0.5); }
+
+.nl-btn {
+  background: white;
+  color: #3B2068;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+.nl-thanks {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nl-error {
+  color: #ffb3b3;
+  font-size: 13px;
+}

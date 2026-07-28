@@ -233,6 +233,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [loadingAll, setLoadingAll]   = useState(false)
   const fetchedAllRef                 = useRef(false)
   const [playCounts, setPlayCounts] = useState({})
+  const [nlEmail,    setNlEmail]    = useState('')
+  const [nlState,    setNlState]    = useState('idle') // idle | loading | done | error
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -544,6 +546,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
+  async function handleNewsletterSignup(e) {
+    e.preventDefault()
+    if (!nlEmail.trim()) return
+    setNlState('loading')
+    try {
+      const r = await fetch('/api/newsletter-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: nlEmail.trim() }),
+      })
+      const data = await r.json()
+      setNlState(data.ok || r.ok ? 'done' : 'error')
+    } catch {
+      setNlState('error')
+    }
+  }
+
   const titleBlock = (
     <div className="hero-title" onClick={handleTitleTap} style={{ cursor: 'default' }}>
       <div className="hero-title-main">Daaglikse Hoop</div>
@@ -619,6 +638,31 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="luister-newsletter">
+        <div className="nl-text">
+          <span className="nl-from">'n Persoonlike boodskap van Dewald</span>
+          <span className="nl-desc">Ontvang elke week 'n e-pos vol hoop.</span>
+        </div>
+        {nlState === 'done' ? (
+          <div className="nl-thanks">✅ Dankie! Jy is ingeskryf.</div>
+        ) : (
+          <form className="nl-form" onSubmit={handleNewsletterSignup}>
+            <input
+              className="nl-input"
+              type="email"
+              placeholder="jou@epos.com"
+              value={nlEmail}
+              onChange={e => setNlEmail(e.target.value)}
+              disabled={nlState === 'loading'}
+            />
+            <button className="nl-btn" type="submit" disabled={nlState === 'loading'}>
+              {nlState === 'loading' ? '...' : 'EK WIL DIT ONTVANG'}
+            </button>
+          </form>
+        )}
+        {nlState === 'error' && <div className="nl-error">Iets het fout gegaan. Probeer weer.</div>}
       </div>
 
       <div className="luister-body">

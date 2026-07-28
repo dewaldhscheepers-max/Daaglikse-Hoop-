@@ -70,7 +70,7 @@ module.exports = async function handler(req, res) {
       if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`
       const r   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       const data = await r.json()
-      emailCount += (data.documents || []).length
+      emailCount += (data.documents || []).filter(d => d.fields?.email?.stringValue).length
       pageToken = data.nextPageToken || null
     } while (pageToken)
   } catch {}
