@@ -642,7 +642,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-newsletter">
         <div className="nl-text">
-          <span className="nl-from">✉ 'n Persoonlike boodskap van Dewald</span>
           <span className="nl-desc">Ontvang elke week 'n e-pos vol hoop.</span>
         </div>
         {nlState === 'done' ? (
