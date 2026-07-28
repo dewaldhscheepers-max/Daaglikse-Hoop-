@@ -54,8 +54,7 @@ export default function LeesplanneLys({ onClose }) {
   }
 
   function openPlan(plan) {
-    onClose()
-    setTimeout(() => window.dispatchEvent(new CustomEvent(plan.event)), 80)
+    window.dispatchEvent(new CustomEvent(plan.event))
   }
 
   return (
@@ -106,13 +105,13 @@ export default function LeesplanneLys({ onClose }) {
             </p>
             <button
               className="lpl-donation-btn"
-              onClick={() => { onClose(); setTimeout(() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot')), 80) }}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
             >
               💜 Maandelikse Hoopdraer
             </button>
             <button
               className="lpl-donation-btn lpl-donation-once"
-              onClick={() => { onClose(); setTimeout(() => window.dispatchEvent(new CustomEvent('open-donation')), 80) }}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
             >
               🙏 Eenmalige bydrae
             </button>
