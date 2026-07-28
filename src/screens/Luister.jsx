@@ -658,7 +658,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               disabled={nlState === 'loading'}
             />
             <button className="nl-btn" type="submit" disabled={nlState === 'loading'}>
-              {nlState === 'loading' ? '...' : 'EK WIL DIT ONTVANG'}
+              {nlState === 'loading' ? '...' : 'INSKRYF'}
             </button>
           </form>
         )}
