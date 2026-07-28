@@ -6,6 +6,15 @@ import './KinderAdmin.css'
 
 const PIN = '2025'
 
+function readAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = () => resolve(reader.result.split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 function compressImage(file, maxWidth = 1500, quality = 0.82) {
   return new Promise(resolve => {
     const img = new Image()
