@@ -626,7 +626,7 @@ export default function App() {
             <div className="payment-popup-icon">📖</div>
             <div className="payment-popup-title">Leesplanne is verhuis</div>
             <p className="payment-popup-msg">
-              Jou leesplanne is nou op die <strong>Meer</strong> skerm. Alle vordering is bewaar.
+              Jou leesplanne is nou op die <strong>e-boek blad</strong>. Alle vordering is bewaar.
             </p>
             <button
               className="payment-popup-btn"
