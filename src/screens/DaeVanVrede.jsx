@@ -13,7 +13,7 @@ const SLEUTELS = [
 let cachedDae = null
 
 export default function DaeVanVrede({ onClose, onBuyBook }) {
-  const [view, setView]           = useState('opening')
+  const [view, setView]           = useState('list')
   const [currentDay, setCurrentDay] = useState(null)
   const [dae, setDae]             = useState(cachedDae || [])
   const [completed, setCompleted] = useState(() => {
@@ -125,7 +125,7 @@ export default function DaeVanVrede({ onClose, onBuyBook }) {
       <div className="dvv-overlay">
         <div className="dvv-screen">
           <div className="dvv-header">
-            <button className="dvv-back" onClick={() => setView('opening')}>
+            <button className="dvv-back" onClick={onClose}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
                 <polyline points="15 18 9 12 15 6"/>
               </svg>
