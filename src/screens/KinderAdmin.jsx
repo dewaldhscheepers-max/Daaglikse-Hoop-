@@ -128,30 +128,35 @@ export default function KinderAdmin() {
     setUploading(true)
     setUploadMsg('')
     const uploaded = []
+    let lastError = ''
 
     for (let i = 0; i < files.length; i++) {
-      setUploadMsg(`Laai op... (${i + 1} van ${files.length})`)
       const file = files[i]
       try {
+        setUploadMsg(`Komprimeer prent ${i + 1} van ${files.length}...`)
         const base64 = await compressImage(file)
-        if (!base64) { setUploadMsg(`Fout: kon nie prent lees nie`); continue }
+        if (!base64) { lastError = 'Kon nie prent komprimeer nie'; continue }
+        const sizeKB  = Math.round(base64.length * 0.75 / 1024)
         const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.jpg`
+        setUploadMsg(`Stuur ${sizeKB}KB na bediener... (${i + 1} van ${files.length})`)
         const r = await fetch('/api/kinder-upload', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ pin: PIN, bookId, filename, imageBase64: base64 }),
         })
-        const data = await r.json()
+        const text = await r.text()
+        let data
+        try { data = JSON.parse(text) } catch { lastError = `Bediener fout (${r.status}): ${text.slice(0, 120)}`; continue }
         if (data.url) uploaded.push(data.url)
-        else setUploadMsg(`Fout: ${data.error || 'onbekend'}`)
+        else { lastError = `API fout: ${data.error || text.slice(0, 120)}` }
       } catch (err) {
-        setUploadMsg(`Fout: ${err.message}`)
+        lastError = `Netwerk fout: ${err.message}`
       }
     }
 
     setEditingBook(prev => ({ ...prev, pages: [...(prev.pages || []), ...uploaded] }))
     setUploading(false)
-    setUploadMsg(uploaded.length ? `✅ ${uploaded.length} bladsy(e) opgelaai` : 'Geen bladsye opgelaai nie')
+    setUploadMsg(uploaded.length ? `✅ ${uploaded.length} bladsy(e) opgelaai` : (lastError || 'Geen bladsye opgelaai nie'))
     setTimeout(() => setUploadMsg(''), 4000)
   }
 
