@@ -234,7 +234,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const fetchedAllRef                 = useRef(false)
   const [playCounts, setPlayCounts] = useState({})
   const [nlEmail,    setNlEmail]    = useState('')
-  const [nlState,    setNlState]    = useState('idle') // idle | loading | done | error
+  const [nlState,    setNlState]    = useState(() => localStorage.getItem('nl_subscribed') ? 'done' : 'idle')
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -557,7 +557,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         body: JSON.stringify({ email: nlEmail.trim() }),
       })
       const data = await r.json()
-      setNlState(data.ok || r.ok ? 'done' : 'error')
+      if (data.ok || r.ok) {
+        localStorage.setItem('nl_subscribed', '1')
+        setNlState('done')
+      } else {
+        setNlState('error')
+      }
     } catch {
       setNlState('error')
     }
@@ -640,13 +645,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         </div>
       </div>
 
-      <div className="luister-newsletter">
+      {nlState !== 'done' && <div className="luister-newsletter">
         <div className="nl-text">
           <span className="nl-desc">Ontvang elke week 'n e-pos vol hoop.</span>
         </div>
-        {nlState === 'done' ? (
-          <div className="nl-thanks">✅ Dankie! Jy sal hierdie week iets in jou inkassie kry.</div>
-        ) : (
           <form className="nl-form" onSubmit={handleNewsletterSignup}>
             <input
               className="nl-input"
@@ -660,8 +662,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               {nlState === 'loading' ? '...' : 'INSKRYF'}
             </button>
           </form>
-        )}
-      </div>
+        {nlState === 'error' && <div className="nl-error">Probeer weer.</div>}
+      </div>}
 
       <div className="luister-body">
 
