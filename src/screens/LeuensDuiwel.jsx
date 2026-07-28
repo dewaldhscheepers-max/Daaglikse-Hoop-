@@ -38,6 +38,14 @@ export default function LeuensDuiwel({ onClose }) {
   function openDay(dagNr) {
     const dag = dae.find(d => d.dag === dagNr)
     if (!dag) return
+    if (!lastDay && !localStorage.getItem('rp_counted_ld')) {
+      localStorage.setItem('rp_counted_ld', '1')
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: 'leuens-duiwel' }),
+      }).catch(() => {})
+    }
     setCurrentDay(dag)
     setLastDay(dagNr)
     localStorage.setItem('ld_lastDay', String(dagNr))

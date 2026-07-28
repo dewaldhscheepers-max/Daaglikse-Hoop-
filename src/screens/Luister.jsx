@@ -233,10 +233,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [loadingAll, setLoadingAll]   = useState(false)
   const fetchedAllRef                 = useRef(false)
   const [playCounts, setPlayCounts] = useState({})
-  const [planLikes, setPlanLikes]   = useState({})
-  const [likedPlans, setLikedPlans] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('likedPlans') || '{}') } catch { return {} }
-  })
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -369,17 +365,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       setPlanLikes(counts)
     }).catch(() => {})
   }, [])
-
-  function handlePlanLike(planId) {
-    const alreadyLiked = likedPlans[planId]
-    const delta = alreadyLiked ? -1 : 1
-    const newLiked = { ...likedPlans, [planId]: !alreadyLiked }
-    setLikedPlans(newLiked)
-    try { localStorage.setItem('likedPlans', JSON.stringify(newLiked)) } catch {}
-    setPlanLikes(prev => ({ ...prev, [planId]: Math.max(0, (prev[planId] || 0) + delta) }))
-    setDoc(doc(db, 'readingPlanLikes', planId), { count: increment(delta) }, { merge: true }).catch(() => {})
-  }
-
 
   // ── MediaSession API ──
   useEffect(() => {
@@ -645,84 +630,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           </div>
         )}
         {installBanner}
-
-        {/* ── Leesplanne ── */}
-        <div className="leesplanne-section">
-          <p className="leesplanne-heading">Leesplanne</p>
-          <p className="leesplanne-sub">Kort Bybelse leesplanne wat jy dag vir dag kan volg.</p>
-
-          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-daevrede'))}>
-            <span className="leesplan-icon">🕊️</span>
-            <div className="leesplan-info">
-              <div className="leesplan-title">11 Dae van Vrede</div>
-              <div className="leesplan-desc">'n Kort leesplan vir wanneer jou gedagtes raas en jou hart moeg is.</div>
-              <div className="leesplan-meta">11 dae · gratis</div>
-            </div>
-            <div className="leesplan-right">
-              <button
-                className={`leesplan-like-btn${likedPlans['11-dae-vrede'] ? ' liked' : ''}`}
-                onClick={e => { e.stopPropagation(); handlePlanLike('11-dae-vrede') }}
-              >
-                <span className="leesplan-like-icon">{likedPlans['11-dae-vrede'] ? '♥' : '♡'}</span>
-              </button>
-              <span className="leesplan-arrow">›</span>
-            </div>
-          </button>
-
-          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-dinge-verander'))}>
-            <span className="leesplan-icon">✨</span>
-            <div className="leesplan-info">
-              <div className="leesplan-title">Dinge Wat Jou Lewe Kan Verander</div>
-              <div className="leesplan-desc">Dag-vir-dag waarhede wat jou help om anders te dink, bid en leef.</div>
-              <div className="leesplan-meta">24 dae · gratis</div>
-            </div>
-            <div className="leesplan-right">
-              <button
-                className={`leesplan-like-btn${likedPlans['dinge-verander'] ? ' liked' : ''}`}
-                onClick={e => { e.stopPropagation(); handlePlanLike('dinge-verander') }}
-              >
-                <span className="leesplan-like-icon">{likedPlans['dinge-verander'] ? '♥' : '♡'}</span>
-              </button>
-              <span className="leesplan-arrow">›</span>
-            </div>
-          </button>
-
-          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-seer-na-vryheid'))}>
-            <span className="leesplan-icon">💙</span>
-            <div className="leesplan-info">
-              <div className="leesplan-title">'N Reis van Seer na Vryheid</div>
-              <div className="leesplan-desc">Wanneer mense jou seermaak — genees jou hart, herwin jou lewe, loop vry.</div>
-              <div className="leesplan-meta">14 dae · gratis</div>
-            </div>
-            <div className="leesplan-right">
-              <button
-                className={`leesplan-like-btn${likedPlans['seer-na-vryheid'] ? ' liked' : ''}`}
-                onClick={e => { e.stopPropagation(); handlePlanLike('seer-na-vryheid') }}
-              >
-                <span className="leesplan-like-icon">{likedPlans['seer-na-vryheid'] ? '♥' : '♡'}</span>
-              </button>
-              <span className="leesplan-arrow">›</span>
-            </div>
-          </button>
-
-          <button className="leesplan-card" onClick={() => window.dispatchEvent(new CustomEvent('open-leuens-duiwel'))}>
-            <span className="leesplan-icon">⚔️</span>
-            <div className="leesplan-info">
-              <div className="leesplan-title">7 Leuens van die Duiwel</div>
-              <div className="leesplan-desc">Herken die vyand se stem en kies God se waarheid elke dag.</div>
-              <div className="leesplan-meta">7 dae · gratis</div>
-            </div>
-            <div className="leesplan-right">
-              <button
-                className={`leesplan-like-btn${likedPlans['leuens-duiwel'] ? ' liked' : ''}`}
-                onClick={e => { e.stopPropagation(); handlePlanLike('leuens-duiwel') }}
-              >
-                <span className="leesplan-like-icon">{likedPlans['leuens-duiwel'] ? '♥' : '♡'}</span>
-              </button>
-              <span className="leesplan-arrow">›</span>
-            </div>
-          </button>
-        </div>
 
         {/* ── Search bar ── */}
         <div className="search-bar">

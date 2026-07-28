@@ -52,6 +52,14 @@ export default function SeerNaVryheid({ onClose }) {
   function openDay(dagNr) {
     const dag = dae.find(d => d.dag === dagNr)
     if (!dag) return
+    if (!lastDay && !localStorage.getItem('rp_counted_snv')) {
+      localStorage.setItem('rp_counted_snv', '1')
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: 'seer-na-vryheid' }),
+      }).catch(() => {})
+    }
     setCurrentDay(dag)
     setLastDay(dagNr)
     localStorage.setItem('snv_lastDay', String(dagNr))

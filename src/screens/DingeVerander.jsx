@@ -52,6 +52,14 @@ export default function DingeVerander({ onClose }) {
   function openDay(dagNr) {
     const dag = dae.find(d => d.dag === dagNr)
     if (!dag) return
+    if (!lastDay && !localStorage.getItem('rp_counted_dvk')) {
+      localStorage.setItem('rp_counted_dvk', '1')
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: 'dinge-verander' }),
+      }).catch(() => {})
+    }
     setCurrentDay(dag)
     setLastDay(dagNr)
     localStorage.setItem('dvk_lastDay', String(dagNr))
