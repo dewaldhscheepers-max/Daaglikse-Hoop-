@@ -62,7 +62,12 @@ export default function LeesplanneLys({ onClose }) {
     <div className="lpl-overlay">
       <div className="lpl-screen">
         <div className="lpl-header">
-          <button className="lpl-close" onClick={onClose}>✕</button>
+          <button className="lpl-back" onClick={onClose}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Terug
+          </button>
           <div className="lpl-title-row">
             <span className="lpl-heading">📖 Leesplanne</span>
           </div>

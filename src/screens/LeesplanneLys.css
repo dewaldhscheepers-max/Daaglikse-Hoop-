@@ -19,25 +19,22 @@
   padding: 56px 20px 16px;
   background: var(--cream, #FAF8F5);
   border-bottom: 1px solid var(--cream-dark, #EDE8E2);
-  position: relative;
   flex: 0 0 auto;
 }
 
-.lpl-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: var(--cream-dark, #EDE8E2);
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 14px;
-  cursor: pointer;
-  color: var(--text-muted, #888);
-  display: flex;
+.lpl-back {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--purple, #7B5EA7);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .lpl-title-row {
