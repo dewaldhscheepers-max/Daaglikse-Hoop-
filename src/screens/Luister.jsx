@@ -642,23 +642,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-newsletter">
         <div className="nl-text">
-          <span className="nl-from">'n Persoonlike boodskap van Dewald</span>
+          <span className="nl-from">✉ 'n Persoonlike boodskap van Dewald</span>
           <span className="nl-desc">Ontvang elke week 'n e-pos vol hoop.</span>
         </div>
         {nlState === 'done' ? (
-          <div className="nl-thanks">✅ Jy is ingeskryf</div>
+          <div className="nl-thanks">✅ Dankie! Jy sal hierdie week iets in jou inkassie kry.</div>
         ) : (
           <form className="nl-form" onSubmit={handleNewsletterSignup}>
             <input
               className="nl-input"
               type="email"
-              placeholder="jou e-pos"
+              placeholder="jou e-posadres"
               value={nlEmail}
               onChange={e => setNlEmail(e.target.value)}
               disabled={nlState === 'loading'}
             />
             <button className="nl-btn" type="submit" disabled={nlState === 'loading'}>
-              {nlState === 'loading' ? '...' : 'INSKRYF'}
+              {nlState === 'loading' ? '...' : 'EK WIL DIT ONTVANG'}
             </button>
           </form>
         )}
