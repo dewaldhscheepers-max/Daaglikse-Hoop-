@@ -9,7 +9,7 @@ const PLANS = [
     event: 'open-bybel-maklik-gemaak',
     icon:  '📖',
     title: 'Die Bybel Maklik Gemaak',
-    desc:  'Stap deur al 66 boeke van die Bybel in 67 dae — met verduidelikings en 'n selftoets elke dag.',
+    desc:  "Stap deur al 66 boeke van die Bybel in 67 dae — met verduidelikings en 'n selftoets elke dag.",
     meta:  '67 dae · gratis',
   },
   {
