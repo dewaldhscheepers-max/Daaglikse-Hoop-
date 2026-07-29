@@ -19,6 +19,7 @@ import SeerNaVryheid from './screens/SeerNaVryheid'
 import Vredepad from './screens/Vredepad'
 import HoopVennoot from './screens/HoopVennoot'
 import LeuensDuiwel from './screens/LeuensDuiwel'
+import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -78,7 +79,8 @@ export default function App() {
   const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
   const [showVredepad, setShowVredepad]           = useState(false)
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
-  const [showLeuensDuiwel, setShowLeuensDuiwel]   = useState(false)
+  const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
+  const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -407,6 +409,12 @@ export default function App() {
     return () => window.removeEventListener('open-leuens-duiwel', onOpen)
   }, [])
 
+  useEffect(() => {
+    function onOpen() { setShowBybelMaklik(true) }
+    window.addEventListener('open-bybel-maklik-gemaak', onOpen)
+    return () => window.removeEventListener('open-bybel-maklik-gemaak', onOpen)
+  }, [])
+
   // ── 1000 Huise van Hoop veldtog ──
   useEffect(() => {
     function onOpen() { setShowHuise(true) }
@@ -607,6 +615,9 @@ export default function App() {
         <HoopVennoot onClose={() => setShowHoopVennoot(false)} />
       )}
 
+      {showBybelMaklik && (
+        <BybelMaklikGemaak onClose={() => setShowBybelMaklik(false)} />
+      )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
       )}

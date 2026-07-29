@@ -1,0 +1,114 @@
+.bmg-intro {
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bmg-intro-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.bmg-day-header {
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bmg-day-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.bmg-lees-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--lavender-soft);
+  color: var(--purple-dark);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.bmg-toets {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.bmg-vrae {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bmg-vraag {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bmg-vraag-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bmg-opsies {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bmg-opsie {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+}
+
+.bmg-opsie:disabled { cursor: default; }
+
+.bmg-opsie-correct {
+  background: #e8f5e9;
+  border-color: #27713f;
+  color: #1a5c32;
+}
+
+.bmg-opsie-wrong {
+  background: #fdecea;
+  border-color: #c0392b;
+  color: #922b21;
+}
+
+.bmg-opsie-reveal {
+  background: #e8f5e9;
+  border-color: #27713f;
+  opacity: 0.7;
+}
+
+.bmg-letter {
+  font-weight: 800;
+  font-size: 13px;
+  min-width: 18px;
+  flex-shrink: 0;
+}
