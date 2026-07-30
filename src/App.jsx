@@ -21,6 +21,7 @@ import HoopVennoot from './screens/HoopVennoot'
 import LeuensDuiwel from './screens/LeuensDuiwel'
 import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
 import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
+import RustelosGedagtes from './screens/RustelosGedagtes'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -83,6 +84,7 @@ export default function App() {
   const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
+  const [showRustelosGedagtes, setShowRustelosGedagtes] = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -376,6 +378,13 @@ export default function App() {
     return () => window.removeEventListener('open-daevrede', onOpen)
   }, [])
 
+  // ── Rustelose Gedagtes leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowRustelosGedagtes(true) }
+    window.addEventListener('open-rustelose-gedagtes', onOpen)
+    return () => window.removeEventListener('open-rustelose-gedagtes', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -628,6 +637,9 @@ export default function App() {
       )}
       {showWanneerAngs && (
         <WanneerAngsToeslaan onClose={() => setShowWanneerAngs(false)} />
+      )}
+      {showRustelosGedagtes && (
+        <RustelosGedagtes onClose={() => setShowRustelosGedagtes(false)} />
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
