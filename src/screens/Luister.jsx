@@ -677,25 +677,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         {nlState === 'error' && <div className="nl-error">Probeer weer.</div>}
       </div>}
 
-      {featuredVideo && (
-        <div className="fv-section">
-          <p className="fv-eyebrow">Boodskap van hoop</p>
-          <p className="fv-text">{featuredVideo.text}</p>
-          <div className="fv-iframe-wrap">
-            <iframe
-              src={`https://www.youtube.com/embed/${featuredVideo.videoId}?rel=0`}
-              title="Boodskap van hoop"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="fv-iframe"
-            />
-          </div>
-        </div>
-      )}
-
       <div className="luister-body">
 
-        {!featuredVideo && today.wallpaperUrl ? (
+        {featuredVideo ? (
+          <div className="fv-card">
+            <p className="fv-eyebrow">Boodskap van hoop</p>
+            <p className="fv-text">{featuredVideo.text}</p>
+            <div className="fv-iframe-wrap">
+              <iframe
+                src={`https://www.youtube.com/embed/${featuredVideo.videoId}?rel=0`}
+                title="Boodskap van hoop"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="fv-iframe"
+              />
+            </div>
+          </div>
+        ) : today.wallpaperUrl ? (
           <div className="wp-card">
             <div className="wp-card-label">📱 Vandag se wallpaper — hou jou vinger op die foto vir 2 sek en kies "Download image"</div>
             <img src={today.wallpaperUrl} className="wp-card-img" alt="Wallpaper" />

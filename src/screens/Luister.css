@@ -801,26 +801,30 @@
   color: #ffb3b3;
 }
 
-/* ─── Featured video section ─── */
-.fv-section {
-  background: linear-gradient(180deg, #1a0d42 0%, #2b1860 55%, #3a2278 100%);
-  padding: 20px 16px 0;
+/* ─── Featured video card ─── */
+.fv-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
 }
 
 .fv-eyebrow {
-  margin: 0 0 6px;
+  margin: 0;
+  padding: 14px 16px 4px;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 220, 255, 0.55);
+  color: #7c5cbf;
 }
 
 .fv-text {
-  margin: 0 0 16px;
-  font-size: 15px;
+  margin: 0;
+  padding: 0 16px 14px;
+  font-size: 14.5px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.92);
+  color: #1a1030;
   font-weight: 500;
 }
 
