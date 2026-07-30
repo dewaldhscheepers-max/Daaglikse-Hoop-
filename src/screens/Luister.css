@@ -801,21 +801,27 @@
   color: #ffb3b3;
 }
 
-/* ─── Featured video card ─── */
-.fv-card {
-  margin: 16px 0 8px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+/* ─── Featured video section ─── */
+.fv-section {
+  background: linear-gradient(180deg, #1a0d42 0%, #2b1860 55%, #3a2278 100%);
+  padding: 20px 16px 0;
+}
+
+.fv-eyebrow {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 220, 255, 0.55);
 }
 
 .fv-text {
-  margin: 0;
-  padding: 12px 14px 10px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255,255,255,0.9);
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
 }
 
 .fv-iframe-wrap {
