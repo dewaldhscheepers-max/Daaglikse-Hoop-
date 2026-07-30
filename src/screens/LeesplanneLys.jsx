@@ -5,6 +5,14 @@ import './LeesplanneLys.css'
 
 const PLANS = [
   {
+    id:    'wanneer-angs-toeslaan',
+    event: 'open-wanneer-angs-toeslaan',
+    icon:  '🕊️',
+    title: 'Wanneer Angs Toeslaan',
+    desc:  "Vyf dae deur Filippense 4 — leer om jou te verbly, te bid en vrede te ontvang selfs wanneer die lewe swaar is.",
+    meta:  '5 dae · gratis',
+  },
+  {
     id:    'bybel-maklik-gemaak',
     event: 'open-bybel-maklik-gemaak',
     icon:  '📖',

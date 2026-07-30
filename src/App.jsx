@@ -20,6 +20,7 @@ import Vredepad from './screens/Vredepad'
 import HoopVennoot from './screens/HoopVennoot'
 import LeuensDuiwel from './screens/LeuensDuiwel'
 import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
+import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -81,6 +82,7 @@ export default function App() {
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
   const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
+  const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -415,6 +417,12 @@ export default function App() {
     return () => window.removeEventListener('open-bybel-maklik-gemaak', onOpen)
   }, [])
 
+  useEffect(() => {
+    function onOpen() { setShowWanneerAngs(true) }
+    window.addEventListener('open-wanneer-angs-toeslaan', onOpen)
+    return () => window.removeEventListener('open-wanneer-angs-toeslaan', onOpen)
+  }, [])
+
   // ── 1000 Huise van Hoop veldtog ──
   useEffect(() => {
     function onOpen() { setShowHuise(true) }
@@ -617,6 +625,9 @@ export default function App() {
 
       {showBybelMaklik && (
         <BybelMaklikGemaak onClose={() => setShowBybelMaklik(false)} />
+      )}
+      {showWanneerAngs && (
+        <WanneerAngsToeslaan onClose={() => setShowWanneerAngs(false)} />
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
