@@ -124,33 +124,33 @@
   margin-top: 2px;
 }
 
-.lpl-card-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
+.lpl-card-cta {
+  margin-top: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--purple, #7B5EA7);
+  text-transform: uppercase;
 }
 
-.lpl-like-btn {
+.lpl-card-cta.done {
+  color: #5a9e6f;
+}
+
+.lpl-bookmark-btn {
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
-  color: var(--text-muted, #aaa);
+  color: var(--text-muted, #ccc);
   padding: 4px;
   line-height: 1;
+  align-self: flex-start;
+  flex: 0 0 auto;
   -webkit-tap-highlight-color: transparent;
 }
 
-.lpl-like-btn.liked {
-  color: #e05d8a;
-}
-
-.lpl-arrow {
-  font-size: 22px;
-  color: var(--text-muted, #bbb);
-  line-height: 1;
+.lpl-bookmark-btn.saved {
+  color: var(--purple, #7B5EA7);
 }
 
 /* ── Donation section ── */

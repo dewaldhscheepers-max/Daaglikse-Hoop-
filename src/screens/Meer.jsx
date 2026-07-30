@@ -205,9 +205,8 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowLeesplanne(true) }}
         >
           <div className="lp-promo-left">
-            <span className="lp-promo-badge">4 PLANNE</span>
             <h2 className="lp-promo-title">Leesplanne</h2>
-            <p className="lp-promo-sub">Dag-vir-dag Bybelse leesplanne. 7 tot 24 dae. Almal gratis.</p>
+            <p className="lp-promo-sub">Kort en langer Bybelse leesplanne wat jy dag vir dag kan volg. Almal gratis.</p>
           </div>
           <button className="lp-promo-btn" onClick={e => { e.stopPropagation(); setShowLeesplanne(true) }}>
             SIEN PLANNE →
