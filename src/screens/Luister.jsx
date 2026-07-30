@@ -235,6 +235,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [playCounts, setPlayCounts] = useState({})
   const [nlEmail,    setNlEmail]    = useState('')
   const [nlState,    setNlState]    = useState(() => localStorage.getItem('nl_subscribed') ? 'done' : 'idle')
+  const [featuredVideo, setFeaturedVideo] = useState(null)
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
@@ -440,6 +441,17 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     } else { clearInterval(timerRef.current) }
     return () => clearInterval(timerRef.current)
   }, [playing, activeNote?.id])
+
+  // ── Featured video (date-gated, auto-expires) ──
+  useEffect(() => {
+    fetch('/featured-video.json?v=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Johannesburg' })
+        if (data?.videoId && data?.date === today) setFeaturedVideo(data)
+      })
+      .catch(() => {})
+  }, [])
 
   // ── Secret tap for admin ──
   function handleTitleTap() {
@@ -667,12 +679,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       <div className="luister-body">
 
-        {today.wallpaperUrl && (
+        {featuredVideo ? (
+          <div className="fv-card">
+            <p className="fv-text">{featuredVideo.text}</p>
+            <div className="fv-iframe-wrap">
+              <iframe
+                src={`https://www.youtube.com/embed/${featuredVideo.videoId}?rel=0`}
+                title="Boodskap van hoop"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="fv-iframe"
+              />
+            </div>
+          </div>
+        ) : today.wallpaperUrl ? (
           <div className="wp-card">
             <div className="wp-card-label">📱 Vandag se wallpaper — hou jou vinger op die foto vir 2 sek en kies "Download image"</div>
             <img src={today.wallpaperUrl} className="wp-card-img" alt="Wallpaper" />
           </div>
-        )}
+        ) : null}
         {installBanner}
 
         {/* ── Search bar ── */}
