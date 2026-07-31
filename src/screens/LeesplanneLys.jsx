@@ -64,7 +64,7 @@ const PLANS = [
     id:           'seer-na-vryheid',
     event:        'open-seer-na-vryheid',
     icon:         '💙',
-    title:        "'N Reis van Seer na Vryheid",
+    title:        'Wanneer Mense Jou Seermaak',
     desc:         'Wanneer mense jou seermaak — genees jou hart, herwin jou lewe, loop vry.',
     meta:         '14 dae · gratis',
     completedKey: 'snv_completed',

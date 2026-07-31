@@ -51,7 +51,7 @@ export default function SeerNaVryheid({ onClose }) {
   }
 
   function handleShare() {
-    sharePlan("'N Reis van Seer na Vryheid", `💙 'N Reis van Seer na Vryheid — 14 dae\n\nLees dit gratis op Daaglikse Hoop:`)
+    sharePlan('Wanneer Mense Jou Seermaak', `💙 Wanneer Mense Jou Seermaak — 14 dae\n\nLees dit gratis op Daaglikse Hoop:`)
   }
 
   function openDay(dagNr) {
@@ -90,8 +90,8 @@ export default function SeerNaVryheid({ onClose }) {
           <button className="dvv-overlay-close" onClick={onClose}>✕</button>
           <div className="dvv-opening">
             <div className="dvv-opening-badge">Gratis · {totalDae} dae · geen slotjies</div>
-            <h1 className="dvv-opening-title">'N Reis van Seer na Vryheid</h1>
-            <p className="dvv-opening-sub">Wanneer mense jou seermaak.</p>
+            <h1 className="dvv-opening-title">Wanneer Mense Jou Seermaak</h1>
+            <p className="dvv-opening-sub">Vergifnis · Genesing · Vryheid</p>
             <p className="dvv-opening-desc">
               Genees jou hart, herwin jou lewe en loop vry. 'n Dag-vir-dag reis deur vergifnis, heling en nuwe begin.
             </p>
@@ -144,7 +144,7 @@ export default function SeerNaVryheid({ onClose }) {
               </svg>
               Terug
             </button>
-            <span className="dvv-header-title">'N Reis van Seer na Vryheid</span>
+            <span className="dvv-header-title">Wanneer Mense Jou Seermaak</span>
             <button className="dvv-header-share" onClick={handleShare} aria-label="Deel">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -228,7 +228,16 @@ export default function SeerNaVryheid({ onClose }) {
               <section className="dvv-section">
                 <h3 className="dvv-section-title">Vandag se waarheid</h3>
                 <div className="dvv-section-body">
-                  {d.waarheid.split('\n\n').map((para, i) => <p key={i}>{para}</p>)}
+                  {d.waarheid.split('\n\n').map((para, i) => {
+                    const trimmed = para.trim()
+                    const isNumbered = /^\d+\./.test(trimmed)
+                    const wordCount = trimmed.split(/\s+/).length
+                    const hasPunctuation = /[.!?]["»]?$/.test(trimmed)
+                    const isHeading = isNumbered || (wordCount <= 12 && !hasPunctuation)
+                    return isHeading
+                      ? <p key={i} style={{ fontWeight: 700, color: 'var(--text)', marginTop: 8 }}>{para}</p>
+                      : <p key={i}>{para}</p>
+                  })}
                 </div>
               </section>
             )}
