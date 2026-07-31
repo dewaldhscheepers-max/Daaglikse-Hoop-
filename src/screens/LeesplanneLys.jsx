@@ -126,17 +126,6 @@ const PLANS = [
     lastDayKey:   'dbs_lastDay',
     total:        7,
   },
-  {
-    id:           'wen-die-oorlog',
-    event:        'open-wen-die-oorlog',
-    icon:         '⚡',
-    title:        'Wen die Oorlog in Jou Gedagtes',
-    desc:         'Vernuwe jou gedagtes, breek vestings en wen die oorlog — 17 hoofstukke en 40 dae van denkvernuwing deur Dewald Scheepers.',
-    meta:         '58 inskrywings · gratis',
-    completedKey: 'wdo_completed',
-    lastDayKey:   'wdo_lastDay',
-    total:        58,
-  },
 ]
 
 function readProgress(plan) {

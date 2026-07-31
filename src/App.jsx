@@ -28,7 +28,6 @@ import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
 import HuiseVanHoop from './screens/HuiseVanHoop'
-import WenDieOorlog from './screens/WenDieOorlog'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -97,7 +96,6 @@ export default function App() {
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showToksies,            setShowToksies]            = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
-  const [showWenDieOorlog, setShowWenDieOorlog]   = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
   function onAudioPlayingChange(playing) {
@@ -486,13 +484,6 @@ export default function App() {
     return () => window.removeEventListener('open-huise-van-hoop', onOpen)
   }, [])
 
-  // ── Wen die Oorlog in Jou Gedagtes leesplan ──
-  useEffect(() => {
-    function onOpen() { setShowWenDieOorlog(true) }
-    window.addEventListener('open-wen-die-oorlog', onOpen)
-    return () => window.removeEventListener('open-wen-die-oorlog', onOpen)
-  }, [])
-
   // ── Leesplanne-verhuis notice (once, only if user has an active plan) ──
   useEffect(() => {
     if (localStorage.getItem('leesplan_moved_notice') === '1') return
@@ -712,10 +703,6 @@ export default function App() {
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
-      )}
-
-      {showWenDieOorlog && (
-        <WenDieOorlog onClose={() => setShowWenDieOorlog(false)} />
       )}
 
       {showHuise && (
