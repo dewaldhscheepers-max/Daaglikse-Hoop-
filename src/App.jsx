@@ -23,6 +23,7 @@ import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
 import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
 import RustelosGedagtes from './screens/RustelosGedagtes'
 import AsAllesWegval from './screens/AsAllesWegval'
+import AngsDetox from './screens/AngsDetox'
 import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
@@ -88,6 +89,7 @@ export default function App() {
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
   const [showRustelosGedagtes, setShowRustelosGedagtes] = useState(false)
   const [showAsAllesWegval,    setShowAsAllesWegval]    = useState(false)
+  const [showAngsDetox,        setShowAngsDetox]        = useState(false)
   const [showDinkNuut,         setShowDinkNuut]         = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
@@ -396,6 +398,13 @@ export default function App() {
     return () => window.removeEventListener('open-as-alles-wegval', onOpen)
   }, [])
 
+  // ── Angs Detox leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowAngsDetox(true) }
+    window.addEventListener('open-angs-detox', onOpen)
+    return () => window.removeEventListener('open-angs-detox', onOpen)
+  }, [])
+
   // ── Dink Nuut, Leef Nuut leesplan ──
   useEffect(() => {
     function onOpen() { setShowDinkNuut(true) }
@@ -661,6 +670,9 @@ export default function App() {
       )}
       {showAsAllesWegval && (
         <AsAllesWegval onClose={() => setShowAsAllesWegval(false)} />
+      )}
+      {showAngsDetox && (
+        <AngsDetox onClose={() => setShowAngsDetox(false)} />
       )}
       {showDinkNuut && (
         <DinkNuutLeefNuut onClose={() => setShowDinkNuut(false)} />

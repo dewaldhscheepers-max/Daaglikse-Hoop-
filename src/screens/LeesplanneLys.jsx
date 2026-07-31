@@ -6,6 +6,17 @@ import './LeesplanneLys.css'
 
 const PLANS = [
   {
+    id:           'angs-detox',
+    event:        'open-angs-detox',
+    icon:         '🌿',
+    title:        'Angs Detox',
+    desc:         "Leer om angstige gedagtes te herken, te toets en te vervang — 7 dae wat jou vryheid gee om anders te dink.",
+    meta:         '7 dae · gratis',
+    completedKey: 'angsd_completed',
+    lastDayKey:   'angsd_lastDay',
+    total:        7,
+  },
+  {
     id:           'wanneer-angs-toeslaan',
     event:        'open-wanneer-angs-toeslaan',
     icon:         '🕊️',
