@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { db } from '../firebase'
 import { doc, setDoc, increment } from 'firebase/firestore'
+import { sharePlan } from '../shareUtil'
 import './LeesplanneLys.css'
 
 const PLANS = [
@@ -139,6 +140,11 @@ export default function LeesplanneLys({ onClose }) {
     setDoc(doc(db, 'readingPlanLikes', planId), { count: increment(delta) }, { merge: true }).catch(() => {})
   }
 
+  function handleShare(e, plan) {
+    e.stopPropagation()
+    sharePlan(plan.title, `${plan.icon} ${plan.title} — ${plan.meta}\n\nLees dit gratis op Daaglikse Hoop:`)
+  }
+
   function openPlan(plan) {
     window.dispatchEvent(new CustomEvent(plan.event))
   }
@@ -171,13 +177,26 @@ export default function LeesplanneLys({ onClose }) {
                   <div className="lpl-card-meta">{plan.meta}</div>
                   <div className={`lpl-card-cta${p.done ? ' done' : ''}`}>{ctaLabel(plan, p)}</div>
                 </div>
-                <button
-                  className={`lpl-bookmark-btn${saved[plan.id] ? ' saved' : ''}`}
-                  onClick={e => handleSave(e, plan.id)}
-                  aria-label={saved[plan.id] ? 'Verwyder stoor' : 'Stoor'}
-                >
-                  <BookmarkIcon filled={!!saved[plan.id]} />
-                </button>
+                <div className="lpl-card-actions">
+                  <button
+                    className={`lpl-bookmark-btn${saved[plan.id] ? ' saved' : ''}`}
+                    onClick={e => handleSave(e, plan.id)}
+                    aria-label={saved[plan.id] ? 'Verwyder stoor' : 'Stoor'}
+                  >
+                    <BookmarkIcon filled={!!saved[plan.id]} />
+                  </button>
+                  <button
+                    className="lpl-share-btn"
+                    onClick={e => handleShare(e, plan)}
+                    aria-label="Deel"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                      <polyline points="16 6 12 2 8 6"/>
+                      <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                  </button>
+                </div>
               </button>
             )
           })}
