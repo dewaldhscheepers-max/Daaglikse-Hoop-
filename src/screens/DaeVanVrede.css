@@ -67,6 +67,20 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.dvv-header-share {
+  background: none;
+  border: none;
+  color: var(--purple);
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.85;
+}
+.dvv-header-share:active { opacity: 0.5; }
+
 /* Close for full-page screens (opening, closing) */
 .dvv-overlay-close {
   position: absolute;
