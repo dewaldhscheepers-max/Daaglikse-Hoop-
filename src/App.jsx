@@ -22,6 +22,7 @@ import LeuensDuiwel from './screens/LeuensDuiwel'
 import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
 import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
 import RustelosGedagtes from './screens/RustelosGedagtes'
+import AsAllesWegval from './screens/AsAllesWegval'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -85,6 +86,7 @@ export default function App() {
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
   const [showRustelosGedagtes, setShowRustelosGedagtes] = useState(false)
+  const [showAsAllesWegval,    setShowAsAllesWegval]    = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -385,6 +387,13 @@ export default function App() {
     return () => window.removeEventListener('open-rustelose-gedagtes', onOpen)
   }, [])
 
+  // ── As Alles Wegval leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowAsAllesWegval(true) }
+    window.addEventListener('open-as-alles-wegval', onOpen)
+    return () => window.removeEventListener('open-as-alles-wegval', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -640,6 +649,9 @@ export default function App() {
       )}
       {showRustelosGedagtes && (
         <RustelosGedagtes onClose={() => setShowRustelosGedagtes(false)} />
+      )}
+      {showAsAllesWegval && (
+        <AsAllesWegval onClose={() => setShowAsAllesWegval(false)} />
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />

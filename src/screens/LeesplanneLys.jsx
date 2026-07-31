@@ -70,6 +70,17 @@ const PLANS = [
     lastDayKey:   'ld_lastDay',
     total:        7,
   },
+  {
+    id:           'as-alles-wegval',
+    event:        'open-as-alles-wegval',
+    icon:         '📜',
+    title:        'As Alles Wegval',
+    desc:         "Job, die duiwel en die God van herstel — vir wanneer lyding jou lewe binneval.",
+    meta:         '7 dae · gratis',
+    completedKey: 'aaw_completed',
+    lastDayKey:   'aaw_lastDay',
+    total:        7,
+  },
 ]
 
 function readProgress(plan) {
