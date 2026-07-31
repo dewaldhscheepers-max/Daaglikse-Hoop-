@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="af">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouVersion toets</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #FAF8F5; color: #2D2040;
+    margin: 0; padding: 20px 16px 60px; line-height: 1.5;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: #8A7E9A; margin: 0 0 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+  input {
+    width: 100%; padding: 12px; font-size: 14px; font-family: monospace;
+    border: 1.5px solid #DDD6E8; border-radius: 10px; background: #fff; color: #2D2040;
+  }
+  button {
+    width: 100%; padding: 14px; margin-top: 12px; font-size: 15px; font-weight: 600;
+    background: #7C6FAF; color: #fff; border: none; border-radius: 10px; cursor: pointer;
+  }
+  button.ghost { background: #fff; color: #7C6FAF; border: 1.5px solid #7C6FAF; }
+  button:disabled { opacity: .5; }
+  .box {
+    margin-top: 18px; background: #fff; border: 1px solid #E4DDEE;
+    border-radius: 12px; padding: 14px;
+  }
+  .box h2 { font-size: 15px; margin: 0 0 10px; }
+  .ok   { color: #2F7A55; font-weight: 700; }
+  .bad  { color: #B04A4A; font-weight: 700; }
+  .hit  { background: #EAF5EE; border-left: 3px solid #2F7A55; padding: 8px 10px; border-radius: 6px; margin: 6px 0; }
+  .row  { font-size: 13px; padding: 5px 0; border-bottom: 1px solid #F0EBE3; }
+  .row:last-child { border-bottom: none; }
+  code  { font-family: monospace; font-size: 12px; background: #F3F0F8; padding: 1px 5px; border-radius: 4px; }
+  pre {
+    background: #2D2040; color: #E8E3F0; padding: 12px; border-radius: 8px;
+    font-size: 11px; overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+    max-height: 320px; overflow-y: auto;
+  }
+  .muted { font-size: 12px; color: #8A7E9A; }
+</style>
+</head>
+<body>
+
+<h1>YouVersion toets</h1>
+<p class="sub">Kyk watter Bybels vir jou App Key beskikbaar is.</p>
+
+<label for="key">App Key</label>
+<input id="key" type="text" placeholder="plak jou sleutel hier" autocomplete="off" spellcheck="false">
+
+<button id="go">Kyk watter Bybels beskikbaar is</button>
+<button id="chap" class="ghost">Toets: haal 'n hoofstuk</button>
+
+<div id="out"></div>
+
+<script>
+const $   = s => document.querySelector(s);
+const out = $('#out');
+
+// Onthou die sleutel plaaslik sodat jy dit net een keer hoef te tik
+$('#key').value = localStorage.getItem('yvkey') || '';
+$('#key').addEventListener('input', e => localStorage.setItem('yvkey', e.target.value.trim()));
+
+const BASE = 'https://api.youversion.com/v1';
+
+function card(title, inner) {
+  const d = document.createElement('div');
+  d.className = 'box';
+  d.innerHTML = '<h2>' + title + '</h2>' + inner;
+  out.appendChild(d);
+  return d;
+}
+
+async function tryGet(path, key) {
+  const url = BASE + path;
+  try {
+    const r = await fetch(url, { headers: { 'X-YVP-App-Key': key, 'accept': 'application/json' } });
+    const text = await r.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch (_) {}
+    return { url, status: r.status, ok: r.ok, json, text };
+  } catch (err) {
+    return { url, status: 0, ok: false, json: null, text: 'NETWERKFOUT: ' + err.message };
+  }
+}
+
+// Vind die weergawe-lys ongeag presies watter vorm die API teruggee
+function extractList(json) {
+  if (!json) return null;
+  if (Array.isArray(json)) return json;
+  for (const k of ['data', 'bibles', 'versions', 'items', 'results']) {
+    if (Array.isArray(json[k])) return json[k];
+    if (json[k] && Array.isArray(json[k].bibles)) return json[k].bibles;
+  }
+  return null;
+}
+
+function isAfrikaans(v) {
+  const s = JSON.stringify(v).toLowerCase();
+  return s.includes('afrikaan') || /"(iso_?639_?3|language_tag|lang)"\s*:\s*"afr"/.test(s);
+}
+
+function label(v) {
+  const id    = v.id ?? v.version_id ?? v.bible_id ?? '?';
+  const abbr  = v.abbreviation ?? v.local_abbreviation ?? v.abbr ?? '';
+  const title = v.title ?? v.name ?? v.local_title ?? v.local_name ?? '';
+  const lang  = (v.language && (v.language.name || v.language.local_name || v.language.iso_639_3)) || v.language_tag || '';
+  return { id, abbr, title, lang };
+}
+
+$('#go').addEventListener('click', async () => {
+  const key = $('#key').value.trim();
+  out.innerHTML = '';
+  if (!key) { card('Fout', '<span class="bad">Plak eers jou App Key hierbo.</span>'); return; }
+
+  $('#go').disabled = true;
+  card('Besig...', '<span class="muted">Vra die weergawe-lys op...</span>');
+
+  const paths = ['/bibles', '/bibles?language_tag=afr', '/bibles?language=afr', '/versions'];
+  let winner = null, attempts = [];
+
+  for (const p of paths) {
+    const r = await tryGet(p, key);
+    attempts.push(r);
+    if (r.ok && extractList(r.json)) { winner = r; break; }
+  }
+
+  out.innerHTML = '';
+
+  if (!winner) {
+    let h = '<p class="bad">Kon nie die lys kry nie.</p>';
+    attempts.forEach(a => {
+      h += '<div class="row"><code>' + a.url.replace(BASE, '') + '</code> → <b>HTTP ' + a.status + '</b></div>';
+    });
+    h += '<p class="muted" style="margin-top:10px">Rou antwoord van die eerste poging:</p><pre>'
+       + (attempts[0].text || '(leeg)').slice(0, 2500).replace(/</g, '&lt;') + '</pre>';
+    card('Geen sukses', h);
+    $('#go').disabled = false;
+    return;
+  }
+
+  const list = extractList(winner.json);
+  const afr  = list.filter(isAfrikaans);
+
+  card('Verbinding', '<p class="ok">Werk! HTTP ' + winner.status + '</p>'
+     + '<div class="row">Endpunt: <code>' + winner.url.replace(BASE, '') + '</code></div>'
+     + '<div class="row">Totale weergawes: <b>' + list.length + '</b></div>');
+
+  if (afr.length) {
+    let h = '<p class="ok">' + afr.length + ' Afrikaanse weergawe(s) gevind</p>';
+    afr.forEach(v => {
+      const L = label(v);
+      h += '<div class="hit"><b>' + (L.abbr || L.title) + '</b> — ' + L.title
+         + '<br><span class="muted">id: <code>' + L.id + '</code></span></div>';
+    });
+    card('Afrikaans', h);
+  } else {
+    card('Afrikaans', '<p class="bad">Geen Afrikaanse weergawe in hierdie lys nie.</p>'
+       + '<p class="muted">Dit beteken waarskynlik jy moet eers deur <b>Bible Licensing</b> in die portaal gaan '
+       + 'om toegang tot die gelisensieerde weergawes te kry.</p>');
+  }
+
+  let h = '';
+  list.slice(0, 80).forEach(v => {
+    const L = label(v);
+    h += '<div class="row"><b>' + (L.abbr || '—') + '</b> · ' + L.title
+       + ' <span class="muted">(' + L.lang + ', id ' + L.id + ')</span></div>';
+  });
+  if (list.length > 80) h += '<p class="muted">... en nog ' + (list.length - 80) + '</p>';
+  card('Eerste weergawes in die lys', h);
+
+  card('Rou data (eerste item)', '<pre>' + JSON.stringify(list[0], null, 2).replace(/</g, '&lt;') + '</pre>');
+
+  $('#go').disabled = false;
+});
+
+$('#chap').addEventListener('click', async () => {
+  const key = $('#key').value.trim();
+  out.innerHTML = '';
+  if (!key) { card('Fout', '<span class="bad">Plak eers jou App Key hierbo.</span>'); return; }
+
+  $('#chap').disabled = true;
+  card('Besig...', '<span class="muted">Haal Johannes 3...</span>');
+
+  // 3034 is die voorbeeld-id uit YouVersion se eie dokumentasie
+  const r = await tryGet('/bibles/3034/books/JHN/chapters/3/verses', key);
+  out.innerHTML = '';
+
+  card('Hoofstuk-toets', '<div class="row">Endpunt: <code>' + r.url.replace(BASE, '') + '</code></div>'
+     + '<div class="row">Status: <b class="' + (r.ok ? 'ok' : 'bad') + '">HTTP ' + r.status + '</b></div>');
+
+  card('Antwoord', '<pre>' + (r.text || '(leeg)').slice(0, 3000).replace(/</g, '&lt;') + '</pre>');
+
+  $('#chap').disabled = false;
+});
+</script>
+
+</body>
+</html>
