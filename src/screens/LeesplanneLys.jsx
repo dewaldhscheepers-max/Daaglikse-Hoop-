@@ -71,6 +71,17 @@ const PLANS = [
     total:        7,
   },
   {
+    id:           'dink-nuut-leef-nuut',
+    event:        'open-dink-nuut-leef-nuut',
+    icon:         '💡',
+    title:        'Dink Nuut, Leef Nuut',
+    desc:         "Vernuw jou gedagtes in 5 dae — leer om toksiese gedagtes te toets, te vang en te vervang met Godse waarheid.",
+    meta:         '5 dae · gratis',
+    completedKey: 'dnln_completed',
+    lastDayKey:   'dnln_lastDay',
+    total:        5,
+  },
+  {
     id:           'as-alles-wegval',
     event:        'open-as-alles-wegval',
     icon:         '📜',
