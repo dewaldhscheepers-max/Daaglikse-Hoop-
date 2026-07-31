@@ -104,6 +104,17 @@ const PLANS = [
     lastDayKey:   'aaw_lastDay',
     total:        7,
   },
+  {
+    id:           'deursoek-breek-stuur',
+    event:        'open-deursoek-breek-stuur',
+    icon:         '🙏',
+    title:        'Deursoek my · Breek my · Stuur my',
+    desc:         '7 dae van eerlike gebede wat jou lewe verander — van veilige gebede na gevaarlike oorgawe.',
+    meta:         '7 dae · gratis',
+    completedKey: 'dbs_completed',
+    lastDayKey:   'dbs_lastDay',
+    total:        7,
+  },
 ]
 
 function readProgress(plan) {

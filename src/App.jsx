@@ -25,6 +25,7 @@ import RustelosGedagtes from './screens/RustelosGedagtes'
 import AsAllesWegval from './screens/AsAllesWegval'
 import AngsDetox from './screens/AngsDetox'
 import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
+import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -91,6 +92,7 @@ export default function App() {
   const [showAsAllesWegval,    setShowAsAllesWegval]    = useState(false)
   const [showAngsDetox,        setShowAngsDetox]        = useState(false)
   const [showDinkNuut,         setShowDinkNuut]         = useState(false)
+  const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -412,6 +414,13 @@ export default function App() {
     return () => window.removeEventListener('open-dink-nuut-leef-nuut', onOpen)
   }, [])
 
+  // ── Deursoek my · Breek my · Stuur my leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowDeursoekBreekStuur(true) }
+    window.addEventListener('open-deursoek-breek-stuur', onOpen)
+    return () => window.removeEventListener('open-deursoek-breek-stuur', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -676,6 +685,9 @@ export default function App() {
       )}
       {showDinkNuut && (
         <DinkNuutLeefNuut onClose={() => setShowDinkNuut(false)} />
+      )}
+      {showDeursoekBreekStuur && (
+        <DeursoekBreekStuur onClose={() => setShowDeursoekBreekStuur(false)} />
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
