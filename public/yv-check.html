@@ -48,11 +48,22 @@
 <h1>YouVersion toets</h1>
 <p class="sub">Kyk watter Bybels vir jou App Key beskikbaar is.</p>
 
-<label for="key">App Key</label>
-<input id="key" type="text" placeholder="plak jou sleutel hier" autocomplete="off" spellcheck="false">
+<h2 style="font-size:16px;margin:22px 0 0">1 · YouVersion</h2>
+<label for="key">YouVersion App Key</label>
+<input id="key" type="text" placeholder="plak jou YouVersion sleutel" autocomplete="off" spellcheck="false">
 
 <button id="go">Kyk watter Bybels beskikbaar is</button>
 <button id="chap" class="ghost">Toets: haal 'n hoofstuk</button>
+
+<h2 style="font-size:16px;margin:30px 0 0">2 · API.Bible</h2>
+<p class="muted" style="margin:4px 0 0">
+  Registreer gratis by <b>scripture.api.bible</b>, plak dan die sleutel hier.
+</p>
+<label for="abkey">API.Bible sleutel</label>
+<input id="abkey" type="text" placeholder="plak jou API.Bible sleutel" autocomplete="off" spellcheck="false">
+
+<button id="abgo">Kyk watter Bybels beskikbaar is</button>
+<button id="abafr" class="ghost">Soek net Afrikaans</button>
 
 <div id="out"></div>
 
@@ -198,6 +209,79 @@ $('#go').addEventListener('click', async () => {
 
   $('#go').disabled = false;
 });
+
+/* ─────────── API.Bible ─────────── */
+const AB = 'https://api.scripture.api.bible/v1';
+
+$('#abkey').value = localStorage.getItem('abkey') || '';
+$('#abkey').addEventListener('input', e => localStorage.setItem('abkey', e.target.value.trim()));
+
+async function abGet(path, key) {
+  const url = AB + path;
+  try {
+    const r = await fetch(url, { headers: { 'api-key': key, 'accept': 'application/json' } });
+    const text = await r.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch (_) {}
+    return { url, status: r.status, ok: r.ok, json, text };
+  } catch (err) {
+    return { url, status: 0, ok: false, json: null, text: 'NETWERKFOUT: ' + err.message };
+  }
+}
+
+async function abRun(onlyAfr) {
+  const key = $('#abkey').value.trim();
+  out.innerHTML = '';
+  if (!key) { card('Fout', '<span class="bad">Plak eers jou API.Bible sleutel.</span>'); return; }
+
+  card('Besig...', '<span class="muted">Vra API.Bible op...</span>');
+  const r = await abGet(onlyAfr ? '/bibles?language=afr' : '/bibles', key);
+  out.innerHTML = '';
+
+  if (!r.ok) {
+    card('Geen sukses', '<p class="bad">HTTP ' + r.status + '</p><pre>'
+       + (r.text || '(leeg)').slice(0, 1500).replace(/</g, '&lt;') + '</pre>');
+    return;
+  }
+
+  const list = (r.json && r.json.data) || [];
+  const afr  = list.filter(b => {
+    const l = (b.language && (b.language.id || b.language.name)) || '';
+    return /afr/i.test(l) || /afrikaan/i.test(JSON.stringify(b));
+  });
+
+  card('Verbinding', '<p class="ok">Werk! HTTP ' + r.status + '</p>'
+     + '<div class="row">Endpunt: <code>' + r.url.replace(AB, '') + '</code></div>'
+     + '<div class="row">Bybels beskikbaar vir jou sleutel: <b>' + list.length + '</b></div>');
+
+  if (afr.length) {
+    let h = '<p class="ok">' + afr.length + ' Afrikaanse weergawe(s)!</p>';
+    afr.forEach(b => {
+      h += '<div class="hit"><b>' + (b.abbreviation || b.abbreviationLocal || '') + '</b> — '
+         + (b.name || b.nameLocal || '')
+         + '<br><span class="muted">id: <code>' + b.id + '</code></span>'
+         + (b.copyright ? '<br><span class="muted">' + String(b.copyright).slice(0, 160) + '</span>' : '')
+         + '</div>';
+    });
+    card('Afrikaans', h);
+  } else {
+    card('Afrikaans', '<p class="bad">Geen Afrikaanse weergawe vir hierdie sleutel nie.</p>'
+       + '<p class="muted">Die gratis vlak gee net publieke-domein en Creative Commons weergawes. '
+       + 'Afrikaans sal per weergawe aangevra moet word.</p>');
+  }
+
+  let h = '';
+  list.slice(0, 60).forEach(b => {
+    const lang = (b.language && (b.language.name || b.language.id)) || '';
+    h += '<div class="row"><b>' + (b.abbreviation || '—') + '</b> · ' + (b.name || '')
+       + ' <span class="muted">(' + lang + ')</span></div>';
+  });
+  if (list.length > 60) h += '<p class="muted">... en nog ' + (list.length - 60) + '</p>';
+  if (h) card('Beskikbare Bybels', h);
+}
+
+$('#abgo').addEventListener('click',  () => abRun(false));
+$('#abafr').addEventListener('click', () => abRun(true));
 
 $('#chap').addEventListener('click', async () => {
   const key = $('#key').value.trim();
