@@ -44,6 +44,8 @@ const ICONS = {
 const PLANS = [
   {
     id:           'angs-detox',
+    countKey:     'rp_counted_angsd',
+    bookId:       'angs-detox',
     event:        'open-angs-detox',
     icon:         'leaf',
     tint:         '#E8F1EA',
@@ -57,6 +59,8 @@ const PLANS = [
   },
   {
     id:           'wanneer-angs-toeslaan',
+    countKey:     'rp_counted_wat',
+    bookId:       'wanneer-angs-toeslaan',
     event:        'open-wanneer-angs-toeslaan',
     icon:         'dove',
     tint:         '#EAEFF7',
@@ -70,6 +74,8 @@ const PLANS = [
   },
   {
     id:           'bybel-maklik-gemaak',
+    countKey:     'rp_counted_bmg',
+    bookId:       'bybel-maklik-gemaak',
     event:        'open-bybel-maklik-gemaak',
     icon:         'book',
     tint:         '#F3EFE6',
@@ -83,6 +89,8 @@ const PLANS = [
   },
   {
     id:           'rustelose-gedagtes',
+    countKey:     'rp_counted_rg',
+    bookId:       'rustelose-gedagtes-leesplan',
     event:        'open-rustelose-gedagtes',
     icon:         'mind',
     tint:         '#EDE8F8',
@@ -96,6 +104,8 @@ const PLANS = [
   },
   {
     id:           'dinge-verander',
+    countKey:     'rp_counted_dvk',
+    bookId:       'dinge-verander',
     event:        'open-dinge-verander',
     icon:         'sunrise',
     tint:         '#F8F1E4',
@@ -109,6 +119,8 @@ const PLANS = [
   },
   {
     id:           'seer-na-vryheid',
+    countKey:     'rp_counted_snv',
+    bookId:       'seer-na-vryheid',
     event:        'open-seer-na-vryheid',
     icon:         'heart',
     tint:         '#F6EBEF',
@@ -122,6 +134,8 @@ const PLANS = [
   },
   {
     id:           'leuens-duiwel',
+    countKey:     'rp_counted_ld',
+    bookId:       'leuens-duiwel',
     event:        'open-leuens-duiwel',
     icon:         'shield',
     tint:         '#EEEAF3',
@@ -135,6 +149,8 @@ const PLANS = [
   },
   {
     id:           'dink-nuut-leef-nuut',
+    countKey:     'rp_counted_dnln',
+    bookId:       'dink-nuut-leef-nuut',
     event:        'open-dink-nuut-leef-nuut',
     icon:         'bulb',
     tint:         '#E6F0F0',
@@ -148,6 +164,8 @@ const PLANS = [
   },
   {
     id:           'as-alles-wegval',
+    countKey:     'rp_counted_aaw',
+    bookId:       'as-alles-wegval',
     event:        'open-as-alles-wegval',
     icon:         'anchor',
     tint:         '#EDEDEF',
@@ -161,6 +179,8 @@ const PLANS = [
   },
   {
     id:           'toksies',
+    countKey:     'rp_counted_toksies',
+    bookId:       'toksies',
     event:        'open-toksies',
     icon:         'boundary',
     tint:         '#EFEEE9',
@@ -174,6 +194,8 @@ const PLANS = [
   },
   {
     id:           'deursoek-breek-stuur',
+    countKey:     'rp_counted_dbs',
+    bookId:       'deursoek-breek-stuur',
     event:        'open-deursoek-breek-stuur',
     icon:         'hands',
     tint:         '#EDE8F8',
@@ -248,6 +270,16 @@ export default function LeesplanneLys({ onClose }) {
   }
 
   function openPlan(plan) {
+    // Tel die oopmaak by die e-boek-teller. Dieselfde sleutel as die plan se eie
+    // skerm gebruik, sodat dit nooit dubbel tel nie.
+    if (!localStorage.getItem(plan.countKey)) {
+      localStorage.setItem(plan.countKey, '1')
+      fetch('/api/kinder-boek-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: plan.bookId }),
+      }).catch(() => {})
+    }
     window.dispatchEvent(new CustomEvent(plan.event))
   }
 
