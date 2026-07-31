@@ -105,6 +105,17 @@ const PLANS = [
     total:        7,
   },
   {
+    id:           'toksies',
+    event:        'open-toksies',
+    icon:         '🛡️',
+    title:        'Toksies',
+    desc:         'Herken verhoudings wat jou leegmaak, stel grense met liefde, en bewaak die vrede wat God jou gegee het.',
+    meta:         '13 dae · gratis',
+    completedKey: 'toksies_completed',
+    lastDayKey:   'toksies_lastDay',
+    total:        13,
+  },
+  {
     id:           'deursoek-breek-stuur',
     event:        'open-deursoek-breek-stuur',
     icon:         '🙏',

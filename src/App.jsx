@@ -26,6 +26,7 @@ import AsAllesWegval from './screens/AsAllesWegval'
 import AngsDetox from './screens/AngsDetox'
 import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
+import Toksies from './screens/Toksies'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import './App.css'
 
@@ -93,6 +94,7 @@ export default function App() {
   const [showAngsDetox,        setShowAngsDetox]        = useState(false)
   const [showDinkNuut,         setShowDinkNuut]         = useState(false)
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
+  const [showToksies,            setShowToksies]            = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -421,6 +423,13 @@ export default function App() {
     return () => window.removeEventListener('open-deursoek-breek-stuur', onOpen)
   }, [])
 
+  // ── Toksies leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowToksies(true) }
+    window.addEventListener('open-toksies', onOpen)
+    return () => window.removeEventListener('open-toksies', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -688,6 +697,9 @@ export default function App() {
       )}
       {showDeursoekBreekStuur && (
         <DeursoekBreekStuur onClose={() => setShowDeursoekBreekStuur(false)} />
+      )}
+      {showToksies && (
+        <Toksies onClose={() => setShowToksies(false)} />
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
