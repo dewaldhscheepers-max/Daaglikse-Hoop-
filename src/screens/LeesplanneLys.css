@@ -15,10 +15,11 @@
   overflow: hidden;
 }
 
+/* ── Header ── */
 .lpl-header {
-  padding: 56px 20px 16px;
+  padding: 56px 20px 18px;
   background: var(--cream, #FAF8F5);
-  border-bottom: 1px solid var(--cream-dark, #EDE8E2);
+  border-bottom: 1px solid var(--cream-dark, #F0EBE3);
   flex: 0 0 auto;
 }
 
@@ -28,158 +29,203 @@
   gap: 5px;
   background: none;
   border: none;
-  padding: 0 0 10px;
+  padding: 0 0 14px;
   font-family: var(--font-body);
   font-size: 15px;
-  font-weight: 600;
-  color: var(--purple, #7B5EA7);
+  font-weight: 500;
+  color: var(--purple, #7C6FAF);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.lpl-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
 .lpl-heading {
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 27px;
   font-weight: 700;
-  color: var(--text, #1A1A2E);
+  color: var(--text, #2D2040);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 5px;
 }
 
 .lpl-sub {
-  font-size: 14px;
-  color: var(--text-muted, #888);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--text-muted, #8A7E9A);
   line-height: 1.5;
   margin: 0;
 }
 
+/* ── Body ── */
 .lpl-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px 16px calc(var(--nav-height, 70px) + var(--safe-bottom, 0px) + 24px);
+  padding: 16px 14px calc(var(--nav-height, 70px) + var(--safe-bottom, 0px) + 28px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 11px;
 }
 
 /* ── Plan card ── */
 .lpl-card {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 13px;
   background: var(--white, #fff);
-  border-radius: 16px;
-  border: 1.5px solid var(--cream-dark, #EDE8E2);
-  padding: 16px 14px;
-  cursor: pointer;
-  text-align: left;
+  border: 1px solid rgba(124, 111, 175, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(45, 32, 64, 0.04), 0 6px 18px rgba(45, 32, 64, 0.045);
+  padding: 15px 14px;
   width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .lpl-card:active {
-  background: var(--cream, #FAF8F5);
+  transform: scale(0.99);
+  box-shadow: 0 1px 2px rgba(45, 32, 64, 0.05);
 }
 
-.lpl-card-icon {
-  font-size: 28px;
-  flex: 0 0 auto;
-  line-height: 1;
+/* ── Icon tile — vaste grootte ── */
+.lpl-tile {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
 }
 
+.lpl-tile svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* ── Text ── */
 .lpl-card-info {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
 }
 
 .lpl-card-title {
   font-family: var(--font-serif);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--text, #1A1A2E);
-  line-height: 1.3;
+  color: var(--text, #2D2040);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  margin-bottom: 4px;
 }
 
 .lpl-card-desc {
-  font-size: 13px;
-  color: var(--text-muted, #888);
-  line-height: 1.45;
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+  line-height: 1.5;
+  margin-bottom: 9px;
 }
 
-.lpl-card-meta {
-  font-size: 11px;
+/* ── Footer: pill + cta ── */
+.lpl-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.lpl-pill {
+  font-size: 10px;
   font-weight: 600;
-  color: var(--purple, #7B5EA7);
-  letter-spacing: 0.02em;
-  margin-top: 2px;
-}
-
-.lpl-card-cta {
-  margin-top: 7px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: var(--purple, #7B5EA7);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  color: var(--purple-dark, #5C4E8E);
+  background: var(--lavender-soft, #EDE8F8);
+  border-radius: 20px;
+  padding: 3.5px 9px;
+  white-space: nowrap;
 }
 
-.lpl-card-cta.done {
-  color: #5a9e6f;
+.lpl-pill.done {
+  color: #3C7A5C;
+  background: rgba(92, 158, 120, 0.13);
 }
 
+.lpl-cta {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--purple, #7C6FAF);
+  white-space: nowrap;
+}
+
+/* ── Progress ── */
+.lpl-prog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.lpl-prog-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--lavender-soft, #EDE8F8);
+  overflow: hidden;
+}
+
+.lpl-prog-fill {
+  height: 100%;
+  background: var(--purple, #7C6FAF);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.lpl-prog-pct {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted, #8A7E9A);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Actions ── */
 .lpl-card-actions {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  gap: 1px;
   flex-shrink: 0;
+  margin: -3px -4px 0 0;
 }
 
-.lpl-bookmark-btn {
+.lpl-icon-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-muted, #ccc);
-  padding: 4px;
-  line-height: 1;
+  padding: 6px;
+  border-radius: 8px;
+  line-height: 0;
+  color: rgba(138, 126, 154, 0.55);
   -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s;
 }
 
-.lpl-bookmark-btn.saved {
-  color: var(--purple, #7B5EA7);
-}
-
-.lpl-share-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--purple, #7B5EA7);
-  padding: 4px;
-  line-height: 1;
-  opacity: 0.7;
-  display: inline-flex;
-  align-items: center;
-  -webkit-tap-highlight-color: transparent;
-}
-.lpl-share-btn:active { opacity: 0.4; }
+.lpl-icon-btn:active { color: var(--purple, #7C6FAF); }
+.lpl-icon-btn.saved  { color: var(--purple, #7C6FAF); }
 
 /* ── Donation section ── */
 .lpl-donation-section {
-  margin-top: 8px;
-  padding: 20px 16px;
+  margin-top: 6px;
+  padding: 22px 18px 19px;
   background: var(--white, #fff);
-  border-radius: 16px;
-  border: 1.5px solid var(--cream-dark, #EDE8E2);
+  border: 1px solid rgba(124, 111, 175, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(45, 32, 64, 0.04), 0 6px 18px rgba(45, 32, 64, 0.045);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -188,37 +234,31 @@
 
 .lpl-donation-text {
   font-size: 13px;
-  color: var(--text-muted, #888);
-  line-height: 1.55;
+  color: var(--text-muted, #8A7E9A);
+  line-height: 1.6;
   text-align: center;
-  margin: 0;
+  margin: 0 0 3px;
 }
 
 .lpl-donation-btn {
   width: 100%;
   padding: 13px 16px;
-  background: var(--purple, #7B5EA7);
-  color: white;
-  border: none;
-  border-radius: 12px;
+  border-radius: 11px;
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
+  background: var(--purple, #7C6FAF);
+  color: #fff;
+  border: none;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s;
+  transition: opacity 0.15s;
 }
 
-.lpl-donation-btn:active {
-  background: var(--purple-dark, #5A3E8B);
-}
+.lpl-donation-btn:active { opacity: 0.75; }
 
 .lpl-donation-btn.lpl-donation-once {
-  background: var(--cream, #FAF8F5);
-  color: var(--purple, #7B5EA7);
-  border: 1.5px solid var(--purple, #7B5EA7);
-}
-
-.lpl-donation-btn.lpl-donation-once:active {
-  background: var(--cream-dark, #EDE8E2);
+  background: transparent;
+  color: var(--purple, #7C6FAF);
+  border: 1.5px solid rgba(124, 111, 175, 0.38);
 }
