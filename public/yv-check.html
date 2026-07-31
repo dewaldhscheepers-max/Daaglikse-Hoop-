@@ -119,24 +119,46 @@ $('#go').addEventListener('click', async () => {
   $('#go').disabled = true;
   card('Besig...', '<span class="muted">Vra die weergawe-lys op...</span>');
 
-  const paths = ['/bibles', '/bibles?language_tag=afr', '/bibles?language=afr', '/versions'];
+  // Die API vereis language_ranges[] — probeer die Afrikaanse taalkodes
+  const LR = 'language_ranges%5B%5D=';
+  const paths = [
+    '/bibles?' + LR + 'afr',
+    '/bibles?' + LR + 'af',
+    '/bibles?' + LR + 'afr&' + LR + 'af',
+    '/bibles?' + LR + '*',
+    '/bibles?' + LR + 'eng',
+  ];
   let winner = null, attempts = [];
 
   for (const p of paths) {
     const r = await tryGet(p, key);
     attempts.push(r);
-    if (r.ok && extractList(r.json)) { winner = r; break; }
+    const l = extractList(r.json);
+    if (r.ok && l && l.length) { winner = r; break; }
   }
 
   out.innerHTML = '';
 
-  if (!winner) {
-    let h = '<p class="bad">Kon nie die lys kry nie.</p>';
+  // Wys altyd wat elke poging opgelewer het
+  {
+    let h = '';
     attempts.forEach(a => {
-      h += '<div class="row"><code>' + a.url.replace(BASE, '') + '</code> → <b>HTTP ' + a.status + '</b></div>';
+      const l = extractList(a.json);
+      h += '<div class="row"><code>' + decodeURIComponent(a.url.replace(BASE, ''))
+         + '</code> → <b>HTTP ' + a.status + '</b>'
+         + (l ? ' · <b>' + l.length + '</b> weergawes' : '') + '</div>';
     });
-    h += '<p class="muted" style="margin-top:10px">Rou antwoord van die eerste poging:</p><pre>'
-       + (attempts[0].text || '(leeg)').slice(0, 2500).replace(/</g, '&lt;') + '</pre>';
+    card('Pogings', h);
+  }
+
+  if (!winner) {
+    let h = '<p class="bad">Kon geen weergawes kry nie.</p>'
+          + '<p class="muted">Rou antwoorde:</p>';
+    attempts.forEach(a => {
+      h += '<p class="muted" style="margin-top:8px"><code>'
+         + decodeURIComponent(a.url.replace(BASE, '')) + '</code></p><pre>'
+         + (a.text || '(leeg)').slice(0, 900).replace(/</g, '&lt;') + '</pre>';
+    });
     card('Geen sukses', h);
     $('#go').disabled = false;
     return;
