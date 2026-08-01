@@ -75,7 +75,7 @@ const out = $('#out');
 $('#key').value = localStorage.getItem('yvkey') || '';
 $('#key').addEventListener('input', e => localStorage.setItem('yvkey', e.target.value.trim()));
 
-const BASE = 'https://api.youversion.com/v1';
+let BASE = 'https://api.youversion.com/v1';
 
 function card(title, inner) {
   const d = document.createElement('div');
@@ -130,23 +130,35 @@ $('#go').addEventListener('click', async () => {
   $('#go').disabled = true;
   card('Besig...', '<span class="muted">Vra die weergawe-lys op...</span>');
 
-  // Die API vereis language_ranges[] — probeer die Afrikaanse taalkodes
+  // Kontroletoets eerste: /bibles kaal het gister HTTP 422 gegee.
+  // As dit nou ook misluk, is die probleem nie die parameter nie.
   const LR = 'language_ranges%5B%5D=';
   const paths = [
-    '/bibles?' + LR + 'afr',
-    '/bibles?' + LR + 'af',
-    '/bibles?' + LR + 'afr&' + LR + 'af',
-    '/bibles?' + LR + '*',
+    '/bibles',                       // ← KONTROLE (gister: 422)
     '/bibles?' + LR + 'eng',
+    '/bibles?' + LR + 'afr',
+    '/bibles?language_ranges[]=eng', // onge-enkodeerde hakies
+    '/bibles?' + LR + '*',
   ];
   let winner = null, attempts = [];
 
-  for (const p of paths) {
-    const r = await tryGet(p, key);
-    attempts.push(r);
-    const l = extractList(r.json);
-    if (r.ok && l && l.length) { winner = r; break; }
+  // Toets albei basisse: met /v1 en sonder
+  const BASES = ['https://api.youversion.com/v1', 'https://api.youversion.com'];
+
+  outer:
+  for (const base of BASES) {
+    BASE = base;
+    for (const p of paths) {
+      const r = await tryGet(p, key);
+      r.base = base;
+      attempts.push(r);
+      const l = extractList(r.json);
+      if (r.ok && l && l.length) { winner = r; break outer; }
+    }
+    // as die kontrole 'n regte HTTP-status gee, is hierdie basis lewendig
+    if (attempts.some(a => a.base === base && a.status > 0)) break;
   }
+  BASE = 'https://api.youversion.com/v1';
 
   out.innerHTML = '';
 
@@ -155,10 +167,20 @@ $('#go').addEventListener('click', async () => {
     let h = '';
     attempts.forEach(a => {
       const l = extractList(a.json);
-      h += '<div class="row"><code>' + decodeURIComponent(a.url.replace(BASE, ''))
-         + '</code> → <b>HTTP ' + a.status + '</b>'
+      const pad = a.url.replace(a.base, '');
+      const dood = a.status === 0;
+      h += '<div class="row"><span class="muted">' + a.base.replace('https://api.youversion.com', '') + '</span> '
+         + '<code>' + decodeURIComponent(pad) + '</code> → '
+         + '<b class="' + (dood ? 'bad' : 'ok') + '">HTTP ' + a.status + '</b>'
+         + (dood ? ' <span class="muted">(nooit deurgekom)</span>' : '')
          + (l ? ' · <b>' + l.length + '</b> weergawes' : '') + '</div>';
     });
+    const enigeLewend = attempts.some(a => a.status > 0);
+    h += '<p class="muted" style="margin-top:10px">'
+       + (enigeLewend
+          ? 'Ten minste een versoek het die bediener bereik — dit is dus nie CORS nie.'
+          : '<b class="bad">Geen enkele versoek het deurgekom nie.</b> Dit dui op CORS, of die API blok die blaaier heeltemal.')
+       + '</p>';
     card('Pogings', h);
   }
 
