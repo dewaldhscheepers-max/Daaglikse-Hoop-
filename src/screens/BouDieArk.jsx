@@ -131,19 +131,19 @@ export default function BouDieArk({ onClose }) {
   const [diere, setDiere]       = useState(() => leesDiere())
   const [wysDiere, setWysDiere] = useState(false)
 
-  // Moenie op CSS staatmaak vir die hoogte nie. Meet die skerm en stel dit
-  // as 'n pixelwaarde, sodat geen ouer-element dit kan inkort nie.
-  const [skermH, setSkermH] = useState(() => window.innerHeight || 0)
+  // Terwyl die spel oop is, kry die bladsy self die spel se donker kleur.
+  // Chrome se adresbalk gly in en uit en verander die sigbare hoogte; sonder
+  // dit sou die app in daardie oomblik deurwys.
   useEffect(() => {
-    function meet() { setSkermH(window.innerHeight || document.documentElement.clientHeight || 0) }
-    meet()
-    const t = setTimeout(meet, 120)
-    window.addEventListener('resize', meet)
-    window.addEventListener('orientationchange', meet)
+    const b = document.body, h = document.documentElement
+    const bBg = b.style.background, hBg = h.style.background, bOv = b.style.overflow
+    b.style.background = '#100D17'
+    h.style.background = '#100D17'
+    b.style.overflow = 'hidden'
     return () => {
-      clearTimeout(t)
-      window.removeEventListener('resize', meet)
-      window.removeEventListener('orientationchange', meet)
+      b.style.background = bBg
+      h.style.background = hBg
+      b.style.overflow = bOv
     }
   }, [])
 
@@ -599,7 +599,7 @@ export default function BouDieArk({ onClose }) {
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return createPortal((
-    <div className="ark-overlay" style={skermH ? { height: skermH + 'px' } : undefined}>
+    <div className="ark-overlay">
 
       {/* ── Kop ── */}
       <div className="ark-kop">

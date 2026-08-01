@@ -4,6 +4,14 @@
   position: fixed;
   inset: 0;
   top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
+
+  /* dvh volg die sigbare area, sodat die knoppies bereikbaar bly wanneer
+     Chrome se adresbalk wys. Die bladsy self is agter donker gemaak, dus
+     is daar nooit 'n gaping wanneer die balk in of uit gly nie. */
+  height: 100vh;
+  height: 100dvh;
+
+  overscroll-behavior: none;
   z-index: 260;
   display: flex;
   flex-direction: column;
