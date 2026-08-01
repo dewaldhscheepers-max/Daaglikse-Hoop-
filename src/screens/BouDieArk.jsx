@@ -316,25 +316,30 @@ export default function BouDieArk({ onClose }) {
 
       const bg = Math.max(8, Math.floor(Math.min(breed / KOL, hoogte / RY)))
       const w = bg * KOL, h = bg * RY
+      const nw = w * dpr, nh = h * dpr
+
+      // Kritiek: canvas.width skryf maak die doek skoon en verander die
+      // uitleg. Doen dit net wanneer die grootte werklik anders is, anders
+      // vuur die uitleg-verandering hierdie funksie weer af en spring die
+      // bord heen en weer tussen twee groottes.
+      if (doek.width === nw && doek.height === nh) return
       // CSS-grootte bly w×h; die agtergrond is dpr keer groter vir skerp lyne.
       // teken() werk in toestel-pixels, dus bly die transform identiteit.
       doek.style.width  = w + 'px'
       doek.style.height = h + 'px'
-      doek.width  = w * dpr
-      doek.height = h * dpr
+      doek.width  = nw
+      doek.height = nh
+      vuil.current = true
       teken()
     }
     pas()
     // Chrome se adresbalk en die uitleg gaan eers ná 'n raam of twee sit.
     const t1 = setTimeout(pas, 60)
     const t2 = setTimeout(pas, 300)
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(pas) : null
-    if (ro && wrapRef.current) ro.observe(wrapRef.current)
     window.addEventListener('resize', pas)
     window.addEventListener('orientationchange', pas)
     return () => {
       clearTimeout(t1); clearTimeout(t2)
-      if (ro) ro.disconnect()
       window.removeEventListener('resize', pas)
       window.removeEventListener('orientationchange', pas)
     }
