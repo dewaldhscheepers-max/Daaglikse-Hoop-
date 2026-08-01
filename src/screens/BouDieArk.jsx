@@ -204,9 +204,16 @@ export default function BouDieArk({ onClose }) {
   }
 
   /* ── Teken ── */
+  // Merk dat daar iets nuuts is om te teken. Sonder dit herteken die lus
+  // 60 keer per sekonde al staan alles stil, wat op swakker toestelle
+  // flikker en strepe veroorsaak.
+  const vuil = useRef(true)
+  const merkVuil = useCallback(() => { vuil.current = true }, [])
+
   const teken = useCallback(() => {
     const doek = doekRef.current
     if (!doek) return
+    vuil.current = false
     const ctx = doek.getContext('2d')
     const s   = spel.current
     const bg  = doek.width / KOL
@@ -361,6 +368,7 @@ export default function BouDieArk({ onClose }) {
   const vasmaak = useCallback(() => {
     const s = spel.current
     selle(s.stuk).forEach(([x, y]) => { if (y >= 0) s.bord[y][x] = STUKKE[s.stuk.tipe].kleur })
+    vuil.current = true
 
     const oor = s.bord.filter(ry => ry.some(c => c === null))
     const skoon = RY - oor.length
@@ -405,7 +413,7 @@ export default function BouDieArk({ onClose }) {
     const rot = (s.stuk.rot + 1) % 4
     for (const [dx, dy] of STAMPE) {
       const p = { ...s.stuk, rot, x: s.stuk.x + dx, y: s.stuk.y + dy }
-      if (!bots(s.bord, p)) { s.stuk = p; teken(); return }
+      if (!bots(s.bord, p)) { s.stuk = p; merkVuil(); teken(); return }
     }
   }, [teken])
 
@@ -424,6 +432,7 @@ export default function BouDieArk({ onClose }) {
     while (!bots(s.bord, { ...s.stuk, y: s.stuk.y + 1 })) { s.stuk.y++; n++ }
     s.telling += n * 2
     setTelling(s.telling)
+    merkVuil()
     vasmaak()
     teken()
   }, [teken, vasmaak])
@@ -465,10 +474,11 @@ export default function BouDieArk({ onClose }) {
         s.val -= tempo
         if (!s.stuk) break
         const p = { ...s.stuk, y: s.stuk.y + 1 }
-        if (!bots(s.bord, p)) s.stuk = p
-        else { vasmaak(); break }
+        if (!bots(s.bord, p)) { s.stuk = p; vuil.current = true }
+        else { vuil.current = true; vasmaak(); break }
       }
-      teken()
+      // weer beweeg aanhoudend; andersins net wanneer iets verander het
+      if (vuil.current || stadiumBy(s.stadium).nr >= REEN_VANAF) teken()
       id = requestAnimationFrame(raam)
     }
     id = requestAnimationFrame(raam)
