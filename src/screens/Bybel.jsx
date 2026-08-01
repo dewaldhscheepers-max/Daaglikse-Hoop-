@@ -53,6 +53,28 @@ function goedgekeurdeSleutel(afk) {
   return null
 }
 
+function Steun() {
+  return (
+    <div className="byb-steun">
+      <p className="byb-steun-teks">
+        Die Bybel in hierdie app is gratis. As dit jou help, help ons om meer te doen.
+      </p>
+      <button
+        className="byb-steun-knop byb-steun-primer"
+        onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
+      >
+        Maandelikse Hoopdraer
+      </button>
+      <button
+        className="byb-steun-knop byb-steun-spook"
+        onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
+      >
+        Eenmalige bydrae
+      </button>
+    </div>
+  )
+}
+
 export default function Bybel({ onClose }) {
   const [view, setView]             = useState('boeke')
   const [weergawes, setWeergawes]   = useState(weergaweKas || [])
@@ -216,6 +238,7 @@ export default function Bybel({ onClose }) {
                   {nt.map(k => <button key={k} className="byb-boek" onClick={() => openBoek(k)}>{boekNaam(k)}</button>)}
                 </div>
               </>}
+              <Steun />
             </>
           )}
 
@@ -236,6 +259,7 @@ export default function Bybel({ onClose }) {
                 <button className="byb-blaai-knop" disabled={hoofstuk >= hoofstukke.length} onClick={() => blaaiNa(hoofstuk + 1)}>Volgende →</button>
               </div>
               <p className="byb-erkenning">{NAME[sleutel] || ''} · verskaf deur YouVersion</p>
+              <Steun />
             </>
           )}
 

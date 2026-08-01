@@ -168,12 +168,14 @@
 .byb-nommer:active { transform: scale(0.96); }
 
 /* ── Die Bybelteks ── */
+/* Georgia en Noto Serif is vir skermlees ontwerp — groot x-hoogte, stewige
+   stamme. Cormorant is 'n vertoonletter en lees swaar in lang teks. */
 .byb-teks {
-  font-family: var(--font-serif);
-  font-size: 24px;
-  line-height: 1.85;
-  color: #2A1F42;
-  letter-spacing: 0.004em;
+  font-family: Georgia, 'Noto Serif', 'Droid Serif', 'Times New Roman', serif;
+  font-size: 22px;
+  line-height: 1.8;
+  color: #241B38;
+  letter-spacing: 0.002em;
 }
 
 .byb-teks .p  { margin: 0 0 1.35em; }
@@ -194,8 +196,8 @@
 .byb-teks .s,
 .byb-teks .s1,
 .byb-teks h3 {
-  font-family: var(--font-serif);
-  font-size: 0.72em;
+  font-family: var(--font-body);
+  font-size: 0.62em;
   font-weight: 700;
   color: var(--byb-goud);
   letter-spacing: 0.05em;
@@ -234,6 +236,53 @@
   color: var(--byb-sag);
   text-align: center;
   line-height: 1.6;
+}
+
+/* ── Skenking, heel onder ── */
+.byb-steun {
+  margin-top: 34px;
+  padding: 22px 18px 19px;
+  background: #FFFFFF;
+  border: 1px solid var(--byb-rand);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.byb-steun-teks {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--byb-sag);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 3px;
+}
+
+.byb-steun-knop {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 11px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.byb-steun-knop:active { opacity: 0.75; }
+
+.byb-steun-primer {
+  background: var(--byb-pers);
+  color: #fff;
+  border: none;
+}
+
+.byb-steun-spook {
+  background: transparent;
+  color: var(--byb-pers);
+  border: 1.5px solid rgba(107, 92, 158, 0.35);
 }
 
 /* ── Bottom sheet ── */
