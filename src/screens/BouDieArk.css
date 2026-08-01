@@ -149,6 +149,7 @@
   max-width: 100%;
   max-height: 100%;
   display: block;
+  border-radius: 12px;
   /* Geen border-radius en geen laag-promosie nie. 'n Afgeronde, gepromoveerde
      doek laat sommige Android-GPU's ou laag-inhoud langs die rande wys —
      dit was die strepe. Die doek teken sy eie agtergrond, dus lyk 'n
