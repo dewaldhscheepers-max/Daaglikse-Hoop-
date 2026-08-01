@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { playCollect, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
+import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
 import ArkBou from '../components/ArkBou'
@@ -60,6 +60,23 @@ const PUNTE = { 1: 100, 2: 300, 3: 500, 4: 800 }
 
 const STOOR   = 'ark_stoor'
 const VERSAMEL = 'ark_diere'
+const VERSTE   = 'ark_verste'
+
+/* Hoe ver jy al ooit in die verhaal gekom het. 'n Nuwe spel begin twee
+   stadiums hieronder: jy herdoen nooit die hele verhaal en herwin nooit
+   diere wat lankal in die ark is nie, maar jy kry darem 'n paar stadiums
+   om warm te word voordat die spoed weer is waar jy dit gelos het. */
+const TERUG_BY_NUWE = 2
+
+function leesVerste() {
+  try { return Math.max(1, Number(localStorage.getItem(VERSTE)) || 1) } catch { return 1 }
+}
+function stoorVerste(nr) {
+  try { if (nr > leesVerste()) localStorage.setItem(VERSTE, String(nr)) } catch {}
+}
+function beginStadium() {
+  return Math.max(1, leesVerste() - TERUG_BY_NUWE)
+}
 
 function leesDiere() {
   try { return JSON.parse(localStorage.getItem(VERSAMEL) || '[]') } catch { return [] }
@@ -216,15 +233,19 @@ export default function BouDieArk({ onClose }) {
     const s = spel.current
     const st = stadiumBy(s.stadium)
     s.loop = false
+    // Was hierdie dier al in die ark? Dan moet die kaart nie maak of jy hom
+    // nou eers gewen het nie.
+    const reeds = leesDiere().includes(st.dier)
     stoorDier(st.dier)
     setDiere(leesDiere())
-    setKlaar(st)
+    setKlaar({ ...st, reeds })
     playLevelComplete()
   }, [])
 
   function volgendeStadium() {
     const s = spel.current
     s.stadium += 1
+    stoorVerste(s.stadium)
     s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
     s.sTyd = 0; s.sBegin = performance.now()
     s.weer.druppels = []; s.weer.water = 0
@@ -422,11 +443,11 @@ export default function BouDieArk({ onClose }) {
       s.sPunte += wins
       s.sBesteMulti = Math.max(s.sBesteMulti, skoon)
       s.sKombo += 1
-      playCollect(Math.min(skoon - 1, 3), Math.max(skoon, s.sKombo))
+      playPlanke(skoon)
       setLyne(s.lyne)
     } else {
       s.sKombo = 0          // kombo breek wanneer 'n stuk geen ry maak nie
-      playHit()
+      playHout()   // 'n plank kom tot rus
     }
     setTelling(s.telling)
 
@@ -588,7 +609,10 @@ export default function BouDieArk({ onClose }) {
   useEffect(() => {
     try {
       const d = JSON.parse(localStorage.getItem(STOOR) || 'null')
-      if (d) setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, stadium: d.stadium || 1 })
+      if (d) {
+        setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, stadium: d.stadium || 1 })
+        stoorVerste(d.stadium || 1)   // vir spelers wat reeds ver was
+      }
     } catch {}
   }, [])
 
@@ -610,12 +634,13 @@ export default function BouDieArk({ onClose }) {
   function begin() {
     const s = spel.current
     s.bord = leegBord(); s.sak = nuweSak(); s.volgende = null
+    const beginBy = beginStadium()
     s.telling = 0; s.lyne = 0; s.val = 0
-    s.stadium = 1; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
+    s.stadium = beginBy; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
     s.sKombo = 0; s.sTyd = 0; s.sBegin = performance.now()
     s.weer = { druppels: [], water: 0 }
     vorderRef.current = 0
-    setTelling(0); setLyne(0); setStadiumNr(1); setVorder(0); setKlaar(null)
+    setTelling(0); setLyne(0); setStadiumNr(beginBy); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
     setBewaar(null)
     setToestand('speel')
@@ -631,6 +656,7 @@ export default function BouDieArk({ onClose }) {
       s.volgende = d.volgende
       s.telling = d.telling; s.lyne = d.lyne; s.val = 0
       s.stadium = d.stadium || 1
+      stoorVerste(s.stadium)
       s.sLyne = d.sLyne || 0; s.sPunte = d.sPunte || 0
       s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
       s.sTyd = d.sTyd || 0; s.sBegin = performance.now()
@@ -657,6 +683,8 @@ export default function BouDieArk({ onClose }) {
   // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
   // alles verlore is nie. Elders wys dit die lopende spel.
   const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, lyne, stadium: stadiumNr }
+  // Waar 'n splinternuwe spel sal begin. Lees goedkoop uit localStorage.
+  const nuweBy = beginStadium()
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
@@ -745,7 +773,8 @@ export default function BouDieArk({ onClose }) {
               </button>
             )}
             <button className={`ark-knop ${bewaar ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
-              {bewaar ? 'Begin van voor af' : 'Begin speel'}
+              {bewaar ? 'Nuwe spel' : 'Begin speel'}
+              {nuweBy > 1 && <small>Begin by stadium {nuweBy}</small>}
             </button>
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})
@@ -786,7 +815,11 @@ export default function BouDieArk({ onClose }) {
 
           <div className="ark-nuwe-dier">
             <Dier id={klaar.dier} grootte={104} paar />
-            <span>{dierNaam(klaar.dier)} — 'n paar aan boord</span>
+            <span>
+              {klaar.reeds
+                ? `${dierNaam(klaar.dier)} — reeds aan boord`
+                : `${dierNaam(klaar.dier)} — 'n paar aan boord`}
+            </span>
           </div>
 
           <blockquote className="ark-vers">

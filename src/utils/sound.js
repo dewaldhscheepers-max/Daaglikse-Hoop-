@@ -46,6 +46,88 @@ export function playCollect(idx = 0, combo = 1) {
   } catch {}
 }
 
+/* ── Hout ──────────────────────────────────────────────────────
+   Vir Bou die Ark. Geen klokkies, geen helder rand: 'n plank wat op 'n
+   plank val. Twee dele — 'n kort growwe ruisstoot deur 'n laagdeurlaat-
+   filter vir die aanslag, en 'n paar lae resonansies wat vinnig doodgaan.
+   Hout ring nie na nie, dus is die verval kort. Elke slag word effens
+   anders gestem sodat 'n ry plante nie soos 'n masjien klink nie.
+   Vredepad se klanke bly onaangeraak.
+   ────────────────────────────────────────────────────────────── */
+function ruisBron(c, duur) {
+  const n   = Math.max(1, Math.floor(c.sampleRate * duur))
+  const buf = c.createBuffer(1, n, c.sampleRate)
+  const d   = buf.getChannelData(0)
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1
+  const src = c.createBufferSource()
+  src.buffer = buf
+  return src
+}
+
+function hout(c, t, krag = 1) {
+  const v = Math.min(1, Math.max(0.25, krag))
+
+  // Die aanslag. Die kort optrek keer 'n digitale klap, wat skerp klink.
+  const src = ruisBron(c, 0.1)
+  const lp  = c.createBiquadFilter()
+  lp.type = 'lowpass'
+  lp.frequency.value = 720 + Math.random() * 240
+  lp.Q.value = 0.8
+  const gr = c.createGain()
+  gr.gain.setValueAtTime(0.0001, t)
+  gr.gain.linearRampToValueAtTime(0.42 * v, t + 0.002)
+  gr.gain.exponentialRampToValueAtTime(0.0001, t + 0.08)
+  src.connect(lp); lp.connect(gr); gr.connect(_master)
+  src.start(t); src.stop(t + 0.11)
+
+  // Die lyf van die plank.
+  const basis = 166 + Math.random() * 28
+  ;[[1, 0.30, 0.17], [1.47, 0.14, 0.12], [2.31, 0.06, 0.08]].forEach(([m, vol, verval]) => {
+    const o = c.createOscillator(), g = c.createGain()
+    o.type = 'triangle'
+    o.frequency.setValueAtTime(basis * m, t)
+    o.frequency.exponentialRampToValueAtTime(basis * m * 0.84, t + verval)
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.linearRampToValueAtTime(vol * v, t + 0.004)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + verval)
+    o.connect(g); g.connect(_master)
+    o.start(t); o.stop(t + verval + 0.04)
+  })
+}
+
+// 'n Stuk kom tot rus.
+export function playHout(krag = 1) {
+  if (_muted) return
+  try {
+    const c = getCtx()
+    hout(c, c.currentTime, krag)
+    if (navigator.vibrate) navigator.vibrate(9)
+  } catch {}
+}
+
+// 'n Ry is klaar en word deel van die ark: 'n paar planke wat kort na
+// mekaar neersak, met 'n warm lae toon onder wat die ruimte vul.
+export function playPlanke(rye = 1) {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    const n = Math.min(4, Math.max(1, rye))
+    for (let i = 0; i <= n; i++) hout(c, nou + i * 0.055, 0.85 + i * 0.05)
+
+    const o = c.createOscillator(), g = c.createGain()
+    o.type = 'sine'
+    o.frequency.setValueAtTime(88, nou)
+    o.frequency.exponentialRampToValueAtTime(66, nou + 0.5)
+    g.gain.setValueAtTime(0.0001, nou)
+    g.gain.linearRampToValueAtTime(0.16 + n * 0.03, nou + 0.03)
+    g.gain.exponentialRampToValueAtTime(0.0001, nou + 0.55)
+    o.connect(g); g.connect(_master)
+    o.start(nou); o.stop(nou + 0.6)
+
+    if (navigator.vibrate) navigator.vibrate(n >= 3 ? 40 : 22)
+  } catch {}
+}
+
 export function playHit() {
   if (_muted) return
   try {
