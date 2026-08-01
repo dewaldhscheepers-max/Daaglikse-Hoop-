@@ -124,6 +124,165 @@
   color: var(--byb-pers);
 }
 
+/* ── Soek ── */
+.byb-soek-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.byb-soek-ikoon {
+  position: absolute;
+  left: 15px;
+  color: var(--byb-sag);
+  pointer-events: none;
+}
+
+.byb-soek {
+  width: 100%;
+  padding: 15px 42px 15px 44px;
+  border-radius: 13px;
+  border: 1px solid var(--byb-rand);
+  background: #FFFFFF;
+  color: #2A1F42;
+  font-family: var(--font-body);
+  font-size: 16px;
+}
+
+.byb-soek::placeholder { color: #A79DB4; }
+.byb-soek:focus { outline: none; border-color: var(--byb-pers); }
+
+.byb-soek-vee {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--byb-sag);
+  font-size: 15px;
+  padding: 9px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.byb-treffer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #FFFCF4;
+  border: 1px solid var(--byb-goud);
+  border-radius: 13px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.byb-treffer-naam {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #2A1F42;
+}
+
+.byb-treffer-gaan {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--byb-pers);
+  white-space: nowrap;
+}
+
+.byb-geen-treffer {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--byb-sag);
+  line-height: 1.6;
+  margin: 0 4px 16px;
+}
+
+/* ── Gaan voort ── */
+.byb-voort {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  background: var(--byb-pers);
+  border: none;
+  border-radius: 13px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.byb-voort-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.byb-voort-plek {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* ── Tikbare verse ── */
+.byb-vers {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+
+.byb-vers:active { background: rgba(201, 169, 97, 0.22); }
+
+.byb-vers-blad {
+  padding-bottom: calc(var(--safe-bottom, 0px) + 22px);
+}
+
+.byb-vers-kop {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #2A1F42;
+  text-align: center;
+  margin: 0 20px 10px;
+}
+
+.byb-vers-teks {
+  font-family: Georgia, 'Noto Serif', serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: #241B38;
+  margin: 0 20px 18px;
+  max-height: 34vh;
+  overflow-y: auto;
+}
+
+.byb-vers-knoppe {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0 18px;
+}
+
+.byb-vers-nota {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--byb-sag);
+  text-align: center;
+  margin: 12px 20px 0;
+}
+
 /* ── Boeke en hoofstukke ── */
 .byb-afdeling {
   font-family: var(--font-serif);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './Bybel.css'
-import { boekNaam, NT_EERSTE } from '../data/bybelBoeke'
+import { BOEKE, boekNaam, NT_EERSTE } from '../data/bybelBoeke'
 
 const API = '/api/bible?path='
 
@@ -53,6 +53,59 @@ function goedgekeurdeSleutel(afk) {
   return null
 }
 
+// "Joh 3:16", "genesis 1", "1 kor 13" → { kode, hoofstuk, vers }
+function ontleedVerwysing(vraag, beskikbaar) {
+  const skoon = vraag.trim().toLowerCase().replace(/\s+/g, ' ')
+  if (!skoon) return null
+  const m = skoon.match(/^(.+?)\s*(\d+)?\s*[:.]?\s*(\d+)?$/)
+  if (!m) return null
+  const naamDeel = (m[1] || '').trim()
+  if (!naamDeel) return null
+
+  let beste = null
+  for (const kode of beskikbaar) {
+    const naam = (BOEKE[kode] || kode).toLowerCase()
+    const kort = kode.toLowerCase()
+    if (naam === naamDeel || kort === naamDeel) { beste = kode; break }
+    if (naam.startsWith(naamDeel) || kort.startsWith(naamDeel)) {
+      if (!beste) beste = kode
+    }
+  }
+  if (!beste) return null
+  return { kode: beste, hoofstuk: m[2] ? parseInt(m[2]) : 1, vers: m[3] ? parseInt(m[3]) : null }
+}
+
+// Die API gee los teks ná elke versmerker. Draai elke vers in 'n tikbare blok.
+function omhulVerse(root) {
+  if (!root || root.dataset.omhul === '1') return
+  const merkers = Array.from(root.querySelectorAll('.yv-v'))
+  if (!merkers.length) return
+  const ouers = new Set(merkers.map(m => m.parentNode).filter(Boolean))
+
+  ouers.forEach(ouer => {
+    const kinders = Array.from(ouer.childNodes)
+    const groepe = []
+    let huidige = null
+    kinders.forEach(node => {
+      const isMerker = node.nodeType === 1 && node.classList && node.classList.contains('yv-v')
+      if (isMerker) { huidige = { v: node.getAttribute('v'), nodes: [node] }; groepe.push(huidige) }
+      else if (huidige) { huidige.nodes.push(node) }
+      else { groepe.push({ v: null, nodes: [node] }) }
+    })
+    const frag = document.createDocumentFragment()
+    groepe.forEach(g => {
+      if (g.v == null) { g.nodes.forEach(n => frag.appendChild(n)); return }
+      const sp = document.createElement('span')
+      sp.className = 'byb-vers'
+      sp.setAttribute('data-v', g.v)
+      g.nodes.forEach(n => sp.appendChild(n))
+      frag.appendChild(sp)
+    })
+    ouer.appendChild(frag)
+  })
+  root.dataset.omhul = '1'
+}
+
 function Steun() {
   return (
     <div className="byb-steun">
@@ -85,8 +138,12 @@ export default function Bybel({ onClose }) {
   const [inhoud, setInhoud]         = useState(null)
   const [laai, setLaai]             = useState(false)
   const [fout, setFout]             = useState(null)
-  const [blad, setBlad]             = useState(false)   // bottom sheet
+  const [blad, setBlad]             = useState(false)   // vertaling-blad
+  const [soek, setSoek]             = useState('')
+  const [laaste, setLaaste]         = useState(() => lees('byb_laaste', null))
+  const [gekose, setGekose]         = useState(null)     // aangetikte vers
   const bodyRef = useRef(null)
+  const teksRef = useRef(null)
 
   const weergawe = weergawes.find(w => w.id === weergaweId) || null
   const sleutel  = weergawe ? goedgekeurdeSleutel(weergawe.abbreviation) : null
@@ -146,15 +203,35 @@ export default function Bybel({ onClose }) {
     laaiHoofstukke(kode, weergaweId)
   }
 
+  function onthou(kode, nr) {
+    const pos = { boek: kode, hoofstuk: nr }
+    setLaaste(pos)
+    stoor('byb_laaste', pos)
+  }
+
   function openHoofstuk(nr) {
     setHoofstuk(nr); setView('lees')
     laaiTeks(boek, nr, weergaweId)
+    onthou(boek, nr)
+  }
+
+  // Spring direk na 'n boek en hoofstuk (vanaf soek of "gaan voort")
+  function springNa(kode, nr, versNr) {
+    setBoek(kode); setHoofstuk(nr); setView('lees'); setSoek('')
+    laaiHoofstukke(kode, weergaweId)
+    laaiTeks(kode, nr, weergaweId)
+    onthou(kode, nr)
+    if (versNr) setTimeout(() => {
+      const el = teksRef.current && teksRef.current.querySelector(`.byb-vers[data-v="${versNr}"]`)
+      if (el) el.scrollIntoView({ block: 'center' })
+    }, 400)
   }
 
   function blaaiNa(nr) {
     if (nr < 1 || nr > hoofstukke.length) return
     setHoofstuk(nr)
     laaiTeks(boek, nr, weergaweId)
+    onthou(boek, nr)
     if (bodyRef.current) bodyRef.current.scrollTop = 0
   }
 
@@ -164,6 +241,43 @@ export default function Bybel({ onClose }) {
     setBlad(false)
     if (boek) laaiHoofstukke(boek, id)
     if (view === 'lees' && boek && hoofstuk) laaiTeks(boek, hoofstuk, id)
+  }
+
+  useEffect(() => {
+    if (view === 'lees' && inhoud && teksRef.current) omhulVerse(teksRef.current)
+  }, [view, inhoud])
+
+  function tikVers(e) {
+    const el = e.target.closest && e.target.closest('.byb-vers')
+    if (!el || !teksRef.current || !teksRef.current.contains(el)) return
+    const v = el.getAttribute('data-v')
+    const teks = (el.textContent || '').replace(/^\s*\d+\s*/, '').trim()
+    if (!teks) return
+    setGekose({ v, teks })
+  }
+
+  function versVerwysing() {
+    return gekose ? `${boekNaam(boek)} ${hoofstuk}:${gekose.v}` : ''
+  }
+
+  async function kopieerVers() {
+    const t = `"${gekose.teks}"\n\n— ${versVerwysing()} (${sleutel})`
+    try { await navigator.clipboard.writeText(t) } catch {}
+    setGekose(null)
+  }
+
+  async function deelVers() {
+    const APP = 'https://dewaldscheepers.com/go'
+    const teks = `"${gekose.teks}"\n\n— ${versVerwysing()} (${sleutel})\n\nGelees in Daaglikse Hoop — 'n gratis Afrikaanse app met daaglikse oordenkings, gebed, leesplanne en die Bybel.`
+    try {
+      if (navigator.share) await navigator.share({ title: versVerwysing(), text: teks, url: APP })
+      else await navigator.clipboard.writeText(teks + '\n' + APP)
+    } catch (err) {
+      if (err && err.name !== 'AbortError') {
+        try { await navigator.clipboard.writeText(teks + '\n' + APP) } catch {}
+      }
+    }
+    setGekose(null)
   }
 
   const boeke   = (weergawe && weergawe.books) || []
@@ -176,6 +290,8 @@ export default function Bybel({ onClose }) {
       .map(k => weergawes.find(w => goedgekeurdeSleutel(w.abbreviation) === k))
       .filter(Boolean)
   }
+  const soekTreffer = soek.trim() ? ontleedVerwysing(soek, boeke) : null
+
   const aanbeveel = groep(AANBEVEEL)
   const meer      = groep(MEER)
 
@@ -226,6 +342,46 @@ export default function Bybel({ onClose }) {
 
           {view === 'boeke' && !laai && (
             <>
+              <div className="byb-soek-wrap">
+                <svg className="byb-soek-ikoon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  className="byb-soek"
+                  value={soek}
+                  onChange={e => setSoek(e.target.value)}
+                  placeholder="Soek 'n vers — bv. Joh 3:16"
+                  autoComplete="off"
+                  spellCheck="false"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && soekTreffer) springNa(soekTreffer.kode, soekTreffer.hoofstuk, soekTreffer.vers)
+                  }}
+                />
+                {soek && (
+                  <button className="byb-soek-vee" onClick={() => setSoek('')} aria-label="Vee uit">✕</button>
+                )}
+              </div>
+
+              {soek.trim() && (
+                soekTreffer ? (
+                  <button className="byb-treffer" onClick={() => springNa(soekTreffer.kode, soekTreffer.hoofstuk, soekTreffer.vers)}>
+                    <span className="byb-treffer-naam">
+                      {boekNaam(soekTreffer.kode)} {soekTreffer.hoofstuk}{soekTreffer.vers ? ':' + soekTreffer.vers : ''}
+                    </span>
+                    <span className="byb-treffer-gaan">Gaan soontoe →</span>
+                  </button>
+                ) : (
+                  <p className="byb-geen-treffer">Geen boek gevind nie. Probeer bv. <b>Joh 3:16</b> of <b>Psalms 23</b>.</p>
+                )
+              )}
+
+              {!soek.trim() && laaste && BOEKE[laaste.boek] && (
+                <button className="byb-voort" onClick={() => springNa(laaste.boek, laaste.hoofstuk)}>
+                  <span className="byb-voort-label">Gaan voort waar jy was</span>
+                  <span className="byb-voort-plek">{boekNaam(laaste.boek)} {laaste.hoofstuk} →</span>
+                </button>
+              )}
+
               {ot.length > 0 && <>
                 <div className="byb-afdeling">Ou Testament</div>
                 <div className="byb-rooster">
@@ -253,7 +409,12 @@ export default function Bybel({ onClose }) {
 
           {view === 'lees' && inhoud && (
             <>
-              <div className="byb-teks" dangerouslySetInnerHTML={{ __html: inhoud.content || '' }} />
+              <div
+                className="byb-teks"
+                ref={teksRef}
+                onClick={tikVers}
+                dangerouslySetInnerHTML={{ __html: inhoud.content || '' }}
+              />
               <div className="byb-blaai">
                 <button className="byb-blaai-knop" disabled={hoofstuk <= 1} onClick={() => blaaiNa(hoofstuk - 1)}>← Vorige</button>
                 <button className="byb-blaai-knop" disabled={hoofstuk >= hoofstukke.length} onClick={() => blaaiNa(hoofstuk + 1)}>Volgende →</button>
@@ -266,6 +427,27 @@ export default function Bybel({ onClose }) {
           <div style={{ height: 44 }} />
         </div>
       </div>
+
+      {/* ── Vers-aksies ── */}
+      {gekose && (
+        <>
+          <div className="byb-blad-agter" onClick={() => setGekose(null)} />
+          <div className="byb-blad byb-vers-blad" role="dialog" aria-label="Vers">
+            <div className="byb-blad-gryp" />
+            <div className="byb-vers-kop">{versVerwysing()}</div>
+            <p className="byb-vers-teks">{gekose.teks}</p>
+            <div className="byb-vers-knoppe">
+              <button className="byb-steun-knop byb-steun-primer" onClick={deelVers}>
+                Deel hierdie vers
+              </button>
+              <button className="byb-steun-knop byb-steun-spook" onClick={kopieerVers}>
+                Kopieer
+              </button>
+            </div>
+            <p className="byb-vers-nota">Deel stuur ook 'n skakel na die app saam.</p>
+          </div>
+        </>
+      )}
 
       {/* ── Bottom sheet ── */}
       {blad && (
