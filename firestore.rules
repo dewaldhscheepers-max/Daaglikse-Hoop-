@@ -90,13 +90,17 @@ service cloud.firestore {
     }
 
     // Bou die Ark se wereldwye ranglys.
-    // Almal kan lees. NIEMAND kan skryf nie — die enigste pad in is
-    // /api/ark-ranglys, wat die speler se ID-token verifieer en die lopie
-    // op geloofwaardigheid toets voordat dit tel. Sonder hierdie reel kon
-    // enigiemand met die blaaier se konsole 'n punt van 'n miljoen instuur
-    // en sou "wereldwyd" niks beteken nie.
+    // Geen kliënt raak hieraan nie — nie lees nie en nie skryf nie. Die
+    // enigste pad in en uit is /api/ark-ranglys, wat met die diensrekening
+    // werk, die speler se ID-token verifieer en die lopie op
+    // geloofwaardigheid toets voordat 'n punt tel.
+    //
+    // Firestore weier by verstek waar geen reel pas nie, dus is hierdie blok
+    // nie wat die versameling toemaak nie — dit is klaar toe. Dit staan hier
+    // sodat die bedoeling swart op wit is en niemand dit later per ongeluk
+    // oopmaak nie.
     match /arkRanglys/{userId} {
-      allow read:  if true;
+      allow read:  if false;
       allow write: if false;
     }
 
