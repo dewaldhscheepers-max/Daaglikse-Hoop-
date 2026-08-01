@@ -4,7 +4,7 @@ import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../da
 import { Dier, dierNaam } from '../data/arkDiere'
 import {
   leesNaam, stoorNaam, keurNaam, haalRanglys, kasLys,
-  stuurPunt, stuurWagry,
+  stuurPunt, stuurWagry, naamAfgewys, wysNaamAf,
 } from '../data/arkRanglys'
 import ArkBou from '../components/ArkBou'
 import './BouDieArk.css'
@@ -215,6 +215,7 @@ export default function BouDieArk({ onClose }) {
   const [ranglysLaai, setRanglysLaai] = useState(false)
   const [ranglysOud, setRanglysOud]   = useState(null)     // wanneer die kas gemaak is
   const [naam, setNaam]               = useState(() => leesNaam())
+  const [afgewys, setAfgewys]         = useState(() => naamAfgewys())
   const [naamInvoer, setNaamInvoer]   = useState('')
   const [naamFout, setNaamFout]       = useState(null)
   const [stuur, setStuur]             = useState(null)     // { besig, rang, totaal, fout, beterAs }
@@ -793,12 +794,22 @@ export default function BouDieArk({ onClose }) {
     }
   }, [])
 
-  // Die lopie word ingestuur sodra die ark volraak — maar net as ons 'n naam
-  // het. Sonder 'n naam vra ons eers, want die naam kom op 'n openbare lys.
+  /* Wanneer word 'n lopie ingestuur?
+     By ELKE voltooide stadium, en weer wanneer die ark volraak.
+
+     Voorheen was dit net by die einde, en dit was verkeerd: 'n speler wat
+     goed speel en sy spel aan die gang hou, sou nooit op die ranglys kom
+     nie. Jy moes eers verloor. Nou tel jou vordering soos jy dit maak, en
+     die stadium-klaar kaart is ook 'n beter oomblik om na 'n naam te vra as
+     die skerm wat se jy is dood. */
+  useEffect(() => {
+    if (!klaar || !naam) return
+    stuurLopie(naam)
+  }, [klaar, naam, stuurLopie])
+
   useEffect(() => {
     if (toestand !== 'verloor') return
     if (!naam) return
-    setStuur(null)
     stuurLopie(naam)
   }, [toestand, naam, stuurLopie])
 
@@ -808,7 +819,34 @@ export default function BouDieArk({ onClose }) {
     const skoon = naamInvoer.trim().replace(/\s+/g, ' ')
     stoorNaam(skoon)
     setNaam(skoon)
+    setAfgewys(false)
     setNaamFout(null)
+    setNaamInvoer('')
+  }
+
+  /* Een naamblok wat op meer as een plek gebruik word. Die vraag verskil,
+     want die oomblik verskil: by 'n gewende dier is dit 'n beloning, by 'n
+     vol ark is dit 'n laaste kans. */
+  function naamBlok(vraag) {
+    return (
+      <div className="ark-naamvra">
+        <p>{vraag}</p>
+        <input
+          className="ark-invoer"
+          value={naamInvoer}
+          onChange={e => { setNaamInvoer(e.target.value); setNaamFout(null) }}
+          placeholder="Jou naam"
+          maxLength={20}
+          aria-label="Jou naam vir die ranglys"
+        />
+        {naamFout && <span className="ark-fout">{naamFout}</span>}
+        <button className="ark-knop ark-knop-primer" onClick={bevestigNaam}>Sit my op die lys</button>
+        <button className="ark-knop ark-knop-spook" onClick={() => { wysNaamAf(); setAfgewys(true) }}>
+          Nie nou nie
+        </button>
+        <p className="ark-fyndruk">Jou naam is al wat ons wys. Jy hoef nie jou regte naam te gebruik nie.</p>
+      </div>
+    )
   }
 
   function pouseer() { stoorSpel(); setToestand('pouse') }
@@ -990,24 +1028,7 @@ export default function BouDieArk({ onClose }) {
 
             {/* Sonder 'n naam stuur ons niks in nie — die naam kom op 'n
                 openbare lys, dus moet die speler dit self kies. */}
-            {!naam && (
-              <div className="ark-naamvra">
-                <p>Wil jy op die wêreldwye ranglys wees? Kies 'n naam.</p>
-                <input
-                  className="ark-invoer"
-                  value={naamInvoer}
-                  onChange={e => { setNaamInvoer(e.target.value); setNaamFout(null) }}
-                  placeholder="Jou naam"
-                  maxLength={20}
-                  aria-label="Jou naam vir die ranglys"
-                />
-                {naamFout && <span className="ark-fout">{naamFout}</span>}
-                <button className="ark-knop ark-knop-primer" onClick={bevestigNaam}>
-                  Stuur my punt in
-                </button>
-                <p className="ark-fyndruk">Jou naam is al wat ons wys. Jy hoef nie jou regte naam te gebruik nie.</p>
-              </div>
-            )}
+            {!naam && !afgewys && naamBlok('Wil jy op die wêreldwye ranglys wees? Kies \'n naam.')}
 
             {naam && stuur?.besig && <p className="ark-blad-teks">Besig om jou punt in te stuur…</p>}
 
@@ -1054,6 +1075,12 @@ export default function BouDieArk({ onClose }) {
             {klaar.vers}
             <cite>{klaar.ref}</cite>
           </blockquote>
+
+          {!naam && !afgewys && naamBlok('Wil jy met jou diere op die wêreldwye ranglys wees?')}
+
+          {naam && stuur && !stuur.besig && stuur.rang && (
+            <p className="ark-kennis">Jy staan nou #{stuur.rang} van {stuur.totaal} wêreldwyd.</p>
+          )}
 
           <button className="ark-knop ark-knop-primer" onClick={volgendeStadium}>Gaan voort</button>
           <button className="ark-knop ark-knop-spook" onClick={() => { stoorSpel(); setKlaar(null); setToestand('pouse') }}>
@@ -1130,6 +1157,10 @@ export default function BouDieArk({ onClose }) {
           {ranglys && ranglys.totaal > ranglys.lys.length && (
             <p className="ark-fyndruk">Boonste {ranglys.lys.length} van {ranglys.totaal} spelers.</p>
           )}
+
+          {/* Hier vra ons altyd, ook as die speler vroeer "nie nou nie" gese
+              het — hy het self hierheen gekom, dus is dit nie neul nie. */}
+          {!naam && naamBlok('Jy is nog nie op die lys nie. Kies \'n naam.')}
 
           <button className="ark-knop ark-knop-primer" onClick={() => setWysRanglys(false)}>Terug</button>
         </div>

@@ -20,6 +20,7 @@ import { auth, getOrCreateAnonUid } from '../firebase'
 
 const PAD    = '/api/ark-ranglys'
 const NAAM   = 'ark_naam'
+const AFGEWYS = 'ark_naam_afgewys'
 const WAGRY  = 'ark_wagry'
 const KAS    = 'ark_ranglys_kas'
 const KAS_MS = 5 * 60 * 1000
@@ -29,7 +30,16 @@ export function leesNaam() {
   try { return localStorage.getItem(NAAM) || '' } catch { return '' }
 }
 export function stoorNaam(n) {
-  try { localStorage.setItem(NAAM, n) } catch {}
+  try { localStorage.setItem(NAAM, n); localStorage.removeItem(AFGEWYS) } catch {}
+}
+
+/* Het die speler al gese hy wil nie op die lys wees nie? Dan vra ons nie
+   weer by elke stadium nie. Die keuse bly beskikbaar op die ranglysskerm. */
+export function naamAfgewys() {
+  try { return localStorage.getItem(AFGEWYS) === '1' } catch { return false }
+}
+export function wysNaamAf() {
+  try { localStorage.setItem(AFGEWYS, '1') } catch {}
 }
 
 /* Dieselfde reëls as die bediener s'n. Ons keur hier eers sodat die speler
