@@ -559,11 +559,19 @@ export function doenSkuif(bord, a, b, { rng, telVersamel = true } = {}) {
   let grootsteKetting = 0
   let spesiaalGemaak = 0
   let kombinasies = 0
+  /* Vir die doelwit-tipes wat later bykom:
+       geveeSelle    — waar op die bord daar gevee is (vir 'verlig')
+       grootstePas   — die grootste enkele figuur (vir 'grootpas')
+       spesiaalSoorte — hoeveel van ELKE soort spesiale vrug gemaak is */
+  const geveeSelle = []
+  let grootstePas = 0
+  const spesiaalSoorte = {}
 
   if (!magRuil(bord, a, b)) {
     stappe.push({ tipe: 'ongeldig', a, b })
     return { geldig: false, stappe, punte: 0, versamel, versperrings,
-             grootsteKetting: 0, spesiaalGemaak: 0, kombinasies: 0 }
+             grootsteKetting: 0, spesiaalGemaak: 0, kombinasies: 0,
+             geveeSelle: [], grootstePas: 0, spesiaalSoorte: {} }
   }
 
   const sa0 = { ...selBy(bord, a.k, a.r) }
@@ -638,6 +646,7 @@ export function doenSkuif(bord, a, b, { rng, telVersamel = true } = {}) {
       nuweSpesiaal.push({ k: plek[0], r: plek[1], soort, vrug: g.vrug })
       punte += PUNTE.spesiaalGemaak
       spesiaalGemaak += 1
+      spesiaalSoorte[soort] = (spesiaalSoorte[soort] || 0) + 1
     }
 
     let rondePunte = 0
@@ -655,6 +664,9 @@ export function doenSkuif(bord, a, b, { rng, telVersamel = true } = {}) {
       if (g.hoek) rondePunte += PUNTE.vrug * PUNTE.hoek
     }
     punte += Math.round(rondePunte * maal)
+
+    for (const g of groepe) grootstePas = Math.max(grootstePas, g.selle.length)
+    for (const sl of teVee) geveeSelle.push(uitSleutel(sl))
 
     const geraak = slaanVersperrings(bord, teVee)
     geraak.filter(v => v.oor === 0).forEach(v => {
@@ -686,7 +698,8 @@ export function doenSkuif(bord, a, b, { rng, telVersamel = true } = {}) {
   }
 
   return { geldig: true, stappe, punte, versamel, versperrings,
-           grootsteKetting, spesiaalGemaak, kombinasies }
+           grootsteKetting, spesiaalGemaak, kombinasies,
+           geveeSelle, grootstePas, spesiaalSoorte }
 }
 
 /* Ná 'n skuif: is die bord nog speelbaar? Skommel indien nodig, en dit kos

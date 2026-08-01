@@ -3,7 +3,10 @@ import {
   maakBord, maakRng, magRuil, doenSkuif, versekerSkuif, bedekSel,
   RYLIG, KOLOMLIG, OESKRAG, REENBOOGVRUG, FEESMANDJIE,
 } from '../game/vrugtefees/enjin'
-import { VLAKKE, vlakBy, hoofstukVan, doelTeks, doelBehaal, doelVordering, BLOK_NAAM } from '../data/vrugtefeesVlakke'
+import {
+  VLAKKE, HOOFSTUKKE, HOOFSTUK_WOORD, vlakBy, hoofstukVan,
+  doelTeks, doelBehaal, doelVordering, BLOK_NAAM,
+} from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
 import TuinAgtergrond from '../components/TuinAgtergrond'
@@ -65,6 +68,9 @@ export default function Vrugtefees({ onClose }) {
   const [stil, setStil]         = useState(isMuted())
   const [rustig, setRustig]     = useState(() => leesRustig())
   const [wenkWys, setWenkWys]   = useState(true)
+  // Watter hoofstuk se fases die kaart wys. Negentig nommers in een rol is
+  // onbruikbaar; 'n mens kyk na een tuin op 'n slag.
+  const [kaartHoofstuk, setKaartHoofstuk] = useState(0)
 
   // Wat op die skerm is. Die enjin se bord leef in 'n ref; hierdie is die kopie
   // wat React teken, en dit word net tussen animasie-stappe bygewerk.
@@ -105,7 +111,8 @@ export default function Vrugtefees({ onClose }) {
       vlak: v,
       stand: {
         punte: 0, versamel: {}, spesiaalGemaak: 0, kombinasies: 0,
-        grootsteKetting: 0, blokkeAanBegin: bord.selle.filter(s => s.blok).length,
+        grootsteKetting: 0, grootstePas: 0, spesiaalSoorte: {}, verlig: {},
+        blokkeAanBegin: bord.selle.filter(s => s.blok).length,
       },
     }
     skoonTye()
@@ -153,6 +160,10 @@ export default function Vrugtefees({ onClose }) {
     s.stand.spesiaalGemaak += uit.spesiaalGemaak
     s.stand.kombinasies += uit.kombinasies
     s.stand.grootsteKetting = Math.max(s.stand.grootsteKetting, uit.grootsteKetting)
+    s.stand.grootstePas = Math.max(s.stand.grootstePas, uit.grootstePas || 0)
+    for (const [soort, n] of Object.entries(uit.spesiaalSoorte || {}))
+      s.stand.spesiaalSoorte[soort] = (s.stand.spesiaalSoorte[soort] || 0) + n
+    for (const [k, r] of uit.geveeSelle || []) s.stand.verlig[k + ',' + r] = true
 
     setPunte(s.stand.punte)
     setTik(x => x + 1)
@@ -282,6 +293,11 @@ export default function Vrugtefees({ onClose }) {
 
   useEffect(() => { if (teken.current) teken.current.stelRustig(rustig) }, [rustig])
 
+  useEffect(() => {
+    const h = HOOFSTUKKE.findIndex(x => vordering.hoogste >= x.vanaf && vordering.hoogste <= x.tot)
+    if (h >= 0) setKaartHoofstuk(h)
+  }, [])
+
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
   /* Hoeveel versperrings is nog oor? Dieselfde soort toonbank as die
      vrugte s'n, want sonder dit weet 'n mens nie hoe ver jy is nie. */
@@ -363,7 +379,7 @@ export default function Vrugtefees({ onClose }) {
             <div className="vf-versamel">
               {versamelLys.map(v => (
                 <div key={v.soort} className={`vf-versamel-item${v.het >= v.nodig ? ' klaar' : ''}`}>
-                  <Vrug soort={v.soort} grootte={24} />
+                  <Vrug soort={v.soort} grootte={34} />
                   <b>{v.het}/{v.nodig}</b>
                 </div>
               ))}
@@ -405,9 +421,26 @@ export default function Vrugtefees({ onClose }) {
               <small>Fase {vordering.hoogste}</small>
             </button>
 
-            <p className="vf-fyndruk">of kies 'n fase wat jy klaar oop het</p>
+            <div className="vf-hoofstukbalk">
+              <button
+                className="vf-pyl"
+                onClick={() => setKaartHoofstuk(h => Math.max(0, h - 1))}
+                disabled={kaartHoofstuk === 0}
+                aria-label="Vorige tuin"
+              >‹</button>
+              <span>{HOOFSTUKKE[kaartHoofstuk].naam}</span>
+              <button
+                className="vf-pyl"
+                onClick={() => setKaartHoofstuk(h => Math.min(HOOFSTUKKE.length - 1, h + 1))}
+                disabled={kaartHoofstuk >= HOOFSTUKKE.length - 1 ||
+                          HOOFSTUKKE[kaartHoofstuk + 1].vanaf > vordering.hoogste}
+                aria-label="Volgende tuin"
+              >›</button>
+            </div>
+
             <div className="vf-vlakrooster">
-              {VLAKKE.map(v => {
+              {VLAKKE.filter(v => v.nr >= HOOFSTUKKE[kaartHoofstuk].vanaf &&
+                                   v.nr <= HOOFSTUKKE[kaartHoofstuk].tot).map(v => {
                 const oop = v.nr <= vordering.hoogste
                 return (
                   <button
@@ -422,6 +455,7 @@ export default function Vrugtefees({ onClose }) {
                 )
               })}
             </div>
+            <p className="vf-fyndruk">Fase {vordering.hoogste} van {VLAKKE.length} oop</p>
             <button className="vf-knop vf-knop-spook" onClick={wisselRustig}>
               Rustige beweging: {rustig ? 'aan' : 'af'}
             </button>
@@ -456,12 +490,19 @@ export default function Vrugtefees({ onClose }) {
               <div><span>Skuiwe oor</span><b>{skuiweOor}</b></div>
               <div><span>Beste ketting</span><b>{spel.current.stand ? spel.current.stand.grootsteKetting : 0}</b></div>
             </div>
+            {(() => {
+              const h = HOOFSTUKKE.findIndex(x => x.tot === vlak.nr)
+              return h >= 0 ? <p className="vf-hoofstukwoord">{HOOFSTUK_WOORD[h]}</p> : null
+            })()}
+
             {vlak.nr < VLAKKE.length ? (
               <button className="vf-knop vf-knop-primer" onClick={() => { setVlakNr(vlak.nr + 1); beginVlak(vlak.nr + 1) }}>
                 Volgende fase
               </button>
             ) : (
-              <p className="vf-blad-teks">Jy het die eerste twee tuine klaargemaak. Meer wag.</p>
+              <p className="vf-blad-teks">
+                Jy het al {VLAKKE.length} fases klaargemaak — die hele Tuinreis.
+              </p>
             )}
             <button className="vf-knop vf-knop-spook" onClick={() => beginVlak(vlak.nr)}>Speel weer</button>
             <button className="vf-knop vf-knop-spook" onClick={() => setToestand('kaart')}>Terug na die fases</button>

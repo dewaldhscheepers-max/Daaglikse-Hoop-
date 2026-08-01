@@ -29,6 +29,7 @@ function alleSkuiwe(bord) {
 function leeStand(bord, vlak) {
   return {
     punte: 0, versamel: {}, spesiaalGemaak: 0, kombinasies: 0, grootsteKetting: 0,
+    grootstePas: 0, spesiaalSoorte: {}, verlig: {},
     blokkeAanBegin: bord.selle.filter(s => s.blok).length,
   }
 }
@@ -39,6 +40,10 @@ function voegBy(stand, uit) {
   stand.spesiaalGemaak += uit.spesiaalGemaak
   stand.kombinasies += uit.kombinasies
   stand.grootsteKetting = Math.max(stand.grootsteKetting, uit.grootsteKetting)
+  stand.grootstePas = Math.max(stand.grootstePas || 0, uit.grootstePas || 0)
+  for (const [soort, n] of Object.entries(uit.spesiaalSoorte || {}))
+    stand.spesiaalSoorte[soort] = (stand.spesiaalSoorte[soort] || 0) + n
+  for (const [k, r] of uit.geveeSelle || []) stand.verlig[k + ',' + r] = true
 }
 
 /* Speel een lopie. `slordig` is hoe dikwels die bot 'n lukrake skuif kies
@@ -80,7 +85,10 @@ function speelVlak(vlak, saadBykomend, slordig = 0) {
            spesiale vrugte te MAAK nie — en 'n mens doen dit doelbewus. Ons
            gee dus 'n bonus vir spesiale vrugte, sodat die bot ongeveer soos
            'n speler dink wat 'n kombinasie beplan. */
-        const spesiaalBonus = vlak.doel.tipe === 'kombo' ? uit.spesiaalGemaak * 300 : 0
+        const spesiaalBonus =
+          vlak.doel.tipe === 'kombo' ? uit.spesiaalGemaak * 300
+          : vlak.doel.tipe === 'soortspesiaal' ? uit.spesiaalGemaak * 200
+          : 0
         const waarde = doelVordering(vlak.doel, proefStand, proef) * 1000 + spesiaalBonus + uit.punte / 1000
         if (waarde > besteWaarde) { besteWaarde = waarde; beste = kandidaat }
       }
@@ -106,6 +114,22 @@ console.log('vlak  doelwit'.padEnd(34) + 'gemiddeld'.padStart(11) + 'slordig'.pa
 console.log('─'.repeat(74))
 
 let probleme = []
+
+/* Eers 'n kontrole wat niks met moeilikheid te doen het nie: kan die vlak se
+   doelwit hoegenaamd bestaan? Ek het drie vlakke gebou wat vra vir 'n vrug
+   wat nie op daardie bord kan verskyn nie. Die bot het dit as "0% haalbaar"
+   gerapporteer sonder om te sê hoekom. */
+for (const vlak of VLAKKE) {
+  if (vlak.doel.tipe === 'versamel')
+    for (const k of Object.keys(vlak.doel.vrugte))
+      if (Number(k) >= vlak.soorte)
+        probleme.push(`vlak ${vlak.nr}: vra vrug ${k}, maar die bord het net ${vlak.soorte} soorte`)
+  if (vlak.doel.tipe === 'verlig')
+    for (const [k, r] of vlak.doel.selle)
+      if ((vlak.blokke || []).some(b => b.k === k && b.r === r && (b.tipe === 'klip' || b.tipe === 'krat')))
+        probleme.push(`vlak ${vlak.nr}: 'n verlig-sel by ${k},${r} sit onder 'n klip of krat`)
+}
+
 for (const vlak of VLAKKE) {
   let winsG = 0, winsS = 0, skuiweSom = 0, skommelSom = 0
   for (let i = 0; i < N; i++) {

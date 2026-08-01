@@ -120,7 +120,7 @@
 .vf-tel-doel { flex: 1.6; }
 
 .vf-tel-item span {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -137,7 +137,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.vf-tel-doel b { font-size: 12px; font-weight: 600; color: #E4C98A; white-space: normal; line-height: 1.3; }
+.vf-tel-doel b { font-size: 13.5px; font-weight: 600; color: #E4C98A; white-space: normal; line-height: 1.3; }
 .vf-tel-item b.min { color: #E8A08A; }
 
 .vf-balk {
@@ -159,21 +159,29 @@
 .vf-versamel {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  padding: 0 12px 8px;
+  gap: 8px;
+  padding: 0 10px 10px;
   flex: 0 0 auto;
   flex-wrap: wrap;
 }
 .vf-versamel-item {
+  /* Dit was te klein om te lees. Groter vrug, groter syfers, en 'n donker
+     agtergrond sodat dit teen die geskilderde tuin uitstaan. */
   display: flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 3px 10px 3px 4px;
+  gap: 7px;
+  background: rgba(12, 17, 28, 0.72);
+  border: 1px solid rgba(228, 201, 138, 0.28);
+  border-radius: 22px;
+  padding: 5px 14px 5px 6px;
 }
-.vf-versamel-item b { font-size: 12.5px; font-weight: 700; color: #F6F1E7; font-variant-numeric: tabular-nums; }
+.vf-versamel-item b {
+  font-size: 18px;
+  font-weight: 700;
+  color: #F6F1E7;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
 .vf-versamel-item.klaar { border-color: #7FA05A; background: rgba(127, 160, 90, 0.18); }
 .vf-versamel-item.klaar b { color: #A9CC84; }
 
@@ -390,8 +398,8 @@
 /* Die merkie langs die toonbank, sodat 'n mens weet WATTER versperring
    getel word. Dieselfde vorm as op die bord. */
 .vf-blokmerk {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   border-radius: 6px;
   flex-shrink: 0;
 }
@@ -405,3 +413,48 @@
   background-image: linear-gradient(0deg, rgba(0,0,0,0.3) 0 2px, transparent 2px),
                     linear-gradient(90deg, rgba(0,0,0,0.3) 0 2px, transparent 2px);
   background-size: 50% 50%; }
+
+/* ── Die fasekaart per hoofstuk ──
+   Negentig nommers in een rol is onbruikbaar. 'n Mens kyk na een tuin op 'n
+   slag en blaai met die pyle. */
+.vf-hoofstukbalk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 8px 0 2px;
+}
+.vf-hoofstukbalk span {
+  flex: 1;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: #E4C98A;
+}
+.vf-pyl {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(12, 17, 28, 0.7);
+  border: 1px solid rgba(228, 201, 138, 0.3);
+  color: #E4C98A;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.vf-pyl:disabled { color: #4E5769; border-color: rgba(255,255,255,0.08); cursor: default; }
+.vf-pyl:not(:disabled):active { background: rgba(228, 201, 138, 0.18); }
+
+.vf-hoofstukwoord {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #C9BC9E;
+  font-style: italic;
+  max-width: 280px;
+  margin: 2px 0 6px;
+}
