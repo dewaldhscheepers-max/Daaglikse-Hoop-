@@ -589,6 +589,7 @@ export default function BouDieArk({ onClose }) {
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})
             </button>
+            <p className="ark-weergawe">weergawe {__BOU__}</p>
           </div>
         )}
 

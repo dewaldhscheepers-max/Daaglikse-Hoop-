@@ -3,6 +3,13 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  define: {
+    // Boutyd, sodat ons op die skerm kan sien watter weergawe loop
+    __BOU__: JSON.stringify(
+      new Date().toLocaleString('af-ZA', { timeZone: 'Africa/Johannesburg',
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    ),
+  },
   plugins: [
     react(),
     VitePWA({
