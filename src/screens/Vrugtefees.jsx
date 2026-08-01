@@ -4,7 +4,8 @@ import {
   RYLIG, KOLOMLIG, OESKRAG, REENBOOGVRUG, FEESMANDJIE,
 } from '../game/vrugtefees/enjin'
 import { VLAKKE, vlakBy, hoofstukVan, doelTeks, doelBehaal, doelVordering } from '../data/vrugtefeesVlakke'
-import { Vrug, vrugNaam } from '../data/vrugte'
+import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
+import { maakTekenaar } from '../game/vrugtefees/teken'
 import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import './Vrugtefees.css'
 
@@ -13,13 +14,18 @@ import './Vrugtefees.css'
 
    Die enjin doen al die dink. Hierdie lêer wys net wat gebeur het.
 
-   Die bord is gewone DOM, nie 'n canvas nie. 'n Canvas kry sy eie
-   grafiese laag, en dit is presies wat op haar foon strepe gemaak het in
-   Bou die Ark. Vier-en-sestig blokkies is niks vir die blaaier nie.
+   Die bord is 'n canvas. My eerste poging was DOM, en dit was verkeerd:
+   die selle was aan hul roosterposisie vasgemaak, dus het niks ooit beweeg
+   nie — vrugte het net verdwyn en verskyn. 'n Mens moet SIEN hoe hulle gly
+   en val, anders voel die spel dood.
 
-   Elke skuif gee 'n lys stappe terug. Ons speel hulle een vir een af met 'n
-   tydlyn. Die logika is klaar voordat die eerste animasie begin, dus kan
-   die speler nooit die bord in 'n halwe toestand vang nie.
+   Die doek loop met willReadFrequently, wat Chrome laat kies om dit op die
+   SVE te hou in plaas van 'n eie GPU-laag. Daardie laag was Bou die Ark se
+   strepe op haar foon. Daar is ook geen border-radius op die doek nie.
+
+   Elke skuif gee 'n lys stappe terug. Die enjin is klaar voordat die eerste
+   animasie begin, dus kan die speler nooit die bord in 'n halwe toestand
+   vang nie.
    ──────────────────────────────────────────────────────────── */
 
 const STOOR   = 'vf_stoor'
@@ -60,15 +66,15 @@ export default function Vrugtefees({ onClose }) {
 
   // Wat op die skerm is. Die enjin se bord leef in 'n ref; hierdie is die kopie
   // wat React teken, en dit word net tussen animasie-stappe bygewerk.
-  const [selle, setSelle]       = useState([])
+  const doekRef  = useRef(null)
+  const teken    = useRef(null)
   const [punte, setPunte]       = useState(0)
   const [skuiweOor, setSkuiweOor] = useState(0)
   const [vorder, setVorder]     = useState(0)
   const [gekies, setGekies]     = useState(null)
   const [besig, setBesig]       = useState(false)
+  const [tik, setTik]           = useState(0)      // dwing 'n hertekening van die telbord
   const [roep, setRoep]         = useState(null)     // "GOEIE PAS!" ens.
-  const [glim, setGlim]         = useState([])       // selle wat nou verdwyn
-  const [skud, setSkud]         = useState(null)     // ongeldige ruil
 
   const spel = useRef({ bord: null, rng: null, stand: null, vlak: null })
   const tydsers = useRef([])
@@ -101,59 +107,45 @@ export default function Vrugtefees({ onClose }) {
       },
     }
     skoonTye()
-    setSelle(bord.selle.map(s => ({ ...s })))
+    if (teken.current) { teken.current.stelBord(bord); teken.current.stelKies(null) }
     setPunte(0)
     setSkuiweOor(v.skuiwe)
     setVorder(0)
-    setGekies(null); setBesig(false); setRoep(null); setGlim([]); setSkud(null)
+    setGekies(null); setBesig(false); setRoep(null)
     setWenkWys(!!v.wenk)
     setToestand('speel')
   }, [skoonTye])
 
-  const wysBord = useCallback(() => {
-    setSelle(spel.current.bord.selle.map(s => ({ ...s })))
-  }, [])
-
-  /* ── Een skuif, met sy animasie ── */
+  /* ── Een skuif ──
+     Die enjin los alles op en gee 'n lys stappe. Die tekenaar speel hulle
+     af; ons wag daarvoor en werk dan die telbord by. */
   const speelSkuif = useCallback(async (a, b) => {
     const s = spel.current
-    if (!s.bord || besig) return
-    if (!magRuil(s.bord, a, b)) {
-      setSkud([a, b]); playHit()
-      await wag(TEMPO.terug * 2)
-      setSkud(null)
+    const t = teken.current
+    if (!s.bord || !t || besig) return
+
+    setBesig(true)
+    setGekies(null); t.stelKies(null)
+
+    const uit = doenSkuif(s.bord, a, b, { rng: s.rng })
+
+    if (!uit.geldig) {
+      playHit()
+      await t.speelStappe(uit.stappe, s.bord)
+      setBesig(false)
       return
     }
 
-    setBesig(true)
-    setGekies(null)
-    const uit = doenSkuif(s.bord, a, b, { rng: s.rng })
+    // Die roep gaan saam met die grootste ketting van hierdie skuif
+    const ketting = uit.grootsteKetting
+    if (uit.kombinasies > 0)  setRoep('GROOT KOMBINASIE!')
+    else if (ketting >= 4)    setRoep('VRUGTEFEES!')
+    else if (ketting === 3)   setRoep('PRAGTIGE OES!')
+    else if (ketting === 2)   setRoep('GOEIE PAS!')
+    playPlanke(Math.min(4, Math.max(1, ketting)))
 
-    // Die enjin is klaar. Nou wys ons wat gebeur het, stap vir stap.
-    for (const stap of uit.stappe) {
-      if (stap.tipe === 'ruil') {
-        wysBord()
-        await wag(TEMPO.ruil)
-      } else if (stap.tipe === 'kombinasie') {
-        setRoep('GROOT KOMBINASIE!')
-        playPlanke(4)
-        await wag(TEMPO.vee)
-      } else if (stap.tipe === 'vee') {
-        setGlim(stap.selle.map(([k, r]) => k + ',' + r))
-        if (stap.ketting >= 4)      { setRoep('VRUGTEFEES!'); playPlanke(4) }
-        else if (stap.ketting === 3) { setRoep('PRAGTIGE OES!'); playPlanke(3) }
-        else if (stap.ketting === 2) { setRoep('GOEIE PAS!'); playPlanke(2) }
-        else                         { playPlanke(1) }
-        await wag(TEMPO.vee)
-        setGlim([])
-        wysBord()
-      } else if (stap.tipe === 'val') {
-        wysBord()
-        await wag(TEMPO.val)
-      }
-    }
+    await t.speelStappe(uit.stappe, s.bord)
 
-    // Tel op
     s.stand.punte += uit.punte
     for (const [i, n] of Object.entries(uit.versamel)) s.stand.versamel[i] = (s.stand.versamel[i] || 0) + n
     s.stand.spesiaalGemaak += uit.spesiaalGemaak
@@ -161,20 +153,20 @@ export default function Vrugtefees({ onClose }) {
     s.stand.grootsteKetting = Math.max(s.stand.grootsteKetting, uit.grootsteKetting)
 
     setPunte(s.stand.punte)
+    setTik(x => x + 1)
     setVorder(doelVordering(s.vlak.doel, s.stand, s.bord))
     const oor = skuiweOor - 1
     setSkuiweOor(oor)
 
     // Skommel as die bord doodgeloop het. Dit kos nooit 'n skuif nie.
     const sk = versekerSkuif(s.bord, s.vlak.saad + oor * 31)
-    if (sk) { setRoep('DIE TUIN SKUIF'); wysBord(); await wag(TEMPO.val) }
+    if (sk) { setRoep('DIE TUIN SKUIF'); t.stelBord(s.bord); await new Promise(r => setTimeout(r, 320)) }
 
     setRoep(null)
     setBesig(false)
 
     if (doelBehaal(s.vlak.doel, s.stand, s.bord)) {
-      const bonus = oor * 90
-      s.stand.punte += bonus
+      s.stand.punte += oor * 90
       setPunte(s.stand.punte)
       playLevelComplete()
       const nuut = { ...vordering }
@@ -186,47 +178,60 @@ export default function Vrugtefees({ onClose }) {
       playHit()
       setToestand('verloor')
     }
-  }, [besig, wag, wysBord, skuiweOor, vordering])
+  }, [besig, skuiweOor, vordering])
 
-  /* ── Kies en ruil ── */
-  function tikSel(k, r) {
-    if (besig || toestand !== 'speel') return
-    const sel = spel.current.bord && spel.current.bord.selle[r * 8 + k]
-    if (!sel || bedekSel(sel)) return
-    if (!gekies) { setGekies({ k, r }); playHout(0.4); return }
-    if (gekies.k === k && gekies.r === r) { setGekies(null); return }
-    const naby = Math.abs(gekies.k - k) + Math.abs(gekies.r - r) === 1
-    if (!naby) { setGekies({ k, r }); playHout(0.4); return }
-    speelSkuif(gekies, { k, r })
+  /* ── Kies en ruil ──
+     Die doek weet self watter sel onder 'n punt is. Ons werk in
+     doek-pixels, want die doek se buffer is groter as sy CSS-grootte. */
+  function selUitGebeurtenis(e) {
+    const t = teken.current
+    const d = doekRef.current
+    if (!t || !d) return null
+    const p = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e)
+    const r = d.getBoundingClientRect()
+    const skaal = d.width / r.width
+    return t.selBy((p.clientX - r.left) * skaal, (p.clientY - r.top) * skaal)
   }
 
-  /* Sleep. Ons hou die beginpunt vas en kyk watter kant toe die vinger die
-     verste beweeg het — so kan 'n skuins veeg nooit per ongeluk 'n skuins
-     ruil word nie. */
+  function kiesSel(pos) {
+    if (besig || toestand !== 'speel' || !pos) return
+    const sel = spel.current.bord && spel.current.bord.selle[pos.r * 8 + pos.k]
+    if (!sel || bedekSel(sel)) return
+    if (!gekies) { setGekies(pos); teken.current.stelKies(pos); playHout(0.4); return }
+    if (gekies.k === pos.k && gekies.r === pos.r) { setGekies(null); teken.current.stelKies(null); return }
+    const naby = Math.abs(gekies.k - pos.k) + Math.abs(gekies.r - pos.r) === 1
+    if (!naby) { setGekies(pos); teken.current.stelKies(pos); playHout(0.4); return }
+    speelSkuif(gekies, pos)
+  }
+
+  /* Sleep. Ons kyk watter kant toe die vinger die VERSTE beweeg het, sodat
+     'n skuins veeg nooit per ongeluk 'n skuins ruil word nie. */
   const sleep = useRef(null)
-  function raakBegin(e, k, r) {
+  function raakBegin(e) {
     if (besig || toestand !== 'speel') return
-    const t = e.touches ? e.touches[0] : e
-    sleep.current = { k, r, x: t.clientX, y: t.clientY, gedoen: false }
+    const pos = selUitGebeurtenis(e)
+    if (!pos) return
+    const p = e.touches ? e.touches[0] : e
+    sleep.current = { ...pos, x: p.clientX, y: p.clientY, gedoen: false }
   }
   function raakBeweeg(e) {
     const s = sleep.current
     if (!s || s.gedoen || besig) return
-    const t = e.touches ? e.touches[0] : e
-    const dx = t.clientX - s.x, dy = t.clientY - s.y
-    if (Math.abs(dx) < 18 && Math.abs(dy) < 18) return
+    const p = e.touches ? e.touches[0] : e
+    const dx = p.clientX - s.x, dy = p.clientY - s.y
+    if (Math.abs(dx) < 16 && Math.abs(dy) < 16) return
     s.gedoen = true
     const [nk, nr] = Math.abs(dx) > Math.abs(dy)
       ? [s.k + Math.sign(dx), s.r]
       : [s.k, s.r + Math.sign(dy)]
     if (nk < 0 || nr < 0 || nk > 7 || nr > 7) return
-    setGekies(null)
+    setGekies(null); teken.current.stelKies(null)
     speelSkuif({ k: s.k, r: s.r }, { k: nk, r: nr })
   }
-  function raakEinde() {
+  function raakEinde(e) {
     const s = sleep.current
     sleep.current = null
-    if (s && !s.gedoen) tikSel(s.k, s.r)
+    if (s && !s.gedoen) kiesSel({ k: s.k, r: s.r })
   }
 
   /* ── Klank en beweging ── */
@@ -237,6 +242,44 @@ export default function Vrugtefees({ onClose }) {
     try { localStorage.setItem(RUSTIG, nuut ? '1' : '0') } catch {}
   }
 
+  /* ── Die tekenaar ──
+     Een keer opgestel. Die doek se buffer kom net uit sy BREEDTE; op Android
+     skuif Chrome se adresbalk in en uit en dan verander die hoogte
+     aanhoudend. Elke skryf na canvas.width maak die doek skoon. */
+  useEffect(() => {
+    const d = doekRef.current
+    if (!d) return
+    const t = maakTekenaar(d, { vrugte: VRUG_TEKENINGE, kolomme: 8, rye: 8 })
+    teken.current = t
+    t.stelRustig(rustig)
+
+    function pas() {
+      const breed = d.getBoundingClientRect().width
+      if (!breed) return
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const nuutSy = Math.round(breed * dpr / 8) * 8
+      if (d.width === nuutSy) return
+      d.width = nuutSy
+      d.height = nuutSy
+      t.stelPrente()
+      if (spel.current.bord) t.stelBord(spel.current.bord)
+    }
+    pas()
+    const t1 = setTimeout(pas, 80)
+    window.addEventListener('resize', pas)
+    window.addEventListener('orientationchange', pas)
+    t.begin()
+    return () => {
+      clearTimeout(t1)
+      window.removeEventListener('resize', pas)
+      window.removeEventListener('orientationchange', pas)
+      t.stop()
+      teken.current = null
+    }
+  }, [])
+
+  useEffect(() => { if (teken.current) teken.current.stelRustig(rustig) }, [rustig])
+
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
   const versamelLys = useMemo(() => {
     if (vlak.doel.tipe !== 'versamel') return null
@@ -244,7 +287,7 @@ export default function Vrugtefees({ onClose }) {
     return Object.entries(vlak.doel.vrugte).map(([i, n]) => ({
       soort: Number(i), nodig: n, het: Math.min(n, (st && st.versamel[i]) || 0),
     }))
-  }, [vlak, punte, selle])
+  }, [vlak, punte, tik])
 
   return (
     <div className="vf-oorleg">
@@ -303,48 +346,17 @@ export default function Vrugtefees({ onClose }) {
 
       {/* ── Die bord ── */}
       <div className="vf-bord-wrap">
-        {toestand !== 'kaart' && (
-          <div
-            className="vf-bord"
-            onTouchMove={raakBeweeg}
-            onTouchEnd={raakEinde}
-            onMouseUp={raakEinde}
-            onMouseLeave={() => { sleep.current = null }}
-          >
-            {selle.map((sel, i) => {
-              const k = i % 8, r = Math.floor(i / 8)
-              const sl = k + ',' + r
-              const isGekies = gekies && gekies.k === k && gekies.r === r
-              const isSkud = skud && skud.some(p => p.k === k && p.r === r)
-              return (
-                <div
-                  key={i}
-                  className={
-                    'vf-sel' +
-                    (isGekies ? ' gekies' : '') +
-                    (glim.includes(sl) ? ' glim' : '') +
-                    (isSkud ? ' skud' : '') +
-                    (sel.blok ? ' blok-' + sel.blok : '')
-                  }
-                  style={{ left: `${k * 12.5}%`, top: `${r * 12.5}%` }}
-                  onTouchStart={e => raakBegin(e, k, r)}
-                  onMouseDown={e => raakBegin(e, k, r)}
-                  role="button"
-                  tabIndex={-1}
-                  aria-label={sel.vrug != null ? vrugNaam(sel.vrug) : 'leeg'}
-                >
-                  {sel.blok && <span className="vf-blok" data-slae={sel.blokSlae} />}
-                  {sel.vrug != null && !bedekSel(sel) && (
-                    <span className="vf-vrug">
-                      <Vrug soort={sel.vrug} grootte="100%" />
-                      {sel.spesiaal && <i className="vf-spesiaal">{SPESIAAL_MERK[sel.spesiaal]}</i>}
-                    </span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        <canvas
+          ref={doekRef}
+          className={'vf-doek' + (toestand === 'kaart' ? ' weg' : '')}
+          onTouchStart={raakBegin}
+          onTouchMove={raakBeweeg}
+          onTouchEnd={raakEinde}
+          onMouseDown={raakBegin}
+          onMouseMove={raakBeweeg}
+          onMouseUp={raakEinde}
+          onMouseLeave={() => { sleep.current = null }}
+        />
 
         {roep && <div className="vf-roep">{roep}</div>}
 
@@ -354,8 +366,18 @@ export default function Vrugtefees({ onClose }) {
             <span className="vf-merk">{hoofstuk.naam}</span>
             <h2 className="vf-blad-titel">Vrugtefees</h2>
             <p className="vf-blad-teks">
-              Pas die vrugte, bou groot kombinasies en kyk hoe ver jou oes kan groei.
+              Skuif twee vrugte langs mekaar om drie of meer te pas.
             </p>
+
+            <button
+              className="vf-knop vf-knop-primer vf-speelknop"
+              onClick={() => { setVlakNr(vordering.hoogste); beginVlak(vordering.hoogste) }}
+            >
+              Speel
+              <small>Fase {vordering.hoogste}</small>
+            </button>
+
+            <p className="vf-fyndruk">of kies 'n fase wat jy klaar oop het</p>
             <div className="vf-vlakrooster">
               {VLAKKE.map(v => {
                 const oop = v.nr <= vordering.hoogste
@@ -372,7 +394,6 @@ export default function Vrugtefees({ onClose }) {
                 )
               })}
             </div>
-            <p className="vf-fyndruk">Fase {vordering.hoogste} van {VLAKKE.length} oop</p>
             <button className="vf-knop vf-knop-spook" onClick={wisselRustig}>
               Rustige beweging: {rustig ? 'aan' : 'af'}
             </button>
