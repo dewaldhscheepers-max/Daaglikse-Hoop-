@@ -3,6 +3,7 @@
 .byb-overlay {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 250;
   display: flex;
   flex-direction: column;
@@ -448,6 +449,7 @@
 .byb-blad-agter {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(42, 31, 66, 0.42);
   z-index: 260;
   animation: bybFade 0.18s ease;

@@ -3,6 +3,7 @@
 .kb-library {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 9000;
   background: var(--cream);
   overflow-y: auto;
@@ -24,6 +25,7 @@
   content: '';
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: url("data:image/svg+xml,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='200' cy='300' rx='280' ry='120' fill='rgba(255,200,100,0.06)'/%3E%3Cellipse cx='200' cy='330' rx='200' ry='90' fill='rgba(255,200,100,0.04)'/%3E%3C/svg%3E") bottom/cover no-repeat;
   pointer-events: none;
 }
@@ -133,6 +135,7 @@
 .kb-book-cover-fallback {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   display: none;
   align-items: center;
   justify-content: center;

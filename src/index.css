@@ -52,6 +52,7 @@ body {
 .app {
   display: flex;
   flex-direction: column;
+  height: 100vh;
   height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
@@ -170,6 +171,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: url("data:image/svg+xml,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='200' cy='320' rx='280' ry='160' fill='rgba(255,255,255,0.06)'/%3E%3Cellipse cx='200' cy='340' rx='200' ry='120' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") bottom/cover no-repeat;
 }
 

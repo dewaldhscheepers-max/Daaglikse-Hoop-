@@ -154,6 +154,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(45, 32, 64, 0.55);
   z-index: 10000;
   display: flex;
@@ -172,6 +173,7 @@
   flex-direction: column;
   gap: 10px;
   position: relative;
+  max-height: 90vh;
   max-height: 90dvh;
   overflow-y: auto;
 }

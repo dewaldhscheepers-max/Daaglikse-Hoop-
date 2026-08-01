@@ -3,6 +3,7 @@
 .kbl-reader {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 10000;
   background: #1a1a2e;
   overflow: hidden;
@@ -12,6 +13,7 @@
 .kbl-scroll {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   display: flex;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -54,6 +56,7 @@
 .kbl-page-fallback {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   display: none;
   align-items: center;
   justify-content: center;
@@ -192,6 +195,7 @@
 .kbl-overlay {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 50;
   display: flex;
   align-items: center;

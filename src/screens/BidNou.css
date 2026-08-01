@@ -446,6 +446,7 @@
 .bidnou-modal-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(20, 10, 40, 0.45);
   z-index: 250;
   display: flex;

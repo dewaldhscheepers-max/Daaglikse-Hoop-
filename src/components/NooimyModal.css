@@ -1,6 +1,7 @@
 .nooimy-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(45, 32, 64, 0.55);
   z-index: 200;
   display: flex;
@@ -15,6 +16,7 @@
   width: 100%;
   max-width: 480px;
   position: relative;
+  max-height: 92vh;
   max-height: 92dvh;
   overflow-y: auto;
   display: flex;

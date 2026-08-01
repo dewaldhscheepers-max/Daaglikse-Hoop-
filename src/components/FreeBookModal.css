@@ -2,6 +2,7 @@
 .fb-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(45, 32, 64, 0.60);
   display: flex;
   align-items: flex-end;
@@ -13,6 +14,7 @@
   background: var(--white);
   border-radius: 28px 28px 0 0;
   padding: 28px 24px calc(40px + var(--safe-bottom, 0px));
+  max-height: 92vh;
   max-height: 92dvh;
   overflow-y: auto;
   display: flex;

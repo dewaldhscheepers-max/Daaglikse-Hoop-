@@ -2,6 +2,7 @@
 .vp-overlay {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -389,6 +390,7 @@
 .vp-breathing-overlay {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -617,6 +619,7 @@
 .vp-confirm-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(0, 0, 0, 0.35);
   z-index: 10010;
   display: flex;
@@ -1116,6 +1119,7 @@
 .vp-consent-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(0,0,0,0.45);
   z-index: 10020;
   display: flex;
@@ -1372,6 +1376,7 @@
 .vp-stiloomblik {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -1539,6 +1544,7 @@
 .vp-promise-overlay {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1588,6 +1594,7 @@
 .vp-tutorial-overlay {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(0, 0, 0, 0.48);
   z-index: 20;
   pointer-events: none;
@@ -1679,6 +1686,7 @@
 .vp-tut-ring {
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   border-radius: 50%;
   border: 2.5px solid rgba(255, 255, 255, 0.92);
   animation: vp-tut-ring-pulse 0.9s ease-in-out infinite;

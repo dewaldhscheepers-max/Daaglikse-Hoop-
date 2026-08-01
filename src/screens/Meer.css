@@ -193,6 +193,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(45, 32, 64, 0.55);
   z-index: 10000;
   display: flex;
@@ -211,6 +212,7 @@
   flex-direction: column;
   gap: 10px;
   position: relative;
+  max-height: 90vh;
   max-height: 90dvh;
   overflow-y: auto;
 }
@@ -723,6 +725,7 @@
   content: '';
   position: absolute;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: url("data:image/svg+xml,%3Csvg width='400' height='220' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='320' cy='240' rx='200' ry='120' fill='rgba(255,255,255,0.07)'/%3E%3Cellipse cx='80' cy='10' rx='140' ry='80' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E") center/cover no-repeat;
   pointer-events: none;
 }

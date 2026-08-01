@@ -1,6 +1,7 @@
 .huise-backdrop {
   position: fixed;
   inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
   background: rgba(10, 5, 20, 0.60);
   display: flex;
   align-items: flex-end;
