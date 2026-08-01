@@ -53,10 +53,18 @@ const SLEUTELS = Object.keys(STUKKE)
 // Muurstampe: as 'n rotasie bots, probeer hierdie verskuiwings.
 const STAMPE = [[0,0], [-1,0], [1,0], [-2,0], [2,0], [0,-1], [-1,-1], [1,-1]]
 
-// Spoedkurwe — begin vriendelik, bereik 'n getoetste maksimum en bly daar.
+/* Spoedkurwe.
+
+   Dit was 70ms per stadium met 'n vloer van 220ms. By stadium 12 het 'n stuk
+   die hele bord in 4.6 sekondes geval, en niemand het al twaalf diere gehaal
+   voordat die ark volgeraak het nie. Die spel se punt is om die verhaal
+   deur te maak, nie om jou te klop nie.
+
+   Nou 45ms per stadium met 'n vloer van 400ms: stadium 1 val in 20 sekondes,
+   stadium 12 in 10. Dit word wel moeiliker, maar dit bly haalbaar. */
 const BEGIN_MS = 1000
-const STAP_MS  = 70
-const MIN_MS   = 220        // getoetste maksimum spoed; nooit vinniger nie
+const STAP_MS  = 45
+const MIN_MS   = 400
 /* Die spoed volg die stadium. Daar is net een vorderingsgetal in die spel:
    die stadium van Noag se verhaal. Stadium 1 val stadig, stadium 12 — die
    einde van die verhaal — val naby die vinnigste wat ons toelaat. */
