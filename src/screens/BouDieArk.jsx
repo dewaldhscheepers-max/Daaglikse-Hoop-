@@ -49,10 +49,11 @@ const STAMPE = [[0,0], [-1,0], [1,0], [-2,0], [2,0], [0,-1], [-1,-1], [1,-1]]
 const BEGIN_MS = 1000
 const STAP_MS  = 70
 const MIN_MS   = 220        // getoetste maksimum spoed; nooit vinniger nie
-const LYNE_PER_VLAK = 10
-
-function valTempo(vlak) {
-  return Math.max(MIN_MS, BEGIN_MS - (vlak - 1) * STAP_MS)
+/* Die spoed volg die stadium. Daar is net een vorderingsgetal in die spel:
+   die stadium van Noag se verhaal. Stadium 1 val stadig, stadium 12 — die
+   einde van die verhaal — val naby die vinnigste wat ons toelaat. */
+function valTempo(stadium) {
+  return Math.max(MIN_MS, BEGIN_MS - (stadium - 1) * STAP_MS)
 }
 
 const PUNTE = { 1: 100, 2: 300, 3: 500, 4: 800 }
@@ -152,7 +153,6 @@ export default function BouDieArk({ onClose }) {
   const [toestand, setToestand] = useState('menu')  // menu · speel · pouse · verloor
   const [telling, setTelling]   = useState(0)
   const [lyne, setLyne]         = useState(0)
-  const [vlak, setVlak]         = useState(1)
   const [volgende, setVolgende] = useState(null)
   const [stil, setStil]         = useState(isMuted())
   // Die gestoorde spel se opsomming, of null. Ons wys dit in die telbord
@@ -175,7 +175,7 @@ export default function BouDieArk({ onClose }) {
     stuk: null,
     sak: [],
     volgende: null,
-    telling: 0, lyne: 0, vlak: 1,
+    telling: 0, lyne: 0,
     val: 0, laas: 0,
     loop: false,
     // stadium
@@ -386,17 +386,15 @@ export default function BouDieArk({ onClose }) {
     if (skoon > 0) {
       while (oor.length < RY) oor.unshift(Array(KOL).fill(null))
       s.bord = oor
-      const wins = (PUNTE[skoon] || 0) * s.vlak
+      const wins = (PUNTE[skoon] || 0) * s.stadium
       s.lyne += skoon
       s.telling += wins
       s.sLyne += skoon
       s.sPunte += wins
       s.sBesteMulti = Math.max(s.sBesteMulti, skoon)
       s.sKombo += 1
-      const nuweVlak = Math.floor(s.lyne / LYNE_PER_VLAK) + 1
-      if (nuweVlak > s.vlak) s.vlak = nuweVlak
       playCollect(Math.min(skoon - 1, 3), Math.max(skoon, s.sKombo))
-      setLyne(s.lyne); setVlak(s.vlak)
+      setLyne(s.lyne)
     } else {
       s.sKombo = 0          // kombo breek wanneer 'n stuk geen ry maak nie
       playHit()
@@ -480,7 +478,7 @@ export default function BouDieArk({ onClose }) {
       if (st.nr >= WATER_VANAF) {
         s.weer.water = Math.min(1, s.weer.water + dt / 45000)
       }
-      const tempo = valTempo(s.vlak)
+      const tempo = valTempo(s.stadium)
       while (s.val >= tempo) {
         s.val -= tempo
         if (!s.stuk) break
@@ -550,18 +548,18 @@ export default function BouDieArk({ onClose }) {
     try {
       localStorage.setItem(STOOR, JSON.stringify({
         bord: s.bord, stuk: s.stuk, sak: s.sak, volgende: s.volgende,
-        telling: s.telling, lyne: s.lyne, vlak: s.vlak,
+        telling: s.telling, lyne: s.lyne,
         stadium: s.stadium, sLyne: s.sLyne, sPunte: s.sPunte,
         sBesteMulti: s.sBesteMulti, sKombo: s.sKombo, sTyd: s.sTyd,
       }))
-      setBewaar({ telling: s.telling, lyne: s.lyne, vlak: s.vlak, stadium: s.stadium })
+      setBewaar({ telling: s.telling, lyne: s.lyne, stadium: s.stadium })
     } catch {}
   }, [])
 
   useEffect(() => {
     try {
       const d = JSON.parse(localStorage.getItem(STOOR) || 'null')
-      if (d) setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, vlak: d.vlak || 1, stadium: d.stadium || 1 })
+      if (d) setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, stadium: d.stadium || 1 })
     } catch {}
   }, [])
 
@@ -583,12 +581,12 @@ export default function BouDieArk({ onClose }) {
   function begin() {
     const s = spel.current
     s.bord = leegBord(); s.sak = nuweSak(); s.volgende = null
-    s.telling = 0; s.lyne = 0; s.vlak = 1; s.val = 0
+    s.telling = 0; s.lyne = 0; s.val = 0
     s.stadium = 1; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
     s.sKombo = 0; s.sTyd = 0; s.sBegin = performance.now()
     s.weer = { druppels: [], water: 0 }
     vorderRef.current = 0
-    setTelling(0); setLyne(0); setVlak(1); setStadiumNr(1); setVorder(0); setKlaar(null)
+    setTelling(0); setLyne(0); setStadiumNr(1); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
     setBewaar(null)
     setToestand('speel')
@@ -602,7 +600,7 @@ export default function BouDieArk({ onClose }) {
       const s = spel.current
       s.bord = d.bord; s.stuk = d.stuk; s.sak = d.sak || nuweSak()
       s.volgende = d.volgende
-      s.telling = d.telling; s.lyne = d.lyne; s.vlak = d.vlak; s.val = 0
+      s.telling = d.telling; s.lyne = d.lyne; s.val = 0
       s.stadium = d.stadium || 1
       s.sLyne = d.sLyne || 0; s.sPunte = d.sPunte || 0
       s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
@@ -610,7 +608,7 @@ export default function BouDieArk({ onClose }) {
       s.weer = { druppels: [], water: 0 }
       const v = doelVordering(s)
       vorderRef.current = v
-      setTelling(d.telling); setLyne(d.lyne); setVlak(d.vlak); setVolgende(d.volgende)
+      setTelling(d.telling); setLyne(d.lyne); setVolgende(d.volgende)
       setStadiumNr(s.stadium); setVorder(v); setKlaar(null)
       setToestand('speel')
     } catch { begin() }
@@ -629,7 +627,7 @@ export default function BouDieArk({ onClose }) {
   const stad = stadiumBy(stadiumNr)
   // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
   // alles verlore is nie. Elders wys dit die lopende spel.
-  const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, vlak, lyne }
+  const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, lyne, stadium: stadiumNr }
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
@@ -667,7 +665,7 @@ export default function BouDieArk({ onClose }) {
       {/* By die menu wys ons die gestoorde spel se syfers, nie nulle nie. */}
       <div className="ark-tel">
         <div className="ark-tel-item"><span>Punte</span><b>{wysTel.telling.toLocaleString('af')}</b></div>
-        <div className="ark-tel-item"><span>Vlak</span><b>{wysTel.vlak}</b></div>
+        <div className="ark-tel-item"><span>Stadium</span><b>{wysTel.stadium}</b></div>
         <div className="ark-tel-item"><span>Lyne</span><b>{wysTel.lyne}</b></div>
         <div className="ark-volgende">
           <span>Volgende</span>
@@ -742,7 +740,6 @@ export default function BouDieArk({ onClose }) {
             <h2 className="ark-blad-titel">Die ark is vol</h2>
             <div className="ark-uitslag">
               <div><span>Punte</span><b>{telling.toLocaleString('af')}</b></div>
-              <div><span>Vlak</span><b>{vlak}</b></div>
               <div><span>Lyne</span><b>{lyne}</b></div>
               <div><span>Stadium</span><b>{stadiumNr}</b></div>
             </div>

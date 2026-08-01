@@ -208,10 +208,20 @@
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.14s;
+  /* Ook hier geen opacity nie — 'n opacity onder 1 skep 'n eie laag,
+     net soos 'n transform. Ons verander net kleur. */
+  transition: background-color 0.12s, border-color 0.12s;
 }
 
-.ark-knop:active { opacity: 0.75; }
+.ark-knop-primer:active {
+  background: linear-gradient(150deg, #6A5F99 0%, #4E4179 100%);
+  border-color: #B5A6E0;
+}
+
+.ark-knop-spook:active {
+  background: rgba(196, 183, 232, 0.12);
+  border-color: rgba(196, 183, 232, 0.5);
+}
 
 /* Die opsomming van die gestoorde spel onder "Gaan voort" */
 .ark-knop small {
@@ -289,14 +299,23 @@
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.1s, transform 0.08s;
+  /* Net kleur. Sien die nota by :active hieronder. */
+  transition: background-color 0.1s, border-color 0.1s;
 }
 
 .ark-beheer-knop svg { width: 24px; height: 24px; }
 
+/* Hierdie knoppie het 'n transform: scale() gehad wanneer jy dit druk.
+   'n transform dwing die blaaier om 'n eie grafiese laag vir die element
+   te skep, en om dit weer weg te gooi wanneer die druk verby is. Op
+   sommige Android-GPU's word daardie laag gewys voordat dit geverf is —
+   dan sien jy rou grafiese geheue, wat lyk soos 'n band van gekleurde
+   ruis oor die knoppiebalk. Dit is wat op haar foon gebeur, en dit is
+   waarom dit erger word hoe meer sy aan die knoppies raak.
+   Kleur alleen verf net; dit skep nooit 'n laag nie. */
 .ark-beheer-knop:active {
   background: rgba(196, 183, 232, 0.24);
-  transform: scale(0.94);
+  border-color: rgba(196, 183, 232, 0.45);
 }
 
 /* ── Stadium-strook ── */
