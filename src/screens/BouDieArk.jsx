@@ -123,7 +123,9 @@ export default function BouDieArk({ onClose }) {
   const [vlak, setVlak]         = useState(1)
   const [volgende, setVolgende] = useState(null)
   const [stil, setStil]         = useState(isMuted())
-  const [hetStoor, setHetStoor] = useState(false)
+  // Die gestoorde spel se opsomming, of null. Ons wys dit in die telbord
+  // terwyl die menu oop is, sodat dit duidelik is dat niks verlore is nie.
+  const [bewaar, setBewaar]     = useState(null)
   const [stadiumNr, setStadiumNr] = useState(1)
   const [vorder, setVorder]     = useState(0)      // 0..1 na die doelwit toe
   const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
@@ -344,7 +346,7 @@ export default function BouDieArk({ onClose }) {
       s.loop = false
       s.stuk = null
       try { localStorage.removeItem(STOOR) } catch {}
-      setHetStoor(false)
+      setBewaar(null)
       setToestand('verloor')
       playHit()
       return false
@@ -531,20 +533,30 @@ export default function BouDieArk({ onClose }) {
         stadium: s.stadium, sLyne: s.sLyne, sPunte: s.sPunte,
         sBesteMulti: s.sBesteMulti, sKombo: s.sKombo, sTyd: s.sTyd,
       }))
-      setHetStoor(true)
+      setBewaar({ telling: s.telling, lyne: s.lyne, vlak: s.vlak, stadium: s.stadium })
     } catch {}
   }, [])
 
   useEffect(() => {
-    try { setHetStoor(!!localStorage.getItem(STOOR)) } catch {}
+    try {
+      const d = JSON.parse(localStorage.getItem(STOOR) || 'null')
+      if (d) setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, vlak: d.vlak || 1, stadium: d.stadium || 1 })
+    } catch {}
   }, [])
 
   // Stoor ook as die blaaier of tabblad weggaan
   useEffect(() => {
     function weg() { if (spel.current.loop) { stoorSpel(); setToestand('pouse') } }
-    document.addEventListener('visibilitychange', () => { if (document.hidden) weg() })
+    // Android maak die app dood sonder om altyd pagehide te vuur, dus is
+    // visibilitychange die betroubare een. Dit moet 'n benoemde funksie wees,
+    // anders kan die opruiming dit nie verwyder nie en stapel dit op.
+    function versteek() { if (document.hidden) weg() }
+    document.addEventListener('visibilitychange', versteek)
     window.addEventListener('pagehide', weg)
-    return () => window.removeEventListener('pagehide', weg)
+    return () => {
+      document.removeEventListener('visibilitychange', versteek)
+      window.removeEventListener('pagehide', weg)
+    }
   }, [stoorSpel])
 
   function begin() {
@@ -557,7 +569,7 @@ export default function BouDieArk({ onClose }) {
     vorderRef.current = 0
     setTelling(0); setLyne(0); setVlak(1); setStadiumNr(1); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
-    setHetStoor(false)
+    setBewaar(null)
     setToestand('speel')
     setTimeout(() => plaasNuwe(), 0)
   }
@@ -594,6 +606,9 @@ export default function BouDieArk({ onClose }) {
 
   const volgendeVorm = volgende ? STUKKE[volgende].vorms[0] : null
   const stad = stadiumBy(stadiumNr)
+  // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
+  // alles verlore is nie. Elders wys dit die lopende spel.
+  const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, vlak, lyne }
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
@@ -628,10 +643,11 @@ export default function BouDieArk({ onClose }) {
       </div>
 
       {/* ── Telbord ── */}
+      {/* By die menu wys ons die gestoorde spel se syfers, nie nulle nie. */}
       <div className="ark-tel">
-        <div className="ark-tel-item"><span>Punte</span><b>{telling.toLocaleString('af')}</b></div>
-        <div className="ark-tel-item"><span>Vlak</span><b>{vlak}</b></div>
-        <div className="ark-tel-item"><span>Lyne</span><b>{lyne}</b></div>
+        <div className="ark-tel-item"><span>Punte</span><b>{wysTel.telling.toLocaleString('af')}</b></div>
+        <div className="ark-tel-item"><span>Vlak</span><b>{wysTel.vlak}</b></div>
+        <div className="ark-tel-item"><span>Lyne</span><b>{wysTel.lyne}</b></div>
         <div className="ark-volgende">
           <span>Volgende</span>
           <div className="ark-volgende-blok">
@@ -674,9 +690,14 @@ export default function BouDieArk({ onClose }) {
             <p className="ark-blad-teks">
               Laat die planke sak en pak hulle netjies. Elke volle ry bou 'n stuk van die ark.
             </p>
-            {hetStoor && <button className="ark-knop ark-knop-primer" onClick={hervat}>Gaan voort</button>}
-            <button className={`ark-knop ${hetStoor ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
-              {hetStoor ? 'Begin van voor af' : 'Begin speel'}
+            {bewaar && (
+              <button className="ark-knop ark-knop-primer" onClick={hervat}>
+                Gaan voort
+                <small>Stadium {bewaar.stadium} · {bewaar.telling.toLocaleString('af')} punte</small>
+              </button>
+            )}
+            <button className={`ark-knop ${bewaar ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
+              {bewaar ? 'Begin van voor af' : 'Begin speel'}
             </button>
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})

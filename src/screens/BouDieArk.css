@@ -196,6 +196,15 @@
 
 .ark-knop:active { opacity: 0.75; }
 
+/* Die opsomming van die gestoorde spel onder "Gaan voort" */
+.ark-knop small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
 .ark-knop-primer {
   background: linear-gradient(150deg, #7C6FAF 0%, #5C4E8E 100%);
   color: #fff;
