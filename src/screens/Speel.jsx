@@ -19,6 +19,22 @@ const SPELETJIES = [
       </>
     ),
   },
+  {
+    id:      'bou-die-ark',
+    event:   'open-bou-die-ark',
+    titel:   'Bou die Ark',
+    beskryf: 'Laat die planke sak en pak hulle netjies. Elke volle ry bou \'n stuk van die ark.',
+    merk:    'Speel nou',
+    tint:    '#F3EEE4',
+    stroke:  '#9A7340',
+    ikoon: (
+      <>
+        <path d="M3 14h18l-2.2 5.2a2 2 0 0 1-1.84 1.2H7.04a2 2 0 0 1-1.84-1.2Z"/>
+        <path d="M5.5 14V9.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2V14"/>
+        <path d="M9.5 7.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2.5"/>
+      </>
+    ),
+  },
 ]
 
 export default function Speel() {

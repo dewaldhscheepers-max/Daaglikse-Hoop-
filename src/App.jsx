@@ -30,6 +30,7 @@ import Toksies from './screens/Toksies'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
+import BouDieArk from './screens/BouDieArk'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -99,6 +100,7 @@ export default function App() {
   const [showToksies,            setShowToksies]            = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showBybel, setShowBybel]                 = useState(false)
+  const [showArk, setShowArk]                     = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
   function onAudioPlayingChange(playing) {
@@ -487,6 +489,13 @@ export default function App() {
     return () => window.removeEventListener('open-vredepad', onOpen)
   }, [])
 
+  // ── Bou die Ark, vanaf die Speel-blad ──
+  useEffect(() => {
+    function onOpen() { setShowArk(true) }
+    window.addEventListener('open-bou-die-ark', onOpen)
+    return () => window.removeEventListener('open-bou-die-ark', onOpen)
+  }, [])
+
   // ── Bybel ──
   useEffect(() => {
     function onOpen() { setShowBybel(true) }
@@ -720,6 +729,10 @@ export default function App() {
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
+      )}
+
+      {showArk && (
+        <BouDieArk onClose={() => setShowArk(false)} />
       )}
 
       {showBybel && (

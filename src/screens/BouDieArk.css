@@ -1,0 +1,261 @@
+/* ── Bou die Ark ── */
+
+.ark-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 0%, #2A2340 0%, #16121F 60%, #100D17 100%);
+  color: #EDE8F5;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* ── Kop ── */
+.ark-kop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 46px 12px 10px;
+  flex: 0 0 auto;
+}
+
+.ark-titel {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #F3EEFA;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ark-ikoon {
+  background: none;
+  border: none;
+  color: #C4B7E8;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+  border-radius: 9px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ark-ikoon:active { background: rgba(255, 255, 255, 0.08); }
+
+/* ── Telbord ── */
+.ark-tel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 12px;
+  flex: 0 0 auto;
+}
+
+.ark-tel-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+  padding: 8px 10px;
+}
+
+.ark-tel-item span {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #9A8FB8;
+}
+
+.ark-tel-item b {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  color: #F3EEFA;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.ark-volgende {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+  padding: 8px 11px;
+}
+
+.ark-volgende > span {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #9A8FB8;
+}
+
+.ark-volgende-blok {
+  position: relative;
+  width: 44px;
+  height: 33px;
+}
+
+.ark-volgende-blok i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+/* ── Bord ── */
+.ark-doek-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 14px;
+}
+
+.ark-doek {
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  display: block;
+}
+
+/* ── Oorlegblaaie ── */
+.ark-blad {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 26px;
+  background: rgba(16, 13, 23, 0.9);
+  backdrop-filter: blur(3px);
+  text-align: center;
+}
+
+.ark-blad-titel {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 700;
+  color: #F3EEFA;
+  margin: 0;
+}
+
+.ark-blad-teks {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #B4A9CC;
+  margin: 0 0 6px;
+  max-width: 270px;
+}
+
+.ark-knop {
+  width: 100%;
+  max-width: 250px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.14s;
+}
+
+.ark-knop:active { opacity: 0.75; }
+
+.ark-knop-primer {
+  background: linear-gradient(150deg, #7C6FAF 0%, #5C4E8E 100%);
+  color: #fff;
+  border: 1px solid #9E8FD0;
+}
+
+.ark-knop-spook {
+  background: transparent;
+  color: #C4B7E8;
+  border: 1.5px solid rgba(196, 183, 232, 0.3);
+}
+
+.ark-uitslag {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.ark-uitslag div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 62px;
+}
+
+.ark-uitslag span {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #9A8FB8;
+}
+
+.ark-uitslag b {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #E9C87A;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Kontroles ── */
+.ark-beheer {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px calc(var(--safe-bottom, 0px) + 16px);
+}
+
+.ark-beheer-knop {
+  flex: 1;
+  height: 58px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #D6CBF0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s, transform 0.08s;
+}
+
+.ark-beheer-knop svg { width: 24px; height: 24px; }
+
+.ark-beheer-knop:active {
+  background: rgba(196, 183, 232, 0.24);
+  transform: scale(0.94);
+}
