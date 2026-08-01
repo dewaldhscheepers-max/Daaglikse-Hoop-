@@ -137,12 +137,23 @@
   position: relative;
   padding: 0 14px;
   overflow: hidden;          /* die doek mag nooit die knoppies uitstoot nie */
+  /* Die band bo en onder die bord moet sy eie ondeursigtige verf he. Sonder
+     dit leen dit die voorouer se laag, en op sommige Android-GPU's bly ou
+     inhoud daar staan wanneer die adresbalk beweeg — die strepe om die spel. */
+  background: #16121F;
 }
 
 .ark-doek {
+  /* Geen inlyn breedte/hoogte uit JavaScript nie. Die doek se buffer is
+     10:20, en die blaaier krimp dit self om binne die houer te pas. So
+     verander die skerm se hoogte die uitleg sonder dat iets die doek
+     skoonmaak of herteken. */
+  display: block;
+  width: auto;
+  height: auto;
   max-width: 100%;
   max-height: 100%;
-  display: block;
+  aspect-ratio: 1 / 2;
   border-radius: 12px;
   /* Geen laag-promosie (transform / will-change / box-shadow) nie. 'n
      Gepromoveerde doek laat sommige Android-GPU's ou laag-inhoud langs die
@@ -253,7 +264,11 @@
   flex-shrink: 0;
   display: flex;
   gap: 8px;
-  padding: 12px 14px calc(var(--safe-bottom, 0px) + 16px);
+  /* Ekstra ruimte onder: die onderste rand van die skerm is waar Chrome se
+     adresbalk en Android se gebaarbalk lewe. As 'n knoppie daar sit, laat
+     elke druk die blaaier se balk in- of uitgly. */
+  padding: 12px 14px calc(var(--safe-bottom, 0px) + 24px);
+  background: #16121F;
 }
 
 .ark-beheer-knop {

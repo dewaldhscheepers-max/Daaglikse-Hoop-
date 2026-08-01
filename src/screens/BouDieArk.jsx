@@ -281,46 +281,41 @@ export default function BouDieArk({ onClose }) {
     }
   }, [])
 
-  /* ── Grootte pas by die skerm ── */
+  /* ── Grootte pas by die skerm ──
+     Die doek se agtergrondbuffer word net uit die BREEDTE bereken, nooit uit
+     die hoogte nie. Op Android skuif Chrome se adresbalk in en uit sodra jy
+     naby die onderkant raak, en dan verander die skerm se hoogte tientalle
+     kere in 'n sekonde. Elke skryf na canvas.width maak die doek skoon en
+     dwing 'n nuwe uitleg af — dit is wat die strepe en die geflikker maak.
+     Die breedte verander nooit tydens daardie animasie nie, dus bly die
+     buffer stil. CSS (max-height) krimp die doek visueel as die hoogte min
+     word; dit kos die GPU niks en maak niks skoon nie. */
   useEffect(() => {
     function pas() {
       const doek = doekRef.current, wrap = wrapRef.current
       if (!doek || !wrap) return
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-      // Moenie op die flex-ketting staatmaak nie. As die houer se hoogte om
-      // enige rede nog nul is, sou min() dit ignoreer en die bord uit die
-      // skerm uit groei. Meet eerder die skerm self en trek die res af.
-      const skerm  = window.innerHeight || document.documentElement.clientHeight
-      const bo     = wrap.getBoundingClientRect().top
-      const onder  = beheerRef.current ? beheerRef.current.offsetHeight : 0
-      const beskik = Math.max(120, skerm - bo - onder - 12)
+      // clientWidth sluit die houer se 14px-kantvulling in
+      const ruimte = wrap.clientWidth > 60 ? wrap.clientWidth - 28 : window.innerWidth - 28
+      const breed  = Math.max(120, ruimte)
 
-      const hoogte = wrap.clientHeight > 40 ? Math.min(wrap.clientHeight, beskik) : beskik
-      const breed  = wrap.clientWidth > 40 ? wrap.clientWidth : (window.innerWidth - 28)
+      const bg = Math.max(8, Math.floor((breed / KOL) * dpr))
+      const nw = bg * KOL, nh = bg * RY
 
-      const bg = Math.max(8, Math.floor(Math.min(breed / KOL, hoogte / RY)))
-      const w = bg * KOL, h = bg * RY
-      const nw = w * dpr, nh = h * dpr
-
-      // Kritiek: canvas.width skryf maak die doek skoon en verander die
-      // uitleg. Doen dit net wanneer die grootte werklik anders is, anders
-      // vuur die uitleg-verandering hierdie funksie weer af en spring die
-      // bord heen en weer tussen twee groottes.
       if (doek.width === nw && doek.height === nh) return
-      // CSS-grootte bly w×h; die agtergrond is dpr keer groter vir skerp lyne.
-      // teken() werk in toestel-pixels, dus bly die transform identiteit.
-      doek.style.width  = w + 'px'
-      doek.style.height = h + 'px'
       doek.width  = nw
       doek.height = nh
       vuil.current = true
       teken()
     }
     pas()
-    // Chrome se adresbalk en die uitleg gaan eers ná 'n raam of twee sit.
+    // Die uitleg gaan eers ná 'n raam of twee sit.
     const t1 = setTimeout(pas, 60)
     const t2 = setTimeout(pas, 300)
+    // resize bly aan vir 'n werklike breedte-verandering (draai die foon om).
+    // 'n Blote hoogte-verandering laat pas() dadelik terugkeer sonder om
+    // enigiets aan die DOM te skryf, dus kos die adresbalk se animasie niks.
     window.addEventListener('resize', pas)
     window.addEventListener('orientationchange', pas)
     return () => {
