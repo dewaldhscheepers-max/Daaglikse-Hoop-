@@ -1,12 +1,18 @@
 /* ── Bou die Ark ── */
 
 .ark-overlay {
-  /* Presies dieselfde struktuur as Vredepad, wat op haar foon werk.
-     Geen dvh (dit verander aanhoudend soos Chrome se adresbalk beweeg),
-     geen touch-action, geen overscroll-behavior. */
   position: fixed;
   inset: 0;
   top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
+  /* Chrome Android meet 'n vaste element teen die GROOT skerm — die skerm
+     soos dit lyk wanneer die adresbalk weg is. Terwyl die balk sigbaar is,
+     sit die onderste stukkie dus agter die balk, en dis presies waar die
+     knoppies is. Daarom "wys" hulle nie, en daarom kom hulle terug sodra
+     jy daar raak en die balk wegskuif.
+     svh is die hoogte met AL die blaaier se balke sigbaar. Anders as dvh
+     bly dit staan wanneer die balk beweeg, dus is die knoppies altyd
+     sigbaar en spring niks. Blaaiers sonder svh val terug op inset: 0. */
+  height: 100svh;
   z-index: 9999;
   display: flex;
   flex-direction: column;

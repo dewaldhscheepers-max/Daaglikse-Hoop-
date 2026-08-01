@@ -116,6 +116,38 @@ function bots(bord, stuk) {
   })
 }
 
+/* Die stil agtergrond: agtergrondkleur, wolke en die leë selle. Word een
+   keer gebou en daarna net oorgeplak. */
+function bouAgtergrond(w, h, stNr) {
+  const c = document.createElement('canvas')
+  c.width = w; c.height = h
+  const g = c.getContext('2d')
+  const bg = w / KOL
+
+  g.fillStyle = stNr >= WOLKE_VANAF ? '#141020' : '#1B1626'
+  g.fillRect(0, 0, w, h)
+
+  if (stNr >= WOLKE_VANAF) {
+    g.fillStyle = 'rgba(120,110,150,0.10)'
+    for (let i = 0; i < 3; i++) {
+      g.beginPath()
+      g.ellipse(w * (0.2 + i * 0.3), h * 0.05, w * 0.3, h * 0.035, 0, 0, Math.PI * 2)
+      g.fill()
+    }
+  }
+
+  g.fillStyle = 'rgba(255,255,255,0.035)'
+  const r = Math.max(2, bg * 0.16)
+  for (let y = 0; y < RY; y++) {
+    for (let x = 0; x < KOL; x++) {
+      g.beginPath()
+      ronde(g, x * bg + 1.5, y * bg + 1.5, bg - 3, bg - 3, r)
+      g.fill()
+    }
+  }
+  return c
+}
+
 export default function BouDieArk({ onClose }) {
   const [toestand, setToestand] = useState('menu')  // menu · speel · pouse · verloor
   const [telling, setTelling]   = useState(0)
@@ -195,6 +227,16 @@ export default function BouDieArk({ onClose }) {
   const vuil = useRef(true)
   const merkVuil = useCallback(() => { vuil.current = true }, [])
 
+  /* ── Die stil agtergrond ──
+     Die rooster was 1-pixel haarlyne. 'n Doek se buffer pas selde presies op
+     die skerm se pixels (haar foon se DPR is 2.81, die buffer is tot 2×
+     beperk), dus word alles met 'n nie-heeltallige faktor verklein. 'n Lyn
+     van een pixel land dan soms op 'n pixelgrens en soms tussenin: party
+     lyne word helder, party verdwyn, en dit skuif heen en weer. Dit is die
+     strepe. Sagte teels het geen dun rand nie en verklein skoon.
+     Ons bou dit een keer en plak dit daarna net oor. */
+  const agtergrond = useRef({ sleutel: '', doek: null })
+
   const teken = useCallback(() => {
     const doek = doekRef.current
     if (!doek) return
@@ -203,31 +245,15 @@ export default function BouDieArk({ onClose }) {
     const s   = spel.current
     const bg  = doek.width / KOL
 
-    ctx.clearRect(0, 0, doek.width, doek.height)
-
-    // agtergrond word donkerder soos die storm nader kom
+    // Die agtergrond word donkerder soos die storm nader kom, dus is die
+    // stadium deel van die sleutel.
     const st = stadiumBy(s.stadium)
-    ctx.fillStyle = st.nr >= WOLKE_VANAF ? '#141020' : '#1B1626'
-    ctx.fillRect(0, 0, doek.width, doek.height)
-
-    if (st.nr >= WOLKE_VANAF) {
-      // wolkbanke bo-aan
-      ctx.fillStyle = 'rgba(120,110,150,0.10)'
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath()
-        ctx.ellipse(doek.width * (0.2 + i * 0.3), doek.height * 0.05,
-                    doek.width * 0.3, doek.height * 0.035, 0, 0, Math.PI * 2)
-        ctx.fill()
-      }
+    const sleutel = doek.width + ':' + doek.height + ':' + (st.nr >= WOLKE_VANAF ? 'storm' : 'kalm')
+    if (agtergrond.current.sleutel !== sleutel) {
+      agtergrond.current = { sleutel, doek: bouAgtergrond(doek.width, doek.height, st.nr) }
     }
-    ctx.strokeStyle = 'rgba(255,255,255,0.045)'
-    ctx.lineWidth = 1
-    for (let x = 1; x < KOL; x++) {
-      ctx.beginPath(); ctx.moveTo(x * bg, 0); ctx.lineTo(x * bg, doek.height); ctx.stroke()
-    }
-    for (let y = 1; y < RY; y++) {
-      ctx.beginPath(); ctx.moveTo(0, y * bg); ctx.lineTo(doek.width, y * bg); ctx.stroke()
-    }
+    // Ondeursigtig en vol grootte, dus is 'n clearRect onnodig.
+    ctx.drawImage(agtergrond.current.doek, 0, 0)
 
     const blok = (x, y, kleur, deurskyn) => {
       if (y < 0) return
