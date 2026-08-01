@@ -1193,6 +1193,15 @@ export default function BouDieArk({ onClose }) {
       {/* ── Versameling ── */}
       {wysDiere && (
         <div className="ark-blad ark-blad-vol">
+          {/* 'n Uitweg wat altyd bo-aan sit. Die knoppie heel onder kan
+              afgestoot word deur 'n lang lys of 'n klein skerm, en die kop se
+              terugpyl le onder hierdie oorlegblad. Sonder hierdie een kan 'n
+              mens vasgekeer raak. */}
+          <button className="ark-blad-toe" onClick={() => setWysDiere(false)} aria-label="Terug">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
           <h2 className="ark-blad-titel">My diere</h2>
           <p className="ark-blad-teks">Elke voltooide stadium bring 'n paar aan boord.</p>
 
@@ -1230,6 +1239,15 @@ export default function BouDieArk({ onClose }) {
           haal nie, en 'n lys waarop nog niemand is nie. */}
       {wysRanglys && (
         <div className="ark-blad ark-blad-vol">
+          {/* 'n Uitweg wat altyd bo-aan sit. Die knoppie heel onder kan
+              afgestoot word deur 'n lang lys of 'n klein skerm, en die kop se
+              terugpyl le onder hierdie oorlegblad. Sonder hierdie een kan 'n
+              mens vasgekeer raak. */}
+          <button className="ark-blad-toe" onClick={() => setWysRanglys(false)} aria-label="Terug">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
           <h2 className="ark-blad-titel">Wêreldwye ranglys</h2>
           <p className="ark-blad-teks">
             Gerangskik op hoe ver die ark gebou is, dan op punte.

@@ -748,3 +748,26 @@
   color: #8E82AE;
   font-variant-numeric: tabular-nums;
 }
+
+/* Uitweg bo-aan 'n volskerm-oorlegblad. Vas teen die venster, dus bly dit
+   staan al rol die inhoud en al is die skerm klein. */
+.ark-blad-toe {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 12px;
+  z-index: 6;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2A2340;
+  border: 1px solid #4A3E6E;
+  color: #CFC2F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.ark-blad-toe:active { background: #453A66; border-color: #7C6FAF; }
