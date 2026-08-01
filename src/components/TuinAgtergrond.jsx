@@ -39,6 +39,20 @@ function Boom({ x, y, s, kleur, blaar }) {
   )
 }
 
+/* Die geskilderde tuine. Elkeen is 'n WebP van omtrent 45 KB — die bronne
+   was PNG's van 2.5 MB elk, en 'n mens sien geen verskil agter 'n bord nie.
+   Hulle is effens vervaag en verdonker, want die vrugte moet die helderste
+   ding op die skerm bly. */
+const PRENTE = [
+  '/vrugtefees/liefde.webp',
+  '/vrugtefees/vreugde.webp',
+  '/vrugtefees/vrede.webp',
+  '/vrugtefees/geduld.webp',
+  '/vrugtefees/vriendelikheid.webp',
+  '/vrugtefees/goedheid.webp',
+  '/vrugtefees/getrouheid.webp',
+]
+
 export default function TuinAgtergrond({ hoofstuk = 0 }) {
   const t = TUINE[hoofstuk % TUINE.length]
   const id = 'tuin' + (hoofstuk % TUINE.length)
@@ -47,9 +61,14 @@ export default function TuinAgtergrond({ hoofstuk = 0 }) {
   const voorste = [6, 20, 34, 48, 62, 76, 90, 104, 118, 132, 146]
   const agterste = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150]
 
+  const prent = PRENTE[hoofstuk % PRENTE.length]
+
   return (
-    <svg
-      className="vf-tuin"
+    <div className="vf-tuin-houer">
+      {/* Die getekende tuin bly onder: dit is daar terwyl die prent laai,
+          en as die prent ooit nie kom nie, is die skerm nie leeg nie. */}
+      <svg
+        className="vf-tuin"
       viewBox="0 0 160 280"
       preserveAspectRatio="xMidYMax slice"
       aria-hidden="true"
@@ -109,6 +128,10 @@ export default function TuinAgtergrond({ hoofstuk = 0 }) {
 
       {/* verdof waar die bord sit */}
       <rect width="160" height="280" fill={`url(#${id}-verdof)`} />
-    </svg>
+      </svg>
+
+      <img className="vf-tuin-prent" src={prent} alt="" aria-hidden="true" loading="eager" />
+      <div className="vf-tuin-sluier" />
+    </div>
   )
 }

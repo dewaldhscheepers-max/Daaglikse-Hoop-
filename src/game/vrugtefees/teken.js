@@ -234,10 +234,20 @@ export function maakTekenaar(doek, opsies) {
     const g = selGrootte()
     ctx.clearRect(0, 0, doek.width, doek.height)
 
-    // agtergrond en die rooster
-    ctx.fillStyle = '#1D2739'
+    /* Die bord se agtergrond word HIER geteken, met afgeronde hoeke en
+       effens deurskynend, sodat die geskilderde tuin daaragter deurskyn.
+       'n border-radius in CSS sou 'n masker-laag afdwing — die ding wat op
+       haar foon gebreek het. Binne die doek is dit net verf. */
+    const hoek = g * 0.42
+    ctx.save()
+    ctx.beginPath()
+    if (ctx.roundRect) ctx.roundRect(0, 0, doek.width, doek.height, hoek)
+    else ctx.rect(0, 0, doek.width, doek.height)
+    ctx.clip()
+
+    ctx.fillStyle = 'rgba(18, 25, 40, 0.74)'
     ctx.fillRect(0, 0, doek.width, doek.height)
-    ctx.fillStyle = 'rgba(255,255,255,0.030)'
+    ctx.fillStyle = 'rgba(255,255,255,0.035)'
     for (let r = 0; r < rye; r++)
       for (let k = 0; k < kolomme; k++) {
         if ((k + r) % 2) continue
@@ -296,6 +306,15 @@ export function maakTekenaar(doek, opsies) {
         ctx.globalAlpha = 1
       }
     }
+
+    // 'n dun goue rand om die bord, binne die klip
+    ctx.strokeStyle = 'rgba(228, 201, 138, 0.28)'
+    ctx.lineWidth = Math.max(2, g * 0.05)
+    ctx.beginPath()
+    if (ctx.roundRect) ctx.roundRect(1, 1, doek.width - 2, doek.height - 2, hoek)
+    else ctx.rect(1, 1, doek.width - 2, doek.height - 2)
+    ctx.stroke()
+    ctx.restore()
   }
 
   function begin() {

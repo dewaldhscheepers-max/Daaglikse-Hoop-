@@ -3,18 +3,43 @@
    natuurlike groen. Geen canvas, geen laag-promosie op iets wat 'n mens
    druk. Dit is die twee dinge wat in Bou die Ark op haar foon gebreek het. */
 
-.vf-tuin {
+.vf-tuin-houer {
+  position: absolute;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.vf-tuin, .vf-tuin-prent {
   position: absolute;
   inset: 0;
   top: 0; right: 0; bottom: 0; left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
-  pointer-events: none;
+}
+
+/* Die geskilderde tuin bo-op die getekende een. Sy oop middel val presies
+   waar die bord sit — dis waarom hierdie prente werk en my landskap nie. */
+.vf-tuin-prent {
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+/* 'n Dun sluier sodat wit teks en helder vrugte altyd leesbaar bly, hoe
+   helder die prent ook al is. */
+.vf-tuin-sluier {
+  position: absolute;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background:
+    radial-gradient(ellipse 78% 46% at 50% 62%, rgba(10, 14, 24, 0.62) 0%, rgba(10, 14, 24, 0.30) 60%, rgba(10, 14, 24, 0.10) 100%),
+    linear-gradient(180deg, rgba(10, 14, 24, 0.55) 0%, rgba(10, 14, 24, 0.12) 22%, rgba(10, 14, 24, 0.12) 78%, rgba(10, 14, 24, 0.45) 100%);
 }
 
 /* Alles behalwe die tuin sit bo-op hom */
-.vf-oorleg > *:not(.vf-tuin) { position: relative; z-index: 1; }
+.vf-oorleg > *:not(.vf-tuin-houer) { position: relative; z-index: 1; }
 
 .vf-oorleg {
   position: fixed;
