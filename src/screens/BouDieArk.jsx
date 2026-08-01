@@ -70,6 +70,22 @@ function stoorDier(id) {
   } catch {}
 }
 
+// roundRect is eers Chrome 99+. Sonder 'n terugval gooi die hele
+// tekenfunksie op ouer toestelle en die spel vries.
+function ronde(ctx, x, y, w, h, r) {
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, w, h, r)
+    return
+  }
+  const rr = Math.min(r, w / 2, h / 2)
+  ctx.moveTo(x + rr, y)
+  ctx.arcTo(x + w, y,     x + w, y + h, rr)
+  ctx.arcTo(x + w, y + h, x,     y + h, rr)
+  ctx.arcTo(x,     y + h, x,     y,     rr)
+  ctx.arcTo(x,     y,     x + w, y,     rr)
+  ctx.closePath()
+}
+
 function leegBord() {
   return Array.from({ length: RY }, () => Array(KOL).fill(null))
 }
@@ -115,8 +131,9 @@ export default function BouDieArk({ onClose }) {
   const [wysDiere, setWysDiere] = useState(false)
 
   const vorderRef = useRef(0)
-  const doekRef = useRef(null)
-  const wrapRef = useRef(null)
+  const doekRef  = useRef(null)
+  const wrapRef  = useRef(null)
+  const beheerRef = useRef(null)
 
   // Spel-toestand leef in 'n ref sodat die lus nie by elke raam herbou nie
   const spel = useRef({
@@ -209,13 +226,13 @@ export default function BouDieArk({ onClose }) {
       ctx.globalAlpha = deurskyn ? 0.22 : 1
       ctx.fillStyle = kleur
       ctx.beginPath()
-      ctx.roundRect(px + 1.5, py + 1.5, bg - 3, bg - 3, r)
+      ronde(ctx, px + 1.5, py + 1.5, bg - 3, bg - 3, r)
       ctx.fill()
       if (!deurskyn) {
         // sagte hoogtepunt bo — gee die blok diepte sonder om luidrugtig te wees
         ctx.fillStyle = 'rgba(255,255,255,0.16)'
         ctx.beginPath()
-        ctx.roundRect(px + 1.5, py + 1.5, bg - 3, (bg - 3) * 0.36, [r, r, 0, 0])
+        ronde(ctx, px + 1.5, py + 1.5, bg - 3, (bg - 3) * 0.36, r)
         ctx.fill()
       }
       ctx.globalAlpha = 1
@@ -261,7 +278,19 @@ export default function BouDieArk({ onClose }) {
       const doek = doekRef.current, wrap = wrapRef.current
       if (!doek || !wrap) return
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const bg  = Math.floor(Math.min(wrap.clientWidth / KOL, wrap.clientHeight / RY))
+
+      // Moenie op die flex-ketting staatmaak nie. As die houer se hoogte om
+      // enige rede nog nul is, sou min() dit ignoreer en die bord uit die
+      // skerm uit groei. Meet eerder die skerm self en trek die res af.
+      const skerm  = window.innerHeight || document.documentElement.clientHeight
+      const bo     = wrap.getBoundingClientRect().top
+      const onder  = beheerRef.current ? beheerRef.current.offsetHeight : 0
+      const beskik = Math.max(120, skerm - bo - onder - 12)
+
+      const hoogte = wrap.clientHeight > 40 ? Math.min(wrap.clientHeight, beskik) : beskik
+      const breed  = wrap.clientWidth > 40 ? wrap.clientWidth : (window.innerWidth - 28)
+
+      const bg = Math.max(8, Math.floor(Math.min(breed / KOL, hoogte / RY)))
       const w = bg * KOL, h = bg * RY
       // CSS-grootte bly w×h; die agtergrond is dpr keer groter vir skerp lyne.
       // teken() werk in toestel-pixels, dus bly die transform identiteit.
@@ -272,8 +301,19 @@ export default function BouDieArk({ onClose }) {
       teken()
     }
     pas()
+    // Chrome se adresbalk en die uitleg gaan eers ná 'n raam of twee sit.
+    const t1 = setTimeout(pas, 60)
+    const t2 = setTimeout(pas, 300)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(pas) : null
+    if (ro && wrapRef.current) ro.observe(wrapRef.current)
     window.addEventListener('resize', pas)
-    return () => window.removeEventListener('resize', pas)
+    window.addEventListener('orientationchange', pas)
+    return () => {
+      clearTimeout(t1); clearTimeout(t2)
+      if (ro) ro.disconnect()
+      window.removeEventListener('resize', pas)
+      window.removeEventListener('orientationchange', pas)
+    }
   }, [teken, toestand])
 
   /* ── Stukbestuur ── */
@@ -699,7 +739,7 @@ export default function BouDieArk({ onClose }) {
 
       {/* ── Kontroles ── */}
       {toestand === 'speel' && (
-        <div className="ark-beheer">
+        <div className="ark-beheer" ref={beheerRef}>
           <button className="ark-beheer-knop" onClick={() => skuif(-1)} aria-label="Links">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>

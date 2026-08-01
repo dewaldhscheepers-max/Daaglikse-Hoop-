@@ -134,9 +134,12 @@
   justify-content: center;
   position: relative;
   padding: 0 14px;
+  overflow: hidden;          /* die doek mag nooit die knoppies uitstoot nie */
 }
 
 .ark-doek {
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
   display: block;
@@ -235,6 +238,7 @@
 /* ── Kontroles ── */
 .ark-beheer {
   flex: 0 0 auto;
+  flex-shrink: 0;
   display: flex;
   gap: 8px;
   padding: 12px 14px calc(var(--safe-bottom, 0px) + 16px);
