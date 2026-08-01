@@ -58,10 +58,14 @@ export const VLAKKE = [
     doel: { tipe: 'versamel', vrugte: { 2: 16, 4: 16 } },
     blokke: b(DROE_BLAAR, [0, 7], [1, 7], [6, 7], [7, 7]) },
 
-  { nr: 7, saad: 1630, soorte: 5, skuiwe: 22,
+  /* Hierdie was die eerste vlak met 'n versperring wat twee slae vat, en dit
+     was te swaar. Ses onkruid teen die rande beteken twaalf raak passings op
+     presies daardie selle, en die buitenste kolomme kry die minste passings.
+     Nou vier, binnetoe, met meer skuiwe. */
+  { nr: 7, saad: 1630, soorte: 5, skuiwe: 26,
     doel: { tipe: 'skoonmaak', tipes: [ONKRUID] },
-    blokke: b(ONKRUID, [1, 4], [6, 4], [1, 6], [6, 6], [3, 7], [4, 7]),
-    wenk: 'Onkruid het twee slae nodig.' },
+    blokke: b(ONKRUID, [2, 3], [5, 3], [3, 5], [4, 5]),
+    wenk: 'Onkruid het twee slae nodig. Pas twee keer op dieselfde plek.' },
 
   { nr: 8, saad: 1744, soorte: 5, skuiwe: 14,
     doel: { tipe: 'ketting', lengte: 3 },

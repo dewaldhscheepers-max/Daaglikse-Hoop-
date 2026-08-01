@@ -121,7 +121,12 @@ for (const vlak of VLAKKE) {
   console.log(naam.padEnd(34) + `${kG}%`.padStart(11) + `${kS}%`.padStart(10) +
               `   ${gemSkuiwe} van ${vlak.skuiwe}`)
 
-  if (kG < 70) probleme.push(`vlak ${vlak.nr}: te moeilik — 'n gemiddelde speler wen dit net ${kG}% van die tyd`)
+  /* Die eerste tien vlakke leer die speler. Daar is 'n mens nog besig om die
+     reels te verstaan, en 87% vir 'n bot wat ELKE keer die beste skuif speel
+     beteken 'n mens sukkel. Dewald het op vlak 7 vasgesit terwyl my drempel
+     van 70% dit deurgelaat het. Vroeg moet dit 95% wees. */
+  const drempel = vlak.nr <= 10 ? 95 : 70
+  if (kG < drempel) probleme.push(`vlak ${vlak.nr}: te moeilik — 'n gemiddelde speler wen dit net ${kG}% van die tyd (moet ${drempel}% wees)`)
   /* Die eerste tien vlakke MAG maklik wees — hulle leer die speler, en 'n
      mens jaag nie iemand weg by vlak drie nie. Van vlak elf af moet
      slordige spel wel kan misluk. */
