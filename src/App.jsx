@@ -29,6 +29,7 @@ import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
+import Speel from './screens/Speel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -479,6 +480,13 @@ export default function App() {
     return () => window.removeEventListener('open-wanneer-angs-toeslaan', onOpen)
   }, [])
 
+  // ── Vredepad, vanaf die Speel-blad ──
+  useEffect(() => {
+    function onOpen() { setShowVredepad(true) }
+    window.addEventListener('open-vredepad', onOpen)
+    return () => window.removeEventListener('open-vredepad', onOpen)
+  }, [])
+
   // ── Bybel ──
   useEffect(() => {
     function onOpen() { setShowBybel(true) }
@@ -530,8 +538,7 @@ export default function App() {
   }, [])
 
   function handleNav(id) {
-    if (id === 'vredepad') { setShowVredepad(true); return }
-    if (id === 'nooiomy')  { setNooimy(true);       return }
+    if (id === 'nooiomy') { setNooimy(true); return }
     setTab(id)
     if (screenRef.current) screenRef.current.scrollTop = 0
   }
@@ -614,6 +621,7 @@ export default function App() {
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
+          {tab === 'speel'   && <Speel />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} installPrompt={installPrompt} isInstalled={isInstalled} onNavigate={handleNav} />}
         </ErrorBoundary>
       </div>

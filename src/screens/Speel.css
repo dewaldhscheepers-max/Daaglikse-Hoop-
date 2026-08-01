@@ -1,0 +1,107 @@
+.speel {
+  min-height: 100%;
+  background: var(--cream, #FAF8F5);
+}
+
+/* Erf die app se gradiënt-kop soos Luister en E-boeke */
+.speel-header {
+  padding: 56px 24px 30px;
+}
+
+.speel-title {
+  position: relative;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  margin: 0 0 7px;
+}
+
+.speel-sub {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.speel-body {
+  padding: 18px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Speletjie-kaart ── */
+.speel-kaart {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  width: 100%;
+  background: var(--white, #fff);
+  border: 1px solid rgba(124, 111, 175, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(45, 32, 64, 0.04), 0 6px 18px rgba(45, 32, 64, 0.045);
+  padding: 16px 15px;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease;
+}
+
+.speel-kaart:active { transform: scale(0.99); }
+
+.speel-teel {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.speel-teel svg { width: 24px; height: 24px; display: block; }
+
+.speel-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.speel-kaart-titel {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text, #2D2040);
+  line-height: 1.25;
+}
+
+.speel-kaart-beskryf {
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+  line-height: 1.5;
+}
+
+.speel-kaart-merk {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--purple, #7C6FAF);
+  margin-top: 2px;
+}
+
+.speel-binnekort {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+  text-align: center;
+  margin: 6px 0 4px;
+}

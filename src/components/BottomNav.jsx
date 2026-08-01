@@ -32,12 +32,14 @@ export default function BottomNav({ active, onChange, onBybel }) {
       )
     },
     {
-      id: 'vredepad',
-      label: 'Vredepad',
+      id: 'speel',
+      label: 'Speel',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          <rect x="2.5" y="6" width="19" height="12" rx="4"/>
+          <path d="M7 10.5v3M5.5 12h3"/>
+          <circle cx="16" cy="11" r="1"/>
+          <circle cx="18" cy="13.5" r="1"/>
         </svg>
       )
     },
