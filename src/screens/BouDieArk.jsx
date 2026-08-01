@@ -175,15 +175,6 @@ function bouAgtergrond(w, h, stNr) {
   g.fillStyle = stNr >= WOLKE_VANAF ? '#141020' : '#1B1626'
   g.fillRect(0, 0, w, h)
 
-  if (stNr >= WOLKE_VANAF) {
-    g.fillStyle = 'rgba(120,110,150,0.10)'
-    for (let i = 0; i < 3; i++) {
-      g.beginPath()
-      g.ellipse(w * (0.2 + i * 0.3), h * 0.05, w * 0.3, h * 0.035, 0, 0, Math.PI * 2)
-      g.fill()
-    }
-  }
-
   g.fillStyle = 'rgba(255,255,255,0.035)'
   const r = Math.max(2, bg * 0.16)
   for (let y = 0; y < RY; y++) {
@@ -248,7 +239,7 @@ export default function BouDieArk({ onClose }) {
     // stadium
     stadium: 1,
     sLyne: 0, sPunte: 0, sBesteMulti: 0, sKombo: 0, sTyd: 0,
-    weer: { druppels: [], water: 0 },
+    weer: { druppels: [], water: 0, wolkX: 0 },
   })
 
   /* ── Hoeveel van die doelwit is klaar ── */
@@ -335,6 +326,35 @@ export default function BouDieArk({ onClose }) {
     // reeds geplaas
     for (let y = 0; y < RY; y++) {
       for (let x = 0; x < KOL; x++) if (s.bord[y][x]) blok(x, y, s.bord[y][x], false)
+    }
+
+    /* Wolkbank.
+       Dit was drie stil ellipse teen 10% deursigtigheid op 'n amper swart
+       agtergrond — 9 uit 255 se helderheidsverskil, in 'n band 7% van die
+       bord hoog. Op 'n foon in daglig sien niemand dit nie.
+       Nou is dit sterker, hoër, en dit dryf stadig. Die reën wys dat
+       beweging is wat weer laat registreer; stil vorms registreer nie. */
+    if (st.nr >= WOLKE_VANAF) {
+      /* Drie aparte wolke met gapings tussenin. My eerste poging was ses
+         wye ellipse wat oorvleuel het tot een aaneenlopende band — dit het
+         gedryf, maar 'n eweredige band wat skuif lyk presies soos 'n band
+         wat stilstaan. 'n Mens sien beweging teen die gapings. */
+      const dw = s.weer.wolkX || 0
+      ctx.fillStyle = 'rgba(158,152,188,0.19)'
+      const PUFFE = [[-0.075, 0.010, 0.085], [0, 0, 0.115], [0.080, 0.014, 0.070]]
+      for (let k = 0; k < 3; k++) {
+        const kern = (k * 0.62 + dw) % 1.9 - 0.4
+        const hoogte = 0.052 + (k % 2) * 0.030
+        for (const [dx, dy, r] of PUFFE) {
+          ctx.beginPath()
+          ctx.ellipse(doek.width * (kern + dx),
+                      doek.height * (hoogte + dy),
+                      doek.width * r,
+                      doek.height * r * 0.42,
+                      0, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
     }
 
     // reën en stygende water — altyd agter die stukke, nooit oor die spel nie
@@ -460,7 +480,7 @@ export default function BouDieArk({ onClose }) {
     stoorVerste(s.stadium)
     s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
     s.sTyd = 0
-    s.weer.druppels = []; s.weer.water = 0
+    s.weer.druppels = []; s.weer.water = 0; s.weer.wolkX = 0
     setStadiumNr(s.stadium)
     setVorder(0)
     setKlaar(null)
@@ -569,6 +589,10 @@ export default function BouDieArk({ onClose }) {
       }
 
       // weer
+      if (st.nr >= WOLKE_VANAF) {
+        // Een volle oorsteek neem omtrent twee minute — net genoeg om te sien
+        s.weer.wolkX = ((s.weer.wolkX || 0) + dt / 50000) % 1.9
+      }
       if (st.nr >= REEN_VANAF) {
         const w = s.weer
         if (w.druppels.length < 34) w.druppels.push({ x: Math.random(), y: Math.random(), s: 0.5 + Math.random() * 0.7 })
@@ -586,7 +610,7 @@ export default function BouDieArk({ onClose }) {
         else { vuil.current = true; vasmaak(); break }
       }
       // weer beweeg aanhoudend; andersins net wanneer iets verander het
-      if (vuil.current || stadiumBy(s.stadium).nr >= REEN_VANAF) teken()
+      if (vuil.current || stadiumBy(s.stadium).nr >= WOLKE_VANAF) teken()
       id = requestAnimationFrame(raam)
     }
     id = requestAnimationFrame(raam)
@@ -700,7 +724,7 @@ export default function BouDieArk({ onClose }) {
     s.stukke = 0; s.speelMs = 0
     s.stadium = beginBy; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
     s.sKombo = 0; s.sTyd = 0
-    s.weer = { druppels: [], water: 0 }
+    s.weer = { druppels: [], water: 0, wolkX: 0 }
     vorderRef.current = 0
     setTelling(0); setLyne(0); setStadiumNr(beginBy); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
@@ -729,7 +753,7 @@ export default function BouDieArk({ onClose }) {
       s.sLyne = d.sLyne || 0; s.sPunte = d.sPunte || 0
       s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
       s.sTyd = d.sTyd || 0
-      s.weer = { druppels: [], water: 0 }
+      s.weer = { druppels: [], water: 0, wolkX: 0 }
 
       // As die doelwit reeds behaal is, was die stadium klaar toe die spel
       // gestoor is — die dier is destyds toegeken. Skuif dadelik aan, anders
