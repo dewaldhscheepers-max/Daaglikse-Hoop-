@@ -681,3 +681,39 @@
   }
   .ark-draai p { font-size: 14px; color: #C4B7E8; line-height: 1.55; max-width: 300px; }
 }
+
+/* ── Die einde van die verhaal ── */
+.ark-finale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.arkbou-groot { width: 190px; height: auto; }
+
+/* Die naam moet raakgesien word — 'n te fyn fout laat 'n mens dink niks
+   het gebeur nie, en dan tik jy dit oor en oor in. */
+.ark-fout-groot {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: rgba(233, 160, 138, 0.12);
+  border: 1px solid rgba(233, 160, 138, 0.35);
+}
+
+.ark-kennis b { color: #E9C87A; font-weight: 700; }
+
+.ark-skakel {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #C4B7E8;
+  text-decoration: underline;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}

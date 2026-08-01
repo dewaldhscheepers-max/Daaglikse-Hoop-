@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
-import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
+import { STADIUMS, stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
 import {
   leesNaam, stoorNaam, keurNaam, haalRanglys, kasLys,
@@ -218,6 +218,7 @@ export default function BouDieArk({ onClose }) {
   const [afgewys, setAfgewys]         = useState(() => naamAfgewys())
   const [naamInvoer, setNaamInvoer]   = useState('')
   const [naamFout, setNaamFout]       = useState(null)
+  const [naamGestoor, setNaamGestoor] = useState(false)
   const [stuur, setStuur]             = useState(null)     // { besig, rang, totaal, fout, beterAs }
 
   const vorderRef = useRef(0)
@@ -440,7 +441,8 @@ export default function BouDieArk({ onClose }) {
     // se toestand heel bly: "Hou hier op" moet kan stoor, en die lus moet iets
     // he om te laat val wanneer jy weer begin.
     if (!s.stuk && !plaasNuwe()) return    // die ark het volgeraak
-    setKlaar({ ...st, reeds })
+    // Stadium 12 is die einde van Noag se verhaal. Dit verdien 'n eie oomblik.
+    setKlaar({ ...st, reeds, finale: st.nr === STADIUMS.length })
     playLevelComplete()
   }, [plaasNuwe])
 
@@ -822,6 +824,7 @@ export default function BouDieArk({ onClose }) {
     setAfgewys(false)
     setNaamFout(null)
     setNaamInvoer('')
+    setNaamGestoor(true)
   }
 
   /* Een naamblok wat op meer as een plek gebruik word. Die vraag verskil,
@@ -839,7 +842,7 @@ export default function BouDieArk({ onClose }) {
           maxLength={20}
           aria-label="Jou naam vir die ranglys"
         />
-        {naamFout && <span className="ark-fout">{naamFout}</span>}
+        {naamFout && <span className="ark-fout ark-fout-groot">{naamFout}</span>}
         <button className="ark-knop ark-knop-primer" onClick={bevestigNaam}>Sit my op die lys</button>
         <button className="ark-knop ark-knop-spook" onClick={() => { wysNaamAf(); setAfgewys(true) }}>
           Nie nou nie
@@ -874,6 +877,18 @@ export default function BouDieArk({ onClose }) {
      lys wat ons gehaal het toe die spel oopgemaak het, dus noem ons dit
      voorlopig. Val die speler buite die stuk lys wat ons het, sê ons niks —
      'n raaiskoot wat soos 'n feit lyk, is erger as stilte. */
+  /* Hoeveel van die ark staan? Dit is die hele verhaal se vordering, nie
+     die huidige stadium s'n nie.
+
+     Voorheen het die tekening met die stadium se vordering gevul, dus het
+     die ark twaalf keer opgebou en weer teruggeval en nooit klaar geword
+     nie. Vir 'n spel wat "Bou die Ark" heet, was dit die verkeerde ding om
+     te wys. Nou styg dit oor die twaalf stadiums heen en bly dan vol. */
+  const arkVordering = useMemo(
+    () => Math.min(1, Math.max(0, (stadiumNr - 1 + vorder) / STADIUMS.length)),
+    [stadiumNr, vorder]
+  )
+
   const voorlopig = useMemo(() => {
     if (!ranglys || !ranglys.lys.length) return null
     const beter = ranglys.lys.filter(
@@ -956,7 +971,7 @@ export default function BouDieArk({ onClose }) {
       {/* ── Stadium ── */}
       {toestand === 'speel' && (
         <div className="ark-stadium">
-          <ArkBou vordering={vorder} />
+          <ArkBou vordering={arkVordering} />
           <div className="ark-stadium-info">
             <span className="ark-stadium-nr">Stadium {stadiumNr}</span>
             <span className="ark-stadium-naam">{stad.naam}</span>
@@ -1059,11 +1074,13 @@ export default function BouDieArk({ onClose }) {
       {/* ── Stadium voltooi ── */}
       {klaar && (
         <div className="ark-blad ark-blad-vol">
-          <span className="ark-klaar-merk">Stadium {klaar.nr} voltooi</span>
-          <h2 className="ark-blad-titel">{klaar.naam}</h2>
+          <span className="ark-klaar-merk">
+            {klaar.finale ? 'Die verhaal is volledig' : `Stadium ${klaar.nr} voltooi`}
+          </span>
+          <h2 className="ark-blad-titel">{klaar.finale ? 'Die ark is klaar' : klaar.naam}</h2>
 
           <div className="ark-nuwe-dier">
-            <Dier id={klaar.dier} grootte={104} paar />
+            <Dier id={klaar.dier} grootte={klaar.finale ? 76 : 104} paar />
             <span>
               {klaar.reeds
                 ? `${dierNaam(klaar.dier)} — reeds aan boord`
@@ -1071,13 +1088,39 @@ export default function BouDieArk({ onClose }) {
             </span>
           </div>
 
-          <blockquote className="ark-vers">
-            {klaar.vers}
-            <cite>{klaar.ref}</cite>
-          </blockquote>
+          {/* Die einde van Noag se verhaal. Die volle ark, die reënboog, en
+              'n eerlike woord oor wat hierna kom: die reis hou aan, maar die
+              verhaal het 'n einde gehad. */}
+          {klaar.finale && (
+            <div className="ark-finale">
+              <ArkBou vordering={1} grootte="groot" />
+              <p className="ark-blad-teks">
+                Al twaalf stadiums is agter die rug en al die diere is aan boord.
+              </p>
+              <blockquote className="ark-vers">
+                My reënboog plaas Ek in die wolke; dit sal die teken wees van die verbond
+                tussen My en die aarde.
+                <cite>Genesis 9:13</cite>
+              </blockquote>
+              <p className="ark-fyndruk">
+                Die reis gaan voort met nuwe stadiums, maar die ark staan.
+              </p>
+            </div>
+          )}
+
+
+          {!klaar.finale && (
+            <blockquote className="ark-vers">
+              {klaar.vers}
+              <cite>{klaar.ref}</cite>
+            </blockquote>
+          )}
 
           {!naam && !afgewys && naamBlok('Wil jy met jou diere op die wêreldwye ranglys wees?')}
 
+          {naam && naamGestoor && (
+            <p className="ark-kennis">Ons het jou naam gestoor as <b>{naam}</b>.</p>
+          )}
           {naam && stuur && !stuur.besig && stuur.rang && (
             <p className="ark-kennis">Jy staan nou #{stuur.rang} van {stuur.totaal} wêreldwyd.</p>
           )}
@@ -1161,6 +1204,17 @@ export default function BouDieArk({ onClose }) {
           {/* Hier vra ons altyd, ook as die speler vroeer "nie nou nie" gese
               het — hy het self hierheen gekom, dus is dit nie neul nie. */}
           {!naam && naamBlok('Jy is nog nie op die lys nie. Kies \'n naam.')}
+
+          {/* Die naam moet sigbaar wees. Sonder dit kan 'n mens nie weet of
+              dit gestoor is nie, en dan tik jy dit oor en oor in. */}
+          {naam && (
+            <p className="ark-kennis">
+              Jy speel as <b>{naam}</b>.{' '}
+              <button className="ark-skakel" onClick={() => { setNaam(''); setNaamInvoer(naam); setNaamGestoor(false) }}>
+                Verander
+              </button>
+            </p>
+          )}
 
           <button className="ark-knop ark-knop-primer" onClick={() => setWysRanglys(false)}>Terug</button>
         </div>
