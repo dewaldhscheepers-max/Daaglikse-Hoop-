@@ -533,6 +533,22 @@ export default function App() {
   useEffect(() => {
     if (!navigator.serviceWorker) return
     let refreshing = false
+
+    // Chrome kyk net by 'n vars navigasie vir 'n nuwe weergawe. 'n Tab wat
+    // oop bly kan dus vir dae op ou kode sit. Vra self.
+    let stop = false
+    async function kykVirNuut() {
+      if (stop) return
+      try {
+        const reg = await navigator.serviceWorker.getRegistration()
+        if (reg) await reg.update()
+      } catch {}
+    }
+    kykVirNuut()
+    const tik = setInterval(kykVirNuut, 15 * 60 * 1000)
+    function opWakker() { if (!document.hidden) kykVirNuut() }
+    document.addEventListener('visibilitychange', opWakker)
+    window.addEventListener('focus', opWakker)
     function doRefresh() {
       if (!refreshing && !isPlayingRef.current) { refreshing = true; window.location.reload() }
     }
@@ -541,6 +557,10 @@ export default function App() {
     navigator.serviceWorker.addEventListener('message',          onMessage)
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
     return () => {
+      stop = true
+      clearInterval(tik)
+      document.removeEventListener('visibilitychange', opWakker)
+      window.removeEventListener('focus', opWakker)
       navigator.serviceWorker.removeEventListener('message',          onMessage)
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
     }
