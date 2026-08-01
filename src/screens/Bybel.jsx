@@ -4,27 +4,37 @@ import { boekNaam, NT_EERSTE } from '../data/bybelBoeke'
 
 const API = '/api/bible?path='
 
-// Voorkeur-weergawes bo-aan die kieser
-const VOORKEUR = ['NIV11', 'AMP', 'BSB', 'NASB2020', 'engWEBUS', 'ASV']
+// Goedgekeurde vertalings. Slegs hierdie word gewys, en dan net dié wat die
+// API werklik vir hierdie toepassing beskikbaar stel.
+const AANBEVEEL = ['NIV11', 'KJV', 'AMP', 'BSB', 'NIrV']
+const MEER      = ['NASB2020', 'NASB1995', 'NIVUK11', 'FBV', 'LSV', 'EASY', 'engWEBUS']
 
-const GROOTTES = [15, 17, 19, 21, 24]
-const TEMAS    = [
-  { id: 'lig',   naam: 'Lig'   },
-  { id: 'sepia', naam: 'Sepia' },
-  { id: 'donker', naam: 'Donker' },
-]
+// Die API se afkorting vir die King James kan verskil — aanvaar enige amptelike vorm
+const KJV_ALIASE = ['KJV', 'KJV1769', 'AKJV']
+
+const NAME = {
+  NIV11:    'New International Version',
+  KJV:      'King James Version',
+  AMP:      'Amplified Bible',
+  BSB:      'Berean Standard Bible',
+  NIrV:     "New International Reader's Version",
+  NASB2020: 'New American Standard Bible 2020',
+  NASB1995: 'New American Standard Bible 1995',
+  NIVUK11:  'New International Version, Anglicised',
+  FBV:      'Free Bible Version',
+  LSV:      'Literal Standard Version',
+  EASY:     'EasyEnglish Bible 2024',
+  engWEBUS: 'World English Bible',
+}
 
 let weergaweKas = null
 const hoofstukKas = {}
 const teksKas     = {}
 
-function lees(sleutel, verstek) {
-  try { const v = localStorage.getItem(sleutel); return v == null ? verstek : JSON.parse(v) }
-  catch { return verstek }
+function lees(k, verstek) {
+  try { const v = localStorage.getItem(k); return v == null ? verstek : JSON.parse(v) } catch { return verstek }
 }
-function stoor(sleutel, waarde) {
-  try { localStorage.setItem(sleutel, JSON.stringify(waarde)) } catch {}
-}
+function stoor(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} }
 
 async function haal(pad, params = {}) {
   const qs = new URLSearchParams()
@@ -35,111 +45,103 @@ async function haal(pad, params = {}) {
   return r.json()
 }
 
+// Gee die sleutel waaronder ons hierdie weergawe ken, of null as dit nie goedgekeur is nie
+function goedgekeurdeSleutel(afk) {
+  if (!afk) return null
+  if (KJV_ALIASE.includes(afk)) return 'KJV'
+  if (AANBEVEEL.includes(afk) || MEER.includes(afk)) return afk
+  return null
+}
+
 export default function Bybel({ onClose }) {
-  const [view, setView]           = useState('boeke')
-  const [weergawes, setWeergawes] = useState(weergaweKas || [])
-  const [weergaweId, setWeergaweId] = useState(() => lees('byb_weergawe', 3034))
-  const [boek, setBoek]           = useState(null)
+  const [view, setView]             = useState('boeke')
+  const [weergawes, setWeergawes]   = useState(weergaweKas || [])
+  const [weergaweId, setWeergaweId] = useState(() => lees('byb_weergawe', null))
+  const [boek, setBoek]             = useState(null)
   const [hoofstukke, setHoofstukke] = useState([])
-  const [hoofstuk, setHoofstuk]   = useState(null)
-  const [inhoud, setInhoud]       = useState(null)
-  const [laai, setLaai]           = useState(false)
-  const [fout, setFout]           = useState(null)
-  const [wysKieser, setWysKieser] = useState(false)
-  const [wysInstel, setWysInstel] = useState(false)
-  const [grootte, setGrootte]     = useState(() => lees('byb_grootte', 17))
-  const [tema, setTema]           = useState(() => lees('byb_tema', 'lig'))
+  const [hoofstuk, setHoofstuk]     = useState(null)
+  const [inhoud, setInhoud]         = useState(null)
+  const [laai, setLaai]             = useState(false)
+  const [fout, setFout]             = useState(null)
+  const [blad, setBlad]             = useState(false)   // bottom sheet
   const bodyRef = useRef(null)
 
   const weergawe = weergawes.find(w => w.id === weergaweId) || null
+  const sleutel  = weergawe ? goedgekeurdeSleutel(weergawe.abbreviation) : null
 
-  useEffect(() => { stoor('byb_weergawe', weergaweId) }, [weergaweId])
-  useEffect(() => { stoor('byb_grootte', grootte) }, [grootte])
-  useEffect(() => { stoor('byb_tema', tema) }, [tema])
+  useEffect(() => { if (weergaweId) stoor('byb_weergawe', weergaweId) }, [weergaweId])
+  useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = 0 }, [view, boek, hoofstuk])
 
-  useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = 0
-  }, [view, boek, hoofstuk])
-
-  // ── Weergawes laai ──
+  // ── Weergawes laai en filtreer tot die goedgekeurde lys ──
   useEffect(() => {
     if (weergaweKas) return
     setLaai(true)
     haal('/v1/bibles', { 'language_ranges[]': 'eng' })
       .then(d => {
-        const lys = (d && (d.data || d.bibles)) || []
+        const rou = (d && (d.data || d.bibles)) || []
+        const lys = rou.filter(w => goedgekeurdeSleutel(w.abbreviation))
         weergaweKas = lys
         setWeergawes(lys)
-        if (!lys.some(w => w.id === weergaweId) && lys.length) setWeergaweId(lys[0].id)
+
+        const gestoor = lees('byb_weergawe', null)
+        if (gestoor && lys.some(w => w.id === gestoor)) return
+        const kies = k => lys.find(w => goedgekeurdeSleutel(w.abbreviation) === k)
+        const verstek = kies('KJV') || kies('NIV11') || lys[0]
+        if (verstek) setWeergaweId(verstek.id)
       })
       .catch(e => setFout('Kon nie die Bybels laai nie (' + e.message + ')'))
       .finally(() => setLaai(false))
   }, [])
 
-  // ── Hoofstukke van 'n boek ──
-  const laaiHoofstukke = useCallback(async (boekKode) => {
-    const sleutel = weergaweId + ':' + boekKode
-    if (hoofstukKas[sleutel]) { setHoofstukke(hoofstukKas[sleutel]); return }
+  const laaiHoofstukke = useCallback(async (kode, wId) => {
+    const s = wId + ':' + kode
+    if (hoofstukKas[s]) { setHoofstukke(hoofstukKas[s]); return }
     setLaai(true); setFout(null)
     try {
-      const d = await haal(`/v1/bibles/${weergaweId}/books/${boekKode}/chapters`)
+      const d = await haal(`/v1/bibles/${wId}/books/${kode}/chapters`)
       const lys = (d && (d.data || d.chapters)) || []
-      hoofstukKas[sleutel] = lys
+      hoofstukKas[s] = lys
       setHoofstukke(lys)
-    } catch (e) {
-      setFout('Kon nie die hoofstukke laai nie (' + e.message + ')')
-    } finally { setLaai(false) }
-  }, [weergaweId])
+    } catch (e) { setFout('Kon nie die hoofstukke laai nie (' + e.message + ')') }
+    finally { setLaai(false) }
+  }, [])
 
-  // ── Teks van 'n hoofstuk ──
-  const laaiTeks = useCallback(async (boekKode, nr) => {
-    const usfm    = `${boekKode}.${nr}`
-    const sleutel = weergaweId + ':' + usfm
-    if (teksKas[sleutel]) { setInhoud(teksKas[sleutel]); return }
+  const laaiTeks = useCallback(async (kode, nr, wId) => {
+    const usfm = `${kode}.${nr}`
+    const s = wId + ':' + usfm
+    if (teksKas[s]) { setInhoud(teksKas[s]); return }
     setLaai(true); setFout(null); setInhoud(null)
     try {
-      const d = await haal(`/v1/bibles/${weergaweId}/passages/${usfm}`, { format: 'html' })
-      teksKas[sleutel] = d
+      const d = await haal(`/v1/bibles/${wId}/passages/${usfm}`, { format: 'html' })
+      teksKas[s] = d
       setInhoud(d)
-    } catch (e) {
-      setFout('Kon nie die teks laai nie (' + e.message + ')')
-    } finally { setLaai(false) }
-  }, [weergaweId])
+    } catch (e) { setFout('Kon nie die teks laai nie (' + e.message + ')') }
+    finally { setLaai(false) }
+  }, [])
 
   function openBoek(kode) {
     setBoek(kode); setHoofstukke([]); setView('hoofstukke')
-    laaiHoofstukke(kode)
+    laaiHoofstukke(kode, weergaweId)
   }
 
   function openHoofstuk(nr) {
     setHoofstuk(nr); setView('lees')
-    laaiTeks(boek, nr)
-    stoor('byb_laaste', { boek, hoofstuk: nr })
+    laaiTeks(boek, nr, weergaweId)
   }
 
-  function blaai(rigting) {
-    const nr = hoofstuk + rigting
+  function blaaiNa(nr) {
     if (nr < 1 || nr > hoofstukke.length) return
     setHoofstuk(nr)
-    laaiTeks(boek, nr)
-    stoor('byb_laaste', { boek, hoofstuk: nr })
+    laaiTeks(boek, nr, weergaweId)
     if (bodyRef.current) bodyRef.current.scrollTop = 0
   }
 
+  // Een druk kies, maak toe, hou boek en hoofstuk
   function kiesWeergawe(id) {
     setWeergaweId(id)
-    setWysKieser(false)
-    if (view === 'lees' && boek && hoofstuk) {
-      const usfm = `${boek}.${hoofstuk}`
-      if (teksKas[id + ':' + usfm]) setInhoud(teksKas[id + ':' + usfm])
-      else {
-        setLaai(true); setInhoud(null)
-        haal(`/v1/bibles/${id}/passages/${usfm}`, { format: 'html' })
-          .then(d => { teksKas[id + ':' + usfm] = d; setInhoud(d) })
-          .catch(e => setFout('Kon nie die teks laai nie (' + e.message + ')'))
-          .finally(() => setLaai(false))
-      }
-    }
+    setBlad(false)
+    if (boek) laaiHoofstukke(boek, id)
+    if (view === 'lees' && boek && hoofstuk) laaiTeks(boek, hoofstuk, id)
   }
 
   const boeke   = (weergawe && weergawe.books) || []
@@ -147,193 +149,143 @@ export default function Bybel({ onClose }) {
   const ot      = ntIndex >= 0 ? boeke.slice(0, ntIndex) : boeke
   const nt      = ntIndex >= 0 ? boeke.slice(ntIndex)    : []
 
-  const gesorteerdeWeergawes = [...weergawes].sort((a, b) => {
-    const ia = VOORKEUR.indexOf(a.abbreviation), ib = VOORKEUR.indexOf(b.abbreviation)
-    if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
-    return (a.abbreviation || '').localeCompare(b.abbreviation || '')
-  })
+  function groep(lys) {
+    return lys
+      .map(k => weergawes.find(w => goedgekeurdeSleutel(w.abbreviation) === k))
+      .filter(Boolean)
+  }
+  const aanbeveel = groep(AANBEVEEL)
+  const meer      = groep(MEER)
 
-  const titel = view === 'lees' && boek
-    ? `${boekNaam(boek)} ${hoofstuk}`
-    : view === 'hoofstukke' && boek
-      ? boekNaam(boek)
-      : 'Bybel'
+  const titel = view === 'lees' && boek ? `${boekNaam(boek)} ${hoofstuk}`
+              : view === 'hoofstukke' && boek ? boekNaam(boek)
+              : 'Bybel'
 
   return (
-    <div className={`byb-overlay byb-${tema}`}>
+    <div className="byb-overlay">
       <div className="byb-screen">
 
-        {/* ── Kop ── */}
         <div className="byb-header">
           <button
             className="byb-back"
             onClick={() => {
-              if (view === 'lees')            { setView('hoofstukke') }
+              if (view === 'lees') setView('hoofstukke')
               else if (view === 'hoofstukke') { setView('boeke'); setBoek(null) }
-              else                            { onClose() }
+              else onClose()
             }}
             aria-label="Terug"
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-
-          <button className="byb-titel" onClick={() => { setView('boeke'); setBoek(null) }}>
-            {titel}
-          </button>
-
-          <button className="byb-weergawe-knop" onClick={() => setWysKieser(v => !v)}>
-            {weergawe ? weergawe.abbreviation : '…'}
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </button>
-
-          <button className="byb-ikoon" onClick={() => setWysInstel(v => !v)} aria-label="Instellings">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 7h10M18 7h2M4 17h4M12 17h8"/>
-              <circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>
-            </svg>
-          </button>
-
-          <button className="byb-ikoon" onClick={onClose} aria-label="Sluit">✕</button>
+          <span className="byb-titel">{titel}</span>
+          <button className="byb-sluit" onClick={onClose} aria-label="Sluit">✕</button>
         </div>
 
-        {/* ── Weergawe-kieser ── */}
-        {wysKieser && (
-          <div className="byb-paneel">
-            <div className="byb-paneel-titel">Vertaling</div>
-            <div className="byb-weergawe-lys">
-              {gesorteerdeWeergawes.map(w => (
-                <button
-                  key={w.id}
-                  className={`byb-weergawe-item${w.id === weergaweId ? ' aktief' : ''}`}
-                  onClick={() => kiesWeergawe(w.id)}
-                >
-                  <b>{w.abbreviation}</b>
-                  <span>{w.localized_title || w.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Instellings ── */}
-        {wysInstel && (
-          <div className="byb-paneel">
-            <div className="byb-paneel-titel">Lettergrootte</div>
-            <div className="byb-knoppe">
-              {GROOTTES.map(g => (
-                <button
-                  key={g}
-                  className={`byb-chip${g === grootte ? ' aktief' : ''}`}
-                  onClick={() => setGrootte(g)}
-                  style={{ fontSize: Math.round(g * 0.75) }}
-                >
-                  A
-                </button>
-              ))}
-            </div>
-            <div className="byb-paneel-titel" style={{ marginTop: 14 }}>Agtergrond</div>
-            <div className="byb-knoppe">
-              {TEMAS.map(t => (
-                <button
-                  key={t.id}
-                  className={`byb-chip byb-tema-${t.id}${t.id === tema ? ' aktief' : ''}`}
-                  onClick={() => setTema(t.id)}
-                >
-                  {t.naam}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Lyf ── */}
         <div className="byb-body" ref={bodyRef}>
 
-          {fout && <div className="byb-fout">{fout}</div>}
+          {/* Vertaling — altyd sigbaar */}
+          {weergawe && (
+            <button className="byb-vertaling-kaart" onClick={() => setBlad(true)}>
+              <span className="byb-vertaling-afk">{sleutel}</span>
+              <span className="byb-vertaling-naam">{NAME[sleutel] || weergawe.title}</span>
+              <span className="byb-vertaling-wissel">
+                Verander vertaling
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </button>
+          )}
 
+          {fout && <div className="byb-fout">{fout}</div>}
           {laai && !inhoud && <div className="byb-laai">Laai…</div>}
 
           {view === 'boeke' && !laai && (
             <>
-              {ot.length > 0 && (
-                <>
-                  <div className="byb-afdeling">Ou Testament</div>
-                  <div className="byb-rooster">
-                    {ot.map(k => (
-                      <button key={k} className="byb-boek" onClick={() => openBoek(k)}>
-                        {boekNaam(k)}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-              {nt.length > 0 && (
-                <>
-                  <div className="byb-afdeling">Nuwe Testament</div>
-                  <div className="byb-rooster">
-                    {nt.map(k => (
-                      <button key={k} className="byb-boek" onClick={() => openBoek(k)}>
-                        {boekNaam(k)}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              {ot.length > 0 && <>
+                <div className="byb-afdeling">Ou Testament</div>
+                <div className="byb-rooster">
+                  {ot.map(k => <button key={k} className="byb-boek" onClick={() => openBoek(k)}>{boekNaam(k)}</button>)}
+                </div>
+              </>}
+              {nt.length > 0 && <>
+                <div className="byb-afdeling">Nuwe Testament</div>
+                <div className="byb-rooster">
+                  {nt.map(k => <button key={k} className="byb-boek" onClick={() => openBoek(k)}>{boekNaam(k)}</button>)}
+                </div>
+              </>}
             </>
           )}
 
           {view === 'hoofstukke' && !laai && (
             <div className="byb-rooster byb-rooster-nommers">
               {hoofstukke.map((h, i) => {
-                const nr = h.title || h.id || (i + 1)
-                return (
-                  <button key={i} className="byb-nommer" onClick={() => openHoofstuk(Number(nr) || i + 1)}>
-                    {nr}
-                  </button>
-                )
+                const nr = Number(h.title || h.id || i + 1) || i + 1
+                return <button key={i} className="byb-nommer" onClick={() => openHoofstuk(nr)}>{nr}</button>
               })}
             </div>
           )}
 
           {view === 'lees' && inhoud && (
             <>
-              <div
-                className="byb-teks"
-                style={{ fontSize: grootte }}
-                dangerouslySetInnerHTML={{ __html: inhoud.content || '' }}
-              />
-
+              <div className="byb-teks" dangerouslySetInnerHTML={{ __html: inhoud.content || '' }} />
               <div className="byb-blaai">
-                <button
-                  className="byb-blaai-knop"
-                  disabled={hoofstuk <= 1}
-                  onClick={() => blaai(-1)}
-                >
-                  ← Vorige
-                </button>
-                <button
-                  className="byb-blaai-knop"
-                  disabled={hoofstuk >= hoofstukke.length}
-                  onClick={() => blaai(1)}
-                >
-                  Volgende →
-                </button>
+                <button className="byb-blaai-knop" disabled={hoofstuk <= 1} onClick={() => blaaiNa(hoofstuk - 1)}>← Vorige</button>
+                <button className="byb-blaai-knop" disabled={hoofstuk >= hoofstukke.length} onClick={() => blaaiNa(hoofstuk + 1)}>Volgende →</button>
               </div>
-
-              <p className="byb-erkenning">
-                {weergawe ? (weergawe.localized_title || weergawe.title) : ''}
-                {' · verskaf deur YouVersion'}
-              </p>
+              <p className="byb-erkenning">{NAME[sleutel] || ''} · verskaf deur YouVersion</p>
             </>
           )}
 
-          <div style={{ height: 40 }} />
+          <div style={{ height: 44 }} />
         </div>
       </div>
+
+      {/* ── Bottom sheet ── */}
+      {blad && (
+        <>
+          <div className="byb-blad-agter" onClick={() => setBlad(false)} />
+          <div className="byb-blad" role="dialog" aria-label="Kies jou Bybelvertaling">
+            <div className="byb-blad-gryp" />
+            <h2 className="byb-blad-titel">Kies jou Bybelvertaling</h2>
+            <div className="byb-blad-lys">
+              {aanbeveel.length > 0 && <div className="byb-blad-afdeling">Aanbeveel</div>}
+              {aanbeveel.map(w => {
+                const s = goedgekeurdeSleutel(w.abbreviation)
+                return (
+                  <button key={w.id} className={`byb-blad-item${w.id === weergaweId ? ' aktief' : ''}`} onClick={() => kiesWeergawe(w.id)}>
+                    <span className="byb-blad-afk">{s}</span>
+                    <span className="byb-blad-naam">{NAME[s] || w.title}</span>
+                    {w.id === weergaweId && (
+                      <svg className="byb-blad-vink" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </button>
+                )
+              })}
+
+              {meer.length > 0 && <div className="byb-blad-afdeling">Meer vertalings</div>}
+              {meer.map(w => {
+                const s = goedgekeurdeSleutel(w.abbreviation)
+                return (
+                  <button key={w.id} className={`byb-blad-item${w.id === weergaweId ? ' aktief' : ''}`} onClick={() => kiesWeergawe(w.id)}>
+                    <span className="byb-blad-afk">{s}</span>
+                    <span className="byb-blad-naam">{NAME[s] || w.title}</span>
+                    {w.id === weergaweId && (
+                      <svg className="byb-blad-vink" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

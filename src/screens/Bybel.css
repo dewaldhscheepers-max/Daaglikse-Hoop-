@@ -1,4 +1,4 @@
-/* ── Bybel-leser ── */
+/* ── Bybelleser — altyd lig, rustig, groot leesbare teks ── */
 
 .byb-overlay {
   position: fixed;
@@ -7,31 +7,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  --byb-bg:     #FAF8F5;
-  --byb-teks:   #2D2040;
-  --byb-sag:    #8A7E9A;
-  --byb-rand:   rgba(124, 111, 175, 0.16);
-  --byb-kaart:  #FFFFFF;
-  --byb-aksent: #7C6FAF;
-  background: var(--byb-bg);
-  color: var(--byb-teks);
-}
-
-.byb-sepia {
-  --byb-bg:    #F4ECDD;
-  --byb-teks:  #3A2E1F;
-  --byb-sag:   #8A7A62;
-  --byb-rand:  rgba(120, 96, 60, 0.2);
-  --byb-kaart: #FBF5EA;
-}
-
-.byb-donker {
-  --byb-bg:     #16131C;
-  --byb-teks:   #E8E3F0;
-  --byb-sag:    #9A91AC;
-  --byb-rand:   rgba(232, 227, 240, 0.14);
-  --byb-kaart:  #221D2C;
-  --byb-aksent: #B3A5E0;
+  background: #FBF8F2;          /* sagte roomwit */
+  color: #2A1F42;               /* diep donkerpers */
+  --byb-pers:  #6B5C9E;
+  --byb-goud:  #C9A961;
+  --byb-sag:   #8A7E9A;
+  --byb-rand:  rgba(107, 92, 158, 0.13);
 }
 
 .byb-screen {
@@ -45,26 +26,25 @@
 .byb-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 50px 12px 12px;
-  border-bottom: 1px solid var(--byb-rand);
+  gap: 8px;
+  padding: 50px 14px 14px;
   flex: 0 0 auto;
-  background: var(--byb-bg);
+  background: #FBF8F2;
+  border-bottom: 1px solid var(--byb-rand);
 }
 
 .byb-back,
-.byb-ikoon {
+.byb-sluit {
   background: none;
   border: none;
-  color: var(--byb-aksent);
-  padding: 7px;
+  color: var(--byb-pers);
+  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: 15px;
   line-height: 1;
+  font-size: 17px;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
@@ -72,171 +52,105 @@
 .byb-titel {
   flex: 1;
   min-width: 0;
-  background: none;
-  border: none;
-  text-align: left;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 700;
-  color: var(--byb-teks);
-  cursor: pointer;
-  padding: 0 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.byb-weergawe-knop {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: var(--byb-kaart);
-  border: 1px solid var(--byb-rand);
-  border-radius: 20px;
-  padding: 5px 9px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--byb-aksent);
-  cursor: pointer;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ── Panele ── */
-.byb-paneel {
-  padding: 14px 16px;
-  background: var(--byb-kaart);
-  border-bottom: 1px solid var(--byb-rand);
-  flex: 0 0 auto;
-  max-height: 46vh;
-  overflow-y: auto;
-}
-
-.byb-paneel-titel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--byb-sag);
-  margin-bottom: 8px;
-}
-
-.byb-weergawe-lys {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.byb-weergawe-item {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  background: none;
-  border: none;
-  text-align: left;
-  padding: 9px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--byb-teks);
-  font-family: var(--font-body);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.byb-weergawe-item b {
-  font-size: 13px;
-  color: var(--byb-aksent);
-  flex-shrink: 0;
-  min-width: 62px;
-}
-
-.byb-weergawe-item span {
-  font-size: 12px;
-  color: var(--byb-sag);
+  color: #2A1F42;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.byb-weergawe-item.aktief {
-  background: rgba(124, 111, 175, 0.12);
-}
-
-.byb-knoppe {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-
-.byb-chip {
-  min-width: 44px;
-  padding: 9px 13px;
-  border-radius: 9px;
-  border: 1.5px solid var(--byb-rand);
-  background: var(--byb-bg);
-  color: var(--byb-teks);
-  font-family: var(--font-body);
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.byb-chip.aktief {
-  border-color: var(--byb-aksent);
-  color: var(--byb-aksent);
-}
-
-.byb-tema-lig    { background: #FAF8F5; color: #2D2040; }
-.byb-tema-sepia  { background: #F4ECDD; color: #3A2E1F; }
-.byb-tema-donker { background: #16131C; color: #E8E3F0; }
 
 /* ── Lyf ── */
 .byb-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px 16px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 24px);
+  padding: 18px 20px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 28px);
 }
 
 .byb-laai,
 .byb-fout {
-  padding: 34px 16px;
+  padding: 34px 8px;
   text-align: center;
   color: var(--byb-sag);
-  font-size: 14px;
+  font-size: 15px;
 }
-
 .byb-fout { color: #B04A4A; }
 
+/* ── Vertaling-kaart ── */
+.byb-vertaling-kaart {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  background: #FFFFFF;
+  border: 1px solid var(--byb-rand);
+  border-left: 3px solid var(--byb-goud);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 2px 10px rgba(42, 31, 66, 0.05);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.byb-vertaling-afk {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 700;
+  color: #2A1F42;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.byb-vertaling-naam {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--byb-sag);
+  line-height: 1.4;
+}
+
+.byb-vertaling-wissel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--byb-pers);
+}
+
+/* ── Boeke en hoofstukke ── */
 .byb-afdeling {
   font-family: var(--font-serif);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--byb-sag);
-  margin: 14px 2px 8px;
+  margin: 18px 2px 10px;
 }
 
 .byb-rooster {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 7px;
+  gap: 8px;
 }
 
-.byb-rooster-nommers {
-  grid-template-columns: repeat(5, 1fr);
-}
+.byb-rooster-nommers { grid-template-columns: repeat(5, 1fr); }
 
 .byb-boek,
 .byb-nommer {
-  background: var(--byb-kaart);
+  background: #FFFFFF;
   border: 1px solid var(--byb-rand);
-  border-radius: 11px;
-  padding: 13px 10px;
+  border-radius: 12px;
+  padding: 16px 12px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  color: var(--byb-teks);
+  color: #2A1F42;
   cursor: pointer;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
@@ -246,77 +160,187 @@
 .byb-nommer {
   text-align: center;
   font-variant-numeric: tabular-nums;
-  padding: 14px 4px;
+  padding: 16px 4px;
+  font-size: 17px;
 }
 
 .byb-boek:active,
 .byb-nommer:active { transform: scale(0.96); }
 
-/* ── Die teks self ── */
+/* ── Die Bybelteks ── */
 .byb-teks {
   font-family: var(--font-serif);
-  line-height: 1.75;
-  color: var(--byb-teks);
-  letter-spacing: 0.003em;
+  font-size: 24px;
+  line-height: 1.85;
+  color: #2A1F42;
+  letter-spacing: 0.004em;
 }
 
-.byb-teks .p     { margin: 0 0 1em; }
+.byb-teks .p  { margin: 0 0 1.35em; }
 .byb-teks .q,
 .byb-teks .q1,
-.byb-teks .q2    { margin: 0 0 .7em; padding-left: 1.2em; }
+.byb-teks .q2 { margin: 0 0 1em; padding-left: 1.1em; }
 
-/* Versnommers */
 .byb-teks .yv-vlbl {
   font-family: var(--font-body);
-  font-size: 0.62em;
+  font-size: 0.52em;
   font-weight: 700;
-  color: var(--byb-aksent);
+  color: var(--byb-pers);
   vertical-align: super;
-  margin-right: 3px;
+  margin-right: 5px;
   line-height: 0;
 }
 
-/* Opskrifte binne die teks */
 .byb-teks .s,
 .byb-teks .s1,
 .byb-teks h3 {
   font-family: var(--font-serif);
-  font-size: 0.92em;
+  font-size: 0.72em;
   font-weight: 700;
-  color: var(--byb-sag);
-  margin: 1.4em 0 .5em;
+  color: var(--byb-goud);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 2em 0 .8em;
 }
 
 .byb-teks .nd { font-variant: small-caps; }
-.byb-teks .wj { color: inherit; }
 
 /* ── Blaai ── */
 .byb-blaai {
   display: flex;
-  gap: 9px;
-  margin-top: 26px;
+  gap: 10px;
+  margin-top: 34px;
 }
 
 .byb-blaai-knop {
   flex: 1;
-  padding: 13px;
-  border-radius: 11px;
-  border: 1.5px solid var(--byb-rand);
-  background: var(--byb-kaart);
-  color: var(--byb-aksent);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid var(--byb-rand);
+  background: #FFFFFF;
+  color: var(--byb-pers);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.byb-blaai-knop:disabled { opacity: 0.35; }
+.byb-blaai-knop:disabled { opacity: 0.3; }
 
 .byb-erkenning {
-  margin-top: 22px;
-  font-size: 11px;
+  margin-top: 26px;
+  font-size: 12px;
   color: var(--byb-sag);
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+/* ── Bottom sheet ── */
+.byb-blad-agter {
+  position: fixed;
+  inset: 0;
+  background: rgba(42, 31, 66, 0.42);
+  z-index: 260;
+  animation: bybFade 0.18s ease;
+}
+
+@keyframes bybFade { from { opacity: 0 } to { opacity: 1 } }
+
+.byb-blad {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  z-index: 261;
+  background: #FBF8F2;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 34px rgba(42, 31, 66, 0.22);
+  padding: 10px 0 calc(var(--safe-bottom, 0px) + 18px);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  animation: bybOp 0.24s cubic-bezier(.22,.9,.3,1);
+}
+
+@keyframes bybOp { from { transform: translate(-50%, 100%) } to { transform: translate(-50%, 0) } }
+
+.byb-blad-gryp {
+  width: 42px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(107, 92, 158, 0.25);
+  margin: 4px auto 12px;
+  flex-shrink: 0;
+}
+
+.byb-blad-titel {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #2A1F42;
+  text-align: center;
+  margin: 0 20px 6px;
+  flex-shrink: 0;
+}
+
+.byb-blad-lys {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 12px 0;
+}
+
+.byb-blad-afdeling {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--byb-goud);
+  margin: 16px 10px 7px;
+}
+
+.byb-blad-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--byb-rand);
+  border-radius: 13px;
+  padding: 15px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.byb-blad-item.aktief {
+  border-color: var(--byb-goud);
+  background: #FFFCF4;
+}
+
+.byb-blad-afk {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #2A1F42;
+  min-width: 88px;
+  flex-shrink: 0;
+}
+
+.byb-blad-naam {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--byb-sag);
+  line-height: 1.35;
+}
+
+.byb-blad-vink {
+  color: var(--byb-goud);
+  flex-shrink: 0;
 }
