@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { playCollect, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
@@ -129,6 +130,22 @@ export default function BouDieArk({ onClose }) {
   const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
   const [diere, setDiere]       = useState(() => leesDiere())
   const [wysDiere, setWysDiere] = useState(false)
+
+  // Moenie op CSS staatmaak vir die hoogte nie. Meet die skerm en stel dit
+  // as 'n pixelwaarde, sodat geen ouer-element dit kan inkort nie.
+  const [skermH, setSkermH] = useState(() => window.innerHeight || 0)
+  useEffect(() => {
+    function meet() { setSkermH(window.innerHeight || document.documentElement.clientHeight || 0) }
+    meet()
+    const t = setTimeout(meet, 120)
+    window.addEventListener('resize', meet)
+    window.addEventListener('orientationchange', meet)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', meet)
+      window.removeEventListener('orientationchange', meet)
+    }
+  }, [])
 
   const vorderRef = useRef(0)
   const doekRef  = useRef(null)
@@ -581,8 +598,8 @@ export default function BouDieArk({ onClose }) {
   const stad = stadiumBy(stadiumNr)
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
-  return (
-    <div className="ark-overlay">
+  return createPortal((
+    <div className="ark-overlay" style={skermH ? { height: skermH + 'px' } : undefined}>
 
       {/* ── Kop ── */}
       <div className="ark-kop">
@@ -769,5 +786,5 @@ export default function BouDieArk({ onClose }) {
         </div>
       )}
     </div>
-  )
+  ), document.body)
 }
