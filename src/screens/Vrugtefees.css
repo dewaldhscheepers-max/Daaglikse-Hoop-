@@ -1,0 +1,424 @@
+/* ── Vrugtefees ──
+   Dieselfde warm identiteit as die app: diep nag-agtergrond, amber detail,
+   natuurlike groen. Geen canvas, geen laag-promosie op iets wat 'n mens
+   druk. Dit is die twee dinge wat in Bou die Ark op haar foon gebreek het. */
+
+.vf-oorleg {
+  position: fixed;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;   /* vir blaaiers sonder inset */
+  /* svh: die hoogte met al die blaaier se balke SIGBAAR. Anders as dvh bly
+     dit staan wanneer Chrome se adresbalk beweeg, dus sit niks ooit agter
+     die balk nie. */
+  height: 100svh;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #141B2A;
+  color: #F2EDE3;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Keer dat 'n veeg oor die bord die bladsy laat rol */
+  touch-action: none;
+}
+
+/* ── Kop ── */
+.vf-kop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 46px 12px 8px;
+  flex: 0 0 auto;
+  background: #141B2A;
+}
+
+.vf-titel {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #F6F1E7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vf-ikoon {
+  background: none;
+  border: none;
+  color: #C7B99C;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.1s;
+}
+.vf-ikoon:active { background: rgba(255, 255, 255, 0.08); }
+
+/* ── Telbord ── */
+.vf-tel {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 8px;
+  flex: 0 0 auto;
+}
+
+.vf-tel-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+  padding: 7px 10px;
+}
+.vf-tel-doel { flex: 1.6; }
+
+.vf-tel-item span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #9C9080;
+}
+
+.vf-tel-item b {
+  font-size: 16px;
+  font-weight: 700;
+  color: #F6F1E7;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vf-tel-doel b { font-size: 12px; font-weight: 600; color: #E4C98A; white-space: normal; line-height: 1.3; }
+.vf-tel-item b.min { color: #E8A08A; }
+
+.vf-balk {
+  height: 4px;
+  margin: 0 12px 8px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.vf-balk i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7FA05A, #E0B35A);
+  transition: width 0.35s ease;
+}
+
+.vf-versamel {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 12px 8px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+.vf-versamel-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3px 10px 3px 4px;
+}
+.vf-versamel-item b { font-size: 12.5px; font-weight: 700; color: #F6F1E7; font-variant-numeric: tabular-nums; }
+.vf-versamel-item.klaar { border-color: #7FA05A; background: rgba(127, 160, 90, 0.18); }
+.vf-versamel-item.klaar b { color: #A9CC84; }
+
+/* ── Die bord ── */
+.vf-bord-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px calc(var(--safe-bottom, 0px) + 14px);
+  background: #141B2A;
+}
+
+.vf-bord {
+  position: relative;
+  width: min(100%, 60vh);
+  aspect-ratio: 1 / 1;
+  background: #1D2739;
+  border-radius: 16px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.vf-sel {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* Klein vulling: op 'n foon van 360 pixels is elke sel omtrent 42px, en
+     die vrug moet daarvan soveel as moontlik vul om leesbaar te bly. */
+  padding: 1.5%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* left en top word geanimeer, nie transform nie. 'n Transform maak 'n
+     eie grafiese laag; op sommige Android-GPU's is dit presies waar ou
+     laag-inhoud bly staan. Vier-en-sestig selle is min genoeg dat die
+     blaaier dit maklik hanteer. */
+  transition: left 0.2s ease, top 0.2s ease;
+}
+
+.vf-vrug {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vf-vrug svg { width: 100%; height: 100%; display: block; }
+
+.vf-sel.gekies .vf-vrug {
+  filter: drop-shadow(0 0 0 transparent);
+  outline: 2px solid #E4C98A;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.vf-sel.glim .vf-vrug { opacity: 0.25; }
+
+.vf-sel.skud { animation: vf-skud 0.28s ease; }
+@keyframes vf-skud {
+  0%, 100% { margin-left: 0; }
+  25%      { margin-left: -5px; }
+  75%      { margin-left: 5px; }
+}
+
+.vf-spesiaal {
+  position: absolute;
+  right: 4%;
+  bottom: 2%;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  color: #14202E;
+  background: #F0DCA8;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Versperrings ── */
+.vf-blok {
+  position: absolute;
+  inset: 6%;
+  border-radius: 8px;
+  pointer-events: none;
+}
+/* Elke versperring wys ook 'n patroon, nie net 'n kleur nie */
+.blok-droeblaar .vf-blok { background: rgba(160, 132, 74, 0.42); box-shadow: inset 0 0 0 2px rgba(200, 170, 110, 0.5); }
+.blok-onkruid   .vf-blok { background: rgba(90, 120, 70, 0.48);
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.14) 0 3px, transparent 3px 7px); }
+.blok-doring    .vf-blok { background: rgba(120, 70, 80, 0.5);
+  background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.18) 0 2px, transparent 2px 6px); }
+.blok-klip      .vf-blok { background: #4C5568; box-shadow: inset 0 3px 0 rgba(255,255,255,0.12), inset 0 -3px 0 rgba(0,0,0,0.25); }
+.blok-krat      .vf-blok { background: #7A5A34;
+  background-image: linear-gradient(0deg, rgba(0,0,0,0.22) 0 2px, transparent 2px), linear-gradient(90deg, rgba(0,0,0,0.22) 0 2px, transparent 2px);
+  background-size: 50% 50%; }
+
+/* ── Roep ── */
+.vf-roep {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  margin-left: -45vw;
+  width: 90vw;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: #F0DCA8;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* ── Oorlegblaaie ── */
+.vf-blad {
+  position: absolute;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px;
+  background: rgba(15, 20, 32, 0.97);
+  text-align: center;
+  overflow-y: auto;
+}
+
+.vf-merk {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #E4C98A;
+}
+
+.vf-blad-titel {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 700;
+  color: #F6F1E7;
+  margin: 0;
+}
+
+.vf-blad-teks {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #B9AE9C;
+  max-width: 270px;
+  margin: 0;
+}
+
+.vf-fyndruk { font-size: 11px; color: #8A806F; }
+
+.vf-knop {
+  width: 100%;
+  max-width: 250px;
+  padding: 13px 18px;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Net kleur — geen transform, geen opacity. Sien die nota by .vf-sel. */
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.vf-knop-primer {
+  background: linear-gradient(150deg, #7FA05A 0%, #5C7A3E 100%);
+  color: #fff;
+  border: 1px solid #A3C47E;
+}
+.vf-knop-primer:active { background: linear-gradient(150deg, #6E8C4C 0%, #4E6834 100%); }
+.vf-knop-spook {
+  background: transparent;
+  color: #C7B99C;
+  border: 1.5px solid rgba(199, 185, 156, 0.3);
+}
+.vf-knop-spook:active { background: rgba(199, 185, 156, 0.12); }
+
+.vf-uitslag { display: flex; gap: 14px; margin: 2px 0 6px; }
+.vf-uitslag div { display: flex; flex-direction: column; gap: 2px; min-width: 62px; }
+.vf-uitslag span {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #9C9080;
+}
+.vf-uitslag b {
+  font-family: var(--font-serif); font-size: 21px; font-weight: 700;
+  color: #E4C98A; font-variant-numeric: tabular-nums;
+}
+
+/* ── Die fasekaart ── */
+.vf-vlakrooster {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+  margin: 4px 0 6px;
+}
+
+.vf-vlakknop {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: #24304A;
+  border: 1px solid #3A4A66;
+  color: #F6F1E7;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.vf-vlakknop.nou { border-color: #E4C98A; color: #F0DCA8; }
+.vf-vlakknop.toe { background: #1B2434; color: #4E5769; cursor: default; }
+.vf-vlakknop:not(.toe):active { background: #2E3C5C; }
+.vf-vlakknop i {
+  position: absolute;
+  right: 5px; bottom: 5px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #7FA05A;
+}
+
+/* ── Wenk ── */
+.vf-wenk {
+  position: absolute;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 26px;
+  background: rgba(15, 20, 32, 0.94);
+  text-align: center;
+}
+.vf-wenk p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #F2EDE3;
+  max-width: 280px;
+}
+
+/* ── Landskap ──
+   Die bord is vierkantig en het hoogte nodig. Le die foon plat en daar bly
+   te min oor; ons se dit eerder reguit. */
+.vf-draai { display: none; }
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .vf-oorleg > *:not(.vf-draai) { display: none; }
+  .vf-draai {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+  .vf-draai svg { color: #C7B99C; }
+  .vf-draai h2 { font-family: var(--font-serif); font-size: 23px; color: #F6F1E7; }
+  .vf-draai p { font-size: 14px; color: #B9AE9C; }
+}
+
+/* ── Rustige beweging ── */
+@media (prefers-reduced-motion: reduce) {
+  .vf-sel { transition: none; }
+  .vf-sel.skud { animation: none; }
+  .vf-balk i { transition: none; }
+}

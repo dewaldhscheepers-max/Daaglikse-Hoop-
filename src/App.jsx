@@ -31,6 +31,7 @@ import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
+import Vrugtefees from './screens/Vrugtefees'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -101,6 +102,7 @@ export default function App() {
   const [showHuise, setShowHuise]                 = useState(false)
   const [showBybel, setShowBybel]                 = useState(false)
   const [showArk, setShowArk]                     = useState(false)
+  const [showVrugtefees, setShowVrugtefees]       = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
   function onAudioPlayingChange(playing) {
@@ -496,6 +498,13 @@ export default function App() {
     return () => window.removeEventListener('open-bou-die-ark', onOpen)
   }, [])
 
+  // ── Vrugtefees, vanaf die Speel-blad ──
+  useEffect(() => {
+    function onOpen() { setShowVrugtefees(true) }
+    window.addEventListener('open-vrugtefees', onOpen)
+    return () => window.removeEventListener('open-vrugtefees', onOpen)
+  }, [])
+
   // ── Bybel ──
   useEffect(() => {
     function onOpen() { setShowBybel(true) }
@@ -749,6 +758,10 @@ export default function App() {
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
+      )}
+
+      {showVrugtefees && (
+        <Vrugtefees onClose={() => setShowVrugtefees(false)} />
       )}
 
       {showArk && (

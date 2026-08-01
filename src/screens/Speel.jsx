@@ -35,6 +35,22 @@ const SPELETJIES = [
       </>
     ),
   },
+  {
+    id:      'vrugtefees',
+    event:   'open-vrugtefees',
+    titel:   'Vrugtefees',
+    beskryf: 'Pas die vrugte, bou groot kombinasies en kyk hoe ver jou oes kan groei.',
+    merk:    'Speel nou',
+    tint:    '#F5EDE0',
+    stroke:  '#B4762F',
+    ikoon: (
+      <>
+        <path d="M12 21c-4 0-7-3.2-7-7 0-3 2-5.4 4.2-6.2C10.4 7.3 11.2 6.2 12 4.6c.8 1.6 1.6 2.7 2.8 3.2C17 8.6 19 11 19 14c0 3.8-3 7-7 7Z"/>
+        <path d="M12 4.6C11 3 9.5 2.4 8 3c.6 1.9 2.2 2.7 4 1.6Z"/>
+        <path d="M9 13.5c1.6 1.8 4.4 1.8 6 0"/>
+      </>
+    ),
+  },
 ]
 
 export default function Speel() {
