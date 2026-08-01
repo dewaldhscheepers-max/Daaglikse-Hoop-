@@ -506,3 +506,174 @@
   color: #6B6480;
   letter-spacing: 0.04em;
 }
+
+/* ── Ranglys ── */
+.ark-ranglys {
+  list-style: none;
+  width: 100%;
+  max-width: 340px;
+  margin: 4px 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.ark-ranglys li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+}
+
+/* Jou eie ry moet uitstaan sonder om luidrugtig te wees */
+.ark-ranglys li.ek {
+  background: rgba(124, 111, 175, 0.24);
+  border-color: #A98436;
+}
+
+.ark-rang-nr {
+  flex: 0 0 26px;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #E9C87A;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ark-rang-naam {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #EDE8F5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ark-rang-syfers {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+.ark-rang-syfers b { font-size: 12px; font-weight: 600; color: #C4B7E8; }
+.ark-rang-syfers i { font-size: 11px; font-style: normal; color: #8E82AE; }
+
+/* ── Voorlopige rang tydens speel ── */
+.ark-voorlopig {
+  display: block;
+  margin-top: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #8E82AE;
+}
+
+/* ── Naam vra ── */
+.ark-naamvra {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin: 6px 0 12px;
+}
+.ark-naamvra p { font-size: 13.5px; color: #C4B7E8; text-align: center; line-height: 1.5; }
+
+.ark-invoer {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 11px;
+  background: #201A30;
+  border: 1px solid #4A3E6E;
+  color: #EDE8F5;
+  font-family: var(--font-body);
+  font-size: 15px;
+  text-align: center;
+}
+.ark-invoer:focus { outline: none; border-color: #9E8FD0; }
+
+/* ── Foute en fyndruk ── */
+.ark-fout {
+  font-size: 12.5px;
+  color: #E9A08A;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.ark-fout-blok {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+
+.ark-fyndruk {
+  font-size: 11px;
+  color: #7A6F96;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.ark-kennis {
+  font-size: 11.5px;
+  color: #8E82AE;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.ark-rang-uitslag {
+  font-size: 14px;
+  color: #C4B7E8;
+  text-align: center;
+  line-height: 1.6;
+  margin: 4px 0 12px;
+}
+.ark-rang-uitslag b {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  color: #E9C87A;
+}
+
+/* ── Landskap ──
+   Die bord is 10 breed en 20 hoog. Le die foon plat, bly daar so min hoogte
+   oor dat die bord tot 'n paar pixels krimp en die spel onspeelbaar word.
+   Ons se dit eerder reguit as om iets onbruikbaars te wys. */
+.ark-draai {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .ark-overlay > *:not(.ark-draai) { display: none; }
+  .ark-draai {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+  }
+  .ark-draai svg { color: #C4B7E8; }
+  .ark-draai h2 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 700;
+    color: #F3EEFA;
+  }
+  .ark-draai p { font-size: 14px; color: #C4B7E8; line-height: 1.55; max-width: 300px; }
+}

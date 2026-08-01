@@ -1,15 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
+import {
+  leesNaam, stoorNaam, keurNaam, haalRanglys, kasLys,
+  stuurPunt, stuurWagry,
+} from '../data/arkRanglys'
 import ArkBou from '../components/ArkBou'
 import './BouDieArk.css'
 
 /* ────────────────────────────────────────────────────────────
-   Bou die Ark — Fase 1 en 2
+   Bou die Ark
    Kern-meganika, stadiums met doelwitte, die ark wat opbou,
-   dierepare, versameling en weer.
-   Die ranglys kom in Fase 3.
+   dierepare, versameling, weer, en die wereldwye ranglys.
+
+   Die ranglys is werklik wereldwyd: die punte leef in Firestore en die
+   kliënt mag nie daarheen skryf nie. Alles gaan deur /api/ark-ranglys,
+   wat die speler se Firebase-token verifieer en toets of die lopie fisies
+   moontlik is. Sien src/data/arkRanglys.js vir die kliënt se kant.
    ──────────────────────────────────────────────────────────── */
 
 const KOL = 10
@@ -197,6 +205,20 @@ export default function BouDieArk({ onClose }) {
   // Verander elke keer as die spel-lus van voor af moet begin
   const [rondte, setRondte]     = useState(0)
 
+  /* ── Ranglys ──
+     ranglys is null solank ons nie 'n antwoord het nie. 'n Leë lys en 'n
+     mislukte oproep is nie dieselfde ding nie, dus hou ons die fout apart
+     en wys nooit 'n leë lys as die waarheid nie. */
+  const [wysRanglys, setWysRanglys]   = useState(false)
+  const [ranglys, setRanglys]         = useState(null)     // { lys, totaal }
+  const [ranglysFout, setRanglysFout] = useState(null)
+  const [ranglysLaai, setRanglysLaai] = useState(false)
+  const [ranglysOud, setRanglysOud]   = useState(null)     // wanneer die kas gemaak is
+  const [naam, setNaam]               = useState(() => leesNaam())
+  const [naamInvoer, setNaamInvoer]   = useState('')
+  const [naamFout, setNaamFout]       = useState(null)
+  const [stuur, setStuur]             = useState(null)     // { besig, rang, totaal, fout, beterAs }
+
   const vorderRef = useRef(0)
   const doekRef  = useRef(null)
   const wrapRef  = useRef(null)
@@ -209,11 +231,13 @@ export default function BouDieArk({ onClose }) {
     sak: [],
     volgende: null,
     telling: 0, lyne: 0,
+    // Wat die bediener nodig het om te keur of die lopie moontlik is
+    stukke: 0, speelMs: 0,
     val: 0, laas: 0,
     loop: false,
     // stadium
     stadium: 1,
-    sLyne: 0, sPunte: 0, sBesteMulti: 0, sKombo: 0, sBegin: 0, sTyd: 0,
+    sLyne: 0, sPunte: 0, sBesteMulti: 0, sKombo: 0, sTyd: 0,
     weer: { druppels: [], water: 0 },
   })
 
@@ -424,7 +448,7 @@ export default function BouDieArk({ onClose }) {
     s.stadium += 1
     stoorVerste(s.stadium)
     s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
-    s.sTyd = 0; s.sBegin = performance.now()
+    s.sTyd = 0
     s.weer.druppels = []; s.weer.water = 0
     setStadiumNr(s.stadium)
     setVorder(0)
@@ -440,6 +464,7 @@ export default function BouDieArk({ onClose }) {
   /* ── Vasmaak en lyne skoonmaak ── */
   const vasmaak = useCallback(() => {
     const s = spel.current
+    s.stukke += 1
     selle(s.stuk).forEach(([x, y]) => { if (y >= 0) s.bord[y][x] = STUKKE[s.stuk.tipe].kleur })
     vuil.current = true
 
@@ -521,6 +546,7 @@ export default function BouDieArk({ onClose }) {
       const dt = nou - s.laas
       s.laas = nou
       s.val += dt
+      s.speelMs += dt
 
       // oorleef-doelwit tel saam met werklike speeltyd
       const st = stadiumBy(s.stadium)
@@ -611,6 +637,7 @@ export default function BouDieArk({ onClose }) {
       localStorage.setItem(STOOR, JSON.stringify({
         bord: s.bord, stuk: s.stuk, sak: s.sak, volgende: s.volgende,
         telling: s.telling, lyne: s.lyne,
+        stukke: s.stukke, speelMs: Math.round(s.speelMs),
         stadium: s.stadium, sLyne: s.sLyne, sPunte: s.sPunte,
         sBesteMulti: s.sBesteMulti, sKombo: s.sKombo, sTyd: s.sTyd,
       }))
@@ -624,6 +651,8 @@ export default function BouDieArk({ onClose }) {
       if (d) {
         setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, stadium: d.stadium || 1 })
         stoorVerste(d.stadium || 1)   // vir spelers wat reeds ver was
+        // Sodat die "Volgende"-blokkie in die menu nie leeg staan nie
+        if (d.volgende && STUKKE[d.volgende]) setVolgende(d.volgende)
       }
     } catch {}
   }, [])
@@ -657,8 +686,9 @@ export default function BouDieArk({ onClose }) {
     s.bord = leegBord(); s.sak = nuweSak(); s.volgende = null
     const beginBy = beginStadium()
     s.telling = 0; s.lyne = 0; s.val = 0
+    s.stukke = 0; s.speelMs = 0
     s.stadium = beginBy; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
-    s.sKombo = 0; s.sTyd = 0; s.sBegin = performance.now()
+    s.sKombo = 0; s.sTyd = 0
     s.weer = { druppels: [], water: 0 }
     vorderRef.current = 0
     setTelling(0); setLyne(0); setStadiumNr(beginBy); setVorder(0); setKlaar(null)
@@ -682,11 +712,12 @@ export default function BouDieArk({ onClose }) {
       s.bord = d.bord; s.stuk = d.stuk; s.sak = d.sak || nuweSak()
       s.volgende = d.volgende
       s.telling = d.telling; s.lyne = d.lyne; s.val = 0
+      s.stukke = d.stukke || 0; s.speelMs = d.speelMs || 0
       s.stadium = d.stadium || 1
       stoorVerste(s.stadium)
       s.sLyne = d.sLyne || 0; s.sPunte = d.sPunte || 0
       s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
-      s.sTyd = d.sTyd || 0; s.sBegin = performance.now()
+      s.sTyd = d.sTyd || 0
       s.weer = { druppels: [], water: 0 }
 
       // As die doelwit reeds behaal is, was die stadium klaar toe die spel
@@ -709,6 +740,77 @@ export default function BouDieArk({ onClose }) {
     } catch { begin() }
   }
 
+  /* ── Ranglys laai ──
+     Wys eers die kas sodat daar dadelik iets is, en merk dit as oud. Die
+     vars antwoord vervang dit sodra dit kom. */
+  const laaiRanglys = useCallback(async () => {
+    const k = kasLys()
+    if (k) { setRanglys({ lys: k.lys, totaal: k.totaal }); setRanglysOud(k.tyd) }
+    setRanglysLaai(true)
+    setRanglysFout(null)
+    const uit = await haalRanglys()
+    setRanglysLaai(false)
+    if (uit.ok) {
+      setRanglys({ lys: uit.lys, totaal: uit.totaal })
+      setRanglysOud(null)
+      setRanglysFout(null)
+    } else {
+      setRanglysFout({ boodskap: uit.fout, rede: uit.rede })
+      // Ons hou die kas op die skerm, maar dit bly as oud gemerk.
+    }
+  }, [])
+
+  // Wanneer die spel oopmaak: stuur enige punte wat vasgehaak het, en haal
+  // die lys sodat die voorlopige rang iets het om teen te meet.
+  useEffect(() => {
+    let leef = true
+    ;(async () => {
+      try { await stuurWagry() } catch {}
+      if (!leef) return
+      const uit = await haalRanglys()
+      if (!leef) return
+      if (uit.ok) { setRanglys({ lys: uit.lys, totaal: uit.totaal }); setRanglysOud(null) }
+    })()
+    return () => { leef = false }
+  }, [])
+
+  const stuurLopie = useCallback(async (metNaam) => {
+    const s = spel.current
+    const lopie = {
+      punte:   Math.max(0, Math.round(s.telling)),
+      stadium: Math.max(1, s.stadium),
+      lyne:    Math.max(0, Math.round(s.lyne)),
+      stukke:  Math.max(0, Math.round(s.stukke)),
+      speelMs: Math.max(0, Math.round(s.speelMs)),
+    }
+    setStuur({ besig: true })
+    const uit = await stuurPunt(metNaam, lopie)
+    if (uit.ok) {
+      setStuur({ besig: false, rang: uit.rang, totaal: uit.totaal, beterAs: uit.beterAs })
+      if (uit.lys) { setRanglys({ lys: uit.lys, totaal: uit.totaal }); setRanglysOud(null) }
+    } else {
+      setStuur({ besig: false, fout: uit.fout, rede: uit.rede, herprobeer: uit.herprobeer })
+    }
+  }, [])
+
+  // Die lopie word ingestuur sodra die ark volraak — maar net as ons 'n naam
+  // het. Sonder 'n naam vra ons eers, want die naam kom op 'n openbare lys.
+  useEffect(() => {
+    if (toestand !== 'verloor') return
+    if (!naam) return
+    setStuur(null)
+    stuurLopie(naam)
+  }, [toestand, naam, stuurLopie])
+
+  function bevestigNaam() {
+    const fout = keurNaam(naamInvoer)
+    if (fout) { setNaamFout(fout); return }
+    const skoon = naamInvoer.trim().replace(/\s+/g, ' ')
+    stoorNaam(skoon)
+    setNaam(skoon)
+    setNaamFout(null)
+  }
+
   function pouseer() { stoorSpel(); setToestand('pouse') }
 
   function verlaat() {
@@ -723,12 +825,46 @@ export default function BouDieArk({ onClose }) {
   // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
   // alles verlore is nie. Elders wys dit die lopende spel.
   const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, lyne, stadium: stadiumNr }
-  // Waar 'n splinternuwe spel sal begin. Lees goedkoop uit localStorage.
-  const nuweBy = beginStadium()
+  // Waar 'n splinternuwe spel sal begin. Net wanneer die menu wys, anders
+  // lees ons localStorage by elke raam van die spel.
+  const nuweBy = useMemo(
+    () => (toestand === 'menu' ? beginStadium() : 1),
+    [toestand, bewaar]
+  )
+
+  /* Waar sou hierdie lopie NOU op die lys val? Dit is 'n skatting uit die
+     lys wat ons gehaal het toe die spel oopgemaak het, dus noem ons dit
+     voorlopig. Val die speler buite die stuk lys wat ons het, sê ons niks —
+     'n raaiskoot wat soos 'n feit lyk, is erger as stilte. */
+  const voorlopig = useMemo(() => {
+    if (!ranglys || !ranglys.lys.length) return null
+    const beter = ranglys.lys.filter(
+      e => e.stadium > stadiumNr || (e.stadium === stadiumNr && e.punte > telling)
+    ).length
+    const buiteLys = beter >= ranglys.lys.length && ranglys.totaal > ranglys.lys.length
+    if (buiteLys) return null
+    // Jy staan nog nie op die lys nie, dus tel jy by die noemer. Sonder dit
+    // kry 'n mens onsin soos "#5 van 4".
+    const rang = beter + 1
+    return { rang, uit: Math.max(ranglys.totaal || ranglys.lys.length, rang) }
+  }, [ranglys, stadiumNr, telling])
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
     <div className="ark-overlay">
+
+      {/* ── Le die foon plat ──
+          Word deur CSS gewys en versteek die res. Die bord is 10 breed en
+          20 hoog; in landskap bly daar so min hoogte oor dat dit onspeelbaar
+          word. Ons se dit eerder reguit. */}
+      <div className="ark-draai">
+        <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="7" y="2" width="10" height="20" rx="2"/>
+          <path d="M12 18h.01"/>
+        </svg>
+        <h2>Draai jou foon regop</h2>
+        <p>Die ark word van onder af gebou, dus het die bord hoogte nodig.</p>
+      </div>
 
       {/* ── Kop ── */}
       <div className="ark-kop">
@@ -788,6 +924,11 @@ export default function BouDieArk({ onClose }) {
             <span className="ark-stadium-naam">{stad.naam}</span>
             <span className="ark-stadium-doel">{doelTeks(stad.doel)}</span>
             <div className="ark-balk"><i style={{ width: `${Math.round(vorder * 100)}%` }} /></div>
+            {voorlopig && (
+              <span className="ark-voorlopig">
+                Voorlopig #{voorlopig.rang} van {voorlopig.uit}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -821,6 +962,9 @@ export default function BouDieArk({ onClose }) {
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})
             </button>
+            <button className="ark-knop ark-knop-spook" onClick={() => { setWysRanglys(true); laaiRanglys() }}>
+              Wêreldwye ranglys
+            </button>
             <p className="ark-weergawe">weergawe {__BOU__}</p>
           </div>
         )}
@@ -843,7 +987,49 @@ export default function BouDieArk({ onClose }) {
               <div><span>Lyne</span><b>{lyne}</b></div>
               <div><span>Stadium</span><b>{stadiumNr}</b></div>
             </div>
+
+            {/* Sonder 'n naam stuur ons niks in nie — die naam kom op 'n
+                openbare lys, dus moet die speler dit self kies. */}
+            {!naam && (
+              <div className="ark-naamvra">
+                <p>Wil jy op die wêreldwye ranglys wees? Kies 'n naam.</p>
+                <input
+                  className="ark-invoer"
+                  value={naamInvoer}
+                  onChange={e => { setNaamInvoer(e.target.value); setNaamFout(null) }}
+                  placeholder="Jou naam"
+                  maxLength={20}
+                  aria-label="Jou naam vir die ranglys"
+                />
+                {naamFout && <span className="ark-fout">{naamFout}</span>}
+                <button className="ark-knop ark-knop-primer" onClick={bevestigNaam}>
+                  Stuur my punt in
+                </button>
+                <p className="ark-fyndruk">Jou naam is al wat ons wys. Jy hoef nie jou regte naam te gebruik nie.</p>
+              </div>
+            )}
+
+            {naam && stuur?.besig && <p className="ark-blad-teks">Besig om jou punt in te stuur…</p>}
+
+            {naam && stuur && !stuur.besig && stuur.rang && (
+              <p className="ark-rang-uitslag">
+                {stuur.beterAs ? 'Jou beste tot nou toe.' : 'Jou beste bly staan.'}<br />
+                <b>#{stuur.rang}</b> van {stuur.totaal} spelers wêreldwyd
+              </p>
+            )}
+
+            {naam && stuur && !stuur.besig && stuur.fout && (
+              <div className="ark-fout-blok">
+                <span className="ark-fout">{stuur.fout}</span>
+                {stuur.rede && <p className="ark-fyndruk">({stuur.rede})</p>}
+                <button className="ark-knop ark-knop-spook" onClick={() => stuurLopie(naam)}>Probeer weer</button>
+              </div>
+            )}
+
             <button className="ark-knop ark-knop-primer" onClick={begin}>Speel weer</button>
+            <button className="ark-knop ark-knop-spook" onClick={() => { setWysRanglys(true); laaiRanglys() }}>
+              Wêreldwye ranglys
+            </button>
             <button className="ark-knop ark-knop-spook" onClick={onClose}>Klaar</button>
           </div>
         )}
@@ -893,6 +1079,59 @@ export default function BouDieArk({ onClose }) {
             })}
           </div>
           <button className="ark-knop ark-knop-primer" onClick={() => setWysDiere(false)}>Terug</button>
+        </div>
+      )}
+
+      {/* ── Wêreldwye ranglys ──
+          Drie toestande wat ons uitmekaar hou, want hulle beteken nie
+          dieselfde nie: 'n lys wat ons gehaal het, 'n lys wat ons nie kon
+          haal nie, en 'n lys waarop nog niemand is nie. */}
+      {wysRanglys && (
+        <div className="ark-blad ark-blad-vol">
+          <h2 className="ark-blad-titel">Wêreldwye ranglys</h2>
+          <p className="ark-blad-teks">
+            Gerangskik op hoe ver die ark gebou is, dan op punte.
+          </p>
+
+          {ranglysOud && ranglys && (
+            <p className="ark-kennis">
+              Dit is wat ons laas gesien het{ranglysLaai ? ' — besig om op te dateer' : ''}.
+            </p>
+          )}
+          {ranglysLaai && !ranglys && <p className="ark-blad-teks">Besig om te laai…</p>}
+
+          {ranglysFout && (
+            <div className="ark-fout-blok">
+              <span className="ark-fout">{ranglysFout.boodskap}</span>
+              {ranglysFout.rede && <p className="ark-fyndruk">({ranglysFout.rede})</p>}
+              <button className="ark-knop ark-knop-spook" onClick={laaiRanglys}>Probeer weer</button>
+            </div>
+          )}
+
+          {ranglys && ranglys.lys.length > 0 && (
+            <ol className="ark-ranglys">
+              {ranglys.lys.map((e, i) => (
+                <li key={e.uid} className={e.naam === naam ? 'ek' : undefined}>
+                  <span className="ark-rang-nr">{i + 1}</span>
+                  <span className="ark-rang-naam">{e.naam}</span>
+                  <span className="ark-rang-syfers">
+                    <b>Stadium {e.stadium}</b>
+                    <i>{(e.punte || 0).toLocaleString('af')} punte</i>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {ranglys && ranglys.lys.length === 0 && !ranglysFout && (
+            <p className="ark-blad-teks">Nog niemand op die lys nie. Jy kan die eerste wees.</p>
+          )}
+
+          {ranglys && ranglys.totaal > ranglys.lys.length && (
+            <p className="ark-fyndruk">Boonste {ranglys.lys.length} van {ranglys.totaal} spelers.</p>
+          )}
+
+          <button className="ark-knop ark-knop-primer" onClick={() => setWysRanglys(false)}>Terug</button>
         </div>
       )}
 

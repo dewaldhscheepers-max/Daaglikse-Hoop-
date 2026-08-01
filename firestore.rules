@@ -89,6 +89,17 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // Bou die Ark se wereldwye ranglys.
+    // Almal kan lees. NIEMAND kan skryf nie — die enigste pad in is
+    // /api/ark-ranglys, wat die speler se ID-token verifieer en die lopie
+    // op geloofwaardigheid toets voordat dit tel. Sonder hierdie reel kon
+    // enigiemand met die blaaier se konsole 'n punt van 'n miljoen instuur
+    // en sou "wereldwyd" niks beteken nie.
+    match /arkRanglys/{userId} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;
