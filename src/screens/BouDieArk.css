@@ -145,30 +145,15 @@
   overflow: hidden;          /* die doek mag nooit die knoppies uitstoot nie */
 }
 
-.ark-bord {
-  /* Suiwer CSS-grootte: 10 breed, 20 hoog, altyd 1:2. Geen JavaScript
-     wat meet nie, dus niks wat kan spring nie. */
-  aspect-ratio: 1 / 2;
-  max-height: 100%;
+.ark-doek {
   max-width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(20, 1fr);
-  gap: 1px;
-  padding: 1px;
-  background: #221C30;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.ark-sel {
+  max-height: 100%;
   display: block;
-  border-radius: 2px;
-  background: #1B1626;
+  /* Geen border-radius en geen laag-promosie nie. 'n Afgeronde, gepromoveerde
+     doek laat sommige Android-GPU's ou laag-inhoud langs die rande wys —
+     dit was die strepe. Die doek teken sy eie agtergrond, dus lyk 'n
+     reghoekige rand steeds skoon. */
 }
-
-.ark-sel-skadu { opacity: 0.26; }
 
 /* ── Oorlegblaaie ── */
 .ark-blad {

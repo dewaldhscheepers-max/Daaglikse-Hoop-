@@ -148,7 +148,9 @@ export default function BouDieArk({ onClose }) {
   }, [])
 
   const vorderRef = useRef(0)
+  const doekRef  = useRef(null)
   const wrapRef  = useRef(null)
+  const beheerRef = useRef(null)
 
   // Spel-toestand leef in 'n ref sodat die lus nie by elke raam herbou nie
   const spel = useRef({
@@ -201,35 +203,147 @@ export default function BouDieArk({ onClose }) {
     setToestand('speel')
   }
 
-  /* ── Bord as gewone HTML ──
-     Geen canvas nie. Die bord is 200 blokkies in 'n CSS-rooster.
-     Geen GPU-laag, geen hergrootte, geen meting — dus niks van die
-     goed wat op sommige toestelle geskeur en geflikker het. */
-  const [raster, setRaster] = useState(() => Array(KOL * RY).fill(null))
+  /* ── Teken ── */
+  // Merk dat daar iets nuuts is om te teken. Sonder dit herteken die lus
+  // 60 keer per sekonde al staan alles stil, wat op swakker toestelle
+  // flikker en strepe veroorsaak.
+  const vuil = useRef(true)
+  const merkVuil = useCallback(() => { vuil.current = true }, [])
 
-  const verfris = useCallback(() => {
-    const s = spel.current
-    const r = new Array(KOL * RY).fill(null)
+  const teken = useCallback(() => {
+    const doek = doekRef.current
+    if (!doek) return
+    vuil.current = false
+    const ctx = doek.getContext('2d')
+    const s   = spel.current
+    const bg  = doek.width / KOL
 
-    for (let y = 0; y < RY; y++)
-      for (let x = 0; x < KOL; x++)
-        if (s.bord[y][x]) r[y * KOL + x] = { k: s.bord[y][x] }
+    ctx.clearRect(0, 0, doek.width, doek.height)
 
+    // agtergrond word donkerder soos die storm nader kom
+    const st = stadiumBy(s.stadium)
+    ctx.fillStyle = st.nr >= WOLKE_VANAF ? '#141020' : '#1B1626'
+    ctx.fillRect(0, 0, doek.width, doek.height)
+
+    if (st.nr >= WOLKE_VANAF) {
+      // wolkbanke bo-aan
+      ctx.fillStyle = 'rgba(120,110,150,0.10)'
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath()
+        ctx.ellipse(doek.width * (0.2 + i * 0.3), doek.height * 0.05,
+                    doek.width * 0.3, doek.height * 0.035, 0, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.045)'
+    ctx.lineWidth = 1
+    for (let x = 1; x < KOL; x++) {
+      ctx.beginPath(); ctx.moveTo(x * bg, 0); ctx.lineTo(x * bg, doek.height); ctx.stroke()
+    }
+    for (let y = 1; y < RY; y++) {
+      ctx.beginPath(); ctx.moveTo(0, y * bg); ctx.lineTo(doek.width, y * bg); ctx.stroke()
+    }
+
+    const blok = (x, y, kleur, deurskyn) => {
+      if (y < 0) return
+      const px = x * bg, py = y * bg, r = Math.max(2, bg * 0.16)
+      ctx.globalAlpha = deurskyn ? 0.22 : 1
+      ctx.fillStyle = kleur
+      ctx.beginPath()
+      ronde(ctx, px + 1.5, py + 1.5, bg - 3, bg - 3, r)
+      ctx.fill()
+      if (!deurskyn) {
+        // sagte hoogtepunt bo — gee die blok diepte sonder om luidrugtig te wees
+        ctx.fillStyle = 'rgba(255,255,255,0.16)'
+        ctx.beginPath()
+        ronde(ctx, px + 1.5, py + 1.5, bg - 3, (bg - 3) * 0.36, r)
+        ctx.fill()
+      }
+      ctx.globalAlpha = 1
+    }
+
+    // reeds geplaas
+    for (let y = 0; y < RY; y++) {
+      for (let x = 0; x < KOL; x++) if (s.bord[y][x]) blok(x, y, s.bord[y][x], false)
+    }
+
+    // reën en stygende water — altyd agter die stukke, nooit oor die spel nie
+    if (st.nr >= REEN_VANAF) {
+      ctx.strokeStyle = 'rgba(170,190,225,0.22)'
+      ctx.lineWidth = Math.max(1, bg * 0.045)
+      s.weer.druppels.forEach(d => {
+        ctx.beginPath()
+        ctx.moveTo(d.x * doek.width, d.y * doek.height)
+        ctx.lineTo(d.x * doek.width, d.y * doek.height + doek.height * 0.035)
+        ctx.stroke()
+      })
+    }
+    if (st.nr >= WATER_VANAF && s.weer.water > 0) {
+      const wy = doek.height * (1 - s.weer.water * 0.22)
+      const g = ctx.createLinearGradient(0, wy, 0, doek.height)
+      g.addColorStop(0, 'rgba(70,120,160,0.30)')
+      g.addColorStop(1, 'rgba(40,80,120,0.42)')
+      ctx.fillStyle = g
+      ctx.fillRect(0, wy, doek.width, doek.height - wy)
+    }
+
+    // skaduwee waar die stuk sal land
     if (s.stuk) {
       const skadu = { ...s.stuk }
       while (!bots(s.bord, { ...skadu, y: skadu.y + 1 })) skadu.y++
-      const kleur = STUKKE[s.stuk.tipe].kleur
-      selle(skadu).forEach(([x, y]) => {
-        if (y >= 0 && y < RY && x >= 0 && x < KOL && !r[y * KOL + x]) r[y * KOL + x] = { k: kleur, s: true }
-      })
-      selle(s.stuk).forEach(([x, y]) => {
-        if (y >= 0 && y < RY && x >= 0 && x < KOL) r[y * KOL + x] = { k: kleur }
-      })
+      selle(skadu).forEach(([x, y]) => blok(x, y, STUKKE[s.stuk.tipe].kleur, true))
+      selle(s.stuk).forEach(([x, y]) => blok(x, y, STUKKE[s.stuk.tipe].kleur, false))
     }
-    setRaster(r)
   }, [])
 
-  const teken = verfris
+  /* ── Grootte pas by die skerm ── */
+  useEffect(() => {
+    function pas() {
+      const doek = doekRef.current, wrap = wrapRef.current
+      if (!doek || !wrap) return
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+
+      // Moenie op die flex-ketting staatmaak nie. As die houer se hoogte om
+      // enige rede nog nul is, sou min() dit ignoreer en die bord uit die
+      // skerm uit groei. Meet eerder die skerm self en trek die res af.
+      const skerm  = window.innerHeight || document.documentElement.clientHeight
+      const bo     = wrap.getBoundingClientRect().top
+      const onder  = beheerRef.current ? beheerRef.current.offsetHeight : 0
+      const beskik = Math.max(120, skerm - bo - onder - 12)
+
+      const hoogte = wrap.clientHeight > 40 ? Math.min(wrap.clientHeight, beskik) : beskik
+      const breed  = wrap.clientWidth > 40 ? wrap.clientWidth : (window.innerWidth - 28)
+
+      const bg = Math.max(8, Math.floor(Math.min(breed / KOL, hoogte / RY)))
+      const w = bg * KOL, h = bg * RY
+      const nw = w * dpr, nh = h * dpr
+
+      // Kritiek: canvas.width skryf maak die doek skoon en verander die
+      // uitleg. Doen dit net wanneer die grootte werklik anders is, anders
+      // vuur die uitleg-verandering hierdie funksie weer af en spring die
+      // bord heen en weer tussen twee groottes.
+      if (doek.width === nw && doek.height === nh) return
+      // CSS-grootte bly w×h; die agtergrond is dpr keer groter vir skerp lyne.
+      // teken() werk in toestel-pixels, dus bly die transform identiteit.
+      doek.style.width  = w + 'px'
+      doek.style.height = h + 'px'
+      doek.width  = nw
+      doek.height = nh
+      vuil.current = true
+      teken()
+    }
+    pas()
+    // Chrome se adresbalk en die uitleg gaan eers ná 'n raam of twee sit.
+    const t1 = setTimeout(pas, 60)
+    const t2 = setTimeout(pas, 300)
+    window.addEventListener('resize', pas)
+    window.addEventListener('orientationchange', pas)
+    return () => {
+      clearTimeout(t1); clearTimeout(t2)
+      window.removeEventListener('resize', pas)
+      window.removeEventListener('orientationchange', pas)
+    }
+  }, [teken, toestand])
 
   /* ── Stukbestuur ── */
   function trekVolgende(s) {
@@ -259,6 +373,7 @@ export default function BouDieArk({ onClose }) {
   const vasmaak = useCallback(() => {
     const s = spel.current
     selle(s.stuk).forEach(([x, y]) => { if (y >= 0) s.bord[y][x] = STUKKE[s.stuk.tipe].kleur })
+    vuil.current = true
 
     const oor = s.bord.filter(ry => ry.some(c => c === null))
     const skoon = RY - oor.length
@@ -303,7 +418,7 @@ export default function BouDieArk({ onClose }) {
     const rot = (s.stuk.rot + 1) % 4
     for (const [dx, dy] of STAMPE) {
       const p = { ...s.stuk, rot, x: s.stuk.x + dx, y: s.stuk.y + dy }
-      if (!bots(s.bord, p)) { s.stuk = p; teken(); return }
+      if (!bots(s.bord, p)) { s.stuk = p; merkVuil(); teken(); return }
     }
   }, [teken])
 
@@ -322,6 +437,7 @@ export default function BouDieArk({ onClose }) {
     while (!bots(s.bord, { ...s.stuk, y: s.stuk.y + 1 })) { s.stuk.y++; n++ }
     s.telling += n * 2
     setTelling(s.telling)
+    merkVuil()
     vasmaak()
     teken()
   }, [teken, vasmaak])
@@ -363,10 +479,11 @@ export default function BouDieArk({ onClose }) {
         s.val -= tempo
         if (!s.stuk) break
         const p = { ...s.stuk, y: s.stuk.y + 1 }
-        if (!bots(s.bord, p)) s.stuk = p
-        else { vasmaak(); break }
+        if (!bots(s.bord, p)) { s.stuk = p; vuil.current = true }
+        else { vuil.current = true; vasmaak(); break }
       }
-      teken()
+      // weer beweeg aanhoudend; andersins net wanneer iets verander het
+      if (vuil.current || stadiumBy(s.stadium).nr >= REEN_VANAF) teken()
       id = requestAnimationFrame(raam)
     }
     id = requestAnimationFrame(raam)
@@ -566,15 +683,7 @@ export default function BouDieArk({ onClose }) {
         onTouchMove={raakBeweeg}
         onTouchEnd={raakEinde}
       >
-        <div className="ark-bord">
-          {raster.map((sel, i) => (
-            <i
-              key={i}
-              className={sel ? (sel.s ? 'ark-sel ark-sel-skadu' : 'ark-sel') : 'ark-sel'}
-              style={sel ? { background: sel.k } : undefined}
-            />
-          ))}
-        </div>
+        <canvas ref={doekRef} className="ark-doek" />
 
         {toestand === 'menu' && (
           <div className="ark-blad">
@@ -663,7 +772,7 @@ export default function BouDieArk({ onClose }) {
 
       {/* ── Kontroles ── */}
       {toestand === 'speel' && (
-        <div className="ark-beheer">
+        <div className="ark-beheer" ref={beheerRef}>
           <button className="ark-beheer-knop" onClick={() => skuif(-1)} aria-label="Links">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>
