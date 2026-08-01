@@ -1,4 +1,4 @@
-export default function BottomNav({ active, onChange }) {
+export default function BottomNav({ active, onChange, onBybel }) {
   const tabs = [
     {
       id: 'luister',
@@ -57,6 +57,16 @@ export default function BottomNav({ active, onChange }) {
 
   return (
     <nav className="bottom-nav">
+      {/* Bybel — sweef links bo die balk, altyd sigbaar */}
+      <button className="nav-bybel" onClick={onBybel} aria-label="Bybel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 6.5C10.5 5.2 8.4 4.6 6 4.6c-.9 0-1.7.1-2.5.3v12.4c.8-.2 1.6-.3 2.5-.3 2.4 0 4.5.6 6 1.9"/>
+          <path d="M12 6.5c1.5-1.3 3.6-1.9 6-1.9.9 0 1.7.1 2.5.3v12.4c-.8-.2-1.6-.3-2.5-.3-2.4 0-4.5.6-6 1.9"/>
+          <path d="M12 6.5v12.4"/>
+        </svg>
+        <span>BYBEL</span>
+      </button>
+
       {tabs.map(t => (
         <button
           key={t.id}

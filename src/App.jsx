@@ -28,6 +28,7 @@ import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
 import HuiseVanHoop from './screens/HuiseVanHoop'
+import Bybel from './screens/Bybel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -96,6 +97,7 @@ export default function App() {
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showToksies,            setShowToksies]            = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
+  const [showBybel, setShowBybel]                 = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
   function onAudioPlayingChange(playing) {
@@ -477,6 +479,13 @@ export default function App() {
     return () => window.removeEventListener('open-wanneer-angs-toeslaan', onOpen)
   }, [])
 
+  // ── Bybel ──
+  useEffect(() => {
+    function onOpen() { setShowBybel(true) }
+    window.addEventListener('open-bybel', onOpen)
+    return () => window.removeEventListener('open-bybel', onOpen)
+  }, [])
+
   // ── 1000 Huise van Hoop veldtog ──
   useEffect(() => {
     function onOpen() { setShowHuise(true) }
@@ -609,7 +618,7 @@ export default function App() {
         </ErrorBoundary>
       </div>
 
-      <BottomNav active={tab} onChange={handleNav} />
+      <BottomNav active={tab} onChange={handleNav} onBybel={() => setShowBybel(true)} />
 
       {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
@@ -703,6 +712,10 @@ export default function App() {
       )}
       {showLeuensDuiwel && (
         <LeuensDuiwel onClose={() => setShowLeuensDuiwel(false)} />
+      )}
+
+      {showBybel && (
+        <Bybel onClose={() => setShowBybel(false)} />
       )}
 
       {showHuise && (
