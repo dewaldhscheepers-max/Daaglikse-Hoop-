@@ -72,10 +72,12 @@ body {
 /* ── Bybel-knoppie: sweef links bo die balk ── */
 .nav-bybel {
   position: absolute;
-  left: 16px;
-  bottom: calc(100% - 6px);
-  width: 58px;
-  height: 58px;
+  /* Die balk het 5 oortjies, dus sit Luister se middel op 10% */
+  left: 10%;
+  transform: translateX(-50%);
+  bottom: calc(100% - 2px);
+  width: 56px;
+  height: 56px;
   border-radius: 14px;
   background: linear-gradient(150deg, #6B4FA0 0%, #523D82 100%);
   border: 2px solid #D9AE4A;
@@ -103,7 +105,7 @@ body {
   line-height: 1;
 }
 
-.nav-bybel:active { transform: scale(0.93); }
+.nav-bybel:active { transform: translateX(-50%) scale(0.93); }
 
 .bottom-nav {
   position: fixed;
