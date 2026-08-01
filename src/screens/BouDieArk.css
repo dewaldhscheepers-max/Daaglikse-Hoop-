@@ -1,18 +1,13 @@
 /* ── Bou die Ark ── */
 
 .ark-overlay {
+  /* Presies dieselfde struktuur as Vredepad, wat op haar foon werk.
+     Geen dvh (dit verander aanhoudend soos Chrome se adresbalk beweeg),
+     geen touch-action, geen overscroll-behavior. */
   position: fixed;
   inset: 0;
   top: 0; right: 0; bottom: 0; left: 0;  /* vir blaaiers sonder inset */
-
-  /* dvh volg die sigbare area, sodat die knoppies bereikbaar bly wanneer
-     Chrome se adresbalk wys. Die bladsy self is agter donker gemaak, dus
-     is daar nooit 'n gaping wanneer die balk in of uit gly nie. */
-  height: 100vh;
-  height: 100dvh;
-
-  overscroll-behavior: none;
-  z-index: 260;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -20,7 +15,6 @@
   color: #EDE8F5;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: none;
 }
 
 /* ── Kop ── */
@@ -150,10 +144,9 @@
   max-height: 100%;
   display: block;
   border-radius: 12px;
-  /* Geen border-radius en geen laag-promosie nie. 'n Afgeronde, gepromoveerde
-     doek laat sommige Android-GPU's ou laag-inhoud langs die rande wys —
-     dit was die strepe. Die doek teken sy eie agtergrond, dus lyk 'n
-     reghoekige rand steeds skoon. */
+  /* Geen laag-promosie (transform / will-change / box-shadow) nie. 'n
+     Gepromoveerde doek laat sommige Android-GPU's ou laag-inhoud langs die
+     rande wys — dit was die strepe. */
 }
 
 /* ── Oorlegblaaie ── */

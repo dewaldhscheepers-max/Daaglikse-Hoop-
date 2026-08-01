@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { createPortal } from 'react-dom'
 import { playCollect, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
@@ -130,22 +129,6 @@ export default function BouDieArk({ onClose }) {
   const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
   const [diere, setDiere]       = useState(() => leesDiere())
   const [wysDiere, setWysDiere] = useState(false)
-
-  // Terwyl die spel oop is, kry die bladsy self die spel se donker kleur.
-  // Chrome se adresbalk gly in en uit en verander die sigbare hoogte; sonder
-  // dit sou die app in daardie oomblik deurwys.
-  useEffect(() => {
-    const b = document.body, h = document.documentElement
-    const bBg = b.style.background, hBg = h.style.background, bOv = b.style.overflow
-    b.style.background = '#100D17'
-    h.style.background = '#100D17'
-    b.style.overflow = 'hidden'
-    return () => {
-      b.style.background = bBg
-      h.style.background = hBg
-      b.style.overflow = bOv
-    }
-  }, [])
 
   const vorderRef = useRef(0)
   const doekRef  = useRef(null)
@@ -613,7 +596,7 @@ export default function BouDieArk({ onClose }) {
   const stad = stadiumBy(stadiumNr)
   const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
-  return createPortal((
+  return (
     <div className="ark-overlay">
 
       {/* ── Kop ── */}
@@ -802,5 +785,5 @@ export default function BouDieArk({ onClose }) {
         </div>
       )}
     </div>
-  ), document.body)
+  )
 }
