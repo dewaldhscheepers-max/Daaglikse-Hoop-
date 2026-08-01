@@ -194,6 +194,8 @@ export default function BouDieArk({ onClose }) {
   const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
   const [diere, setDiere]       = useState(() => leesDiere())
   const [wysDiere, setWysDiere] = useState(false)
+  // Verander elke keer as die spel-lus van voor af moet begin
+  const [rondte, setRondte]     = useState(0)
 
   const vorderRef = useRef(0)
   const doekRef  = useRef(null)
@@ -227,32 +229,6 @@ export default function BouDieArk({ onClose }) {
       case 'oorleef': return Math.min(1, s.sTyd / d.waarde)
       default:        return 0
     }
-  }
-
-  const voltooiStadium = useCallback(() => {
-    const s = spel.current
-    const st = stadiumBy(s.stadium)
-    s.loop = false
-    // Was hierdie dier al in die ark? Dan moet die kaart nie maak of jy hom
-    // nou eers gewen het nie.
-    const reeds = leesDiere().includes(st.dier)
-    stoorDier(st.dier)
-    setDiere(leesDiere())
-    setKlaar({ ...st, reeds })
-    playLevelComplete()
-  }, [])
-
-  function volgendeStadium() {
-    const s = spel.current
-    s.stadium += 1
-    stoorVerste(s.stadium)
-    s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
-    s.sTyd = 0; s.sBegin = performance.now()
-    s.weer.druppels = []; s.weer.water = 0
-    setStadiumNr(s.stadium)
-    setVorder(0)
-    setKlaar(null)
-    setToestand('speel')
   }
 
   /* ── Teken ── */
@@ -425,6 +401,41 @@ export default function BouDieArk({ onClose }) {
     return true
   }, [])
 
+  const voltooiStadium = useCallback(() => {
+    const s = spel.current
+    const st = stadiumBy(s.stadium)
+    s.loop = false
+    // Was hierdie dier al in die ark? Dan moet die kaart nie maak of jy hom
+    // nou eers gewen het nie.
+    const reeds = leesDiere().includes(st.dier)
+    stoorDier(st.dier)
+    setDiere(leesDiere())
+    // Wanneer die stadium klaar is deurdat 'n stuk pas vasgemaak het, is daar
+    // niks meer op die bord nie. Sit dadelik 'n nuwe stuk neer sodat die spel
+    // se toestand heel bly: "Hou hier op" moet kan stoor, en die lus moet iets
+    // he om te laat val wanneer jy weer begin.
+    if (!s.stuk && !plaasNuwe()) return    // die ark het volgeraak
+    setKlaar({ ...st, reeds })
+    playLevelComplete()
+  }, [plaasNuwe])
+
+  function volgendeStadium() {
+    const s = spel.current
+    s.stadium += 1
+    stoorVerste(s.stadium)
+    s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
+    s.sTyd = 0; s.sBegin = performance.now()
+    s.weer.druppels = []; s.weer.water = 0
+    setStadiumNr(s.stadium)
+    setVorder(0)
+    setKlaar(null)
+    setToestand('speel')
+    // Kritiek: toestand was reeds 'speel', dus sou React die spel-lus se
+    // effek nie weer laat loop nie en die lus bly dood. Hierdie teller
+    // verander wel, dus begin die lus van voor af.
+    setRondte(r => r + 1)
+  }
+
   /* ── Vasmaak en lyne skoonmaak ── */
   const vasmaak = useCallback(() => {
     const s = spel.current
@@ -453,7 +464,7 @@ export default function BouDieArk({ onClose }) {
 
     const v = doelVordering(s)
     setVorder(v)
-    if (v >= 1) { voltooiStadium(); return }
+    if (v >= 1) { s.stuk = null; voltooiStadium(); return }
 
     plaasNuwe()
   }, [plaasNuwe])
@@ -542,7 +553,7 @@ export default function BouDieArk({ onClose }) {
     }
     id = requestAnimationFrame(raam)
     return () => { s.loop = false; cancelAnimationFrame(id) }
-  }, [toestand, teken, vasmaak, voltooiStadium])
+  }, [toestand, rondte, teken, vasmaak, voltooiStadium])
 
   /* ── Sleutelbord (vir toetsing op 'n rekenaar) ── */
   useEffect(() => {
