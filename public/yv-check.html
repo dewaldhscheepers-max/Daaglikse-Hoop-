@@ -105,6 +105,19 @@ async function tryGet(path, key, mode) {
   }
 }
 
+// Deur ons eie /api/bible proxy — selfde oorsprong, dus geen CORS
+async function proxyGet(url) {
+  try {
+    const r = await fetch(url, { headers: { 'accept': 'application/json' } });
+    const text = await r.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch (_) {}
+    return { url, status: r.status, ok: r.ok, json, text, mode: 'proxy' };
+  } catch (err) {
+    return { url, status: 0, ok: false, json: null, text: 'NETWERKFOUT: ' + err.message, mode: 'proxy' };
+  }
+}
+
 // Vind die weergawe-lys ongeag presies watter vorm die API teruggee
 function extractList(json) {
   if (!json) return null;
@@ -323,19 +336,18 @@ $('#chap').addEventListener('click', async () => {
   $('#chap').disabled = true;
   card('Besig...', '<span class="muted">Soek die endpunt wat werklike teks gee...</span>');
 
-  // Uit die amptelike SDK: /v1/bibles/{id}/passages/{usfm}?format=html
-  // format is VERPLIG. usfm kan 'n vers (JHN.3.16) of 'n hele hoofstuk (GEN.1) wees.
+  // Deur ons eie bediener-proxy — die blaaier mag nie direk aan hierdie endpunte raak nie
   const kandidate = [
-    '/bibles/3034/passages/JHN.3.16?format=html',
-    '/bibles/3034/passages/GEN.1?format=html',
-    '/bibles/3034/passages/JHN.3.16?format=text',
-    '/bibles/3034/index',
+    '/api/bible?path=/v1/bibles/3034/passages/JHN.3.16&format=html',
+    '/api/bible?path=/v1/bibles/3034/passages/GEN.1&format=html',
+    '/api/bible?path=/v1/bibles/3034/index',
+    '/api/bible?path=/v1/bibles&language_ranges[]=eng',
   ];
 
   const uitslae = [];
   let wenner = null;
   for (const c of kandidate) {
-    const r = await tryGet(c, key, 'query');
+    const r = await proxyGet(c);
     // "regte teks" = 'n string van meer as 25 karakters wat spasies bevat
     const hetTeks = /"[^"]{25,}\s[^"]{10,}"/.test(r.text || '');
     uitslae.push({ ...r, hetTeks });
@@ -346,7 +358,7 @@ $('#chap').addEventListener('click', async () => {
 
   let h = '';
   uitslae.forEach(u => {
-    h += '<div class="row"><code>' + decodeURIComponent(u.url.replace(BASE, '').split('&x-yvp')[0]) + '</code> → '
+    h += '<div class="row"><code>' + decodeURIComponent(u.url.replace('/api/bible?path=', '').split('&x-yvp')[0]) + '</code> → '
        + '<b class="' + (u.ok ? 'ok' : 'bad') + '">HTTP ' + u.status + '</b>'
        + (u.hetTeks ? ' <b class="ok">· TEKS!</b>' : '') + '</div>';
   });
@@ -354,13 +366,13 @@ $('#chap').addEventListener('click', async () => {
 
   if (wenner) {
     card('Gevind', '<p class="ok">Hierdie endpunt gee die teks:</p>'
-       + '<div class="row"><code>' + decodeURIComponent(wenner.url.replace(BASE, '').split('&x-yvp')[0]) + '</code></div>');
+       + '<div class="row"><code>' + decodeURIComponent(wenner.url.replace('/api/bible?path=', '').split('&x-yvp')[0]) + '</code></div>');
     card('Antwoord', '<pre>' + (wenner.text || '').slice(0, 2500).replace(/</g, '&lt;') + '</pre>');
   } else {
     card('Geen teks', '<p class="bad">Geen kandidaat het teks teruggegee nie.</p>'
        + '<p class="muted">Rou antwoorde van die eerste twee wat HTTP 200 gegee het:</p>'
        + uitslae.filter(u => u.ok).slice(0, 2).map(u =>
-           '<p class="muted"><code>' + decodeURIComponent(u.url.replace(BASE, '').split('&x-yvp')[0]) + '</code></p><pre>'
+           '<p class="muted"><code>' + decodeURIComponent(u.url.replace('/api/bible?path=', '').split('&x-yvp')[0]) + '</code></p><pre>'
            + (u.text || '(leeg)').slice(0, 800).replace(/</g, '&lt;') + '</pre>').join(''));
   }
 
