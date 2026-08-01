@@ -850,8 +850,6 @@ export default function Vredepad({ onClose }) {
   const [consentName, setConsentName]         = useState('')
   const [consentError, setConsentError]       = useState('')
   const [lbCelebration, setLbCelebration]     = useState(null)
-  const [weeklyLb, setWeeklyLb]               = useState([])
-  const [lbTab, setLbTab]                     = useState('week')
   const [gameMinScore, setGameMinScore]        = useState(10)
   const anonUidRef = useRef(null)
   const pendingLbRef = useRef(null)
@@ -876,8 +874,6 @@ export default function Vredepad({ onClose }) {
       const cached = JSON.parse(localStorage.getItem('vp_lb_cache') || 'null')
       if (cached?.length) {
         setLeaderboard(sortLeaderboard(cached))
-        const weekAgo = Date.now() / 1000 - 7 * 24 * 3600
-        setWeeklyLb(sortLeaderboard(cached.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > weekAgo)))
       }
     } catch {}
     getDocs(collection(db, 'leaderboard')).then(snap => {
@@ -886,8 +882,6 @@ export default function Vredepad({ onClose }) {
         return { userId: d.id, ...r, createdAt: r.createdAt?.seconds ? { seconds: r.createdAt.seconds } : null, updatedAt: r.updatedAt?.seconds ? { seconds: r.updatedAt.seconds } : null }
       })
       setLeaderboard(sortLeaderboard(all))
-      const weekAgo = Date.now() / 1000 - 7 * 24 * 3600
-      setWeeklyLb(sortLeaderboard(all.filter(e => (e.updatedAt?.seconds ?? e.createdAt?.seconds ?? 0) > weekAgo)))
       try { localStorage.setItem('vp_lb_cache', JSON.stringify(all)) } catch {}
     }).catch(() => {})
 
@@ -2063,14 +2057,10 @@ export default function Vredepad({ onClose }) {
           </button>
           <div className="vp-leaderboard">
             <p className="vp-lb-title">Vredepad Top 10</p>
-            <div className="vp-lb-tabs">
-              <button className={`vp-lb-tab${lbTab === 'week' ? ' active' : ''}`} onClick={() => setLbTab('week')}>Hierdie Week</button>
-              <button className={`vp-lb-tab${lbTab === 'alltyd' ? ' active' : ''}`} onClick={() => setLbTab('alltyd')}>Aller-tye</button>
-            </div>
             {(() => {
-              const list = lbTab === 'week' ? weeklyLb : leaderboard
+              const list = leaderboard
               if (list.length === 0) return (
-                <p className="vp-lb-empty">{lbTab === 'week' ? 'Niemand het hierdie week gespeel nie. Jy kan eerste wees!' : 'Nog niemand op die Top 10 nie. Jy kan die eerste wees!'}</p>
+                <p className="vp-lb-empty">Nog niemand op die Top 10 nie. Jy kan die eerste wees!</p>
               )
               return list.map((entry, i) => (
                 <div key={entry.userId} className={`vp-lb-row${entry.userId === myUid ? ' mine' : ''}`}>
@@ -2084,9 +2074,9 @@ export default function Vredepad({ onClose }) {
               ))
             })()}
             {(() => {
-              const list = lbTab === 'week' ? weeklyLb : leaderboard
+              const list = leaderboard
               const myRank = list.findIndex(e => e.userId === myUid)
-              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die {lbTab === 'week' ? 'weeklikse' : 'Vredepad'} Top 10. ✨</p>
+              if (myRank >= 0) return <p className="vp-lb-my-rank">Jy is nommer {myRank + 1} op die Vredepad Top 10. ✨</p>
               const last = list[list.length - 1]
               const gap = last ? last.level - totalLevels : 999
               const close = list.length >= 10 && gap <= 12
