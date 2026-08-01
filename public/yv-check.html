@@ -323,16 +323,13 @@ $('#chap').addEventListener('click', async () => {
   $('#chap').disabled = true;
   card('Besig...', '<span class="muted">Soek die endpunt wat werklike teks gee...</span>');
 
-  // /verses gee net struktuur. Soek die een wat regte woorde teruggee.
+  // Uit die amptelike SDK: /v1/bibles/{id}/passages/{usfm}?format=html
+  // format is VERPLIG. usfm kan 'n vers (JHN.3.16) of 'n hele hoofstuk (GEN.1) wees.
   const kandidate = [
-    '/bibles/3034/books/JHN/chapters/3',
-    '/bibles/3034/books/JHN/chapters/3?include_content=true',
-    '/bibles/3034/books/JHN/chapters/3/verses?include_content=true',
-    '/bibles/3034/passages/JHN.3.16',
-    '/bibles/3034/passages?ids=JHN.3.16',
-    '/bibles/3034/verses/JHN.3.16',
-    '/bibles/3034/books/JHN/chapters/3/verses/16',
-    '/passages/JHN.3.16?bible_id=3034',
+    '/bibles/3034/passages/JHN.3.16?format=html',
+    '/bibles/3034/passages/GEN.1?format=html',
+    '/bibles/3034/passages/JHN.3.16?format=text',
+    '/bibles/3034/index',
   ];
 
   const uitslae = [];
