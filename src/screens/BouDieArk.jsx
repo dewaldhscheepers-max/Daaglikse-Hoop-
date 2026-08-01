@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { playCollect, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
+import { stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
+import { Dier, dierNaam } from '../data/arkDiere'
+import ArkBou from '../components/ArkBou'
 import './BouDieArk.css'
 
 /* ────────────────────────────────────────────────────────────
-   Bou die Ark — Fase 1
-   Kern-meganika, beweging, rotasie, botsing, lyne, telling,
-   game-over, mobiele beheer, pouse en hervat.
-   Ark-bou, diere en ranglys kom in Fase 2 en 3.
+   Bou die Ark — Fase 1 en 2
+   Kern-meganika, stadiums met doelwitte, die ark wat opbou,
+   dierepare, versameling en weer.
+   Die ranglys kom in Fase 3.
    ──────────────────────────────────────────────────────────── */
 
 const KOL = 10
@@ -54,7 +57,18 @@ function valTempo(vlak) {
 
 const PUNTE = { 1: 100, 2: 300, 3: 500, 4: 800 }
 
-const STOOR = 'ark_stoor'
+const STOOR   = 'ark_stoor'
+const VERSAMEL = 'ark_diere'
+
+function leesDiere() {
+  try { return JSON.parse(localStorage.getItem(VERSAMEL) || '[]') } catch { return [] }
+}
+function stoorDier(id) {
+  try {
+    const h = leesDiere()
+    if (!h.includes(id)) localStorage.setItem(VERSAMEL, JSON.stringify([...h, id]))
+  } catch {}
+}
 
 function leegBord() {
   return Array.from({ length: RY }, () => Array(KOL).fill(null))
@@ -94,7 +108,13 @@ export default function BouDieArk({ onClose }) {
   const [volgende, setVolgende] = useState(null)
   const [stil, setStil]         = useState(isMuted())
   const [hetStoor, setHetStoor] = useState(false)
+  const [stadiumNr, setStadiumNr] = useState(1)
+  const [vorder, setVorder]     = useState(0)      // 0..1 na die doelwit toe
+  const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
+  const [diere, setDiere]       = useState(() => leesDiere())
+  const [wysDiere, setWysDiere] = useState(false)
 
+  const vorderRef = useRef(0)
   const doekRef = useRef(null)
   const wrapRef = useRef(null)
 
@@ -107,7 +127,47 @@ export default function BouDieArk({ onClose }) {
     telling: 0, lyne: 0, vlak: 1,
     val: 0, laas: 0,
     loop: false,
+    // stadium
+    stadium: 1,
+    sLyne: 0, sPunte: 0, sBesteMulti: 0, sKombo: 0, sBegin: 0, sTyd: 0,
+    weer: { druppels: [], water: 0 },
   })
+
+  /* ── Hoeveel van die doelwit is klaar ── */
+  function doelVordering(s) {
+    const st = stadiumBy(s.stadium)
+    const d = st.doel
+    switch (d.tipe) {
+      case 'lyne':    return Math.min(1, s.sLyne / d.waarde)
+      case 'punte':   return Math.min(1, s.sPunte / d.waarde)
+      case 'multi':   return Math.min(1, s.sBesteMulti / d.waarde)
+      case 'kombo':   return Math.min(1, s.sKombo / d.waarde)
+      case 'oorleef': return Math.min(1, s.sTyd / d.waarde)
+      default:        return 0
+    }
+  }
+
+  const voltooiStadium = useCallback(() => {
+    const s = spel.current
+    const st = stadiumBy(s.stadium)
+    s.loop = false
+    stoorDier(st.dier)
+    setDiere(leesDiere())
+    setKlaar(st)
+    playLevelComplete()
+  }, [])
+
+  function volgendeStadium() {
+    const s = spel.current
+    s.stadium += 1
+    s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
+    s.sTyd = 0; s.sBegin = performance.now()
+    s.weer.druppels = []; s.weer.water = 0
+    setStadiumNr(s.stadium)
+    setVorder(0)
+    setKlaar(null)
+    setToestand('speel')
+  }
 
   /* ── Teken ── */
   const teken = useCallback(() => {
@@ -119,9 +179,21 @@ export default function BouDieArk({ onClose }) {
 
     ctx.clearRect(0, 0, doek.width, doek.height)
 
-    // agtergrond + rooster
-    ctx.fillStyle = '#1B1626'
+    // agtergrond word donkerder soos die storm nader kom
+    const st = stadiumBy(s.stadium)
+    ctx.fillStyle = st.nr >= WOLKE_VANAF ? '#141020' : '#1B1626'
     ctx.fillRect(0, 0, doek.width, doek.height)
+
+    if (st.nr >= WOLKE_VANAF) {
+      // wolkbanke bo-aan
+      ctx.fillStyle = 'rgba(120,110,150,0.10)'
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath()
+        ctx.ellipse(doek.width * (0.2 + i * 0.3), doek.height * 0.05,
+                    doek.width * 0.3, doek.height * 0.035, 0, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
     ctx.strokeStyle = 'rgba(255,255,255,0.045)'
     ctx.lineWidth = 1
     for (let x = 1; x < KOL; x++) {
@@ -152,6 +224,26 @@ export default function BouDieArk({ onClose }) {
     // reeds geplaas
     for (let y = 0; y < RY; y++) {
       for (let x = 0; x < KOL; x++) if (s.bord[y][x]) blok(x, y, s.bord[y][x], false)
+    }
+
+    // reën en stygende water — altyd agter die stukke, nooit oor die spel nie
+    if (st.nr >= REEN_VANAF) {
+      ctx.strokeStyle = 'rgba(170,190,225,0.22)'
+      ctx.lineWidth = Math.max(1, bg * 0.045)
+      s.weer.druppels.forEach(d => {
+        ctx.beginPath()
+        ctx.moveTo(d.x * doek.width, d.y * doek.height)
+        ctx.lineTo(d.x * doek.width, d.y * doek.height + doek.height * 0.035)
+        ctx.stroke()
+      })
+    }
+    if (st.nr >= WATER_VANAF && s.weer.water > 0) {
+      const wy = doek.height * (1 - s.weer.water * 0.22)
+      const g = ctx.createLinearGradient(0, wy, 0, doek.height)
+      g.addColorStop(0, 'rgba(70,120,160,0.30)')
+      g.addColorStop(1, 'rgba(40,80,120,0.42)')
+      ctx.fillStyle = g
+      ctx.fillRect(0, wy, doek.width, doek.height - wy)
     }
 
     // skaduwee waar die stuk sal land
@@ -218,16 +310,27 @@ export default function BouDieArk({ onClose }) {
     if (skoon > 0) {
       while (oor.length < RY) oor.unshift(Array(KOL).fill(null))
       s.bord = oor
+      const wins = (PUNTE[skoon] || 0) * s.vlak
       s.lyne += skoon
-      s.telling += (PUNTE[skoon] || 0) * s.vlak
+      s.telling += wins
+      s.sLyne += skoon
+      s.sPunte += wins
+      s.sBesteMulti = Math.max(s.sBesteMulti, skoon)
+      s.sKombo += 1
       const nuweVlak = Math.floor(s.lyne / LYNE_PER_VLAK) + 1
-      if (nuweVlak > s.vlak) { s.vlak = nuweVlak; playLevelComplete() }
-      else playCollect(Math.min(skoon - 1, 3), skoon)
+      if (nuweVlak > s.vlak) s.vlak = nuweVlak
+      playCollect(Math.min(skoon - 1, 3), Math.max(skoon, s.sKombo))
       setLyne(s.lyne); setVlak(s.vlak)
     } else {
+      s.sKombo = 0          // kombo breek wanneer 'n stuk geen ry maak nie
       playHit()
     }
     setTelling(s.telling)
+
+    const v = doelVordering(s)
+    setVorder(v)
+    if (v >= 1) { voltooiStadium(); return }
+
     plaasNuwe()
   }, [plaasNuwe])
 
@@ -281,6 +384,25 @@ export default function BouDieArk({ onClose }) {
       const dt = nou - s.laas
       s.laas = nou
       s.val += dt
+
+      // oorleef-doelwit tel saam met werklike speeltyd
+      const st = stadiumBy(s.stadium)
+      if (st.doel.tipe === 'oorleef') {
+        s.sTyd += dt / 1000
+        const v = Math.min(1, s.sTyd / st.doel.waarde)
+        if (Math.abs(v - vorderRef.current) > 0.01) { vorderRef.current = v; setVorder(v) }
+        if (v >= 1) { voltooiStadium(); return }
+      }
+
+      // weer
+      if (st.nr >= REEN_VANAF) {
+        const w = s.weer
+        if (w.druppels.length < 34) w.druppels.push({ x: Math.random(), y: Math.random(), s: 0.5 + Math.random() * 0.7 })
+        w.druppels.forEach(d => { d.y += (dt / 1000) * d.s; if (d.y > 1) { d.y = -0.05; d.x = Math.random() } })
+      }
+      if (st.nr >= WATER_VANAF) {
+        s.weer.water = Math.min(1, s.weer.water + dt / 45000)
+      }
       const tempo = valTempo(s.vlak)
       while (s.val >= tempo) {
         s.val -= tempo
@@ -294,7 +416,7 @@ export default function BouDieArk({ onClose }) {
     }
     id = requestAnimationFrame(raam)
     return () => { s.loop = false; cancelAnimationFrame(id) }
-  }, [toestand, teken, vasmaak])
+  }, [toestand, teken, vasmaak, voltooiStadium])
 
   /* ── Sleutelbord (vir toetsing op 'n rekenaar) ── */
   useEffect(() => {
@@ -351,6 +473,8 @@ export default function BouDieArk({ onClose }) {
       localStorage.setItem(STOOR, JSON.stringify({
         bord: s.bord, stuk: s.stuk, sak: s.sak, volgende: s.volgende,
         telling: s.telling, lyne: s.lyne, vlak: s.vlak,
+        stadium: s.stadium, sLyne: s.sLyne, sPunte: s.sPunte,
+        sBesteMulti: s.sBesteMulti, sKombo: s.sKombo, sTyd: s.sTyd,
       }))
       setHetStoor(true)
     } catch {}
@@ -372,7 +496,11 @@ export default function BouDieArk({ onClose }) {
     const s = spel.current
     s.bord = leegBord(); s.sak = nuweSak(); s.volgende = null
     s.telling = 0; s.lyne = 0; s.vlak = 1; s.val = 0
-    setTelling(0); setLyne(0); setVlak(1)
+    s.stadium = 1; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
+    s.sKombo = 0; s.sTyd = 0; s.sBegin = performance.now()
+    s.weer = { druppels: [], water: 0 }
+    vorderRef.current = 0
+    setTelling(0); setLyne(0); setVlak(1); setStadiumNr(1); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
     setHetStoor(false)
     setToestand('speel')
@@ -387,7 +515,15 @@ export default function BouDieArk({ onClose }) {
       s.bord = d.bord; s.stuk = d.stuk; s.sak = d.sak || nuweSak()
       s.volgende = d.volgende
       s.telling = d.telling; s.lyne = d.lyne; s.vlak = d.vlak; s.val = 0
+      s.stadium = d.stadium || 1
+      s.sLyne = d.sLyne || 0; s.sPunte = d.sPunte || 0
+      s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
+      s.sTyd = d.sTyd || 0; s.sBegin = performance.now()
+      s.weer = { druppels: [], water: 0 }
+      const v = doelVordering(s)
+      vorderRef.current = v
       setTelling(d.telling); setLyne(d.lyne); setVlak(d.vlak); setVolgende(d.volgende)
+      setStadiumNr(s.stadium); setVorder(v); setKlaar(null)
       setToestand('speel')
     } catch { begin() }
   }
@@ -402,6 +538,8 @@ export default function BouDieArk({ onClose }) {
   function klank() { const m = toggleMute(); setStil(m) }
 
   const volgendeVorm = volgende ? STUKKE[volgende].vorms[0] : null
+  const stad = stadiumBy(stadiumNr)
+  const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
     <div className="ark-overlay">
@@ -452,6 +590,19 @@ export default function BouDieArk({ onClose }) {
         </div>
       </div>
 
+      {/* ── Stadium ── */}
+      {toestand === 'speel' && (
+        <div className="ark-stadium">
+          <ArkBou vordering={vorder} />
+          <div className="ark-stadium-info">
+            <span className="ark-stadium-nr">Stadium {stadiumNr}</span>
+            <span className="ark-stadium-naam">{stad.naam}</span>
+            <span className="ark-stadium-doel">{doelTeks(stad.doel)}</span>
+            <div className="ark-balk"><i style={{ width: `${Math.round(vorder * 100)}%` }} /></div>
+          </div>
+        </div>
+      )}
+
       {/* ── Bord ── */}
       <div
         className="ark-doek-wrap"
@@ -471,6 +622,9 @@ export default function BouDieArk({ onClose }) {
             {hetStoor && <button className="ark-knop ark-knop-primer" onClick={hervat}>Gaan voort</button>}
             <button className={`ark-knop ${hetStoor ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
               {hetStoor ? 'Begin van voor af' : 'Begin speel'}
+            </button>
+            <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
+              My diere ({diere.length} van {ALLE_DIERE.length})
             </button>
           </div>
         )}
@@ -492,12 +646,56 @@ export default function BouDieArk({ onClose }) {
               <div><span>Punte</span><b>{telling.toLocaleString('af')}</b></div>
               <div><span>Vlak</span><b>{vlak}</b></div>
               <div><span>Lyne</span><b>{lyne}</b></div>
+              <div><span>Stadium</span><b>{stadiumNr}</b></div>
             </div>
             <button className="ark-knop ark-knop-primer" onClick={begin}>Speel weer</button>
             <button className="ark-knop ark-knop-spook" onClick={onClose}>Klaar</button>
           </div>
         )}
       </div>
+
+      {/* ── Stadium voltooi ── */}
+      {klaar && (
+        <div className="ark-blad ark-blad-vol">
+          <span className="ark-klaar-merk">Stadium {klaar.nr} voltooi</span>
+          <h2 className="ark-blad-titel">{klaar.naam}</h2>
+
+          <div className="ark-nuwe-dier">
+            <Dier id={klaar.dier} grootte={104} paar />
+            <span>{dierNaam(klaar.dier)} — 'n paar aan boord</span>
+          </div>
+
+          <blockquote className="ark-vers">
+            {klaar.vers}
+            <cite>{klaar.ref}</cite>
+          </blockquote>
+
+          <button className="ark-knop ark-knop-primer" onClick={volgendeStadium}>Gaan voort</button>
+          <button className="ark-knop ark-knop-spook" onClick={() => { stoorSpel(); setKlaar(null); setToestand('pouse') }}>
+            Hou hier op
+          </button>
+        </div>
+      )}
+
+      {/* ── Versameling ── */}
+      {wysDiere && (
+        <div className="ark-blad ark-blad-vol">
+          <h2 className="ark-blad-titel">My diere</h2>
+          <p className="ark-blad-teks">Elke voltooide stadium bring 'n paar aan boord.</p>
+          <div className="ark-diere-rooster">
+            {ALLE_DIERE.map(id => {
+              const het = diere.includes(id)
+              return (
+                <div key={id} className={`ark-dier-blok${het ? '' : ' dof'}`}>
+                  <Dier id={id} grootte={56} paar dof={!het} />
+                  <span>{het ? dierNaam(id) : '—'}</span>
+                </div>
+              )
+            })}
+          </div>
+          <button className="ark-knop ark-knop-primer" onClick={() => setWysDiere(false)}>Terug</button>
+        </div>
+      )}
 
       {/* ── Kontroles ── */}
       {toestand === 'speel' && (

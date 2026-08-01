@@ -259,3 +259,162 @@
   background: rgba(196, 183, 232, 0.24);
   transform: scale(0.94);
 }
+
+/* ── Stadium-strook ── */
+.ark-stadium {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 10px;
+  flex: 0 0 auto;
+}
+
+.arkbou {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 40px;
+  overflow: visible;
+}
+
+.ark-stadium-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ark-stadium-nr {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #E9C87A;
+}
+
+.ark-stadium-naam {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: #F3EEFA;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ark-stadium-doel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: #9A8FB8;
+  line-height: 1.35;
+}
+
+.ark-balk {
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.ark-balk i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #C08B4E, #E9C87A);
+  transition: width 0.35s ease;
+}
+
+/* ── Blaaie wat die hele skerm vul ── */
+.ark-blad-vol {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding: 54px 24px 34px;
+}
+
+.ark-klaar-merk {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #E9C87A;
+}
+
+.ark-nuwe-dier {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.ark-nuwe-dier span {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: #B4A9CC;
+}
+
+.ark-vers {
+  margin: 6px 0 10px;
+  padding: 16px 18px;
+  max-width: 320px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #C08B4E;
+  border-radius: 4px 12px 12px 4px;
+  font-family: Georgia, 'Noto Serif', serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #E4DDF2;
+  text-align: left;
+}
+
+.ark-vers cite {
+  display: block;
+  margin-top: 9px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 600;
+  color: #E9C87A;
+}
+
+/* ── Versameling ── */
+.ark-diere-rooster {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 330px;
+  margin: 4px 0 14px;
+}
+
+.ark-dier-blok {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+}
+
+.ark-dier-blok span {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #C4B7E8;
+}
+
+.ark-dier-blok.dof {
+  background: rgba(255, 255, 255, 0.02);
+  border-style: dashed;
+}
+
+.ark-dier-blok.dof span { color: #6B6480; }
