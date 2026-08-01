@@ -3,6 +3,19 @@
    natuurlike groen. Geen canvas, geen laag-promosie op iets wat 'n mens
    druk. Dit is die twee dinge wat in Bou die Ark op haar foon gebreek het. */
 
+.vf-tuin {
+  position: absolute;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Alles behalwe die tuin sit bo-op hom */
+.vf-oorleg > *:not(.vf-tuin) { position: relative; z-index: 1; }
+
 .vf-oorleg {
   position: fixed;
   inset: 0;
@@ -30,7 +43,6 @@
   gap: 6px;
   padding: 46px 12px 8px;
   flex: 0 0 auto;
-  background: #141B2A;
 }
 
 .vf-titel {
@@ -149,7 +161,6 @@
   align-items: center;
   justify-content: center;
   padding: 0 10px calc(var(--safe-bottom, 0px) + 14px);
-  background: #141B2A;
 }
 
 .vf-doek {

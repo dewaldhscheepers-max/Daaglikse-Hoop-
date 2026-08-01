@@ -151,9 +151,9 @@ export function maakTekenaar(doek, opsies) {
         const a = spriteBy(stap.a.k, stap.a.r), b = spriteBy(stap.b.k, stap.b.r)
         if (a && b) {
           a.doelX = b.k; a.doelY = b.r; b.doelX = a.k; b.doelY = a.r
-          await beweeg(130)
+          await beweeg(170)
           a.doelX = a.k; a.doelY = a.r; b.doelX = b.k; b.doelY = b.r
-          await beweeg(130)
+          await beweeg(170)
         }
       } else if (stap.tipe === 'ruil') {
         const ia = stap.a.r * kolomme + stap.a.k
@@ -163,9 +163,9 @@ export function maakTekenaar(doek, opsies) {
         const a = st.sprites.get(idA), b = st.sprites.get(idB)
         if (a) { a.k = stap.b.k; a.r = stap.b.r; a.doelX = a.k; a.doelY = a.r }
         if (b) { b.k = stap.a.k; b.r = stap.a.r; b.doelX = b.k; b.doelY = b.r }
-        await beweeg(150)
+        await beweeg(200)
       } else if (stap.tipe === 'kombinasie') {
-        await new Promise(res => setTimeout(res, duur(120)))
+        await new Promise(res => setTimeout(res, duur(170)))
       } else if (stap.tipe === 'vee') {
         const ids = []
         for (const [k, r] of stap.selle) {
@@ -179,7 +179,7 @@ export function maakTekenaar(doek, opsies) {
           if (v.oor <= 0) st.blokke[i] = null
           else if (st.blokke[i]) st.blokke[i].slae = v.oor
         }
-        await bars(ids, 260)
+        await bars(ids, 320)
         // nuwe spesiale vrugte verskyn waar die enjin hulle gesit het
         for (const ns of stap.spesiaalGemaak) {
           const sp = maakSprite(ns.k, ns.r, ns.vrug, ns.soort)
@@ -205,7 +205,7 @@ export function maakTekenaar(doek, opsies) {
           st.sprites.set(sp.id, sp)
           st.rooster[n.r * kolomme + n.k] = sp.id
         }
-        await beweeg(230)
+        await beweeg(300)
       }
     }
     // Sinchroniseer met die enjin, sodat 'n fout nooit kan opbou nie
@@ -214,7 +214,7 @@ export function maakTekenaar(doek, opsies) {
 
   function groei(sp) {
     const begin = performance.now()
-    const t = duur(180)
+    const t = duur(230)
     function raam(nou) {
       const p = Math.min(1, (nou - begin) / t)
       sp.skaal = 0.2 + 0.8 * (1 - Math.pow(1 - p, 3))

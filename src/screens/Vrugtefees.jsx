@@ -6,6 +6,7 @@ import {
 import { VLAKKE, vlakBy, hoofstukVan, doelTeks, doelBehaal, doelVordering } from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
+import TuinAgtergrond from '../components/TuinAgtergrond'
 import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
 import './Vrugtefees.css'
 
@@ -32,7 +33,8 @@ const STOOR   = 'vf_stoor'
 const VORDER  = 'vf_vordering'
 const RUSTIG  = 'vf_rustig'      // verminderde beweging
 
-const TEMPO = { vee: 260, val: 220, ruil: 150, terug: 150 }
+// Tempo van die animasie. Dewald wou dit 'n bietjie stadiger he.
+const TEMPO = { vee: 320, val: 300, ruil: 200, terug: 180 }
 
 function leesVordering() {
   try {
@@ -291,6 +293,9 @@ export default function Vrugtefees({ onClose }) {
 
   return (
     <div className="vf-oorleg">
+
+      {/* Die tuin agter alles. Geteken, nie 'n prentlêer nie. */}
+      <TuinAgtergrond hoofstuk={hoofstuk.vanaf === 1 ? 0 : 1} />
 
       {/* ── Le die foon regop ── */}
       <div className="vf-draai">
