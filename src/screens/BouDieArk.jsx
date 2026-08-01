@@ -429,6 +429,7 @@ export default function BouDieArk({ onClose }) {
     setStadiumNr(s.stadium)
     setVorder(0)
     setKlaar(null)
+    vuil.current = true
     setToestand('speel')
     // Kritiek: toestand was reeds 'speel', dus sou React die spel-lus se
     // effek nie weer laat loop nie en die lus bly dood. Hierdie teller
@@ -629,7 +630,16 @@ export default function BouDieArk({ onClose }) {
 
   // Stoor ook as die blaaier of tabblad weggaan
   useEffect(() => {
-    function weg() { if (spel.current.loop) { stoorSpel(); setToestand('pouse') } }
+    // Stoor sodra daar 'n spel is om te stoor — nie net wanneer die lus loop
+    // nie. Terwyl die stadium-klaar kaart wys, staan die lus stil; as jy dan
+    // die app toemaak sou niks gestoor het nie en jy sou daardie hele stadium
+    // verloor het.
+    function weg() {
+      const s = spel.current
+      if (!s.stuk) return
+      stoorSpel()
+      if (s.loop) setToestand('pouse')
+    }
     // Android maak die app dood sonder om altyd pagehide te vuur, dus is
     // visibilitychange die betroubare een. Dit moet 'n benoemde funksie wees,
     // anders kan die opruiming dit nie verwyder nie en stapel dit op.
@@ -654,8 +664,14 @@ export default function BouDieArk({ onClose }) {
     setTelling(0); setLyne(0); setStadiumNr(beginBy); setVorder(0); setKlaar(null)
     try { localStorage.removeItem(STOOR) } catch {}
     setBewaar(null)
+    // Gooi die vorige spel se stuk weg en sit dadelik 'n nuwe een neer.
+    // Voorheen het 'n setTimeout dit gedoen, en tussenin kon die lus 'n raam
+    // of twee met die ou spel se stuk teken.
+    s.stuk = null
+    plaasNuwe()
+    vuil.current = true      // anders bly die vorige spel se prent staan
     setToestand('speel')
-    setTimeout(() => plaasNuwe(), 0)
+    setRondte(r => r + 1)
   }
 
   function hervat() {
@@ -672,11 +688,24 @@ export default function BouDieArk({ onClose }) {
       s.sBesteMulti = d.sBesteMulti || 0; s.sKombo = d.sKombo || 0
       s.sTyd = d.sTyd || 0; s.sBegin = performance.now()
       s.weer = { druppels: [], water: 0 }
+
+      // As die doelwit reeds behaal is, was die stadium klaar toe die spel
+      // gestoor is — die dier is destyds toegeken. Skuif dadelik aan, anders
+      // sit jy in 'n stadium wat klaar is en moet jy nog 'n lyn maak voordat
+      // dieselfde kaart weer wys.
+      if (doelVordering(s) >= 1) {
+        s.stadium += 1
+        stoorVerste(s.stadium)
+        s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0; s.sTyd = 0
+      }
+
       const v = doelVordering(s)
       vorderRef.current = v
       setTelling(d.telling); setLyne(d.lyne); setVolgende(d.volgende)
       setStadiumNr(s.stadium); setVorder(v); setKlaar(null)
+      vuil.current = true      // die herstelde bord moet dadelik teken
       setToestand('speel')
+      setRondte(r => r + 1)
     } catch { begin() }
   }
 
@@ -720,7 +749,9 @@ export default function BouDieArk({ onClose }) {
             </svg>
           )}
         </button>
-        {toestand === 'speel' && (
+        {/* Nie terwyl die stadium-klaar kaart wys nie: pouse en dan "speel
+            verder" sou die lus agter die kaart aan die gang sit. */}
+        {toestand === 'speel' && !klaar && (
           <button className="ark-ikoon" onClick={pouseer} aria-label="Pouse">
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               <line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/>
