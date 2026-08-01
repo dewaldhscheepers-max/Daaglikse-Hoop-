@@ -123,11 +123,33 @@ export const VLAKKE = [
 ]
 
 export function vlakBy(nr) {
-  return VLAKKE.find(v => v.nr === nr) || null
+  const v = VLAKKE.find(x => x.nr === nr)
+  if (!v) return null
+  // Die skoonmaak-doelwitte kry hul telling uit die bord self, sodat 'n mens
+  // dit nie op twee plekke moet regsit nie.
+  if (v.doel.tipe === 'skoonmaak' && !v.doel.telling) v.doel.telling = blokTelling(v)
+  return v
 }
 
 export function hoofstukVan(nr) {
   return HOOFSTUKKE.find(h => nr >= h.vanaf && nr <= h.tot) || HOOFSTUKKE[0]
+}
+
+/* Die versperrings se name, sodat die doelwit kan sê wat om weg te maak
+   in plaas van 'maak die tuin skoon'. */
+export const BLOK_NAAM = {
+  [DROE_BLAAR]: { een: 'droë blaar', meer: 'droë blare' },
+  [ONKRUID]:    { een: 'onkruid',    meer: 'onkruid' },
+  [DORING]:     { een: 'doring',     meer: 'dorings' },
+  [KLIP]:       { een: 'klip',       meer: 'klippe' },
+  [KRAT]:       { een: 'krat',       meer: 'kratte' },
+}
+
+/* Hoeveel van elke soort staan op die bord aan die begin? */
+export function blokTelling(vlak) {
+  const uit = {}
+  for (const b of vlak.blokke || []) uit[b.tipe] = (uit[b.tipe] || 0) + 1
+  return uit
 }
 
 /* Wat moet die skerm as die doelwit wys? Een kort sin, in Afrikaans. */
@@ -138,7 +160,17 @@ export function doelTeks(doel, vrugNaam) {
         .map(([i, n]) => `${n} ${vrugNaam(Number(i)).toLowerCase()}`)
         .join(' en ')
     case 'punte':     return `${doel.waarde.toLocaleString('af')} punte`
-    case 'skoonmaak': return 'maak die tuin skoon'
+    case 'skoonmaak': {
+      /* Dit het net 'maak die tuin skoon' gesê, wat nooit verklap het wát
+         of hoeveel. Nou noem dit die ding by die naam. */
+      const tel = doel.telling || {}
+      const dele = doel.tipes.map(t => {
+        const n = tel[t] || 0
+        const naam = BLOK_NAAM[t] || { een: t, meer: t }
+        return n ? `${n} ${n === 1 ? naam.een : naam.meer}` : naam.meer
+      })
+      return 'verwyder ' + dele.join(' en ')
+    }
     case 'spesiaal':  return `maak ${doel.aantal} spesiale vrugte`
     case 'kombo':     return `${doel.aantal} spesiale kombinasie${doel.aantal > 1 ? 's' : ''}`
     case 'ketting':   return `'n ketting van ${doel.lengte}`

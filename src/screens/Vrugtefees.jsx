@@ -3,7 +3,7 @@ import {
   maakBord, maakRng, magRuil, doenSkuif, versekerSkuif, bedekSel,
   RYLIG, KOLOMLIG, OESKRAG, REENBOOGVRUG, FEESMANDJIE,
 } from '../game/vrugtefees/enjin'
-import { VLAKKE, vlakBy, hoofstukVan, doelTeks, doelBehaal, doelVordering } from '../data/vrugtefeesVlakke'
+import { VLAKKE, vlakBy, hoofstukVan, doelTeks, doelBehaal, doelVordering, BLOK_NAAM } from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
 import TuinAgtergrond from '../components/TuinAgtergrond'
@@ -283,6 +283,18 @@ export default function Vrugtefees({ onClose }) {
   useEffect(() => { if (teken.current) teken.current.stelRustig(rustig) }, [rustig])
 
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
+  /* Hoeveel versperrings is nog oor? Dieselfde soort toonbank as die
+     vrugte s'n, want sonder dit weet 'n mens nie hoe ver jy is nie. */
+  const blokLys = useMemo(() => {
+    if (vlak.doel.tipe !== 'skoonmaak' || !spel.current.bord) return null
+    const tel = vlak.doel.telling || {}
+    return vlak.doel.tipes.map(t => {
+      const oor = spel.current.bord.selle.filter(s => s.blok === t).length
+      const begin = tel[t] || oor
+      return { tipe: t, weg: begin - oor, begin }
+    })
+  }, [vlak, punte, tik, toestand])
+
   const versamelLys = useMemo(() => {
     if (vlak.doel.tipe !== 'versamel') return null
     const st = spel.current.stand
@@ -335,6 +347,17 @@ export default function Vrugtefees({ onClose }) {
           </div>
 
           <div className="vf-balk"><i style={{ width: `${Math.round(vorder * 100)}%` }} /></div>
+
+          {blokLys && (
+            <div className="vf-versamel">
+              {blokLys.map(b => (
+                <div key={b.tipe} className={`vf-versamel-item${b.weg >= b.begin ? ' klaar' : ''}`}>
+                  <i className={'vf-blokmerk blok-' + b.tipe} />
+                  <b>{b.weg}/{b.begin}</b>
+                </div>
+              ))}
+            </div>
+          )}
 
           {versamelLys && (
             <div className="vf-versamel">

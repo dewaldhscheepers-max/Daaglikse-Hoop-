@@ -254,27 +254,6 @@ export function maakTekenaar(doek, opsies) {
         ctx.fillRect(k * g, r * g, g, g)
       }
 
-    // versperrings onder die vrugte
-    for (let i = 0; i < st.blokke.length; i++) {
-      const b = st.blokke[i]
-      if (!b) continue
-      const k = i % kolomme, r = Math.floor(i / kolomme)
-      const [donker, lig] = BLOK_KLEUR[b.tipe] || ['#555', '#999']
-      const m = g * 0.07
-      ctx.fillStyle = donker
-      ctx.fillRect(k * g + m, r * g + m, g - m * 2, g - m * 2)
-      ctx.strokeStyle = lig
-      ctx.lineWidth = Math.max(2, g * 0.05)
-      ctx.strokeRect(k * g + m, r * g + m, g - m * 2, g - m * 2)
-      // hoeveel slae oor — stippels, sodat dit nie net kleur is nie
-      ctx.fillStyle = lig
-      for (let n = 0; n < b.slae; n++) {
-        ctx.beginPath()
-        ctx.arc(k * g + g * 0.5 + (n - (b.slae - 1) / 2) * g * 0.18, r * g + g * 0.5, g * 0.055, 0, Math.PI * 2)
-        ctx.fill()
-      }
-    }
-
     // gekose sel
     if (st.kies) {
       ctx.strokeStyle = '#E4C98A'
@@ -304,6 +283,103 @@ export function maakTekenaar(doek, opsies) {
           ctx.fillText(MERK[s.spesiaal] || '?', cx + g * 0.28, cy + g * 0.30)
         }
         ctx.globalAlpha = 1
+      }
+    }
+
+    /* Versperrings.
+       Dit was 'n plat gekleurde blok AGTER die vrug, met die slae-stippels
+       in die middel waar die vrug hulle toegemaak het. 'n Mens kon nie sien
+       wat onkruid is of hoeveel slae oor is nie.
+       Nou word elkeen geteken soos die ding wat dit is, OOR die vrug se
+       rande, en die stippels sit in die hoek waar niks hulle toemaak nie. */
+    for (let i = 0; i < st.blokke.length; i++) {
+      const b = st.blokke[i]
+      if (!b) continue
+      const k = i % kolomme, r = Math.floor(i / kolomme)
+      const x = k * g, y = r * g
+      const [donker, lig] = BLOK_KLEUR[b.tipe] || ['#555', '#999']
+
+      if (b.tipe === 'klip') {
+        // 'n Klip vat die hele sel; daar is geen vrug om te wys nie
+        ctx.fillStyle = donker
+        ctx.beginPath()
+        ctx.ellipse(x + g * 0.5, y + g * 0.56, g * 0.38, g * 0.32, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = lig
+        ctx.beginPath()
+        ctx.ellipse(x + g * 0.40, y + g * 0.44, g * 0.16, g * 0.11, -0.5, 0, Math.PI * 2)
+        ctx.fill()
+      } else if (b.tipe === 'krat') {
+        ctx.fillStyle = donker
+        ctx.fillRect(x + g * 0.12, y + g * 0.12, g * 0.76, g * 0.76)
+        ctx.strokeStyle = lig
+        ctx.lineWidth = Math.max(2, g * 0.06)
+        ctx.strokeRect(x + g * 0.12, y + g * 0.12, g * 0.76, g * 0.76)
+        ctx.beginPath()
+        ctx.moveTo(x + g * 0.12, y + g * 0.5); ctx.lineTo(x + g * 0.88, y + g * 0.5)
+        ctx.moveTo(x + g * 0.5, y + g * 0.12); ctx.lineTo(x + g * 0.5, y + g * 0.88)
+        ctx.stroke()
+      } else if (b.tipe === 'onkruid') {
+        // Rankies wat van onder af oor die vrug groei
+        ctx.strokeStyle = donker
+        ctx.lineWidth = Math.max(2, g * 0.075)
+        ctx.lineCap = 'round'
+        for (const [vx, hoogte] of [[0.24, 0.42], [0.5, 0.55], [0.76, 0.40]]) {
+          ctx.beginPath()
+          ctx.moveTo(x + g * vx, y + g * 0.96)
+          ctx.quadraticCurveTo(x + g * (vx + 0.1), y + g * (0.96 - hoogte * 0.6), x + g * vx, y + g * (0.96 - hoogte))
+          ctx.stroke()
+        }
+        ctx.fillStyle = lig
+        for (const [bx, by, rr] of [[0.20, 0.56, 0.11], [0.55, 0.42, 0.13], [0.80, 0.58, 0.10]]) {
+          ctx.beginPath()
+          ctx.ellipse(x + g * bx, y + g * by, g * rr, g * rr * 0.55, -0.7, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      } else if (b.tipe === 'doring') {
+        // Stingels met stekels wat oor die sel kruis
+        ctx.strokeStyle = donker
+        ctx.lineWidth = Math.max(2, g * 0.085)
+        ctx.lineCap = 'round'
+        ctx.beginPath()
+        ctx.moveTo(x + g * 0.10, y + g * 0.86); ctx.lineTo(x + g * 0.90, y + g * 0.16)
+        ctx.moveTo(x + g * 0.10, y + g * 0.20); ctx.lineTo(x + g * 0.90, y + g * 0.84)
+        ctx.stroke()
+        ctx.fillStyle = lig
+        for (const [tx, ty] of [[0.30, 0.68], [0.55, 0.42], [0.72, 0.66], [0.40, 0.34]]) {
+          ctx.beginPath()
+          ctx.moveTo(x + g * tx, y + g * ty)
+          ctx.lineTo(x + g * (tx + 0.11), y + g * (ty - 0.06))
+          ctx.lineTo(x + g * (tx + 0.03), y + g * (ty + 0.09))
+          ctx.closePath()
+          ctx.fill()
+        }
+      } else {
+        // droë blaar: 'n gekrulde blaar oor die onderste hoek
+        ctx.fillStyle = donker
+        ctx.beginPath()
+        ctx.ellipse(x + g * 0.34, y + g * 0.70, g * 0.28, g * 0.16, -0.6, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = lig
+        ctx.beginPath()
+        ctx.ellipse(x + g * 0.66, y + g * 0.76, g * 0.22, g * 0.13, 0.5, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.strokeStyle = lig
+        ctx.lineWidth = Math.max(1.5, g * 0.035)
+        ctx.beginPath()
+        ctx.moveTo(x + g * 0.16, y + g * 0.80); ctx.lineTo(x + g * 0.52, y + g * 0.62)
+        ctx.stroke()
+      }
+
+      /* Hoeveel slae oor. Links bo, waar die vrug niks toemaak nie. */
+      if (b.slae > 1) {
+        for (let n = 0; n < b.slae; n++) {
+          const px = x + g * 0.16 + n * g * 0.15, py = y + g * 0.15
+          ctx.fillStyle = 'rgba(10, 14, 24, 0.75)'
+          ctx.beginPath(); ctx.arc(px, py, g * 0.075, 0, Math.PI * 2); ctx.fill()
+          ctx.fillStyle = lig
+          ctx.beginPath(); ctx.arc(px, py, g * 0.05, 0, Math.PI * 2); ctx.fill()
+        }
       }
     }
 

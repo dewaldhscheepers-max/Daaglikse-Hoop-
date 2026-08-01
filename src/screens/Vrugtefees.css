@@ -386,3 +386,22 @@
   .vf-sel.skud { animation: none; }
   .vf-balk i { transition: none; }
 }
+
+/* Die merkie langs die toonbank, sodat 'n mens weet WATTER versperring
+   getel word. Dieselfde vorm as op die bord. */
+.vf-blokmerk {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.vf-blokmerk.blok-droeblaar { background: #8A6E3C; box-shadow: inset 0 0 0 2px #C9AA6E; }
+.vf-blokmerk.blok-onkruid   { background: #4E6B3A;
+  background-image: repeating-linear-gradient(60deg, #8FB268 0 2px, transparent 2px 6px); }
+.vf-blokmerk.blok-doring    { background: #6E3A46;
+  background-image: repeating-linear-gradient(-45deg, #C08090 0 2px, transparent 2px 6px); }
+.vf-blokmerk.blok-klip      { background: #4C5568; box-shadow: inset 0 3px 0 rgba(255,255,255,0.18); }
+.vf-blokmerk.blok-krat      { background: #7A5A34;
+  background-image: linear-gradient(0deg, rgba(0,0,0,0.3) 0 2px, transparent 2px),
+                    linear-gradient(90deg, rgba(0,0,0,0.3) 0 2px, transparent 2px);
+  background-size: 50% 50%; }
