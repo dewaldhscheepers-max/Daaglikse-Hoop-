@@ -840,7 +840,7 @@ export default function BouDieArk({ onClose }) {
               <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
             </svg>
           </button>
-          <button className="ark-beheer-knop" onClick={hardVal} aria-label="Laat val">
+          <button className="ark-beheer-knop ark-beheer-val" onClick={hardVal} aria-label="Laat val">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="19 9 12 16 5 9"/><line x1="5" y1="19" x2="19" y2="19"/>
             </svg>

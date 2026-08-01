@@ -280,21 +280,24 @@
   flex: 0 0 auto;
   flex-shrink: 0;
   display: flex;
-  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
   /* Ekstra ruimte onder: die onderste rand van die skerm is waar Chrome se
      adresbalk en Android se gebaarbalk lewe. As 'n knoppie daar sit, laat
      elke druk die blaaier se balk in- of uitgly. */
-  padding: 12px 14px calc(var(--safe-bottom, 0px) + 24px);
+  padding: 10px 14px calc(var(--safe-bottom, 0px) + 22px);
   background: #16121F;
 }
 
 .ark-beheer-knop {
-  flex: 1;
-  height: 58px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.075);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #D6CBF0;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2A2340;
+  border: 1px solid #4A3E6E;
+  color: #CFC2F0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,7 +307,24 @@
   transition: background-color 0.1s, border-color 0.1s;
 }
 
-.ark-beheer-knop svg { width: 24px; height: 24px; }
+.ark-beheer-knop svg { width: 21px; height: 21px; }
+
+/* Die laat-val-knoppie is die een wat die stuk vasmaak. Goud merk dit as
+   die daad-knoppie, in lyn met die res van die app. */
+.ark-beheer-val {
+  width: 54px;
+  height: 54px;
+  background: #3A2E4E;
+  border-color: #A98436;
+  color: #EBCB84;
+}
+
+.ark-beheer-val svg { width: 24px; height: 24px; }
+
+.ark-beheer-val:active {
+  background: #4C3C60;
+  border-color: #D9AE4A;
+}
 
 /* Hierdie knoppie het 'n transform: scale() gehad wanneer jy dit druk.
    'n transform dwing die blaaier om 'n eie grafiese laag vir die element
@@ -315,8 +335,8 @@
    waarom dit erger word hoe meer sy aan die knoppies raak.
    Kleur alleen verf net; dit skep nooit 'n laag nie. */
 .ark-beheer-knop:active {
-  background: rgba(196, 183, 232, 0.24);
-  border-color: rgba(196, 183, 232, 0.45);
+  background: #453A66;
+  border-color: #7C6FAF;
 }
 
 /* ── Stadium-strook ── */
