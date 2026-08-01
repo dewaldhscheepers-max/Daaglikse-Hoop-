@@ -321,16 +321,51 @@ $('#chap').addEventListener('click', async () => {
   if (!key) { card('Fout', '<span class="bad">Plak eers jou App Key hierbo.</span>'); return; }
 
   $('#chap').disabled = true;
-  card('Besig...', '<span class="muted">Haal Johannes 3...</span>');
+  card('Besig...', '<span class="muted">Soek die endpunt wat werklike teks gee...</span>');
 
-  // 3034 is die voorbeeld-id uit YouVersion se eie dokumentasie
-  const r = await tryGet('/bibles/3034/books/JHN/chapters/3/verses', key);
+  // /verses gee net struktuur. Soek die een wat regte woorde teruggee.
+  const kandidate = [
+    '/bibles/3034/books/JHN/chapters/3',
+    '/bibles/3034/books/JHN/chapters/3?include_content=true',
+    '/bibles/3034/books/JHN/chapters/3/verses?include_content=true',
+    '/bibles/3034/passages/JHN.3.16',
+    '/bibles/3034/passages?ids=JHN.3.16',
+    '/bibles/3034/verses/JHN.3.16',
+    '/bibles/3034/books/JHN/chapters/3/verses/16',
+    '/passages/JHN.3.16?bible_id=3034',
+  ];
+
+  const uitslae = [];
+  let wenner = null;
+  for (const c of kandidate) {
+    const r = await tryGet(c, key, 'query');
+    // "regte teks" = 'n string van meer as 25 karakters wat spasies bevat
+    const hetTeks = /"[^"]{25,}\s[^"]{10,}"/.test(r.text || '');
+    uitslae.push({ ...r, hetTeks });
+    if (r.ok && hetTeks) { wenner = r; break; }
+  }
+
   out.innerHTML = '';
 
-  card('Hoofstuk-toets', '<div class="row">Endpunt: <code>' + r.url.replace(BASE, '') + '</code></div>'
-     + '<div class="row">Status: <b class="' + (r.ok ? 'ok' : 'bad') + '">HTTP ' + r.status + '</b></div>');
+  let h = '';
+  uitslae.forEach(u => {
+    h += '<div class="row"><code>' + decodeURIComponent(u.url.replace(BASE, '').split('&x-yvp')[0]) + '</code> → '
+       + '<b class="' + (u.ok ? 'ok' : 'bad') + '">HTTP ' + u.status + '</b>'
+       + (u.hetTeks ? ' <b class="ok">· TEKS!</b>' : '') + '</div>';
+  });
+  card('Kandidate', h);
 
-  card('Antwoord', '<pre>' + (r.text || '(leeg)').slice(0, 3000).replace(/</g, '&lt;') + '</pre>');
+  if (wenner) {
+    card('Gevind', '<p class="ok">Hierdie endpunt gee die teks:</p>'
+       + '<div class="row"><code>' + decodeURIComponent(wenner.url.replace(BASE, '').split('&x-yvp')[0]) + '</code></div>');
+    card('Antwoord', '<pre>' + (wenner.text || '').slice(0, 2500).replace(/</g, '&lt;') + '</pre>');
+  } else {
+    card('Geen teks', '<p class="bad">Geen kandidaat het teks teruggegee nie.</p>'
+       + '<p class="muted">Rou antwoorde van die eerste twee wat HTTP 200 gegee het:</p>'
+       + uitslae.filter(u => u.ok).slice(0, 2).map(u =>
+           '<p class="muted"><code>' + decodeURIComponent(u.url.replace(BASE, '').split('&x-yvp')[0]) + '</code></p><pre>'
+           + (u.text || '(leeg)').slice(0, 800).replace(/</g, '&lt;') + '</pre>').join(''));
+  }
 
   $('#chap').disabled = false;
 });
