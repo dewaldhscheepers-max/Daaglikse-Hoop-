@@ -160,7 +160,8 @@
   max-width: 100%;
   max-height: 100%;
   aspect-ratio: 1 / 2;
-  border-radius: 12px;
+  /* Geen border-radius hier nie — die ronding word binne die doek geteken.
+     'n Afgeronde rand op 'n saamgestelde element dwing 'n masker-laag. */
   /* Geen laag-promosie (transform / will-change / box-shadow) nie. 'n
      Gepromoveerde doek laat sommige Android-GPU's ou laag-inhoud langs die
      rande wys — dit was die strepe. */

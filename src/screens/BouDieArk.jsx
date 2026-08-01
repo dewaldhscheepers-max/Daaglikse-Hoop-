@@ -117,13 +117,27 @@ function bots(bord, stuk) {
   })
 }
 
+/* Die bord se afgeronde hoeke. Dit was 'n border-radius in CSS, maar 'n
+   afgeronde rand op 'n saamgestelde laag dwing die blaaier om 'n masker-laag
+   te maak — nog 'n laag wat op haar foon ongeverf gewys kan word. Ons teken
+   die ronding nou binne-in die doek, dus lyk dit presies dieselfde en is
+   daar geen masker nie. */
+function bordRonding(w) {
+  return Math.max(6, (w / KOL) * 0.6)
+}
+
 /* Die stil agtergrond: agtergrondkleur, wolke en die leë selle. Word een
    keer gebou en daarna net oorgeplak. */
 function bouAgtergrond(w, h, stNr) {
   const c = document.createElement('canvas')
   c.width = w; c.height = h
-  const g = c.getContext('2d')
+  const g = c.getContext('2d', { willReadFrequently: true })
   const bg = w / KOL
+
+  // Alles binne die afgeronde vorm; die hoeke bly deursigtig.
+  g.beginPath()
+  ronde(g, 0, 0, w, h, bordRonding(w))
+  g.clip()
 
   g.fillStyle = stNr >= WOLKE_VANAF ? '#141020' : '#1B1626'
   g.fillRect(0, 0, w, h)
@@ -241,7 +255,15 @@ export default function BouDieArk({ onClose }) {
     const doek = doekRef.current
     if (!doek) return
     vuil.current = false
-    const ctx = doek.getContext('2d')
+    /* willReadFrequently laat Chrome die doek op die SVE hou in plaas van
+       op die GPU. Dit is die hele punt hier: 'n GPU-doek is 'n aparte
+       grafiese laag, en alles wat ná daardie laag kom — die knoppiebalk —
+       beland in 'n eie laag daarbo. Op haar foon word daardie laag gewys
+       voordat dit geverf is, en dan sien sy rou geheue. Vredepad het geen
+       doek nie, en daarom glitch Vredepad nie.
+       Die bord is klein en word net herteken wanneer iets verander, dus
+       kos die SVE-pad ons niks wat 'n mens kan sien nie. */
+    const ctx = doek.getContext('2d', { willReadFrequently: true })
     const s   = spel.current
     const bg  = doek.width / KOL
 
@@ -252,8 +274,14 @@ export default function BouDieArk({ onClose }) {
     if (agtergrond.current.sleutel !== sleutel) {
       agtergrond.current = { sleutel, doek: bouAgtergrond(doek.width, doek.height, st.nr) }
     }
-    // Ondeursigtig en vol grootte, dus is 'n clearRect onnodig.
+    // Die agtergrond se hoeke is deursigtig, dus moet ons wel skoonmaak.
+    ctx.clearRect(0, 0, doek.width, doek.height)
     ctx.drawImage(agtergrond.current.doek, 0, 0)
+    // Alles hierna bly binne die afgeronde bord.
+    ctx.save()
+    ctx.beginPath()
+    ronde(ctx, 0, 0, doek.width, doek.height, bordRonding(doek.width))
+    ctx.clip()
 
     const blok = (x, y, kleur, deurskyn) => {
       if (y < 0) return
@@ -305,6 +333,7 @@ export default function BouDieArk({ onClose }) {
       selle(skadu).forEach(([x, y]) => blok(x, y, STUKKE[s.stuk.tipe].kleur, true))
       selle(s.stuk).forEach(([x, y]) => blok(x, y, STUKKE[s.stuk.tipe].kleur, false))
     }
+    ctx.restore()
   }, [])
 
   /* ── Grootte pas by die skerm ──
