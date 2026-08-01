@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
-import { STADIUMS, stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF } from '../data/arkStadiums'
+import {
+  STADIUMS, GROEPE, ALLE_DIERE, ARK_KLAAR,
+  stadiumBy, doelTeks, WOLKE_VANAF, REEN_VANAF, WATER_VANAF,
+} from '../data/arkStadiums'
 import { Dier, dierNaam } from '../data/arkDiere'
 import {
   leesNaam, stoorNaam, keurNaam, haalRanglys, kasLys,
@@ -469,8 +472,9 @@ export default function BouDieArk({ onClose }) {
     // se toestand heel bly: "Hou hier op" moet kan stoor, en die lus moet iets
     // he om te laat val wanneer jy weer begin.
     if (!s.stuk && !plaasNuwe()) return    // die ark het volgeraak
-    // Stadium 12 is die einde van Noag se verhaal. Dit verdien 'n eie oomblik.
-    setKlaar({ ...st, reeds, finale: st.nr === STADIUMS.length })
+    /* Twee oomblikke verdien meer as 'n gewone kaart: wanneer die ark klaar
+       gebou is, en heel laaste wanneer Noag en sy gesin aan boord gaan. */
+    setKlaar({ ...st, reeds, arkKlaar: st.nr === ARK_KLAAR, finale: st.nr === STADIUMS.length })
     playLevelComplete()
   }, [plaasNuwe])
 
@@ -917,7 +921,7 @@ export default function BouDieArk({ onClose }) {
      nie. Vir 'n spel wat "Bou die Ark" heet, was dit die verkeerde ding om
      te wys. Nou styg dit oor die twaalf stadiums heen en bly dan vol. */
   const arkVordering = useMemo(
-    () => Math.min(1, Math.max(0, (stadiumNr - 1 + vorder) / STADIUMS.length)),
+    () => Math.min(1, Math.max(0, (stadiumNr - 1 + vorder) / ARK_KLAAR)),
     [stadiumNr, vorder]
   )
 
@@ -933,7 +937,6 @@ export default function BouDieArk({ onClose }) {
     const rang = beter + 1
     return { rang, uit: Math.max(ranglys.totaal || ranglys.lys.length, rang) }
   }, [ranglys, stadiumNr, telling])
-  const ALLE_DIERE = ['duif','skaap','bok','olifant','kameel','perd','leeu','sebra','giraf','beer','haas','vos']
 
   return (
     <div className="ark-overlay">
@@ -1107,41 +1110,64 @@ export default function BouDieArk({ onClose }) {
       {klaar && (
         <div className="ark-blad ark-blad-vol">
           <span className="ark-klaar-merk">
-            {klaar.finale ? 'Die verhaal is volledig' : `Stadium ${klaar.nr} voltooi`}
+            {klaar.finale   ? 'Almal is aan boord'
+             : klaar.arkKlaar ? 'Die ark is klaar gebou'
+             : `Stadium ${klaar.nr} voltooi`}
           </span>
-          <h2 className="ark-blad-titel">{klaar.finale ? 'Die ark is klaar' : klaar.naam}</h2>
+          <h2 className="ark-blad-titel">
+            {klaar.finale ? 'Die deur gaan toe' : klaar.arkKlaar ? 'Die ark is klaar' : klaar.naam}
+          </h2>
 
           <div className="ark-nuwe-dier">
-            <Dier id={klaar.dier} grootte={klaar.finale ? 76 : 104} paar />
+            <Dier id={klaar.dier} grootte={klaar.finale || klaar.arkKlaar ? 80 : 104} paar={!klaar.finale} />
             <span>
-              {klaar.reeds
-                ? `${dierNaam(klaar.dier)} — reeds aan boord`
-                : `${dierNaam(klaar.dier)} — 'n paar aan boord`}
+              {klaar.finale
+                ? 'Agt mense, en elke dier twee-twee'
+                : klaar.reeds
+                  ? `${dierNaam(klaar.dier)} — reeds aan boord`
+                  : `${dierNaam(klaar.dier)} — 'n paar aan boord`}
             </span>
           </div>
 
           {/* Die einde van Noag se verhaal. Die volle ark, die reënboog, en
               'n eerlike woord oor wat hierna kom: die reis hou aan, maar die
               verhaal het 'n einde gehad. */}
-          {klaar.finale && (
+          {(klaar.arkKlaar || klaar.finale) && (
             <div className="ark-finale">
               <ArkBou vordering={1} grootte="groot" />
-              <p className="ark-blad-teks">
-                Al twaalf stadiums is agter die rug en al die diere is aan boord.
-              </p>
-              <blockquote className="ark-vers">
-                My reënboog plaas Ek in die wolke; dit sal die teken wees van die verbond
-                tussen My en die aarde.
-                <cite>Genesis 9:13</cite>
-              </blockquote>
-              <p className="ark-fyndruk">
-                Die reis gaan voort met nuwe stadiums, maar die ark staan.
-              </p>
+              {klaar.arkKlaar ? (
+                <>
+                  <p className="ark-blad-teks">
+                    Die hout is gelê en die dak is op. Nou kan die diere kom.
+                  </p>
+                  <blockquote className="ark-vers">
+                    Noag het alles gedoen net soos God hom beveel het.
+                    <cite>Genesis 6:22</cite>
+                  </blockquote>
+                  <p className="ark-fyndruk">
+                    Van hier af kom die diere twee-twee aan boord.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="ark-blad-teks">
+                    Al {ALLE_DIERE.length} is aan boord — die ark, die diere, en die gesin.
+                  </p>
+                  <blockquote className="ark-vers">
+                    My reënboog plaas Ek in die wolke; dit sal die teken wees van die verbond
+                    tussen My en die aarde.
+                    <cite>Genesis 9:13</cite>
+                  </blockquote>
+                  <p className="ark-fyndruk">
+                    Die reis gaan voort met nuwe stadiums, maar die verhaal is klaar.
+                  </p>
+                </>
+              )}
             </div>
           )}
 
 
-          {!klaar.finale && (
+          {!klaar.finale && !klaar.arkKlaar && (
             <blockquote className="ark-vers">
               {klaar.vers}
               <cite>{klaar.ref}</cite>
@@ -1169,17 +1195,31 @@ export default function BouDieArk({ onClose }) {
         <div className="ark-blad ark-blad-vol">
           <h2 className="ark-blad-titel">My diere</h2>
           <p className="ark-blad-teks">Elke voltooide stadium bring 'n paar aan boord.</p>
-          <div className="ark-diere-rooster">
-            {ALLE_DIERE.map(id => {
-              const het = diere.includes(id)
-              return (
-                <div key={id} className={`ark-dier-blok${het ? '' : ' dof'}`}>
-                  <Dier id={id} grootte={56} paar dof={!het} />
-                  <span>{het ? dierNaam(id) : '—'}</span>
+
+          {/* In groepe, want sewe-en-dertig in een ry lees soos 'n lys. */}
+          {GROEPE.map(groep => {
+            const idsInGroep = ALLE_DIERE.slice(groep.vanaf - 1, groep.tot)
+            const het = idsInGroep.filter(id => diere.includes(id)).length
+            return (
+              <div key={groep.naam} className="ark-groep">
+                <div className="ark-groep-kop">
+                  <span>{groep.naam}</span>
+                  <b>{het} / {idsInGroep.length}</b>
                 </div>
-              )
-            })}
-          </div>
+                <div className="ark-diere-rooster">
+                  {idsInGroep.map(id => {
+                    const gekry = diere.includes(id)
+                    return (
+                      <div key={id} className={`ark-dier-blok${gekry ? '' : ' dof'}`}>
+                        <Dier id={id} grootte={52} paar={id !== 'noag'} dof={!gekry} />
+                        <span>{gekry ? dierNaam(id) : '—'}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
           <button className="ark-knop ark-knop-primer" onClick={() => setWysDiere(false)}>Terug</button>
         </div>
       )}

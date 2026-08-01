@@ -717,3 +717,34 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ── Versameling in groepe ── */
+.ark-groep {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 16px;
+}
+
+.ark-groep-kop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 2px 7px;
+  border-bottom: 1px solid rgba(196, 183, 232, 0.16);
+  margin-bottom: 10px;
+}
+
+.ark-groep-kop span {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: #E9C87A;
+}
+
+.ark-groep-kop b {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8E82AE;
+  font-variant-numeric: tabular-nums;
+}

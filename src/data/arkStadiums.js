@@ -48,7 +48,106 @@ export const STADIUMS = [
 
   { naam: 'Die Ark Dryf',       doel: { tipe: 'kombo',   waarde: 3  }, dier: 'vos',
     vers: 'God het aan Noag gedink en aan al die diere by hom in die ark.', ref: 'Genesis 8:1' },
+
+  /* ── Groep 2: Die diere van die veld (13–24) ── */
+
+  { naam: 'Die Osse Kom',       doel: { tipe: 'lyne',    waarde: 10 }, dier: 'os',
+    vers: 'Jy mag nie ’n bees se bek toebind as hy graan dors nie.', ref: 'Deuteronomium 25:4' },
+
+  { naam: 'Die Beeste Wei',     doel: { tipe: 'punte',   waarde: 4000 }, dier: 'bees',
+    vers: 'Uit die Nyl het sewe koeie opgekom, mooi en vet, en hulle het in die rietgras gewei.', ref: 'Genesis 41:2' },
+
+  { naam: 'Die Donkie Praat',   doel: { tipe: 'lyne',    waarde: 12 }, dier: 'donkie',
+    vers: 'Die Here het die donkie laat praat, en sy het vir Bileam gese: Wat het ek jou aangedoen?', ref: 'Numeri 22:28' },
+
+  { naam: 'Die Muil van die Koning', doel: { tipe: 'multi', waarde: 2 }, dier: 'muil',
+    vers: 'Laat Salomo op my eie muil ry en bring hom af na Gihon toe.', ref: '1 Konings 1:33' },
+
+  { naam: 'Die Ram in die Bos', doel: { tipe: 'lyne',    waarde: 14 }, dier: 'ram',
+    vers: 'Abraham het opgekyk en agter hom ’n ram gesien wat met sy horings in die bos vasgevang was.', ref: 'Genesis 22:13' },
+
+  { naam: 'Die Vetgemaakte Kalf', doel: { tipe: 'punte', waarde: 5500 }, dier: 'kalf',
+    vers: 'Bring die vetgemaakte kalf, slag hom, en laat ons eet en feesvier.', ref: 'Lukas 15:23' },
+
+  { naam: 'Die Varke van die Vreemde', doel: { tipe: 'lyne', waarde: 16 }, dier: 'vark',
+    vers: 'Hy het hom in diens gestel by een van die burgers van daardie land, wat hom uitgestuur het om varke op te pas.', ref: 'Lukas 15:15' },
+
+  { naam: 'Die Honde onder die Tafel', doel: { tipe: 'kombo', waarde: 3 }, dier: 'hond',
+    vers: 'Ja, Here, maar die hondjies eet tog van die krummels wat van hulle base se tafel afval.', ref: 'Matteus 15:27' },
+
+  { naam: 'Die Kraai Vlieg Uit', doel: { tipe: 'lyne',   waarde: 18 }, dier: 'kraai',
+    vers: 'Hy het ’n kraai uitgestuur, en die het heen en weer gevlieg totdat die water op die aarde opgedroog het.', ref: 'Genesis 8:7' },
+
+  { naam: 'Op Arendsvlerke',    doel: { tipe: 'oorleef', waarde: 75 }, dier: 'arend',
+    vers: 'Julle het self gesien wat Ek aan Egipte gedoen het, en hoe Ek julle op arendsvlerke gedra en na My toe gebring het.', ref: 'Eksodus 19:4' },
+
+  { naam: 'Nie Een Mossie Nie', doel: { tipe: 'multi',   waarde: 3 }, dier: 'mossie',
+    vers: 'Word twee mossies nie vir ’n sent verkoop nie? En nie een van hulle sal op die grond val sonder julle Vader nie.', ref: 'Matteus 10:29' },
+
+  { naam: 'Die Volstruis se Vlerk', doel: { tipe: 'lyne', waarde: 20 }, dier: 'volstruis',
+    vers: 'Die volstruis klap vrolik met haar vlerke.', ref: 'Job 39:13' },
+
+  /* ── Groep 3: Die wilde diere (25–36) ── */
+
+  { naam: 'Die Wolf en die Lam', doel: { tipe: 'lyne',   waarde: 22 }, dier: 'wolf',
+    vers: 'Die wolf sal by die lam bly kuier, en die luiperd by die bokkie gaan le.', ref: 'Jesaja 11:6' },
+
+  { naam: 'Die Luiperd se Vlekke', doel: { tipe: 'punte', waarde: 8000 }, dier: 'luiperd',
+    vers: 'Kan ’n Kussiet sy vel verander, of ’n luiperd sy vlekke?', ref: 'Jeremia 13:23' },
+
+  { naam: 'Die Slang in die Tuin', doel: { tipe: 'lyne', waarde: 24 }, dier: 'slang',
+    vers: 'Die slang was listiger as al die wilde diere wat die Here God gemaak het.', ref: 'Genesis 3:1' },
+
+  { naam: 'Leviatan',           doel: { tipe: 'oorleef', waarde: 90 }, dier: 'krokodil',
+    vers: 'Kan jy Leviatan met ’n vishoek uittrek?', ref: 'Job 41:1' },
+
+  { naam: 'Die Skilpad',        doel: { tipe: 'lyne',    waarde: 26 }, dier: 'skilpad',
+    vers: 'Dit is die diere wat op die grond kruip en wat vir julle onrein is: die mol, die muis en die skilpad.', ref: 'Levitikus 11:29' },
+
+  { naam: 'Die Muis',           doel: { tipe: 'kombo',   waarde: 3 }, dier: 'muis',
+    vers: 'Dit is die diere wat op die grond kruip en wat vir julle onrein is: die mol, die muis en die skilpad.', ref: 'Levitikus 11:29' },
+
+  { naam: 'Die Sprinkane Kom',  doel: { tipe: 'lyne',    waarde: 28 }, dier: 'sprinkaan',
+    vers: 'Die sprinkane het oor die hele Egipte getrek en in die hele gebied van Egipte gaan sit.', ref: 'Eksodus 10:14' },
+
+  { naam: 'Die Kwartels in die Aand', doel: { tipe: 'punte', waarde: 11000 }, dier: 'kwartel',
+    vers: 'Daardie aand het kwartels opgekom en die kamp oordek.', ref: 'Eksodus 16:13' },
+
+  { naam: 'Die Groot Vis',      doel: { tipe: 'lyne',    waarde: 30 }, dier: 'vis',
+    vers: 'Die Here het ’n groot vis beskik om Jona in te sluk, en Jona was drie dae en drie nagte in die maag van die vis.', ref: 'Jona 1:17' },
+
+  { naam: 'Die Ape van Tarsis', doel: { tipe: 'multi',   waarde: 3 }, dier: 'aap',
+    vers: 'Elke drie jaar het die skepe van Tarsis goud, silwer, ivoor, ape en poue gebring.', ref: '1 Konings 10:22' },
+
+  { naam: 'Die Poue van Tarsis', doel: { tipe: 'lyne',   waarde: 32 }, dier: 'pou',
+    vers: 'Elke drie jaar het die skepe van Tarsis goud, silwer, ivoor, ape en poue gebring.', ref: '1 Konings 10:22' },
+
+  { naam: 'Die Jakkalse',       doel: { tipe: 'punte',   waarde: 15000 }, dier: 'jakkals',
+    vers: 'Simson het gaan drie honderd jakkalse gevang.', ref: 'Rigters 15:4' },
+
+  /* ── Die laaste stadium: die gesin gaan in ── */
+
+  { naam: 'Noag en Sy Gesin',   doel: { tipe: 'oorleef', waarde: 120 }, dier: 'noag',
+    vers: 'Op daardie selfde dag het Noag in die ark gegaan, en Sem, Gam en Jafet, die seuns van Noag, en Noag se vrou en die drie vroue van sy seuns saam met hulle.', ref: 'Genesis 7:13' },
 ]
+
+/* Die ark self word in die eerste twaalf stadiums gebou. Daarna kom die
+   diere aan boord, en heel laaste Noag en sy gesin. Die tekening van die
+   ark vul dus oor die eerste twaalf en bly daarna vol. */
+export const ARK_KLAAR = 12
+
+/* Die drie groepe plus die gesin. Die versamelskerm wys hulle so, want
+   sewe-en-dertig diere in een lang ry lees soos 'n lys en nie soos 'n ark
+   wat vol word nie. */
+export const GROEPE = [
+  { naam: 'Die Ark',                vanaf: 1,  tot: 12 },
+  { naam: 'Die Diere van die Veld', vanaf: 13, tot: 24 },
+  { naam: 'Die Wilde Diere',        vanaf: 25, tot: 36 },
+  { naam: 'Die Gesin',              vanaf: 37, tot: 37 },
+]
+
+// Elke stadium se dier, in volgorde. Die spel se enigste bron hiervoor.
+export const ALLE_DIERE = STADIUMS.map(s => s.dier)
 
 // Ná die verhaal loop dit voort: dieselfde soorte doelwitte, stadig groter.
 const HERHAAL = ['lyne', 'punte', 'multi', 'oorleef', 'lyne', 'kombo']
