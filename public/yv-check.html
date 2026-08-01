@@ -85,16 +85,23 @@ function card(title, inner) {
   return d;
 }
 
-async function tryGet(path, key) {
-  const url = BASE + path;
+// mode 'query' = sleutel as query-parameter, GEEN pasgemaakte koppe → geen CORS-preflight
+async function tryGet(path, key, mode) {
+  let url = BASE + path;
+  let opts = {};
+  if (mode === 'query') {
+    url += (url.includes('?') ? '&' : '?') + 'x-yvp-app-key=' + encodeURIComponent(key);
+  } else {
+    opts = { headers: { 'X-YVP-App-Key': key, 'accept': 'application/json' } };
+  }
   try {
-    const r = await fetch(url, { headers: { 'X-YVP-App-Key': key, 'accept': 'application/json' } });
+    const r = await fetch(url, opts);
     const text = await r.text();
     let json = null;
     try { json = JSON.parse(text); } catch (_) {}
-    return { url, status: r.status, ok: r.ok, json, text };
+    return { url, status: r.status, ok: r.ok, json, text, mode };
   } catch (err) {
-    return { url, status: 0, ok: false, json: null, text: 'NETWERKFOUT: ' + err.message };
+    return { url, status: 0, ok: false, json: null, text: 'NETWERKFOUT: ' + err.message, mode };
   }
 }
 
@@ -145,18 +152,20 @@ $('#go').addEventListener('click', async () => {
   // Toets albei basisse: met /v1 en sonder
   const BASES = ['https://api.youversion.com/v1', 'https://api.youversion.com'];
 
+  // QUERY EERSTE — geen pasgemaakte koppe, dus geen CORS-preflight
   outer:
-  for (const base of BASES) {
-    BASE = base;
-    for (const p of paths) {
-      const r = await tryGet(p, key);
-      r.base = base;
-      attempts.push(r);
-      const l = extractList(r.json);
-      if (r.ok && l && l.length) { winner = r; break outer; }
+  for (const mode of ['query', 'header']) {
+    for (const base of BASES) {
+      BASE = base;
+      for (const p of paths) {
+        const r = await tryGet(p, key, mode);
+        r.base = base;
+        attempts.push(r);
+        const l = extractList(r.json);
+        if (r.ok && l && l.length) { winner = r; break outer; }
+      }
+      if (attempts.some(a => a.base === base && a.mode === mode && a.status > 0)) break;
     }
-    // as die kontrole 'n regte HTTP-status gee, is hierdie basis lewendig
-    if (attempts.some(a => a.base === base && a.status > 0)) break;
   }
   BASE = 'https://api.youversion.com/v1';
 
@@ -169,8 +178,9 @@ $('#go').addEventListener('click', async () => {
       const l = extractList(a.json);
       const pad = a.url.replace(a.base, '');
       const dood = a.status === 0;
-      h += '<div class="row"><span class="muted">' + a.base.replace('https://api.youversion.com', '') + '</span> '
-         + '<code>' + decodeURIComponent(pad) + '</code> → '
+      h += '<div class="row"><b style="color:#7C6FAF">' + (a.mode === 'query' ? 'QUERY' : 'KOP') + '</b> '
+         + '<span class="muted">' + (a.base.replace('https://api.youversion.com', '') || '/') + '</span> '
+         + '<code>' + decodeURIComponent(pad).split('&x-yvp')[0] + '</code> → '
          + '<b class="' + (dood ? 'bad' : 'ok') + '">HTTP ' + a.status + '</b>'
          + (dood ? ' <span class="muted">(nooit deurgekom)</span>' : '')
          + (l ? ' · <b>' + l.length + '</b> weergawes' : '') + '</div>';
