@@ -142,6 +142,16 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     }),
   ]
 
+  // Omslae vir die Leesplanne-kaart — Bybel Maklik Gemaak, Rustelose Gedagtes, Dink Nuut
+  const LP_PROMO_IDS = ['bybel-hulpbron', 'rustelose-gedagtes', 'dink-nuut-leef-nuut']
+  const lpPromoCovers = LP_PROMO_IDS
+    .map(id => {
+      const ov = bookOverrides[id] || {}
+      const st = BOOKS.find(b => b.id === id) || {}
+      return ov.coverUrl || st.coverUrl || null
+    })
+    .filter(Boolean)
+
   const totalBooks = rgCount + 3000 + liveCount
   const totalValue = rgCount * 110 + 150000 + liveValue
 
@@ -204,9 +214,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           onClick={() => setShowLeesplanne(true)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowLeesplanne(true) }}
         >
-          <div className="lp-promo-left">
-            <h2 className="lp-promo-title">Leesplanne</h2>
-            <p className="lp-promo-sub">Kort en langer Bybelse leesplanne wat jy dag vir dag kan volg. Almal gratis.</p>
+          <div className="lp-promo-row">
+            <div className="lp-promo-left">
+              <h2 className="lp-promo-title">Leesplanne</h2>
+              <p className="lp-promo-sub">Kort en langer Bybelse leesplanne wat jy dag vir dag kan volg. Almal gratis.</p>
+            </div>
+            {lpPromoCovers.length > 0 && (
+              <div className="lp-promo-covers" aria-hidden="true">
+                {lpPromoCovers.map((src, i) => (
+                  <div key={i} className="lp-promo-cover">
+                    <img src={src} alt="" loading="lazy" draggable="false" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button className="lp-promo-btn" onClick={e => { e.stopPropagation(); setShowLeesplanne(true) }}>
             SIEN PLANNE →
