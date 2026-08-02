@@ -53,7 +53,19 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  height: 100dvh;
+  /* svh, NIE dvh nie.
+
+     dvh is die "dinamiese" uitkyk: dit verander saam met Chrome se
+     adresbalk. Op 'n foon beteken dit die HELE app-omhulsel word by elke
+     raam van daardie animasie hervorm — 'n volle uitleg en herverf, wat
+     die kompositor dwing om nuwe teels toe te ken. Op een spesifieke
+     Android-SVE wys 'n vars teel ongeinisialiseerde geheue as gekleurde
+     strepe.
+
+     svh is die klein uitkyk: dit staan stil. Die reel is lankal in die
+     speletjies toegepas maar nooit hier in die omhulsel nie, en die
+     omhulsel dra elke skerm. */
+  height: 100svh;
   max-width: 480px;
   margin: 0 auto;
   position: relative;
@@ -106,13 +118,24 @@ body {
   line-height: 1;
 }
 
-.nav-bybel:active { transform: translateX(-50%) scale(0.93); }
+/* Geen scale nie. 'n transform op :active maak en breek 'n saamgestelde
+   laag by elke druk, en op een spesifieke Android-SVE wys daardie nuwe laag
+   ongeinisialiseerde geheue as gekleurde strepe. Dit is presies wat Bou die
+   Ark se strepe was. Die reel is in die speletjies toegepas maar nooit hier
+   in die globale nav nie, en hierdie nav sit onder ELKE skerm.
+   Ons verander net kleur. */
+.nav-bybel:active { background: #2A2340; }
 
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Gesentreer met marges, nie met 'n transform nie. 'n Permanente
+     transform op 'n position:fixed element maak dit vir altyd 'n eie
+     saamgestelde laag, en dit sit onder elke skerm in die app. Dieselfde
+     plek, sonder die laag. */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 480px;
   height: calc(var(--nav-height) + var(--safe-bottom));

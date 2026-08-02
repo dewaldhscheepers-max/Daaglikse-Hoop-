@@ -134,7 +134,23 @@ export default function TuinAgtergrond({ hoofstuk = 0 }) {
       <rect width="160" height="280" fill={`url(#${id}-verdof)`} />
       </svg>
 
-      <img className="vf-tuin-prent" src={prent} alt="" aria-hidden="true" loading="eager" />
+      {/* Die geskilderde tuin as 'n CSS-agtergrond, nie 'n <img> nie.
+
+          'n Volskerm <img> is die grootste tekstuur in die hele app, en
+          Chrome gee so iets maklik sy EIE saamgestelde laag. Op haar foon
+          het presies daardie laag rou geheue as gekleurde strepe gewys —
+          die strepe het gelyk soos 'n horisontaal gesmeerde foto, wat is
+          wat 'n mens sien as 'n beeldtekstuur met die verkeerde stride
+          gelees word.
+
+          'n CSS-agtergrond word in die ouer se laag geverf in plaas van sy
+          eie te kry. Presies dieselfde beeld, dieselfde snit, een laag
+          minder om te breek. */}
+      <div
+        className="vf-tuin-prent"
+        style={{ backgroundImage: `url(${prent})` }}
+        aria-hidden="true"
+      />
       <div className="vf-tuin-sluier" />
     </div>
   )

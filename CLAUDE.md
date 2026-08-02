@@ -86,6 +86,30 @@ Vier reels geld sedertdien oral waar daar 'n `<canvas>` is:
 Verwant: gebruik `100svh`, nie `100dvh` nie. `dvh` verander saam met die
 adresbalk. `inset: 0` word teen die *groot* uitkyk gemeet.
 
+**Die reels geld vir die HELE app, nie net die speletjies nie.** Die strepe
+het in Vrugtefees teruggekom nadat albei speletjies self skoon was, en die
+oorsake het buite hulle gele:
+
+* `.app` in `index.css` was `100dvh`. Die hele omhulsel is by elke raam van
+  die adresbalk se animasie hervorm, en die omhulsel dra elke skerm.
+* `.nav-bybel:active` het nog `transform: scale(0.93)` gehad — presies die
+  Ark se oorspronklike oorsaak, in die globale nav wat onder elke skerm sit.
+* `.bottom-nav` was met `transform: translateX(-50%)` gesentreer, wat dit vir
+  altyd 'n eie saamgestelde laag maak. Sentreer met marges.
+
+**'n Volskerm `<img>` is die grootste tekstuur in die app** en Chrome gee dit
+maklik sy eie laag. Vrugtefees se geskilderde tuin was so 'n `<img>`; die
+strepe het gelyk soos 'n horisontaal gesmeerde foto, wat is wat 'n mens sien
+as 'n beeldtekstuur met die verkeerde stride gelees word. Dit is nou 'n
+CSS-`background-image` op 'n ONDEURSIGTIGE houer: dit word in die ouer se
+laag geverf, en 'n ongeverfde teel wys die agtergrondkleur in plaas van
+gemors.
+
+Daar is nog `transform: scale()` op `:active` in Luister, BidSaam, BidNou,
+Bybel, Vredepad en ander. Hulle is nog nie aangeraak nie omdat daardie
+skerms nie die fout gewys het nie — maar as strepe daar opduik, kyk eerste
+daarna.
+
 ---
 
 ## Ranglyste

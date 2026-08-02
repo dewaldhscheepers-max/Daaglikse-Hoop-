@@ -10,6 +10,15 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  /* 'n VASTE agtergrondkleur, nie deurskynend nie.
+
+     Op haar foon het die boonste helfte van hierdie laag rou GPU-geheue as
+     gekleurde strepe gewys, en toe weer reggekom. Wanneer die kompositor 'n
+     nuwe teel toeken en dit lees voordat dit geverf is, wys dit wat ook al
+     in daardie geheue was. Met 'n ondeursigtige agtergrond weet Chrome die
+     laag is solied en 'n ongeverfde teel wys hierdie kleur in plaas van
+     gemors. */
+  background: #141B2A;
 }
 
 .vf-tuin, .vf-tuin-prent {
@@ -21,10 +30,15 @@
 }
 
 /* Die geskilderde tuin bo-op die getekende een. Sy oop middel val presies
-   waar die bord sit — dis waarom hierdie prente werk en my landskap nie. */
+   waar die bord sit — dis waarom hierdie prente werk en my landskap nie.
+
+   background-size/position doen presies wat object-fit/object-position op
+   die ou <img> gedoen het. Sien die nota in TuinAgtergrond.jsx oor hoekom
+   dit nie meer 'n <img> is nie. */
 .vf-tuin-prent {
-  object-fit: cover;
-  object-position: center 30%;
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
 }
 
 /* 'n Dun sluier sodat wit teks en helder vrugte altyd leesbaar bly, hoe
