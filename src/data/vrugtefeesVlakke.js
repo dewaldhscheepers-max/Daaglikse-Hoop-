@@ -471,7 +471,10 @@ export function doelTeks(doel, vrugNaam) {
         const naam = BLOK_NAAM[t] || { een: t, meer: t }
         return n ? `${n} ${n === 1 ? naam.een : naam.meer}` : naam.meer
       })
-      return 'verwyder ' + dele.join(' en ')
+      /* 'n Ry van "en ... en ... en" lees sleg. Afrikaans gebruik kommas
+         en 'n enkele 'en' voor die laaste. */
+      if (dele.length <= 1) return 'verwyder ' + dele.join('')
+      return 'verwyder ' + dele.slice(0, -1).join(', ') + ' en ' + dele[dele.length - 1]
     }
     case 'spesiaal':  return `maak ${doel.aantal} spesiale vrugte`
     case 'kombo':     return `${doel.aantal} spesiale kombinasie${doel.aantal > 1 ? 's' : ''}`
@@ -544,9 +547,11 @@ export function doelTelling(doel, stand, bord) {
       })
     }
 
-    /* Punte kry niks: die telbord bo wys dit klaar, en die doelteks noem die
-       teiken. Nog 'n blokkie sou dieselfde getal 'n derde keer wys. */
-    case 'punte':     return []
+    /* Punte het eers niks gekry nie, want die telbord bo wys jou punte en die
+       doelteks noem die teiken. Maar dan moet 'n mens self twee getalle op
+       twee plekke vergelyk. Elke doelwit kry 'n toonbank — geen uitsondering
+       wat 'n mens moet onthou nie. */
+    case 'punte':     return merk('pt', '\u2605', stand.punte, doel.waarde)
 
     case 'spesiaal':  return merk('sp', '✦', stand.spesiaalGemaak, doel.aantal)
     case 'kombo':     return merk('kb', '✷', stand.kombinasies, doel.aantal)

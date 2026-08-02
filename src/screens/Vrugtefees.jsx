@@ -635,7 +635,10 @@ export default function Vrugtefees({ onClose }) {
                   {d.soort === 'vrug' ? <Vrug soort={d.vrug} grootte={34} />
                    : d.soort === 'blok' ? <i className={'vf-blokmerk blok-' + d.blok} />
                    : <i className="vf-merkie">{d.merk}</i>}
-                  <b>{d.het}/{d.nodig}</b>
+                  {/* Groot getalle kry spasies: "0/10500" is nie leesbaar nie. */}
+                  <b>{d.nodig >= 1000
+                    ? `${d.het.toLocaleString('af')} / ${d.nodig.toLocaleString('af')}`
+                    : `${d.het}/${d.nodig}`}</b>
                 </div>
               ))}
             </div>
