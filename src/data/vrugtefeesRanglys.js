@@ -28,6 +28,7 @@ const PAD     = '/api/vrugtefees-ranglys'
 const NAAM    = 'vf_naam'
 const AFGEWYS = 'vf_naam_afgewys'
 const WAGRY   = 'vf_wagry'
+const LAASTE  = 'vf_laaste_lopie'
 const KAS     = 'vf_ranglys_kas'
 const KAS_MS  = 5 * 60 * 1000
 
@@ -73,6 +74,33 @@ function stoorWagry(w) {
   try { localStorage.setItem(WAGRY, JSON.stringify(w.slice(-3))) } catch {}
 }
 export function wagryLengte() { return leesWagry().length }
+
+/* ── Die laaste lopie wat klaargespeel is ──
+   Sonder dit was daar 'n stil doodloopstraat: as jy 'n lopie klaarmaak
+   VOORDAT jy 'n naam gekies het, is niks ingestuur nie. Kies jy dan later 'n
+   naam op die ranglysskerm, was daar niks meer om in te stuur nie — die
+   lopie het net in die geheue geleef en is weg toe die skerm toemaak.
+
+   Dewald se vrou het presies dit gedoen: haar naam ingetik en toe nooit op
+   die lys verskyn nie.
+
+   Nou bly die laaste klaargespeelde lopie hier lê tot dit deurgekom het. */
+function stoorLaaste(lopie) {
+  try { localStorage.setItem(LAASTE, JSON.stringify(lopie)) } catch {}
+}
+export function leesLaaste() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LAASTE) || 'null')
+    if (!d || !Array.isArray(d.skuiwe) || !d.skuiwe.length) return null
+    // 'n Daaglikse lopie van gister kan nooit meer tel nie.
+    if (d.soort === 'daagliks' && d.dag !== dagSleutel(new Date())) return null
+    return d
+  } catch { return null }
+}
+export function vergeetLaaste() {
+  try { localStorage.removeItem(LAASTE) } catch {}
+}
+export function onthouLopie(lopie) { stoorLaaste(lopie) }
 
 /* ── Kas ── */
 function leesKas() {
@@ -183,6 +211,8 @@ export async function stuurOes(naam, lopie) {
   const inskrywing = { naam, ...lopie }
   try {
     const uit = await stuurEen(inskrywing)
+    // Deur of finaal afgekeur: in albei gevalle hoef ons dit nie te onthou nie.
+    if (uit.ok || !uit.herprobeer) vergeetLaaste()
     if (!uit.ok && uit.herprobeer) stoorWagry([...leesWagry(), inskrywing])
     return uit
   } catch {

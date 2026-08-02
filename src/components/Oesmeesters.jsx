@@ -47,6 +47,11 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
   const [naam, setNaam]   = useState(() => leesNaam())
   const [naamFout, setNaamFout] = useState(null)
   const [vraNaam, setVraNaam]   = useState(!!naamNodig)
+  /* Wat gebeur het nadat 'n mens sy naam gestoor het. Sonder dit was die
+     knoppie 'n stil doodloopstraat: jy tik jou naam, dit stoor, en niks se
+     vir jou of jy nou op die lys is of nog moet speel nie. */
+  const [naamUitslag, setNaamUitslag] = useState(null)
+  const [naamBesig, setNaamBesig]     = useState(false)
 
   const haal = useCallback(async () => {
     setBesig(true); setFout(null)
@@ -68,13 +73,20 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
     haal()
   }, [haal])
 
-  function stoorDieNaam() {
+  async function stoorDieNaam() {
     const f = keurNaam(naam)
     if (f) { setNaamFout(f); return }
-    stoorNaam(naam.trim().replace(/\s+/g, ' '))
+    const skoon = naam.trim().replace(/\s+/g, ' ')
+    stoorNaam(skoon)
     setNaamFout(null)
     setVraNaam(false)
-    if (onNaam) onNaam(naam.trim().replace(/\s+/g, ' '))
+    setNaamBesig(true)
+    let uit = null
+    try { uit = onNaam ? await onNaam(skoon) : null } catch { uit = null }
+    setNaamBesig(false)
+    setNaamUitslag(uit || { ok: false, geenLopie: true,
+      fout: 'Jou naam is gestoor. Speel Vandag se Oes of Die Oneindige Oes, en dan gaan jou punt vanself op die lys.' })
+    haal()
   }
 
   const bron = data || (kas ? {
@@ -102,6 +114,17 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
           {naamFout && <p className="vf-fout">{naamFout}</p>}
           <button className="vf-knop vf-knop-primer" onClick={stoorDieNaam}>Stoor</button>
         </div>
+      )}
+
+      {naamBesig && <p className="vf-blad-teks">Besig om in te stuur…</p>}
+      {naamUitslag && !naamBesig && (
+        naamUitslag.ok
+          ? <p className="vf-blad-teks">
+              {naamUitslag.beterAs === false
+                ? 'Jou vorige lopie was beter, dus bly daardie een staan.'
+                : <>Ingestuur{naamUitslag.rang ? <> — jy is <b>nommer {naamUitslag.rang}</b></> : null}.</>}
+            </p>
+          : <p className={naamUitslag.geenLopie ? 'vf-blad-teks vf-sag' : 'vf-fout'}>{naamUitslag.fout}</p>
       )}
 
       <div className="vf-blaaie">

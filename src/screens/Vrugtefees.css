@@ -720,3 +720,12 @@
   border-color: #A9CC84;
   color: #A9CC84;
 }
+
+/* 'n Nuwe rekord. Dit moet gese word — dis die hele punt van 'n ranglys. */
+.vf-rekord {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #A9CC84;
+  margin: 0;
+}

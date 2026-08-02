@@ -12,7 +12,10 @@ import { maakTekenaar } from '../game/vrugtefees/teken'
 import TuinAgtergrond from '../components/TuinAgtergrond'
 import Oesmeesters from '../components/Oesmeesters'
 import { PRESTASIES, boekAan, lees as leesPrestasies } from '../data/vrugtefeesPrestasies'
-import { stuurOes, stuurWagry, leesNaam, naamAfgewys, wysNaamAf, keurNaam, stoorNaam } from '../data/vrugtefeesRanglys'
+import {
+  stuurOes, stuurWagry, leesNaam, naamAfgewys, wysNaamAf, keurNaam, stoorNaam,
+  onthouLopie, leesLaaste,
+} from '../data/vrugtefeesRanglys'
 import { getOrCreateAnonUid } from '../firebase'
 import {
   playVrugPas, playSpesiaal, playKombinasie, playOesRonde, playOesKlaar,
@@ -139,8 +142,14 @@ export default function Vrugtefees({ onClose }) {
   }, [])
   useEffect(() => () => skoonTye(), [skoonTye])
 
-  /* Punte wat nie deurgekom het nie, probeer weer wanneer die spel oopmaak. */
-  useEffect(() => { stuurWagry().catch(() => {}) }, [])
+  /* Punte wat nie deurgekom het nie, probeer weer wanneer die spel oopmaak.
+     Dit sluit 'n lopie in wat klaargespeel is voordat daar 'n naam was: sodra
+     die naam bestaan, gaan dit vanself in. */
+  useEffect(() => {
+    stuurWagry().catch(() => {})
+    const laaste = leesLaaste()
+    if (laaste && leesNaam() && !naamAfgewys()) stuurOes(leesNaam(), laaste).catch(() => {})
+  }, [])
 
   /* Ons eie uid, net om die speler se eie ry op die ranglys uit te lig. */
   const [myUid, setMyUid] = useState(null)
@@ -367,6 +376,11 @@ export default function Vrugtefees({ onClose }) {
 
     if (lopie.klaar) {
       playOesKlaar()
+      /* Onthou die lopie voordat ons iets anders doen. Al is daar nog geen
+         naam nie, moet dit later ingestuur kan word. */
+      onthouLopie(modus === 'daagliks'
+        ? { soort: 'daagliks', dag: o.dag, skuiwe: o.skuiwe }
+        : { soort: 'oneindig', saad: o.saad, skuiwe: o.skuiwe })
       const r = boekAan({
         besteOesRonde: lopie.rondesKlaar,
         besteOesPunte: lopie.punte,
@@ -381,20 +395,38 @@ export default function Vrugtefees({ onClose }) {
   /* ── Stuur die lopie in ──
      Ons stuur die saad en die skuiwe. Nie die punte nie: die bediener speel
      dit oor en tel self. Daar is dus niks om te oordryf nie. */
+  /* Stuur die lopie in.
+
+     Ons stuur die saad en die skuiwe. Nie die punte nie: die bediener speel
+     dit oor en tel self.
+
+     Dit het vroeer STIL opgegee wanneer daar niks in die geheue was nie. 'n
+     Mens kon dus jou naam op die ranglysskerm intik en dan nooit op die lys
+     verskyn nie, sonder 'n woord van verduideliking. Nou val ons terug op die
+     laaste klaargespeelde lopie, en as daar werklik niks is nie, se ons dit. */
   const stuurDieOes = useCallback(async () => {
     const o = oes.current
-    if (!o.lopie || !o.skuiwe.length) return
+    const lopie = (o.lopie && o.skuiwe.length)
+      ? (modus === 'daagliks'
+          ? { soort: 'daagliks', dag: o.dag, skuiwe: o.skuiwe }
+          : { soort: 'oneindig', saad: o.saad, skuiwe: o.skuiwe })
+      : leesLaaste()
+
+    if (!lopie) {
+      const g = { ok: false, geenLopie: true,
+        fout: 'Jou naam is gestoor. Speel Vandag se Oes of Die Oneindige Oes, en dan gaan jou punt vanself op die lys.' }
+      setUitslag(g)
+      return g
+    }
+    if (naamAfgewys()) return null
     const naam = leesNaam()
-    if (!naam) return            // die skerm vra dit; ons stuur daarna
-    if (naamAfgewys()) return
+    if (!naam) return null       // die skerm vra dit; ons stuur daarna
 
     setStuurBesig(true)
-    const lopie = modus === 'daagliks'
-      ? { soort: 'daagliks', dag: o.dag, skuiwe: o.skuiwe }
-      : { soort: 'oneindig', saad: o.saad, skuiwe: o.skuiwe }
     const uit = await stuurOes(naam, lopie)
     setUitslag(uit)
     setStuurBesig(false)
+    return uit
   }, [modus])
 
   function stoorNaamEnStuur() {
@@ -883,12 +915,15 @@ export default function Vrugtefees({ onClose }) {
             {stuurBesig && <p className="vf-blad-teks">Besig om in te stuur…</p>}
 
             {uitslag && uitslag.ok && (
-              <p className="vf-blad-teks">
-                {uitslag.rang
-                  ? <>Jy is <b>nommer {uitslag.rang}</b> van {uitslag.totaal.toLocaleString('af')}.</>
-                  : <>Ingestuur.</>}
-                {!uitslag.beterAs && <><br /><small>Jou vorige lopie was beter, dus bly daardie een staan.</small></>}
-              </p>
+              <>
+                {uitslag.beterAs && <p className="vf-rekord">Nuwe rekord!</p>}
+                <p className="vf-blad-teks">
+                  {uitslag.rang
+                    ? <>Jy is <b>nommer {uitslag.rang}</b> van {uitslag.totaal.toLocaleString('af')}.</>
+                    : <>Ingestuur.</>}
+                  {!uitslag.beterAs && <><br /><small>Jou vorige lopie was beter, dus bly daardie een staan.</small></>}
+                </p>
+              </>
             )}
             {uitslag && !uitslag.ok && (
               <p className="vf-fout">{uitslag.fout}</p>
