@@ -149,7 +149,12 @@ for (const vlak of VLAKKE) {
      reels te verstaan, en 87% vir 'n bot wat ELKE keer die beste skuif speel
      beteken 'n mens sukkel. Dewald het op vlak 7 vasgesit terwyl my drempel
      van 70% dit deurgelaat het. Vroeg moet dit 95% wees. */
-  const drempel = vlak.nr <= 10 ? 95 : 70
+  /* 'n Helling, nie een drempel nie.
+     Dewald het op vlak 7 vasgesit, en toe weer op vlak 11. Albei kere het my
+     drempel dit deurgelaat, want 70% vir 'n perfekte bot klink redelik — maar
+     vlak 11 kom NET na 'n hoofstuk waar alles 100% is. Dit is 'n trap, nie 'n
+     helling nie. Die spel moet stadig swaarder word, nie met 'n skok nie. */
+  const drempel = vlak.nr <= 10 ? 95 : vlak.nr <= 20 ? 88 : vlak.nr <= 40 ? 80 : 72
   if (kG < drempel) probleme.push(`vlak ${vlak.nr}: te moeilik — 'n gemiddelde speler wen dit net ${kG}% van die tyd (moet ${drempel}% wees)`)
   /* Die eerste tien vlakke MAG maklik wees — hulle leer die speler, en 'n
      mens jaag nie iemand weg by vlak drie nie. Van vlak elf af moet

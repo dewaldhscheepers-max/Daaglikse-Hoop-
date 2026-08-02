@@ -106,8 +106,8 @@ export const VLAKKE = [
   /* ── Die Pad van Vreugde (11–20) ──
      Spesiale vrugte en kombinasies kom by. */
 
-  { nr: 11, saad: 2085, soorte: 6, skuiwe: 24,
-    doel: { tipe: 'punte', waarde: 9000 } },
+  { nr: 11, saad: 2085, soorte: 5, skuiwe: 18,
+    doel: { tipe: 'punte', waarde: 10500 } },
 
   { nr: 12, saad: 2143, soorte: 6, skuiwe: 22,
     doel: { tipe: 'spesiaal', aantal: 4 } },
@@ -133,14 +133,14 @@ export const VLAKKE = [
     blokke: b(KRAT, [2, 2], [5, 2], [2, 5], [5, 5]),
     wenk: 'Kratte hou \'n vrug vas. Breek hulle oop.' },
 
-  { nr: 18, saad: 2790, soorte: 6, skuiwe: 26,
-    doel: { tipe: 'punte', waarde: 8500 },
+  { nr: 18, saad: 2790, soorte: 6, skuiwe: 30,
+    doel: { tipe: 'punte', waarde: 7500 },
     blokke: [...b(ONKRUID, [1, 1], [6, 1]), ...b(DORING, [1, 6], [6, 6])] },
 
   { nr: 19, saad: 2904, soorte: 5, skuiwe: 30,
     doel: { tipe: 'kombo', aantal: 2 } },
 
-  { nr: 20, saad: 3011, soorte: 6, skuiwe: 28,
+  { nr: 20, saad: 3011, soorte: 5, skuiwe: 26,
     doel: { tipe: 'skoonmaak', tipes: [DROE_BLAAR, ONKRUID, DORING, KLIP] },
     blokke: [...b(DROE_BLAAR, [0, 6], [1, 6], [6, 6], [7, 6]), ...b(ONKRUID, [2, 4], [5, 4]), ...b(DORING, [3, 2], [4, 2]), ...b(KLIP, [3, 5], [4, 5])],
     wenk: 'Die laaste tuin van hierdie pad. Maak alles skoon.' },
@@ -160,15 +160,15 @@ export const VLAKKE = [
     doel: { tipe: 'grootpas', grootte: 5 },
     wenk: 'Vyf in een figuur. Kyk waar twee rye mekaar kan raak.' },
 
-  { nr: 24, saad: 3452, soorte: 6, skuiwe: 26,
-    doel: { tipe: 'punte', waarde: 12000 },
+  { nr: 24, saad: 3452, soorte: 6, skuiwe: 30,
+    doel: { tipe: 'punte', waarde: 10000 },
     blokke: b(DROE_BLAAR, [3, 3], [4, 3], [3, 4], [4, 4]) },
 
   { nr: 25, saad: 3561, soorte: 6, skuiwe: 28,
     doel: { tipe: 'skoonmaak', tipes: [KRAT, ONKRUID] },
     blokke: [...b(KRAT, [2, 2], [5, 2]), ...b(ONKRUID, [2, 5], [5, 5])] },
 
-  { nr: 26, saad: 3670, soorte: 6, skuiwe: 24,
+  { nr: 26, saad: 3670, soorte: 5, skuiwe: 28,
     doel: { tipe: 'soortspesiaal', soort: OESKRAG, aantal: 2 },
     wenk: 'n L- of T-vorm gee ’n Oeskrag.' },
 
@@ -182,7 +182,7 @@ export const VLAKKE = [
   { nr: 29, saad: 3903, soorte: 6, skuiwe: 24,
     doel: { tipe: 'ketting', lengte: 4 } },
 
-  { nr: 30, saad: 4015, soorte: 6, skuiwe: 30,
+  { nr: 30, saad: 4015, soorte: 5, skuiwe: 36,
     doel: { tipe: 'skoonmaak', tipes: [KLIP, KRAT, DROE_BLAAR] },
     blokke: [...b(KLIP, [3, 3], [4, 4]), ...b(KRAT, [4, 3], [3, 4]), ...b(DROE_BLAAR, [0, 7])] },
 
@@ -192,7 +192,7 @@ export const VLAKKE = [
   { nr: 31, saad: 4126, soorte: 6, skuiwe: 28,
     doel: { tipe: 'punte', waarde: 12000 } },
 
-  { nr: 32, saad: 4237, soorte: 6, skuiwe: 30,
+  { nr: 32, saad: 4237, soorte: 5, skuiwe: 34,
     doel: { tipe: 'skoonmaak', tipes: [DORING] },
     blokke: b(DORING, [1, 2], [6, 2], [3, 4], [4, 4]) },
 
@@ -211,7 +211,7 @@ export const VLAKKE = [
     doel: { tipe: 'kombo', aantal: 1 } },
 
   { nr: 37, saad: 4783, soorte: 7, skuiwe: 30,
-    doel: { tipe: 'versamel', vrugte: { 0: 17, 2: 17, 6: 14 } } },
+    doel: { tipe: 'versamel', vrugte: { 0: 15, 2: 15, 6: 12 } } },
 
   { nr: 38, saad: 4894, soorte: 6, skuiwe: 28,
     doel: { tipe: 'grootpas', grootte: 5 } },
