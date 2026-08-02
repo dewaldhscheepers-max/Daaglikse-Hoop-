@@ -5,7 +5,7 @@ import {
 import { beginOes, oesSkuif, dagSleutel, dagSaad } from '../game/vrugtefees/oes'
 import {
   VLAKKE, HOOFSTUKKE, HOOFSTUK_WOORD, vlakBy, hoofstukVan,
-  doelTeks, doelBehaal, doelVordering,
+  doelTeks, doelBehaal, doelVordering, doelTelling,
 } from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
@@ -223,6 +223,10 @@ export default function Vrugtefees({ onClose }) {
 
   function roepVir(uit) {
     if (uit.kombinasies > 0)            return 'GROOT KOMBINASIE!'
+    /* 'n Spesiale vrug is die belangrikste ding wat op die bord kan gebeur,
+       en dit het tot nou heeltemal stil gebeur. */
+    if (uit.spesiaalGemaak > 1)         return 'TWEE SPESIALE VRUGTE!'
+    if (uit.spesiaalGemaak === 1)       return 'SPESIALE VRUG!'
     if (uit.grootsteKetting >= 4)       return 'VRUGTEFEES!'
     if (uit.grootsteKetting === 3)      return 'PRAGTIGE OES!'
     if (uit.grootsteKetting === 2)      return 'GOEIE PAS!'
@@ -538,25 +542,17 @@ export default function Vrugtefees({ onClose }) {
 
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
 
-  /* Hoeveel versperrings is nog oor? Dieselfde soort toonbank as die
-     vrugte s'n, want sonder dit weet 'n mens nie hoe ver jy is nie. */
-  const blokLys = useMemo(() => {
-    if (isOes || vlak.doel.tipe !== 'skoonmaak' || !spel.current.bord) return null
-    const tel = vlak.doel.telling || {}
-    return vlak.doel.tipes.map(t => {
-      const oor = spel.current.bord.selle.filter(s => s.blok === t).length
-      const begin = tel[t] || oor
-      return { tipe: t, weg: begin - oor, begin }
-    })
-  }, [vlak, punte, tik, toestand, isOes])
+  /* Die toonbank. Een lys vir ELKE doelwit-tipe.
 
-  const versamelLys = useMemo(() => {
-    if (isOes || vlak.doel.tipe !== 'versamel') return null
+     Dit het net vir 'versamel' en 'skoonmaak' bestaan; die ander sewe tipes
+     het niks gewys nie behalwe 'n balkie. Op fase 12 — maak vier spesiale
+     vrugte — was daar dus letterlik niks om na te kyk nie. */
+  const doelLys = useMemo(() => {
+    if (isOes) return null
     const st = spel.current.stand
-    return Object.entries(vlak.doel.vrugte).map(([i, n]) => ({
-      soort: Number(i), nodig: n, het: Math.min(n, (st && st.versamel[i]) || 0),
-    }))
-  }, [vlak, punte, tik, isOes])
+    if (!st) return null
+    return doelTelling(vlak.doel, st, spel.current.bord)
+  }, [vlak, punte, tik, toestand, isOes])
 
   const prestasieStand = useMemo(() => leesPrestasies(), [toestand, nuutBehaal.length])
 
@@ -632,23 +628,14 @@ export default function Vrugtefees({ onClose }) {
             </div>
           )}
 
-          {blokLys && (
+          {doelLys && doelLys.length > 0 && (
             <div className="vf-versamel">
-              {blokLys.map(b => (
-                <div key={b.tipe} className={`vf-versamel-item${b.weg >= b.begin ? ' klaar' : ''}`}>
-                  <i className={'vf-blokmerk blok-' + b.tipe} />
-                  <b>{b.weg}/{b.begin}</b>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {versamelLys && (
-            <div className="vf-versamel">
-              {versamelLys.map(v => (
-                <div key={v.soort} className={`vf-versamel-item${v.het >= v.nodig ? ' klaar' : ''}`}>
-                  <Vrug soort={v.soort} grootte={34} />
-                  <b>{v.het}/{v.nodig}</b>
+              {doelLys.map(d => (
+                <div key={d.sleutel} className={`vf-versamel-item${d.het >= d.nodig ? ' klaar' : ''}`}>
+                  {d.soort === 'vrug' ? <Vrug soort={d.vrug} grootte={34} />
+                   : d.soort === 'blok' ? <i className={'vf-blokmerk blok-' + d.blok} />
+                   : <i className="vf-merkie">{d.merk}</i>}
+                  <b>{d.het}/{d.nodig}</b>
                 </div>
               ))}
             </div>
@@ -922,7 +909,7 @@ export default function Vrugtefees({ onClose }) {
           <Oesmeesters
             myUid={myUid}
             terug={() => setToestand(oes.current.lopie && modus !== 'reis' ? 'oesklaar' : 'kaart')}
-            naamNodig={false}
+            naamNodig={!leesNaam() && !naamAfgewys()}
             onNaam={() => stuurDieOes()}
           />
         )}

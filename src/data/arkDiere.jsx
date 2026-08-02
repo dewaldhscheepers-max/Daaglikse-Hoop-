@@ -198,19 +198,22 @@ const D = {
   },
 
   /* ── Groep 2: die diere van die veld ── */
-  bees: {
-    naam: 'Bees',
+  koei: {
+    naam: 'Koei',
     kleur: '#E8E2D6', diep: '#B9AE9C',
     dele: (k, d) => (
       <>
         <ellipse cx="30" cy="34" rx="19" ry="12" fill={k} />
-        <path d="M14 28c7-3 13-2 16 3-4 5-11 6-17 3z" fill="#6B5B4A" />
-        <path d="M34 40c6-2 11-1 13 3-4 4-10 4-15 1z" fill="#6B5B4A" />
+        <path d="M14 28c7-3 13-2 16 3-4 5-11 6-17 3z" fill="#4A3E33" />
+        <path d="M34 40c6-2 11-1 13 3-4 4-10 4-15 1z" fill="#4A3E33" />
         <ellipse cx="49" cy="26" rx="9" ry="8" fill={k} />
         <ellipse cx="55" cy="29" rx="4" ry="3.4" fill="#C99AA0" />
         <circle cx="51" cy="23" r="1.7" fill="#3A3128" />
         <path d="M42 19c-3-4-1-7 2-6M56 19c3-4 1-7-2-6" stroke="#8A7B66" strokeWidth="2.6" strokeLinecap="round" fill="none" />
-        <path d="M20 45v8M29 46v7M38 45v8" stroke={d} strokeWidth="3.4" strokeLinecap="round" />
+        {/* die uier: wat 'n koei van 'n os onderskei */}
+        <ellipse cx="27" cy="45" rx="6" ry="4.2" fill="#D9A9AE" />
+        <path d="M24 48v2.6M30 48v2.6" stroke="#C08E95" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M18 45v8M36 45v8" stroke={d} strokeWidth="3.4" strokeLinecap="round" />
         <path d="M12 30c-4 4-5 9-3 13" stroke={d} strokeWidth="2.4" strokeLinecap="round" fill="none" />
       </>
     ),
@@ -452,17 +455,26 @@ const D = {
       </>
     ),
   },
-  skilpad: {
-    naam: 'Skilpad',
-    kleur: '#8A7A4E', diep: '#63583A',
+  akkedis: {
+    naam: 'Akkedis',
+    kleur: '#5E8A4A', diep: '#3E6132',
     dele: (k, d) => (
       <>
-        <path d="M14 40a17 12 0 0 1 34 0z" fill={d} />
-        <path d="M18 40a13 9 0 0 1 26 0z" fill={k} />
-        <path d="M31 31v9M24 34l3 6M38 34l-3 6" stroke={d} strokeWidth="1.8" strokeLinecap="round" />
-        <ellipse cx="52" cy="38" rx="6.5" ry="5" fill="#A89A6E" />
-        <circle cx="55" cy="36" r="1.4" fill="#2E2719" />
-        <path d="M19 41v6M28 42v5M38 42v5M46 41v6" stroke="#A89A6E" strokeWidth="3" strokeLinecap="round" />
+        {/* lang lyf, lang stert: dit is wat 'n akkedis van 'n skilpad skei */}
+        <path d="M16 44c5-6 12-9 19-9s15 3 19 8c-5 5-12 7-19 7s-14-2-19-6z" fill={k} />
+        {/* die stert: lank en spits, want dit is die helfte van 'n akkedis */}
+        <path d="M17 42c-6 0-11 2-14 6 3 2 7 2 11 1 3-1 5-3 6-4z" fill={k} />
+        <path d="M4 48c-2 1-3 2-3 3 2 1 4 0 5-1z" fill={d} />
+        <path d="M46 40c5-4 11-5 14-2-2 4-8 6-13 6z" fill={k} />
+        <ellipse cx="55" cy="38" rx="7" ry="5" fill={k} />
+        <circle cx="58" cy="36" r="1.6" fill="#1E2A18" />
+        <path d="M61 39l5 1-5 1z" fill="#C4585A" />
+        {/* die rugkam */}
+        <path d="M24 35l2-4 2 4M32 33l2-4 2 4M40 34l2-4 2 4" fill={d} />
+        {/* vier bene wat na buite staan */}
+        <path d="M22 49l-4 5M31 51l-2 5M40 50l2 5M48 47l5 4" stroke={d} strokeWidth="3" strokeLinecap="round" />
+        <ellipse cx="28" cy="43" rx="3" ry="2" fill={d} opacity="0.55" />
+        <ellipse cx="38" cy="44" rx="3" ry="2" fill={d} opacity="0.55" />
       </>
     ),
   },
@@ -552,33 +564,26 @@ const D = {
       </>
     ),
   },
-  pou: {
-    naam: 'Pou',
-    kleur: '#2E7A8A', diep: '#1E5563',
+  seekoei: {
+    naam: 'Seekoei',
+    kleur: '#8A7A8E', diep: '#5E5163',
     dele: (k, d) => (
       <>
-        {/* die waaier: vyf vere wat uit een punt straal, elk met 'n oog */}
-        <g>
-          {[-58, -30, 0, 30, 58].map((hoek, i) => (
-            <g key={i} transform={`rotate(${hoek} 40 40)`}>
-              <ellipse cx="40" cy="18" rx="4.6" ry="19" fill={i % 2 ? '#3E9AA8' : '#57B0B8'} />
-              <circle cx="40" cy="6" r="3.4" fill="#1E4A57" />
-              <circle cx="40" cy="6" r="1.8" fill="#D9B24A" />
-            </g>
-          ))}
-        </g>
-        {/* liggaam voor die waaier */}
-        <ellipse cx="30" cy="44" rx="11" ry="9" fill={k} />
-        <path d="M35 39l4-11" stroke={k} strokeWidth="5" strokeLinecap="round" />
-        <circle cx="40" cy="27" r="5.5" fill={k} />
-        <path d="M45 26l6 1.6-6 1.8z" fill="#D9B24A" />
-        <circle cx="41.5" cy="25.5" r="1.4" fill="#0E2A33" />
-        {/* kuif: drie stokkies met 'n bolletjie */}
-        <path d="M40 21v-4M37 22l-1.5-3.6M43 22l1.5-3.6" stroke="#1E4A57" strokeWidth="1.4" strokeLinecap="round" />
-        <circle cx="40" cy="16" r="1.5" fill="#D9B24A" />
-        <circle cx="35.2" cy="17.6" r="1.3" fill="#D9B24A" />
-        <circle cx="44.8" cy="17.6" r="1.3" fill="#D9B24A" />
-        <path d="M27 52l-1 4M33 52l1 4" stroke={d} strokeWidth="2.4" strokeLinecap="round" />
+        {/* die water waarin hy staan */}
+        <path d="M2 50h60v3H2z" fill="#3E6A8A" opacity="0.5" />
+        <ellipse cx="28" cy="38" rx="20" ry="13" fill={k} />
+        {/* die kop: breed en stomp, die ding wat 'n seekoei is */}
+        <path d="M44 32c8-2 15 1 16 6 0 5-7 8-15 7-6-1-9-5-9-7s2-5 8-6z" fill={k} />
+        <ellipse cx="59" cy="38" rx="5" ry="4.6" fill={d} />
+        <circle cx="57" cy="36" r="1.2" fill="#241E28" />
+        <circle cx="61" cy="37" r="1.2" fill="#241E28" />
+        <circle cx="49" cy="31" r="1.7" fill="#241E28" />
+        {/* klein ore bo-op */}
+        <circle cx="44" cy="27" r="2.6" fill={d} />
+        <circle cx="52" cy="26" r="2.4" fill={d} />
+        {/* kort dik bene */}
+        <path d="M17 49v4M27 50v3M37 49v4" stroke={d} strokeWidth="5" strokeLinecap="round" />
+        <path d="M9 34c-4 2-6 5-4 8" stroke={d} strokeWidth="2.4" strokeLinecap="round" fill="none" />
       </>
     ),
   },

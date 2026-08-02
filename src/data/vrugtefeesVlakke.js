@@ -408,13 +408,29 @@ export const VLAKKE = [
     wenk: 'Die laaste tuin. Alles wat jy geleer het, op een bord.' },
 ]
 
+/* ── Maak die skoonmaak-doelwitte eerlik ──
+   Dit loop een keer wanneer die lêer laai, oor ELKE vlak.
+
+   Twee dinge het hier stukkend gegaan:
+
+     1. Die balanseerder gooi versperrings weg om 'n vlak makliker te maak,
+        maar het die TIPE in doel.tipes laat staan. Vlak 56 het gesê
+        "verwyder dorings en onkruid" terwyl daar geen onkruid op die bord
+        was nie. Dewald se woorde: as jy sê kry iets, moet dit daar wees.
+        Ons gooi dus enige tipe uit wat nie werklik op die bord is nie.
+
+     2. Die telling is lui gevul, net wanneer vlakBy() geroep is. Enigiets
+        wat die doelteks eerder gebruik het, het 'n vlak sonder getalle
+        gekry. Nou is dit klaar gevul voordat iemand dit kan vra. */
+for (const v of VLAKKE) {
+  if (v.doel.tipe !== 'skoonmaak') continue
+  const tel = blokTelling(v)
+  v.doel.tipes = v.doel.tipes.filter(t => (tel[t] || 0) > 0)
+  v.doel.telling = tel
+}
+
 export function vlakBy(nr) {
-  const v = VLAKKE.find(x => x.nr === nr)
-  if (!v) return null
-  // Die skoonmaak-doelwitte kry hul telling uit die bord self, sodat 'n mens
-  // dit nie op twee plekke moet regsit nie.
-  if (v.doel.tipe === 'skoonmaak' && !v.doel.telling) v.doel.telling = blokTelling(v)
-  return v
+  return VLAKKE.find(x => x.nr === nr) || null
 }
 
 export function hoofstukVan(nr) {
@@ -495,6 +511,65 @@ export function doelBehaal(doel, stand, bord) {
     default:
       return false
   }
+}
+
+/* ── Die toonbank op die skerm ──
+   Gee 'n lys blokkies terug: wat jy moet kry, en hoeveel jy het.
+
+   Dit het lank net vir 'versamel' en 'skoonmaak' bestaan. Die ander sewe
+   doelwit-tipes het NIKS gewys nie behalwe 'n balkie — en 'n balkie sê nie
+   of jy een van vier gemaak het of drie nie. Dewald het op fase 12 gesit,
+   wat vra vir vier spesiale vrugte, en gesê "ek sien dan niks". Hy was reg:
+   daar was niks om te sien nie.
+
+   Elke tipe kom nou hier deur, sodat 'n nuwe doelwit-tipe nie weer stil kan
+   wegraak. `soort` sê vir die skerm wat om te teken. */
+export function doelTelling(doel, stand, bord) {
+  const merk = (sleutel, teken, het, nodig) =>
+    [{ sleutel, soort: 'merk', merk: teken, het: Math.min(het, nodig), nodig }]
+
+  switch (doel.tipe) {
+    case 'versamel':
+      return Object.entries(doel.vrugte).map(([i, n]) => ({
+        sleutel: 'v' + i, soort: 'vrug', vrug: Number(i),
+        het: Math.min(n, (stand.versamel[i] || 0)), nodig: n,
+      }))
+
+    case 'skoonmaak': {
+      const tel = doel.telling || {}
+      return doel.tipes.map(t => {
+        const oor = bord ? bord.selle.filter(s => s.blok === t).length : 0
+        const begin = tel[t] || oor
+        return { sleutel: 'b' + t, soort: 'blok', blok: t, het: begin - oor, nodig: begin }
+      })
+    }
+
+    /* Punte kry niks: die telbord bo wys dit klaar, en die doelteks noem die
+       teiken. Nog 'n blokkie sou dieselfde getal 'n derde keer wys. */
+    case 'punte':     return []
+
+    case 'spesiaal':  return merk('sp', '✦', stand.spesiaalGemaak, doel.aantal)
+    case 'kombo':     return merk('kb', '✷', stand.kombinasies, doel.aantal)
+    case 'ketting':   return merk('kt', '⇊', stand.grootsteKetting, doel.lengte)
+    case 'grootpas':  return merk('gp', '▣', stand.grootstePas || 0, doel.grootte)
+
+    case 'soortspesiaal':
+      return merk('ss', SPESIAAL_MERK[doel.soort] || '✦',
+                  stand.spesiaalSoorte[doel.soort] || 0, doel.aantal)
+
+    case 'verlig': {
+      const aan = doel.selle.filter(([k, r]) => stand.verlig && stand.verlig[k + ',' + r]).length
+      return merk('vl', '◆', aan, doel.selle.length)
+    }
+
+    default: return []
+  }
+}
+
+/* Die simbole wat die tekenaar op 'n spesiale vrug sit. Hulle staan hier
+   ook, sodat die toonbank dieselfde teken wys as die bord. */
+export const SPESIAAL_MERK = {
+  rylig: '↔', kolomlig: '↕', oeskrag: '✷', reenboog: '✺', feesmandjie: '❉',
 }
 
 /* Hoe ver is die speler? 0..1, vir die balkie op die skerm. */

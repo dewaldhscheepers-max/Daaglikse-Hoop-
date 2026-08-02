@@ -17,9 +17,106 @@
 
 import { bedekSel, RYLIG, KOLOMLIG, OESKRAG, REENBOOGVRUG, FEESMANDJIE } from './enjin'
 
-const MERK = {
-  [RYLIG]: '↔', [KOLOMLIG]: '↕', [OESKRAG]: '✷',
-  [REENBOOGVRUG]: '✺', [FEESMANDJIE]: '❉',
+/* ── 'n Spesiale vrug ──
+   Dit was 'n goue kolletjie van agt pixels in die hoek met 'n Unicode-teken
+   (↔ ↕ ✷ ✺ ❉) wat met fillText in system-ui geteken is. Twee dinge daaraan
+   was verkeerd, en Dewald het albei op fase 12 raakgeloop: hy het gesê
+   "daar is geen spesiale vrugte nie".
+
+     1. Daardie dingbats sit nie in Android se verstek-tipografie nie. Wat
+        'n mens kry, is 'n leë blokkie of niks.
+     2. Agt pixels in 'n hoek is te klein om raak te sien terwyl die bord
+        beweeg.
+
+   Nou word alles met paaie geteken — geen font, niks wat die stelsel moet
+   verskaf nie. Dieselfde reel as oral elders hier: teken dit self.
+
+   Elke spesiale kry 'n helder ring om die HELE vrug, want dit is wat 'n
+   mens eerste sien, plus 'n vorm wat sê wat dit doen. */
+
+const SPESIAAL_KLEUR = {
+  [RYLIG]:        '#F0DCA8',
+  [KOLOMLIG]:     '#F0DCA8',
+  [OESKRAG]:      '#FFC978',
+  [REENBOOGVRUG]: '#FFFFFF',
+  [FEESMANDJIE]:  '#FFE9A8',
+}
+
+function tekenSpesiaal(ctx, soort, cx, cy, g, alfa) {
+  const r = g * 0.42
+  ctx.save()
+  ctx.globalAlpha = alfa
+
+  // Die gloed onder die ring, sodat dit teen enige vrugkleur uitstaan.
+  ctx.shadowColor = SPESIAAL_KLEUR[soort] || '#F0DCA8'
+  ctx.shadowBlur = g * 0.22
+
+  if (soort === REENBOOGVRUG) {
+    // 'n Reenboog-ring: ses segmente, elkeen sy eie kleur.
+    const kleure = ['#E05A5A', '#E0913A', '#E8D34A', '#6FB35A', '#4A8FD0', '#9A6FC8']
+    ctx.lineWidth = g * 0.09
+    ctx.lineCap = 'butt'
+    for (let i = 0; i < 6; i++) {
+      ctx.strokeStyle = kleure[i]
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, (i / 6) * Math.PI * 2 - Math.PI / 2, ((i + 1) / 6) * Math.PI * 2 - Math.PI / 2)
+      ctx.stroke()
+    }
+    ctx.restore()
+    return
+  }
+
+  ctx.strokeStyle = SPESIAAL_KLEUR[soort] || '#F0DCA8'
+  ctx.lineWidth = g * 0.075
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.shadowBlur = 0
+  ctx.fillStyle = SPESIAAL_KLEUR[soort] || '#F0DCA8'
+  ctx.lineCap = 'round'
+
+  const pyl = (dx, dy) => {
+    // 'n Driehoek wat na buite wys, aan albei kante van die vrug.
+    const p = g * 0.30, w = g * 0.11
+    ctx.beginPath()
+    ctx.moveTo(cx + dx * p * 1.42, cy + dy * p * 1.42)
+    ctx.lineTo(cx + dx * p - dy * w, cy + dy * p - dx * w)
+    ctx.lineTo(cx + dx * p + dy * w, cy + dy * p + dx * w)
+    ctx.closePath()
+    ctx.fill()
+  }
+
+  if (soort === RYLIG) {
+    ctx.lineWidth = g * 0.07
+    ctx.beginPath(); ctx.moveTo(cx - g * 0.26, cy); ctx.lineTo(cx + g * 0.26, cy); ctx.stroke()
+    pyl(-1, 0); pyl(1, 0)
+  } else if (soort === KOLOMLIG) {
+    ctx.lineWidth = g * 0.07
+    ctx.beginPath(); ctx.moveTo(cx, cy - g * 0.26); ctx.lineTo(cx, cy + g * 0.26); ctx.stroke()
+    pyl(0, -1); pyl(0, 1)
+  } else if (soort === OESKRAG) {
+    // 'n Ster wat na agt kante skiet.
+    ctx.lineWidth = g * 0.055
+    for (let i = 0; i < 8; i++) {
+      const h = (i / 8) * Math.PI * 2
+      const binne = g * 0.12, buite = g * 0.34
+      ctx.beginPath()
+      ctx.moveTo(cx + Math.cos(h) * binne, cy + Math.sin(h) * binne)
+      ctx.lineTo(cx + Math.cos(h) * buite, cy + Math.sin(h) * buite)
+      ctx.stroke()
+    }
+  } else if (soort === FEESMANDJIE) {
+    // 'n Vol kruis: dit vee 'n ry en 'n kolom saam.
+    ctx.lineWidth = g * 0.085
+    ctx.beginPath()
+    ctx.moveTo(cx - g * 0.32, cy); ctx.lineTo(cx + g * 0.32, cy)
+    ctx.moveTo(cx, cy - g * 0.32); ctx.lineTo(cx, cy + g * 0.32)
+    ctx.stroke()
+    pyl(-1, 0); pyl(1, 0); pyl(0, -1); pyl(0, 1)
+  }
+
+  ctx.restore()
 }
 
 const BLOK_KLEUR = {
@@ -270,18 +367,7 @@ export function maakTekenaar(doek, opsies) {
         const cx = s.x * g + g / 2, cy = s.y * g + g / 2
         ctx.globalAlpha = s.alfa
         ctx.drawImage(beeld, cx - grootte / 2, cy - grootte / 2, grootte, grootte)
-        if (s.spesiaal) {
-          const rr = g * 0.17
-          ctx.fillStyle = '#F0DCA8'
-          ctx.beginPath()
-          ctx.arc(cx + g * 0.28, cy + g * 0.28, rr, 0, Math.PI * 2)
-          ctx.fill()
-          ctx.fillStyle = '#14202E'
-          ctx.font = `700 ${Math.round(rr * 1.5)}px system-ui, sans-serif`
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          ctx.fillText(MERK[s.spesiaal] || '?', cx + g * 0.28, cy + g * 0.30)
-        }
+        if (s.spesiaal) tekenSpesiaal(ctx, s.spesiaal, cx, cy, g * s.skaal, s.alfa)
         ctx.globalAlpha = 1
       }
     }

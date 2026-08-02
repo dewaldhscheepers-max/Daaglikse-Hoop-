@@ -52,10 +52,10 @@ export const STADIUMS = [
   /* ── Groep 2: Die diere van die veld (13–24) ── */
 
   { naam: 'Die Osse Kom',       doel: { tipe: 'lyne',    waarde: 10 }, dier: 'os',
-    vers: 'Jy mag nie ’n bees se bek toebind as hy graan dors nie.', ref: 'Deuteronomium 25:4' },
+    vers: 'As daar nie osse is nie, is die voerkrip leeg; met net een goeie os bring jy ’n groot oes in.', ref: 'Spreuke 14:4' },
 
-  { naam: 'Die Beeste Wei',     doel: { tipe: 'punte',   waarde: 4000 }, dier: 'bees',
-    vers: 'Uit die Nyl het sewe koeie opgekom, mooi en vet, en hulle het in die rietgras gewei.', ref: 'Genesis 41:2' },
+  { naam: 'Die Koeie Wei',     doel: { tipe: 'punte',   waarde: 4000 }, dier: 'koei',
+    vers: 'Uit die rivier kom daar toe sewe mooi vet koeie uit en hulle gaan wei in die vleigras.', ref: 'Genesis 41:2' },
 
   { naam: 'Die Donkie Praat',   doel: { tipe: 'lyne',    waarde: 12 }, dier: 'donkie',
     vers: 'Die Here het die donkie laat praat, en sy het vir Bileam gesê: Wat het ek jou aangedoen?', ref: 'Numeri 22:28' },
@@ -85,7 +85,7 @@ export const STADIUMS = [
     vers: 'Word twee mossies nie vir ’n sent verkoop nie? En nie een van hulle sal op die grond val sonder julle Vader nie.', ref: 'Matteus 10:29' },
 
   { naam: 'Die Volstruis se Vlerk', doel: { tipe: 'lyne', waarde: 20 }, dier: 'volstruis',
-    vers: 'Die volstruis klap vrolik met haar vlerke.', ref: 'Job 39:13' },
+    vers: 'Die vlerke van die volstruis klap vrolik net soos dié van die ooievaar en die valk.', ref: 'Job 39:16' },
 
   /* ── Groep 3: Die wilde diere (25–36) ── */
 
@@ -99,13 +99,13 @@ export const STADIUMS = [
     vers: 'Die slang was listiger as al die wilde diere wat die Here God gemaak het.', ref: 'Genesis 3:1' },
 
   { naam: 'Leviatan',           doel: { tipe: 'oorleef', waarde: 90 }, dier: 'krokodil',
-    vers: 'Kan jy Leviatan met ’n vishoek uittrek?', ref: 'Job 41:1' },
+    vers: 'Kan jy ’n krokodil met ’n hoek vang of hom ’n tou in die bek sit?', ref: 'Job 40:20' },
 
-  { naam: 'Die Skilpad',        doel: { tipe: 'lyne',    waarde: 26 }, dier: 'skilpad',
-    vers: 'Dit is die diere wat op die grond kruip en wat vir julle onrein is: die mol, die muis en die skilpad.', ref: 'Levitikus 11:29' },
+  { naam: 'Die Akkedis',        doel: { tipe: 'lyne',    waarde: 26 }, dier: 'akkedis',
+    vers: 'Die volgende diertjies wat volop voorkom in die veld, moet julle as onrein beskou: molle, muise en al die akkedissoorte.', ref: 'Levitikus 11:29' },
 
   { naam: 'Die Muis',           doel: { tipe: 'kombo',   waarde: 3 }, dier: 'muis',
-    vers: 'Dit is die diere wat op die grond kruip en wat vir julle onrein is: die mol, die muis en die skilpad.', ref: 'Levitikus 11:29' },
+    vers: 'Die goue afbeeldings van die muise was vir die versterkte en onversterkte stede van die vyf Filistynse regeerders.', ref: '1 Samuel 6:18' },
 
   { naam: 'Die Sprinkane Kom',  doel: { tipe: 'lyne',    waarde: 28 }, dier: 'sprinkaan',
     vers: 'Die sprinkane het oor die hele Egipte getrek en in die hele gebied van Egipte gaan sit.', ref: 'Eksodus 10:14' },
@@ -119,11 +119,11 @@ export const STADIUMS = [
   { naam: 'Die Ape van Tarsis', doel: { tipe: 'multi',   waarde: 3 }, dier: 'aap',
     vers: 'Elke drie jaar het die skepe van Tarsis goud, silwer, ivoor, ape en poue gebring.', ref: '1 Konings 10:22' },
 
-  { naam: 'Die Poue van Tarsis', doel: { tipe: 'lyne',   waarde: 32 }, dier: 'pou',
-    vers: 'Elke drie jaar het die skepe van Tarsis goud, silwer, ivoor, ape en poue gebring.', ref: '1 Konings 10:22' },
+  { naam: 'Die Seekoei', doel: { tipe: 'lyne',   waarde: 32 }, dier: 'seekoei',
+    vers: 'Kyk die seekoei: Ek het hom gemaak toe Ek jou gemaak het, hy vreet gras soos ’n bees.', ref: 'Job 40:10' },
 
   { naam: 'Die Jakkalse',       doel: { tipe: 'punte',   waarde: 15000 }, dier: 'jakkals',
-    vers: 'Simson het gaan drie honderd jakkalse vang.', ref: 'Rigters 15:4' },
+    vers: 'Hy het toe drie honderd jakkalse gaan vang en hulle sterte twee-twee aan mekaar vasgemaak.', ref: 'Rigters 15:4' },
 
   /* ── Die laaste stadium: die gesin gaan in ── */
 

@@ -683,3 +683,26 @@
   margin: 0;
 }
 .vf-tut p { max-width: 270px; }
+
+/* Die merkie op die toonbank vir doelwitte wat nie 'n vrug of 'n
+   versperring is nie — spesiale vrugte, kombinasies, kettings.
+   Dieselfde grootte as 'n vrug, sodat die ry eenders lyk. */
+.vf-merkie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(240, 220, 168, 0.16);
+  border: 1.5px solid #F0DCA8;
+  color: #F0DCA8;
+  font-size: 17px;
+  line-height: 1;
+  font-style: normal;
+}
+.vf-versamel-item.klaar .vf-merkie {
+  background: rgba(127, 160, 90, 0.22);
+  border-color: #A9CC84;
+  color: #A9CC84;
+}
