@@ -1,16 +1,23 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
-  maakBord, maakRng, magRuil, doenSkuif, versekerSkuif, bedekSel,
-  RYLIG, KOLOMLIG, OESKRAG, REENBOOGVRUG, FEESMANDJIE,
+  doenSkuif, versekerSkuif, bedekSel, maakBord, maakRng, REENBOOGVRUG,
 } from '../game/vrugtefees/enjin'
+import { beginOes, oesSkuif, dagSleutel, dagSaad } from '../game/vrugtefees/oes'
 import {
   VLAKKE, HOOFSTUKKE, HOOFSTUK_WOORD, vlakBy, hoofstukVan,
-  doelTeks, doelBehaal, doelVordering, BLOK_NAAM,
+  doelTeks, doelBehaal, doelVordering,
 } from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
 import TuinAgtergrond from '../components/TuinAgtergrond'
-import { playHout, playPlanke, playHit, playLevelComplete, toggleMute, isMuted } from '../utils/sound'
+import Oesmeesters from '../components/Oesmeesters'
+import { PRESTASIES, boekAan, lees as leesPrestasies } from '../data/vrugtefeesPrestasies'
+import { stuurOes, stuurWagry, leesNaam, naamAfgewys, wysNaamAf, keurNaam, stoorNaam } from '../data/vrugtefeesRanglys'
+import { getOrCreateAnonUid } from '../firebase'
+import {
+  playVrugPas, playSpesiaal, playKombinasie, playOesRonde, playOesKlaar,
+  playHit, playLevelComplete, toggleMute, isMuted,
+} from '../utils/sound'
 import './Vrugtefees.css'
 
 /* ────────────────────────────────────────────────────────────
@@ -30,14 +37,23 @@ import './Vrugtefees.css'
    Elke skuif gee 'n lys stappe terug. Die enjin is klaar voordat die eerste
    animasie begin, dus kan die speler nooit die bord in 'n halwe toestand
    vang nie.
+
+   Drie speelwyses deel hierdie een skerm:
+
+     · Die Tuinreis — negentig fases met doelwitte.
+     · Die Oneindige Oes — speel tot die skuiwe op is.
+     · Vandag se Oes — dieselfde as die oes, maar die bord kom uit die
+       datum, sodat almal ter wereld dieselfde een speel.
+
+   Die twee oes-wyses loop deur src/game/vrugtefees/oes.js, wat DIESELFDE
+   lêer is wat die bediener gebruik om 'n ingestuurde lopie oor te speel.
+   Daarom skryf hierdie skerm elke geldige skuif neer: dit is wat ingestuur
+   word, nie 'n puntetelling nie.
    ──────────────────────────────────────────────────────────── */
 
-const STOOR   = 'vf_stoor'
-const VORDER  = 'vf_vordering'
-const RUSTIG  = 'vf_rustig'      // verminderde beweging
-
-// Tempo van die animasie. Dewald wou dit 'n bietjie stadiger he.
-const TEMPO = { vee: 320, val: 300, ruil: 200, terug: 180 }
+const VORDER    = 'vf_vordering'
+const RUSTIG    = 'vf_rustig'      // verminderde beweging
+const TUTORIAAL = 'vf_tutoriaal'
 
 function leesVordering() {
   try {
@@ -55,40 +71,67 @@ function leesRustig() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   } catch { return false }
 }
-
-const SPESIAAL_MERK = {
-  [RYLIG]: '↔', [KOLOMLIG]: '↕', [OESKRAG]: '✷',
-  [REENBOOGVRUG]: '✺', [FEESMANDJIE]: '❉',
+function tutoriaalGesien() {
+  try { return localStorage.getItem(TUTORIAAL) === '1' } catch { return true }
+}
+function merkTutoriaal() {
+  try { localStorage.setItem(TUTORIAAL, '1') } catch {}
 }
 
+/* Die tutoriaal. Drie kaarte, nie meer nie. Dewald se eerste woorde oor
+   hierdie spel was dat die Ark hom te lank besig gehou het — 'n tutoriaal
+   wat 'n mens deur tien skerms sleep, is presies daardie fout. */
+const TUT = [
+  { titel: 'Skuif twee vrugte',
+    teks: 'Sleep \'n vrug na \'n buurman, of tik altwee. Drie of meer eenders pas, en hulle is geoes.' },
+  { titel: 'Kyk na die doel',
+    teks: 'Bo-aan staan wat hierdie fase van jou vra. Die balkie daaronder wys hoe ver jy is.' },
+  { titel: 'Vier of meer gee krag',
+    teks: 'Pas vier, en jy kry \'n spesiale vrug. Ruil twee spesiales met mekaar vir iets groots.' },
+]
+
 export default function Vrugtefees({ onClose }) {
-  const [toestand, setToestand] = useState('kaart')   // kaart · speel · gewen · verloor · pouse
+  // kaart · speel · gewen · verloor · pouse · oesklaar · oesmeesters · prestasies
+  const [toestand, setToestand] = useState('kaart')
+  const [modus, setModus]       = useState('reis')   // reis · oneindig · daagliks
   const [vlakNr, setVlakNr]     = useState(1)
   const [vordering, setVordering] = useState(() => leesVordering())
   const [stil, setStil]         = useState(isMuted())
   const [rustig, setRustig]     = useState(() => leesRustig())
   const [wenkWys, setWenkWys]   = useState(true)
-  // Watter hoofstuk se fases die kaart wys. Negentig nommers in een rol is
-  // onbruikbaar; 'n mens kyk na een tuin op 'n slag.
+  const [tutStap, setTutStap]   = useState(-1)
   const [kaartHoofstuk, setKaartHoofstuk] = useState(0)
 
-  // Wat op die skerm is. Die enjin se bord leef in 'n ref; hierdie is die kopie
-  // wat React teken, en dit word net tussen animasie-stappe bygewerk.
-  const doekRef  = useRef(null)
-  const teken    = useRef(null)
-  const [punte, setPunte]       = useState(0)
+  const doekRef = useRef(null)
+  const teken   = useRef(null)
+  const [punte, setPunte]         = useState(0)
   const [skuiweOor, setSkuiweOor] = useState(0)
-  const [vorder, setVorder]     = useState(0)
-  const [gekies, setGekies]     = useState(null)
-  const [besig, setBesig]       = useState(false)
-  const [tik, setTik]           = useState(0)      // dwing 'n hertekening van die telbord
-  const [roep, setRoep]         = useState(null)     // "GOEIE PAS!" ens.
+  const [vorder, setVorder]       = useState(0)
+  const [gekies, setGekies]       = useState(null)
+  const [besig, setBesig]         = useState(false)
+  const [tik, setTik]             = useState(0)
+  const [roep, setRoep]           = useState(null)
+
+  // Die oes se eie toonbank op die skerm
+  const [oesRonde, setOesRonde]   = useState(1)
+  const [oesSoort, setOesSoort]   = useState(0)
+  const [oesHet, setOesHet]       = useState(0)
+  const [oesTeiken, setOesTeiken] = useState(0)
+  const [uitslag, setUitslag]     = useState(null)   // wat die bediener gesê het
+  const [stuurBesig, setStuurBesig] = useState(false)
+  const [nuutBehaal, setNuutBehaal] = useState([])
+  const [naamIn, setNaamIn]       = useState(() => leesNaam())
+  const [naamFout, setNaamFout]   = useState(null)
 
   const spel = useRef({ bord: null, rng: null, stand: null, vlak: null })
+  const oes  = useRef({ lopie: null, skuiwe: [], saad: 0, dag: null })
   const tydsers = useRef([])
 
   const vlak = vlakBy(vlakNr) || VLAKKE[0]
   const hoofstuk = hoofstukVan(vlakNr)
+  const hoofstukNr = Math.max(0, HOOFSTUKKE.findIndex(h => vlakNr >= h.vanaf && vlakNr <= h.tot))
+  const isOes = modus !== 'reis'
+  const agtergrondNr = isOes ? (oesRonde - 1) % HOOFSTUKKE.length : hoofstukNr
 
   const skoonTye = useCallback(() => {
     tydsers.current.forEach(t => clearTimeout(t))
@@ -96,12 +139,14 @@ export default function Vrugtefees({ onClose }) {
   }, [])
   useEffect(() => () => skoonTye(), [skoonTye])
 
-  const wag = useCallback((ms) => new Promise(res => {
-    const t = setTimeout(res, rustig ? Math.min(ms, 60) : ms)
-    tydsers.current.push(t)
-  }), [rustig])
+  /* Punte wat nie deurgekom het nie, probeer weer wanneer die spel oopmaak. */
+  useEffect(() => { stuurWagry().catch(() => {}) }, [])
 
-  /* ── Begin 'n vlak ── */
+  /* Ons eie uid, net om die speler se eie ry op die ranglys uit te lig. */
+  const [myUid, setMyUid] = useState(null)
+  useEffect(() => { getOrCreateAnonUid().then(setMyUid).catch(() => {}) }, [])
+
+  /* ── Begin 'n fase van die Tuinreis ── */
   const beginVlak = useCallback((nr) => {
     const v = vlakBy(nr) || VLAKKE[0]
     const bord = maakBord({ saad: v.saad, soorte: v.soorte, blokke: v.blokke || null })
@@ -115,26 +160,96 @@ export default function Vrugtefees({ onClose }) {
         blokkeAanBegin: bord.selle.filter(s => s.blok).length,
       },
     }
+    oes.current = { lopie: null, skuiwe: [], saad: 0, dag: null }
     skoonTye()
     if (teken.current) { teken.current.stelBord(bord); teken.current.stelKies(null) }
+    setModus('reis')
+    setVlakNr(nr)
     setPunte(0)
     setSkuiweOor(v.skuiwe)
     setVorder(0)
-    setGekies(null); setBesig(false); setRoep(null)
+    setGekies(null); setBesig(false); setRoep(null); setUitslag(null)
+    setNuutBehaal([])
     setWenkWys(!!v.wenk)
+    setTutStap(tutoriaalGesien() ? -1 : 0)
     setToestand('speel')
   }, [skoonTye])
 
-  /* ── Een skuif ──
-     Die enjin los alles op en gee 'n lys stappe. Die tekenaar speel hulle
-     af; ons wag daarvoor en werk dan die telbord by. */
-  const speelSkuif = useCallback(async (a, b) => {
+  /* ── Begin 'n oes-lopie ──
+     Die saad is die enigste verskil tussen die twee wyses. By Vandag se Oes
+     kom dit uit die datum, en die bediener bereken presies dieselfde een uit
+     die dag — dus kan niemand 'n gunstige bord kies nie. */
+  const beginOesLopie = useCallback((soort) => {
+    const dag = dagSleutel(new Date())
+    const saad = soort === 'daagliks'
+      ? dagSaad(dag)
+      : Math.floor(Math.random() * 2000000000)
+
+    let lopie
+    try { lopie = beginOes(saad) } catch { return }
+
+    oes.current = { lopie, skuiwe: [], saad, dag: soort === 'daagliks' ? dag : null }
+    spel.current = { bord: lopie.bord, rng: null, stand: null, vlak: null }
+    skoonTye()
+    if (teken.current) { teken.current.stelBord(lopie.bord); teken.current.stelKies(null) }
+    setModus(soort)
+    setPunte(0)
+    setSkuiweOor(lopie.skuiweOor)
+    setOesRonde(lopie.ronde)
+    setOesSoort(lopie.soort)
+    setOesHet(0)
+    setOesTeiken(lopie.teiken)
+    setVorder(0)
+    setGekies(null); setBesig(false); setRoep(null); setUitslag(null)
+    setNuutBehaal([])
+    setWenkWys(false)
+    setTutStap(tutoriaalGesien() ? -1 : 0)
+    setToestand('speel')
+  }, [skoonTye])
+
+  const wagVir = useCallback((ms) => new Promise(res => {
+    const t = setTimeout(res, rustig ? Math.min(ms, 60) : ms)
+    tydsers.current.push(t)
+  }), [rustig])
+
+  /* ── Klank vir een skuif ──
+     Vrugte, nie planke nie. Die spel het tot nou Bou die Ark se hout geleen
+     en dit het klaar geklink of iets breek eerder as of iets gepluk word. */
+  function klankVir(uit) {
+    if (uit.kombinasies > 0) playKombinasie()
+    else if (uit.spesiaalGemaak > 0) playSpesiaal()
+    else playVrugPas(Math.max(1, uit.grootsteKetting), uit.grootstePas || 3)
+  }
+
+  function roepVir(uit) {
+    if (uit.kombinasies > 0)            return 'GROOT KOMBINASIE!'
+    if (uit.grootsteKetting >= 4)       return 'VRUGTEFEES!'
+    if (uit.grootsteKetting === 3)      return 'PRAGTIGE OES!'
+    if (uit.grootsteKetting === 2)      return 'GOEIE PAS!'
+    return null
+  }
+
+  /* Wat die skuif aan die prestasies gedoen het. Ons boek dit een keer per
+     skuif aan, sodat 'n mens 'n merk kry op die oomblik dat dit gebeur. */
+  function boekSkuif(uit, ekstra = {}) {
+    const reenboog = Object.entries(uit.spesiaalSoorte || {})
+      .filter(([s]) => s === REENBOOGVRUG).reduce((n, [, v]) => n + v, 0)
+    const r = boekAan({
+      besteKetting: uit.grootsteKetting,
+      besteGrootpas: uit.grootstePas || 0,
+      kombinasies: uit.kombinasies,
+      spesiaalGemaak: uit.spesiaalGemaak,
+      reenboog,
+      ...ekstra,
+    })
+    if (r.nuut.length) setNuutBehaal(n => [...n, ...r.nuut])
+    return r
+  }
+
+  /* ── Een skuif in die Tuinreis ── */
+  const speelReisSkuif = useCallback(async (a, b) => {
     const s = spel.current
     const t = teken.current
-    if (!s.bord || !t || besig) return
-
-    setBesig(true)
-    setGekies(null); t.stelKies(null)
 
     const uit = doenSkuif(s.bord, a, b, { rng: s.rng })
 
@@ -145,13 +260,8 @@ export default function Vrugtefees({ onClose }) {
       return
     }
 
-    // Die roep gaan saam met die grootste ketting van hierdie skuif
-    const ketting = uit.grootsteKetting
-    if (uit.kombinasies > 0)  setRoep('GROOT KOMBINASIE!')
-    else if (ketting >= 4)    setRoep('VRUGTEFEES!')
-    else if (ketting === 3)   setRoep('PRAGTIGE OES!')
-    else if (ketting === 2)   setRoep('GOEIE PAS!')
-    playPlanke(Math.min(4, Math.max(1, ketting)))
+    setRoep(roepVir(uit))
+    klankVir(uit)
 
     await t.speelStappe(uit.stappe, s.bord)
 
@@ -165,15 +275,16 @@ export default function Vrugtefees({ onClose }) {
       s.stand.spesiaalSoorte[soort] = (s.stand.spesiaalSoorte[soort] || 0) + n
     for (const [k, r] of uit.geveeSelle || []) s.stand.verlig[k + ',' + r] = true
 
+    boekSkuif(uit)
+
     setPunte(s.stand.punte)
     setTik(x => x + 1)
     setVorder(doelVordering(s.vlak.doel, s.stand, s.bord))
     const oor = skuiweOor - 1
     setSkuiweOor(oor)
 
-    // Skommel as die bord doodgeloop het. Dit kos nooit 'n skuif nie.
     const sk = versekerSkuif(s.bord, s.vlak.saad + oor * 31)
-    if (sk) { setRoep('DIE TUIN SKUIF'); t.stelBord(s.bord); await new Promise(r => setTimeout(r, 320)) }
+    if (sk) { setRoep('DIE TUIN SKUIF'); t.stelBord(s.bord); await wagVir(320) }
 
     setRoep(null)
     setBesig(false)
@@ -186,12 +297,119 @@ export default function Vrugtefees({ onClose }) {
       nuut.hoogste = Math.max(nuut.hoogste, Math.min(VLAKKE.length, s.vlak.nr + 1))
       nuut.bestes = { ...nuut.bestes, [s.vlak.nr]: Math.max(nuut.bestes[s.vlak.nr] || 0, s.stand.punte) }
       setVordering(nuut); stoorVordering(nuut)
+      const hs = Math.max(1, HOOFSTUKKE.findIndex(h => s.vlak.nr >= h.vanaf && s.vlak.nr <= h.tot) + 1)
+      const r = boekAan({
+        vlakkeKlaar: Math.max(s.vlak.nr, nuut.hoogste - 1),
+        hoogsteHoofstuk: hs,
+        besteSkuiweOor: oor,
+      })
+      if (r.nuut.length) setNuutBehaal(n => [...n, ...r.nuut])
       setToestand('gewen')
     } else if (oor <= 0) {
       playHit()
       setToestand('verloor')
     }
-  }, [besig, skuiweOor, vordering])
+  }, [skuiweOor, vordering, wagVir])
+
+  /* ── Een skuif in 'n oes-lopie ──
+     Alles loop deur oesSkuif, want dit is die kode wat die bediener ook
+     gebruik. Elke GELDIGE skuif word neergeskryf; dit is die bewys wat
+     ingestuur word. */
+  const speelOesSkuif = useCallback(async (a, b) => {
+    const o = oes.current
+    const t = teken.current
+    const lopie = o.lopie
+    if (!lopie) { setBesig(false); return }
+
+    const uit = oesSkuif(lopie, a, b)
+
+    if (!uit.geldig) {
+      playHit()
+      if (uit.stappe && uit.stappe.length) await t.speelStappe(uit.stappe, lopie.bord)
+      setBesig(false)
+      return
+    }
+
+    o.skuiwe.push([a.k, a.r, b.k, b.r])
+
+    setRoep(roepVir(uit))
+    klankVir(uit)
+
+    await t.speelStappe(uit.stappe, lopie.bord)
+
+    boekSkuif(uit)
+
+    setPunte(lopie.punte)
+    setSkuiweOor(lopie.skuiweOor)
+    setOesHet(lopie.het)
+    setTik(x => x + 1)
+
+    if (uit.rondeKlaar) {
+      playOesRonde()
+      setRoep('RONDE ' + (lopie.ronde - 1) + ' BINNE!')
+      setOesRonde(lopie.ronde)
+      setOesSoort(lopie.soort)
+      setOesTeiken(lopie.teiken)
+      boekAan({ besteOesRonde: lopie.rondesKlaar, besteOesPunte: lopie.punte })
+      await wagVir(520)
+    }
+
+    setVorder(lopie.teiken ? Math.min(1, lopie.het / lopie.teiken) : 0)
+
+    if (uit.skommel) { setRoep('DIE TUIN SKUIF'); t.stelBord(lopie.bord); await wagVir(320) }
+
+    setRoep(null)
+    setBesig(false)
+
+    if (lopie.klaar) {
+      playOesKlaar()
+      const r = boekAan({
+        besteOesRonde: lopie.rondesKlaar,
+        besteOesPunte: lopie.punte,
+        ...(modus === 'daagliks' ? { dagLaaste: o.dag } : {}),
+      })
+      if (r.nuut.length) setNuutBehaal(n => [...n, ...r.nuut])
+      setToestand('oesklaar')
+      stuurDieOes()
+    }
+  }, [modus, wagVir])
+
+  /* ── Stuur die lopie in ──
+     Ons stuur die saad en die skuiwe. Nie die punte nie: die bediener speel
+     dit oor en tel self. Daar is dus niks om te oordryf nie. */
+  const stuurDieOes = useCallback(async () => {
+    const o = oes.current
+    if (!o.lopie || !o.skuiwe.length) return
+    const naam = leesNaam()
+    if (!naam) return            // die skerm vra dit; ons stuur daarna
+    if (naamAfgewys()) return
+
+    setStuurBesig(true)
+    const lopie = modus === 'daagliks'
+      ? { soort: 'daagliks', dag: o.dag, skuiwe: o.skuiwe }
+      : { soort: 'oneindig', saad: o.saad, skuiwe: o.skuiwe }
+    const uit = await stuurOes(naam, lopie)
+    setUitslag(uit)
+    setStuurBesig(false)
+  }, [modus])
+
+  function stoorNaamEnStuur() {
+    const f = keurNaam(naamIn)
+    if (f) { setNaamFout(f); return }
+    stoorNaam(naamIn.trim().replace(/\s+/g, ' '))
+    setNaamFout(null)
+    stuurDieOes()
+  }
+
+  /* ── Een skuif ── */
+  const speelSkuif = useCallback(async (a, b) => {
+    const t = teken.current
+    if (!t || besig) return
+    setBesig(true)
+    setGekies(null); t.stelKies(null)
+    if (modus === 'reis') await speelReisSkuif(a, b)
+    else await speelOesSkuif(a, b)
+  }, [besig, modus, speelReisSkuif, speelOesSkuif])
 
   /* ── Kies en ruil ──
      Die doek weet self watter sel onder 'n punt is. Ons werk in
@@ -206,14 +424,19 @@ export default function Vrugtefees({ onClose }) {
     return t.selBy((p.clientX - r.left) * skaal, (p.clientY - r.top) * skaal)
   }
 
+  function huidigeBord() {
+    return modus === 'reis' ? spel.current.bord : (oes.current.lopie && oes.current.lopie.bord)
+  }
+
   function kiesSel(pos) {
     if (besig || toestand !== 'speel' || !pos) return
-    const sel = spel.current.bord && spel.current.bord.selle[pos.r * 8 + pos.k]
+    const bord = huidigeBord()
+    const sel = bord && bord.selle[pos.r * 8 + pos.k]
     if (!sel || bedekSel(sel)) return
-    if (!gekies) { setGekies(pos); teken.current.stelKies(pos); playHout(0.4); return }
+    if (!gekies) { setGekies(pos); teken.current.stelKies(pos); return }
     if (gekies.k === pos.k && gekies.r === pos.r) { setGekies(null); teken.current.stelKies(null); return }
     const naby = Math.abs(gekies.k - pos.k) + Math.abs(gekies.r - pos.r) === 1
-    if (!naby) { setGekies(pos); teken.current.stelKies(pos); playHout(0.4); return }
+    if (!naby) { setGekies(pos); teken.current.stelKies(pos); return }
     speelSkuif(gekies, pos)
   }
 
@@ -241,7 +464,7 @@ export default function Vrugtefees({ onClose }) {
     setGekies(null); teken.current.stelKies(null)
     speelSkuif({ k: s.k, r: s.r }, { k: nk, r: nr })
   }
-  function raakEinde(e) {
+  function raakEinde() {
     const s = sleep.current
     sleep.current = null
     if (s && !s.gedoen) kiesSel({ k: s.k, r: s.r })
@@ -253,6 +476,20 @@ export default function Vrugtefees({ onClose }) {
     const nuut = !rustig
     setRustig(nuut)
     try { localStorage.setItem(RUSTIG, nuut ? '1' : '0') } catch {}
+  }
+
+  /* ── Deel ── */
+  async function deel() {
+    const wat = isOes
+      ? `Ek het ${punte.toLocaleString('af')} punte in ${modus === 'daagliks' ? 'Vandag se Oes' : 'Die Oneindige Oes'} gehaal — ronde ${oesRonde}.`
+      : `Ek het fase ${vlak.nr} van Vrugtefees klaargemaak met ${punte.toLocaleString('af')} punte.`
+    const teks = `${wat}\n\nVrugtefees, in Daaglikse Hoop.`
+    try {
+      if (navigator.share) { await navigator.share({ text: teks, url: window.location.origin }) ; return }
+      await navigator.clipboard.writeText(`${teks}\n${window.location.origin}`)
+      setRoep('GEKOPIEER')
+      setTimeout(() => setRoep(null), 1400)
+    } catch { /* die speler het gekanselleer; dis nie 'n fout nie */ }
   }
 
   /* ── Die tekenaar ──
@@ -275,7 +512,8 @@ export default function Vrugtefees({ onClose }) {
       d.width = nuutSy
       d.height = nuutSy
       t.stelPrente()
-      if (spel.current.bord) t.stelBord(spel.current.bord)
+      const bord = modus === 'reis' ? spel.current.bord : (oes.current.lopie && oes.current.lopie.bord)
+      if (bord) t.stelBord(bord)
     }
     pas()
     const t1 = setTimeout(pas, 80)
@@ -299,31 +537,47 @@ export default function Vrugtefees({ onClose }) {
   }, [])
 
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
+
   /* Hoeveel versperrings is nog oor? Dieselfde soort toonbank as die
      vrugte s'n, want sonder dit weet 'n mens nie hoe ver jy is nie. */
   const blokLys = useMemo(() => {
-    if (vlak.doel.tipe !== 'skoonmaak' || !spel.current.bord) return null
+    if (isOes || vlak.doel.tipe !== 'skoonmaak' || !spel.current.bord) return null
     const tel = vlak.doel.telling || {}
     return vlak.doel.tipes.map(t => {
       const oor = spel.current.bord.selle.filter(s => s.blok === t).length
       const begin = tel[t] || oor
       return { tipe: t, weg: begin - oor, begin }
     })
-  }, [vlak, punte, tik, toestand])
+  }, [vlak, punte, tik, toestand, isOes])
 
   const versamelLys = useMemo(() => {
-    if (vlak.doel.tipe !== 'versamel') return null
+    if (isOes || vlak.doel.tipe !== 'versamel') return null
     const st = spel.current.stand
     return Object.entries(vlak.doel.vrugte).map(([i, n]) => ({
       soort: Number(i), nodig: n, het: Math.min(n, (st && st.versamel[i]) || 0),
     }))
-  }, [vlak, punte, tik])
+  }, [vlak, punte, tik, isOes])
+
+  const prestasieStand = useMemo(() => leesPrestasies(), [toestand, nuutBehaal.length])
+
+  /* Wat in die kop staan. Die ranglys en die prestasies is nie 'n tuin nie,
+     dus mag die hoofstuk se naam nie daar bly staan nie. */
+  const kopNaam = toestand === 'kaart'       ? 'Vrugtefees'
+                : toestand === 'oesmeesters' ? 'Oesmeesters'
+                : toestand === 'prestasies'  ? 'Prestasies'
+                : modus === 'daagliks'       ? 'Vandag se Oes'
+                : modus === 'oneindig'       ? 'Die Oneindige Oes'
+                : hoofstuk.naam
 
   return (
     <div className="vf-oorleg">
 
-      {/* Die tuin agter alles. Geteken, nie 'n prentlêer nie. */}
-      <TuinAgtergrond hoofstuk={hoofstuk.vanaf === 1 ? 0 : 1} />
+      {/* Die tuin agter alles. Elke hoofstuk het sy eie.
+
+          Dit het lank net 0 of 1 deurgegee, wat beteken al nege hoofstukke
+          het twee agtergronde gedeel — sewe geskilderde tuine wat niemand
+          ooit gesien het nie. */}
+      <TuinAgtergrond hoofstuk={agtergrondNr} />
 
       {/* ── Le die foon regop ── */}
       <div className="vf-draai">
@@ -341,7 +595,7 @@ export default function Vrugtefees({ onClose }) {
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <span className="vf-titel">{toestand === 'kaart' ? 'Vrugtefees' : hoofstuk.naam}</span>
+        <span className="vf-titel">{kopNaam}</span>
         <button className="vf-ikoon" onClick={klank} aria-label={stil ? 'Klank aan' : 'Klank af'}>
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 5 6 9H2v6h4l5 4z" />
@@ -357,12 +611,26 @@ export default function Vrugtefees({ onClose }) {
             <div className="vf-tel-item"><span>Punte</span><b>{punte.toLocaleString('af')}</b></div>
             <div className="vf-tel-item"><span>Skuiwe</span><b className={skuiweOor <= 3 ? 'min' : ''}>{skuiweOor}</b></div>
             <div className="vf-tel-item vf-tel-doel">
-              <span>Fase {vlak.nr}</span>
-              <b>{doelWoorde}</b>
+              {isOes ? <>
+                <span>Ronde {oesRonde}</span>
+                <b>oes {oesTeiken} {vrugNaam(oesSoort)}</b>
+              </> : <>
+                <span>Fase {vlak.nr}</span>
+                <b>{doelWoorde}</b>
+              </>}
             </div>
           </div>
 
           <div className="vf-balk"><i style={{ width: `${Math.round(vorder * 100)}%` }} /></div>
+
+          {isOes && (
+            <div className="vf-versamel">
+              <div className={`vf-versamel-item${oesHet >= oesTeiken ? ' klaar' : ''}`}>
+                <Vrug soort={oesSoort} grootte={34} />
+                <b>{oesHet}/{oesTeiken}</b>
+              </div>
+            </div>
+          )}
 
           {blokLys && (
             <div className="vf-versamel">
@@ -392,7 +660,7 @@ export default function Vrugtefees({ onClose }) {
       <div className="vf-bord-wrap">
         <canvas
           ref={doekRef}
-          className={'vf-doek' + (toestand === 'kaart' ? ' weg' : '')}
+          className={'vf-doek' + (toestand === 'kaart' || toestand === 'oesmeesters' || toestand === 'prestasies' ? ' weg' : '')}
           onTouchStart={raakBegin}
           onTouchMove={raakBeweeg}
           onTouchEnd={raakEinde}
@@ -404,10 +672,18 @@ export default function Vrugtefees({ onClose }) {
 
         {roep && <div className="vf-roep">{roep}</div>}
 
+        {/* 'n Nuwe prestasie. Dit onderbreek niks: dit gly in en weer weg. */}
+        {nuutBehaal.length > 0 && toestand === 'speel' && (
+          <div className="vf-nuut" onClick={() => setNuutBehaal([])}>
+            <b>{nuutBehaal[nuutBehaal.length - 1].naam}</b>
+            <span>{nuutBehaal[nuutBehaal.length - 1].beskrywing}</span>
+          </div>
+        )}
+
         {/* ── Vlakkaart ── */}
         {toestand === 'kaart' && (
           <div className="vf-blad">
-            <span className="vf-merk">{hoofstuk.naam}</span>
+            <span className="vf-merk">{HOOFSTUKKE[kaartHoofstuk].naam}</span>
             <h2 className="vf-blad-titel">Vrugtefees</h2>
             <p className="vf-blad-teks">
               Skuif twee vrugte langs mekaar om drie of meer te pas.
@@ -415,11 +691,22 @@ export default function Vrugtefees({ onClose }) {
 
             <button
               className="vf-knop vf-knop-primer vf-speelknop"
-              onClick={() => { setVlakNr(vordering.hoogste); beginVlak(vordering.hoogste) }}
+              onClick={() => beginVlak(vordering.hoogste)}
             >
               Speel
               <small>Fase {vordering.hoogste}</small>
             </button>
+
+            <div className="vf-modusknoppe">
+              <button className="vf-modusknop" onClick={() => beginOesLopie('daagliks')}>
+                <b>Vandag se Oes</b>
+                <small>Almal speel dieselfde bord</small>
+              </button>
+              <button className="vf-modusknop" onClick={() => beginOesLopie('oneindig')}>
+                <b>Die Oneindige Oes</b>
+                <small>Speel tot die skuiwe op is</small>
+              </button>
+            </div>
 
             <div className="vf-hoofstukbalk">
               <button
@@ -447,7 +734,7 @@ export default function Vrugtefees({ onClose }) {
                     key={v.nr}
                     className={`vf-vlakknop${oop ? '' : ' toe'}${v.nr === vordering.hoogste ? ' nou' : ''}`}
                     disabled={!oop}
-                    onClick={() => { setVlakNr(v.nr); beginVlak(v.nr) }}
+                    onClick={() => beginVlak(v.nr)}
                   >
                     {v.nr}
                     {vordering.bestes[v.nr] ? <i /> : null}
@@ -456,14 +743,42 @@ export default function Vrugtefees({ onClose }) {
               })}
             </div>
             <p className="vf-fyndruk">Fase {vordering.hoogste} van {VLAKKE.length} oop</p>
+
+            <button className="vf-knop vf-knop-spook" onClick={() => setToestand('oesmeesters')}>
+              Top 20 Oesmeesters
+            </button>
+            <button className="vf-knop vf-knop-spook" onClick={() => setToestand('prestasies')}>
+              Prestasies ({Object.keys(prestasieStand.behaal).length} van {PRESTASIES.length})
+            </button>
             <button className="vf-knop vf-knop-spook" onClick={wisselRustig}>
               Rustige beweging: {rustig ? 'aan' : 'af'}
             </button>
           </div>
         )}
 
+        {/* ── Tutoriaal ── */}
+        {toestand === 'speel' && tutStap >= 0 && (
+          <div className="vf-wenk vf-tut">
+            <span className="vf-merk">{tutStap + 1} van {TUT.length}</span>
+            <h3>{TUT[tutStap].titel}</h3>
+            <p>{TUT[tutStap].teks}</p>
+            <button
+              className="vf-knop vf-knop-primer"
+              onClick={() => {
+                if (tutStap + 1 < TUT.length) setTutStap(tutStap + 1)
+                else { merkTutoriaal(); setTutStap(-1) }
+              }}
+            >
+              {tutStap + 1 < TUT.length ? 'Volgende' : 'Kom ons speel'}
+            </button>
+            <button className="vf-knop vf-knop-spook" onClick={() => { merkTutoriaal(); setTutStap(-1) }}>
+              Slaan oor
+            </button>
+          </div>
+        )}
+
         {/* ── Wenk ── */}
-        {toestand === 'speel' && wenkWys && vlak.wenk && (
+        {toestand === 'speel' && tutStap < 0 && wenkWys && vlak.wenk && !isOes && (
           <div className="vf-wenk" onClick={() => setWenkWys(false)}>
             <p>{vlak.wenk}</p>
             <button className="vf-knop vf-knop-primer" onClick={() => setWenkWys(false)}>Goed</button>
@@ -475,8 +790,12 @@ export default function Vrugtefees({ onClose }) {
           <div className="vf-blad">
             <h2 className="vf-blad-titel">Gepouseer</h2>
             <button className="vf-knop vf-knop-primer" onClick={() => setToestand('speel')}>Speel verder</button>
-            <button className="vf-knop vf-knop-spook" onClick={() => beginVlak(vlakNr)}>Begin die fase weer</button>
-            <button className="vf-knop vf-knop-spook" onClick={() => setToestand('kaart')}>Terug na die fases</button>
+            {!isOes && (
+              <button className="vf-knop vf-knop-spook" onClick={() => beginVlak(vlakNr)}>Begin die fase weer</button>
+            )}
+            <button className="vf-knop vf-knop-spook" onClick={() => { setModus('reis'); setToestand('kaart') }}>
+              Terug na die fases
+            </button>
           </div>
         )}
 
@@ -495,8 +814,16 @@ export default function Vrugtefees({ onClose }) {
               return h >= 0 ? <p className="vf-hoofstukwoord">{HOOFSTUK_WOORD[h]}</p> : null
             })()}
 
+            {nuutBehaal.length > 0 && (
+              <div className="vf-nuut-lys">
+                {nuutBehaal.map(p => (
+                  <div key={p.id}><b>{p.naam}</b><span>{p.beskrywing}</span></div>
+                ))}
+              </div>
+            )}
+
             {vlak.nr < VLAKKE.length ? (
-              <button className="vf-knop vf-knop-primer" onClick={() => { setVlakNr(vlak.nr + 1); beginVlak(vlak.nr + 1) }}>
+              <button className="vf-knop vf-knop-primer" onClick={() => beginVlak(vlak.nr + 1)}>
                 Volgende fase
               </button>
             ) : (
@@ -504,6 +831,7 @@ export default function Vrugtefees({ onClose }) {
                 Jy het al {VLAKKE.length} fases klaargemaak — die hele Tuinreis.
               </p>
             )}
+            <button className="vf-knop vf-knop-spook" onClick={deel}>Deel</button>
             <button className="vf-knop vf-knop-spook" onClick={() => beginVlak(vlak.nr)}>Speel weer</button>
             <button className="vf-knop vf-knop-spook" onClick={() => setToestand('kaart')}>Terug na die fases</button>
           </div>
@@ -520,6 +848,104 @@ export default function Vrugtefees({ onClose }) {
             </div>
             <button className="vf-knop vf-knop-primer" onClick={() => beginVlak(vlak.nr)}>Probeer weer</button>
             <button className="vf-knop vf-knop-spook" onClick={() => setToestand('kaart')}>Terug na die fases</button>
+          </div>
+        )}
+
+        {/* ── 'n Oes-lopie is klaar ── */}
+        {toestand === 'oesklaar' && (
+          <div className="vf-blad">
+            <span className="vf-merk">{modus === 'daagliks' ? 'Vandag se Oes' : 'Die Oneindige Oes'}</span>
+            <h2 className="vf-blad-titel">Die mandjies is vol</h2>
+            <div className="vf-uitslag">
+              <div><span>Punte</span><b>{punte.toLocaleString('af')}</b></div>
+              <div><span>Rondes</span><b>{oes.current.lopie ? oes.current.lopie.rondesKlaar : 0}</b></div>
+              <div><span>Skuiwe</span><b>{oes.current.lopie ? oes.current.lopie.skuiweGedoen : 0}</b></div>
+            </div>
+
+            {nuutBehaal.length > 0 && (
+              <div className="vf-nuut-lys">
+                {nuutBehaal.map(p => (
+                  <div key={p.id}><b>{p.naam}</b><span>{p.beskrywing}</span></div>
+                ))}
+              </div>
+            )}
+
+            {/* Die ranglys. Ons vra die naam eers hier — nie voor die spel
+                nie, want dan vra ons iets voordat 'n mens weet of jy wil. */}
+            {!leesNaam() && !naamAfgewys() && (
+              <div className="vf-naamvra">
+                <p className="vf-blad-teks">Wil jy hierdie oes op die wêreldwye lys sit?</p>
+                <input
+                  className="vf-inset"
+                  value={naamIn}
+                  maxLength={20}
+                  placeholder="Jou naam"
+                  onChange={e => { setNaamIn(e.target.value); setNaamFout(null) }}
+                />
+                {naamFout && <p className="vf-fout">{naamFout}</p>}
+                <button className="vf-knop vf-knop-primer" onClick={stoorNaamEnStuur}>Stuur in</button>
+                <button className="vf-knop vf-knop-spook" onClick={() => { wysNaamAf(); setUitslag(null) }}>
+                  Nee dankie
+                </button>
+              </div>
+            )}
+
+            {stuurBesig && <p className="vf-blad-teks">Besig om in te stuur…</p>}
+
+            {uitslag && uitslag.ok && (
+              <p className="vf-blad-teks">
+                {uitslag.rang
+                  ? <>Jy is <b>nommer {uitslag.rang}</b> van {uitslag.totaal.toLocaleString('af')}.</>
+                  : <>Ingestuur.</>}
+                {!uitslag.beterAs && <><br /><small>Jou vorige lopie was beter, dus bly daardie een staan.</small></>}
+              </p>
+            )}
+            {uitslag && !uitslag.ok && (
+              <p className="vf-fout">{uitslag.fout}</p>
+            )}
+
+            <button className="vf-knop vf-knop-primer" onClick={() => beginOesLopie(modus)}>
+              Nog 'n keer
+            </button>
+            <button className="vf-knop vf-knop-spook" onClick={deel}>Deel</button>
+            <button className="vf-knop vf-knop-spook" onClick={() => setToestand('oesmeesters')}>
+              Top 20 Oesmeesters
+            </button>
+            <button className="vf-knop vf-knop-spook" onClick={() => { setModus('reis'); setToestand('kaart') }}>
+              Terug na die fases
+            </button>
+          </div>
+        )}
+
+        {/* ── Oesmeesters ── */}
+        {toestand === 'oesmeesters' && (
+          <Oesmeesters
+            myUid={myUid}
+            terug={() => setToestand(oes.current.lopie && modus !== 'reis' ? 'oesklaar' : 'kaart')}
+            naamNodig={false}
+            onNaam={() => stuurDieOes()}
+          />
+        )}
+
+        {/* ── Prestasies ── */}
+        {toestand === 'prestasies' && (
+          <div className="vf-blad">
+            <span className="vf-merk">
+              {Object.keys(prestasieStand.behaal).length} van {PRESTASIES.length}
+            </span>
+            <h2 className="vf-blad-titel">Prestasies</h2>
+            <div className="vf-prestasie-lys">
+              {PRESTASIES.map(p => {
+                const behaal = !!prestasieStand.behaal[p.id]
+                return (
+                  <div key={p.id} className={'vf-prestasie' + (behaal ? ' behaal' : '')}>
+                    <b>{behaal ? p.naam : '—'}</b>
+                    <span>{p.beskrywing}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <button className="vf-knop vf-knop-spook" onClick={() => setToestand('kaart')}>Terug</button>
           </div>
         )}
       </div>

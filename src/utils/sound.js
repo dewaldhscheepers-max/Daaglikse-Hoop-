@@ -159,6 +159,150 @@ export function playLevelComplete() {
   } catch {}
 }
 
+/* ── Vrugte ────────────────────────────────────────────────────
+   Vir Vrugtefees. Die spel het tot nou Bou die Ark se planke geleen, en
+   dit was verkeerd: hout is dof, droog en dood — presies wat 'n ark moet
+   wees en presies wat 'n vrug nie is nie.
+
+   'n Vrug wat pluk, is kort, sappig en rond. Drie dele: 'n vinnige
+   toonhoogteval (die stingel wat breek), 'n baie kort gefiltreerde ruis
+   (die skil), en 'n sagte lyf daaronder. Geen klokkie nie — Vredepad se
+   klokkies bly Vredepad s'n, en 'n klokkie in 'n tuin klink na glas.
+
+   Bou die Ark en Vredepad se klanke bly heeltemal onaangeraak.
+   ────────────────────────────────────────────────────────────── */
+
+// 'n Warm, laer toonleer as PENTA. Dieselfde note, 'n oktaaf sagter.
+const TUIN = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25]
+
+function pluk(c, t, hz, krag = 1) {
+  const v = Math.min(1, Math.max(0.2, krag))
+
+  // Die stingel wat breek: 'n vinnige val in toonhoogte.
+  const o = c.createOscillator(), g = c.createGain()
+  o.type = 'sine'
+  o.frequency.setValueAtTime(hz * 1.6, t)
+  o.frequency.exponentialRampToValueAtTime(hz, t + 0.045)
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.linearRampToValueAtTime(0.30 * v, t + 0.006)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.26)
+  o.connect(g); g.connect(_master)
+  o.start(t); o.stop(t + 0.3)
+
+  // Die skil. Kort en sag, net genoeg om die aanslag lyf te gee.
+  const src = ruisBron(c, 0.05)
+  const bp = c.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.frequency.value = 1400 + Math.random() * 500
+  bp.Q.value = 1.2
+  const gr = c.createGain()
+  gr.gain.setValueAtTime(0.0001, t)
+  gr.gain.linearRampToValueAtTime(0.10 * v, t + 0.003)
+  gr.gain.exponentialRampToValueAtTime(0.0001, t + 0.05)
+  src.connect(bp); bp.connect(gr); gr.connect(_master)
+  src.start(t); src.stop(t + 0.06)
+
+  // Die lyf: 'n ronde onderteun sodat dit sappig eerder as dun klink.
+  const o2 = c.createOscillator(), g2 = c.createGain()
+  o2.type = 'triangle'
+  o2.frequency.setValueAtTime(hz * 0.5, t)
+  g2.gain.setValueAtTime(0.0001, t)
+  g2.gain.linearRampToValueAtTime(0.12 * v, t + 0.012)
+  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.22)
+  o2.connect(g2); g2.connect(_master)
+  o2.start(t); o2.stop(t + 0.26)
+}
+
+/* 'n Pas. Die ketting stoot dit die toonleer op, sodat 'n lang
+   kettingreaksie soos 'n stygende frase klink in plaas van herhaling. */
+export function playVrugPas(ketting = 1, hoeveel = 3) {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    const trap = Math.min(TUIN.length - 3, Math.max(0, ketting - 1))
+    const n = Math.min(4, Math.max(1, hoeveel - 2))
+    for (let i = 0; i < n; i++)
+      pluk(c, nou + i * 0.042, TUIN[(trap + i) % TUIN.length], 0.9 - i * 0.08)
+    if (navigator.vibrate) navigator.vibrate(ketting >= 3 ? 26 : 14)
+  } catch {}
+}
+
+// Vrugte wat in die mandjie val: sag, laag, sonder rand.
+export function playVrugVal(hoeveel = 1) {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    const n = Math.min(3, Math.max(1, hoeveel))
+    for (let i = 0; i < n; i++) {
+      const o = c.createOscillator(), g = c.createGain()
+      const t = nou + i * 0.035
+      o.type = 'sine'
+      o.frequency.setValueAtTime(150 + Math.random() * 40, t)
+      o.frequency.exponentialRampToValueAtTime(96, t + 0.1)
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.linearRampToValueAtTime(0.13, t + 0.008)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16)
+      o.connect(g); g.connect(_master)
+      o.start(t); o.stop(t + 0.2)
+    }
+  } catch {}
+}
+
+// 'n Spesiale vrug is gemaak: 'n kort stygende glans.
+export function playSpesiaal() {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    ;[0, 2, 4, 5].forEach((i, n) => pluk(c, nou + n * 0.05, TUIN[i] * 2, 0.75))
+    if (navigator.vibrate) navigator.vibrate([14, 20, 22])
+  } catch {}
+}
+
+// Twee spesiales saam. Die grootste oomblik in 'n skuif.
+export function playKombinasie() {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    ;[0, 2, 4, 5, 7].forEach((i, n) => {
+      pluk(c, nou + n * 0.055, TUIN[i] * 2, 0.95)
+      pluk(c, nou + n * 0.055 + 0.012, TUIN[i], 0.5)
+    })
+    // 'n Warm bas onder wat die ruimte vul.
+    const o = c.createOscillator(), g = c.createGain()
+    o.type = 'sine'
+    o.frequency.setValueAtTime(98, nou)
+    o.frequency.exponentialRampToValueAtTime(65.41, nou + 0.6)
+    g.gain.setValueAtTime(0.0001, nou)
+    g.gain.linearRampToValueAtTime(0.20, nou + 0.04)
+    g.gain.exponentialRampToValueAtTime(0.0001, nou + 0.7)
+    o.connect(g); g.connect(_master)
+    o.start(nou); o.stop(nou + 0.75)
+    if (navigator.vibrate) navigator.vibrate([25, 25, 45])
+  } catch {}
+}
+
+// 'n Ronde van die oes is binne.
+export function playOesRonde() {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    ;[TUIN[0], TUIN[2], TUIN[4], TUIN[5] * 2].forEach((hz, i) =>
+      pluk(c, nou + i * 0.09, hz, 0.9))
+    if (navigator.vibrate) navigator.vibrate([18, 24, 18, 24, 40])
+  } catch {}
+}
+
+// Die lopie is klaar. Dalend — dit is 'n einde, nie 'n oorwinning nie.
+export function playOesKlaar() {
+  if (_muted) return
+  try {
+    const c = getCtx(), nou = c.currentTime
+    ;[TUIN[5], TUIN[4], TUIN[2], TUIN[0]].forEach((hz, i) =>
+      pluk(c, nou + i * 0.13, hz, 0.7 - i * 0.1))
+    if (navigator.vibrate) navigator.vibrate([30, 40, 30])
+  } catch {}
+}
+
 export function startAmbient() {
   stopAmbient()
   if (_muted) return

@@ -104,6 +104,27 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Vrugtefees se twee ranglyste: die Oesmeesters (beste lopie ooit) en
+    // Vandag se Oes (almal op dieselfde bord).
+    //
+    // Net soos by arkRanglys raak geen klient hieraan nie. Die enigste pad
+    // in en uit is /api/vrugtefees-ranglys, wat die speler se ID-token
+    // verifieer en — anders as die Ark — die hele lopie OORSPEEL met
+    // dieselfde enjin voordat 'n punt tel. Die klient stuur nie eens sy
+    // puntetelling nie; die bediener bereken dit self.
+    //
+    // Firestore weier klaar waar geen reel pas nie. Hierdie blokke staan
+    // hier sodat die bedoeling swart op wit is en niemand dit later per
+    // ongeluk oopmaak nie.
+    match /vfOesmeesters/{userId} {
+      allow read:  if false;
+      allow write: if false;
+    }
+    match /vfDagoes/{userId} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;
