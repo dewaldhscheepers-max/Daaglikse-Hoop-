@@ -58,7 +58,7 @@ export const STADIUMS = [
     vers: 'Uit die Nyl het sewe koeie opgekom, mooi en vet, en hulle het in die rietgras gewei.', ref: 'Genesis 41:2' },
 
   { naam: 'Die Donkie Praat',   doel: { tipe: 'lyne',    waarde: 12 }, dier: 'donkie',
-    vers: 'Die Here het die donkie laat praat, en sy het vir Bileam gese: Wat het ek jou aangedoen?', ref: 'Numeri 22:28' },
+    vers: 'Die Here het die donkie laat praat, en sy het vir Bileam gesê: Wat het ek jou aangedoen?', ref: 'Numeri 22:28' },
 
   { naam: 'Die Muil van die Koning', doel: { tipe: 'multi', waarde: 2 }, dier: 'muil',
     vers: 'Laat Salomo op my eie muil ry en bring hom af na Gihon toe.', ref: '1 Konings 1:33' },
@@ -90,7 +90,7 @@ export const STADIUMS = [
   /* ── Groep 3: Die wilde diere (25–36) ── */
 
   { naam: 'Die Wolf en die Lam', doel: { tipe: 'lyne',   waarde: 22 }, dier: 'wolf',
-    vers: 'Die wolf sal by die lam bly kuier, en die luiperd by die bokkie gaan le.', ref: 'Jesaja 11:6' },
+    vers: 'Die wolf sal by die lam bly kuier, en die luiperd by die bokkie gaan lê.', ref: 'Jesaja 11:6' },
 
   { naam: 'Die Luiperd se Vlekke', doel: { tipe: 'punte', waarde: 8000 }, dier: 'luiperd',
     vers: 'Kan ’n Kussiet sy vel verander, of ’n luiperd sy vlekke?', ref: 'Jeremia 13:23' },
@@ -123,7 +123,7 @@ export const STADIUMS = [
     vers: 'Elke drie jaar het die skepe van Tarsis goud, silwer, ivoor, ape en poue gebring.', ref: '1 Konings 10:22' },
 
   { naam: 'Die Jakkalse',       doel: { tipe: 'punte',   waarde: 15000 }, dier: 'jakkals',
-    vers: 'Simson het gaan drie honderd jakkalse gevang.', ref: 'Rigters 15:4' },
+    vers: 'Simson het gaan drie honderd jakkalse vang.', ref: 'Rigters 15:4' },
 
   /* ── Die laaste stadium: die gesin gaan in ── */
 
