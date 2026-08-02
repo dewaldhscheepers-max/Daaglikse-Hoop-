@@ -225,14 +225,14 @@ Bou die Ark en Vredepad se klanke is heeltemal onaangeraak.
 
 ## Die agtergronde
 
-Sewe is uit Dewald se eie prente gemaak: 720px breed, effens vervaag en
-verdonker, as WebP van omtrent 45 KB elk. Die bronne was PNG's van 2,5 MB en
-'n mens sien geen verskil agter 'n bord nie.
+Al nege kom uit Dewald se eie prente: 720px breed, `GaussianBlur(1.1)`,
+`Brightness(0.82)`, as WebP van omtrent 50 KB elk. Die bronne was PNG's van
+'n paar megagreep en 'n mens sien geen verskil agter 'n bord nie. Die vervaag
+en verdonker is nie kompressie nie — dit is sodat die vrugte die helderste
+ding op die skerm bly.
 
-Daar is nege hoofstukke en sewe prente, dus is `sagmoedigheid.webp` en
-`selfbeheersing.webp` uit `vrede` en `getrouheid` hergradeer — die een stiller
-en mistig, die ander koeler en donkerder. As daar ooit twee regte prente is,
-vervang net die lêers.
+Gebruik dieselfde resep as daar ooit een vervang word, anders spring die een
+prent uit teen die ander agt.
 
 `Vrugtefees.jsx` het lank net 0 of 1 as hoofstuknommer deurgegee, wat beteken
 al nege hoofstukke het twee agtergronde gedeel. Sewe geskilderde tuine wat
@@ -264,7 +264,6 @@ uit die versoek se liggaam nie.
 
 ## Wat nog nie gedoen is nie
 
-* Die twee laaste agtergronde is hergradeerde weergawes, nie eie prente nie.
 * Daar is geen bediener-kant beperking op hoe dikwels 'n mens kan instuur nie.
   Elke instuur speel 'n lopie oor, wat SVE kos; as dit ooit misbruik word, is
   'n tempo-perk per uid die regte plek om te begin.

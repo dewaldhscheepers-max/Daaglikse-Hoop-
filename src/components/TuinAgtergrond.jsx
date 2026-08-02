@@ -51,11 +51,8 @@ const PRENTE = [
   '/vrugtefees/vriendelikheid.webp',
   '/vrugtefees/goedheid.webp',
   '/vrugtefees/getrouheid.webp',
-  /* Die laaste twee is nie eie bronprente nie. Dewald het sewe gestuur en
-     daar is nege hoofstukke, dus is hierdie twee uit vrede en getrouheid
-     hergrader — sagmoedigheid stiller en mistig, selfbeheersing koeler en
-     donkerder. Dit lyk soos sy eie stel eerder as twee vreemde prente, en
-     as hy ooit twee regtes stuur, vervang net die lêers. */
+  /* Sagmoedigheid is die sagte sonsondergang met die vye, selfbeheersing die
+     maanlig-granaattuin. Die nag pas by die berg: krag wat stil is. */
   '/vrugtefees/sagmoedigheid.webp',
   '/vrugtefees/selfbeheersing.webp',
 ]
