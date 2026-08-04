@@ -87,20 +87,28 @@ const VERSTE   = 'ark_verste'
 
 /* Hoe ver jy al ooit in die verhaal gekom het.
 
-   'n Nuwe spel het eers twee stadiums hieronder begin, sodat 'n mens warm
-   kon word voordat die spoed weer is waar jy dit gelos het. Dit was 'n fout:
-   die knoppie het "Nuwe spel" gese en dan by stadium 8 begin, en Dewald het
-   dieselfde sebra en giraf oor en oor gevang. 'n Knoppie moet doen wat sy
-   naam se. 'n Nuwe spel begin by die begin; wil jy voortgaan, is daar 'n
-   knoppie wat dit se. */
+   Die stadiums is nie 'n moeilikheidsleer nie — hulle is die VERHAAL, en
+   elkeen gee 'n dier. 'n Mens lees nie 'n verhaal oor en oor nie, en 'n mens
+   wil nie die sebra 'n tiende keer vang nie.
+
+   Hierdie een reel het twee keer verkeerd geloop:
+
+   Eers het 'n nuwe spel by `verste - 2` begin, sodat 'n mens warm kon word.
+   Die knoppie het toe "Nuwe spel" gese en by stadium 8 begin, en dit het vir
+   niemand sin gemaak nie.
+
+   Toe het ek die verkeerde ding reggemaak: ek het die knoppie eerlik gemaak
+   deur die vordering weg te gooi, en toe het elke dood 'n mens terug na
+   stadium 1 gestuur om sewe stadiums se diere oor te wen. Dit was erger.
+
+   Die klagte was oor die ETIKET, nie oor die funksie nie. 'n Lopie eindig
+   wanneer jy doodgaan; die verhaal val nie saam met hom terug nie. Die menu
+   se dus wat elke knoppie doen, en 'n nuwe lopie begin waar jy was. */
 function leesVerste() {
   try { return Math.max(1, Number(localStorage.getItem(VERSTE)) || 1) } catch { return 1 }
 }
 function stoorVerste(nr) {
   try { if (nr > leesVerste()) localStorage.setItem(VERSTE, String(nr)) } catch {}
-}
-function beginStadium() {
-  return 1
 }
 
 function leesDiere() {
@@ -205,6 +213,9 @@ export default function BouDieArk({ onClose }) {
   // Die gestoorde spel se opsomming, of null. Ons wys dit in die telbord
   // terwyl die menu oop is, sodat dit duidelik is dat niks verlore is nie.
   const [bewaar, setBewaar]     = useState(null)
+  // Die verste stadium wat hierdie speler ooit bereik het. 'n Nuwe lopie
+  // begin hier, en die menu se dit hardop.
+  const [verste, setVerste]     = useState(() => leesVerste())
   const [stadiumNr, setStadiumNr] = useState(1)
   const [vorder, setVorder]     = useState(0)      // 0..1 na die doelwit toe
   const [klaar, setKlaar]       = useState(null)   // stadium-klaar oorlegblad
@@ -488,6 +499,7 @@ export default function BouDieArk({ onClose }) {
     const s = spel.current
     s.stadium += 1
     stoorVerste(s.stadium)
+    setVerste(leesVerste())
     s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0; s.sKombo = 0
     s.sTyd = 0
     s.weer.druppels = []; s.weer.water = 0; s.weer.wolkX = 0
@@ -696,6 +708,7 @@ export default function BouDieArk({ onClose }) {
       if (d) {
         setBewaar({ telling: d.telling || 0, lyne: d.lyne || 0, stadium: d.stadium || 1 })
         stoorVerste(d.stadium || 1)   // vir spelers wat reeds ver was
+        setVerste(leesVerste())
         // Sodat die "Volgende"-blokkie in die menu nie leeg staan nie
         if (d.volgende && STUKKE[d.volgende]) setVolgende(d.volgende)
       }
@@ -726,10 +739,14 @@ export default function BouDieArk({ onClose }) {
     }
   }, [stoorSpel])
 
-  function begin() {
+  /* 'n Nuwe lopie. Sonder 'n argument begin dit by jou verste stadium — die
+     diere wat jy klaar het, word nie weer gejaag nie. begin(1) is die enigste
+     manier om die verhaal van voor af te lees, en net 'n knoppie wat dit se
+     mag dit roep. */
+  function begin(vanaf) {
     const s = spel.current
     s.bord = leegBord(); s.sak = nuweSak(); s.volgende = null
-    const beginBy = beginStadium()
+    const beginBy = Number.isInteger(vanaf) && vanaf >= 1 ? vanaf : leesVerste()
     s.telling = 0; s.lyne = 0; s.val = 0
     s.stukke = 0; s.speelMs = 0
     s.stadium = beginBy; s.sLyne = 0; s.sPunte = 0; s.sBesteMulti = 0
@@ -905,9 +922,14 @@ export default function BouDieArk({ onClose }) {
 
   const volgendeVorm = volgende ? STUKKE[volgende].vorms[0] : null
   const stad = stadiumBy(stadiumNr)
-  // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
-  // alles verlore is nie. Elders wys dit die lopende spel.
-  const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, lyne, stadium: stadiumNr }
+  /* In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
+     alles verlore is nie. Is daar nie een nie, wys dit steeds jou verste
+     stadium — dieselfde getal as op die knoppie. 'n Telbord wat "Stadium 1"
+     se langs 'n knoppie wat "begin by stadium 8" se, is presies die soort
+     teenstrydigheid wat hierdie skerm al twee keer laat verkeerd loop het. */
+  const wysTel = toestand !== 'menu'
+    ? { telling, lyne, stadium: stadiumNr }
+    : bewaar || { telling: 0, lyne: 0, stadium: verste }
   /* Waar sou hierdie lopie NOU op die lys val? Dit is 'n skatting uit die
      lys wat ons gehaal het toe die spel oopgemaak het, dus noem ons dit
      voorlopig. Val die speler buite die stuk lys wat ons het, sê ons niks —
@@ -1042,10 +1064,22 @@ export default function BouDieArk({ onClose }) {
                 <small>Stadium {bewaar.stadium} · {bewaar.telling.toLocaleString('af')} punte</small>
               </button>
             )}
-            <button className={`ark-knop ${bewaar ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
-              {bewaar ? 'Begin oor van stadium 1' : 'Begin speel'}
-              {bewaar && <small>Jou diere bly in die ark</small>}
+            {/* Drie verskillende dinge, elkeen met sy eie naam. 'n Knoppie
+                wat nie se waar hy begin nie, is presies hoe hierdie skerm
+                twee keer verkeerd geloop het. */}
+            <button
+              className={`ark-knop ${bewaar ? 'ark-knop-spook' : 'ark-knop-primer'}`}
+              onClick={() => begin()}
+            >
+              {verste > 1 ? 'Nuwe lopie' : 'Begin speel'}
+              {verste > 1 && <small>Begin by stadium {verste} · jou diere bly</small>}
             </button>
+            {verste > 1 && (
+              <button className="ark-knop ark-knop-spook" onClick={() => begin(1)}>
+                Begin die verhaal oor
+                <small>Terug na stadium 1 · jou diere bly</small>
+              </button>
+            )}
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})
             </button>
@@ -1062,7 +1096,10 @@ export default function BouDieArk({ onClose }) {
             <h2 className="ark-blad-titel">Gepouseer</h2>
             <p className="ark-blad-teks">Jou spel is gestoor. Jy kan later verder speel.</p>
             <button className="ark-knop ark-knop-primer" onClick={() => setToestand('speel')}>Speel verder</button>
-            <button className="ark-knop ark-knop-spook" onClick={begin}>Begin van voor af</button>
+            <button className="ark-knop ark-knop-spook" onClick={() => begin()}>
+              Nuwe lopie
+              {verste > 1 && <small>Begin by stadium {verste}</small>}
+            </button>
             <button className="ark-knop ark-knop-spook" onClick={verlaat}>Verlaat</button>
           </div>
         )}
@@ -1097,7 +1134,11 @@ export default function BouDieArk({ onClose }) {
               </div>
             )}
 
-            <button className="ark-knop ark-knop-primer" onClick={begin}>Speel weer</button>
+            {/* Doodgaan eindig die lopie, nie die verhaal nie. */}
+            <button className="ark-knop ark-knop-primer" onClick={() => begin()}>
+              Speel weer
+              {verste > 1 && <small>Begin by stadium {verste} · jou diere bly</small>}
+            </button>
             <button className="ark-knop ark-knop-spook" onClick={() => { setWysRanglys(true); laaiRanglys() }}>
               Wêreldwye ranglys
             </button>
