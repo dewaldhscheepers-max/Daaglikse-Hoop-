@@ -463,10 +463,10 @@ export function blokTelling(vlak) {
 export function doelTeks(doel, vrugNaam) {
   switch (doel.tipe) {
     case 'versamel':
-      return Object.entries(doel.vrugte)
+      return 'Oes ' + Object.entries(doel.vrugte)
         .map(([i, n]) => `${n} ${vrugNaam(Number(i)).toLowerCase()}`)
         .join(' en ')
-    case 'punte':     return `${doel.waarde.toLocaleString('af')} punte`
+    case 'punte':     return `Verdien ${doel.waarde.toLocaleString('af')} punte`
     case 'skoonmaak': {
       /* Dit het net 'maak die tuin skoon' gesê, wat nooit verklap het wát
          of hoeveel. Nou noem dit die ding by die naam. */
@@ -478,26 +478,29 @@ export function doelTeks(doel, vrugNaam) {
       })
       /* 'n Ry van "en ... en ... en" lees sleg. Afrikaans gebruik kommas
          en 'n enkele 'en' voor die laaste. */
-      if (dele.length <= 1) return 'verwyder ' + dele.join('')
-      return 'verwyder ' + dele.slice(0, -1).join(', ') + ' en ' + dele[dele.length - 1]
+      if (dele.length <= 1) return 'Verwyder ' + dele.join('')
+      return 'Verwyder ' + dele.slice(0, -1).join(', ') + ' en ' + dele[dele.length - 1]
     }
-    case 'spesiaal':  return `maak ${doel.aantal} spesiale vrugte`
-    case 'kombo':     return `ruil ${doel.aantal} keer twee spesiales`
+    case 'spesiaal':  return `Maak ${doel.aantal} spesiale vrugte`
+    case 'kombo':
+      return doel.aantal === 1
+        ? 'Ruil twee spesiale vrugte om'
+        : `Ruil ${doel.aantal} keer twee spesiale vrugte om`
     /* Dit het "'n ketting van 4" gese. Dewald het op fase 16 vasgesit en
        gevra wat 'n mens veronderstel is om te DOEN. Hy was reg — dit is 'n
        selfstandige naamwoord, nie 'n opdrag nie. Nou se dit wat gebeur. */
     case 'ketting': {
       const n = doel.aantal || 1
       return n === 1
-        ? `kry ${doel.lengte} passings uit een skuif`
-        : `kry ${n} skuiwe met ${doel.lengte} passings elk`
+        ? `Maak 'n ketting van ${doel.lengte}`
+        : `Maak ${n} kettings van ${doel.lengte}`
     }
-    case 'verlig':    return `oes op ${doel.selle.length} gemerkte plekke`
-    case 'grootpas':  return `maak een passing van ${doel.grootte}`
+    case 'verlig':    return `Oes op ${doel.selle.length} gemerkte plekke`
+    case 'grootpas':  return `Pas ${doel.grootte} vrugte in een vorm`
     case 'soortspesiaal': {
       const naam = { rylig: 'Rylig', kolomlig: 'Kolomlig', oeskrag: 'Oeskrag',
                      reenboog: 'Reënboogvrug', feesmandjie: 'Feesmandjie' }[doel.soort] || doel.soort
-      return `maak ${doel.aantal} ${naam}${doel.aantal > 1 ? 'e' : ''}`
+      return `Maak ${doel.aantal} ${naam}${doel.aantal > 1 ? 'e' : ''}`
     }
     default:          return ''
   }
@@ -552,30 +555,30 @@ export function kettingTelling(stand, lengte) {
 export function doelUitleg(doel) {
   switch (doel.tipe) {
     case 'versamel':
-      return 'Pas drie of meer van daardie vrug om dit te oes.'
+      return 'Kry drie of meer van daardie vrug langs mekaar. Dan is hulle geoes.'
     case 'punte':
-      return 'Groter passings en kettings gee baie meer punte as drie op \'n slag.'
+      return 'Hoe groter die passing, hoe meer punte. Vier of vyf op \'n slag tel baie meer as drie.'
     case 'skoonmaak':
-      return 'Pas \'n vrug langs of bo-op die versperring om dit te breek.'
+      return 'Maak \'n passing langs of bo-op die versperring. Elke passing breek \'n stukkie daarvan weg.'
     case 'spesiaal':
-      return 'Pas vier of meer eenders in een skuif, dan word een van hulle spesiaal.'
+      return 'Kry vier of meer eenderse vrugte met een skuif bymekaar. Een van hulle word dan \'n spesiale vrug.'
     case 'kombo':
-      return 'Skuif twee spesiale vrugte teen mekaar en ruil hulle met mekaar.'
+      return 'Skuif twee spesiale vrugte langs mekaar en ruil hulle dan om. Dit is \'n kombinasie.'
     case 'ketting':
-      return 'Een passing laat vrugte val, en as hulle vanself weer pas, is dit \'n ketting. Jy kan dit nie beplan nie — speel laag op die bord waar die meeste van bo af inval, en dit kom vanself.'
+      return 'As jy \'n passing maak, val daar nuwe vrugte van bo af in. Pas daardie vrugte vanself ook, is dit \'n ketting. Speel onderaan die bord — daar val die meeste in, en die kans is die beste.'
     case 'verlig':
-      return 'Oes \'n vrug op elke plek wat op die bord gemerk is.'
+      return 'Party plekke op die bord is gemerk. Oes \'n vrug op elkeen van hulle.'
     case 'grootpas':
-      return 'Kry soveel vrugte in EEN figuur. \'n L- of T-vorm tel ook, nie net \'n reguit ry nie.'
+      return 'Kry al daardie vrugte in een vorm bymekaar. \'n L of \'n T tel ook — dit hoef nie \'n reguit ry te wees nie.'
     case 'soortspesiaal': {
       const hoe = {
         rylig: 'Vier langs mekaar in \'n ry gee \'n Rylig.',
-        kolomlig: 'Vier bo-op mekaar gee \'n Kolomlig.',
-        oeskrag: '\'n L- of T-vorm gee \'n Oeskrag.',
-        reenboog: 'Vyf in \'n reguit streep gee \'n Reenboogvrug.',
-        feesmandjie: '\'n Groot figuur gee \'n Feesmandjie.',
+        kolomlig: 'Vier bo-op mekaar in \'n kolom gee \'n Kolomlig.',
+        oeskrag: 'Vier of meer in \'n L- of T-vorm gee \'n Oeskrag.',
+        reenboog: 'Vyf in \'n reguit streep gee \'n Reënboogvrug.',
+        feesmandjie: '\'n Baie groot passing gee \'n Feesmandjie.',
       }
-      return hoe[doel.soort] || 'Pas vier of meer eenders in een skuif.'
+      return hoe[doel.soort] || 'Kry vier of meer eenderse vrugte met een skuif bymekaar.'
     }
     default: return ''
   }
