@@ -16,20 +16,22 @@ import './Steun.css'
 
 export default function Steun({ onSluit }) {
   return (
-    <div className="steun-blad" role="dialog" aria-label="Help dra die hoop">
+    <div className="steun-blad" role="dialog" aria-label="Help my om Daaglikse Hoop gratis te hou">
       <div className="steun-blad-binne">
         <div className="steun-hart">♥</div>
 
-        <h1 className="steun-titel">Help dra die hoop</h1>
+        <h1 className="steun-titel">Help my om Daaglikse Hoop gratis te hou</h1>
 
         <p className="steun-lei">
-          Daaglikse Hoop is en bly heeltemal gratis — die daaglikse boodskappe,
-          die Bybel, die gebedsmuur en alles anders. Niks gaan ooit agter 'n
-          betaling nie.
+          Alles op Daaglikse Hoop is en bly gratis — die daaglikse
+          stemboodskappe, die Bybel, die gebedsmuur, e-boeke en alles wat nog
+          kom.
         </p>
         <p className="steun-lei steun-lei-fyn">
-          Jou bydrae betaal die app se kostes, die stemboodskappe en die
-          gratis boeke, sodat dit vir die volgende mens ook gratis kan wees.
+          As Daaglikse Hoop iets vir jou beteken, kan jy my vrywillig help om
+          met hierdie bediening voort te gaan. Jou ondersteuning help om die
+          werk van Daaglikse Hoop moontlik te maak en elke dag meer mense te
+          bereik.
         </p>
 
         <button
@@ -37,7 +39,7 @@ export default function Steun({ onSluit }) {
           onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
         >
           Maandelikse ondersteuning
-          <small>Word 'n Hoop-Vennoot</small>
+          <small>Word 'n maandelikse ondersteuner</small>
         </button>
 
         <button
@@ -45,7 +47,7 @@ export default function Steun({ onSluit }) {
           onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
         >
           Eenmalige ondersteuning
-          <small>Enige bedrag help</small>
+          <small>Gee enige bedrag</small>
         </button>
 
         {/* Nooit 'n betaalmuur nie. Hierdie pad moet altyd oop wees. */}
@@ -54,7 +56,8 @@ export default function Steun({ onSluit }) {
         </button>
 
         <p className="steun-fyn">
-          Elke bydrae gaan deur PayFast. Ons sien nooit jou kaartbesonderhede nie.
+          Betalings word veilig deur PayFast verwerk. Ons kry nooit toegang tot
+          jou kaartbesonderhede nie.
         </p>
       </div>
     </div>
