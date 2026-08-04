@@ -3,6 +3,7 @@ import {
   doenSkuif, versekerSkuif, bedekSel, maakBord, maakRng, REENBOOGVRUG,
 } from '../game/vrugtefees/enjin'
 import { beginOes, oesSkuif, dagSleutel, dagSaad } from '../game/vrugtefees/oes'
+import { beginVlakLopie, reisSkuif } from '../game/vrugtefees/reis'
 import {
   VLAKKE, HOOFSTUKKE, HOOFSTUK_WOORD, vlakBy, hoofstukVan,
   doelTeks, doelBehaal, doelVordering, doelTelling,
@@ -126,7 +127,12 @@ export default function Vrugtefees({ onClose }) {
   const [naamIn, setNaamIn]       = useState(() => leesNaam())
   const [naamFout, setNaamFout]   = useState(null)
 
+  /* spel.current IS die fase-lopie uit reis.js — dieselfde objek wat die
+     bediener bou wanneer hy 'n ingestuurde fase oorspeel. reisSkuiwe hou die
+     skuiwe wat ons neerskryf; dit is wat ingestuur word, nie 'n puntetelling
+     nie. */
   const spel = useRef({ bord: null, rng: null, stand: null, vlak: null })
+  const reisSkuiwe = useRef([])
   const oes  = useRef({ lopie: null, skuiwe: [], saad: 0, dag: null })
   const tydsers = useRef([])
 
@@ -157,21 +163,13 @@ export default function Vrugtefees({ onClose }) {
 
   /* ── Begin 'n fase van die Tuinreis ── */
   const beginVlak = useCallback((nr) => {
-    const v = vlakBy(nr) || VLAKKE[0]
-    const bord = maakBord({ saad: v.saad, soorte: v.soorte, blokke: v.blokke || null })
-    spel.current = {
-      bord,
-      rng: maakRng(v.saad * 977 + 17),
-      vlak: v,
-      stand: {
-        punte: 0, versamel: {}, spesiaalGemaak: 0, kombinasies: 0,
-        grootsteKetting: 0, grootstePas: 0, spesiaalSoorte: {}, verlig: {},
-        blokkeAanBegin: bord.selle.filter(s => s.blok).length,
-      },
-    }
+    const lopie = beginVlakLopie(nr) || beginVlakLopie(1)
+    const v = lopie.vlak
+    spel.current = lopie
+    reisSkuiwe.current = []
     oes.current = { lopie: null, skuiwe: [], saad: 0, dag: null }
     skoonTye()
-    if (teken.current) { teken.current.stelBord(bord); teken.current.stelKies(null) }
+    if (teken.current) { teken.current.stelBord(lopie.bord); teken.current.stelKies(null) }
     setModus('reis')
     setVlakNr(nr)
     setPunte(0)
@@ -259,51 +257,44 @@ export default function Vrugtefees({ onClose }) {
     return r
   }
 
-  /* ── Een skuif in die Tuinreis ── */
+  /* ── Een skuif in die Tuinreis ──
+     Alles loop deur reisSkuif, want dit is die kode wat die bediener ook
+     gebruik om 'n ingestuurde fase oor te speel. Elke GELDIGE skuif word
+     neergeskryf; dit is die bewys wat ingestuur word. */
   const speelReisSkuif = useCallback(async (a, b) => {
     const s = spel.current
     const t = teken.current
 
-    const uit = doenSkuif(s.bord, a, b, { rng: s.rng })
+    const uit = reisSkuif(s, a, b)
 
     if (!uit.geldig) {
       playHit()
-      await t.speelStappe(uit.stappe, s.bord)
+      if (uit.stappe && uit.stappe.length) await t.speelStappe(uit.stappe, s.bord)
       setBesig(false)
       return
     }
+
+    reisSkuiwe.current.push([a.k, a.r, b.k, b.r])
 
     setRoep(roepVir(uit))
     klankVir(uit)
 
     await t.speelStappe(uit.stappe, s.bord)
 
-    s.stand.punte += uit.punte
-    for (const [i, n] of Object.entries(uit.versamel)) s.stand.versamel[i] = (s.stand.versamel[i] || 0) + n
-    s.stand.spesiaalGemaak += uit.spesiaalGemaak
-    s.stand.kombinasies += uit.kombinasies
-    s.stand.grootsteKetting = Math.max(s.stand.grootsteKetting, uit.grootsteKetting)
-    s.stand.grootstePas = Math.max(s.stand.grootstePas, uit.grootstePas || 0)
-    for (const [soort, n] of Object.entries(uit.spesiaalSoorte || {}))
-      s.stand.spesiaalSoorte[soort] = (s.stand.spesiaalSoorte[soort] || 0) + n
-    for (const [k, r] of uit.geveeSelle || []) s.stand.verlig[k + ',' + r] = true
-
     boekSkuif(uit)
 
     setPunte(s.stand.punte)
     setTik(x => x + 1)
     setVorder(doelVordering(s.vlak.doel, s.stand, s.bord))
-    const oor = skuiweOor - 1
+    const oor = s.skuiweOor
     setSkuiweOor(oor)
 
-    const sk = versekerSkuif(s.bord, s.vlak.saad + oor * 31)
-    if (sk) { setRoep('DIE TUIN SKUIF'); t.stelBord(s.bord); await wagVir(320) }
+    if (uit.skommel) { setRoep('DIE TUIN SKUIF'); t.stelBord(s.bord); await wagVir(320) }
 
     setRoep(null)
     setBesig(false)
 
-    if (doelBehaal(s.vlak.doel, s.stand, s.bord)) {
-      s.stand.punte += oor * 90
+    if (s.gewen) {
       setPunte(s.stand.punte)
       playLevelComplete()
       const nuut = { ...vordering }
@@ -318,11 +309,16 @@ export default function Vrugtefees({ onClose }) {
       })
       if (r.nuut.length) setNuutBehaal(n => [...n, ...r.nuut])
       setToestand('gewen')
-    } else if (oor <= 0) {
+      /* Die fase is bewysbaar klaar. Skryf dit weg en stuur dit in — dit is
+         wat 'n mens op die Tuinreis se bord sit. */
+      const bewys = { soort: 'tuinreis', vlak: s.vlak.nr, skuiwe: [...reisSkuiwe.current] }
+      onthouLopie(bewys)
+      stuurDieReis(bewys)
+    } else if (s.klaar) {
       playHit()
       setToestand('verloor')
     }
-  }, [skuiweOor, vordering, wagVir])
+  }, [vordering, wagVir])
 
   /* ── Een skuif in 'n oes-lopie ──
      Alles loop deur oesSkuif, want dit is die kode wat die bediener ook
@@ -395,6 +391,23 @@ export default function Vrugtefees({ onClose }) {
   /* ── Stuur die lopie in ──
      Ons stuur die saad en die skuiwe. Nie die punte nie: die bediener speel
      dit oor en tel self. Daar is dus niks om te oordryf nie. */
+  /* Stuur 'n voltooide fase in.
+
+     Die kliënt stuur die FASENOMMER en sy skuiwe. Die saad van daardie fase
+     staan in die bediener se eie data, dus bou hy die bord self, speel die
+     skuiwe oor en kyk of die doelwit werklik behaal is. Ons stuur geen
+     puntetelling nie. */
+  const stuurDieReis = useCallback(async (bewys) => {
+    if (naamAfgewys()) return null
+    const naam = leesNaam()
+    if (!naam) return null      // die wen-skerm vra dit; ons stuur daarna
+    setStuurBesig(true)
+    const uit = await stuurOes(naam, bewys)
+    setUitslag(uit)
+    setStuurBesig(false)
+    return uit
+  }, [])
+
   /* Stuur die lopie in.
 
      Ons stuur die saad en die skuiwe. Nie die punte nie: die bediener speel
@@ -843,6 +856,40 @@ export default function Vrugtefees({ onClose }) {
                 ))}
               </div>
             )}
+
+            {/* Die ranglys. Ons vra die naam by die EERSTE fase wat 'n mens
+                klaarmaak — dit is die oomblik waar dit iets beteken, en dis
+                een keer, nooit weer nie. */}
+            {!leesNaam() && !naamAfgewys() && (
+              <div className="vf-naamvra">
+                <p className="vf-blad-teks">Wil jy op die wêreldwye Tuinreis-lys wees?</p>
+                <input
+                  className="vf-inset"
+                  value={naamIn}
+                  maxLength={20}
+                  placeholder="Jou naam"
+                  onChange={e => { setNaamIn(e.target.value); setNaamFout(null) }}
+                />
+                {naamFout && <p className="vf-fout">{naamFout}</p>}
+                <button className="vf-knop vf-knop-primer" onClick={stoorNaamEnStuur}>Stuur in</button>
+                <button className="vf-knop vf-knop-spook" onClick={() => { wysNaamAf(); setUitslag(null) }}>
+                  Nee dankie
+                </button>
+              </div>
+            )}
+
+            {stuurBesig && <p className="vf-blad-teks">Besig om in te stuur…</p>}
+            {uitslag && uitslag.ok && (
+              <>
+                {uitslag.beterAs && <p className="vf-rekord">Nuwe beste vir hierdie fase!</p>}
+                <p className="vf-blad-teks">
+                  {uitslag.rang
+                    ? <>Jy is <b>nommer {uitslag.rang}</b> van {uitslag.totaal.toLocaleString('af')} op die Tuinreis.</>
+                    : <>Ingestuur.</>}
+                </p>
+              </>
+            )}
+            {uitslag && !uitslag.ok && <p className="vf-fout">{uitslag.fout}</p>}
 
             {vlak.nr < VLAKKE.length ? (
               <button className="vf-knop vf-knop-primer" onClick={() => beginVlak(vlak.nr + 1)}>

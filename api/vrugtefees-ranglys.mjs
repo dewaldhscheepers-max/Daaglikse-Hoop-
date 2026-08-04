@@ -34,9 +34,11 @@
 
 import crypto from 'node:crypto'
 import { herspeel, dagSleutel, dagSaad, isDagSleutel } from '../src/game/vrugtefees/oes.js'
+import { herspeelVlak, AANTAL_VLAKKE } from '../src/game/vrugtefees/reis.js'
 
 const MEESTERS = 'vfOesmeesters'
 const DAGOES   = 'vfDagoes'
+const TUINREIS = 'vfTuinreis'
 const TOP_N    = 20
 
 /* ── Firestore-toegang met die diensrekening ── */
@@ -133,11 +135,23 @@ export function keurLopie(lyf, nouDatum) {
   if (!lyf || typeof lyf !== 'object') return { fout: 'geen lopie' }
 
   const soort = lyf.soort
-  if (soort !== 'oneindig' && soort !== 'daagliks') return { fout: 'onbekende soort' }
+  if (soort !== 'oneindig' && soort !== 'daagliks' && soort !== 'tuinreis')
+    return { fout: 'onbekende soort' }
 
   if (!Array.isArray(lyf.skuiwe)) return { fout: 'geen skuiwe' }
   if (lyf.skuiwe.length < 1) return { fout: 'geen skuiwe' }
   if (lyf.skuiwe.length > MAKS_SKUIWE) return { fout: 'te veel skuiwe' }
+
+  /* ── Die Tuinreis ──
+     Die fase se saad staan in die data wat die bediener SELF het. Die kliënt
+     stuur net die fasenommer en sy skuiwe; ons bou daardie presiese bord en
+     speel dit oor. 'n Lys skuiwe wat die fase nie klaarmaak nie, tel nie —
+     hoeveel punte dit ook al opgetel het. */
+  if (soort === 'tuinreis') {
+    const uit = herspeelVlak(lyf.vlak, lyf.skuiwe)
+    if (!uit.ok) return { fout: uit.fout }
+    return { soort, vlak: uit.vlak, punte: uit.punte, skuiwe: uit.skuiwe, rondes: 0 }
+  }
 
   let saad, dag = null
 
@@ -171,6 +185,12 @@ const uitVeld = v => {
   if ('doubleValue' in v) return Number(v.doubleValue)
   if ('stringValue' in v) return v.stringValue
   if ('timestampValue' in v) return v.timestampValue
+  // Die Tuinreis hou 'n beste punt per fase in 'n kaart.
+  if ('mapValue' in v) {
+    const uit = {}
+    for (const [k, x] of Object.entries((v.mapValue && v.mapValue.fields) || {})) uit[k] = uitVeld(x)
+    return uit
+  }
   return null
 }
 
@@ -182,8 +202,17 @@ function uitDok(d) {
     punte:  uitVeld(f.punte) || 0,
     rondes: uitVeld(f.rondes) || 0,
     dag:    uitVeld(f.dag) || null,
+    hoogste: uitVeld(f.hoogste) || 0,
+    vlakke: uitVeld(f.vlakke) || {},
     opgedateer: uitVeld(f.opgedateer) || null,
   }
+}
+
+/* Die Tuinreis word anders gerangskik: hoe VER jy is tel eerste, en punte
+   skei net gelykes. Dit is wat 'n mens van 'n reis wil weet. */
+export function rangordeReis(a, b) {
+  if ((b.hoogste || 0) !== (a.hoogste || 0)) return (b.hoogste || 0) - (a.hoogste || 0)
+  return (b.punte || 0) - (a.punte || 0)
 }
 
 // Punte eerste — die oes gaan oor hoeveel jy ingebring het.
@@ -204,7 +233,7 @@ async function haalLys(projekId, token, versameling, dag = null) {
      pas nie meer nie, dus maak die bord homself skoon sonder dat ons rye
      hoef uit te vee. */
   if (dag) lys = lys.filter(e => e.dag === dag)
-  return lys.sort(rangorde)
+  return lys.sort(versameling === TUINREIS ? rangordeReis : rangorde)
 }
 
 export default async function handler(req, res) {
@@ -220,9 +249,10 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const token = await kryToken()
-      const [meesters, dagLys] = await Promise.all([
+      const [meesters, dagLys, reisLys] = await Promise.all([
         haalLys(projekId, token, MEESTERS),
         haalLys(projekId, token, DAGOES, vandag),
+        haalLys(projekId, token, TUINREIS),
       ])
       res.setHeader('Cache-Control', 'public, max-age=20')
       return res.status(200).json({
@@ -233,6 +263,9 @@ export default async function handler(req, res) {
         meestersTotaal: meesters.length,
         daagliks: dagLys.slice(0, TOP_N),
         daagliksTotaal: dagLys.length,
+        tuinreis: reisLys.slice(0, TOP_N),
+        tuinreisTotaal: reisLys.length,
+        aantalVlakke: AANTAL_VLAKKE,
       })
     } catch {
       /* Nooit 'n leë lys as die waarheid aanbied nie. Die app moet weet dit
@@ -262,7 +295,9 @@ export default async function handler(req, res) {
   }
   if (!uid) return res.status(401).json({ ok: false, fout: 'aanmelding nie geldig nie' })
 
-  const versameling = keur.soort === 'daagliks' ? DAGOES : MEESTERS
+  const versameling = keur.soort === 'daagliks' ? DAGOES
+                    : keur.soort === 'tuinreis' ? TUINREIS
+                    : MEESTERS
 
   try {
     const token = await kryToken()
@@ -271,14 +306,45 @@ export default async function handler(req, res) {
     // Ons oorskryf net as dit werklik beter is.
     const bestaandeR = await fetch(`${basis}/${uid}`, { headers: { Authorization: `Bearer ${token}` } })
     let beterAs = true
-    if (bestaandeR.ok) {
-      const oud = uitDok(await bestaandeR.json())
+    if (bestaandeR.ok && keur.soort !== 'tuinreis') {
+      const oud = uitDok(await bestaandeR.clone().json())
       // By die daaglikse bord tel gister se punt nie as 'n rekord nie.
       if (keur.soort === 'daagliks' && oud.dag !== keur.dag) beterAs = true
       else beterAs = rangorde({ punte: keur.punte, rondes: keur.rondes }, oud) < 0
     }
 
-    if (beterAs) {
+    /* Die Tuinreis werk anders as die twee oes-borde. Daar is nie EEN lopie
+       nie: elke fase is sy eie bewys. Ons hou dus 'n beste punt per fase, en
+       lei 'hoogste' en die totaal daaruit af. So kan 'n mens 'n ou fase weer
+       beter speel sonder om sy vordering te verloor, en kan niemand punte
+       opblaas deur fase 1 honderd keer in te stuur nie — net sy BESTE tel. */
+    if (keur.soort === 'tuinreis') {
+      const oud = bestaandeR.ok ? uitDok(await bestaandeR.clone().json()) : { vlakke: {} }
+      const vlakke = { ...(oud.vlakke || {}) }
+      const sleutel = String(keur.vlak)
+      const vorige = vlakke[sleutel] || 0
+      beterAs = keur.punte > vorige
+      vlakke[sleutel] = Math.max(vorige, keur.punte)
+
+      const hoogste = Object.keys(vlakke).reduce((a, k) => Math.max(a, Number(k) || 0), 0)
+      const totaal  = Object.values(vlakke).reduce((a, n) => a + (Number(n) || 0), 0)
+
+      const kaart = {}
+      for (const [k, n] of Object.entries(vlakke)) kaart[k] = { integerValue: String(n) }
+
+      const skryf = await fetch(`${basis}/${uid}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: {
+          naam:       { stringValue: naam },
+          hoogste:    { integerValue: String(hoogste) },
+          punte:      { integerValue: String(totaal) },
+          vlakke:     { mapValue: { fields: kaart } },
+          opgedateer: { timestampValue: new Date().toISOString() },
+        } }),
+      })
+      if (!skryf.ok) throw new Error('skryf het misluk')
+    } else if (beterAs) {
       const velde = {
         naam:       { stringValue: naam },
         punte:      { integerValue: String(keur.punte) },
@@ -305,6 +371,7 @@ export default async function handler(req, res) {
       soort: keur.soort,
       punte: keur.punte,
       rondes: keur.rondes,
+      vlak: keur.vlak || null,
       rang: rang || null,
       totaal: lys.length,
       lys: lys.slice(0, TOP_N),

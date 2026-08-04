@@ -114,6 +114,7 @@ function stoorKas(d) {
   try {
     localStorage.setItem(KAS, JSON.stringify({
       meesters: d.meesters || [], daagliks: d.daagliks || [],
+      tuinreis: d.tuinreis || [], tuinreisTotaal: d.tuinreisTotaal || 0,
       dag: d.dag || null, meestersTotaal: d.meestersTotaal || 0,
       daagliksTotaal: d.daagliksTotaal || 0, tyd: Date.now(),
     }))
@@ -130,6 +131,8 @@ export function kasLys() {
   return {
     meesters: k.meesters,
     daagliks: k.dag === vandag ? k.daagliks : null,
+    tuinreis: k.tuinreis || [],
+    tuinreisTotaal: k.tuinreisTotaal || 0,
     dag: k.dag,
     meestersTotaal: k.meestersTotaal,
     daagliksTotaal: k.daagliksTotaal,
@@ -147,7 +150,7 @@ export async function haalRanglys() {
     const d = await r.json().catch(() => null)
     if (!r.ok || !d || !d.ok) {
       return {
-        ok: false, meesters: null, daagliks: null,
+        ok: false, meesters: null, daagliks: null, tuinreis: null,
         fout: 'Die ranglys is nou nie beskikbaar nie. Probeer netnou weer.',
         rede: d && d.fout ? String(d.fout) : null,
       }
@@ -156,11 +159,13 @@ export async function haalRanglys() {
     return {
       ok: true, fout: null,
       meesters: d.meesters, daagliks: d.daagliks, dag: d.dag,
+      tuinreis: d.tuinreis, tuinreisTotaal: d.tuinreisTotaal,
+      aantalVlakke: d.aantalVlakke,
       meestersTotaal: d.meestersTotaal, daagliksTotaal: d.daagliksTotaal,
     }
   } catch {
     return {
-      ok: false, meesters: null, daagliks: null,
+      ok: false, meesters: null, daagliks: null, tuinreis: null,
       fout: 'Ons kon nie die ranglys bereik nie. Kyk of jy aanlyn is.',
     }
   }

@@ -124,6 +124,14 @@ service cloud.firestore {
       allow read:  if false;
       allow write: if false;
     }
+    // Die Tuinreis se bord: hoe ver elke speler gevorder het. Elke fase se
+    // saad staan in die bediener se eie data, dus bou hy die bord self en
+    // speel die ingestuurde skuiwe oor. Net 'n fase wat WERKLIK klaargemaak
+    // is, tel.
+    match /vfTuinreis/{userId} {
+      allow read:  if false;
+      allow write: if false;
+    }
 
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {

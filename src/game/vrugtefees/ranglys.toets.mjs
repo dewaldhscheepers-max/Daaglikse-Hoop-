@@ -9,7 +9,10 @@
 
 import { magRuil } from './enjin.js'
 import { beginOes, oesSkuif, dagSleutel, dagSaad } from './oes.js'
-import { keurLopie, skoonNaam, rangorde, MAKS_SKUIWE } from '../../../api/vrugtefees-ranglys.mjs'
+import { keurLopie, skoonNaam, rangorde, rangordeReis, MAKS_SKUIWE } from '../../../api/vrugtefees-ranglys.mjs'
+import { magRuil as magRuil2, doenSkuif as doenSkuif2, kloonBord as kloonBord2, maakRng as maakRng2 } from './enjin.js'
+import { VLAKKE, doelVordering } from '../../data/vrugtefeesVlakke.js'
+import { beginVlakLopie, reisSkuif } from './reis.js'
 
 let geslaag = 0, gedruip = 0
 function is(naam, a, b) {
@@ -163,6 +166,77 @@ kop('Vandag se Oes')
      undefined)
   waar('net na middernag is dit verby',
        !!keurLopie({ soort: 'daagliks', dag: '2026-08-02', skuiwe }, new Date('2026-08-03T00:00:01Z')).fout)
+}
+
+/* ── Die Tuinreis ── */
+kop('Die Tuinreis')
+{
+  // Speel 'n fase eerlik klaar, presies soos die skerm
+  function speelVlak(nr) {
+    const lopie = beginVlakLopie(nr)
+    const skuiwe = []
+    let w = 0
+    while (!lopie.klaar && w++ < 400) {
+      const keuses = []
+      for (let r = 0; r < 8; r++) for (let k = 0; k < 8; k++) for (const [dk, dr] of [[1, 0], [0, 1]]) {
+        const a = { k, r }, b = { k: k + dk, r: r + dr }
+        if (b.k < 8 && b.r < 8 && magRuil2(lopie.bord, a, b)) keuses.push([a, b])
+      }
+      if (!keuses.length) break
+      let beste = keuses[0], bw = -Infinity
+      for (const [a, b] of keuses) {
+        const proef = kloonBord2(lopie.bord)
+        const ps = JSON.parse(JSON.stringify(lopie.stand))
+        const u = doenSkuif2(proef, a, b, { rng: maakRng2(999) })
+        if (!u.geldig) continue
+        ps.punte += u.punte
+        for (const [i, n] of Object.entries(u.versamel)) ps.versamel[i] = (ps.versamel[i] || 0) + n
+        ps.spesiaalGemaak += u.spesiaalGemaak; ps.kombinasies += u.kombinasies
+        ps.grootsteKetting = Math.max(ps.grootsteKetting, u.grootsteKetting)
+        ps.grootstePas = Math.max(ps.grootstePas, u.grootstePas || 0)
+        for (const [so, n] of Object.entries(u.spesiaalSoorte || {})) ps.spesiaalSoorte[so] = (ps.spesiaalSoorte[so] || 0) + n
+        for (const [k, r] of u.geveeSelle || []) ps.verlig[k + ',' + r] = true
+        const bonus = lopie.vlak.doel.tipe === 'kombo' ? u.spesiaalGemaak * 300
+                    : lopie.vlak.doel.tipe === 'soortspesiaal' ? u.spesiaalGemaak * 200 : 0
+        const wg = doelVordering(lopie.vlak.doel, ps, proef) * 1000 + bonus + u.punte / 1000
+        if (wg > bw) { bw = wg; beste = [a, b] }
+      }
+      if (!reisSkuif(lopie, beste[0], beste[1]).geldig) break
+      skuiwe.push([beste[0].k, beste[0].r, beste[1].k, beste[1].r])
+    }
+    return { lopie, skuiwe }
+  }
+
+  const { lopie, skuiwe } = speelVlak(1)
+  waar('die bot wen fase 1', lopie.gewen)
+
+  const uit = keurLopie({ soort: 'tuinreis', vlak: 1, skuiwe }, NOU)
+  is('n eerlike fase word aanvaar', uit.fout, undefined)
+  is('die punte kom uit die herspeel', uit.punte, lopie.stand.punte)
+  is('die fasenommer kom terug', uit.vlak, 1)
+
+  // Die kliënt se eie puntetelling word nooit geglo nie
+  const gelieg = keurLopie({ soort: 'tuinreis', vlak: 1, skuiwe, punte: 999999 }, NOU)
+  is('n gelieegde puntetelling word geignoreer', gelieg.punte, lopie.stand.punte)
+
+  is('geen fasenommer', keurLopie({ soort: 'tuinreis', skuiwe }, NOU).fout, 'onbekende fase')
+  is('fase 0', keurLopie({ soort: 'tuinreis', vlak: 0, skuiwe }, NOU).fout, 'onbekende fase')
+  is('fase 91', keurLopie({ soort: 'tuinreis', vlak: 91, skuiwe }, NOU).fout, 'onbekende fase')
+  waar('n ander fase se skuiwe word geweier',
+       !!keurLopie({ soort: 'tuinreis', vlak: 2, skuiwe }, NOU).fout)
+
+  // Skuiwe wat nie wen nie, is nie 'n voltooiing nie
+  is('n halwe fase word geweier',
+     keurLopie({ soort: 'tuinreis', vlak: 1, skuiwe: skuiwe.slice(0, skuiwe.length - 1) }, NOU).fout,
+     'daardie skuiwe maak nie die fase klaar nie')
+
+  // Die reis se rangorde: hoe VER jy is tel eerste
+  waar('verder tel meer as meer punte',
+       rangordeReis({ hoogste: 40, punte: 100 }, { hoogste: 12, punte: 900000 }) < 0)
+  waar('gelyke vordering word deur punte geskei',
+       rangordeReis({ hoogste: 40, punte: 900 }, { hoogste: 40, punte: 100 }) < 0)
+  is('heeltemal gelyk bly gelyk',
+     rangordeReis({ hoogste: 5, punte: 5 }, { hoogste: 5, punte: 5 }), 0)
 }
 
 console.log('\n' + '─'.repeat(50))

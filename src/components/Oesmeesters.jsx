@@ -14,22 +14,26 @@ import {
    dit. Ons wys nooit 'n leë tabel wat lyk of niemand speel nie.
    ──────────────────────────────────────────────────────────── */
 
-function Ry({ e, n, ek }) {
+function Ry({ e, n, ek, reis }) {
   return (
     <div className={'vf-rang-ry' + (ek ? ' ek' : '')}>
       <span className="vf-rang-nr">{n}</span>
       <span className="vf-rang-naam">{e.naam}</span>
-      <span className="vf-rang-punte">{(e.punte || 0).toLocaleString('af')}</span>
+      {/* Op die Tuinreis tel hoe VER jy is. Die punte staan fyn daaronder. */}
+      <span className="vf-rang-punte">
+        {reis ? `fase ${e.hoogste || 0}` : (e.punte || 0).toLocaleString('af')}
+        {reis && <small>{(e.punte || 0).toLocaleString('af')}</small>}
+      </span>
     </div>
   )
 }
 
-function Bord({ lys, totaal, leegTeks, myUid }) {
+function Bord({ lys, totaal, leegTeks, myUid, reis }) {
   if (!lys || !lys.length) return <p className="vf-blad-teks">{leegTeks}</p>
   return (
     <>
       <div className="vf-rang-lys">
-        {lys.map((e, i) => <Ry key={e.uid || i} e={e} n={i + 1} ek={e.uid && e.uid === myUid} />)}
+        {lys.map((e, i) => <Ry key={e.uid || i} e={e} n={i + 1} ek={e.uid && e.uid === myUid} reis={reis} />)}
       </div>
       {totaal > lys.length && (
         <p className="vf-fyndruk">{totaal.toLocaleString('af')} spelers altesaam</p>
@@ -39,7 +43,8 @@ function Bord({ lys, totaal, leegTeks, myUid }) {
 }
 
 export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
-  const [blad, setBlad]   = useState('daagliks')   // daagliks · meesters
+  /* Die Tuinreis wys eerste. Dit is die deel wat die meeste mense speel. */
+  const [blad, setBlad]   = useState('tuinreis')   // tuinreis · daagliks · meesters
   const [data, setData]   = useState(null)
   const [besig, setBesig] = useState(true)
   const [fout, setFout]   = useState(null)
@@ -90,8 +95,9 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
   }
 
   const bron = data || (kas ? {
-    meesters: kas.meesters, daagliks: kas.daagliks,
+    meesters: kas.meesters, daagliks: kas.daagliks, tuinreis: kas.tuinreis,
     meestersTotaal: kas.meestersTotaal, daagliksTotaal: kas.daagliksTotaal,
+    tuinreisTotaal: kas.tuinreisTotaal,
   } : null)
 
   const wag = wagryLengte()
@@ -129,9 +135,13 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
 
       <div className="vf-blaaie">
         <button
+          className={'vf-blaai' + (blad === 'tuinreis' ? ' aan' : '')}
+          onClick={() => setBlad('tuinreis')}
+        >Tuinreis</button>
+        <button
           className={'vf-blaai' + (blad === 'daagliks' ? ' aan' : '')}
           onClick={() => setBlad('daagliks')}
-        >Vandag se Oes</button>
+        >Vandag</button>
         <button
           className={'vf-blaai' + (blad === 'meesters' ? ' aan' : '')}
           onClick={() => setBlad('meesters')}
@@ -151,6 +161,22 @@ export default function Oesmeesters({ terug, myUid, naamNodig, onNaam }) {
         <p className="vf-fyndruk vf-fout-sag">
           Ons kon nie nou by die lys uitkom nie — hierdie is die laaste een wat ons gesien het.
         </p>
+      )}
+
+      {bron && blad === 'tuinreis' && (
+        <>
+          <p className="vf-blad-teks vf-sag">
+            Hoe ver elke speler op die reis van 90 fases is. Elke fase word
+            deur die bediener oorgespeel voordat dit tel.
+          </p>
+          <Bord
+            lys={bron.tuinreis}
+            totaal={bron.tuinreisTotaal}
+            myUid={myUid}
+            reis
+            leegTeks="Nog niemand op hierdie lys nie. Maak 'n fase klaar en jy is die eerste."
+          />
+        </>
       )}
 
       {bron && blad === 'daagliks' && (

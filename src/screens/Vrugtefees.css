@@ -729,3 +729,13 @@
   color: #A9CC84;
   margin: 0;
 }
+
+/* Op die Tuinreis is die fase die hoofsaak; die punte staan fyn daaronder. */
+.vf-rang-punte small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #8A806F;
+  line-height: 1.2;
+}
+.vf-rang-punte { text-align: right; }
