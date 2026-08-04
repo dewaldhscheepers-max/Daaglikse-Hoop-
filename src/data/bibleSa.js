@@ -16,8 +16,11 @@
    Moet dus nooit AFR83- of AFR53-teks in hierdie kodebasis plak nie, hoe
    klein die stukkie ook al is. Die pad is die skakel.
 
-   Die Engelse vertalings loop deur api.scripture.api.bible, waar ons wel
-   toestemming het. Dit is hoekom die twee verskillend werk.
+   Die Engelse vertalings loop deur YouVersion se Platform-API (api/bible.js).
+   Daardie API gee net die weergawes waarvoor ons sleutel gelisensieer is, en
+   dit is 19 Engelses — nie een Afrikaans nie. Dit is hoekom die twee kante
+   van hierdie app verskillend werk: die een het 'n lisensie, die ander een
+   het 'n weiering.
    ──────────────────────────────────────────────────────────── */
 
 /* Die Afrikaanse vertalings wat BibleSA aanbied. AFR83 is die 1983-vertaling
