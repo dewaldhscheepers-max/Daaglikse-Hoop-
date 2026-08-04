@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './Bybel.css'
 import { BOEKE, boekNaam, NT_EERSTE } from '../data/bybelBoeke'
+import { bibleSaSkakel } from '../data/bibleSa'
 
 const API = '/api/bible?path='
 
@@ -419,6 +420,23 @@ export default function Bybel({ onClose }) {
                 <button className="byb-blaai-knop" disabled={hoofstuk <= 1} onClick={() => blaaiNa(hoofstuk - 1)}>← Vorige</button>
                 <button className="byb-blaai-knop" disabled={hoofstuk >= hoofstukke.length} onClick={() => blaaiNa(hoofstuk + 1)}>Volgende →</button>
               </div>
+              {/* Die Afrikaanse Bybel.
+
+                  Die Bybelgenootskap van Suid-Afrika het skriftelik geweier
+                  dat hul teks in 'n ander app ingesluit word, en het hierdie
+                  pad self voorgestel: skakel na die vers op BibleSA. Dus
+                  bring ons 'n mens tot by die presiese hoofstuk, en een druk
+                  terug is jy weer hier. */}
+              <a
+                className="byb-afr-knop"
+                href={bibleSaSkakel(boek, hoofstuk)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="byb-afr-hoof">Lees {boekNaam(boek)} {hoofstuk} in Afrikaans</span>
+                <span className="byb-afr-fyn">Maak oop op BibleSA · Bybelgenootskap van SA</span>
+              </a>
+
               <p className="byb-erkenning">{NAME[sleutel] || ''} · verskaf deur YouVersion</p>
               <Steun />
             </>
@@ -456,6 +474,14 @@ export default function Bybel({ onClose }) {
           <div className="byb-blad" role="dialog" aria-label="Kies jou Bybelvertaling">
             <div className="byb-blad-gryp" />
             <h2 className="byb-blad-titel">Kies jou Bybelvertaling</h2>
+            {/* Sonder hierdie sin vra elke Afrikaanse gebruiker dieselfde
+                vraag, en die antwoord lyk soos 'n fout in die app. */}
+            <p className="byb-blad-nota">
+              Die Afrikaanse Bybel kan nie in hierdie app ingesluit word nie —
+              die Bybelgenootskap van SA gee nie daarvoor toestemming nie. Jy
+              kan enige hoofstuk met een druk in Afrikaans op BibleSA oopmaak;
+              die knoppie staan onderaan elke hoofstuk.
+            </p>
             <div className="byb-blad-lys">
               {aanbeveel.length > 0 && <div className="byb-blad-afdeling">Aanbeveel</div>}
               {aanbeveel.map(w => {

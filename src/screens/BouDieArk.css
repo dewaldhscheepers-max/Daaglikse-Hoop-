@@ -771,3 +771,12 @@
 }
 
 .ark-blad-toe:active { background: #453A66; border-color: #7C6FAF; }
+
+/* Die verwysing onder 'n vers is 'n skakel na BibleSA se Afrikaanse teks. */
+.ark-vers cite a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  -webkit-tap-highlight-color: transparent;
+}

@@ -10,6 +10,8 @@ import {
   stuurPunt, stuurWagry, naamAfgewys, wysNaamAf,
 } from '../data/arkRanglys'
 import ArkBou from '../components/ArkBou'
+import { verwysingSkakel } from '../data/bibleSa'
+import { BOEKE } from '../data/bybelBoeke'
 import SteunKnoppies from '../components/SteunKnoppies'
 import '../components/SteunKnoppies.css'
 import './BouDieArk.css'
@@ -1168,7 +1170,16 @@ export default function BouDieArk({ onClose }) {
           {!klaar.finale && !klaar.arkKlaar && (
             <blockquote className="ark-vers">
               {klaar.vers}
-              <cite>{klaar.ref}</cite>
+              {/* Die verwysing is 'n skakel na die vers in Afrikaans op
+                  BibleSA. Die Bybelgenootskap van SA het hierdie pad self
+                  voorgestel toe hulle geweier het dat hul teks in die app
+                  ingesluit word. */}
+              {(() => {
+                const skakel = verwysingSkakel(klaar.ref, BOEKE)
+                return skakel
+                  ? <cite><a href={skakel} target="_blank" rel="noopener noreferrer">{klaar.ref}</a></cite>
+                  : <cite>{klaar.ref}</cite>
+              })()}
             </blockquote>
           )}
 

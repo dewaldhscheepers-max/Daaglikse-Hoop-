@@ -554,3 +554,46 @@
   color: var(--byb-goud);
   flex-shrink: 0;
 }
+
+/* ── Die Afrikaanse Bybel ──
+   Die Bybelgenootskap van SA het geweier dat hul teks in 'n ander app
+   ingesluit word, en het self voorgestel dat ons na die vers op BibleSA
+   skakel. Hierdie knoppie is daardie pad.
+
+   Geen transform of opacity op :active nie — sien CLAUDE.md. */
+.byb-afr-knop {
+  display: block;
+  margin: 18px 0 8px;
+  padding: 14px 16px;
+  border-radius: 13px;
+  background: #F3EFE4;
+  border: 1px solid #D9CEB4;
+  text-align: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.byb-afr-knop:active { background: #E8E1CE; border-color: #C7B896; }
+
+.byb-afr-hoof {
+  display: block;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #5C4E8E;
+}
+.byb-afr-fyn {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: #8A806F;
+}
+
+.byb-blad-nota {
+  margin: 0 0 14px;
+  padding: 0 4px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #8A806F;
+  text-align: left;
+}
