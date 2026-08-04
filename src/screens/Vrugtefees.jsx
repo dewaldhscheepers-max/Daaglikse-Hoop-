@@ -11,6 +11,8 @@ import {
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
 import TuinAgtergrond from '../components/TuinAgtergrond'
+import SteunKnoppies from '../components/SteunKnoppies'
+import '../components/SteunKnoppies.css'
 import Oesmeesters from '../components/Oesmeesters'
 import { PRESTASIES, boekAan, lees as leesPrestasies } from '../data/vrugtefeesPrestasies'
 import {
@@ -521,11 +523,6 @@ export default function Vrugtefees({ onClose }) {
 
   /* ── Klank en beweging ── */
   function klank() { setStil(toggleMute()) }
-  function wisselRustig() {
-    const nuut = !rustig
-    setRustig(nuut)
-    try { localStorage.setItem(RUSTIG, nuut ? '1' : '0') } catch {}
-  }
 
   /* ── Deel ── */
   async function deel() {
@@ -631,7 +628,19 @@ export default function Vrugtefees({ onClose }) {
 
       {/* ── Kop ── */}
       <div className="vf-kop">
-        <button className="vf-ikoon" onClick={toestand === 'speel' ? () => setToestand('pouse') : onClose} aria-label="Terug">
+        {/* Die terug-pyl het van elke skerm af die HELE spel toegemaak. Gaan
+            jy by die ranglys of die prestasies in en druk terug, was jy uit
+            Vrugtefees uit en terug op die Speel-blad. Nou gaan dit terug na
+            die fases; net van die fases af sluit dit die spel. */}
+        <button
+          className="vf-ikoon"
+          onClick={
+            toestand === 'speel' ? () => setToestand('pouse')
+            : toestand === 'kaart' ? onClose
+            : () => setToestand('kaart')
+          }
+          aria-label="Terug"
+        >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -785,9 +794,7 @@ export default function Vrugtefees({ onClose }) {
             <button className="vf-knop vf-knop-spook" onClick={() => setToestand('prestasies')}>
               Prestasies ({Object.keys(prestasieStand.behaal).length} van {PRESTASIES.length})
             </button>
-            <button className="vf-knop vf-knop-spook" onClick={wisselRustig}>
-              Rustige beweging: {rustig ? 'aan' : 'af'}
-            </button>
+            <SteunKnoppies teks="Vrugtefees is gratis, en bly gratis. As dit vir jou iets beteken, help ons om Daaglikse Hoop aan die gang te hou." />
           </div>
         )}
 

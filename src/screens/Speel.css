@@ -37,18 +37,19 @@
 }
 
 /* ── Speletjie-kaart ── */
+/* Die kaart is nou 'n houer met die speel-knoppie bo en 'n deel-knoppie
+   onder. 'n Knoppie kan nie in 'n knoppie sit nie. */
 .speel-kaart {
   display: flex;
-  align-items: flex-start;
-  gap: 13px;
+  flex-direction: column;
   width: 100%;
   background: var(--white, #fff);
   border: 1px solid rgba(124, 111, 175, 0.16);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(45, 32, 64, 0.04), 0 6px 18px rgba(45, 32, 64, 0.045);
-  padding: 16px 15px;
+  padding: 0;
+  overflow: hidden;
   text-align: left;
-  cursor: pointer;
   font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.12s ease;
@@ -105,3 +106,43 @@
   text-align: center;
   margin: 6px 0 4px;
 }
+
+/* Die speel-deel van die kaart: alles behalwe die deel-knoppie. */
+.speel-kaart-hoof {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  width: 100%;
+  padding: 16px 15px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.speel-kaart-hoof:active { background: rgba(124, 111, 175, 0.06); }
+
+/* Deel hierdie speletjie. Die hele punt van hierdie blad is om die app in
+   mense se hande te kry. */
+.speel-deel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(124, 111, 175, 0.14);
+  color: #7C6FAF;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Net kleur op :active. Sien CLAUDE.md oor die gekleurde strepe. */
+  transition: background-color 0.12s;
+}
+.speel-deel:active { background: rgba(124, 111, 175, 0.1); }

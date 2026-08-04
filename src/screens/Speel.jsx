@@ -1,6 +1,19 @@
 import DonationCard from '../components/DonationCard'
 import './Speel.css'
 
+/* Die hele punt van hierdie blad is om die app in mense se hande te kry.
+   Elke speletjie kry dus sy eie deel-knoppie. */
+const APP = 'https://dewaldscheepers.com/go'
+
+async function deelSpel(spel) {
+  const teks = `${spel.titel} — ${spel.beskryf}\n\nGratis in Daaglikse Hoop.`
+  try {
+    if (navigator.share) { await navigator.share({ title: spel.titel, text: teks, url: APP }); return }
+    await navigator.clipboard.writeText(`${teks}\n${APP}`)
+    window.dispatchEvent(new CustomEvent('wys-kennis', { detail: 'Geskakel gekopieer' }))
+  } catch { /* die speler het gekanselleer; dis nie 'n fout nie */ }
+}
+
 // Speletjies wat vrede help bou. Vredepad staan boaan.
 // Om een by te voeg: nog 'n inskrywing hier, en 'n luisteraar in App.jsx.
 const SPELETJIES = [
@@ -69,18 +82,34 @@ export default function Speel() {
 
       <div className="speel-body">
         {SPELETJIES.map(spel => (
-          <button key={spel.id} className="speel-kaart" onClick={() => open(spel)}>
-            <div className="speel-teel" style={{ background: spel.tint }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke={spel.stroke} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                {spel.ikoon}
+          /* Die kaart was een groot <button>. 'n Deel-knoppie kan nie binne
+             'n knoppie sit nie, dus is die kaart nou 'n houer met twee
+             knoppies langs mekaar. */
+          <div key={spel.id} className="speel-kaart">
+            <button className="speel-kaart-hoof" onClick={() => open(spel)}>
+              <div className="speel-teel" style={{ background: spel.tint }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke={spel.stroke} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  {spel.ikoon}
+                </svg>
+              </div>
+              <div className="speel-info">
+                <span className="speel-kaart-titel">{spel.titel}</span>
+                <span className="speel-kaart-beskryf">{spel.beskryf}</span>
+                <span className="speel-kaart-merk">{spel.merk} →</span>
+              </div>
+            </button>
+            <button
+              className="speel-deel"
+              onClick={() => deelSpel(spel)}
+              aria-label={`Deel ${spel.titel}`}
+            >
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
               </svg>
-            </div>
-            <div className="speel-info">
-              <span className="speel-kaart-titel">{spel.titel}</span>
-              <span className="speel-kaart-beskryf">{spel.beskryf}</span>
-              <span className="speel-kaart-merk">{spel.merk} →</span>
-            </div>
-          </button>
+              <span>Deel</span>
+            </button>
+          </div>
         ))}
 
         <p className="speel-binnekort">Meer speletjies is op pad.</p>

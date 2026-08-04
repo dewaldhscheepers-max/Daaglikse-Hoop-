@@ -1,0 +1,61 @@
+/* Die steun-blok onderaan elke speletjie se eerste blad.
+
+   Twee weergawes: 'donker' vir die speletjies se nag-agtergronde, en die
+   ligte een vir 'n wit blad.
+
+   Geen transform of opacity op :active nie. Sien die nota in CLAUDE.md —
+   daardie twee eienskappe maak en breek 'n saamgestelde laag by elke druk,
+   en dit is wat op een Android-foon rou geheue as gekleurde strepe gewys
+   het. Ons verander net kleur. */
+
+.steun-blok {
+  width: 100%;
+  max-width: 280px;
+  margin: 14px auto 0;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.steun-blok.donker {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.steun-teks {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #6E6558;
+}
+.steun-blok.donker .steun-teks { color: #9C9080; }
+
+.steun-rye { display: flex; flex-direction: column; gap: 7px; }
+
+.steun-knop {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 11px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.steun-primer {
+  background: #C7A44A;
+  color: #241E10;
+  border: 1px solid #E0BE68;
+}
+.steun-primer:active { background: #B08F3C; }
+
+.steun-spook {
+  background: transparent;
+  color: #8A7B5A;
+  border: 1.5px solid rgba(199, 164, 74, 0.4);
+}
+.steun-blok.donker .steun-spook { color: #C7B99C; border-color: rgba(199, 185, 156, 0.3); }
+.steun-spook:active { background: rgba(199, 164, 74, 0.12); }

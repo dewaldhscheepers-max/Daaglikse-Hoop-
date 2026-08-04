@@ -10,6 +10,8 @@ import {
   stuurPunt, stuurWagry, naamAfgewys, wysNaamAf,
 } from '../data/arkRanglys'
 import ArkBou from '../components/ArkBou'
+import SteunKnoppies from '../components/SteunKnoppies'
+import '../components/SteunKnoppies.css'
 import './BouDieArk.css'
 
 /* ────────────────────────────────────────────────────────────
@@ -81,12 +83,14 @@ const STOOR   = 'ark_stoor'
 const VERSAMEL = 'ark_diere'
 const VERSTE   = 'ark_verste'
 
-/* Hoe ver jy al ooit in die verhaal gekom het. 'n Nuwe spel begin twee
-   stadiums hieronder: jy herdoen nooit die hele verhaal en herwin nooit
-   diere wat lankal in die ark is nie, maar jy kry darem 'n paar stadiums
-   om warm te word voordat die spoed weer is waar jy dit gelos het. */
-const TERUG_BY_NUWE = 2
+/* Hoe ver jy al ooit in die verhaal gekom het.
 
+   'n Nuwe spel het eers twee stadiums hieronder begin, sodat 'n mens warm
+   kon word voordat die spoed weer is waar jy dit gelos het. Dit was 'n fout:
+   die knoppie het "Nuwe spel" gese en dan by stadium 8 begin, en Dewald het
+   dieselfde sebra en giraf oor en oor gevang. 'n Knoppie moet doen wat sy
+   naam se. 'n Nuwe spel begin by die begin; wil jy voortgaan, is daar 'n
+   knoppie wat dit se. */
 function leesVerste() {
   try { return Math.max(1, Number(localStorage.getItem(VERSTE)) || 1) } catch { return 1 }
 }
@@ -94,7 +98,7 @@ function stoorVerste(nr) {
   try { if (nr > leesVerste()) localStorage.setItem(VERSTE, String(nr)) } catch {}
 }
 function beginStadium() {
-  return Math.max(1, leesVerste() - TERUG_BY_NUWE)
+  return 1
 }
 
 function leesDiere() {
@@ -902,13 +906,6 @@ export default function BouDieArk({ onClose }) {
   // In die menu wys die telbord die gestoorde spel, sodat dit nie lyk of
   // alles verlore is nie. Elders wys dit die lopende spel.
   const wysTel = (toestand === 'menu' && bewaar) ? bewaar : { telling, lyne, stadium: stadiumNr }
-  // Waar 'n splinternuwe spel sal begin. Net wanneer die menu wys, anders
-  // lees ons localStorage by elke raam van die spel.
-  const nuweBy = useMemo(
-    () => (toestand === 'menu' ? beginStadium() : 1),
-    [toestand, bewaar]
-  )
-
   /* Waar sou hierdie lopie NOU op die lys val? Dit is 'n skatting uit die
      lys wat ons gehaal het toe die spel oopgemaak het, dus noem ons dit
      voorlopig. Val die speler buite die stuk lys wat ons het, sê ons niks —
@@ -1044,8 +1041,8 @@ export default function BouDieArk({ onClose }) {
               </button>
             )}
             <button className={`ark-knop ${bewaar ? 'ark-knop-spook' : 'ark-knop-primer'}`} onClick={begin}>
-              {bewaar ? 'Nuwe spel' : 'Begin speel'}
-              {nuweBy > 1 && <small>Begin by stadium {nuweBy}</small>}
+              {bewaar ? 'Begin oor van stadium 1' : 'Begin speel'}
+              {bewaar && <small>Jou diere bly in die ark</small>}
             </button>
             <button className="ark-knop ark-knop-spook" onClick={() => setWysDiere(true)}>
               My diere ({diere.length} van {ALLE_DIERE.length})
@@ -1053,6 +1050,7 @@ export default function BouDieArk({ onClose }) {
             <button className="ark-knop ark-knop-spook" onClick={() => { setWysRanglys(true); laaiRanglys() }}>
               Wêreldwye ranglys
             </button>
+            <SteunKnoppies teks="Bou die Ark is gratis. As dit vir jou iets beteken, help ons om Daaglikse Hoop aan die gang te hou." />
             <p className="ark-weergawe">weergawe {__BOU__}</p>
           </div>
         )}
