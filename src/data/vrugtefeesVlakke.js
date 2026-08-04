@@ -91,7 +91,7 @@ export const VLAKKE = [
     wenk: 'Onkruid het twee slae nodig. Pas twee keer op dieselfde plek.' },
 
   { nr: 8, saad: 1744, soorte: 5, skuiwe: 14,
-    doel: { tipe: 'ketting', lengte: 3 },
+    doel: { tipe: 'ketting', lengte: 3, aantal: 1 },
     wenk: 'Beplan \'n skuif wat laat val, sodat die volgende passing vanself kom.' },
 
   { nr: 9, saad: 1866, soorte: 6, skuiwe: 26,
@@ -125,8 +125,13 @@ export const VLAKKE = [
     doel: { tipe: 'versamel', vrugte: { 1: 22, 5: 22 } },
     blokke: b(KLIP, [0, 0], [7, 0], [0, 7], [7, 7]) },
 
-  { nr: 16, saad: 2597, soorte: 6, skuiwe: 22,
-    doel: { tipe: 'ketting', lengte: 4 } },
+  /* Fase 16 was 'n muntstuk-gooi: 46% vir iemand wat speel, en die toonbank
+     het op 0/4 bly staan tot dit skielik gebeur. Twee dinge is nou anders.
+     Vyf vrugsoorte in plaas van ses — kettings hang van digtheid af, en dit
+     is die grootste hefboom. En dit vra DRIE kleiner kettings in plaas van
+     een groot een, sodat elke goeie skuif tel en 'n mens vordering sien. */
+  { nr: 16, saad: 2597, soorte: 5, skuiwe: 28,
+    doel: { tipe: 'ketting', lengte: 3, aantal: 3 } },
 
   { nr: 17, saad: 2688, soorte: 6, skuiwe: 26,
     doel: { tipe: 'skoonmaak', tipes: [KRAT] },
@@ -179,8 +184,8 @@ export const VLAKKE = [
     doel: { tipe: 'skoonmaak', tipes: [DORING] },
     blokke: b(DORING, [2, 2], [5, 2], [2, 5]) },
 
-  { nr: 29, saad: 3903, soorte: 6, skuiwe: 24,
-    doel: { tipe: 'ketting', lengte: 4 } },
+  { nr: 29, saad: 3903, soorte: 5, skuiwe: 26,
+    doel: { tipe: 'ketting', lengte: 3, aantal: 3 } },
 
   { nr: 30, saad: 4015, soorte: 5, skuiwe: 36,
     doel: { tipe: 'skoonmaak', tipes: [KLIP, KRAT, DROE_BLAAR] },
@@ -252,8 +257,8 @@ export const VLAKKE = [
     doel: { tipe: 'verlig', selle: [[0, 3], [1, 3], [2, 3], [5, 3], [6, 3], [7, 3]] },
     blokke: b(ONKRUID, [3, 3], [4, 3]) },
 
-  { nr: 48, saad: 5897, soorte: 6, skuiwe: 28,
-    doel: { tipe: 'ketting', lengte: 4 } },
+  { nr: 48, saad: 5897, soorte: 5, skuiwe: 32,
+    doel: { tipe: 'ketting', lengte: 4, aantal: 2 } },
 
   { nr: 49, saad: 5908, soorte: 6, skuiwe: 30,
     doel: { tipe: 'skoonmaak', tipes: [KRAT] },
@@ -318,8 +323,8 @@ export const VLAKKE = [
     doel: { tipe: 'skoonmaak', tipes: [KRAT, KLIP] },
     blokke: [...b(KRAT, [2, 2], [5, 2], [2, 5], [5, 5]), ...b(KLIP, [3, 3], [4, 4])] },
 
-  { nr: 66, saad: 7685, soorte: 6, skuiwe: 30,
-    doel: { tipe: 'ketting', lengte: 4 } },
+  { nr: 66, saad: 7685, soorte: 5, skuiwe: 36,
+    doel: { tipe: 'ketting', lengte: 4, aantal: 3 } },
 
   { nr: 67, saad: 7796, soorte: 7, skuiwe: 34,
     doel: { tipe: 'punte', waarde: 7000 } },
@@ -360,8 +365,8 @@ export const VLAKKE = [
   { nr: 77, saad: 8796, soorte: 7, skuiwe: 36,
     doel: { tipe: 'versamel', vrugte: { 0: 22, 3: 20, 6: 19 } } },
 
-  { nr: 78, saad: 8807, soorte: 6, skuiwe: 32,
-    doel: { tipe: 'ketting', lengte: 4 } },
+  { nr: 78, saad: 8807, soorte: 5, skuiwe: 40,
+    doel: { tipe: 'ketting', lengte: 4, aantal: 3 } },
 
   { nr: 79, saad: 8918, soorte: 7, skuiwe: 34,
     doel: { tipe: 'grootpas', grootte: 5 } },
@@ -477,10 +482,18 @@ export function doelTeks(doel, vrugNaam) {
       return 'verwyder ' + dele.slice(0, -1).join(', ') + ' en ' + dele[dele.length - 1]
     }
     case 'spesiaal':  return `maak ${doel.aantal} spesiale vrugte`
-    case 'kombo':     return `${doel.aantal} spesiale kombinasie${doel.aantal > 1 ? 's' : ''}`
-    case 'ketting':   return `'n ketting van ${doel.lengte}`
-    case 'verlig':    return `verlig ${doel.selle.length} plekke in die tuin`
-    case 'grootpas':  return `maak 'n passing van ${doel.grootte}`
+    case 'kombo':     return `ruil ${doel.aantal} keer twee spesiales`
+    /* Dit het "'n ketting van 4" gese. Dewald het op fase 16 vasgesit en
+       gevra wat 'n mens veronderstel is om te DOEN. Hy was reg — dit is 'n
+       selfstandige naamwoord, nie 'n opdrag nie. Nou se dit wat gebeur. */
+    case 'ketting': {
+      const n = doel.aantal || 1
+      return n === 1
+        ? `kry ${doel.lengte} passings uit een skuif`
+        : `kry ${n} skuiwe met ${doel.lengte} passings elk`
+    }
+    case 'verlig':    return `oes op ${doel.selle.length} gemerkte plekke`
+    case 'grootpas':  return `maak een passing van ${doel.grootte}`
     case 'soortspesiaal': {
       const naam = { rylig: 'Rylig', kolomlig: 'Kolomlig', oeskrag: 'Oeskrag',
                      reenboog: 'Reënboogvrug', feesmandjie: 'Feesmandjie' }[doel.soort] || doel.soort
@@ -504,7 +517,7 @@ export function doelBehaal(doel, stand, bord) {
     case 'kombo':
       return stand.kombinasies >= doel.aantal
     case 'ketting':
-      return stand.grootsteKetting >= doel.lengte
+      return kettingTelling(stand, doel.lengte) >= (doel.aantal || 1)
     case 'verlig':
       return doel.selle.every(([k, r]) => stand.verlig && stand.verlig[k + ',' + r])
     case 'grootpas':
@@ -513,6 +526,58 @@ export function doelBehaal(doel, stand, bord) {
       return (stand.spesiaalSoorte[doel.soort] || 0) >= doel.aantal
     default:
       return false
+  }
+}
+
+/* Hoeveel skuiwe het 'n ketting van ten minste hierdie lengte gehaal.
+
+   Ou lopies het net `grootsteKetting` gehad. Ons val daarop terug sodat 'n
+   bewaarde spel of 'n ou toets nie breek nie. */
+export function kettingTelling(stand, lengte) {
+  if (Array.isArray(stand.kettings)) return stand.kettings.filter(n => n >= lengte).length
+  return (stand.grootsteKetting || 0) >= lengte ? 1 : 0
+}
+
+/* ── Hoe 'n mens dit doen ──
+   Een sin per doelwit-tipe wat se WAT om te doen, nie wat die doelwit heet
+   nie.
+
+   Dit het as 'n `wenk` op die EERSTE fase van elke tipe bestaan, en net daar.
+   Teen fase 16 was fase 8 se wenk lankal vergeet, en fase 16 is 'n moeiliker
+   weergawe van dieselfde ding. Dewald het gevra wat hy veronderstel is om te
+   doen, en die spel het dit nerens gese nie.
+
+   Nou staan dit permanent op die skerm, by elke fase. 'n Mens moet nooit
+   iets moet onthou wat die spel vir jou kan wys nie. */
+export function doelUitleg(doel) {
+  switch (doel.tipe) {
+    case 'versamel':
+      return 'Pas drie of meer van daardie vrug om dit te oes.'
+    case 'punte':
+      return 'Groter passings en kettings gee baie meer punte as drie op \'n slag.'
+    case 'skoonmaak':
+      return 'Pas \'n vrug langs of bo-op die versperring om dit te breek.'
+    case 'spesiaal':
+      return 'Pas vier of meer eenders in een skuif, dan word een van hulle spesiaal.'
+    case 'kombo':
+      return 'Skuif twee spesiale vrugte teen mekaar en ruil hulle met mekaar.'
+    case 'ketting':
+      return 'Een passing laat vrugte val, en as hulle vanself weer pas, is dit \'n ketting. Jy kan dit nie beplan nie — speel laag op die bord waar die meeste van bo af inval, en dit kom vanself.'
+    case 'verlig':
+      return 'Oes \'n vrug op elke plek wat op die bord gemerk is.'
+    case 'grootpas':
+      return 'Kry soveel vrugte in EEN figuur. \'n L- of T-vorm tel ook, nie net \'n reguit ry nie.'
+    case 'soortspesiaal': {
+      const hoe = {
+        rylig: 'Vier langs mekaar in \'n ry gee \'n Rylig.',
+        kolomlig: 'Vier bo-op mekaar gee \'n Kolomlig.',
+        oeskrag: '\'n L- of T-vorm gee \'n Oeskrag.',
+        reenboog: 'Vyf in \'n reguit streep gee \'n Reenboogvrug.',
+        feesmandjie: '\'n Groot figuur gee \'n Feesmandjie.',
+      }
+      return hoe[doel.soort] || 'Pas vier of meer eenders in een skuif.'
+    }
+    default: return ''
   }
 }
 
@@ -555,7 +620,8 @@ export function doelTelling(doel, stand, bord) {
 
     case 'spesiaal':  return merk('sp', '✦', stand.spesiaalGemaak, doel.aantal)
     case 'kombo':     return merk('kb', '✷', stand.kombinasies, doel.aantal)
-    case 'ketting':   return merk('kt', '⇊', stand.grootsteKetting, doel.lengte)
+    case 'ketting':
+      return merk('kt', '⇊', kettingTelling(stand, doel.lengte), doel.aantal || 1)
     case 'grootpas':  return merk('gp', '▣', stand.grootstePas || 0, doel.grootte)
 
     case 'soortspesiaal':
@@ -593,7 +659,8 @@ export function doelVordering(doel, stand, bord) {
     }
     case 'spesiaal':  return Math.min(1, stand.spesiaalGemaak / doel.aantal)
     case 'kombo':     return Math.min(1, stand.kombinasies / doel.aantal)
-    case 'ketting':   return Math.min(1, stand.grootsteKetting / doel.lengte)
+    case 'ketting':
+      return Math.min(1, kettingTelling(stand, doel.lengte) / (doel.aantal || 1))
     case 'verlig': {
       const aan = doel.selle.filter(([k, r]) => stand.verlig && stand.verlig[k + ',' + r]).length
       return aan / doel.selle.length

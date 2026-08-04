@@ -739,3 +739,22 @@
   line-height: 1.2;
 }
 .vf-rang-punte { text-align: right; }
+
+/* Hoe jy die doelwit haal. Permanent op die skerm, by elke fase.
+
+   Dit was 'n wenk wat een keer gewys het, op die eerste fase van elke
+   doelwit-tipe. Teen fase 16 was fase 8 se wenk lankal vergeet en die spel
+   het nerens gese wat 'n "ketting" is nie. 'n Mens moet nooit iets hoef te
+   onthou wat die spel vir jou kan wys nie. */
+.vf-hoe {
+  margin: 0 12px 8px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: rgba(12, 17, 28, 0.55);
+  border: 1px solid rgba(228, 201, 138, 0.18);
+  font-size: 12px;
+  line-height: 1.45;
+  color: #C7B99C;
+  text-align: center;
+  flex: 0 0 auto;
+}

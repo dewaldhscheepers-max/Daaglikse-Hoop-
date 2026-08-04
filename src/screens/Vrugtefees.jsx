@@ -6,7 +6,7 @@ import { beginOes, oesSkuif, dagSleutel, dagSaad } from '../game/vrugtefees/oes'
 import { beginVlakLopie, reisSkuif } from '../game/vrugtefees/reis'
 import {
   VLAKKE, HOOFSTUKKE, HOOFSTUK_WOORD, vlakBy, hoofstukVan,
-  doelTeks, doelBehaal, doelVordering, doelTelling,
+  doelTeks, doelBehaal, doelVordering, doelTelling, doelUitleg,
 } from '../data/vrugtefeesVlakke'
 import { Vrug, vrugNaam, VRUG_TEKENINGE } from '../data/vrugte'
 import { maakTekenaar } from '../game/vrugtefees/teken'
@@ -583,6 +583,10 @@ export default function Vrugtefees({ onClose }) {
   }, [])
 
   const doelWoorde = useMemo(() => doelTeks(vlak.doel, vrugNaam), [vlak])
+  /* Hoe 'n mens dit doen. Dit was 'n wenk op die EERSTE fase van elke tipe
+     en net daar — teen fase 16 was fase 8 se wenk lankal vergeet. Nou staan
+     dit by elke fase op die skerm. */
+  const hoeTeks = useMemo(() => (isOes ? '' : doelUitleg(vlak.doel)), [vlak, isOes])
 
   /* Die toonbank. Een lys vir ELKE doelwit-tipe.
 
@@ -670,6 +674,8 @@ export default function Vrugtefees({ onClose }) {
               </>}
             </div>
           </div>
+
+          {hoeTeks && <p className="vf-hoe">{hoeTeks}</p>}
 
           <div className="vf-balk"><i style={{ width: `${Math.round(vorder * 100)}%` }} /></div>
 

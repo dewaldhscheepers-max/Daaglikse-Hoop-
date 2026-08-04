@@ -36,6 +36,15 @@ export function beginVlakLopie(nr) {
     stand: {
       punte: 0, versamel: {}, spesiaalGemaak: 0, kombinasies: 0,
       grootsteKetting: 0, grootstePas: 0, spesiaalSoorte: {}, verlig: {},
+      /* Elke skuif se kettinglengte, nie net die grootste nie.
+
+         'n Ketting is grootliks geluk: 'n mens kan nie 'n vier-diep
+         kettingreaksie beplan nie. As die doelwit dan EEN ketting van vier
+         is, staan die toonbank op 0/4 tot dit skielik gebeur — die speler
+         sien nooit vordering nie en dit voel of niks werk nie. Met 'n lys
+         kan die doelwit vra vir 'n paar kleiner kettings, en dan tel elke
+         goeie skuif. */
+      kettings: [],
       blokkeAanBegin: bord.selle.filter(s => s.blok).length,
     },
     skuiweOor: v.skuiwe,
@@ -63,6 +72,7 @@ export function reisSkuif(lopie, a, b) {
   for (const [soort, n] of Object.entries(uit.spesiaalSoorte || {}))
     st.spesiaalSoorte[soort] = (st.spesiaalSoorte[soort] || 0) + n
   for (const [k, r] of uit.geveeSelle || []) st.verlig[k + ',' + r] = true
+  if (uit.grootsteKetting >= 2) st.kettings.push(uit.grootsteKetting)
 
   lopie.skuiweOor -= 1
   lopie.skuiweGedoen += 1

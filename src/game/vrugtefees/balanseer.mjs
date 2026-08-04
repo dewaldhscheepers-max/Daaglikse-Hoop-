@@ -30,7 +30,7 @@ function alleSkuiwe(bord) {
 function leeStand(bord) {
   return {
     punte: 0, versamel: {}, spesiaalGemaak: 0, kombinasies: 0, grootsteKetting: 0,
-    grootstePas: 0, spesiaalSoorte: {}, verlig: {},
+    grootstePas: 0, spesiaalSoorte: {}, verlig: {}, kettings: [],
     blokkeAanBegin: bord.selle.filter(s => s.blok).length,
   }
 }
@@ -41,6 +41,7 @@ function voegBy(stand, uit) {
   stand.spesiaalGemaak += uit.spesiaalGemaak
   stand.kombinasies += uit.kombinasies
   stand.grootsteKetting = Math.max(stand.grootsteKetting, uit.grootsteKetting)
+  if (uit.grootsteKetting >= 2) stand.kettings.push(uit.grootsteKetting)
   stand.grootstePas = Math.max(stand.grootstePas, uit.grootstePas || 0)
   for (const [s, n] of Object.entries(uit.spesiaalSoorte || {}))
     stand.spesiaalSoorte[s] = (stand.spesiaalSoorte[s] || 0) + n
