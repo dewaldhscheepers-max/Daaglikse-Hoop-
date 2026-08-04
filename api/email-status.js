@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { haalEnOntleed } = require('./_eposLys')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -60,20 +61,25 @@ module.exports = async function handler(req, res) {
     }
   } catch {}
 
-  // Count emailList documents by paging (more reliable than aggregation query)
-  let emailCount = 0
-  try {
-    const base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`
-    let pageToken = null
-    do {
-      let url = `${base}/emailList?pageSize=300&mask.fieldPaths=email`
-      if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`
-      const r   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      const data = await r.json()
-      emailCount += (data.documents || []).filter(d => d.fields?.email?.stringValue).length
-      pageToken = data.nextPageToken || null
-    } while (pageToken)
-  } catch {}
+  /* Die lys word deur _eposLys.js ontleed — dieselfde lêer wat send-bulk-email
+     gebruik. Dit het vroeer die ROU dokumente getel terwyl die stuurder die
+     UNIEKE adresse gestuur het, en daarom het die paneel "2731" belowe en
+     "2131" gelewer. */
+  let lys = { totaal: 0, aktief: 0, duplikate: 0, ongeldig: 0, sonderVeld: 0, uitgesluit: 0, afgemeld: null }
+  try { lys = await haalEnOntleed(projectId, token) } catch {}
 
-  return res.json({ emailCount, activeCampaign })
+  return res.json({
+    // emailCount is nou die getal wat WERKLIK gestuur gaan word.
+    emailCount: lys.aktief,
+    lys: {
+      totaal:     lys.totaal,
+      aktief:     lys.aktief,
+      uitgesluit: lys.uitgesluit,
+      duplikate:  lys.duplikate,
+      ongeldig:   lys.ongeldig,
+      sonderVeld: lys.sonderVeld,
+      afgemeld:   lys.afgemeld,
+    },
+    activeCampaign,
+  })
 }

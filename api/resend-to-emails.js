@@ -38,28 +38,16 @@ function buildHtml(body) {
         ${paragraphs}
         <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
         <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Indien jy die bediening wil ondersteun:</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="padding:0 4px 10px 0;" width="50%">
-              <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
-                💜 Maandelikse Vennoot
-              </a>
-            </td>
-            <td style="padding:0 0 10px 4px;" width="50%">
-              <a href="https://www.dewaldscheepers.com/go" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
-                🙏 Eenmalige Bydrae
-              </a>
-            </td>
-          </tr>
-        </table>
-        <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;margin-bottom:24px;">
-          📱 Maak die Daaglikse Hoop App oop
+        <a href="https://www.dewaldscheepers.com/go/support" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:15px 12px;font-size:14px;font-weight:700;text-align:center;font-family:Georgia,serif;letter-spacing:0.03em;margin-bottom:10px;">
+          &#9829; HELP DRA DIE HOOP
+        </a>
+        <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:700;text-align:center;font-family:Georgia,serif;letter-spacing:0.03em;border:1px solid #ddd6f5;margin-bottom:24px;">
+          &#128241; MAAK DAAGLIKSE HOOP OOP
         </a>
         <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
         <p style="color:#888;font-size:13px;line-height:1.6;">
           Daaglikse Hoop &middot;
-          <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a><br>
-          Jy ontvang hierdie e-pos omdat jy 'n e-boek gekoop het.
+          <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
         </p>
       </div>
     </div>

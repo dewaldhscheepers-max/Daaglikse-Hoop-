@@ -18,6 +18,7 @@ import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
 import Vredepad from './screens/Vredepad'
 import HoopVennoot from './screens/HoopVennoot'
+import Steun from './screens/Steun'
 import LeuensDuiwel from './screens/LeuensDuiwel'
 import BybelMaklikGemaak from './screens/BybelMaklikGemaak'
 import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
@@ -90,6 +91,7 @@ export default function App() {
   const [showSeerNaVryheid, setShowSeerNaVryheid] = useState(false)
   const [showVredepad, setShowVredepad]           = useState(false)
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
+  const [wysSteun, setWysSteun]                   = useState(false)
   const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
@@ -451,6 +453,41 @@ export default function App() {
     return () => window.removeEventListener('open-seer-na-vryheid', onOpen)
   }, [])
 
+  /* ── Die eie steunskakel ──
+     Dit maak NET oop wanneer iemand die spesiale skakel gebruik. 'n Gewone
+     besoeker aan die app kom nooit hier uit nie — dit is die hele punt.
+
+     Ons aanvaar 'n paar vorms, want die skakel word in e-pos, WhatsApp en
+     Facebook gedeel en 'n mens tik dit nie altyd eners nie:
+       /steun · /support · /go/support · /go/steun · ?steun=1 · ?support=true
+
+     Sodra dit oop is, vee ons die pad uit die adresbalk uit. Anders bly 'n
+     mens op /steun sit en sien dit weer by elke herlaai, en dan begin dit
+     na 'n muur voel. */
+  useEffect(() => {
+    try {
+      const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
+      const vraag = new URLSearchParams(window.location.search)
+      const perPad = ['/steun', '/support', '/go/support', '/go/steun'].includes(pad)
+      const perVraag = ['1', 'true', 'ja'].includes((vraag.get('steun') || vraag.get('support') || '').toLowerCase())
+      /* Die bedoeling gaan in sessionStorage, NIE net in die toestand nie.
+
+         Die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar
+         'n nuwe weergawe is. Ons het toe die pad klaar na '/' herskryf, en
+         ná die herlaai was daar niks meer om op te gaan nie — die steunblad
+         het eenvoudig nie verskyn nie. Presies wat 'n mens in 'n e-pos of op
+         WhatsApp sou klik.
+
+         Die vlag oorleef die herlaai; ons vee dit uit wanneer die mens die
+         blad toemaak. */
+      if (perPad || perVraag) {
+        sessionStorage.setItem('steun_versoek', '1')
+        window.history.replaceState({}, '', '/')
+      }
+      if (sessionStorage.getItem('steun_versoek') === '1') setWysSteun(true)
+    } catch {}
+  }, [])
+
   // ── Donation card CTA ──
   useEffect(() => {
     function onOpen() { setDonation(true) }
@@ -667,6 +704,12 @@ export default function App() {
       <BottomNav active={tab} onChange={handleNav} onBybel={() => setShowBybel(true)} />
 
       {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
+      {/* Die steunblad sit onder die twee betaalvensters, sodat 'n mens
+          daarheen kan gaan en weer terugkom sonder om dit te verloor. */}
+      {wysSteun     && <Steun onSluit={() => {
+        setWysSteun(false)
+        try { sessionStorage.removeItem('steun_versoek') } catch {}
+      }} />}
       {showDonation && <DonationModal onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 

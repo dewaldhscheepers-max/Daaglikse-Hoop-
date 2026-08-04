@@ -1,0 +1,120 @@
+/* Die steunblad. Vol skerm, warm, en nooit 'n muur nie.
+
+   Geen transform of opacity op :active. Sien CLAUDE.md — daardie twee
+   eienskappe maak en breek 'n saamgestelde laag by elke druk, en dit is wat
+   op een Android-foon rou geheue as gekleurde strepe gewys het. */
+
+.steun-blad {
+  position: fixed;
+  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
+  /* svh, nie dvh nie: dvh verander saam met Chrome se adresbalk. */
+  height: 100svh;
+  z-index: 10000;
+  overflow-y: auto;
+  background: linear-gradient(170deg, #2E2650 0%, #443A6E 46%, #5C4E8E 100%);
+  color: #F6F2EA;
+  display: flex;
+  justify-content: center;
+}
+
+.steun-blad-binne {
+  width: 100%;
+  max-width: 420px;
+  padding: 52px 24px calc(env(safe-area-inset-bottom, 0px) + 34px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: auto 0;
+}
+
+.steun-hart {
+  font-size: 40px;
+  line-height: 1;
+  color: #F0C9A0;
+  margin-bottom: 12px;
+}
+
+.steun-titel {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 14px;
+  color: #FFFFFF;
+}
+
+.steun-lei {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.86);
+  margin: 0 0 12px;
+  max-width: 330px;
+}
+.steun-lei-fyn { font-size: 14px; color: rgba(255, 255, 255, 0.66); margin-bottom: 26px; }
+
+.steun-blad-knop {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 15px 18px;
+  margin-bottom: 11px;
+  border-radius: 14px;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.steun-blad-knop small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  font-weight: 500;
+  opacity: 0.82;
+}
+
+.steun-blad-primer {
+  background: #F0C9A0;
+  color: #33254A;
+  border: 1px solid #F7DCBC;
+}
+.steun-blad-primer:active { background: #DDB489; }
+
+.steun-blad-tweede {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+}
+.steun-blad-tweede:active { background: rgba(255, 255, 255, 0.18); }
+
+/* Altyd sigbaar, altyd oop. Dit is nie 'n betaalmuur nie. */
+.steun-blad-verder {
+  margin-top: 14px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.steun-blad-verder:active { color: #FFFFFF; }
+
+.steun-fyn {
+  margin: 22px 0 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 300px;
+}
+
+@media (min-width: 480px) {
+  .steun-titel { font-size: 34px; }
+}

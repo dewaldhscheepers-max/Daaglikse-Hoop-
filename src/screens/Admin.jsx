@@ -116,6 +116,8 @@ export default function Admin({ onClose }) {
 
   // ── Bulk email state ──
   const [emailCount,     setEmailCount]     = useState(null)
+  // Waar die verskil tussen die rou lys en die stuurlys vandaan kom.
+  const [lysOpsomming,   setLysOpsomming]   = useState(null)
   const [activeCampaign, setActiveCampaign] = useState(null)
   const [bulkSubject,    setBulkSubject]    = useState('')
   const [bulkBody,       setBulkBody]       = useState('')
@@ -250,7 +252,11 @@ export default function Admin({ onClose }) {
     // Load email subscriber count and active campaign via API (avoids Firestore permission errors)
     fetch('/api/email-status')
       .then(r => r.json())
-      .then(d => { setEmailCount(d.emailCount || 0); if (d.activeCampaign) setActiveCampaign(d.activeCampaign) })
+      .then(d => {
+        setEmailCount(d.emailCount || 0)
+        setLysOpsomming(d.lys || null)
+        if (d.activeCampaign) setActiveCampaign(d.activeCampaign)
+      })
       .catch(() => {})
     return unsub
   }, [unlocked])
@@ -967,10 +973,27 @@ export default function Admin({ onClose }) {
                 ✉️ E-pos Inskrywers
                 {emailCount !== null && (
                   <span style={{ fontWeight: 400, fontSize: 13, color: 'var(--text-muted)', marginLeft: 8 }}>
-                    ({emailCount} inskrywers)
+                    ({emailCount} aktief)
                   </span>
                 )}
               </div>
+
+              {/* Die paneel het "alle 2731" belowe en 2131 gelewer. Nie een
+                  van die twee was verkeerd nie — die een het rou dokumente
+                  getel en die ander die unieke adresse. Nou staan albei hier,
+                  met die verskil uitgeskryf. */}
+              {lysOpsomming && lysOpsomming.uitgesluit > 0 && (
+                <div className="admin-books-note" style={{ marginBottom: 14 }}>
+                  {lysOpsomming.totaal} rekords · <b>{lysOpsomming.aktief} aktief</b> · {lysOpsomming.uitgesluit} uitgesluit
+                  <br />
+                  <span style={{ fontSize: 12 }}>
+                    Uitgesluit: {lysOpsomming.duplikate} duplikate
+                    {lysOpsomming.ongeldig > 0 && ` · ${lysOpsomming.ongeldig} ongeldige adresse`}
+                    {lysOpsomming.sonderVeld > 0 && ` · ${lysOpsomming.sonderVeld} sonder adres`}
+                    {lysOpsomming.afgemeld === null && ' · afmeldings word nog nie aangeteken nie'}
+                  </span>
+                </div>
+              )}
 
               {/* Import existing list */}
               {!bulkImported && (emailCount === 0 || emailCount === null) && (
@@ -1043,13 +1066,21 @@ export default function Admin({ onClose }) {
                     />
                   </div>
                   {bulkResult && (
-                    <div className="admin-success">
-                      ✅ {bulkResult.sentCount} e-posse gestuur
+                    <div className={bulkResult.failedCount > 0 ? 'admin-error' : 'admin-success'}>
+                      {bulkResult.failedCount > 0 ? '⚠️' : '✅'} {bulkResult.sentCount} gestuur
+                      {bulkResult.failedCount > 0 && ` · ${bulkResult.failedCount} het misluk`}
+                      {bulkResult.lys && bulkResult.lys.uitgesluit > 0 &&
+                        ` · ${bulkResult.lys.uitgesluit} uitgesluit (${bulkResult.lys.duplikate} duplikate)`}
                       {bulkResult.remaining > 0 && ` · ${bulkResult.remaining} oor (${bulkResult.daysLeft} dae)`}
+                      {bulkResult.foute && bulkResult.foute.length > 0 && (
+                        <div style={{ fontSize: 12, marginTop: 6, opacity: 0.85 }}>
+                          {bulkResult.foute.join(' · ')}
+                        </div>
+                      )}
                     </div>
                   )}
                   <button className="admin-save-btn" onClick={handleBulkSend} disabled={bulkSending}>
-                    {bulkSending ? 'Besig om te stuur...' : `Stuur na alle ${emailCount} inskrywers`}
+                    {bulkSending ? 'Besig om te stuur...' : `Stuur na ${emailCount} aktiewe inskrywers`}
                   </button>
                   <div className="admin-books-note">
                     Alle e-posse gaan onmiddellik uit.

@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { haalEnOntleed } = require('./_eposLys')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -99,28 +100,16 @@ function buildHtml(body) {
         ${paragraphs}
         <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
         <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Indien jy die bediening wil ondersteun:</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="padding:0 4px 10px 0;" width="50%">
-              <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
-                💜 Maandelikse Vennoot
-              </a>
-            </td>
-            <td style="padding:0 0 10px 4px;" width="50%">
-              <a href="https://www.dewaldscheepers.com/go" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
-                🙏 Eenmalige Bydrae
-              </a>
-            </td>
-          </tr>
-        </table>
-        <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;margin-bottom:24px;">
-          📱 Maak die Daaglikse Hoop App oop
+        <a href="https://www.dewaldscheepers.com/go/support" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:15px 12px;font-size:14px;font-weight:700;text-align:center;font-family:Georgia,serif;letter-spacing:0.03em;margin-bottom:10px;">
+          &#9829; HELP DRA DIE HOOP
+        </a>
+        <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#f5f3ff;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:700;text-align:center;font-family:Georgia,serif;letter-spacing:0.03em;border:1px solid #ddd6f5;margin-bottom:24px;">
+          &#128241; MAAK DAAGLIKSE HOOP OOP
         </a>
         <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 20px;">
         <p style="color:#888;font-size:13px;line-height:1.6;">
           Daaglikse Hoop &middot;
-          <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a><br>
-          Jy ontvang hierdie e-pos omdat jy 'n e-boek gekoop het.
+          <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
         </p>
       </div>
     </div>
@@ -142,11 +131,14 @@ module.exports = async function handler(req, res) {
   const existing = await getActiveCampaign(projectId, token)
   if (existing) return res.status(400).json({ error: 'Aktiewe kampanje loop reeds', campaign: existing })
 
-  const emails = await getAllEmails(projectId, token)
+  const lys = await haalEnOntleed(projectId, token)
+  const emails = lys.adresse
   if (emails.length === 0) return res.status(400).json({ error: 'Geen inskrywers nie. Voer eers die lys in.' })
 
   const html = buildHtml(body)
   let sentCount = 0
+  let failedCount = 0
+  const mislukteBondels = []
 
   for (let i = 0; i < emails.length; i += 100) {
     const chunk = emails.slice(i, i + 100)
@@ -164,8 +156,17 @@ module.exports = async function handler(req, res) {
       })
       const result = await r.json()
       if (r.ok) sentCount += chunk.length
-      else console.error('Resend batch error:', JSON.stringify(result))
+      else {
+        /* 'n Bondel van honderd wat misluk, het vroeer NIKS bygetel nie en
+           net in die log beland. Die paneel het toe 'n kleiner getal gewys
+           sonder om te se hoekom. Nou tel ons dit. */
+        failedCount += chunk.length
+        mislukteBondels.push(String((result && (result.message || result.name)) || r.status))
+        console.error('Resend batch error:', JSON.stringify(result))
+      }
     } catch (e) {
+      failedCount += chunk.length
+      mislukteBondels.push(e.message)
       console.error('Send error:', e.message)
     }
   }
@@ -177,6 +178,9 @@ module.exports = async function handler(req, res) {
     status:        { stringValue: 'completed' },
     total:         { integerValue: String(emails.length) },
     sentCount:     { integerValue: String(sentCount) },
+    failedCount:   { integerValue: String(failedCount) },
+    lysTotaal:     { integerValue: String(lys.totaal) },
+    lysUitgesluit: { integerValue: String(lys.uitgesluit) },
     pendingEmails: { arrayValue: { values: [] } },
     createdAt:     { timestampValue: new Date().toISOString() },
     completedAt:   { timestampValue: new Date().toISOString() },
@@ -187,6 +191,17 @@ module.exports = async function handler(req, res) {
     campaignId,
     total:     emails.length,
     sentCount,
+    failedCount,
     remaining: 0,
+    // Waar die verskil tussen die rou lys en die gestuurde lys vandaan kom.
+    lys: {
+      totaal:     lys.totaal,
+      aktief:     lys.aktief,
+      uitgesluit: lys.uitgesluit,
+      duplikate:  lys.duplikate,
+      ongeldig:   lys.ongeldig,
+      sonderVeld: lys.sonderVeld,
+    },
+    foute: mislukteBondels.slice(0, 5),
   })
 }

@@ -84,13 +84,22 @@ function formatDuration(secs) {
 }
 
 /* ── Community prayer flow — full-screen, one by one ── */
-function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
+function SaamgebedFlow({ prayers, prayed, gereed, fout, onClose, onPray, onHerprobeer }) {
   const [queueIdx,     setQueueIdx]     = useState(0)
   const [prayedInFlow, setPrayedInFlow] = useState(new Set())
   const [done,         setDone]         = useState(false)
 
+  /* Die wagry word EEN keer gebou en dan vasgehou, sodat 'n versoek nie
+     onder jou uitskuif terwyl jy bid nie.
+
+     Dit is gebou op die eerste render, wat 'n fout was: maak jy hierdie
+     skerm oop terwyl die gebede nog laai, was die lys leeg, en 'n leë
+     skikking is truthy — dus is dit NOOIT weer gebou nie. 'n Mens het
+     "Geen nuwe versoeke tans" gesien totdat jy uitgaan en weer inkom.
+
+     Nou wag ons tot die data werklik terug is voordat ons dit vasmaak. */
   const queueRef = useRef(null)
-  if (!queueRef.current) {
+  if (queueRef.current === null && gereed && !fout) {
     const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000
     queueRef.current = [...prayers]
       .filter(p => !p.reported && !prayed.has(p.id) && (p.createdAt?.seconds || 0) * 1000 >= twoDaysAgo)
@@ -100,6 +109,36 @@ function SaamgebedFlow({ prayers, prayed, onClose, onPray }) {
         return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
       })
   }
+
+  // Nog besig om te laai: sê dit, moenie maak of daar niks is nie.
+  if (queueRef.current === null && !fout) {
+    return (
+      <div className="sg-overlay">
+        <button className="sg-close-btn" onClick={onClose} aria-label="Maak toe">✕</button>
+        <div className="sg-done-body">
+          <div className="sg-done-cross">✦</div>
+          <p className="sg-done-title">Besig om die versoeke te haal…</p>
+          <p className="sg-done-sub">Net 'n oomblik.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (fout) {
+    return (
+      <div className="sg-overlay">
+        <button className="sg-close-btn" onClick={onClose} aria-label="Maak toe">✕</button>
+        <div className="sg-done-body">
+          <div className="sg-done-cross">✦</div>
+          <p className="sg-done-title">Ons kon die versoeke nie haal nie.</p>
+          <p className="sg-done-sub">Kyk of jy aanlyn is.</p>
+          <button className="sg-back-btn" onClick={onHerprobeer}>Probeer weer</button>
+          <button className="sg-back-btn" onClick={onClose}>Terug</button>
+        </div>
+      </div>
+    )
+  }
+
   const queue   = queueRef.current
   const total   = queue.length
   const current = queue[queueIdx]
@@ -193,6 +232,11 @@ export default function BidSaam() {
   })
   const cachedHasPrayers = (() => { try { return JSON.parse(localStorage.getItem('cachedPrayers') || '[]').length > 0 } catch { return false } })()
   const [loading, setLoading]     = useState(!cachedHasPrayers)
+  /* Het Firestore al EEN keer geantwoord? 'loading' is nie genoeg nie: dit
+     begin vals sodra daar 'n kas is, en dan sou die saamgebed-wagry uit ou
+     data gebou word voordat die egte lys kom. */
+  const [gereed, setGereed]       = useState(false)
+  const [herlaai, setHerlaai]     = useState(0)
   const [error, setError]         = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [prayedToast, setPrayedToast] = useState(false)
@@ -247,12 +291,14 @@ export default function BidSaam() {
         const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         setPrayers(list)
         setLoading(false)
+        setGereed(true)
+        setError('')
         try { localStorage.setItem('cachedPrayers', JSON.stringify(list)) } catch {}
       },
-      () => { setError('Iets het nie reg gelaai nie.'); setLoading(false) }
+      () => { setError('Iets het nie reg gelaai nie.'); setLoading(false); setGereed(true) }
     )
     return unsub
-  }, [])
+  }, [herlaai])
 
   useEffect(() => {
     const q = query(collection(db, 'testimonies'), orderBy('createdAt', 'desc'), limit(60))
@@ -508,8 +554,11 @@ export default function BidSaam() {
         <SaamgebedFlow
           prayers={prayers}
           prayed={prayed}
+          gereed={gereed}
+          fout={!!error}
           onClose={() => setSaamgebedOpen(false)}
           onPray={togglePrayed}
+          onHerprobeer={() => { setError(''); setGereed(false); setHerlaai(n => n + 1) }}
         />
       )}
 
