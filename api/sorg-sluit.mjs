@@ -25,12 +25,73 @@
    reguit — dan weet Dewald wat om te doen — maar ons maak niks oop nie.
    ──────────────────────────────────────────────────────────── */
 
-import { magSkryf } from './_sorgFirestore.mjs'
+import crypto from 'node:crypto'
+import { magSkryf, MIN_WAGWOORD, leesDok, skryfDok } from './_sorgFirestore.mjs'
+
+const SLOT = 'sorg_slot'
+const MAKS_POGINGS = 8
+const VENSTER_MS = 15 * 60 * 1000
 
 /* 'n Stadige antwoord maak raai duur. Dit is nie 'n groot beskerming nie,
    maar dit kos niks en dit maak duisende pogings per minuut onprakties. */
 function wag(ms) {
   return new Promise(r => setTimeout(r, ms))
+}
+
+/* ── Die perk op raaipogings ──
+
+   Die wagwoord staan nou nerens in die app nie, en dit is die belangrikste
+   ding. Maar 'n mens kan steeds RAAI, en agter hierdie deur le mense se
+   mishandeling en hul selfmoordgedagtes.
+
+   Agt pogings per kwartier per adres. Daarna is dit toe, ook al is die
+   wagwoord reg — anders sou 'n aanvaller wat op poging 4000 die regte een
+   raai, net deurgaan.
+
+   Die telling le in Firestore en nie in die geheue nie: Vercel se funksies
+   leef 'n paar minute en dan is 'n telling in die geheue weg. Dit is presies
+   wat 'n mens NIE wil he by 'n slot nie. */
+function hasAdres(req) {
+  const rou = String(
+    req.headers['x-forwarded-for'] ||
+    req.headers['x-real-ip'] ||
+    (req.socket && req.socket.remoteAddress) || ''
+  ).split(',')[0].trim()
+  if (!rou) return 'onbekend'
+  const sout = process.env.SORG_SOUT || 'daaglikse-hoop-sorg'
+  return crypto.createHash('sha256').update(sout + ':slot:' + rou).digest('hex').slice(0, 24)
+}
+
+async function isToe(id) {
+  try {
+    const d = await leesDok(SLOT, id)
+    if (!d) return false
+    const tot = Number(d.tot) || 0
+    /* Die venster is verby — begin skoon. */
+    if (Date.now() > tot) return false
+    return (Number(d.pogings) || 0) >= MAKS_POGINGS
+  } catch {
+    /* Kan ons nie by die telling kom nie, sluit ons NIE toe nie. 'n Stukkende
+       databasis mag nie Dewald uit sy eie admin hou nie; die stadige antwoord
+       en die wagwoord self staan nog. */
+    return false
+  }
+}
+
+async function telMis(id) {
+  try {
+    const d = await leesDok(SLOT, id)
+    const tot = Number(d && d.tot) || 0
+    const vars = !d || Date.now() > tot
+    await skryfDok(SLOT, id, {
+      pogings: vars ? 1 : (Number(d.pogings) || 0) + 1,
+      tot: vars ? Date.now() + VENSTER_MS : tot,
+    })
+  } catch { /* sien hierbo */ }
+}
+
+async function maakSkoon(id) {
+  try { await skryfDok(SLOT, id, { pogings: 0, tot: 0 }) } catch {}
 }
 
 export default async function handler(req, res) {
@@ -41,20 +102,37 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ fout: 'Method Not Allowed' })
 
+  const adres = hasAdres(req)
+
+  /* Eers die slot, DAN die wagwoord. Andersom sou 'n aanvaller wat die regte
+     een raai, deurkom ondanks die perk. */
+  if (await isToe(adres)) {
+    await wag(700)
+    return res.status(429).json({
+      ok: false,
+      toe: true,
+      fout: 'Te veel pogings. Wag asseblief \'n kwartier en probeer weer.',
+    })
+  }
+
   const mag = magSkryf(req)
-  if (mag.ok) return res.status(200).json({ ok: true })
+  if (mag.ok) {
+    await maakSkoon(adres)
+    return res.status(200).json({ ok: true })
+  }
 
   await wag(700)
+  await telMis(adres)
 
   /* Ons sê WEL of die veranderlike ontbreek. Dit is nie 'n lek nie — dit lyk
      presies dieselfde vir 'n vreemdeling as vir Dewald — en sonder dit sou
      hy nie weet hoekom die regte wagwoord nie werk nie. */
-  const opgestel = !!(process.env.SORG_ADMIN_GEHEIM && process.env.SORG_ADMIN_GEHEIM.length >= 16)
+  const opgestel = !!(process.env.SORG_ADMIN_GEHEIM && process.env.SORG_ADMIN_GEHEIM.length >= MIN_WAGWOORD)
   return res.status(401).json({
     ok: false,
     opgestel,
     fout: opgestel
       ? 'Verkeerde wagwoord.'
-      : 'Daar is nog geen wagwoord opgestel nie. Stel SORG_ADMIN_GEHEIM op Vercel (minstens 16 karakters) en ontplooi weer.',
+      : `Daar is nog geen wagwoord opgestel nie. Stel SORG_ADMIN_GEHEIM op Vercel (minstens ${MIN_WAGWOORD} karakters) en ontplooi weer.`,
   })
 }

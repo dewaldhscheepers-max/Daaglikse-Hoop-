@@ -112,6 +112,10 @@ export default function Sorg() {
   const groepe = volgensBehoefte(videos)
   const plasings = muur || []
 
+  /* Was daar iets wat gehelp het? 'n Video, of 'n plasing met 'n antwoord.
+     Anders wys ons geen versoek om steun nie. */
+  const wysSteun = videos.length > 0 || plasings.some(x => x.antwoord)
+
   return (
     <div className="sorg">
       <div className="sorg-header screen-header">
@@ -125,24 +129,43 @@ export default function Sorg() {
         {/* ── Die held ── */}
         {held && (
           <>
-            <SorgVideo video={held} groot etiket="Die week se video" />
+            <SorgVideo
+              video={held}
+              groot
+              etiket="Die week se video"
+              etiketFyn="Gebaseer op wat mense hierdie week op die muur gedeel het."
+            />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
         )}
 
-        {/* ── Die uitnodiging ── */}
+        {/* ── Die uitnodiging ──
+
+            Die foto en die NAAM staan saam op een reel, en die opskrif kry
+            sy eie spasie daaronder. Toe hulle langs mekaar was, het dit
+            gelyk of "Waarmee kan ek jou help?" sy naam is, en 'n lang
+            opskrif is in 'n handbreedte gedruk.
+
+            "Ek lees dit self" is uit. 'n Helper gaan ook boodskappe nagaan,
+            en dan sou dit nie meer waar wees nie. "Ek antwoord met 'n
+            stemboodskap waar ek kan" hou die persoonlike gevoel en bly
+            eerlik. */}
         <div className="sorg-uitnodig">
-          <div className="sorg-uitnodig-kop">
-            <img className="sorg-gesig" src="/beelde/dewald.jpg" alt="Dewald Scheepers" width="52" height="52" />
-            <h2>Waarmee kan ek jou help?</h2>
+          <div className="sorg-uitnodig-wie">
+            <img className="sorg-gesig" src="/beelde/dewald.jpg" alt="Dewald Scheepers" width="46" height="46" />
+            <span className="sorg-uitnodig-naam">Dewald Scheepers</span>
           </div>
+
+          <h2 className="sorg-uitnodig-titel">Waarmee kan ek jou help?</h2>
+
           <p className="sorg-uitnodig-teks">
-            Vertel my jou storie, vra jou vraag, of deel wat tans swaar op jou
-            hart lê. Ek lees dit self en antwoord met 'n stemboodskap waar ek
-            kan.
+            Vertel my wat swaar is, vra jou vraag of deel jou storie. Jou
+            boodskap verskyn ná goedkeuring openbaar op die Pastorale
+            Sorg-muur. Ek antwoord met 'n stemboodskap waar ek kan.
           </p>
+
           <button className="sorg-vertel" onClick={() => setVormOop(true)}>
-            Deel jou storie of vraag →
+            Vertel my wat swaar is
           </button>
           <p className="sorg-uitnodig-fyn">Jy kan anoniem bly.</p>
         </div>
@@ -178,9 +201,27 @@ export default function Sorg() {
           data === null ? (
             <p className="sorg-leeg">Besig om te laai…</p>
           ) : !videos.length ? (
-            <p className="sorg-leeg">Die eerste video's kom binnekort.</p>
+            <p className="sorg-leeg">
+              Die eerste weeklikse video kom binnekort. Dit sal saamgestel
+              word uit die vrae en onderwerpe wat mense hier op die Pastorale
+              Sorg-muur deel.
+            </p>
           ) : (
-            groepe.map(g => (
+            /* Sonder hierdie kop lyk die afdeling soos enige ander
+               videobiblioteek. Mense moet DADELIK verstaan dat die video's
+               uit hul eie vrae en seer ontstaan:
+
+                 mense deel  →  hy luister  →  een video  →  baie word gehelp */
+            <>
+              <div className="sorg-kring">
+                <p className="sorg-kring-kop">Een video. Elke week.</p>
+                <p className="sorg-kring-teks">
+                  Elke week maak Dewald 'n pastorale video oor die onderwerpe
+                  en vrae wat die meeste op die muur gedeel word. So kan een
+                  persoon se storie uiteindelik baie ander mense help.
+                </p>
+              </div>
+              {groepe.map(g => (
               <div key={g.sleutel} className="sorg-groep">
                 <h2 className="sorg-groep-sin">{g.sin}</h2>
                 {g.videos.map(v => (
@@ -190,7 +231,8 @@ export default function Sorg() {
                   </div>
                 ))}
               </div>
-            ))
+              ))}
+            </>
           )
         )}
 
@@ -213,7 +255,13 @@ export default function Sorg() {
           )
         )}
 
-        {/* ── Die groot steunblok, EEN keer, heel onder ── */}
+        {/* ── Die groot steunblok ──
+
+            EEN keer, heel onder, en NET wanneer daar werklik iets was wat
+            gehelp het — 'n video of 'n antwoord. Op 'n lee muur is dit 'n
+            versoek om geld voordat 'n mens enigiets ontvang het, en dit is
+            presies die verkeerde volgorde. */}
+        {wysSteun && (
         <div className="sorg-steun">
           <p className="sorg-steun-kop">Help om Daaglikse Hoop gratis te hou</p>
           <p className="sorg-steun-teks">
@@ -235,6 +283,7 @@ export default function Sorg() {
             </button>
           </div>
         </div>
+        )}
 
         <p className="sorg-grens">{GRENSSIN}</p>
       </div>

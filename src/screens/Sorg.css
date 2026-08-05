@@ -53,28 +53,39 @@
   background: #FFFFFF;
 }
 
-.sorg-uitnodig-kop {
+/* Die foto en die NAAM saam op een reel. Toe die opskrif hier gestaan het,
+   het dit gelyk of dit sy naam is. */
+.sorg-uitnodig-wie {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 11px;
+  margin-bottom: 14px;
 }
 
 .sorg-gesig {
   flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   object-fit: cover;
   background: #E8E4EE;
 }
 
-.sorg-uitnodig-kop h2 {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 21px;
+.sorg-uitnodig-naam {
+  font-family: var(--font-body);
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: var(--text, #2D2040);
+}
+
+/* Die opskrif kry sy eie volle breedte. */
+.sorg-uitnodig-titel {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--text, #2D2040);
 }
 
@@ -409,3 +420,30 @@
   font-weight: 700;
 }
 .sorg-steun-knop.primer:active { background: #4C4076; }
+
+/* ── Een video. Elke week. ──
+   Sonder hierdie kop lyk die afdeling soos enige videobiblioteek. Mense moet
+   dadelik verstaan dat die video's uit hul eie vrae ontstaan. */
+.sorg-kring {
+  margin: 0 0 20px;
+  padding: 15px 16px;
+  border-left: 3px solid var(--purple-dark, #5C4E8E);
+  border-radius: 0 14px 14px 0;
+  background: #F3EFE6;
+}
+
+.sorg-kring-kop {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.sorg-kring-teks {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: #5A5165;
+}

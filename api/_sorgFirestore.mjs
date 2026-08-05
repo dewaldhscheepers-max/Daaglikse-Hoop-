@@ -160,9 +160,22 @@ export async function veeDok(versameling, id) {
    Is die geheim nie opgestel nie, weier ons alles. 'n Stelsel wat oopgaan
    omdat iemand vergeet het om 'n veranderlike te stel, is erger as een wat
    glad nie werk nie. */
+/* Twaalf, nie sestien nie.
+
+   Sestien was my eie getal, nie 'n vereiste nie. Dewald se wagwoord is
+   twaalf karakters met hoof- en kleinletters, syfers en 'n simbool — dit is
+   'n behoorlike wagwoord, en die egte beskerming is in elk geval nie die
+   lengte nie maar die feit dat hy NERENS in die app se kode staan nie plus
+   die perk op raaipogings in api/sorg-sluit.mjs.
+
+   Onder twaalf gaan ons nie. */
+export const MIN_WAGWOORD = 12
+
 export function magSkryf(req) {
   const verwag = process.env.SORG_ADMIN_GEHEIM
-  if (!verwag || verwag.length < 16) return { ok: false, rede: 'die admin-geheim is nie opgestel nie' }
+  if (!verwag || verwag.length < MIN_WAGWOORD) {
+    return { ok: false, rede: 'die admin-geheim is nie opgestel nie' }
+  }
 
   const gegee = (req.headers['x-sorg-geheim'] || '').toString()
   if (!gegee) return { ok: false, rede: 'geen geheim gestuur nie' }

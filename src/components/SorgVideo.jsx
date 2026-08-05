@@ -15,7 +15,7 @@
 import { useState } from 'react'
 import './SorgVideo.css'
 
-export default function SorgVideo({ video, groot = false, etiket = null, onSpeel = null }) {
+export default function SorgVideo({ video, groot = false, etiket = null, etiketFyn = null, onSpeel = null }) {
   const [speel, setSpeel] = useState(false)
   if (!video || !video.videoId) return null
 
@@ -24,6 +24,10 @@ export default function SorgVideo({ video, groot = false, etiket = null, onSpeel
   return (
     <div className={`sv-kaart${groot ? ' sv-groot' : ''}`}>
       {etiket && <div className="sv-etiket">{etiket}</div>}
+      {/* Hoekom hierdie een die week se video is. Sonder dit lyk dit soos
+          enige video; met dit sien 'n mens die kring: mense deel, en dit
+          word 'n video. */}
+      {etiketFyn && <div className="sv-etiket-fyn">{etiketFyn}</div>}
 
       <div className="sv-raam">
         {speel ? (

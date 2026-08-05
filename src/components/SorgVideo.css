@@ -99,3 +99,12 @@
   font-weight: 600;
   color: #B8860B;
 }
+
+/* Hoekom hierdie een die week se video is. */
+.sv-etiket-fyn {
+  margin: -4px 14px 10px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #8A7E9A);
+}

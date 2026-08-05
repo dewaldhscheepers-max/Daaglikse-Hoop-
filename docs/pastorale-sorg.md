@@ -193,6 +193,15 @@ Nou weet die app die wagwoord **nie**. Wat getik word, gaan na
 `/api/sorg-sluit`, en die bediener vergelyk dit in konstante tyd met
 `SORG_ADMIN_GEHEIM` wat net op Vercel bestaan.
 
+**Agt raaipogings per kwartier per adres.** Die telling le in Firestore
+(`sorg_slot`) en nie in die geheue nie — Vercel se funksies leef 'n paar
+minute en dan sou 'n telling in die geheue weg wees, wat presies is wat 'n
+mens NIE by 'n slot wil he nie. Die slot word EERSTE getoets, voor die
+wagwoord: andersom sou iemand wat op poging 4000 die regte een raai, net
+deurgaan.
+
+Minimum twaalf karakters. Sestien was my eie getal, nie 'n vereiste nie.
+
 Een wagwoord ontsluit **alles** — die notas, die boeke, die video's, én
 Pastorale Sorg se boodskappe. Die tweede wagwoordskerm wat Sorg gehad het, is
 weg.
@@ -234,6 +243,17 @@ nie:
 | Die Muur | almal, nuutste eerste |
 | Die Video's | die biblioteek volgens behoefte |
 
+Bo-aan Die Video's staan **"Een video. Elke week."** met die verduideliking
+dat die video's uit die onderwerpe op die muur ontstaan. Sonder dit lyk die
+afdeling soos enige videobiblioteek; met dit sien 'n mens die kring:
+
+```
+mense deel  →  hy luister  →  een video  →  baie word gehelp
+```
+
+Die week se video dra dieselfde boodskap in een reel: *"Gebaseer op wat mense
+hierdie week op die muur gedeel het."*
+
 "Dewald antwoord" was 'n derde oortjie wat dieselfde plasings gewys het, net
 gefiltreer. Dit het die blad ingewikkeld laat lyk sonder om iets by te voeg —
 die antwoord sit in elk geval BINNE die plasing.
@@ -262,6 +282,11 @@ se pyn 'n wedstryd. Daarom:
   beskrywing van haar huwelik nie.
 
 ### Deel · Ondersteun
+
+Dit wys **net waar daar werklik iets was wat gehelp het** — 'n video of 'n
+antwoord. Op 'n lee muur is 'n versoek om geld die verkeerde volgorde: dit
+vra voordat 'n mens iets ontvang het. Dieselfde geld vir die groot blok
+onderaan; hy verskyn glad nie tot daar 'n video of 'n antwoord is nie.
 
 Onder elke antwoord en elke video staan een klein rustige ry: **Deel** eerste
 en prominenter (groei is die prioriteit), dan **Ondersteun**. Nie "Maak 'n
