@@ -112,9 +112,6 @@ export default function Sorg() {
   const groepe = volgensBehoefte(videos)
   const plasings = muur || []
 
-  /* Was daar iets wat gehelp het? 'n Video, of 'n plasing met 'n antwoord.
-     Anders wys ons geen versoek om steun nie. */
-  const wysSteun = videos.length > 0 || plasings.some(x => x.antwoord)
 
   return (
     <div className="sorg">
@@ -257,11 +254,19 @@ export default function Sorg() {
 
         {/* ── Die groot steunblok ──
 
-            EEN keer, heel onder, en NET wanneer daar werklik iets was wat
-            gehelp het — 'n video of 'n antwoord. Op 'n lee muur is dit 'n
-            versoek om geld voordat 'n mens enigiets ontvang het, en dit is
-            presies die verkeerde volgorde. */}
-        {wysSteun && (
+            EEN keer, en heel onder — na die muur, na die video's, na alles.
+
+            Dit was 'n rukkie voorwaardelik: dit sou net wys as daar 'n video
+            of 'n antwoord was. Die bedoeling was reg (geen versoek om geld
+            voordat iemand iets ontvang het nie), maar die uitvoering was
+            verkeerd: met nul video's en 'n lee muur het die HELE blok
+            verdwyn, en dit lyk of die knoppies weg is in plaas van dat hulle
+            wag.
+
+            Die reel wat werklik saak maak, word in elk geval nagekom deur
+            SorgDeelSteun: daardie klein rytjies bestaan net waar daar 'n
+            video of 'n antwoord IS, want hulle hang aan die ding self. Die
+            een blok heel onderaan hoort altyd daar. */}
         <div className="sorg-steun">
           <p className="sorg-steun-kop">Help om Daaglikse Hoop gratis te hou</p>
           <p className="sorg-steun-teks">
@@ -283,7 +288,6 @@ export default function Sorg() {
             </button>
           </div>
         </div>
-        )}
 
         <p className="sorg-grens">{GRENSSIN}</p>
       </div>

@@ -283,10 +283,14 @@ se pyn 'n wedstryd. Daarom:
 
 ### Deel · Ondersteun
 
-Dit wys **net waar daar werklik iets was wat gehelp het** — 'n video of 'n
-antwoord. Op 'n lee muur is 'n versoek om geld die verkeerde volgorde: dit
-vra voordat 'n mens iets ontvang het. Dieselfde geld vir die groot blok
-onderaan; hy verskyn glad nie tot daar 'n video of 'n antwoord is nie.
+Die klein rytjies hang aan die ding self, dus bestaan hulle vanself net waar
+daar 'n video of 'n antwoord IS. Dit is die reel wat saak maak, en dit word
+outomaties nagekom.
+
+Die GROOT blok onderaan is 'n rukkie voorwaardelik gemaak — hy sou net wys
+as daar 'n video of 'n antwoord was. Dit was verkeerd. Met nul video's en 'n
+lee muur het die hele blok verdwyn, en dan lyk dit of die knoppies weg is in
+plaas van dat hulle wag. Hy staan nou altyd heel onderaan.
 
 Onder elke antwoord en elke video staan een klein rustige ry: **Deel** eerste
 en prominenter (groei is die prioriteit), dan **Ondersteun**. Nie "Maak 'n
