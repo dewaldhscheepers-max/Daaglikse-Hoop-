@@ -618,6 +618,13 @@
 }
 .byb-erkenning-knop:active { color: #5C4E8E; }
 
+.byb-oor-rol {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px;
+  min-height: 0;
+}
+
 .byb-oor-teks {
   margin: 0 0 13px;
   font-size: 14px;
@@ -651,8 +658,9 @@
 
 .byb-oor-toe {
   display: block;
-  width: 100%;
-  margin-top: 6px;
+  flex: 0 0 auto;
+  width: calc(100% - 40px);
+  margin: 10px 20px 0;
   padding: 14px 16px;
   border: 0;
   border-radius: 14px;
@@ -667,3 +675,12 @@
 
 /* Die GAB se verse. Die API se HTML bring sy eie opmaak; hierdie een nie. */
 .gab-vers { margin: 0 0 13px; }
+
+/* Die konsep-nota. Nie 'n waarskuwing nie — 'n eerlike stelling. */
+.byb-oor-konsep {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #F6F1E4;
+  border: 1px solid #E2D8C0;
+  font-size: 13.5px;
+}

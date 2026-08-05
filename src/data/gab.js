@@ -112,6 +112,11 @@ export function gabWeergawe(indeks) {
     books: boeke,
     bron: 'gab',
     weergawe: indeks.weergawe || null,
+    /* Die GAB word nog hersien — hul werf het 'n "Voorstelle"-knoppie met 'n
+       teller. Wat ons gehaal het, is 'n momentopname van werk-in-wording, en
+       die skerm moet dit se. 'n Mens gee nie vir iemand 'n konsep-Bybel
+       sonder om te se dis 'n konsep nie. */
+    konsep: indeks.konsep !== false,
   }
 }
 

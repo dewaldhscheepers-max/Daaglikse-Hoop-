@@ -124,9 +124,13 @@ teks **onveranderd** (moenie eens 'n drukfout regmaak nie — dit is 'n
 afgeleide werk), en **niks kommersieel** op 'n skerm waar die teks wys.
 Daarom is die `Steun`-blok van `Bybel.jsx` af weg. Moet dit nie terugsit nie.
 
-Die teks sit nie in die kode nie — dit is 66 lêers onder `public/gab/`, gebou
-met `node skrifte/bou-gab.mjs <bronleer>`. Is hulle nie daar nie, verskyn die
-GAB eenvoudig nie in die vertalinglys nie en is die app presies soos hy was.
+Die teks sit nie in die kode nie — dit is 66 lêers onder `public/gab/`
+(31 102 verse, 4,3 MB), gehaal deur die **GAB**-werkstroom
+(`skrifte/haal-gab.mjs`). Is hulle nie daar nie, verskyn die GAB eenvoudig nie
+in die vertalinglys nie en is die app presies soos hy was.
+
+Dit is 'n **konsep** — die vertaling word nog hersien. Die etiket wys op die
+erkenning en op die "Oor hierdie vertaling"-blad. Moenie dit afhaal nie.
 
 Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
 

@@ -473,7 +473,7 @@ export default function Bybel({ onClose }) {
                   geld gevra word nie. */}
               {sleutel === GAB_AFK ? (
                 <button className="byb-erkenning byb-erkenning-knop" onClick={() => setOorVertaling(true)}>
-                  {GAB_ERKENNING.naam} · &copy; {GAB_ERKENNING.kopiereg}<br />
+                  {GAB_ERKENNING.naam}{weergawe && weergawe.konsep ? ' · konsep' : ''} · &copy; {GAB_ERKENNING.kopiereg}<br />
                   {GAB_ERKENNING.lisensie} · onveranderd weergegee<br />
                   <u>Oor hierdie vertaling</u>
                 </button>
@@ -592,6 +592,10 @@ export default function Bybel({ onClose }) {
             <div className="byb-blad-gryp" />
             <h2 className="byb-blad-titel">Oor hierdie vertaling</h2>
 
+            {/* Die blad is hoer as 'n foonskerm. Sonder hierdie roller val die
+                Maak toe-knoppie onderkant af — die blaaiertoets het dit gevang
+                op 390x830. */}
+            <div className="byb-oor-rol">
             <p className="byb-oor-teks">
               Die <b>{GAB_ERKENNING.naam}</b> is 'n onafhanklike Afrikaanse
               vertaling wat direk uit die 1769 Cambridge King James Bible
@@ -606,6 +610,14 @@ export default function Bybel({ onClose }) {
               jy 'n fout, rapporteer dit asseblief by die projek self — ons mag
               dit nie hier regmaak nie.
             </p>
+
+            {weergawe && weergawe.konsep && (
+              <p className="byb-oor-teks byb-oor-konsep">
+                <b>Let wel:</b> hierdie vertaling word nog hersien. Wat jy hier
+                lees, is die weergawe soos dit op {weergawe.weergawe} was.
+                Van tyd tot tyd werk ons dit by.
+              </p>
+            )}
 
             <p className="byb-oor-teks byb-oor-fyn">
               &copy; {GAB_ERKENNING.kopiereg}. Beskikbaar onder die Creative
@@ -626,6 +638,7 @@ export default function Bybel({ onClose }) {
               Lees die lisensie
               <small>{GAB_ERKENNING.lisensie}</small>
             </a>
+            </div>
 
             <button className="byb-oor-toe" onClick={() => setOorVertaling(false)}>Maak toe</button>
           </div>

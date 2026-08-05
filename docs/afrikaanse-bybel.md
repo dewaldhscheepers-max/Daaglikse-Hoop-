@@ -45,47 +45,92 @@ gebruik word nie.
 
 ---
 
-## Waar die teks vandaan moet kom
+## Waar die teks vandaan kom
 
-Die GAB-projek publiseer **geen** aflaaibare lêer nie — geen JSON, USFM, PDF
-of GitHub-repo. Ons het dit nagegaan met 'n verkenning wat vanaf 'n
-GitHub-werkstroom geloop het (22 openbare versoeke, een per sekonde, Augustus
-2026). Wat dit gewys het:
+Die GAB-projek publiseer geen aflaaibare lêer nie en het geen kontakadres nie.
+Ons het dit uitgevind met verkenningslopies vanaf 'n GitHub-werkstroom (die
+gewone HAR-metode was toe, want daar is nie 'n rekenaar nie).
 
-* Die werf is met **Astro** gebou. `config.js` noem
-  `https://qcvlwwnxzvevkealcjxd.supabase.co`.
-* Die Bybelteks is **nie** in die HTML nie, **nie** in die JS-bondels nie, en
-  **nie** by enige endpunt wat 'n mens sou raai nie.
-* `robots.txt` sê `Allow: /`, maar die **sitemap het net 7 URL's**, en almal
-  is inligtingsbladsye (`waarom-die-kjv.html`, `vrae.html`, ens.). Daar is
-  geen hoofstukbladsy om te lees nie.
-* Die leser is één kliënt-kant bladsy wat elke hoofstuk uit Supabase trek.
+Wat die verkenning gewys het, in volgorde:
 
-**Gevolgtrekking: die enigste pad na die teks is hul databasis.**
+1. Die werf is **Astro**. `config.js` gee 'n Supabase-adres en 'n
+   `sb_publishable_`-sleutel, met hul eie kommentaar: *"the publishable key is
+   browser-safe by design. (The secret key is NOT here; it lives only in the
+   server .env.)"*
+2. Die eerste versoek na Supabase het 401 gegee. Dit was **ons fout**: die
+   sleutel is nie 'n JWT nie en hoort net in die `apikey`-kopteks, nie ook in
+   `Authorization: Bearer` nie.
+3. Reggestel werk dit — maar die enigste tabel wat hul kliëntkode aanraak is
+   `suggestions`. Die Bybelteks is nie in Supabase nie.
+4. Hul bondel se fetch-oproepe is `Ye+"index.json"` en
+   `Ye+"books/"+e+".json"`, en `Ye` is **`/data/`**.
 
-En daar hou ons op. Die CC BY-NC-ND-lisensie gee ons die **teks**; dit gee ons
-nie hul **infrastruktuur** nie. Hul anon-sleutel staan wel in `config.js`, maar
-31 102 rye daardeur trek is hul Supabase-kwota, op hul rekening, teen 'n
-volume wat geen leser ooit sou veroorsaak nie. Dat hulle geen uitvoer publiseer
-en net 7 bladsye in die sitemap het, sê ook duidelik genoeg dat grootmaat-
-toegang nie die bedoeling is nie.
+**Die Bybel is dus gewone statiese JSON-lêers op hul webbediener.** Geen
+sleutel, geen databasis, geen RLS. Om hulle te lees is presies dieselfde as om
+hul bladsy oop te maak.
 
-Die regte pad is om te vra. Die versoek is klein en maklik om ja op te sê: 'n
-uitvoer van die teks, of toestemming om dit een keer stadig te trek.
+### Hul formaat
+
+```json
+{ "id": "gen", "name": "Génesis", "chapters": {
+    "1": { "1": { "a": "In die begin het God ...",
+                  "e": "In the beginning God ...",
+                  "x": [...], "xi": [...] } } } }
+```
+
+Ons vat **net `a`**.
+
+`e` is die King James. Die regte daarop berus by die Kroon, gepubliseer met
+toestemming van Cambridge University Press — dit is nie ons s'n om te versprei
+nie, en dit hoort ook nie in 'n Afrikaanse Bybel nie. `x` en `xi` is
+kruisverwysings (TSK plus OpenBible.info onder CC BY 4.0); hulle sou 'n eie
+erkenning verg en maak die lêers baie groter.
+
+### Die invoer, en hoe om dit weer te doen
+
+`skrifte/haal-gab.mjs`, wat loop as die **GAB**-werkstroom met stap `haal`
+(Actions → GAB → Run workflow). Dit:
+
+* lees die basispad uit hul eie kode, raai dit nooit;
+* haal een boek elke twee sekondes, nooit parallel;
+* hou 'n kontrolepunt sodat 'n onderbroke lopie hervat;
+* hou dadelik op by 401 of 403; eer `Retry-After` by 429 en hou op na drie;
+  hou op by 404, want dan is die kartering verkeerd;
+* stoor die **rou** antwoord met 'n SHA-256 voordat een karakter aangeraak
+  word (`data/gab-rou/`, buite git);
+* keur teen al 66 boeke se hoofstuktellings, vier bekende versreekse en die
+  31 102-totaal — en **publiseer niks** as dit druip.
+
+Die lopie van 5 Augustus 2026: 69 versoeke, 66 boeke, 1 189 hoofstukke,
+**31 102 verse**, geen leë vers, geen Engels wat deurgeglip het. Die volledige
+herkoms staan in `docs/gab-herkoms.json`, met 'n hash per boek.
+
+**Ná die invoer praat die app nooit weer met hulle nie.** Sy lees net
+`public/gab/`. Dit is in die blaaier bevestig.
+
+### Konsep
+
+Die GAB word nog hersien — hul werf het 'n "Voorstelle"-knoppie met 'n teller.
+Wat ons het, is 'n momentopname. `indeks.json` dra `konsep: true`, die
+erkenning sê "konsep", en die "Oor hierdie vertaling"-blad sê dit uitdruklik.
+Moenie daardie etiket afhaal nie.
 
 ---
 
-## Hoe die teks in die app kom
+## Hoe die teks in die app leef
 
 Die teks sit **nie** in die kode nie. Dit is 66 statiese lêers onder
-`public/gab/`, wat gehaal word wanneer 'n mens 'n boek oopmaak.
+`public/gab/` (4,3 MB), wat gehaal word wanneer 'n mens 'n boek oopmaak.
+
+Kry jy ooit 'n behoorlike uitvoerlêer van die projek self, sit
+`skrifte/bou-gab.mjs` dit om:
 
 ```
 node skrifte/bou-gab.mjs <bronlêer>          # skryf public/gab/
 npm run build
 ```
 
-Die bronlêer is wat die GAB-projek gee. Die skrif aanvaar drie vorms:
+Dit aanvaar drie vorms:
 
 | Vorm | Voorbeeld |
 |---|---|
@@ -117,8 +162,8 @@ Hoofstuk 1 is indeks 0. Vers 1 is indeks 0. Plat teks, geen opmaak.
 ## Wat gebeur as die lêers nie daar is nie
 
 **Niks.** `indeks.json` misluk stil, die GAB verskyn nie in die vertalinglys nie,
-en die app is presies soos hy was. Die kode kan dus gestoot word voordat die teks
-daar is — en dit is presies wat gebeur het.
+en die app is presies soos hy was. Die kode is dus gestoot voordat die teks daar
+was, en niemand het iets gemerk nie.
 
 ---
 
@@ -128,7 +173,8 @@ daar is — en dit is presies wat gebeur het.
 |---|---|
 | `src/data/gab.js` | Haal die lêers, bou die HTML, dra die erkenning |
 | `src/screens/Bybel.jsx` | Kies tussen die GAB en YouVersion per vertaling |
-| `skrifte/bou-gab.mjs` | Sit die bron om na `public/gab/` |
+| `skrifte/haal-gab.mjs` | Haal die teks by die bron af (die GAB-werkstroom) |
+| `skrifte/bou-gab.mjs` | Sit 'n gegewe uitvoerlêer om na `public/gab/` |
 | `src/sw.js` | Kas 'n boek wat een keer gelees is |
 
 Die skerm weet nie waar 'n vertaling vandaan kom nie. `gabHoofstukke()` en
