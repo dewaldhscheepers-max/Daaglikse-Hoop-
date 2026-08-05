@@ -32,6 +32,7 @@ import { useState } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { draSaam, draSaamReeds } from '../data/sorgMuur'
 import SorgVideo from './SorgVideo'
+import SorgDeelSteun from './SorgDeelSteun'
 import './SorgPlasing.css'
 
 const MAANDE = [
@@ -64,7 +65,7 @@ export default function SorgPlasing({ plasing, videos = [] }) {
   }
 
   return (
-    <article className="sp-kaart">
+    <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
       <p className="sp-teks">{plasing.teks}</p>
 
       <p className="sp-wie">
@@ -79,7 +80,12 @@ export default function SorgPlasing({ plasing, videos = [] }) {
           <p className="sp-antwoord-kop">Dewald antwoord</p>
 
           {antwoord.tipe === 'oudio' && (
-            <audio className="sp-oudio" controls preload="none" src={antwoord.bron}>
+            /* `preload="metadata"`, nie "none" nie. Met "none" weet die
+               blaaier nie hoe lank die opname is nie en die speler wys
+               0:00 / 0:00 — dit lyk stukkend, en 'n mens druk dit nie. Net
+               die metadata is 'n paar kilogreep; die klank self laai steeds
+               eers wanneer iemand speel. */
+            <audio className="sp-oudio" controls preload="metadata" src={antwoord.bron}>
               Jou blaaier kan nie hierdie opname speel nie.
             </audio>
           )}
@@ -91,6 +97,10 @@ export default function SorgPlasing({ plasing, videos = [] }) {
           )}
 
           {antwoord.teks && <p className="sp-antwoord-teks">{antwoord.teks}</p>}
+
+          {/* Deel eerste. 'n Antwoord wat iemand gehelp het, is die beste
+              ding wat gedeel kan word — en elke deel bring iemand nuut. */}
+          <SorgDeelSteun soort="plasing" id={plasing.id} />
         </div>
       )}
 
@@ -99,6 +109,7 @@ export default function SorgPlasing({ plasing, videos = [] }) {
         <div className="sp-hoop">
           <p className="sp-hoop-kop">Iets wat jou dalk nou kan help</p>
           <SorgVideo video={video} />
+          <SorgDeelSteun soort="video" id={video.videoId} titel={video.titel} />
         </div>
       )}
 

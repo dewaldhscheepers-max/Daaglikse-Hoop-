@@ -1,4 +1,4 @@
-/* "Vertel my wat swaar is".
+/* "Deel jou storie of vraag" — die vorm.
 
    Twee reels uit CLAUDE.md geld hier soos oral:
    • hoogte met 100svh, nooit 100dvh nie — dvh verander saam met Chrome se
@@ -62,7 +62,7 @@
   padding: 20px 20px calc(var(--safe-bottom, 0px) + 40px);
 }
 
-/* ── Die gevaar-vraag ── */
+/* ── Die opskrif ── */
 .sv-vraag {
   margin: 6px 0 10px;
   font-family: var(--font-serif);
@@ -105,32 +105,8 @@
   color: #9A92A8;
 }
 
-/* Die "dit is nou"-knoppie moet anders lyk as die res. Iemand wat vinnig
-   kyk, moet dit raaksien sonder om te lees. */
-.sv-rooi {
-  background: #A33A3A;
-}
-.sv-rooi:active { background: #8A2F2F; }
-
 .sv-stuur { margin-top: 18px; }
 
-.sv-klein-knop {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px 14px;
-  border: 1px solid #D8D2E4;
-  border-radius: 12px;
-  background: #FFFFFF;
-  color: var(--purple-dark, #5C4E8E);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s;
-}
-.sv-klein-knop:active { background: #F0ECFA; }
-.sv-vol { margin-top: 18px; }
 
 /* ── Die krisisband ──
    Dit keer niks. Dit wys net die nommers, en dit maak dit onmoontlik om
@@ -262,15 +238,7 @@
   font-size: 16px;
 }
 
-/* ── Die drie toestemmings ── */
-.sv-toestemmings {
-  margin-top: 20px;
-  padding: 15px 15px 6px;
-  border: 1px solid #E6E1EE;
-  border-radius: 15px;
-  background: #F6F3FB;
-}
-
+/* ── Die een toestemming ── */
 .sv-blok-merk {
   display: flex;
   align-items: flex-start;
@@ -339,72 +307,83 @@
   color: var(--purple-dark, #5C4E8E);
 }
 
-/* ── Die vers en die gebed ── */
-.sv-vers-blok {
-  margin: 20px 0;
-  padding: 17px 18px;
-  border-radius: 16px;
+
+/* ── Die noodbalk ──
+   Klein en altyd daar. Vroeer was dit 'n hele skerm wat ELKE mens moes
+   verbygaan voordat hy 'n woord kon tik; dit het van 'n pastorale muur 'n
+   nooddiens-aansoek gemaak. */
+.sv-nood {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 11px 14px;
+  border: 1px solid #E4C4C4;
+  border-radius: 12px;
+  background: #FFF4F4;
+  color: #7A5555;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sv-nood:active { background: #FBE4E4; }
+.sv-nood b {
+  flex: 0 0 auto;
+  color: #A33A3A;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sv-nood-oop {
+  margin: -8px 0 18px;
+}
+.sv-nood-oop .sorg-nommers { margin: 0; }
+
+/* ── Dit gaan openbaar wees ──
+   Bo die kassie, nie in fyn druk onder nie. Niemand mag later dink dit was
+   'n privaat briefie aan Dewald nie. */
+.sv-openbaar {
+  margin: 18px 0 10px;
+  padding: 14px 15px;
+  border-left: 3px solid var(--purple-dark, #5C4E8E);
+  border-radius: 0 12px 12px 0;
   background: #F3EFE6;
 }
 
-.sv-vers {
-  margin: 0 0 8px;
-  font-family: var(--font-serif);
-  font-size: 17.5px;
-  font-style: italic;
-  line-height: 1.6;
-  color: var(--text, #2D2040);
-}
-
-.sv-vers-bron {
-  margin: 0 0 14px;
-  font-family: var(--font-body);
-  font-size: 11.5px;
-  color: #8A7E6A;
-}
-
-.sv-gebed {
+.sv-openbaar p {
   margin: 0;
-  padding-top: 13px;
-  border-top: 1px solid rgba(107, 92, 158, 0.14);
   font-family: var(--font-body);
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-size: 13.5px;
+  line-height: 1.6;
   color: #5A5165;
 }
-
-/* ── Die kode ── */
-.sv-kode-blok {
-  margin: 20px 0 0;
-  padding: 16px 16px 14px;
-  border: 1px solid #E6E1EE;
-  border-radius: 15px;
-  background: #FFFFFF;
-}
-
-.sv-kode-kop {
-  margin: 0 0 4px;
-  font-family: var(--font-body);
+.sv-openbaar p + p {
+  margin-top: 9px;
+  color: #7A6F86;
   font-size: 12.5px;
-  font-weight: 700;
-  color: var(--purple-dark, #5C4E8E);
+}
+.sv-openbaar b { color: var(--purple-dark, #5C4E8E); }
+
+/* "Opsioneel" langs 'n etiket */
+.sv-etiket span {
+  margin-left: 7px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted, #8A7E9A);
 }
 
-.sv-kode {
-  margin: 0 0 9px;
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text, #2D2040);
-}
-
-.sv-kode-blok .sv-fyn { margin-bottom: 4px; font-size: 12.5px; }
-
-.sv-klaar-onderwerp {
-  margin: 20px 0 14px;
+.sv-onder-fyn {
+  margin: 4px 2px 0;
   font-family: var(--font-body);
   font-size: 12px;
+  line-height: 1.6;
   color: var(--text-muted, #8A7E9A);
   text-align: center;
 }

@@ -27,26 +27,54 @@ tik nie.
 
 ```
 Sorg-blad
-  └─ "Vertel my wat swaar is"
-       └─ Is jy NOU in gevaar?   ── Ja ──▶  die nommers, dadelik
-       │                                      └─ "Ek wil ook skryf"
-       └─ Nee ──▶ die vorm
-                    · wat is swaar (die teks)
-                    · waaroor gaan dit (die onderwerp)
-                    · anoniem of met 'n voornaam
-                    · die drie toestemmings
-                    · [krisisband verskyn as die woordlys tref]
-                    └─ Stuur
-                         └─ Ons het dit
-                              1. die nommers (as dit 'n krisis is)
-                              2. 'n video wat by sy onderwerp pas
-                              3. 'n vers en 'n gebed
-                              4. sy private kode
-                              5. wil hy weet wanneer daar geantwoord word
+  └─ "Deel jou storie of vraag →"
+       └─ EEN bladsy
+            [klein noodbalk: is jy nou in gevaar? Kry hulp nou]
+            · tik jou vraag of vertel jou storie
+            · waaroor gaan dit (OPSIONEEL)
+            · anoniem of jou voornaam
+            · EEN blokkie
+            · [krisisband verskyn as die woordlys tref]
+            └─ Deel my boodskap
+                 └─ Dankie. Jou boodskap is ontvang.
+                      1. die nommers (as dit dringend klink)
+                      2. twee sinne oor wat nou gaan gebeur
+                      3. 'n video om NOU te kyk
 ```
 
-Die gevaar-vraag kom **voor** die teksblok. 'n Mens wat nou in gevaar is, mag
-nie eers 'n vorm invul om by 'n nommer te kom nie.
+Dit was 'n vyf-skerm-proses met 'n aparte gevaarvraag, drie toestemmings, 'n
+private kode en 'n bevestigingsblad so lank soos 'n kontrak. Dewald het dit
+reguit gestel: **net om 'n boodskap te tik was 'n moerse proses.** Hy was
+reg. Nou is dit ongeveer dertig sekondes.
+
+### Wat opsetlik WEG is
+
+| Wat | Hoekom |
+|---|---|
+| Die aparte "is jy in gevaar"-skerm | Dit het elke mens deur 'n nooddeur laat loop om by 'n teksblok te kom. Nou is dit 'n klein balk bo-aan, altyd daar. |
+| Die sigbare private kode en "Kopieer die kode" | Niemand wil 'n kode verstaan, kopieer en bêre nie. Die kode BESTAAN nog op die bediener — Dewald het hom nodig om 'n boodskap uit te wys — maar die mens sien hom nooit. |
+| Twee van die drie toestemmings | Drie blokkies wat almal net gemerk word om verby te kom, beskerm niemand meer as een wat gelees word nie. |
+| Die vers en die gebed op die bevestigingsblad | Iemand wat pas sy hart neergesit het, wil nie 'n bladsy lees nie. Die video was die deel wat werk. |
+| Die selfdiens-uitvee | Mense gee toestemming dat dit openbaar gaan. Hulle kan nie plaas en dan weer uitvee nie. |
+
+### Dit moet OPENBAAR wees, en dit moet BO staan
+
+Direk bo die tekskassie, nie in fyn druk onder nie:
+
+> Jou boodskap sal, nadat dit nagegaan is, **openbaar op die Pastorale
+> Sorg-muur** verskyn, waar ander mense dit kan lees en saam met jou kan bid.
+>
+> Dit is nie 'n private boodskap net aan Dewald nie. Moenie name,
+> kontakbesonderhede of inligting deel wat iemand kan identifiseer nie.
+
+Niemand mag later kan sê hulle het gedink dit gaan privaat net na Dewald toe.
+
+**POPIA bly egter geld.** Die blokkie beteken nie dat iemand nooit weer
+verwydering mag versoek nie — die Inligtingsreguleerder het 'n amptelike
+vorm daarvoor. Die praktiese oplossing is: geen maklike
+"vee my plasing uit"-knoppie nie, en geen kode wat die gebruiker moet
+bestuur nie, maar Dewald kan enige plasing in die keurpaneel verwyder
+wanneer iemand vra.
 
 ---
 
@@ -66,9 +94,16 @@ Die lys loop op die **skerm** (sodat die nommers dadelik wys) én op die
 **bediener** (sodat 'n mens dit nie omseil deur die JavaScript te verander
 nie).
 
-Die band wat tydens tik verskyn, wys **een** nommer met "Wys al die nommers"
-daaronder. Al vyf is 'n hele skerm hoog, en as hulle bo inskuif verdwyn die
-woorde wat die mens op daardie oomblik tik.
+Die band wat tydens tik verskyn, wys **SADAG en 112** met "Wys al die
+noodnommers" daaronder. Al vyf is 'n hele skerm hoog, en as hulle bo inskuif
+verdwyn die woorde wat die mens op daardie oomblik tik.
+
+Die woorde saak ook. Dit is nie *"Ons het gelees wat jy skryf"* nie — dit laat
+klink of iemand persoonlik op daardie oomblik aanlyn sit en lees. Dit is:
+
+> **Wat jy tik, klink dringend.**
+> Moenie vir 'n antwoord hier wag nie. Jou boodskap gaan deur — moet dit
+> asseblief nie uitvee nie — maar bel asseblief nou.
 
 ---
 
@@ -146,16 +181,32 @@ nommer in sy eie kode het nie.
 
 ---
 
-## Die admin-geheim
+## Die wagwoord — EEN, en die bediener keur hom
 
-Nie die PIN nie. Daardie PIN (2025) staan in die bondel wat elke besoeker
-aflaai; dit hou niemand uit nie. Dieselfde geheim gaan die boodskappe
-ontsluit.
+Die admin het 'n PIN gehad wat **in die kode** gestaan het (`ADMIN_PIN =
+'2025'`). So 'n string beskerm niks: die app se lêers is openbaar, enigiemand
+kan hulle oopmaak en dit lees, en dit vat sowat dertig sekondes. 'n Langer
+wagwoord op dieselfde plek sou presies net so oop wees — hy sou net sterker
+gelyk het.
 
-`SORG_ADMIN_GEHEIM` staan op Vercel, minstens 16 karakters, en **nooit** in
-hierdie kode nie. Is dit nie opgestel nie, weier die bediener alles — 'n
-stelsel wat oopgaan omdat iemand vergeet het om 'n veranderlike te stel, is
-erger as een wat glad nie werk nie.
+Nou weet die app die wagwoord **nie**. Wat getik word, gaan na
+`/api/sorg-sluit`, en die bediener vergelyk dit in konstante tyd met
+`SORG_ADMIN_GEHEIM` wat net op Vercel bestaan.
+
+Een wagwoord ontsluit **alles** — die notas, die boeke, die video's, én
+Pastorale Sorg se boodskappe. Die tweede wagwoordskerm wat Sorg gehad het, is
+weg.
+
+Is die veranderlike nie opgestel nie, sê die skerm dit reguit en niks gaan
+oop nie. 'n Stelsel wat oopgaan omdat iemand vergeet het om 'n veranderlike
+te stel, is erger as een wat glad nie werk nie.
+
+> **Wat nog nie beskerm is nie:** die ander versamelings in `firestore.rules`
+> (`notes`, `books`, `config`, `prayers`…) het `allow write: if true`.
+> Enigiemand kan hulle direk skryf, met of sonder die adminwagwoord — die PIN
+> het hulle nooit beskerm nie, ook nie voorheen nie. Dit is 'n aparte stuk
+> werk en dit raak die lewende app, dus is dit nie saam met hierdie
+> verandering gedoen nie.
 
 ---
 
@@ -180,9 +231,12 @@ nie:
 
 | Oortjie | Wat dit wys |
 |---|---|
-| Dewald antwoord | net die plasings waarop geantwoord is |
 | Die Muur | almal, nuutste eerste |
 | Die Video's | die biblioteek volgens behoefte |
+
+"Dewald antwoord" was 'n derde oortjie wat dieselfde plasings gewys het, net
+gefiltreer. Dit het die blad ingewikkeld laat lyk sonder om iets by te voeg —
+die antwoord sit in elk geval BINNE die plasing.
 
 Dewald se antwoord sit **binne dieselfde kaart**, direk onder die persoon se
 woorde. Nie 'n aparte blad nie en nie 'n draad nie — dit is die enigste
@@ -207,6 +261,22 @@ se pyn 'n wedstryd. Daarom:
 * **geen kommentaar nie.** Geen vreemdeling se raad onder 'n vrou se
   beskrywing van haar huwelik nie.
 
+### Deel · Ondersteun
+
+Onder elke antwoord en elke video staan een klein rustige ry: **Deel** eerste
+en prominenter (groei is die prioriteit), dan **Ondersteun**. Nie "Maak 'n
+donasie" nie — sagter, minder geldgedrewe, en dit maak dieselfde blad oop wat
+reeds bestaan.
+
+Elke gedeelde skakel gaan **direk na daardie spesifieke antwoord of video**
+(`#sorg-plasing-<id>` / `#sorg-video-<id>`). Iemand wat 'n skakel op WhatsApp
+kry, moet die ding sien waaroor die persoon gepraat het, nie 'n vreemde
+tuisblad nie.
+
+Die GROOT steunblok staan **een keer**, heel onderaan die blad. 'n Klein
+teksry raak nooit te veel nie; groot donasieblokke oral wel. En op die
+skryfkant is daar niks — nooit waar iemand sy seer tik nie.
+
 ### Die keurpaneel
 
 `SorgKeur.jsx`, binne die Sorg-admin, agter `SORG_ADMIN_GEHEIM`. Vier hopies:
@@ -216,7 +286,12 @@ Gevaar → Nuut → Op die muur → Gelees
 ```
 
 Gevaar staan eerste en wys **watter woorde getref het**, sodat Dewald sien
-hoekom sonder om eers alles te lees. Die keurblok wys die rou teks in 'n
+hoekom sonder om eers alles te lees.
+
+In die Gevaar-hopie staan daar **nie** "Lees en keur" nie, en daar is **geen
+"Vee uit"** nie. 'n Boodskap waarin iemand van selfmoord skryf, mag nie met
+een verkeerde druk openbaar gaan nie, en mag nie met een verkeerde druk
+permanent verdwyn nie. Daar is **Lees nou** en **Hou terug**. Die keurblok wys die rou teks in 'n
 redigeerbare blok; wat hy stoor, is wat op die muur beland. Bly daar 'n
 nommer of e-posadres in, waarsku die bediener voordat dit deurgaan.
 

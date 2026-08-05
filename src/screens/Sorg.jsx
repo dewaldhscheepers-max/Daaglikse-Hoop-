@@ -3,22 +3,34 @@
 
    Die volgorde op hierdie blad is 'n besluit, nie 'n toeval nie:
 
-     Hulp nou            — altyd bo, altyd bereikbaar
-     Die week se video   — een ding, die held
-     Vertel my wat swaar is
+     Hulp nou             — altyd bo, altyd bereikbaar
+     Die week se video    — een ding, die held
+     Waarmee kan ek jou help?
      Vandag se woord
-     Dewald antwoord · Die Muur · Die Video's
+     Die Muur · Die Video's
+     Help om Daaglikse Hoop gratis te hou
 
    HOOP KOM VOOR PYN. Iemand wat in krisis aankom en veertig plasings van
    ander se lyding lees, gaan slegter weg. Daarom staan die video bo en die
    muur onder, en daarom dra elke plasing op die muur iets by wat help.
 
-   Die skryfknoppie sit binne die eerste skerm. Wie huil, moet nie eers verby
-   twee video's blaai nie — daarom is daar EEN held bo en sak Vandag se woord
-   onder die knoppie.
+   ── Twee oortjies, nie drie nie ──
 
-   En: geen versoek om geld op die skryfkant nie. Die Hoopdraer-uitnodiging
-   hoort net onder 'n antwoord of 'n video, nooit waar iemand sy seer tik nie.
+   "Dewald antwoord" was 'n derde oortjie wat dieselfde plasings gewys het as
+   die muur, net gefiltreer. Dit het die blad ingewikkeld laat lyk sonder om
+   iets by te voeg — die antwoord sit in elk geval BINNE die plasing, direk
+   onder die persoon se woorde. Nou is dit Die Muur en Die Video's.
+
+   ── Die uitnodiging ──
+
+   "Vertel my wat swaar is" het geklink of 'n mens net probleme mag plaas.
+   Mense mag ook 'n vraag vra, hul hele storie vertel, of raad soek. Die
+   uitnodiging sê dit nou, en Dewald se gesig is daarby — nie groot en
+   bemarkingsagtig nie, net genoeg om te wys daar is 'n regte mens aan die
+   ander kant.
+
+   En: geen versoek om geld op die skryfkant nie. Nooit waar iemand sy seer
+   tik nie.
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react'
@@ -26,10 +38,12 @@ import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
+import SorgDeelSteun from '../components/SorgDeelSteun'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
 import { haalMuur } from '../data/sorgMuur'
+import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
 
@@ -51,7 +65,7 @@ export function HulpNou({ oop, onSluit }) {
           Is jy, 'n kind of iemand anders op hierdie oomblik in gevaar? Bel een
           van hierdie nommers. Moenie hier wag nie.
         </p>
-        <SorgNommers />
+        <SorgNommers wys="alles" />
         <button className="sorg-blad-toe" onClick={onSluit}>Maak toe</button>
       </div>
     </>
@@ -59,15 +73,14 @@ export function HulpNou({ oop, onSluit }) {
 }
 
 const AFDELINGS = [
-  { sleutel: 'antwoord', naam: 'Dewald antwoord' },
-  { sleutel: 'muur',     naam: 'Die Muur' },
-  { sleutel: 'videos',   naam: 'Die Video\'s' },
+  { sleutel: 'muur',   naam: 'Die Muur' },
+  { sleutel: 'videos', naam: 'Die Video\'s' },
 ]
 
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
   const [vormOop, setVormOop] = useState(false)
-  const [afdeling, setAfdeling] = useState('antwoord')
+  const [afdeling, setAfdeling] = useState('muur')
   const [data, setData] = useState(null)      // null = besig
   const [woord, setWoord] = useState(null)
   const [muur, setMuur] = useState(null)      // null = besig
@@ -83,16 +96,21 @@ export default function Sorg() {
     return () => { lewendig = false }
   }, [])
 
+  /* 'n Gedeelde skakel bring 'n mens direk by daardie plasing of video uit.
+     Kom hy nie van 'n skakel af nie, gebeur hier niks. */
+  useEffect(() => {
+    const s = leesSorgSkakel()
+    if (!s) return
+    setAfdeling(s.soort === 'video' ? 'videos' : 'muur')
+    if (muur === null && s.soort !== 'video') return
+    const el = document.getElementById(`sorg-${s.soort}-${s.id}`)
+    if (el) el.scrollIntoView({ block: 'center' })
+  }, [muur, data])
+
   const videos = (data && data.videos) || []
   const held   = data ? weekVideo(data) : null
   const groepe = volgensBehoefte(videos)
-
-  /* Die drie oortjies is drie UITSIGTE op dieselfde plasings, nie drie
-     plekke nie. "Dewald antwoord" is die muur gefiltreer tot die wat 'n
-     antwoord het — en die antwoord sit in albei gevalle binne die plasing
-     self, direk onder die woorde. */
   const plasings = muur || []
-  const beantwoord = plasings.filter(p => p.antwoord)
 
   return (
     <div className="sorg">
@@ -106,27 +124,42 @@ export default function Sorg() {
 
         {/* ── Die held ── */}
         {held && (
-          <SorgVideo video={held} groot etiket="Die week se video" />
+          <>
+            <SorgVideo video={held} groot etiket="Die week se video" />
+            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
+          </>
         )}
 
-        {/* ── Die knoppie, binne die eerste skerm ── */}
-        <button className="sorg-vertel" onClick={() => setVormOop(true)}>
-          <span className="sorg-vertel-hoof">Vertel my wat swaar is</span>
-          <span className="sorg-vertel-fyn">Anoniem as jy wil · Dewald lees dit self</span>
-        </button>
+        {/* ── Die uitnodiging ── */}
+        <div className="sorg-uitnodig">
+          <div className="sorg-uitnodig-kop">
+            <img className="sorg-gesig" src="/beelde/dewald.jpg" alt="Dewald Scheepers" width="52" height="52" />
+            <h2>Waarmee kan ek jou help?</h2>
+          </div>
+          <p className="sorg-uitnodig-teks">
+            Vertel my jou storie, vra jou vraag, of deel wat tans swaar op jou
+            hart lê. Ek lees dit self en antwoord met 'n stemboodskap waar ek
+            kan.
+          </p>
+          <button className="sorg-vertel" onClick={() => setVormOop(true)}>
+            Deel jou storie of vraag →
+          </button>
+          <p className="sorg-uitnodig-fyn">Jy kan anoniem bly.</p>
+        </div>
 
-        {/* ── Vandag se woord ──
-            Een bestaande video, elke dag 'n ander een. Dewald hoef niks
-            nuuts te maak nie. */}
+        {/* ── Vandag se woord ── */}
         {woord && (
-          <SorgVideo
-            video={woord}
-            etiket="Vandag se woord"
-            onSpeel={v => merkWoordGesien(v.id)}
-          />
+          <>
+            <SorgVideo
+              video={woord}
+              etiket="Vandag se woord"
+              onSpeel={v => merkWoordGesien(v.id)}
+            />
+            <SorgDeelSteun soort="video" id={woord.videoId} titel={woord.titel} />
+          </>
         )}
 
-        {/* ── Die drie afdelings ── */}
+        {/* ── Twee afdelings ── */}
         <div className="sorg-oortjies" role="tablist">
           {AFDELINGS.map(a => (
             <button
@@ -150,7 +183,12 @@ export default function Sorg() {
             groepe.map(g => (
               <div key={g.sleutel} className="sorg-groep">
                 <h2 className="sorg-groep-sin">{g.sin}</h2>
-                {g.videos.map(v => <SorgVideo key={v.id} video={v} />)}
+                {g.videos.map(v => (
+                  <div key={v.id} id={`sorg-video-${v.videoId}`}>
+                    <SorgVideo video={v} />
+                    <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} />
+                  </div>
+                ))}
               </div>
             ))
           )
@@ -175,18 +213,28 @@ export default function Sorg() {
           )
         )}
 
-        {afdeling === 'antwoord' && (
-          muur === null ? (
-            <p className="sorg-leeg">Besig om te laai…</p>
-          ) : !beantwoord.length ? (
-            <p className="sorg-leeg">
-              Dewald se eerste antwoorde kom binnekort. Sy antwoord kom altyd
-              direk onder die boodskap waarop hy antwoord.
-            </p>
-          ) : (
-            beantwoord.map(p => <SorgPlasing key={p.id} plasing={p} videos={videos} />)
-          )
-        )}
+        {/* ── Die groot steunblok, EEN keer, heel onder ── */}
+        <div className="sorg-steun">
+          <p className="sorg-steun-kop">Help om Daaglikse Hoop gratis te hou</p>
+          <p className="sorg-steun-teks">
+            Alles hier is gratis en bly gratis. As dit vir jou iets beteken,
+            help dit ons om dit vir iemand anders oop te hou.
+          </p>
+          <div className="sorg-steun-knoppe">
+            <button
+              className="sorg-steun-knop primer"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
+            >
+              Ondersteun maandeliks
+            </button>
+            <button
+              className="sorg-steun-knop"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
+            >
+              Gee eenmalig
+            </button>
+          </div>
+        </div>
 
         <p className="sorg-grens">{GRENSSIN}</p>
       </div>
@@ -194,7 +242,8 @@ export default function Sorg() {
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />
 
       {/* Die vorm dek die hele skerm. Iemand wat sy swaarste ding tik, moet
-          niks anders sien nie — geen navigasie, geen ander video's. */}
+          niks anders sien nie — geen navigasie, geen ander video's, en geen
+          versoek om geld nie. */}
       <SorgVorm oop={vormOop} onSluit={() => setVormOop(false)} videoData={data} />
     </div>
   )

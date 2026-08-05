@@ -1,19 +1,16 @@
 /* ────────────────────────────────────────────────────────────
    Pastorale Sorg se admin — die video's.
 
-   ── Hoekom hier 'n geheim gevra word ──
+   ── Een wagwoord ──
 
-   Die res van die admin sit agter 'n PIN wat in die kode staan (2025). Vir
-   "watter stemnota is uitgelig" is dit heeltemal reg: die PIN staan in die
-   bondel wat elke besoeker aflaai, maar die skade is klein.
+   Hierdie skerm het sy eie tweede wagwoordskerm gehad. Dit is weg: die hele
+   admin loop nou op EEN wagwoord, wat Dewald een keer tik en wat die
+   BEDIENER nagaan teen SORG_ADMIN_GEHEIM op Vercel.
 
-   Pastorale Sorg is anders. Hierdie selfde geheim gaan later die boodskappe
-   ontsluit — mense se mishandeling, hul selfmoordgedagtes, hul name. 'n PIN
-   in die bondel sou beteken enigiemand kan dit lees.
-
-   Die geheim staan dus op Vercel (SORG_ADMIN_GEHEIM) en NOOIT in hierdie
-   kode nie. Dewald tik dit een keer; die blaaier hou dit plaaslik. Is dit
-   verkeerd, weier die bediener, en die kliënt kan niks daaraan doen nie.
+   Dieselfde wagwoord ontsluit die boodskappe, en daardie boodskappe is
+   mense se mishandeling en hul selfmoordgedagtes. Daarom staan hy nooit in
+   hierdie kode nie — 'n wagwoord in die app se lêers is nie 'n wagwoord
+   nie, want enigiemand kan daardie lêers oopmaak.
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -22,21 +19,13 @@ import { vergeetVideos } from '../data/sorgVideos'
 import SorgKeur from './SorgKeur'
 import './SorgAdmin.css'
 
-const GEHEIM_SLEUTEL = 'sorg_admin_geheim'
-
-function leesGeheim() {
-  try { return localStorage.getItem(GEHEIM_SLEUTEL) || '' } catch { return '' }
-}
-
 const LEEG = {
   id: null, videoId: '', titel: '', beskrywing: '',
   onderwerpe: [], datum: new Date().toISOString().slice(0, 10),
   weekVideo: false, gepubliseer: true, uitPlasing: '',
 }
 
-export default function SorgAdmin() {
-  const [geheim, setGeheim] = useState(leesGeheim)
-  const [tikGeheim, setTikGeheim] = useState('')
+export default function SorgAdmin({ geheim = '' }) {
   const [videos, setVideos] = useState([])
   const [vorm, setVorm] = useState(LEEG)
   const [besig, setBesig] = useState(false)
@@ -126,40 +115,6 @@ export default function SorgAdmin() {
         ? v.onderwerpe.filter(x => x !== sleutel)
         : [...v.onderwerpe, sleutel],
     }))
-  }
-
-  /* ── Die geheim ── */
-  if (!geheim) {
-    return (
-      <div className="admin-section">
-        <div className="admin-section-title">🤍 Pastorale Sorg</div>
-        <p className="admin-books-note">
-          Hierdie afdeling het 'n eie wagwoord, apart van die PIN. Dieselfde
-          wagwoord gaan later die boodskappe ontsluit, en dié mag nooit in die
-          app se kode staan nie.
-        </p>
-        <div className="admin-field">
-          <label>Sorg-wagwoord</label>
-          <input
-            type="password"
-            value={tikGeheim}
-            onChange={e => setTikGeheim(e.target.value)}
-            placeholder="Die waarde van SORG_ADMIN_GEHEIM op Vercel"
-          />
-        </div>
-        <button
-          className="admin-save-btn"
-          disabled={tikGeheim.trim().length < 16}
-          onClick={() => {
-            const g = tikGeheim.trim()
-            try { localStorage.setItem(GEHEIM_SLEUTEL, g) } catch { /* privaat modus */ }
-            setGeheim(g)
-          }}
-        >
-          Ontsluit
-        </button>
-      </div>
-    )
   }
 
   return (

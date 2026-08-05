@@ -489,6 +489,19 @@ export default function App() {
     } catch {}
   }, [])
 
+  /* ── 'n Gedeelde Sorg-skakel ──
+
+     Elke Deel-knoppie op Pastorale Sorg maak 'n skakel soos
+     #sorg-plasing-m1 of #sorg-video-abc123. Iemand wat dit op WhatsApp kry,
+     moet die DING sien waaroor die persoon gepraat het — nie 'n vreemde
+     tuisblad nie. Sorg self rol na die regte plek toe; hier maak ons net die
+     oortjie oop. */
+  useEffect(() => {
+    try {
+      if (/^#sorg-(plasing|video)-/.test(window.location.hash || '')) setTab('sorg')
+    } catch {}
+  }, [])
+
   // ── Donation card CTA ──
   useEffect(() => {
     function onOpen() { setDonation(true) }

@@ -8,7 +8,25 @@ import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
 
-const ADMIN_PIN = '2025'
+/* ── Die wagwoord ──
+
+   Dit was `const ADMIN_PIN = '2025'` — 'n string in die kode. So 'n string
+   beskerm niks: die app se lêers is openbaar en enigiemand kan hulle
+   oopmaak en dit lees. 'n Langer wagwoord op dieselfde plek sou presies net
+   so oop wees; hy sou net sterker gelyk het.
+
+   Nou weet die app die wagwoord NIE. Wat hier getik word, gaan na
+   /api/sorg-sluit, en die BEDIENER vergelyk dit met SORG_ADMIN_GEHEIM wat
+   net op Vercel bestaan. Dieselfde wagwoord ontsluit alles, ook Pastorale
+   Sorg se boodskappe — een wagwoord, een keer getik.
+
+   Die sleutel word plaaslik gehou sodat Dewald dit nie elke keer hoef te tik
+   nie. Dit is DIESELFDE sleutel wat SorgAdmin gebruik. */
+const GEHEIM_SLEUTEL = 'sorg_admin_geheim'
+
+function leesGeheim() {
+  try { return localStorage.getItem(GEHEIM_SLEUTEL) || '' } catch { return '' }
+}
 
 function extractYoutubeId(input) {
   const s = (input || '').trim()
@@ -25,8 +43,10 @@ function extractYoutubeId(input) {
 
 export default function Admin({ onClose }) {
   const [pin, setPin]           = useState('')
+  const [geheim, setGeheim]     = useState(leesGeheim)
   const [unlocked, setUnlocked] = useState(false)
-  const [pinError, setPinError] = useState(false)
+  const [pinError, setPinError] = useState('')
+  const [pinBesig, setPinBesig] = useState(false)
   const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'kinders' | 'notif' | 'email' | 'video'
 
   // ── Saturday video state ──
@@ -321,10 +341,50 @@ export default function Admin({ onClose }) {
     setRecording(false)
   }
 
-  function checkPin() {
-    if (pin === ADMIN_PIN) { setUnlocked(true); setPinError(false) }
-    else { setPinError(true); setPin('') }
+  /* Die bediener besluit, nie hierdie kode nie. */
+  async function keurWagwoord(w) {
+    try {
+      const r = await fetch('/api/sorg-sluit', {
+        method: 'POST',
+        headers: { 'x-sorg-geheim': w },
+      })
+      const d = await r.json().catch(() => ({}))
+      return { ok: !!d.ok, fout: d.fout }
+    } catch {
+      return { ok: false, fout: 'Ons kon nie by die bediener uitkom nie. Is jy aanlyn?' }
+    }
   }
+
+  async function checkPin() {
+    const w = pin.trim()
+    if (!w || pinBesig) return
+    setPinBesig(true)
+    setPinError('')
+    const d = await keurWagwoord(w)
+    setPinBesig(false)
+    if (d.ok) {
+      try { localStorage.setItem(GEHEIM_SLEUTEL, w) } catch { /* privaat modus */ }
+      setGeheim(w)
+      setUnlocked(true)
+      setPin('')
+      return
+    }
+    setPinError(d.fout || 'Verkeerde wagwoord.')
+    setPin('')
+  }
+
+  /* Was dit al 'n keer reg getik, gaan ons stilweg deur. Die bediener keur
+     dit steeds by elke oproep — hierdie is net gerief, nie 'n hek nie. */
+  useEffect(() => {
+    if (unlocked || !geheim) return
+    let lewendig = true
+    keurWagwoord(geheim).then(d => {
+      if (!lewendig) return
+      if (d.ok) setUnlocked(true)
+      else { try { localStorage.removeItem(GEHEIM_SLEUTEL) } catch {} ; setGeheim('') }
+    })
+    return () => { lewendig = false }
+  }, [geheim, unlocked])
 
 
   // ── Save voice note ──
@@ -563,14 +623,21 @@ export default function Admin({ onClose }) {
           <div className="admin-pin-title">Admin</div>
           <input
             className={`admin-pin-input ${pinError ? 'error' : ''}`}
-            type="password" inputMode="numeric" placeholder="PIN"
+            type="password" placeholder="Wagwoord"
             value={pin}
-            onChange={e => { setPin(e.target.value); setPinError(false) }}
+            onChange={e => { setPin(e.target.value); setPinError('') }}
             onKeyDown={e => e.key === 'Enter' && checkPin()}
             autoFocus
           />
-          {pinError && <div className="admin-pin-error">Verkeerde PIN. Probeer weer.</div>}
-          <button className="admin-pin-btn" onClick={checkPin}>Toegang</button>
+          {pinError && <div className="admin-pin-error">{pinError}</div>}
+          <button className="admin-pin-btn" onClick={checkPin} disabled={pinBesig || !pin.trim()}>
+            {pinBesig ? 'Besig…' : 'Toegang'}
+          </button>
+          <div className="admin-pin-fyn">
+            Die wagwoord staan op Vercel as SORG_ADMIN_GEHEIM, nooit in die
+            app se kode nie. Dieselfde wagwoord ontsluit ook Pastorale Sorg se
+            boodskappe.
+          </div>
         </div>
       </div>
     )
@@ -1097,7 +1164,7 @@ export default function Admin({ onClose }) {
 
           {/* ── KINDERS TAB ── */}
           {activeTab === 'kinders' && <KinderAdmin />}
-          {activeTab === 'sorg'    && <SorgAdmin />}
+          {activeTab === 'sorg'    && <SorgAdmin geheim={geheim} />}
 
           {activeTab === 'video' && (
             <div className="admin-section">

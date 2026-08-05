@@ -70,9 +70,15 @@ function hasToestel(t) {
   return crypto.createHash('sha256').update(sout + ':' + s).digest('hex').slice(0, 32)
 }
 
-/* 'n Bestuurskode wat die persoon self hou. Daarmee kan hy sy plasing later
-   kry, versteek of laat verwyder — POPIA gee hom daardie reg in elk geval,
-   en 'n anonieme mens kan nie anders bewys dit is syne nie.
+/* 'n Verwysing wat by die plasing bly.
+
+   Dit was 'n "private kode" wat op die skerm gewys en gekopieer moes word.
+   Dewald was reg dat dit onnodig was: niemand wil 'n kode verstaan, kopieer
+   en bere nie, en die plasing is in elk geval aan die toestel gekoppel.
+
+   Die kode bly bestaan omdat DEWALD hom nodig het — dit is hoe hy 'n
+   spesifieke boodskap in die keurpaneel uitwys wanneer iemand vra dat sy
+   plasing weggaan. Die mens sien hom nooit.
 
    Leesbaar hardop: geen 0/O/1/I, en in blokke van vier. */
 function maakKode() {
@@ -150,12 +156,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ fout: 'Skryf asseblief net \'n bietjie meer, sodat ons kan verstaan.' })
   }
 
-  /* Al drie toestemmings is nodig. Dit is nie 'n formaliteit nie: die
-     boodskap gaan openbaar, dit mag verkort word om die persoon te beskerm,
-     en niemand hou wag by die muur nie. */
+  /* EEN toestemming, en dit sê alles wat gesê moet word: die boodskap gaan
+     openbaar, en dit mag verkort of aangepas word om mense te beskerm.
+
+     Dit was drie blokkies. Dewald was reg dat dit die indiening in 'n
+     aansoekproses verander het — en drie blokkies wat almal net gemerk word
+     om verby te kom, beskerm niemand meer as een wat gelees word nie. */
   const t = lyf.toestemmings || {}
-  if (!t.openbaar || !t.redigeer || !t.geenWaarborg) {
-    return res.status(400).json({ fout: 'Merk asseblief al drie blokkies voordat jy stuur.' })
+  if (!t.openbaar) {
+    return res.status(400).json({ fout: 'Merk asseblief die blokkie voordat jy stuur.' })
   }
 
   const onderwerp = keurOnderwerp(lyf.onderwerp)
@@ -214,6 +223,9 @@ export default async function handler(req, res) {
       krisisWoorde: krisis.slice(0, 10),
       kontakWaarskuwing: kontak,
       toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
+      /* Waar en wanneer die toestemming gegee is. POPIA vra dat 'n mens kan
+         wys dat daar toestemming was, nie net dat dit gevra is nie. */
+      toestemDatum: new Date(),
       geskep: new Date(),
     })
 

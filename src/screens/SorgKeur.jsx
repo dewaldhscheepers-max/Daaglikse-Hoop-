@@ -195,13 +195,29 @@ export default function SorgKeur({ geheim }) {
               <p className="sk-voorskou">{b.teks}</p>
               <div className="sk-knoppe">
                 {b.status !== 'gekeur' && (
-                  <button className="sk-knop sk-plaas" onClick={() => maakOop(b)}>Lees en keur</button>
+                  /* In die Gevaar-hopie staan daar NIE "Lees en keur" nie.
+                     'n Boodskap waarin iemand van selfmoord skryf, mag nooit
+                     met een verkeerde druk openbaar gaan nie. Daar is "Lees
+                     nou" — wat oopmaak sonder om iets te belowe — en "Hou
+                     terug", wat dit uit die pad haal sonder om dit te
+                     verloor. */
+                  <button className="sk-knop sk-plaas" onClick={() => maakOop(b)}>
+                    {b.status === 'gevaar' ? 'Lees nou' : 'Lees en keur'}
+                  </button>
                 )}
-                <button className="sk-knop sk-vee" onClick={() => {
+                {b.status === 'gevaar' && (
+                  <button className="sk-knop" disabled={besig} onClick={() => doen({ aksie: 'weg', id: b.id })}>
+                    Hou terug
+                  </button>
+                )}
+                {/* Geen "Vee uit" op 'n noodboodskap nie. Een verkeerde druk
+                    en dit is permanent weg — insluitend die enigste rekord
+                    dat iemand om hulp geroep het. */}
+                {b.status !== 'gevaar' && <button className="sk-knop sk-vee" onClick={() => {
                   if (window.confirm("Vee hierdie boodskap heeltemal uit?\n\nDit gaan van die muur EN uit die inbak weg. Dit is wat \u0027n mens doen wanneer die persoon self vra dat dit weggaan.")) {
                     doen({ aksie: 'vee', id: b.id, muurId: b.muurId })
                   }
-                }}>Vee uit</button>
+                }}>Vee uit</button>}
               </div>
             </>
           )}

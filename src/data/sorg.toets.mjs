@@ -23,6 +23,7 @@ import { krisisTreffers, kontakTreffers, plat, isKrisis } from './sorgKrisis.js'
 import { keurOnderwerp, ONDERWERPE, BREE_ONDERWERP, onderwerpBy } from './sorgOnderwerpe.js'
 import { versVir, SORG_VERSE } from './sorgVerse.js'
 import { hoopVir, volgensBehoefte, weekVideo } from './sorgVideos.js'
+import { sorgSkakel, leesSorgSkakel } from './sorgDeel.js'
 
 const hier = path.dirname(fileURLToPath(import.meta.url))
 const wortel = path.resolve(hier, '..', '..')
@@ -216,6 +217,67 @@ afdeling('Die noodnommers')
   kyk('geen skerm het \'n nommer in die kode nie', oortree.length === 0, oortree)
   kyk('SADAG is daar', nommers.includes('0800 567 567'))
   kyk('Childline is daar', nommers.includes('116'))
+}
+
+afdeling('Deel — die skakel moet by die REGTE ding uitkom')
+{
+  globalThis.window = globalThis.window || { location: { origin: 'https://daagliksehoop.co.za' } }
+  kyk('plasing', sorgSkakel('plasing', 'm1').endsWith('#sorg-plasing-m1'), sorgSkakel('plasing', 'm1'))
+  kyk('video', sorgSkakel('video', 'LK-kieYHZJA').endsWith('#sorg-video-LK-kieYHZJA'))
+  kyk('lees plasing terug', JSON.stringify(leesSorgSkakel('#sorg-plasing-m1')) === '{"soort":"plasing","id":"m1"}',
+      leesSorgSkakel('#sorg-plasing-m1'))
+  kyk('lees video terug', leesSorgSkakel('#sorg-video-abc123').id === 'abc123')
+  kyk('gewone hash gee niks', leesSorgSkakel('#iets-anders') === null)
+  kyk('leeg gee niks', leesSorgSkakel('') === null)
+  /* 'n ID met vreemde karakters moet heen en weer oorleef */
+  const raar = 'a b/c'
+  kyk('ontsnapte id oorleef', leesSorgSkakel('#sorg-plasing-' + encodeURIComponent(raar)).id === raar,
+      leesSorgSkakel('#sorg-plasing-' + encodeURIComponent(raar)))
+}
+
+afdeling('Wat NIE meer op die skerm mag wees nie')
+{
+  /* Kommentaar tel nie — daar verduidelik ons juis hoekom hierdie goed weg
+     is. Ons kyk net na die kode wat werklik loop. */
+  const sonderKommentaar = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+  const vorm = sonderKommentaar(fs.readFileSync(path.join(wortel, 'src', 'components', 'SorgVorm.jsx'), 'utf8'))
+  const klaar = sonderKommentaar(fs.readFileSync(path.join(wortel, 'src', 'components', 'SorgKlaar.jsx'), 'utf8'))
+
+  /* Die private kode is weg van die skerm af. Hy bestaan nog op die
+     bediener — Dewald het hom nodig — maar niemand moet hom verstaan,
+     kopieer of bere nie. */
+  kyk('geen kode op die vorm', !/uitslag\.kode|Kopieer die kode|private kode/i.test(vorm + klaar),
+      (vorm + klaar).match(/.{0,40}kode.{0,40}/i))
+
+  /* Een blokkie, nie drie nie. */
+  const blokkies = (vorm.match(/type="checkbox"/g) || []).length
+  kyk('een toestemmingsblokkie', blokkies === 1, blokkies)
+
+  /* Geen aparte gevaarskerm wat elke mens moet verbygaan nie. */
+  kyk('geen aparte gevaarskerm', !/Ja, dit is nou|Nee — ek wil skryf/.test(vorm))
+
+  /* Dit moet BO die kassie staan dat dit openbaar is. */
+  const iOpenbaar = vorm.indexOf('sv-openbaar')
+  const iKassie = vorm.indexOf('<textarea')
+  kyk('die openbaar-waarskuwing staan BO die tekskassie', iOpenbaar > 0 && iOpenbaar < iKassie, [iOpenbaar, iKassie])
+
+  /* Geen versoek om geld op die skryfkant nie. */
+  kyk('geen steunversoek op die vorm', !/Ondersteun|donation|hoop-vennoot/i.test(vorm + klaar),
+      (vorm + klaar).match(/.{0,30}(Ondersteun|donation).{0,30}/i))
+}
+
+afdeling('Geen wagwoord in die app se kode nie')
+{
+  const admin = fs.readFileSync(path.join(wortel, 'src', 'screens', 'Admin.jsx'), 'utf8')
+  const sorgAdmin = fs.readFileSync(path.join(wortel, 'src', 'screens', 'SorgAdmin.jsx'), 'utf8')
+
+  /* Die ou PIN is weg as 'n VERGELYKING. Hy mag in kommentaar staan waar ons
+     verduidelik hoekom hy weg is. */
+  const kode = admin.split('\n').filter(r => !r.trim().startsWith('*') && !r.trim().startsWith('/*')).join('\n')
+  kyk('geen ADMIN_PIN-vergelyking', !/pin\s*===\s*ADMIN_PIN|===\s*['"]2025['"]/.test(kode),
+      kode.match(/.{0,50}ADMIN_PIN.{0,50}/))
+  kyk('die bediener keur die wagwoord', /api\/sorg-sluit/.test(admin))
+  kyk('SorgAdmin het geen tweede wagwoordskerm nie', !/Sorg-wagwoord/.test(sorgAdmin))
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')

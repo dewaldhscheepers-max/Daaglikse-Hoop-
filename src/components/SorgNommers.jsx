@@ -1,14 +1,23 @@
 /* Die noodnommers, oral dieselfde. Een druk om te bel.
 
-   `kompak` is daar vir EEN plek: die band wat verskyn terwyl iemand tik.
-   Al vyf nommers is sowat 'n hele skerm hoog, en as hulle bo die skryfblok
-   inskuif, verdwyn die woorde wat die mens op daardie oomblik tik onder in
-   die blad. Kompak wys die een wat 99% van die tyd die regte een is, met
-   die res 'n druk weg. */
+   Drie maniere om dit te wys:
+
+     alles      al vyf — die Hulp nou-blad
+     dringend   SADAG en 112, met die res 'n druk weg — wanneer die
+                krisiswoorde tref terwyl iemand tik
+     kompak     net die eerste
+
+   Hoekom nie altyd al vyf nie: die volle lys is sowat 'n hele skerm hoog.
+   Skuif dit bo die skryfblok in, verdwyn die woorde wat die mens op daardie
+   oomblik tik onder in die blad. */
 
 import { useState } from 'react'
 import { NOODNOMMERS, belSkakel } from '../data/sorgNommers'
 import '../screens/Sorg.css'
+
+/* SADAG en die noodoproep. Dit is wat 'n mens op daardie oomblik nodig het:
+   iemand om mee te praat, of iemand wat kan uitkom. */
+const DRINGEND = ['0800 567 567', '112']
 
 function Nommer({ n }) {
   return (
@@ -21,16 +30,21 @@ function Nommer({ n }) {
   )
 }
 
-export default function SorgNommers({ kompak = false }) {
+export default function SorgNommers({ wys = 'alles' }) {
   const [almal, setAlmal] = useState(false)
-  const wys = kompak && !almal ? NOODNOMMERS.slice(0, 1) : NOODNOMMERS
+
+  const lys = almal || wys === 'alles'
+    ? NOODNOMMERS
+    : wys === 'dringend'
+      ? NOODNOMMERS.filter(n => DRINGEND.includes(n.nommer))
+      : NOODNOMMERS.slice(0, 1)
 
   return (
     <div className="sorg-nommers">
-      {wys.map(n => <Nommer key={n.nommer} n={n} />)}
-      {kompak && !almal && (
+      {lys.map(n => <Nommer key={n.nommer} n={n} />)}
+      {wys !== 'alles' && !almal && (
         <button className="sorg-nommer-meer" onClick={() => setAlmal(true)}>
-          Wys al die nommers
+          Wys al die noodnommers
         </button>
       )}
     </div>

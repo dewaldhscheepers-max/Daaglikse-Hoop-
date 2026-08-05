@@ -1,26 +1,28 @@
 /* ────────────────────────────────────────────────────────────
-   "Vertel my wat swaar is" — die vorm.
+   "Deel jou storie of vraag" — die vorm.
 
-   Dit is die skerm waar iemand sy swaarste ding tik. Elke besluit hier is
-   daarvoor gemaak, en nie vir netheid nie:
+   Dit was een keer 'n vyf-skerm-proses met 'n aparte gevaarvraag, drie
+   toestemmings, 'n private kode en 'n bevestigingsblad so lank soos 'n
+   kontrak. Dewald het dit reguit gestel: net om 'n boodskap te tik was 'n
+   moerse proses.
 
-   · DIE GEVAAR-VRAAG KOM EERSTE. Voordat iemand 'n woord tik, vra ons of
-     hy nou in gevaar is. Antwoord hy ja, kry hy die nommers dadelik en nie
-     ná drie skerms nie. Sy hulp kan nie wag tot Dewald môre lees nie.
+   Nou is dit EEN bladsy en ongeveer dertig sekondes:
 
-   · DIE KRISISBAND LOOP TERWYL HY TIK. Tref die woordlys, verskyn die
-     nommers bo-aan die vorm — sonder om hom te keer, sonder om te preek, en
-     sonder om die boodskap te blokkeer.
+     tik → (onderwerp, as jy wil) → anoniem of voornaam → een blokkie → stuur
 
-   · GEEN VERSOEK OM GELD OP HIERDIE SKERM NIE. Nooit waar iemand sy seer
-     tik nie.
+   Wat opsetlik WEG is, en hoekom:
 
-   · DIE TEKS WORD NÊRENS PLAASLIK GESTOOR NIE, ook nie as 'n konsep nie.
-     In baie huise is die foon gedeel.
+   · Die aparte gevaarskerm. Dit het elke mens deur 'n nooddeur laat loop om
+     by 'n teksblok te kom. Nou is dit 'n klein balk bo-aan, altyd daar, en
+     die krisisband verskyn vanself as die woorde tref.
+   · Die private kode. Niemand wil 'n kode verstaan, kopieer en bêre nie.
+     Die bediener hou hom steeds — dit is hoe 'n plasing aan 'n toestel
+     gekoppel bly — maar die mens sien hom nooit.
+   · Twee van die drie toestemmings. Een blokkie sê alles wat gesê moet word.
 
-   · DIE DRIE TOESTEMMINGS IS NIE 'N FORMALITEIT NIE. Die boodskap gaan
-     openbaar, dit mag verkort word om die persoon te beskerm, en niemand
-     hou wag by die muur nie. Al drie moet gemerk wees.
+   En die belangrikste verandering is nie 'n verwydering nie: dit staan nou
+   BO die tekskassie dat die boodskap OPENBAAR gaan wees. Niemand mag later
+   dink dit was 'n privaat briefie aan Dewald nie.
 
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
    ──────────────────────────────────────────────────────────── */
@@ -29,7 +31,6 @@ import { useState, useEffect, useRef } from 'react'
 import { ONDERWERPE } from '../data/sorgOnderwerpe'
 import { krisisTreffers } from '../data/sorgKrisis'
 import { stuurBoodskap } from '../data/sorgStuur'
-import { GRENSSIN } from '../data/sorgNommers'
 import SorgNommers from './SorgNommers'
 import SorgKlaar from './SorgKlaar'
 import './SorgVorm.css'
@@ -38,49 +39,41 @@ const MIN_LENGTE = 15
 const MAKS_LENGTE = 2000
 
 export default function SorgVorm({ oop, onSluit, videoData }) {
-  const [stap, setStap] = useState('gevaar')       // gevaar · nommers · skryf · klaar
-  const [onderwerp, setOnderwerp] = useState('')
   const [teks, setTeks] = useState('')
+  const [onderwerp, setOnderwerp] = useState('')
   const [anoniem, setAnoniem] = useState(true)
   const [naam, setNaam] = useState('')
-  const [toestemmings, setToestemmings] = useState({ openbaar: false, redigeer: false, geenWaarborg: false })
+  const [toestem, setToestem] = useState(false)
+  const [hulpOop, setHulpOop] = useState(false)
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
   const [uitslag, setUitslag] = useState(null)
   const bo = useRef(null)
 
   /* Elke keer wat die vorm oopmaak, begin dit skoon. Niks van die vorige
-     mens se boodskap mag oorbly nie. */
+     mens se boodskap mag oorbly nie — in baie huise is die foon gedeel. */
   useEffect(() => {
     if (!oop) return
-    setStap('gevaar')
-    setOnderwerp('')
     setTeks('')
+    setOnderwerp('')
     setAnoniem(true)
     setNaam('')
-    setToestemmings({ openbaar: false, redigeer: false, geenWaarborg: false })
+    setToestem(false)
+    setHulpOop(false)
     setBesig(false)
     setFout('')
     setUitslag(null)
-  }, [oop])
-
-  /* Rol na bo wanneer die stap verander — anders begin die nuwe skerm halfpad
-     af, presies die fout wat Dewald op die gebedskaart uitgewys het. */
-  useEffect(() => {
     if (bo.current) bo.current.scrollTop = 0
-  }, [stap])
+  }, [oop])
 
   if (!oop) return null
 
   const treffers = krisisTreffers(teks)
   const langGenoeg = teks.trim().length >= MIN_LENGTE
-  const almalGemerk = toestemmings.openbaar && toestemmings.redigeer && toestemmings.geenWaarborg
-  const magStuur = langGenoeg && almalGemerk && !besig
-
-  const merk = s => setToestemmings(t => ({ ...t, [s]: !t[s] }))
+  const magStuur = langGenoeg && toestem && !besig
 
   async function stuur() {
-    if (!magStuur) return
+    if (magStuur === false) return
     setBesig(true)
     setFout('')
     const d = await stuurBoodskap({
@@ -88,95 +81,86 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
       onderwerp: onderwerp || 'ander',
       naam: anoniem ? '' : naam,
       anoniem,
-      toestemmings,
+      toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
     })
     setBesig(false)
 
     if (d.ok) {
-      /* Die teks gaan hier uit die geheue uit. Ons het dit nie meer nodig
-         nie, en dit hoort nie in 'n React-toestand rond te lê nie. */
-      setTeks('')
+      setTeks('')          // uit die geheue uit; ons het dit nie meer nodig nie
       setUitslag(d)
-      setStap('klaar')
+      if (bo.current) bo.current.scrollTop = 0
       return
     }
     setFout(d.boodskap || d.fout || 'Ons kon dit nie stuur nie. Probeer asseblief weer.')
   }
 
   return (
-    <div className="sv-oor" role="dialog" aria-label="Vertel my wat swaar is">
+    <div className="sv-oor" role="dialog" aria-label="Deel jou storie of vraag">
       <div className="sv-kop">
         <button className="sv-terug" onClick={onSluit} aria-label="Maak toe">
-          {stap === 'klaar' ? 'Klaar' : 'Terug'}
+          {uitslag ? 'Klaar' : 'Terug'}
         </button>
-        <span className="sv-kop-titel">
-          {stap === 'klaar' ? 'Ons het jou boodskap' : 'Vertel my wat swaar is'}
-        </span>
+        <span className="sv-kop-titel">{uitslag ? 'Dankie' : 'Ek luister'}</span>
       </div>
 
       <div className="sv-rol" ref={bo}>
-
-        {/* ── Die gevaar-vraag, voor alles ── */}
-        {stap === 'gevaar' && (
-          <div className="sv-blok">
-            <h2 className="sv-vraag">
-              Voordat jy skryf — is jy, 'n kind, of iemand anders op hierdie
-              oomblik in gevaar?
-            </h2>
-            <p className="sv-fyn">
-              Ons lees elke boodskap self, maar nie noodwendig vanaand nie.
-              Wanneer dit nou is, is 'n oproep vinniger as ons.
-            </p>
-            <button className="sv-groot-knop sv-rooi" onClick={() => setStap('nommers')}>
-              Ja, dit is nou
-            </button>
-            <button className="sv-groot-knop" onClick={() => setStap('skryf')}>
-              Nee — ek wil skryf
-            </button>
-          </div>
-        )}
-
-        {/* ── Die nommers, sonder om iets terug te hou ── */}
-        {stap === 'nommers' && (
-          <div className="sv-blok">
-            <h2 className="sv-vraag">Bel asseblief nou een van hierdie nommers.</h2>
-            <p className="sv-fyn">
-              Hulle is gratis en hulle antwoord. Moenie hier wag nie.
-            </p>
-            <SorgNommers />
-            <p className="sv-fyn sv-fyn-mid">
-              Jy kan daarna nog steeds skryf. Ons wil ook hoor.
-            </p>
-            <button className="sv-groot-knop" onClick={() => setStap('skryf')}>
-              Ek wil ook skryf
-            </button>
-          </div>
-        )}
-
-        {/* ── Die vorm self ── */}
-        {stap === 'skryf' && (
+        {uitslag ? (
+          <SorgKlaar uitslag={uitslag} videoData={videoData} onSluit={onSluit} />
+        ) : (
           <div className="sv-blok">
 
-            {treffers.length > 0 && (
-              <div className="sv-krisis">
-                <p className="sv-krisis-kop">Ons het gelees wat jy skryf.</p>
-                <p className="sv-krisis-teks">
-                  Jou boodskap gaan deur — moet dit asseblief nie uitvee nie.
-                  Maar iemand kan nou met jou praat, en dit is vinniger as ons.
-                </p>
-                {/* Kompak, want dit skuif bo-in terwyl iemand nog tik. Al vyf
-                    nommers sou sy eie woorde onder uit die skerm stoot. */}
-                <SorgNommers kompak />
+            {/* ── Die noodbalk ──
+                Klein, altyd daar, en dit dwing niemand deur 'n skerm nie. */}
+            <button className="sv-nood" onClick={() => setHulpOop(o => !o)}>
+              Is jy of iemand anders nou in onmiddellike gevaar?
+              <b>Kry hulp nou</b>
+            </button>
+            {hulpOop && (
+              <div className="sv-nood-oop">
+                <SorgNommers wys="alles" />
               </div>
             )}
 
-            <label className="sv-etiket" htmlFor="sv-teks">Wat is swaar?</label>
+            <h2 className="sv-vraag">Ek luister.</h2>
+            <p className="sv-fyn">
+              Jy hoef nie die regte woorde te hê nie. Vertel my net wat gebeur
+              het, hoe jy voel en waarmee jy hulp nodig het.
+            </p>
+
+            {/* ── Die krisisband ──
+                Dit keer niks. Dit sê net: moenie hier wag nie. */}
+            {treffers.length > 0 && (
+              <div className="sv-krisis">
+                <p className="sv-krisis-kop">Wat jy tik, klink dringend.</p>
+                <p className="sv-krisis-teks">
+                  Moenie vir 'n antwoord hier wag nie. Jou boodskap gaan deur —
+                  moet dit asseblief nie uitvee nie — maar bel asseblief nou.
+                </p>
+                <SorgNommers wys="dringend" />
+              </div>
+            )}
+
+            {/* ── Dit gaan openbaar wees ──
+                Bo die kassie, nie onder nie, en nie in fyn druk nie. */}
+            <div className="sv-openbaar">
+              <p>
+                Jou boodskap sal, nadat dit nagegaan is, <b>openbaar op die
+                Pastorale Sorg-muur</b> verskyn, waar ander mense dit kan lees
+                en saam met jou kan bid.
+              </p>
+              <p>
+                Dit is nie 'n private boodskap net aan Dewald nie. Moenie name,
+                kontakbesonderhede of inligting deel wat iemand kan
+                identifiseer nie.
+              </p>
+            </div>
+
             <textarea
               id="sv-teks"
               className="sv-teks"
               value={teks}
               maxLength={MAKS_LENGTE}
-              placeholder="Skryf dit net soos dit is. Jy hoef dit nie mooi te maak nie."
+              placeholder="Tik jou vraag of vertel jou storie hier…"
               onChange={e => setTeks(e.target.value)}
             />
             <div className="sv-teller">
@@ -184,13 +168,10 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 ? `${MAKS_LENGTE - teks.length} karakters oor`
                 : !langGenoeg && teks.length > 0
                   ? 'Skryf net \'n bietjie meer, sodat ons kan verstaan.'
-                  : ' '}
+                  : ' '}
             </div>
 
-            <label className="sv-etiket">Waaroor gaan dit?</label>
-            <p className="sv-fyn sv-fyn-eng">
-              Dit help ons om vir jou dadelik iets te wys wat kan help.
-            </p>
+            <label className="sv-etiket">Waaroor gaan dit? <span>Opsioneel</span></label>
             <div className="sv-onderwerpe">
               {ONDERWERPE.map(o => (
                 <button
@@ -203,7 +184,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               ))}
             </div>
 
-            <label className="sv-etiket">Hoe moet dit wys?</label>
+            <label className="sv-etiket">Hoe moet jou naam wys?</label>
             <div className="sv-naam-keuse">
               <button
                 className={`sv-keuse${anoniem ? ' gekies' : ''}`}
@@ -215,65 +196,40 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 className={`sv-keuse${!anoniem ? ' gekies' : ''}`}
                 onClick={() => setAnoniem(false)}
               >
-                Met my naam
+                Gebruik my voornaam
               </button>
             </div>
             {!anoniem && (
-              <>
-                <input
-                  className="sv-naam"
-                  value={naam}
-                  maxLength={24}
-                  placeholder="Jou voornaam"
-                  onChange={e => setNaam(e.target.value)}
-                />
-                <p className="sv-fyn sv-fyn-eng">
-                  Net 'n voornaam. Ons wys nooit 'n van, 'n nommer of 'n
-                  e-posadres nie — ook nie as jy dit in jou boodskap sit nie.
-                </p>
-              </>
+              <input
+                className="sv-naam"
+                value={naam}
+                maxLength={24}
+                placeholder="Jou voornaam"
+                onChange={e => setNaam(e.target.value)}
+              />
             )}
 
-            {/* ── Die drie ── */}
-            <div className="sv-toestemmings">
-              <label className="sv-blok-merk">
-                <input type="checkbox" checked={toestemmings.openbaar} onChange={() => merk('openbaar')} />
-                <span>
-                  Ek gee toestemming dat my boodskap openbaar op die muur mag
-                  wys, sodat ander wat dieselfde deurgaan, kan sien hulle is
-                  nie alleen nie.
-                </span>
-              </label>
-              <label className="sv-blok-merk">
-                <input type="checkbox" checked={toestemmings.redigeer} onChange={() => merk('redigeer')} />
-                <span>
-                  Ek verstaan dat my boodskap verkort of verander mag word om
-                  my en ander mense te beskerm, en dat dit dalk glad nie wys
-                  nie.
-                </span>
-              </label>
-              <label className="sv-blok-merk">
-                <input type="checkbox" checked={toestemmings.geenWaarborg} onChange={() => merk('geenWaarborg')} />
-                <span>
-                  Ek verstaan dat dit nie 'n nooddiens of terapie is nie, en
-                  dat 'n persoonlike antwoord nie gewaarborg is nie.
-                </span>
-              </label>
-            </div>
+            {/* ── Een blokkie ── */}
+            <label className="sv-blok-merk">
+              <input type="checkbox" checked={toestem} onChange={() => setToestem(t => !t)} />
+              <span>
+                Ek verstaan dat my boodskap ná goedkeuring openbaar op die
+                Pastorale Sorg-muur geplaas word en dat dit verkort of aangepas
+                mag word om mense se privaatheid te beskerm.
+              </span>
+            </label>
 
             {fout && <p className="sv-fout">{fout}</p>}
 
             <button className="sv-groot-knop sv-stuur" disabled={!magStuur} onClick={stuur}>
-              {besig ? 'Besig om te stuur…' : 'Stuur my boodskap'}
+              {besig ? 'Besig om te stuur…' : 'Deel my boodskap'}
             </button>
 
-            <p className="sv-grens">{GRENSSIN}</p>
+            <p className="sv-onder-fyn">
+              Elke boodskap word eers nagegaan. Dewald antwoord gereeld, maar
+              'n persoonlike antwoord kan nie gewaarborg word nie.
+            </p>
           </div>
-        )}
-
-        {/* ── Ná die stuur ── */}
-        {stap === 'klaar' && uitslag && (
-          <SorgKlaar uitslag={uitslag} videoData={videoData} onSluit={onSluit} />
         )}
       </div>
     </div>
