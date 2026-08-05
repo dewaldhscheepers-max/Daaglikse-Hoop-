@@ -22,7 +22,7 @@ on:
         required: true
         default: skema
         type: choice
-        options: [skema, haal]
+        options: [skema, haal, kyk]
 
 permissions:
   contents: write
@@ -40,6 +40,10 @@ jobs:
       - name: Skema
         if: inputs.stap == 'skema'
         run: node skrifte/gab-skema.mjs
+
+      - name: Kyk of die lewende werf dit uitgee
+        if: inputs.stap == 'kyk'
+        run: node skrifte/kyk-gab-lewend.mjs
 
       - name: Haal
         if: inputs.stap == 'haal'
