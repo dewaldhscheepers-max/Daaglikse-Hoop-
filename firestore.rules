@@ -166,6 +166,12 @@ service cloud.firestore {
       allow read:  if false;
       allow write: if false;
     }
+    // "Ek dra dit saam met jou" — een klein dokument per toestel per plasing,
+    // sodat een mens een keer tel. Ook dit loop deur die bediener.
+    match /sorg_saam/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
 
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {

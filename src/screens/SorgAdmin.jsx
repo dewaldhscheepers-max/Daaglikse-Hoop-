@@ -19,6 +19,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ONDERWERPE } from '../data/sorgOnderwerpe'
 import { vergeetVideos } from '../data/sorgVideos'
+import SorgKeur from './SorgKeur'
 import './SorgAdmin.css'
 
 const GEHEIM_SLEUTEL = 'sorg_admin_geheim'
@@ -164,6 +165,11 @@ export default function SorgAdmin() {
   return (
     <div className="admin-section">
 
+      {/* ── Die inbak ──
+          Eerste, want dít is die werk. Die video's en die plafon is
+          onderhoud; die boodskappe is mense wat wag. */}
+      <SorgKeur geheim={geheim} />
+
       {/* ── Hoeveel boodskappe 'n dag ──
           Nie 'n tegniese perk nie: dit is hoeveel EEN MENS in 'n dag
           behoorlik kan lees. Krisisboodskappe kom altyd deur, ook wanneer
@@ -211,7 +217,7 @@ export default function SorgAdmin() {
         </div>
       )}
 
-      <div className="admin-section-title" style={{ marginTop: inst ? 26 : 0 }}>
+      <div className="admin-section-title" style={{ marginTop: 26 }}>
         🤍 Pastorale Sorg — Video's
       </div>
       <p className="admin-books-note">

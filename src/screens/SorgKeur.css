@@ -1,0 +1,195 @@
+/* Die keurpaneel. Net kleur op :active — sien CLAUDE.md. */
+
+.sk-leeg {
+  padding: 22px 6px;
+  text-align: center;
+  color: #8A7E9A;
+  font-size: 14px;
+}
+
+.sk-hopies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.sk-hopie {
+  padding: 8px 13px;
+  border: 1px solid #D8D2E4;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #6E6455;
+  font-size: 13px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.sk-hopie:active { background: #F0ECFA; }
+.sk-hopie b { color: #5C4E8E; }
+
+.sk-hopie.aktief {
+  background: #5C4E8E;
+  border-color: #5C4E8E;
+  color: #FFFFFF;
+}
+.sk-hopie.aktief b { color: #FFFFFF; }
+
+/* Die Gevaar-hopie moet skreeu wanneer daar iets in is. */
+.sk-hopie.gevaar {
+  border-color: #C98A8A;
+  color: #A33A3A;
+}
+.sk-hopie.gevaar b { color: #A33A3A; }
+.sk-hopie.gevaar.aktief {
+  background: #A33A3A;
+  border-color: #A33A3A;
+  color: #FFFFFF;
+}
+.sk-hopie.gevaar.aktief b { color: #FFFFFF; }
+
+/* ── Een boodskap ── */
+.sk-ry {
+  padding: 14px 15px;
+  border: 1px solid #E6E1EE;
+  border-radius: 14px;
+  background: #FFFFFF;
+  margin-bottom: 10px;
+}
+.sk-ry.gevaar {
+  border-color: #E4B9B9;
+  background: #FFF6F6;
+}
+
+.sk-ry-fyn {
+  font-size: 11.5px;
+  color: #8A7E9A;
+  margin-bottom: 7px;
+}
+
+.sk-krisis {
+  margin-bottom: 7px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #F8E0E0;
+  color: #8A2F2F;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sk-kontak {
+  margin-bottom: 7px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #F5EDD8;
+  color: #8A6A2F;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sk-voorskou {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #2D2040;
+  white-space: pre-wrap;
+}
+
+.sk-teks {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #DDD6E6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #2D2040;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.sk-video {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 11px 12px;
+  border: 1px solid #DDD6E6;
+  border-radius: 11px;
+  background: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.sk-knoppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.sk-knop {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border: 1px solid #D8D2E4;
+  border-radius: 11px;
+  background: #FFFFFF;
+  color: #5C4E8E;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sk-knop:active { background: #F0ECFA; }
+.sk-knop:disabled { background: #F3F1F6; color: #A9A2B4; }
+
+.sk-plaas {
+  background: #5C4E8E;
+  border-color: #5C4E8E;
+  color: #FFFFFF;
+}
+.sk-plaas:active { background: #4C4076; }
+.sk-plaas:disabled { background: #DCD6E4; border-color: #DCD6E4; color: #9A92A8; }
+
+.sk-vee { color: #A33A3A; border-color: #E4C4C4; }
+.sk-vee:active { background: #FBE9E9; }
+
+.sk-waarsku {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #E4D0A8;
+  border-radius: 12px;
+  background: #FBF3E2;
+  color: #7A5F2F;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.sk-waarsku p { margin: 0 0 9px; }
+
+.sk-tipes {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+.sk-tipe {
+  flex: 1;
+  padding: 9px 8px;
+  border: 1px solid #D8D2E4;
+  border-radius: 11px;
+  background: #FFFFFF;
+  color: #6E6455;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.sk-tipe:active { background: #F0ECFA; }
+.sk-tipe.aktief {
+  background: #5C4E8E;
+  border-color: #5C4E8E;
+  color: #FFFFFF;
+}

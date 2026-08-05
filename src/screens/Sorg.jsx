@@ -25,9 +25,11 @@ import { useState, useEffect } from 'react'
 import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
+import SorgPlasing from '../components/SorgPlasing'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
+import { haalMuur } from '../data/sorgMuur'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
 
@@ -68,6 +70,7 @@ export default function Sorg() {
   const [afdeling, setAfdeling] = useState('antwoord')
   const [data, setData] = useState(null)      // null = besig
   const [woord, setWoord] = useState(null)
+  const [muur, setMuur] = useState(null)      // null = besig
 
   useEffect(() => {
     let lewendig = true
@@ -76,12 +79,20 @@ export default function Sorg() {
       setData(d)
       setWoord(vandagSeWoord(d))
     })
+    haalMuur().then(p => { if (lewendig) setMuur(p) })
     return () => { lewendig = false }
   }, [])
 
   const videos = (data && data.videos) || []
   const held   = data ? weekVideo(data) : null
   const groepe = volgensBehoefte(videos)
+
+  /* Die drie oortjies is drie UITSIGTE op dieselfde plasings, nie drie
+     plekke nie. "Dewald antwoord" is die muur gefiltreer tot die wat 'n
+     antwoord het — en die antwoord sit in albei gevalle binne die plasing
+     self, direk onder die woorde. */
+  const plasings = muur || []
+  const beantwoord = plasings.filter(p => p.antwoord)
 
   return (
     <div className="sorg">
@@ -146,11 +157,35 @@ export default function Sorg() {
         )}
 
         {afdeling === 'muur' && (
-          <p className="sorg-leeg">Die muur maak binnekort oop.</p>
+          muur === null ? (
+            <p className="sorg-leeg">Besig om te laai…</p>
+          ) : !plasings.length ? (
+            <p className="sorg-leeg">
+              Die muur is nog leeg. Wees die eerste — jou woorde kan die een
+              wees wat iemand anders laat weet hy is nie alleen nie.
+            </p>
+          ) : (
+            <>
+              <p className="sorg-muur-fyn">
+                Elke boodskap hier is deur 'n mens gelees en met toestemming
+                geplaas. Niks kom outomaties op hierdie muur nie.
+              </p>
+              {plasings.map(p => <SorgPlasing key={p.id} plasing={p} videos={videos} />)}
+            </>
+          )
         )}
 
         {afdeling === 'antwoord' && (
-          <p className="sorg-leeg">Dewald se eerste antwoorde kom binnekort.</p>
+          muur === null ? (
+            <p className="sorg-leeg">Besig om te laai…</p>
+          ) : !beantwoord.length ? (
+            <p className="sorg-leeg">
+              Dewald se eerste antwoorde kom binnekort. Sy antwoord kom altyd
+              direk onder die boodskap waarop hy antwoord.
+            </p>
+          ) : (
+            beantwoord.map(p => <SorgPlasing key={p.id} plasing={p} videos={videos} />)
+          )
         )}
 
         <p className="sorg-grens">{GRENSSIN}</p>

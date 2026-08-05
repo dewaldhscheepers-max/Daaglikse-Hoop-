@@ -263,3 +263,14 @@
   transition: background-color 0.12s;
 }
 .sorg-blad-toe:active { background: #4C4076; }
+
+/* ── Die muur ──
+   Die sin bo die plasings is nie 'n disclaimer nie; dit is die belofte wat
+   maak dat iemand dit waag om te skryf. */
+.sorg-muur-fyn {
+  margin: 0 2px 14px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-muted, #8A7E9A);
+}

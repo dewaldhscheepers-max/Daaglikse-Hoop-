@@ -81,6 +81,7 @@ woorde wat die mens op daardie oomblik tik.
 | `sorg_videos` | die videobiblioteek | net die diensrekening |
 | `sorg_config/instellings` | die daaglikse plafon, oop/toe | net die diensrekening |
 | `sorg_tellers/<dag>` | vandag se telling per dag en per toestel | net die diensrekening |
+| `sorg_saam` | wie watter plasing saamdra | net die diensrekening |
 
 `firestore.rules` sit **alles** hier op `read: false, write: false`. Firestore
 weier klaar waar geen reel pas nie; die blokke staan daar sodat niemand dit
@@ -172,13 +173,69 @@ hierdie projek gebeur. Sien CLAUDE.md.
 
 ---
 
+## Die muur en die antwoorde
+
+Die drie oortjies is drie **uitsigte** op dieselfde plasings, nie drie plekke
+nie:
+
+| Oortjie | Wat dit wys |
+|---|---|
+| Dewald antwoord | net die plasings waarop geantwoord is |
+| Die Muur | almal, nuutste eerste |
+| Die Video's | die biblioteek volgens behoefte |
+
+Dewald se antwoord sit **binne dieselfde kaart**, direk onder die persoon se
+woorde. Nie 'n aparte blad nie en nie 'n draad nie — dit is die enigste
+manier waarop iemand sien dat daar op SY ding geantwoord is.
+
+Is daar nog nie 'n antwoord nie, dra die plasing 'n **video**. Nooit net
+iemand se pyn alleen op 'n skerm nie.
+
+Die antwoord is 'n **skakel** na Dewald se eie stem (of 'n video, of
+geskrewe woorde). Daar is geen opname vanuit die app nie — hy maak dit soos
+hy altyd doen en plak die skakel in die keurpaneel.
+
+### Die reaksie
+
+Daar is **een**, en dit is nie 'n punt nie. "37 mense dra dit saam met jou"
+is geselskap; 'n telling wat plasings teen mekaar rangskik, maak van iemand
+se pyn 'n wedstryd. Daarom:
+
+* net een soort reaksie, en dit is 'n saamdra en nie 'n "hou van" nie;
+* **geen rangskikking volgens die telling nie** — die muur is altyd nuutste
+  eerste;
+* **geen kommentaar nie.** Geen vreemdeling se raad onder 'n vrou se
+  beskrywing van haar huwelik nie.
+
+### Die keurpaneel
+
+`SorgKeur.jsx`, binne die Sorg-admin, agter `SORG_ADMIN_GEHEIM`. Vier hopies:
+
+```
+Gevaar → Nuut → Op die muur → Gelees
+```
+
+Gevaar staan eerste en wys **watter woorde getref het**, sodat Dewald sien
+hoekom sonder om eers alles te lees. Die keurblok wys die rou teks in 'n
+redigeerbare blok; wat hy stoor, is wat op die muur beland. Bly daar 'n
+nommer of e-posadres in, waarsku die bediener voordat dit deurgaan.
+
+Die muur is 'n **aparte versameling**, nie 'n vlaggie op die inkomende
+dokument nie. Was dit 'n vlaggie, sou die rou teks en die goedgekeurde teks
+in dieselfde dokument sit, en dan is een verkeerde lees genoeg.
+
+---
+
 ## Wat nog nie gebou is nie
 
-* Die **muur** self, die reaksies en Dewald se antwoorde onder elke plasing.
-* Die **keurpaneel** waar 'n mens `sorg_inkomend` lees, redigeer en na
-  `sorg_muur` stoot.
 * Die bestaande Luister-stemnotas moet met die Sorg-onderwerpe gemerk word,
   sodat die biblioteek op dag een vol is.
+* Die persoon se **bestuurskode** kan nog nie deur homself gebruik word om
+  sy plasing te laat verwyder nie — Dewald doen dit vir hom in die
+  keurpaneel.
+* Kennisgewing wanneer daar op JOU plasing geantwoord is. Die toestemming
+  word reeds gevra; die stuurkant is nog nie gebou nie. Wanneer dit kom:
+  **nooit die teks in die kennisgewing nie.**
 
 Voordat die eerste boodskap gestoor word, moet die regswerk klaar wees:
 POPIA se "spesiale persoonlike inligting", die Children's Act a110
