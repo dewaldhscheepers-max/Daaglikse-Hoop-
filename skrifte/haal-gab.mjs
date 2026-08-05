@@ -155,6 +155,21 @@ async function vindBasis() {
   stop('Kon die basispad nie uit hul kode lees nie. Ons raai nie.')
 }
 
+/* Ander spellings wat 'n mens by so 'n werf kan kry. Hul eie id vir Genesis
+   is "gen", dus is dit waarskynlik USFM in kleinletters, maar ons vang die
+   gewone afwykings sodat 'n lopie nie halfpad omval nie. */
+const ANDERS = {
+  JUDG: 'JDG', SONG: 'SNG', EZEK: 'EZK', JOEL: 'JOL', NAH: 'NAM', ZECH: 'ZEC',
+  MARK: 'MRK', JOHN: 'JHN', ACTS: 'ACT', PHIL: 'PHP', JAMES: 'JAS',
+  MATT: 'MAT', LUKE: 'LUK', ROMANS: 'ROM', REVELATION: 'REV', REVE: 'REV',
+  ESTH: 'EST', PROV: 'PRO', ECCL: 'ECC', ISAIAH: 'ISA', OBAD: 'OBA',
+  ZEPH: 'ZEP', HAGG: 'HAG', PHILEM: 'PHM', TITUS: 'TIT',
+  '1SAM': '1SA', '2SAM': '2SA', '1KGS': '1KI', '2KGS': '2KI',
+  '1CHR': '1CH', '2CHR': '2CH', '1COR': '1CO', '2COR': '2CO',
+  '1THESS': '1TH', '2THESS': '2TH', '1TIM': '1TI', '2TIM': '2TI',
+  '1PET': '1PE', '2PET': '2PE', '1JOHN': '1JN', '2JOHN': '2JN', '3JOHN': '3JN',
+}
+
 /* ── Kartering: hul boeksleutel → ons USFM-kode ── */
 function naarKode(inskrywing) {
   const kandidate = typeof inskrywing === 'string'
@@ -166,6 +181,7 @@ function naarKode(inskrywing) {
   for (const k of kandidate) {
     const bo = String(k).toUpperCase().replace(/[^A-Z0-9]/g, '')
     if (KODES.includes(bo)) return bo
+    if (ANDERS[bo]) return ANDERS[bo]
   }
   /* Op naam, met en sonder aksente */
   const plat = s => String(s).toLowerCase()
@@ -180,36 +196,57 @@ function naarKode(inskrywing) {
 }
 
 /* ── Die verse uit 'n boeklêer, sonder om een karakter te verander ── */
+
+/* Hul vorm, soos die verkenning dit gewys het:
+
+     { "id": "gen", "name": "Génesis", "abbr": "Gén",
+       "chapters": {
+         "1": {
+           "1": { "a": "In die begin het God ...",     <- Afrikaans, die GAB
+                  "e": "In the beginning God ...",     <- die KJV
+                  "x":  [...], "xi": [...] }           <- kruisverwysings
+         }
+       } }
+
+   Ons vat NET "a".
+
+   Die "e"-veld is die King James, en die regte daarop berus by die Kroon,
+   gepubliseer met toestemming van Cambridge University Press. Dit is nie
+   ons s'n om te versprei nie en dit hoort ook nie in 'n Afrikaanse Bybel
+   nie.
+
+   Die kruisverwysings is TSK (publieke domein) plus OpenBible.info onder
+   CC BY 4.0. Hulle sou 'n eie erkenning verg en hulle maak die lêers baie
+   groter. Later, dalk. Nou nie.
+
+   Ontbreek "a" by 'n vers, gee ons null terug en die keuring vang dit. Ons
+   vul niks aan nie — dit is 'n GeenAfgeleides-lisensie. */
 function verseUit(data) {
-  /* Ons ken nie hul presiese vorm vooraf nie, dus soek ons na die vorm wat
-     daar is. Elke tak gee dieselfde antwoord terug: 'n lys hoofstukke, elk 'n
-     lys versteks in volgorde. */
+  const h = data && data.chapters
+  if (!h || typeof h !== 'object' || Array.isArray(h)) return null
 
-  /* a) { chapters: [ { verses: [ {verse, text} ] } ] } */
-  const hoofstukLys = data.chapters || data.hoofstukke || (Array.isArray(data) ? data : null)
-  if (Array.isArray(hoofstukLys)) {
-    return hoofstukLys.map(h => {
-      const verse = Array.isArray(h) ? h : (h.verses || h.verse || h.vers || h.text || [])
-      if (!Array.isArray(verse)) return null
-      return verse.map(v => (typeof v === 'string' ? v : (v.afr ?? v.gab ?? v.text ?? v.teks ?? v.t ?? null)))
-    })
+  const hoofstukNommers = Object.keys(h).filter(k => /^\d+$/.test(k)).map(Number).sort((a, b) => a - b)
+  if (!hoofstukNommers.length) return null
+
+  /* Hoofstukke moet by 1 begin en aaneenlopend wees. */
+  for (let i = 0; i < hoofstukNommers.length; i++) {
+    if (hoofstukNommers[i] !== i + 1) return null
   }
 
-  /* b) { "1": { "1": "teks" } } */
-  if (data && typeof data === 'object') {
-    const sleutels = Object.keys(data).filter(k => /^\d+$/.test(k))
-    if (sleutels.length) {
-      return sleutels.sort((a, b) => a - b).map(h => {
-        const verse = data[h]
-        const vs = Object.keys(verse).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b)
-        return vs.map(v => {
-          const x = verse[v]
-          return typeof x === 'string' ? x : (x && (x.afr ?? x.gab ?? x.text ?? x.teks)) ?? null
-        })
-      })
+  return hoofstukNommers.map(nr => {
+    const verse = h[String(nr)]
+    if (!verse || typeof verse !== 'object') return null
+    const vNommers = Object.keys(verse).filter(k => /^\d+$/.test(k)).map(Number).sort((a, b) => a - b)
+    /* Ook hier: by 1 begin, aaneenlopend. Anders gee ons null en die keuring
+       se presies waar. */
+    for (let i = 0; i < vNommers.length; i++) {
+      if (vNommers[i] !== i + 1) return null
     }
-  }
-  return null
+    return vNommers.map(v => {
+      const teks = verse[String(v)] && verse[String(v)].a
+      return typeof teks === 'string' ? teks : null
+    })
+  })
 }
 
 /* ── Loop ── */
