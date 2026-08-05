@@ -132,6 +132,11 @@ in die vertalinglys nie en is die app presies soos hy was.
 Dit is 'n **konsep** — die vertaling word nog hersien. Die etiket wys op die
 erkenning en op die "Oor hierdie vertaling"-blad. Moenie dit afhaal nie.
 
+Twee dinge maak hierdie Bybel anders as die res: **309 310 kruisverwysings**
+(TSK + OpenBible.info, CC BY 4.0 — daardie erkenning mag ook nie uitval nie) en
+**soek deur die hele teks, aflyn**. Albei is so gebou dat gewone lees hulle
+nooit laai nie.
+
 Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
 
 ---

@@ -5,6 +5,7 @@ import { bibleSaSkakel } from '../data/bibleSa'
 import {
   GAB_ID, GAB_AFK, GAB_ERKENNING,
   gabIndeks, gabWeergawe, gabHoofstukke, gabTeks,
+  soekTeks, gabVerwysings,
 } from '../data/gab'
 
 const API = '/api/bible?path='
@@ -142,6 +143,9 @@ export default function Bybel({ onClose }) {
   const [laaste, setLaaste]         = useState(() => lees('byb_laaste', null))
   const [gekose, setGekose]         = useState(null)     // aangetikte vers
   const [oorVertaling, setOorVertaling] = useState(false)  // GAB se erkenningsblad
+  const [teksSoek, setTeksSoek]     = useState(null)     // { besig, treffers, totaal }
+  const [verwysings, setVerwysings] = useState([])       // vir die aangetikte vers
+  const [wysAlleKruis, setWysAlleKruis] = useState(false)
   const bodyRef = useRef(null)
   const teksRef = useRef(null)
 
@@ -343,6 +347,33 @@ export default function Bybel({ onClose }) {
   }
   const soekTreffer = soek.trim() ? ontleedVerwysing(soek, boeke) : null
 
+  /* ── Soek deur die teks ──
+
+     Net vir die GAB, want net sy teks le op die toestel. Die eerste soektog
+     laai die 66 lêers in; daarna is dit oombliklik. Ons wag 'n oomblik nadat
+     iemand ophou tik het, sodat elke letter nie 'n soektog afskop nie. */
+  useEffect(() => {
+    const vraag = soek.trim()
+    if (sleutel !== GAB_AFK || vraag.length < 3) { setTeksSoek(null); return }
+    let lewendig = true
+    setTeksSoek({ besig: true, treffers: [], totaal: 0 })
+    const t = setTimeout(async () => {
+      const uit = await soekTeks(vraag)
+      if (lewendig) setTeksSoek({ besig: false, ...uit })
+    }, 260)
+    return () => { lewendig = false; clearTimeout(t) }
+  }, [soek, sleutel])
+
+  /* Die aangetikte vers se kruisverwysings. Dit trek een boek se lêer, en
+     net wanneer iemand werklik 'n vers aantik. */
+  useEffect(() => {
+    if (!gekose || sleutel !== GAB_AFK || !boek || !hoofstuk) { setVerwysings([]); return }
+    let lewendig = true
+    setWysAlleKruis(false)
+    gabVerwysings(boek, hoofstuk, Number(gekose.v)).then(v => { if (lewendig) setVerwysings(v) })
+    return () => { lewendig = false }
+  }, [gekose, sleutel, boek, hoofstuk])
+
   const aanbeveel = groep(AANBEVEEL)
   const meer      = groep(MEER)
   /* Die GAB kom nie van YouVersion af nie, dus staan hy in sy eie groep en
@@ -405,7 +436,7 @@ export default function Bybel({ onClose }) {
                   className="byb-soek"
                   value={soek}
                   onChange={e => setSoek(e.target.value)}
-                  placeholder="Soek 'n vers — bv. Joh 3:16"
+                  placeholder={sleutel === GAB_AFK ? "Soek 'n woord of vers — bv. vergifnis" : "Soek 'n vers — bv. Joh 3:16"}
                   autoComplete="off"
                   spellCheck="false"
                   onKeyDown={e => {
@@ -425,8 +456,37 @@ export default function Bybel({ onClose }) {
                     </span>
                     <span className="byb-treffer-gaan">Gaan soontoe →</span>
                   </button>
-                ) : (
+                ) : !teksSoek ? (
                   <p className="byb-geen-treffer">Geen boek gevind nie. Probeer bv. <b>Joh 3:16</b> of <b>Psalms 23</b>.</p>
+                ) : null
+              )}
+
+              {/* ── Woorde, nie net verwysings nie ──
+                  Die hele Afrikaanse Bybel le op die toestel, dus kan 'n mens
+                  vir 'n woord soek sonder sein. Dit loop net wanneer iemand
+                  tik; gewone lees raak dit nooit aan. */}
+              {teksSoek && (
+                teksSoek.besig ? (
+                  <p className="byb-geen-treffer">Besig om die Bybel te deursoek…</p>
+                ) : teksSoek.fout ? null : teksSoek.totaal === 0 ? (
+                  <p className="byb-geen-treffer">Niks gevind vir <b>{soek.trim()}</b> nie.</p>
+                ) : (
+                  <>
+                    <div className="byb-afdeling">
+                      {teksSoek.totaal.toLocaleString('af-ZA')} {teksSoek.totaal === 1 ? 'vers' : 'verse'}
+                      {teksSoek.totaal > teksSoek.treffers.length && ` · eerste ${teksSoek.treffers.length}`}
+                    </div>
+                    {teksSoek.treffers.map(t => (
+                      <button
+                        key={`${t.kode}.${t.hoofstuk}.${t.vers}`}
+                        className="byb-soek-vers"
+                        onClick={() => springNa(t.kode, t.hoofstuk, t.vers)}
+                      >
+                        <span className="byb-soek-vers-ref">{boekNaam(t.kode)} {t.hoofstuk}:{t.vers}</span>
+                        <span className="byb-soek-vers-teks">{t.teks}</span>
+                      </button>
+                    ))}
+                  </>
                 )
               )}
 
@@ -537,6 +597,36 @@ export default function Bybel({ onClose }) {
               </button>
             </div>
             <p className="byb-vers-nota">Deel stuur ook 'n skakel na die app saam.</p>
+
+            {/* ── Waar praat die Bybel nog hieroor? ──
+                Die Treasury of Scripture Knowledge, met OpenBible.info se
+                rangorde, dus staan die sterkste verwysings eerste. Dit is die
+                soort ding wat 'n mens in 'n studeerbybel kry, en geen gratis
+                Afrikaanse app het dit.
+
+                Die lêer word eers gehaal wanneer iemand 'n vers aantik —
+                gewone lees raak dit nooit aan. */}
+            {verwysings.length > 0 && (
+              <div className="byb-kruis">
+                <div className="byb-kruis-kop">Waar praat die Bybel nog hieroor?</div>
+                <div className="byb-kruis-lys">
+                  {verwysings.slice(0, wysAlleKruis ? verwysings.length : 8).map(([k, h, v, tot], i) => (
+                    <button
+                      key={`${k}.${h}.${v}.${i}`}
+                      className="byb-kruis-een"
+                      onClick={() => { setGekose(null); springNa(k, h, v) }}
+                    >
+                      {boekNaam(k)} {h}:{v}{tot ? '-' + tot : ''}
+                    </button>
+                  ))}
+                </div>
+                {verwysings.length > 8 && !wysAlleKruis && (
+                  <button className="byb-kruis-meer" onClick={() => setWysAlleKruis(true)}>
+                    Wys al {verwysings.length}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -657,6 +747,13 @@ export default function Bybel({ onClose }) {
               &copy; {GAB_ERKENNING.kopiereg}. Beskikbaar onder die Creative
               Commons Erkenning&ndash;NieKommersieel&ndash;GeenAfgeleides 4.0
               Internasionaal-lisensie ({GAB_ERKENNING.lisensie}).
+            </p>
+
+            <p className="byb-oor-teks byb-oor-fyn">
+              Die kruisverwysings kom uit die <i>Treasury of Scripture
+              Knowledge</i> (publieke domein) saam met OpenBible.info se
+              rangorde, gebruik onder die Creative Commons
+              Erkenning 4.0-lisensie.
             </p>
 
             <p className="byb-oor-teks byb-oor-fyn">

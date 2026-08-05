@@ -159,6 +159,47 @@ Hoofstuk 1 is indeks 0. Vers 1 is indeks 0. Plat teks, geen opmaak.
 
 ---
 
+## Wat die app hiermee doen
+
+### Kruisverwysings
+
+Tik 'n vers aan en die blad wys **"Waar praat die Bybel nog hieroor?"** — die
+sterkste ander plekke wat oor dieselfde ding praat. Johannes 3:16 gee jou
+Romeine 5:8, 1 Johannes 4:9-10, Romeine 8:32. Tik een en jy is daar.
+
+309 310 verwysings, 5,6 MB, in `public/gab/x/` — **aparte lêers**. Gewone lees
+raak hulle nooit aan; net wie 'n vers aantik, trek daardie een boek s'n. Dit is
+in die blaaier bevestig.
+
+Bron: *Treasury of Scripture Knowledge* (publieke domein) plus OpenBible.info
+se rangorde (CC BY 4.0). Die erkenning staan op "Oor hierdie vertaling" en
+**mag nie uitval nie** — CC BY vereis dit.
+
+Die afkortings ("Joh 1:1-3") word by die INVOER opgelos, uit hul eie indeks se
+`abbr`- en `name`-velde, en as kodes gestoor. Die app ontleed dus niks. 'n
+Afkorting wat ons nie ken nie word getel en gerapporteer, nie stil laat val nie.
+
+Hoogstens 20 per vers, in hul rangorde. Genesis 1:1 alleen het 61; die
+sterkstes staan eerste. Die blad wys agt, met "Wys al 20".
+
+### Soek — enige woord, aflyn
+
+Tik "vergifnis" of "moeg" of "vrede" en die app soek deur al 31 102 verse,
+sonder sein. Dit is waarvoor mense 'n Bybel oopmaak wanneer hulle swaarkry, en
+dit is presies wat die ander gratis Afrikaanse opsies nie kan doen nie.
+
+Die eerste soektog laai die 66 lêers in die geheue (die diensketter het hulle
+meestal reeds op skyf). Daarna is dit oombliklik — gemeet op 811 ms vir "moeg"
+met 31 treffers. **Gewone lees word nooit geraak nie**; die kode loop net
+wanneer iemand tik.
+
+Aksente en hoofletters maak nie saak nie. 'n Verwysing ("Joh 3:16") werk nog
+soos altyd; die twee staan langs mekaar.
+
+Dit werk net vir die GAB, want net sy teks le op die toestel.
+
+---
+
 ## Wat gebeur as die lêers nie daar is nie
 
 **Niks.** `indeks.json` misluk stil, die GAB verskyn nie in die vertalinglys nie,

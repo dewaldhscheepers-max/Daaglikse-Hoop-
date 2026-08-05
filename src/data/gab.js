@@ -180,3 +180,104 @@ export async function gabTeks(kode, nr) {
 export async function gabHoofstukAantal(kode) {
   try { return (await haalBoek(kode)).hoofstukke.length } catch { return 0 }
 }
+
+/* ────────────────────────────────────────────────────────────
+   Soek deur die hele Bybel, aflyn.
+
+   Die 66 lêers le op die toestel, dus kan 'n mens vir 'n WOORD soek en nie
+   net vir 'n verwysing nie — "vergifnis", "moeg", "vrede". Dit is waarvoor
+   mense 'n Bybel oopmaak wanneer hulle swaarkry, en dit is presies wat die
+   gratis Afrikaanse opsies nie kan doen nie.
+
+   Die koste: die eerste soektog moet al 66 lêers inlees. Daarna is dit in die
+   geheue en oombliklik, en die diensketter hou hulle op skyf. GEWONE LEES
+   WORD NOOIT GERAAK NIE — hierdie kode loop net wanneer iemand tik.
+   ──────────────────────────────────────────────────────────── */
+
+/* Sonder aksente en sonder hoofletters, sodat "Jesaja" en "jesaja" en
+   "moeg" en "Moeg" dieselfde is. Dit raak nooit die teks wat gewys word
+   nie — net die kopie waarin ons soek. */
+function platteland(t) {
+  return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+let soekBelofte = null
+
+/* Laai die hele Bybel in die geheue, een keer. Die roeper kan 'n
+   vordering-funksie gee sodat die skerm iets kan wys. */
+export function laaiAllesVirSoek(opVordering) {
+  if (soekBelofte) return soekBelofte
+  soekBelofte = (async () => {
+    const ind = await gabIndeks()
+    if (!ind) { soekBelofte = null; return null }
+    const boeke = ind.boeke.filter(k => BOEKE[k])
+    let klaar = 0
+    const uit = []
+    /* Ses op 'n slag: vinnig genoeg, en dit versmoor nie 'n stadige foon nie. */
+    for (let i = 0; i < boeke.length; i += 6) {
+      const stuk = boeke.slice(i, i + 6)
+      const data = await Promise.all(stuk.map(async kode => {
+        try { return { kode, d: await haalBoek(kode) } } catch { return null }
+      }))
+      for (const x of data) {
+        klaar++
+        if (!x) continue
+        uit.push({ kode: x.kode, hoofstukke: x.d.hoofstukke })
+      }
+      if (opVordering) opVordering(klaar, boeke.length)
+    }
+    return uit
+  })().catch(() => { soekBelofte = null; return null })
+  return soekBelofte
+}
+
+/* Soek 'n frase. Gee 'n lys treffers terug, in Bybelvolgorde.
+
+   `maks` hou die lys hanteerbaar; die teller se hoeveel daar in werklikheid
+   is, sodat 'n mens weet of jy jou soektog moet vernou. */
+export async function soekTeks(vraag, { maks = 60 } = {}) {
+  const naald = platteland(String(vraag || '').trim())
+  if (naald.length < 3) return { treffers: [], totaal: 0, kort: true }
+
+  const alles = await laaiAllesVirSoek()
+  if (!alles) return { treffers: [], totaal: 0, fout: true }
+
+  const treffers = []
+  let totaal = 0
+  for (const { kode, hoofstukke } of alles) {
+    for (let h = 0; h < hoofstukke.length; h++) {
+      const verse = hoofstukke[h]
+      for (let v = 0; v < verse.length; v++) {
+        const teks = verse[v]
+        if (!teks) continue
+        if (platteland(teks).includes(naald)) {
+          totaal++
+          if (treffers.length < maks) treffers.push({ kode, hoofstuk: h + 1, vers: v + 1, teks })
+        }
+      }
+    }
+  }
+  return { treffers, totaal }
+}
+
+/* ── Kruisverwysings ──
+
+   Aparte lêers onder /gab/x/, sodat gewone lees hulle nooit laai nie. Net
+   wie 'n vers aantik, trek daardie een boek se lys.
+
+   'n Verwysing is [kode, hoofstuk, vers, totVers] — die afkortings is by die
+   invoer opgelos, dus hoef die app niks te ontleed nie. */
+const xKas = {}
+
+export async function gabVerwysings(kode, hoofstuk, vers) {
+  try {
+    if (!xKas[kode]) xKas[kode] = await haalJson(`${BASIS}/x/${kode}.json`)
+    const h = xKas[kode] && xKas[kode].verwysings && xKas[kode].verwysings[String(hoofstuk)]
+    const lys = h && h[String(vers)]
+    return Array.isArray(lys) ? lys : []
+  } catch {
+    /* Geen kruisverwysings is nie 'n fout wat 'n mens moet sien nie — die
+       vers-blad wys dan bloot niks ekstra nie. */
+    return []
+  }
+}
