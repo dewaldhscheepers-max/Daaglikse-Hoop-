@@ -193,3 +193,69 @@
   border-color: #5C4E8E;
   color: #FFFFFF;
 }
+
+/* ── Die stemantwoord ── */
+.so { margin-bottom: 10px; }
+
+.so-knoppe {
+  display: flex;
+  gap: 7px;
+}
+.so-knoppe .sk-knop { flex: 1; }
+
+.so-opneem {
+  background: #A33A3A;
+  border-color: #A33A3A;
+  color: #FFFFFF;
+}
+.so-opneem:active { background: #8A2F2F; }
+
+.so-besig {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid #E4B9B9;
+  border-radius: 12px;
+  background: #FFF4F4;
+  color: #8A2F2F;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.so-besig .sk-knop { flex: 0 0 auto; margin-left: auto; }
+
+/* 'n Rooi kol wat wys dat dit loop. Geen transform of opacity op :active
+   nie — dit is 'n animasie op 'n eie element, nie 'n druk-effek nie, en dit
+   maak nie 'n saamgestelde laag by elke druk nie. Sien CLAUDE.md. */
+.so-kol {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #A33A3A;
+  animation: so-klop 1.2s ease-in-out infinite;
+}
+@keyframes so-klop {
+  0%, 100% { background: #A33A3A; }
+  50%      { background: #E8B4B4; }
+}
+
+.so-naam {
+  margin-bottom: 7px;
+  font-size: 12.5px;
+  color: #8A7E9A;
+  word-break: break-all;
+}
+
+.so-speler {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin-bottom: 9px;
+}
+
+.so-klaar {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2F7A4F;
+}

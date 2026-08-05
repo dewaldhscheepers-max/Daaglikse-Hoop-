@@ -265,9 +265,18 @@ manier waarop iemand sien dat daar op SY ding geantwoord is.
 Is daar nog nie 'n antwoord nie, dra die plasing 'n **video**. Nooit net
 iemand se pyn alleen op 'n skerm nie.
 
-Die antwoord is 'n **skakel** na Dewald se eie stem (of 'n video, of
-geskrewe woorde). Daar is geen opname vanuit die app nie — hy maak dit soos
-hy altyd doen en plak die skakel in die keurpaneel.
+Die antwoord kom in drie vorme, en die stemnota word **in die keurpaneel
+self** gemaak — presies soos die stemnotas op Luister:
+
+| Vorm | Hoe |
+|---|---|
+| **Stemnota** | Kies 'n klanklêer, of **neem dit daar en dan op**. Dit gaan na Firebase Storage onder `sorg-antwoorde/`. |
+| **Video** | 'n YouTube-skakel. Daardie bandwydte hoort nie by ons nie. |
+| **Geskrewe** | Net woorde. |
+
+Dit was eers net 'n plek om 'n *skakel* te plak, wat beteken het hy moes die
+klanklêer eers iewers anders oplaai. Dit is 'n omweg wat niemand elke dag
+gaan loop nie.
 
 ### Die reaksie
 

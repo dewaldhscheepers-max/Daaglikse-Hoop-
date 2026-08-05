@@ -23,6 +23,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { vergeetMuur } from '../data/sorgMuur'
+import SorgOpname from '../components/SorgOpname'
 import './SorgKeur.css'
 
 const HOPIES = [
@@ -268,12 +269,18 @@ function Muur({ data, doen, besig }) {
                   </button>
                 ))}
               </div>
-              {tipe !== 'teks' && (
+              {/* 'n Stemnota word HIER opgeneem of gekies, nie iewers anders
+                  opgelaai en dan geplak nie. Dieselfde as die stemnotas op
+                  Luister. Vir 'n video bly dit 'n YouTube-skakel — daardie
+                  bandwydte hoort nie by ons nie. */}
+              {tipe === 'oudio' && <SorgOpname bron={bron} onBron={setBron} />}
+
+              {tipe === 'video' && (
                 <input
                   className="sk-video"
                   value={bron}
                   onChange={e => setBron(e.target.value)}
-                  placeholder={tipe === 'oudio' ? 'Skakel na die klanklêer (https://…)' : 'YouTube-skakel'}
+                  placeholder="YouTube-skakel"
                 />
               )}
               <textarea
@@ -284,7 +291,11 @@ function Muur({ data, doen, besig }) {
                 placeholder={tipe === 'teks' ? 'Jou antwoord' : 'Iets daarby, as jy wil (opsioneel)'}
               />
               <div className="sk-knoppe">
-                <button className="sk-knop sk-plaas" disabled={besig} onClick={() => stuur(m)}>
+                <button
+                  className="sk-knop sk-plaas"
+                  disabled={besig || (tipe === 'teks' ? !teks.trim() : !bron.trim())}
+                  onClick={() => stuur(m)}
+                >
                   Plaas die antwoord
                 </button>
                 <button className="sk-knop" onClick={() => setOop(null)}>Los</button>
