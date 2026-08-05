@@ -1,0 +1,32 @@
+# Verken hoe die Getroue Afrikaanse Bybel se werf sy teks laai.
+#
+# Hoekom dit hier loop en nie op 'n rekenaar nie: die gewone manier is Chrome
+# se Network-oortjie en 'n HAR-lêer, en 'n mens kan nie DevTools op 'n foon
+# oopmaak nie. Hierdie werkstroom doen dieselfde ding en druk die antwoord in
+# die log.
+#
+# Dit haal net openbare bladsye, een per sekonde, hoogstens 24 keer. Dit skryf
+# niks en verander niks aan hierdie repo nie.
+#
+# Loop dit met die hand: Actions -> "Verken die GAB se werf" -> Run workflow.
+
+name: Verken die GAB se werf
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verken:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verken
+        run: node skrifte/verken-gab.mjs
