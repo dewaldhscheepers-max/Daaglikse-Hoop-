@@ -45,6 +45,36 @@ gebruik word nie.
 
 ---
 
+## Waar die teks vandaan moet kom
+
+Die GAB-projek publiseer **geen** aflaaibare lêer nie — geen JSON, USFM, PDF
+of GitHub-repo. Ons het dit nagegaan met 'n verkenning wat vanaf 'n
+GitHub-werkstroom geloop het (22 openbare versoeke, een per sekonde, Augustus
+2026). Wat dit gewys het:
+
+* Die werf is met **Astro** gebou. `config.js` noem
+  `https://qcvlwwnxzvevkealcjxd.supabase.co`.
+* Die Bybelteks is **nie** in die HTML nie, **nie** in die JS-bondels nie, en
+  **nie** by enige endpunt wat 'n mens sou raai nie.
+* `robots.txt` sê `Allow: /`, maar die **sitemap het net 7 URL's**, en almal
+  is inligtingsbladsye (`waarom-die-kjv.html`, `vrae.html`, ens.). Daar is
+  geen hoofstukbladsy om te lees nie.
+* Die leser is één kliënt-kant bladsy wat elke hoofstuk uit Supabase trek.
+
+**Gevolgtrekking: die enigste pad na die teks is hul databasis.**
+
+En daar hou ons op. Die CC BY-NC-ND-lisensie gee ons die **teks**; dit gee ons
+nie hul **infrastruktuur** nie. Hul anon-sleutel staan wel in `config.js`, maar
+31 102 rye daardeur trek is hul Supabase-kwota, op hul rekening, teen 'n
+volume wat geen leser ooit sou veroorsaak nie. Dat hulle geen uitvoer publiseer
+en net 7 bladsye in die sitemap het, sê ook duidelik genoeg dat grootmaat-
+toegang nie die bedoeling is nie.
+
+Die regte pad is om te vra. Die versoek is klein en maklik om ja op te sê: 'n
+uitvoer van die teks, of toestemming om dit een keer stadig te trek.
+
+---
+
 ## Hoe die teks in die app kom
 
 Die teks sit **nie** in die kode nie. Dit is 66 statiese lêers onder
