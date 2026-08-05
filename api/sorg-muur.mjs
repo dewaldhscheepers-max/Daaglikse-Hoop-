@@ -48,7 +48,6 @@ function virDieSkerm(m) {
     onderwerp: m.onderwerp || 'ander',
     datum: m.datum || '',
     antwoord: m.antwoord || null,
-    videoId: m.videoId || '',
     saam: Number(m.saam) || 0,
   }
 }

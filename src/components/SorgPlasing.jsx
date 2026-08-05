@@ -19,8 +19,16 @@
    dieselfde kaart, want dit is die enigste manier waarop 'n mens sien dat
    daar op sy ding geantwoord is.
 
-   Is daar nog nie 'n antwoord nie, dra die plasing 'n VIDEO. Nooit net
-   iemand se pyn alleen op 'n skerm nie.
+   OP DIE MUUR KOM NET DEWALD SE ANTWOORDE. Niks anders nie.
+
+   Hier was 'n rukkie 'n video by elke plasing sonder 'n antwoord, en daarna
+   ook 'n stemnota uit Luister. Dewald het dit reguit gestop: die muur is sy
+   antwoorde, nie 'n plek waar die res van die app ingedra word nie. Iemand
+   wat hier lees, moet die mens se woorde sien en dan sy stem — nie 'n
+   biblioteek nie.
+
+   Die "Terwyl jy wag"-lys bestaan nog, maar net op EEN plek: die skerm direk
+   na 'n indiening, waar iemand werklik wag. Sien `SorgWag`.
 
    Geen kommentaar nie. Geen vreemdeling se raad onder 'n vrou se beskrywing
    van haar huwelik nie.
@@ -31,9 +39,6 @@
 import { useState } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { draSaam, draSaamReeds } from '../data/sorgMuur'
-import { hoopVir } from '../data/sorgVideos'
-import SorgVideo from './SorgVideo'
-import SorgWag from './SorgWag'
 import SorgDeelSteun from './SorgDeelSteun'
 import './SorgPlasing.css'
 
@@ -78,33 +83,11 @@ function egteAntwoord(a) {
   return null
 }
 
-export default function SorgPlasing({ plasing, videos = [], notas = null }) {
+export default function SorgPlasing({ plasing }) {
   const [saam, setSaam] = useState(plasing.saam || 0)
   const [gedra, setGedra] = useState(() => draSaamReeds(plasing.id))
 
   const antwoord = egteAntwoord(plasing.antwoord)
-
-  /* ── Elke plasing moet iets dra wat help ──
-
-     Dit is die reel waarop die hele muur staan: nooit net iemand se pyn
-     alleen op 'n skerm nie. Dit was gebreek. Die video by 'n plasing is
-     opsioneel in die keurpaneel, dus was 'n plasing sonder antwoord EN
-     sonder 'n gekose video heeltemal kaal — en dit is die gewone geval,
-     want Dewald antwoord nie binne die eerste uur nie.
-
-     Nou val ons terug op die biblioteek: 'n video wat by die onderwerp pas,
-     anders die bree een, anders enige. Presies dieselfde valpad as die een
-     wat iemand kry direk nadat hy gestuur het. */
-  const gekies = plasing.videoId
-    ? (videos.find(v => v.videoId === plasing.videoId) ||
-       { id: plasing.id + '-v', videoId: plasing.videoId, titel: 'Iets wat dalk nou kan help' })
-    : null
-
-  const terugval = !antwoord && !gekies && videos.length
-    ? (hoopVir(plasing.onderwerp, { videos, week: null }) || {}).video || null
-    : null
-
-  const video = gekies || terugval
 
   async function dra() {
     if (gedra) return
@@ -153,30 +136,6 @@ export default function SorgPlasing({ plasing, videos = [], notas = null }) {
           <SorgDeelSteun soort="plasing" id={plasing.id} />
         </div>
       )}
-
-      {/* ── Is daar nog nie 'n antwoord nie, dan iets wat wel help ──
-
-          Op die MUUR bly dit by een ding. Die volle "Terwyl jy wag"-lys hoort
-          op die skerm na 'n indiening, waar iemand wag en tyd het. Sit 'n
-          mens hom onder elke plasing, word elke kaart 'n spyskaart en dan
-          lees niemand meer die mens se woorde nie.
-
-          Is daar glad geen video nie — en op die oomblik is daar nul — val
-          dit terug op EEN stemnota. Nooit net iemand se pyn alleen nie. */}
-      {!antwoord && (video ? (
-        <div className="sp-hoop">
-          <p className="sp-hoop-kop">Iets wat jou dalk nou kan help</p>
-          <SorgVideo video={video} />
-          <SorgDeelSteun soort="video" id={video.videoId} titel={video.titel} />
-        </div>
-      ) : (
-        /* GEEN omhulsel hier nie. Dit was 'n <div className="sp-hoop"> om
-           SorgWag, en wanneer SorgWag niks het om te wys nie, gee hy null
-           terug — maar die omhulsel het bly staan met sy marge. 'n Leë blok
-           onder iemand se woorde lyk soos iets wat nie gelaai het nie.
-           SorgWag dra sy eie spasie. */
-        <SorgWag onderwerp={plasing.onderwerp} notas={notas} kort />
-      ))}
 
       {/* ── Geselskap, nie 'n punt nie ── */}
       <button className={`sp-saam${gedra ? ' gedra' : ''}`} onClick={dra} disabled={gedra}>

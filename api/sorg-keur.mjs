@@ -53,19 +53,6 @@ function skoonNaam(n) {
   return s.split(/\s+/)[0] || ''
 }
 
-/* Dieselfde as die video-admin: Dewald plak 'n skakel, ons haal die ID.
-   Vra 'n mens hom om net die ID te plak, plak hy die skakel. */
-function haalVideoId(inset) {
-  const s = String(inset || '').trim()
-  const m = s.match(/shorts\/([a-zA-Z0-9_-]{6,})/) ||
-    s.match(/[?&]v=([a-zA-Z0-9_-]{6,})/) ||
-    s.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/) ||
-    s.match(/embed\/([a-zA-Z0-9_-]{6,})/)
-  if (m) return m[1]
-  if (/^[a-zA-Z0-9_-]{6,20}$/.test(s)) return s
-  return ''
-}
-
 /* 'n Antwoord is 'n SKAKEL na Dewald se eie stem, of 'n video, of geskrewe
    woorde. Geen opname vanuit die app nie — hy maak dit soos hy altyd doen en
    plak die skakel hier. */
@@ -166,10 +153,11 @@ export default async function handler(req, res) {
         datum: new Date().toISOString().slice(0, 10),
         geskep: new Date(),
         gepubliseer: true,
-        /* Elke plasing dra iets wat help. Is daar nog nie 'n antwoord nie,
-           dan 'n video — nooit net iemand se pyn alleen op 'n skerm nie. */
+        /* OP DIE MUUR KOM NET DEWALD SE ANTWOORDE. Daar was hier 'n
+           `videoId` sodat 'n plasing sonder antwoord tog iets kon dra; dit
+           is weg. Die muur is sy stem, nie 'n plek waar die res van die app
+           ingedra word nie. */
         antwoord: null,
-        videoId: haalVideoId(lyf.videoId),
         saam: 0,
       }
       await skryfDok(MUUR, muurId, doc)
@@ -191,7 +179,6 @@ export default async function handler(req, res) {
       if (!lyf.muurId) return res.status(400).json({ fout: 'geen muurId nie' })
       const velde = {}
       if (typeof lyf.teks === 'string') velde.teks = skoonTeks(lyf.teks, MAKS_MUUR_TEKS)
-      if (typeof lyf.videoId === 'string') velde.videoId = haalVideoId(lyf.videoId)
       if (typeof lyf.gepubliseer === 'boolean') velde.gepubliseer = lyf.gepubliseer
       if (!Object.keys(velde).length) return res.status(400).json({ fout: 'niks om te verander nie' })
       await skryfDok(MUUR, String(lyf.muurId), velde, { velde: Object.keys(velde) })

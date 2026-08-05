@@ -15,6 +15,11 @@
    Luister toe nie: hy is besig met iets, en 'n mens wat weggestuur word,
    kom nie terug nie.
 
+   DIT LOOP OP EEN PLEK: die skerm direk na 'n indiening. Dit was 'n rukkie
+   ook op die muur, en Dewald het dit reguit gestop — die muur is sy
+   antwoorde, nie 'n plek waar die res van die app ingedra word nie. Dit is
+   "terwyl jy wag", en 'n mens wag net nadat hy geskryf het.
+
    Geen prys, nooit. Net gratis boeke kom hier.
    ──────────────────────────────────────────────────────────── */
 

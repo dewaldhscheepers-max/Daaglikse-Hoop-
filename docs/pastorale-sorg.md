@@ -275,8 +275,8 @@ Dewald se antwoord sit **binne dieselfde kaart**, direk onder die persoon se
 woorde. Nie 'n aparte blad nie en nie 'n draad nie — dit is die enigste
 manier waarop iemand sien dat daar op SY ding geantwoord is.
 
-Is daar nog nie 'n antwoord nie, dra die plasing 'n **video**. Nooit net
-iemand se pyn alleen op 'n skerm nie.
+Is daar nog nie 'n antwoord nie, dra die plasing **niks anders** nie — net
+die mens se woorde. Die muur is Dewald se antwoorde.
 
 Die antwoord kom in drie vorme, en die stemnota word **in die keurpaneel
 self** gemaak — presies soos die stemnotas op Luister:
@@ -344,10 +344,14 @@ het eers net op VIDEO'S teruggeval — maar daar is nog nul Sorg-video's, dus
 was die valpad leeg en die kaarte kaal. Die app is intussen vol van goed wat
 werk.
 
-| Waar | Wat |
-|---|---|
-| Na 'n indiening | 'n video as daar een is, **drie stemnotas**, en een **gratis e-boek** |
-| Op 'n muurkaart sonder antwoord | 'n video, of anders **een** stemnota |
+**Dit loop op EEN plek: die skerm direk ná 'n indiening.** 'n Video as daar
+een is, **drie stemnotas**, en een **gratis e-boek**.
+
+Dit was 'n rukkie ook op die muur. Dewald het dit reguit gestop, en hy was
+reg: **op die muur kom net sy antwoorde.** Geen Daaglikse Hoop-stemnotas,
+geen video's, niks. Die muur is die mens se woorde en dan sy stem — nie 'n
+plek waar die res van die app ingedra word nie. Dit is "terwyl jy wag", en
+'n mens wag net nadat hy geskryf het.
 
 Die stemnotas kom regstreeks uit Luister se `notes` (klaar oop vir lees) en
 speel HIER, met 'n gewone speler. Ons stuur niemand na Luister toe nie — 'n
@@ -357,10 +361,6 @@ Hulle word by ONDERWERP gekies waar dit kan: die titel, die reeks en die
 skrifverwysing word teen 'n paar woorde getoets. Tref niks, kry hy die
 nuutstes. Dit is nie slim nie en dit hoef nie te wees nie — 'n stemnota van
 Dewald is nooit die verkeerde ding nie.
-
-Op die MUUR bly dit by een ding. Die volle lys hoort waar iemand wag en tyd
-het; onder elke plasing sou dit van elke kaart 'n spyskaart maak en dan lees
-niemand meer die mens se woorde nie.
 
 Die e-boek staan **laaste en klein**, en dit is **altyd gratis** — daar is 'n
 toets wat dit vashou. Iemand wat pas geskryf het dat hy nie meer wil lewe

@@ -43,7 +43,6 @@ export default function SorgKeur({ geheim }) {
   const [hopie, setHopie] = useState(null)
   const [oop, setOop] = useState(null)        // die id wat oop is
   const [teks, setTeks] = useState('')
-  const [videoId, setVideoId] = useState('')
   const [besig, setBesig] = useState(false)
   const [boodskap, setBoodskap] = useState(null)
 
@@ -95,7 +94,6 @@ export default function SorgKeur({ geheim }) {
   function maakOop(b) {
     setOop(b.id)
     setTeks(b.teks || '')
-    setVideoId('')
     setBoodskap(null)
   }
 
@@ -116,7 +114,6 @@ export default function SorgKeur({ geheim }) {
       onderwerp: b.onderwerp,
       anoniem: !b.naam,
       naam: b.naam,
-      videoId,
       tochPlaas,
     })
     if (d && d.ok) { setOop(null); setBoodskap({ goed: 'Op die muur.' }) }
@@ -207,17 +204,6 @@ export default function SorgKeur({ geheim }) {
               <div className="admin-books-note">
                 Dít is wat op die muur gaan wys. Haal name, dorpe en nommers
                 uit. Die rou weergawe bly hier en gaan nêrens heen nie.
-              </div>
-
-              <input
-                className="sk-video"
-                value={videoId}
-                onChange={e => setVideoId(e.target.value)}
-                placeholder="YouTube-skakel wat by hierdie plasing hoort (opsioneel)"
-              />
-              <div className="admin-books-note">
-                Terwyl daar nog nie 'n antwoord is nie, dra die plasing hierdie
-                video. Nooit net iemand se pyn alleen op 'n skerm nie.
               </div>
 
               <div className="sk-knoppe">
