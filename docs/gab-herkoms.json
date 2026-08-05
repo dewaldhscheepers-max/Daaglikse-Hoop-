@@ -1,5 +1,5 @@
 {
-  "gehaal": "2026-08-05T07:28:38.808Z",
+  "gehaal": "2026-08-05T08:58:48.787Z",
   "bron": "https://getroueafrikaansebybel.com/data/",
   "werf": "https://getroueafrikaansebybel.com",
   "lisensie": "CC BY-NC-ND 4.0",
@@ -10,6 +10,11 @@
   "boeke": 66,
   "hoofstukke": 1189,
   "verse": 31102,
+  "kruisverwysings": {
+    "boeke": 66,
+    "aantal": 309310,
+    "bron": "Treasury of Scripture Knowledge (publieke domein) + OpenBible.info (CC BY 4.0)"
+  },
   "ontbrekendeBoeke": [],
   "rou": {
     "GEN": "ffcf54bdcfd9da8c8f5fc40b40914093384548311e34fed93bbdf148ec8bbec4",
