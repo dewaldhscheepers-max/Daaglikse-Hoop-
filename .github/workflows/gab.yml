@@ -1,0 +1,59 @@
+# Die Getroue Afrikaanse Bybel se teks.
+#
+# Loop met die hand: Actions -> "GAB" -> Run workflow -> kies 'n stap.
+#
+#   skema  — kyk hoe hul openbare data lyk. Lees net, skryf niks.
+#   haal   — trek die teks, bou public/gab/, en stoot dit.
+#
+# Waarom dit hier loop en nie op 'n rekenaar nie: daar is nie een. GitHub se
+# masjiene het 'n netwerk; hierdie werkstroom is die enigste pad.
+#
+# Wat dit gebruik: hul eie openbare config.js en die anon-sleutel daarin —
+# die sleutel wat vir ongeverifieerde besoekers bedoel is. Niks word omseil
+# nie, en dit hou dadelik op by 'n 401, 403 of 429.
+
+name: GAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      stap:
+        description: 'Watter stap'
+        required: true
+        default: skema
+        type: choice
+        options: [skema, haal]
+
+permissions:
+  contents: write
+
+jobs:
+  gab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Skema
+        if: inputs.stap == 'skema'
+        run: node skrifte/gab-skema.mjs
+
+      - name: Haal
+        if: inputs.stap == 'haal'
+        run: node skrifte/haal-gab.mjs
+
+      - name: Stoot
+        if: inputs.stap == 'haal'
+        run: |
+          git config user.name  "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add public/gab docs/gab-herkoms.json
+          if git diff --cached --quiet; then
+            echo "Niks verander nie."
+          else
+            git commit -m "Die GAB se teks (outomaties gehaal)"
+            git push
+          fi
