@@ -1,18 +1,58 @@
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import { cacheNames } from 'workbox-core'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
 
+/* Verhoog hierdie getal om elke geinstalleerde app te dwing om sy
+   looptyd-kasse weg te gooi en van voor af te laai.
+
+   Hoekom dit bestaan: 'n geinstalleerde PWA op Android hou sy bladsy lewend
+   in die agtergrond. 'n Mens "maak die app oop" en dit is dieselfde document
+   as gister — dieselfde JavaScript, dieselfde veranderlikes in die geheue.
+   Nuwe kode kan ontplooi wees, en 'n nuwe bate soos public/gab/ kan lewend
+   wees, en die app sien dit nooit.
+
+   Die enigste lêer wat 'n blaaier ALTYD vars gaan haal, is hierdie een
+   (vercel.json sit max-age=0, must-revalidate op /sw.js). Die diensketter is
+   dus die enigste hefboom wat van buite af werk.
+
+   LET OP: die vooraf-kas word NOOIT hier uitgevee nie. Workbox bou hom
+   tydens install, en om hom in activate weg te gooi laat die app met niks —
+   dan werk aflyn nie meer nie. cleanupOutdatedCaches() vat die ou weergawes;
+   hierdie een vat net die looptyd-kasse. */
+const SPOEL = 3
+
+async function spoelLooptyd() {
+  const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
+  const almal = await caches.keys()
+  await Promise.all(almal.filter(n => !hou.has(n)).map(n => caches.delete(n)))
+}
+
 self.addEventListener('install', () => self.skipWaiting())
+
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    self.clients.claim().then(() =>
-      self.clients.matchAll({ type: 'window' }).then(clients =>
-        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }))
-      )
-    )
-  )
+  event.waitUntil((async () => {
+    try {
+      const k = await caches.open('dh-spoel')
+      const r = await k.match('nommer')
+      const vorige = r ? Number(await r.text()) : null
+      if (vorige !== SPOEL) {
+        await spoelLooptyd()
+        await k.put('nommer', new Response(String(SPOEL)))
+      }
+    } catch { /* 'n kas wat nie oopmaak nie mag nooit die aktivering keer nie */ }
+
+    await self.clients.claim()
+
+    /* En se vir elke oop bladsy om te herlaai. Die app luister hierna in
+       main.jsx en in App.jsx, en doen dit al lank — ook die ou weergawes wat
+       nou op mense se fone loop. Dit is hoekom hierdie boodskap 'n ou app kan
+       red. */
+    const clients = await self.clients.matchAll({ type: 'window' })
+    clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }))
+  })())
 })
 
 cleanupOutdatedCaches()

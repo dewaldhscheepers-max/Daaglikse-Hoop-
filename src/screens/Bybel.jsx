@@ -547,21 +547,18 @@ export default function Bybel({ onClose }) {
           <div className="byb-blad-agter" onClick={() => setBlad(false)} />
           <div className="byb-blad" role="dialog" aria-label="Kies jou Bybelvertaling">
             <div className="byb-blad-gryp" />
-            <h2 className="byb-blad-titel">Kies jou Bybelvertaling</h2>
-            {/* Elke Afrikaanse gebruiker vra dieselfde vraag: waar is die
-                1953 en die 1983? Die antwoord moet hier staan, anders lyk dit
-                soos 'n fout in die app. */}
-            {afrikaans.length > 0 && (
-              <p className="byb-blad-nota">
-                Die Getroue Afrikaanse Bybel is 'n onafhanklike vertaling uit
-                die King James, en die enigste een wat in 'n ander app ingesluit
-                mag word. Die 1953 en 1983 mag nie — die Bybelgenootskap van SA
-                gee nie daarvoor toestemming nie. Jy kan hulle wel met een druk
-                op BibleSA oopmaak, onderaan elke hoofstuk.
-              </p>
-            )}
+            <h2 className="byb-blad-titel">Kies</h2>
             <div className="byb-blad-lys">
-              {afrikaans.length > 0 && <div className="byb-blad-afdeling">Afrikaans</div>}
+              {/* Een reel, onder die opskrif. Die lang verduideliking oor die
+                  1953 en die 1983 was te veel vir 'n keuseblad; wie meer wil
+                  weet, kry dit op "Oor hierdie vertaling". */}
+              {afrikaans.length > 0 && <>
+                <div className="byb-blad-afdeling">Afrikaans</div>
+                <p className="byb-blad-fyn">
+                  Die Getroue Afrikaanse Bybel is 'n onafhanklike vertaling uit
+                  die King James.
+                </p>
+              </>}
               {afrikaans.map(w => {
                 const k = goedgekeurdeSleutel(w.abbreviation)
                 return (
@@ -609,6 +606,10 @@ export default function Bybel({ onClose }) {
                 )
               })}
             </div>
+            {/* Die bouweergawe. Dit lyk na niks, maar dit is die enigste manier
+                om op 'n skermkiekie te sien of iemand se app werklik die nuwe
+                kode het — 'n geinstalleerde PWA kan dae lank op ou kode sit. */}
+            <p className="byb-bou">weergawe {__BOU__}</p>
           </div>
         </>
       )}

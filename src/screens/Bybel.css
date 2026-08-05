@@ -684,3 +684,20 @@
   border: 1px solid #E2D8C0;
   font-size: 13.5px;
 }
+
+.byb-bou {
+  margin: 10px 20px 0;
+  font-size: 10.5px;
+  color: var(--byb-sag);
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* Die een reel onder die Afrikaans-opskrif in die keuseblad. */
+.byb-blad-fyn {
+  margin: 0 4px 10px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--byb-sag);
+}
