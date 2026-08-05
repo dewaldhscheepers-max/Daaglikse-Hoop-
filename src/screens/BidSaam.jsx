@@ -9,6 +9,18 @@ import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
 import SaturdayVideoCard from '../components/SaturdayVideoCard'
 
+/* Die "Bid Nou sit nou hier"-strokie is vir mense wat die ou balk geken het.
+   Dit wys 'n paar keer en gaan dan weg — 'n permanente banier word meubels. */
+const BIDNOU_WYS = 4
+function bidnouAlGesien() {
+  try {
+    const n = Number(localStorage.getItem('bidnou_skuif_gesien') || 0)
+    if (n >= BIDNOU_WYS) return true
+    localStorage.setItem('bidnou_skuif_gesien', String(n + 1))
+    return false
+  } catch { return true }
+}
+
 function timeLabel(ts) {
   if (!ts) return 'Nou net'
   const date = ts.toDate ? ts.toDate()
@@ -264,6 +276,9 @@ export default function BidSaam() {
 
   const [showScrollHint, setShowScrollHint] = useState(true)
   const [saamgebedOpen,  setSaamgebedOpen]  = useState(false)
+  /* Een keer per opening bepaal, sodat die strokie nie tydens 'n herteken
+     wegflikker nie. */
+  const [bidnouGesien] = useState(bidnouAlGesien)
   const [satVid,         setSatVid]         = useState({ active: false, videoId: '', title: '', subtitle: '' })
 
   useEffect(() => {
@@ -413,6 +428,30 @@ export default function BidSaam() {
           <p className="community-prayer-tagline">Geen versoek staan alleen nie.</p>
           <button className="community-prayer-btn btn-primary" onClick={() => setSaamgebedOpen(true)}>
             Begin Saamgebed
+          </button>
+        </div>
+
+        {/* ── Bid Nou ──
+
+            Bid Nou was 'n oortjie in die balk; Sorg het daardie plek gevat.
+            Die kaart staan DIREK hier, tweede op die blad, want wie Bid Nou
+            elke dag gebruik, moet dit dadelik sien en nie dink dit is weg
+            nie. Die bidnou-navigate-gebeurtenis is dieselfde een wat Bid Nou
+            self gebruik om hierheen te kom — ons voeg niks nuuts by nie. */}
+        <div className="card bidnou-kaart">
+          {!bidnouGesien && (
+            <div className="bidnou-nuut">Bid Nou sit nou hier</div>
+          )}
+          <h3 className="bidnou-kaart-titel">Bid Nou</h3>
+          <p className="bidnou-kaart-teks">
+            Wanneer jy nie weet wat om te bid nie, begin hier. Kies hoe jy
+            vandag voel, tik op die gevoel, en bid die gebed dadelik saam.
+          </p>
+          <button
+            className="btn-primary bidnou-kaart-knop"
+            onClick={() => window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidnou' }))}
+          >
+            Maak Bid Nou oop
           </button>
         </div>
 

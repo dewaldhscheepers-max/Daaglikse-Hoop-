@@ -918,3 +918,44 @@
 }
 
 
+
+/* ── Die Bid Nou-kaart ──
+   Bid Nou het sy plek in die balk vir Sorg afgestaan, dus staan hy hier,
+   tweede op die blad. Net kleur op :active — sien CLAUDE.md. */
+.bidnou-kaart {
+  position: relative;
+  text-align: center;
+}
+
+.bidnou-nuut {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #F2E8D5;
+  color: #8A6A2F;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.bidnou-kaart-titel {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bidnou-kaart-teks {
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.bidnou-kaart-knop {
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}

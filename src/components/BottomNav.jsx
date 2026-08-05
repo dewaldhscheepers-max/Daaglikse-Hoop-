@@ -22,6 +22,23 @@ export default function BottomNav({ active, onChange, onBybel }) {
       )
     },
     {
+      /* Sorg vat Bid Nou se plek in die balk. Bid Nou is nie weg nie — hy sit
+         nou 'n kaart hoog op Bid Saam, en die bidnou-navigate-gebeurtenis
+         bring 'n mens steeds daarheen. Ses oortjies sou op 'n klein foon
+         begin knyp. */
+      id: 'sorg',
+      label: 'Sorg',
+      icon: (
+        /* 'n Hand wat 'n hart dra. Nie 'n hart alleen nie — die punt is dat
+           iemand dit vir jou vashou. */
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 8.6c-.9-1.3-2.7-1.7-3.9-.6-1.2 1.1-1.2 2.9-.1 4L12 16l4-4c1.1-1.1 1.1-2.9-.1-4-1.2-1.1-3-.7-3.9.6z"/>
+          <path d="M3 14.5c1.6 0 2.4.6 3.3 1.4l2 1.8c.5.5 1.2.8 1.9.8h3.6c1 0 1.9-.5 2.5-1.3l2.6-3.4"/>
+          <path d="M3 14.5V21"/>
+        </svg>
+      )
+    },
+    {
       id: 'meer',
       label: 'E-boeke',
       icon: (
@@ -43,18 +60,6 @@ export default function BottomNav({ active, onChange, onBybel }) {
         </svg>
       )
     },
-    {
-      id: 'bidnou',
-      label: 'Bid Nou',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
-          <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
-          <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
-          <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
-        </svg>
-      )
-    }
   ]
 
   return (
@@ -72,7 +77,7 @@ export default function BottomNav({ active, onChange, onBybel }) {
       {tabs.map(t => (
         <button
           key={t.id}
-          className={`nav-tab${t.id === 'bidnou' ? ' nav-tab-bidnou' : ''}${active === t.id ? ' active' : ''}`}
+          className={`nav-tab${t.id === 'sorg' ? ' nav-tab-sorg' : ''}${active === t.id ? ' active' : ''}`}
           onClick={() => onChange(t.id)}
         >
           {t.icon}

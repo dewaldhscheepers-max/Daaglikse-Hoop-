@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Luister from './screens/Luister'
 import BidSaam from './screens/BidSaam'
 import BidNou from './screens/BidNou'
+import Sorg from './screens/Sorg'
 import Meer from './screens/Meer'
 import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
@@ -696,6 +697,7 @@ export default function App() {
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
+          {tab === 'sorg'    && <Sorg />}
           {tab === 'speel'   && <Speel />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} installPrompt={installPrompt} isInstalled={isInstalled} onNavigate={handleNav} />}
         </ErrorBoundary>

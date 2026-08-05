@@ -1,0 +1,159 @@
+/* Pastorale Sorg.
+
+   Twee reels geld hier soos oral in hierdie app (sien CLAUDE.md):
+   • hoogte met 100svh, nooit 100dvh nie;
+   • geen transform of opacity op :active nie — net kleur. 'n Saamgestelde
+     laag wat by elke druk gemaak en gebreek word, is presies wat op een
+     Android-foon rou GPU-geheue gewys het.
+*/
+
+.sorg {
+  min-height: 100%;
+}
+
+.sorg-header {
+  position: relative;
+}
+
+/* Hulp nou staan altyd bo, op elke Sorg-skerm. Dit is die een knoppie wat
+   nooit weggerol of weggesteek mag word nie. */
+.sorg-hulp-knop {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  padding: 8px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sorg-hulp-knop:active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: #FFFFFF;
+}
+
+.sorg-body {
+  padding: 18px 20px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 28px);
+}
+
+.sorg-binnekort {
+  padding: 40px 10px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── Die Hulp nou-blad ── */
+.sorg-blad-agter {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100svh;
+  z-index: 300;
+  background: rgba(30, 22, 48, 0.5);
+}
+
+.sorg-blad {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 480px;
+  max-height: 86svh;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #FBF8F2;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 34px rgba(42, 31, 66, 0.22);
+  padding: 10px 0 calc(var(--safe-bottom, 0px) + 18px);
+}
+
+.sorg-blad-gryp {
+  width: 42px;
+  height: 4px;
+  border-radius: 2px;
+  background: #DCD4C4;
+  margin: 4px auto 14px;
+  flex: 0 0 auto;
+}
+
+.sorg-blad-titel {
+  margin: 0 20px 8px;
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+}
+
+.sorg-blad-teks {
+  margin: 0 20px 16px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.sorg-nommers {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0 18px;
+}
+
+/* 'n Noodnommer moet een druk wees, en hy moet skreeu. */
+.sorg-nommer {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid #E4B9B9;
+  border-radius: 14px;
+  background: #FFF4F4;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sorg-nommer:active { background: #FBE4E4; border-color: #C98A8A; }
+
+.sorg-nommer-naam {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #8A5F5F;
+  margin-bottom: 3px;
+}
+
+.sorg-nommer-syfer {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #A33A3A;
+}
+
+.sorg-blad-toe {
+  display: block;
+  width: calc(100% - 36px);
+  margin: 16px 18px 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sorg-blad-toe:active { background: #4C4076; }
