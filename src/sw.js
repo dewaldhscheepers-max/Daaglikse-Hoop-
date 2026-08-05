@@ -26,6 +26,27 @@ registerRoute(
   })
 )
 
+/* Die Afrikaanse Bybel se boeke (/gab/GEN.json ...).
+
+   Hulle word NIE vooraf gekas nie — dit is sowat 4 MB en dit sou die
+   installasie opblaas vir mense wat die Bybel dalk nooit oopmaak nie.
+   (globPatterns in vite.config.js sluit json doelbewus uit.)
+
+   Wat wel gebeur: 'n boek wat jy een keer oopgemaak het, bly. Dit is die
+   groot voordeel bo die Engelse vertalings, wat elke keer 'n bediener nodig
+   het. Iemand met min data lees Johannes een keer en het hom daarna altyd.
+
+   CacheFirst is reg omdat 'n vertaling se teks nie verander nie. Verander
+   dit wel, verander die weergawe in indeks.json en dan haal ons die boeke
+   opnuut — 66 inskrywings is genoeg vir die hele Bybel plus die indeks. */
+registerRoute(
+  ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/gab/'),
+  new CacheFirst({
+    cacheName: 'gab-bybel',
+    plugins: [new ExpirationPlugin({ maxEntries: 70, maxAgeSeconds: 180 * 24 * 60 * 60 })]
+  })
+)
+
 self.addEventListener('push', event => {
   if (!event.data) return
   let p = {}

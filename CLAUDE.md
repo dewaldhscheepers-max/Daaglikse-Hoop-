@@ -112,6 +112,26 @@ daarna.
 
 ---
 
+## Die Afrikaanse Bybel
+
+Die Bybelgenootskap van SA het skriftelik geweier dat hul teks (1953, 1983,
+2020) in hierdie app kom, en oorweeg die soort versoek glad nie. Die app
+gebruik dus die **Getroue Afrikaanse Bybel** — 'n onafhanklike 2026-vertaling
+uit die King James, wat self onder CC BY-NC-ND 4.0 beskikbaar gestel word.
+
+Drie dinge mag nooit uitval nie: die **erkenning** onderaan elke hoofstuk, die
+teks **onveranderd** (moenie eens 'n drukfout regmaak nie — dit is 'n
+afgeleide werk), en **niks kommersieel** op 'n skerm waar die teks wys.
+Daarom is die `Steun`-blok van `Bybel.jsx` af weg. Moet dit nie terugsit nie.
+
+Die teks sit nie in die kode nie — dit is 66 lêers onder `public/gab/`, gebou
+met `node skrifte/bou-gab.mjs <bronleer>`. Is hulle nie daar nie, verskyn die
+GAB eenvoudig nie in die vertalinglys nie en is die app presies soos hy was.
+
+Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
+
+---
+
 ## Ranglyste
 
 Albei speletjies se ranglyste loop deur 'n Vercel-funksie met die

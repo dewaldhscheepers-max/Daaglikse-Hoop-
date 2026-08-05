@@ -2,11 +2,18 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import './Bybel.css'
 import { BOEKE, boekNaam, NT_EERSTE } from '../data/bybelBoeke'
 import { bibleSaSkakel } from '../data/bibleSa'
+import {
+  GAB_ID, GAB_AFK, GAB_ERKENNING,
+  gabIndeks, gabWeergawe, gabHoofstukke, gabTeks,
+} from '../data/gab'
 
 const API = '/api/bible?path='
 
 // Goedgekeurde vertalings. Slegs hierdie word gewys, en dan net dié wat die
 // API werklik vir hierdie toepassing beskikbaar stel.
+//
+// Die Afrikaanse een staan apart, want hy kom nie van YouVersion af nie —
+// sien src/data/gab.js. Hy verskyn heel bo, want dit is 'n Afrikaanse app.
 const AANBEVEEL = ['NIV11', 'KJV', 'AMP', 'BSB', 'NIrV']
 const MEER      = ['NASB2020', 'NASB1995', 'NIVUK11', 'FBV', 'LSV', 'EASY', 'engWEBUS']
 
@@ -26,6 +33,7 @@ const NAME = {
   LSV:      'Literal Standard Version',
   EASY:     'EasyEnglish Bible 2024',
   engWEBUS: 'World English Bible',
+  [GAB_AFK]: GAB_ERKENNING.naam,
 }
 
 let weergaweKas = null
@@ -49,6 +57,7 @@ async function haal(pad, params = {}) {
 // Gee die sleutel waaronder ons hierdie weergawe ken, of null as dit nie goedgekeur is nie
 function goedgekeurdeSleutel(afk) {
   if (!afk) return null
+  if (afk === GAB_AFK) return GAB_AFK
   if (KJV_ALIASE.includes(afk)) return 'KJV'
   if (AANBEVEEL.includes(afk) || MEER.includes(afk)) return afk
   return null
@@ -107,28 +116,6 @@ function omhulVerse(root) {
   root.dataset.omhul = '1'
 }
 
-function Steun() {
-  return (
-    <div className="byb-steun">
-      <p className="byb-steun-teks">
-        Die Bybel in hierdie app is gratis. As dit jou help, help ons om meer te doen.
-      </p>
-      <button
-        className="byb-steun-knop byb-steun-primer"
-        onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
-      >
-        Maandelikse Hoopdraer
-      </button>
-      <button
-        className="byb-steun-knop byb-steun-spook"
-        onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
-      >
-        Eenmalige bydrae
-      </button>
-    </div>
-  )
-}
-
 export default function Bybel({ onClose }) {
   const [view, setView]             = useState('boeke')
   const [weergawes, setWeergawes]   = useState(weergaweKas || [])
@@ -143,6 +130,7 @@ export default function Bybel({ onClose }) {
   const [soek, setSoek]             = useState('')
   const [laaste, setLaaste]         = useState(() => lees('byb_laaste', null))
   const [gekose, setGekose]         = useState(null)     // aangetikte vers
+  const [oorVertaling, setOorVertaling] = useState(false)  // GAB se erkenningsblad
   const bodyRef = useRef(null)
   const teksRef = useRef(null)
 
@@ -152,25 +140,48 @@ export default function Bybel({ onClose }) {
   useEffect(() => { if (weergaweId) stoor('byb_weergawe', weergaweId) }, [weergaweId])
   useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = 0 }, [view, boek, hoofstuk])
 
-  // ── Weergawes laai en filtreer tot die goedgekeurde lys ──
+  /* ── Weergawes laai ──
+
+     Twee bronne, en hulle moet mekaar nie kan doodmaak nie:
+
+     · die GAB uit ons eie lêers, wat aflyn werk en altyd daar is;
+     · die Engelses van YouVersion, wat 'n bediener en 'n netwerk verg.
+
+     Daarom loop hulle langs mekaar en word albei se mislukking apart
+     hanteer. Is die netwerk weg, bly die Afrikaanse Bybel staan. Is die
+     GAB-lêers nog nie ontplooi nie, is die app presies soos hy was. */
   useEffect(() => {
     if (weergaweKas) return
     setLaai(true)
-    haal('/v1/bibles', { 'language_ranges[]': 'eng' })
+
+    const engels = haal('/v1/bibles', { 'language_ranges[]': 'eng' })
       .then(d => {
         const rou = (d && (d.data || d.bibles)) || []
-        const lys = rou.filter(w => goedgekeurdeSleutel(w.abbreviation))
-        weergaweKas = lys
-        setWeergawes(lys)
-
-        const gestoor = lees('byb_weergawe', null)
-        if (gestoor && lys.some(w => w.id === gestoor)) return
-        const kies = k => lys.find(w => goedgekeurdeSleutel(w.abbreviation) === k)
-        const verstek = kies('KJV') || kies('NIV11') || lys[0]
-        if (verstek) setWeergaweId(verstek.id)
+        return rou.filter(w => goedgekeurdeSleutel(w.abbreviation))
       })
-      .catch(e => setFout('Kon nie die Bybels laai nie (' + e.message + ')'))
-      .finally(() => setLaai(false))
+      .catch(() => null)   // null beteken "kon nie", [] beteken "niks gekry"
+
+    Promise.all([gabIndeks(), engels]).then(([ind, eng]) => {
+      const afr = ind ? [gabWeergawe(ind)] : []
+      const lys = [...afr, ...(eng || [])]
+
+      if (!lys.length) {
+        setFout('Kon nie die Bybels laai nie. Kyk of jy aanlyn is.')
+        return
+      }
+      /* Is net die Engelses weg, is dit nie 'n fout wat die skerm moet oorneem
+         nie — die Afrikaanse Bybel werk nog. Die vertalingblad wys dan bloot
+         een vertaling. */
+      weergaweKas = lys
+      setWeergawes(lys)
+
+      const gestoor = lees('byb_weergawe', null)
+      if (gestoor && lys.some(w => w.id === gestoor)) return
+      /* Die Afrikaanse een is die verstek in 'n Afrikaanse app. */
+      const kies = k => lys.find(w => goedgekeurdeSleutel(w.abbreviation) === k)
+      const verstek = kies(GAB_AFK) || kies('KJV') || kies('NIV11') || lys[0]
+      if (verstek) setWeergaweId(verstek.id)
+    }).finally(() => setLaai(false))
   }, [])
 
   const laaiHoofstukke = useCallback(async (kode, wId) => {
@@ -178,8 +189,12 @@ export default function Bybel({ onClose }) {
     if (hoofstukKas[s]) { setHoofstukke(hoofstukKas[s]); return }
     setLaai(true); setFout(null)
     try {
-      const d = await haal(`/v1/bibles/${wId}/books/${kode}/chapters`)
-      const lys = (d && (d.data || d.chapters)) || []
+      let lys
+      if (wId === GAB_ID) lys = await gabHoofstukke(kode)
+      else {
+        const d = await haal(`/v1/bibles/${wId}/books/${kode}/chapters`)
+        lys = (d && (d.data || d.chapters)) || []
+      }
       hoofstukKas[s] = lys
       setHoofstukke(lys)
     } catch (e) { setFout('Kon nie die hoofstukke laai nie (' + e.message + ')') }
@@ -192,7 +207,9 @@ export default function Bybel({ onClose }) {
     if (teksKas[s]) { setInhoud(teksKas[s]); return }
     setLaai(true); setFout(null); setInhoud(null)
     try {
-      const d = await haal(`/v1/bibles/${wId}/passages/${usfm}`, { format: 'html' })
+      const d = wId === GAB_ID
+        ? await gabTeks(kode, nr)
+        : await haal(`/v1/bibles/${wId}/passages/${usfm}`, { format: 'html' })
       teksKas[s] = d
       setInhoud(d)
     } catch (e) { setFout('Kon nie die teks laai nie (' + e.message + ')') }
@@ -295,6 +312,10 @@ export default function Bybel({ onClose }) {
 
   const aanbeveel = groep(AANBEVEEL)
   const meer      = groep(MEER)
+  /* Die GAB kom nie van YouVersion af nie, dus staan hy in sy eie groep en
+     heel bo. Is die lêers nie ontplooi nie, is hierdie lys leeg en verander
+     niks aan die skerm nie. */
+  const afrikaans = weergawes.filter(w => w.bron === 'gab')
 
   const titel = view === 'lees' && boek ? `${boekNaam(boek)} ${hoofstuk}`
               : view === 'hoofstukke' && boek ? boekNaam(boek)
@@ -395,7 +416,6 @@ export default function Bybel({ onClose }) {
                   {nt.map(k => <button key={k} className="byb-boek" onClick={() => openBoek(k)}>{boekNaam(k)}</button>)}
                 </div>
               </>}
-              <Steun />
             </>
           )}
 
@@ -424,21 +444,42 @@ export default function Bybel({ onClose }) {
 
                   Die Bybelgenootskap van Suid-Afrika het skriftelik geweier
                   dat hul teks in 'n ander app ingesluit word, en het hierdie
-                  pad self voorgestel: skakel na die vers op BibleSA. Dus
-                  bring ons 'n mens tot by die presiese hoofstuk, en een druk
-                  terug is jy weer hier. */}
+                  pad self voorgestel: skakel na die vers op BibleSA.
+
+                  Die GAB het hierdie knoppie nie oorbodig gemaak nie — baie
+                  mense het by die 1953 of die 1983 grootgeword en soek juis
+                  daardie bewoording. Dit is nou 'n tweede pad, nie die enigste
+                  een nie. */}
               <a
                 className="byb-afr-knop"
                 href={bibleSaSkakel(boek, hoofstuk)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="byb-afr-hoof">Lees {boekNaam(boek)} {hoofstuk} in Afrikaans</span>
-                <span className="byb-afr-fyn">Maak oop op BibleSA · Bybelgenootskap van SA</span>
+                <span className="byb-afr-hoof">Lees dit in die 1953 of 1983</span>
+                <span className="byb-afr-fyn">{boekNaam(boek)} {hoofstuk} op BibleSA · Bybelgenootskap van SA</span>
               </a>
 
-              <p className="byb-erkenning">{NAME[sleutel] || ''} · verskaf deur YouVersion</p>
-              <Steun />
+              {/* Erkenning. Vir die GAB is dit nie hoflikheid nie — die
+                  CC BY-NC-ND-lisensie vereis die naam, die kopiereg, die
+                  lisensie en 'n skakel na die bron oral waar die teks wys.
+                  Haal dit nooit hier uit nie.
+
+                  En let op wat NIE meer hier is nie: die Steun-blok met sy
+                  twee geldknoppies. 'Nie-kommersieel' is 'n voorwaarde van
+                  daardie lisensie, en twee betaalknoppies direk onder die
+                  Bybelteks is presies die prentjie wat dit ondermyn. Die
+                  Bybel is nou die een skerm in die app waar niemand ooit om
+                  geld gevra word nie. */}
+              {sleutel === GAB_AFK ? (
+                <button className="byb-erkenning byb-erkenning-knop" onClick={() => setOorVertaling(true)}>
+                  {GAB_ERKENNING.naam} · &copy; {GAB_ERKENNING.kopiereg}<br />
+                  {GAB_ERKENNING.lisensie} · onveranderd weergegee<br />
+                  <u>Oor hierdie vertaling</u>
+                </button>
+              ) : (
+                <p className="byb-erkenning">{NAME[sleutel] || ''} · verskaf deur YouVersion</p>
+              )}
             </>
           )}
 
@@ -474,16 +515,36 @@ export default function Bybel({ onClose }) {
           <div className="byb-blad" role="dialog" aria-label="Kies jou Bybelvertaling">
             <div className="byb-blad-gryp" />
             <h2 className="byb-blad-titel">Kies jou Bybelvertaling</h2>
-            {/* Sonder hierdie sin vra elke Afrikaanse gebruiker dieselfde
-                vraag, en die antwoord lyk soos 'n fout in die app. */}
-            <p className="byb-blad-nota">
-              Die Afrikaanse Bybel kan nie in hierdie app ingesluit word nie —
-              die Bybelgenootskap van SA gee nie daarvoor toestemming nie. Jy
-              kan enige hoofstuk met een druk in Afrikaans op BibleSA oopmaak;
-              die knoppie staan onderaan elke hoofstuk.
-            </p>
+            {/* Elke Afrikaanse gebruiker vra dieselfde vraag: waar is die
+                1953 en die 1983? Die antwoord moet hier staan, anders lyk dit
+                soos 'n fout in die app. */}
+            {afrikaans.length > 0 && (
+              <p className="byb-blad-nota">
+                Die Getroue Afrikaanse Bybel is 'n onafhanklike vertaling uit
+                die King James, en die enigste een wat in 'n ander app ingesluit
+                mag word. Die 1953 en 1983 mag nie — die Bybelgenootskap van SA
+                gee nie daarvoor toestemming nie. Jy kan hulle wel met een druk
+                op BibleSA oopmaak, onderaan elke hoofstuk.
+              </p>
+            )}
             <div className="byb-blad-lys">
-              {aanbeveel.length > 0 && <div className="byb-blad-afdeling">Aanbeveel</div>}
+              {afrikaans.length > 0 && <div className="byb-blad-afdeling">Afrikaans</div>}
+              {afrikaans.map(w => {
+                const k = goedgekeurdeSleutel(w.abbreviation)
+                return (
+                  <button key={w.id} className={`byb-blad-item${w.id === weergaweId ? ' aktief' : ''}`} onClick={() => kiesWeergawe(w.id)}>
+                    <span className="byb-blad-afk">{k}</span>
+                    <span className="byb-blad-naam">{NAME[k] || w.title}</span>
+                    {w.id === weergaweId && (
+                      <svg className="byb-blad-vink" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </button>
+                )
+              })}
+
+              {aanbeveel.length > 0 && <div className="byb-blad-afdeling">Engels — aanbeveel</div>}
               {aanbeveel.map(w => {
                 const s = goedgekeurdeSleutel(w.abbreviation)
                 return (
@@ -499,7 +560,7 @@ export default function Bybel({ onClose }) {
                 )
               })}
 
-              {meer.length > 0 && <div className="byb-blad-afdeling">Meer vertalings</div>}
+              {meer.length > 0 && <div className="byb-blad-afdeling">Engels — meer</div>}
               {meer.map(w => {
                 const s = goedgekeurdeSleutel(w.abbreviation)
                 return (
@@ -515,6 +576,58 @@ export default function Bybel({ onClose }) {
                 )
               })}
             </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Oor hierdie vertaling ──
+          Die CC BY-NC-ND-lisensie vereis erkenning, die kopieregkennisgewing,
+          die naam van die lisensie met 'n skakel, en 'n skakel na die
+          oorspronklike materiaal. Dit is daardie blad. Moenie dit uithaal of
+          agter 'n instelling wegsteek nie. */}
+      {oorVertaling && (
+        <>
+          <div className="byb-blad-agter" onClick={() => setOorVertaling(false)} />
+          <div className="byb-blad" role="dialog" aria-label="Oor hierdie vertaling">
+            <div className="byb-blad-gryp" />
+            <h2 className="byb-blad-titel">Oor hierdie vertaling</h2>
+
+            <p className="byb-oor-teks">
+              Die <b>{GAB_ERKENNING.naam}</b> is 'n onafhanklike Afrikaanse
+              vertaling wat direk uit die 1769 Cambridge King James Bible
+              gemaak is, met verwysing na die oorspronklike Hebreeus en Grieks
+              waar nodig vir woordkeuse. Dit is <b>nie</b> 'n hersiening van
+              die 1933/1953 Afrikaanse Bybel of enige ander bestaande
+              vertaling nie.
+            </p>
+
+            <p className="byb-oor-teks">
+              Die teks word hier <b>heeltemal onveranderd</b> weergegee. Sien
+              jy 'n fout, rapporteer dit asseblief by die projek self — ons mag
+              dit nie hier regmaak nie.
+            </p>
+
+            <p className="byb-oor-teks byb-oor-fyn">
+              &copy; {GAB_ERKENNING.kopiereg}. Beskikbaar onder die Creative
+              Commons Erkenning&ndash;NieKommersieel&ndash;GeenAfgeleides 4.0
+              Internasionaal-lisensie ({GAB_ERKENNING.lisensie}).
+            </p>
+
+            <p className="byb-oor-teks byb-oor-fyn">
+              Daaglikse Hoop word nie deur die {GAB_ERKENNING.naam}-projek
+              geborg of onderskryf nie.
+            </p>
+
+            <a className="byb-oor-skakel" href={GAB_ERKENNING.bron} target="_blank" rel="noopener noreferrer">
+              Die vertaling se eie werf
+              <small>{GAB_ERKENNING.bron.replace('https://', '')}</small>
+            </a>
+            <a className="byb-oor-skakel" href={GAB_ERKENNING.lisensieSkakel} target="_blank" rel="noopener noreferrer">
+              Lees die lisensie
+              <small>{GAB_ERKENNING.lisensie}</small>
+            </a>
+
+            <button className="byb-oor-toe" onClick={() => setOorVertaling(false)}>Maak toe</button>
           </div>
         </>
       )}
