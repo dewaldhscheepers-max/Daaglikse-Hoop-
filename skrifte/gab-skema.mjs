@@ -88,75 +88,81 @@ if (!BASIS || !SLEUTEL) {
 se('   Supabase: ' + BASIS)
 se('   anon-sleutel: ' + SLEUTEL.slice(0, 12) + '… (' + SLEUTEL.length + ' karakters, nie hier gestoor nie)')
 
-const KOPPE = { apikey: SLEUTEL, authorization: 'Bearer ' + SLEUTEL, accept: 'application/json' }
+/* Presies die kopteks wat hul eie bladsy stuur.
 
-/* ── 2. Wat mag hierdie sleutel sien? ── */
+   Die eerste lopie het 401 gekry omdat ek die sleutel ook as
+   "Authorization: Bearer" gestuur het. 'n sb_publishable_-sleutel is nie 'n
+   JWT nie; Supabase verwag hom in die apikey-kopteks, en Authorization is vir
+   'n aangemelde gebruiker se token. Dit was my fout, nie 'n muur nie.
+
+   Werk hierdie een ook nie, is dit die muur, en dan hou ons op. */
+const KOPPE = { apikey: SLEUTEL, accept: 'application/json' }
+
+/* ── 2. Watter tabel gebruik hul eie kliëntkode? ──
+
+   Ons raai nie tabelname nie. Hul bondel is openbare JavaScript en dit se
+   presies watter tabelle die bladsy lees — .from('...') en enige
+   /rest/v1/-pad. Dit is dieselfde as om na 'n werf se bronkode te kyk. */
 se('')
-se('== 2. Die tabelle wat die openbare sleutel mag lees ==')
-await pouse(800)
-const wortel = await haalTeks(BASIS + '/rest/v1/', KOPPE)
-if ([401, 403, 429].includes(wortel.status)) {
-  se('   status ' + wortel.status + ' — die sleutel mag dit nie. Ons hou op.')
+se('== 2. Wat lees hul eie bladsy? ==')
+const tuisblad = await haalTeks(WERF + '/')
+const bondels = [...new Set(
+  [...tuisblad.lyf.matchAll(/(?:src|href)=["']([^"']+\.(?:js|mjs))(?:\?[^"']*)?["']/gi)].map(m => m[1])
+)]
+
+const tabelle = new Set()
+const paaie = new Set()
+for (const b of bondels.slice(0, 6)) {
+  await pouse(700)
+  const url = b.startsWith('http') ? b : WERF + (b.startsWith('/') ? b : '/' + b)
+  const d = await haalTeks(url)
+  for (const m of d.lyf.matchAll(/\.from\(\s*["'`]([a-z0-9_]+)["'`]/gi)) tabelle.add(m[1])
+  for (const m of d.lyf.matchAll(/\/rest\/v1\/([a-z0-9_]+)/gi)) tabelle.add(m[1])
+  for (const m of d.lyf.matchAll(/["'`](\/rest\/v1\/[^"'`]*)["'`]/gi)) paaie.add(m[1])
+  /* Ook: watter kolomme vra hulle? select('...') */
+  for (const m of d.lyf.matchAll(/\.select\(\s*["'`]([^"'`]{2,120})["'`]/gi)) se('     select: ' + m[1])
+  se(`   ${b} · ${d.lyf.length} karakters`)
+}
+se('   tabelle wat die kode noem: ' + ([...tabelle].join(', ') || '(geen)'))
+if (paaie.size) se('   paaie: ' + [...paaie].join(' , '))
+
+/* ── 3. Vra dieselfde as wat hul bladsy vra ── */
+se('')
+se('== 3. Lees, met dieselfde kopteks as hul bladsy ==')
+const kandidate = [...tabelle]
+if (!kandidate.length) {
+  se('   Hul kode noem geen tabel nie. Ons kan nie verder sonder om te raai nie,')
+  se('   en raai is presies wat ons nie doen nie. Ons hou op.')
   process.exit(0)
 }
-se('   status: ' + wortel.status)
 
-let spek = null
-try { spek = JSON.parse(wortel.lyf) } catch { /* nie JSON nie */ }
-
-let tabelle = []
-if (spek && spek.definitions) tabelle = Object.keys(spek.definitions)
-else if (spek && spek.paths) tabelle = Object.keys(spek.paths).filter(p => p !== '/').map(p => p.slice(1))
-
-if (!tabelle.length) {
-  se('   Geen tabellelys nie. Rou antwoord, eerste 600 karakters:')
-  se('   ' + wortel.lyf.replace(/\s+/g, ' ').slice(0, 600))
-} else {
-  se('   ' + tabelle.length + ' tabel(le): ' + tabelle.join(', '))
-}
-
-/* Die kolomme van elke tabel wat na verse of boeke lyk */
-const interessant = tabelle.filter(t => /vers|verse|chapter|hoofstuk|book|boek|bible|bybel|gab|scripture/i.test(t))
-se('')
-se('   Lyk soos Bybeldata: ' + (interessant.join(', ') || '(niks)'))
-for (const t of (interessant.length ? interessant : tabelle).slice(0, 8)) {
-  const d = spek && spek.definitions && spek.definitions[t]
-  if (d && d.properties) se('     ' + t + ': ' + Object.keys(d.properties).join(', '))
-}
-
-/* ── 3. Een ry, om te sien hoe die data werklik lyk ── */
-se('')
-se('== 3. Een ry uit elke kandidaat ==')
-for (const t of (interessant.length ? interessant : tabelle).slice(0, 6)) {
+let werk = null
+for (const t of kandidate.slice(0, 12)) {
   await pouse(800)
-  const d = await haalTeks(`${BASIS}/rest/v1/${t}?select=*&limit=1`, KOPPE)
-  if ([401, 403, 429].includes(d.status)) { se(`   ${t} → ${d.status}, ons hou op.`); break }
-  se(`   ${t} → ${d.status} · ${d.lyf.replace(/\s+/g, ' ').slice(0, 400)}`)
+  const d = await haalTeks(`${BASIS}/rest/v1/${t}?select=*&limit=1`, { ...KOPPE, prefer: 'count=exact' })
+  const reeks = d.koppe.get('content-range') || ''
+  se(`   ${t} → ${d.status}${reeks ? ' · rye: ' + reeks : ''}`)
+  if (d.status === 429) { se('   429 — te vinnig. Ons hou op.'); process.exit(0) }
+  if (d.status === 200) {
+    se('      ' + d.lyf.replace(/\s+/g, ' ').slice(0, 500))
+    if (d.lyf.length > 20 && !werk) werk = t
+  }
 }
 
-/* ── 4. Kan ons Genesis 1:1 by die naam kry? ── */
+if (!werk) {
+  se('')
+  se('   Alles antwoord 401 of 403. Die openbare sleutel mag hierdie tabelle nie')
+  se('   lees nie — dit is die muur, nie my kopteks nie. Ons hou hier op.')
+  process.exit(0)
+}
+
+/* ── 4. Waar sit Genesis 1:1? ── */
 se('')
-se('== 4. Hoeveel rye is daar, en waar is Genesis 1:1? ==')
-for (const t of interessant.slice(0, 4)) {
-  await pouse(800)
-  /* Prefer count zonder die rye self te trek */
-  const c = await haalTeks(`${BASIS}/rest/v1/${t}?select=*&limit=1`, { ...KOPPE, prefer: 'count=exact' })
-  const reeks = c.koppe.get('content-range') || '(geen)'
-  se(`   ${t}: content-range ${reeks}`)
-}
-
+se('== 4. Genesis 1:1 ==')
 await pouse(800)
-for (const t of interessant.slice(0, 4)) {
-  const kolomme = (spek && spek.definitions && spek.definitions[t] && Object.keys(spek.definitions[t].properties || {})) || []
-  const teksKol = kolomme.find(k => /^(teks|text|afrikaans|afr|gab|verse_text|content|body)$/i.test(k))
-  if (!teksKol) continue
-  await pouse(800)
-  const d = await haalTeks(`${BASIS}/rest/v1/${t}?select=*&${teksKol}=like.*${encodeURIComponent('In die begin het God')}*&limit=2`, KOPPE)
-  if ([401, 403, 429].includes(d.status)) { se(`   ${t} → ${d.status}, ons hou op.`); break }
-  const raak = d.lyf.includes(DRAAD)
-  se(`   ${t}.${teksKol} soek "In die begin het God" → ${d.status}${raak ? '  ← GEVIND' : ''}`)
-  if (raak) se('      ' + d.lyf.replace(/\s+/g, ' ').slice(0, 500))
-}
+const proef = await haalTeks(`${BASIS}/rest/v1/${werk}?select=*&limit=3`, KOPPE)
+se('   drie rye uit ' + werk + ':')
+se('   ' + proef.lyf.replace(/\s+/g, ' ').slice(0, 900))
 
 se('')
 se('== Klaar ==')
