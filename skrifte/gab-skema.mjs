@@ -1,31 +1,32 @@
 /* ────────────────────────────────────────────────────────────
-   Waarheen vra hul bladsy vir 'n hoofstuk?
+   Waar staan die GAB se lêers, en hoe lyk hulle binne?
 
      node skrifte/gab-skema.mjs
 
-   ── Wat ons tot dusver weet ──
+   Die vorige lopie het die antwoord op die groot vraag gegee. Hul bondel se
+   fetch-oproepe is:
 
-   · Die werf is Astro. config.js gee 'n Supabase-adres en 'n
-     sb_publishable_-sleutel, met hul eie kommentaar: "the publishable key is
-     browser-safe by design. (The secret key is NOT here; it lives only in
-     the server .env.)"
-   · Met die regte kopteks (net apikey, geen Authorization) werk die sleutel:
-     die tabel `suggestions` gee 200.
-   · Maar `suggestions` is die ENIGSTE tabel wat hul kliëntkode noem, en die
-     Bybelteks is nie daarin nie.
-   · Die teks is ook nie in die HTML, nie in die sitemap, en nie by 'n
-     geraaide pad nie.
+       Ye + "index.json"
+       Ye + "books/" + e + ".json"
 
-   Die vraag wat oorbly: waarheen gaan die versoek wanneer 'n mens 'n
-   hoofstuk oopmaak? Dit staan in hul openbare JavaScript. Ons lees dit —
-   dieselfde as om na 'n werf se bronkode te kyk — en volg die dinamiese
-   brokke wat die bondel self invoer.
+   Die Bybelteks is dus NIE in Supabase nie. Dit is gewone statiese
+   JSON-lêers op hul webbediener — 'n indeks plus een lêer per boek. Supabase
+   word net vir `suggestions` en aanmelding gebruik.
 
-   Ons omseil niks, ons raai niks, en ons hou op by 401, 403 of 429.
+   Daar is dus geen sleutel, geen databasis, geen RLS en niks om te omseil
+   nie. Om daardie lêers te lees is presies dieselfde as om hul bladsy oop te
+   maak.
+
+   Hierdie skrif doen drie dinge en hou dan op:
+     1. lees uit hul eie kode wat `Ye` is — die basispad;
+     2. haal index.json en druk dit;
+     3. haal een boek en druk sy vorm.
+
+   Drie versoeke. Dan weet ons presies hoe om die res te haal.
    ──────────────────────────────────────────────────────────── */
 
 const WERF = 'https://getroueafrikaansebybel.com'
-const AGENT = 'DaaglikseHoop/1.0 (+https://dewaldscheepers.com; gratis Afrikaanse app; GAB onder CC BY-NC-ND 4.0)'
+const AGENT = 'DaaglikseHoop-GAB-Importer/1.0; one-time non-commercial import; dewaldscheepers.com'
 
 function se(...d) { console.log(...d) }
 function pouse(ms) { return new Promise(r => setTimeout(r, ms)) }
@@ -35,72 +36,97 @@ async function haal(url) {
   return { status: r.status, lyf: await r.text() }
 }
 
-/* Alles wat na 'n pad of 'n adres lyk, uit 'n stuk JavaScript. */
-function paaieUit(kode) {
-  const uit = new Set()
-  for (const m of kode.matchAll(/["'`](\/[a-zA-Z0-9_./{}$-]{2,80})["'`]/g)) uit.add(m[1])
-  for (const m of kode.matchAll(/["'`](https?:\/\/[^"'`\s]{6,120})["'`]/g)) uit.add(m[1])
-  return [...uit]
-}
-
-/* Die argumente van elke fetch(...) — dit is waar die data vandaan kom. */
-function fetchOproepe(kode) {
-  const uit = new Set()
-  for (const m of kode.matchAll(/fetch\(([^)]{0,160})/g)) uit.add(m[1].replace(/\s+/g, ' ').trim())
-  return [...uit]
-}
-
+/* ── 1. Die basispad uit hul kode ── */
 se('')
-se('== 1. Die bladsy se bondels ==')
+se('== 1. Wat is die basispad? ==')
 const tuis = await haal(WERF + '/')
-const eerste = [...new Set(
+const bates = [...new Set(
   [...tuis.lyf.matchAll(/(?:src|href)=["']([^"']+\.(?:js|mjs))(?:\?[^"']*)?["']/gi)].map(m => m[1])
-)]
-se('   ' + eerste.join('\n   '))
+)].filter(b => /\.(js|mjs)$/.test(b))
 
-/* Astro laai eilande as dinamiese brokke. Ons volg /_astro/-verwysings een
-   vlak diep — dit is waar 'n leser se kode gewoonlik sit. */
-const gesien = new Set()
-const ry = eerste.map(b => (b.startsWith('http') ? b : WERF + (b.startsWith('/') ? b : '/' + b)))
-const alleFetches = new Set()
-const alleUrls = new Set()
-
-se('')
-se('== 2. Wat vra hulle, en waarvandaan? ==')
-let nr = 0
-while (ry.length && nr < 12) {
-  const url = ry.shift()
-  if (gesien.has(url)) continue
-  gesien.add(url)
-  nr++
+let basis = null
+for (const b of bates) {
   await pouse(700)
+  const url = b.startsWith('http') ? b : WERF + (b.startsWith('/') ? b : '/' + b)
   const d = await haal(url)
-  if ([401, 403, 429].includes(d.status)) { se('   ' + url + ' → ' + d.status + ', ons hou op.'); break }
-  if (d.status !== 200) { se('   ' + url + ' → ' + d.status); continue }
+  if (d.status !== 200) continue
 
-  const paaie = paaieUit(d.lyf)
-  const fetches = fetchOproepe(d.lyf)
-  fetches.forEach(f => alleFetches.add(f))
-  paaie.filter(p => /json|api|data|bybel|bible|gab|vers|chapter|hoofstuk|book/i.test(p)).forEach(p => alleUrls.add(p))
+  /* Vind die naam voor +"index.json" */
+  const m = d.lyf.match(/([A-Za-z_$][\w$]*)\s*\+\s*["']index\.json["']/)
+  if (!m) continue
+  const naam = m[1]
+  se(`   ${b}: die veranderlike heet ${naam}`)
 
-  se(`   ${url.replace(WERF, '')} · ${d.lyf.length} karakters · ${fetches.length} fetch-oproep(e)`)
+  /* Waar word dit toegeken? Enige van: const Ye="...", Ye="...", ,Ye="..." */
+  const toeken = new RegExp('(?:const |let |var |,|;|\\{|\\()\\s*' + naam + '\\s*=\\s*["\'`]([^"\'`]{1,120})["\'`]')
+  const t = d.lyf.match(toeken)
+  if (t) {
+    basis = t[1]
+    se(`   ${naam} = "${basis}"`)
+  } else {
+    /* Dalk word dit uit stukke gebou. Wys die omgewing sodat 'n mens kan sien. */
+    const i = d.lyf.indexOf(naam + '=')
+    se('   Geen eenvoudige toekenning nie. Omgewing:')
+    se('   ' + d.lyf.slice(Math.max(0, i - 200), i + 200).replace(/\s+/g, ' '))
+  }
+  break
+}
 
-  /* Volg verdere /_astro/-brokke */
-  for (const p of paaie) {
-    if (/^\/_astro\/[^/]+\.(js|mjs)$/.test(p)) {
-      const v = WERF + p
-      if (!gesien.has(v)) ry.push(v)
-    }
+if (!basis) {
+  se('')
+  se('   Kon die basispad nie uit die kode lees nie. Ons hou op — raai is')
+  se('   presies wat ons nie doen nie.')
+  process.exit(0)
+}
+
+const BASIS = basis.startsWith('http') ? basis : WERF + (basis.startsWith('/') ? basis : '/' + basis)
+const VOL = BASIS.endsWith('/') ? BASIS : BASIS + '/'
+se('   volledige basis: ' + VOL)
+
+/* ── 2. index.json ── */
+se('')
+se('== 2. index.json ==')
+await pouse(1500)
+const idx = await haal(VOL + 'index.json')
+se('   status: ' + idx.status + ' · ' + idx.lyf.length + ' karakters')
+if (idx.status !== 200) { se('   Ons hou op.'); process.exit(0) }
+se('   ' + idx.lyf.replace(/\s+/g, ' ').slice(0, 1600))
+
+/* ── 3. Een boek ── */
+let d = null
+try { d = JSON.parse(idx.lyf) } catch { /* nie JSON nie */ }
+
+/* Watter sleutel in die indeks is die boeklys? */
+let boeke = null
+if (Array.isArray(d)) boeke = d
+else if (d && typeof d === 'object') {
+  for (const [k, v] of Object.entries(d)) {
+    if (Array.isArray(v) && v.length >= 60) { se('   boeklys onder "' + k + '" (' + v.length + ')'); boeke = v; break }
   }
 }
 
 se('')
-se('   fetch-oproepe:')
-se(alleFetches.size ? [...alleFetches].map(f => '     ' + f).join('\n') : '     (geen)')
+se('== 3. Een boek ==')
+if (!boeke || !boeke.length) {
+  se("   Kon nie 'n boeklys in die indeks kry nie. Die inhoud hierbo wys hoe dit lyk.")
+  process.exit(0)
+}
 
-se('')
-se('   paaie wat na data lyk:')
-se(alleUrls.size ? [...alleUrls].map(u => '     ' + u).join('\n') : '     (geen)')
+const eerste = boeke[0]
+const sleutelVanBoek = typeof eerste === 'string'
+  ? eerste
+  : (eerste.id || eerste.slug || eerste.file || eerste.code || eerste.abbr || eerste.osis || eerste.key)
+
+se('   eerste inskrywing: ' + JSON.stringify(eerste).slice(0, 300))
+se('   ons vra vir: books/' + sleutelVanBoek + '.json')
+
+await pouse(1500)
+const boek = await haal(VOL + 'books/' + sleutelVanBoek + '.json')
+se('   status: ' + boek.status + ' · ' + boek.lyf.length + ' karakters')
+if (boek.status === 200) {
+  se('   eerste 1500 karakters:')
+  se('   ' + boek.lyf.replace(/\s+/g, ' ').slice(0, 1500))
+}
 
 se('')
 se('== Klaar ==')
