@@ -25,6 +25,15 @@ import { useState, useRef, useEffect } from 'react'
 import { storage } from '../firebase'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 
+/* Vyf-en-twintig megagreep. 'n Stemantwoord van tien minute is sowat 10 MB;
+   verby hierdie punt is dit 'n verkeerde lêer, en 'n mens moet dit weet
+   VOORDAT hy vyf minute lank op 'n swak lyn wag. */
+const MAKS_GREPE = 25 * 1024 * 1024
+
+function megagrepe(n) {
+  return (n / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB'
+}
+
 function tyd(s) {
   const m = Math.floor(s / 60)
   return `${m}:${String(s % 60).padStart(2, '0')}`
@@ -60,6 +69,10 @@ export default function SorgOpname({ bron, onBron }) {
     const f = e.target.files && e.target.files[0]
     if (!f) return
     maakSkoon()
+    if (f.size > MAKS_GREPE) {
+      setFout(`Daardie lêer is ${megagrepe(f.size)}. Die perk is ${megagrepe(MAKS_GREPE)} — kies 'n korter opname.`)
+      return
+    }
     setLêer(f)
     setVoorskou(URL.createObjectURL(f))
   }
@@ -85,7 +98,13 @@ export default function SorgOpname({ bron, onBron }) {
       }
       mr.start()
       setBesigOpneem(true)
-      tellerRef.current = setInterval(() => setSekondes(s => s + 1), 1000)
+      /* Vyftien minute, en dan stop dit self. 'n Opnemer wat aanhou loop omdat
+         iemand vergeet het om Stop te druk, vreet die foon se batery en maak
+         'n lêer wat nooit gaan oplaai nie. */
+      tellerRef.current = setInterval(() => setSekondes(s => {
+        if (s + 1 >= 15 * 60) stopOpneem()
+        return s + 1
+      }), 1000)
     } catch {
       setFout('Die mikrofoon is geweier. Gaan na jou foon se instellings om dit toe te laat.')
     }
@@ -163,7 +182,7 @@ export default function SorgOpname({ bron, onBron }) {
 
       {lêer && !besigOpneem && (
         <>
-          <div className="so-naam">{lêer.name}</div>
+          <div className="so-naam">{lêer.name} · {megagrepe(lêer.size)}</div>
           {voorskou && <audio className="so-speler" controls preload="metadata" src={voorskou} />}
           <div className="so-knoppe">
             <button className="sk-knop sk-plaas" disabled={vordering !== null} onClick={laaiOp}>

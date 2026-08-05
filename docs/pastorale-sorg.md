@@ -337,6 +337,35 @@ Die GROOT steunblok staan **een keer**, heel onderaan die blad. 'n Klein
 teksry raak nooit te veel nie; groot donasieblokke oral wel. En op die
 skryfkant is daar niks — nooit waar iemand sy seer tik nie.
 
+### Terwyl jy wag
+
+Die reel is dat elke plasing en elke indiening iets moet dra wat help. Dit
+het eers net op VIDEO'S teruggeval — maar daar is nog nul Sorg-video's, dus
+was die valpad leeg en die kaarte kaal. Die app is intussen vol van goed wat
+werk.
+
+| Waar | Wat |
+|---|---|
+| Na 'n indiening | 'n video as daar een is, **drie stemnotas**, en een **gratis e-boek** |
+| Op 'n muurkaart sonder antwoord | 'n video, of anders **een** stemnota |
+
+Die stemnotas kom regstreeks uit Luister se `notes` (klaar oop vir lees) en
+speel HIER, met 'n gewone speler. Ons stuur niemand na Luister toe nie — 'n
+mens wat weggestuur word, kom nie terug nie.
+
+Hulle word by ONDERWERP gekies waar dit kan: die titel, die reeks en die
+skrifverwysing word teen 'n paar woorde getoets. Tref niks, kry hy die
+nuutstes. Dit is nie slim nie en dit hoef nie te wees nie — 'n stemnota van
+Dewald is nooit die verkeerde ding nie.
+
+Op die MUUR bly dit by een ding. Die volle lys hoort waar iemand wag en tyd
+het; onder elke plasing sou dit van elke kaart 'n spyskaart maak en dan lees
+niemand meer die mens se woorde nie.
+
+Die e-boek staan **laaste en klein**, en dit is **altyd gratis** — daar is 'n
+toets wat dit vashou. Iemand wat pas geskryf het dat hy nie meer wil lewe
+nie, moet nie 'n boekrak in die gesig kry nie.
+
 ### Die keurpaneel
 
 `SorgKeur.jsx`, binne die Sorg-admin, agter `SORG_ADMIN_GEHEIM`. Vier hopies:

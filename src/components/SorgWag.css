@@ -1,0 +1,106 @@
+/* "Terwyl jy wag". Net kleur op :active — sien CLAUDE.md. */
+
+.sw { margin: 4px 0 18px; }
+
+/* Binne 'n muurkaart het dit lug bo nodig — anders sit die kop teen die naam
+   vas en lyk dit of dit by die naam hoort. */
+.sp-kaart > .sw { margin: 14px 0 0; }
+.sp-kaart > .sw .sw-kop { font-size: 15px; }
+
+.sw-kop {
+  margin: 0 2px 10px;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.sw-onder-kop {
+  margin: 16px 2px 9px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.sw-notas {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sw-nota {
+  padding: 13px 14px 11px;
+  border: 1px solid #E6E1EE;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+
+.sw-nota-titel {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text, #2D2040);
+}
+
+.sw-nota-vers {
+  margin: 3px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.sw-speler {
+  display: block;
+  width: 100%;
+  height: 38px;
+  margin-top: 9px;
+}
+
+/* ── Die e-boek ──
+   Laaste en klein, en nooit met 'n prys nie. Iemand wat pas sy swaarste ding
+   geskryf het, moet nie 'n boekrak in die gesig kry nie. */
+.sw-boek {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #E6E1EE;
+  border-radius: 14px;
+  background: #FBF8F2;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sw-boek:active { background: #F2EEE6; }
+
+.sw-boek-ikoon {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.sw-boek-teks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sw-boek-titel {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text, #2D2040);
+}
+
+.sw-boek-fyn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted, #8A7E9A);
+}

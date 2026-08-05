@@ -35,7 +35,12 @@ const HOPIES = [
 
 export default function SorgKeur({ geheim }) {
   const [data, setData] = useState(null)
-  const [hopie, setHopie] = useState('gevaar')
+  /* `null` beteken: nog nie gekies nie. Ons kies self sodra die data daar is.
+
+     Dit het op 'gevaar' begin. Gevaar is meestal leeg — dit is die punt — dus
+     het Dewald die admin oopgemaak en "Niks in hierdie hopie nie" gesien
+     terwyl daar nuwe boodskappe gewag het. */
+  const [hopie, setHopie] = useState(null)
   const [oop, setOop] = useState(null)        // die id wat oop is
   const [teks, setTeks] = useState('')
   const [videoId, setVideoId] = useState('')
@@ -56,6 +61,16 @@ export default function SorgKeur({ geheim }) {
 
   useEffect(() => { haal() }, [haal])
 
+  /* Gevaar eerste as daar iets in is — dit is die enigste hopie wat nie kan
+     wag nie. Anders die eerste hopie waarin daar werk is. */
+  useEffect(() => {
+    if (hopie !== null || !data) return
+    const inkom = data.inkomend || []
+    const tel = k => inkom.filter(b => (b.status || 'nuut') === k).length
+    const eerste = HOPIES.map(h => h.sleutel).find(k => tel(k) > 0)
+    setHopie(eerste || 'nuut')
+  }, [data, hopie])
+
   async function doen(lyf) {
     setBesig(true)
     setBoodskap(null)
@@ -67,7 +82,7 @@ export default function SorgKeur({ geheim }) {
       })
       const d = await r.json()
       if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return null }
-      if (d.waarsku) { setBoodskap({ waarsku: d.waarsku, herhaal: lyf }); return null }
+      if (d.waarsku) { setBoodskap({ waarsku: d.waarsku, herhaalId: lyf.id }); return null }
       vergeetMuur()
       await haal()
       return d
@@ -84,7 +99,16 @@ export default function SorgKeur({ geheim }) {
     setBoodskap(null)
   }
 
-  async function plaas(b, tochPlaas = false) {
+  /* Die teks kom ALTYD uit die toestand, nooit uit 'n gestoorde kopie nie.
+
+     "Plaas tog so" het vroeer die oorspronklike versoek herhaal. Sien Dewald
+     dus die waarskuwing "daar is nog 'n telefoonnommer in", haal die nommer
+     uit, en druk dan "Plaas tog so", het die OU teks — met die nommer — op
+     die muur beland. Dit is die teenoorgestelde van wat die waarskuwing
+     veronderstel is om te doen. */
+  async function plaas(id, tochPlaas = false) {
+    const b = (data.inkomend || []).find(x => x.id === id)
+    if (!b) return
     const d = await doen({
       aksie: 'keur',
       id: b.id,
@@ -98,7 +122,24 @@ export default function SorgKeur({ geheim }) {
     if (d && d.ok) { setOop(null); setBoodskap({ goed: 'Op die muur.' }) }
   }
 
-  if (!data) return <p className="sk-leeg">Besig om te laai…</p>
+  /* 'n Mislukte haal het vroeer "Besig om te laai…" vir ALTYD gewys, want die
+     foutboodskap is eers laer af geteken en hierdie reel het voor hom
+     teruggekeer. Dewald sou 'n dooie skerm sien met geen idee hoekom nie. */
+  if (!data) {
+    return (
+      <div className="sk">
+        <div className="admin-section-title">🤍 Pastorale Sorg — Boodskappe</div>
+        {boodskap && boodskap.fout ? (
+          <>
+            <div className="admin-error">{boodskap.fout}</div>
+            <button className="sk-knop sk-plaas" onClick={haal}>Probeer weer</button>
+          </>
+        ) : (
+          <p className="sk-leeg">Besig om te laai…</p>
+        )}
+      </div>
+    )
+  }
 
   const inkomend = data.inkomend || []
   const lys = inkomend.filter(b => (b.status || 'nuut') === hopie)
@@ -130,9 +171,7 @@ export default function SorgKeur({ geheim }) {
           <button
             className="sk-knop"
             disabled={besig}
-            onClick={() => doen({ ...boodskap.herhaal, tochPlaas: true }).then(d => {
-              if (d && d.ok) { setOop(null); setBoodskap({ goed: 'Op die muur.' }) }
-            })}
+            onClick={() => plaas(boodskap.herhaalId, true)}
           >
             Plaas tog so
           </button>
@@ -182,7 +221,7 @@ export default function SorgKeur({ geheim }) {
               </div>
 
               <div className="sk-knoppe">
-                <button className="sk-knop sk-plaas" disabled={besig || teks.trim().length < 10} onClick={() => plaas(b)}>
+                <button className="sk-knop sk-plaas" disabled={besig || teks.trim().length < 10} onClick={() => plaas(b.id)}>
                   Plaas op die muur
                 </button>
                 <button className="sk-knop" disabled={besig} onClick={() => doen({ aksie: 'weg', id: b.id })}>

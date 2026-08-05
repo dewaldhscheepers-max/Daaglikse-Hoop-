@@ -24,6 +24,7 @@ import { keurOnderwerp, ONDERWERPE, BREE_ONDERWERP, onderwerpBy } from './sorgOn
 import { versVir, SORG_VERSE } from './sorgVerse.js'
 import { hoopVir, volgensBehoefte, weekVideo } from './sorgVideos.js'
 import { sorgSkakel, leesSorgSkakel } from './sorgDeel.js'
+import { notasVir, boekVir } from './sorgWag.js'
 
 const hier = path.dirname(fileURLToPath(import.meta.url))
 const wortel = path.resolve(hier, '..', '..')
@@ -278,6 +279,43 @@ afdeling('Geen wagwoord in die app se kode nie')
       kode.match(/.{0,50}ADMIN_PIN.{0,50}/))
   kyk('die bediener keur die wagwoord', /api\/sorg-sluit/.test(admin))
   kyk('SorgAdmin het geen tweede wagwoordskerm nie', !/Sorg-wagwoord/.test(sorgAdmin))
+}
+
+afdeling('Terwyl jy wag — stemnotas en n e-boek')
+{
+  const N = [
+    { id: 'a', title: 'Wanneer die bekommernis nie stil raak nie', series: 'Angs', scripture: 'Fil 4:6' },
+    { id: 'b', title: 'Wanneer rou nie ligter word nie', series: 'Rou', scripture: 'Ps 34' },
+    { id: 'c', title: 'Oor geld en werk', series: '', scripture: '' },
+    { id: 'd', title: 'Iets heeltemal anders', series: '', scripture: '' },
+    { id: 'e', title: 'Nog iets anders', series: '', scripture: '' },
+  ]
+
+  kyk('drie kom terug', notasVir('angs', N).length === 3, notasVir('angs', N).length)
+  kyk('die passende een staan EERSTE', notasVir('angs', N)[0].id === 'a', notasVir('angs', N).map(x => x.id))
+  kyk('rou kry die rou-een', notasVir('rou', N)[0].id === 'b', notasVir('rou', N).map(x => x.id))
+  kyk('geld kry die geld-een', notasVir('geld', N)[0].id === 'c', notasVir('geld', N).map(x => x.id))
+  kyk('geen duplikate', new Set(notasVir('angs', N).map(x => x.id)).size === 3)
+
+  /* Tref niks, kry hy die nuutstes — nooit 'n lee hand nie. */
+  kyk('onbekende onderwerp gee steeds drie', notasVir('bloupers', N).length === 3)
+  kyk('ander gee steeds drie', notasVir('ander', N).length === 3)
+
+  /* Minder notas as gevra */
+  kyk('twee notas gee twee', notasVir('angs', N.slice(0, 2)).length === 2)
+  kyk('geen notas gee niks', notasVir('angs', []).length === 0)
+  kyk('null gee niks', notasVir('angs', null).length === 0)
+  kyk('een op die muurkaart', notasVir('angs', N, 1).length === 1)
+
+  /* Elke onderwerp moet iets kry sodra daar enige notas is. */
+  kyk('elke onderwerp kry stemnotas', ONDERWERPE.every(o => notasVir(o.sleutel, N).length === 3),
+      ONDERWERPE.filter(o => notasVir(o.sleutel, N).length !== 3).map(o => o.sleutel))
+
+  /* Die e-boek moet ALTYD gratis wees. Nooit 'n prys waar iemand seer is. */
+  const boeke = ONDERWERPE.map(o => boekVir(o.sleutel)).filter(Boolean)
+  kyk('elke onderwerp kry n boek', boeke.length === ONDERWERPE.length, boeke.length)
+  kyk('elke boek is GRATIS', boeke.every(b => b.free === true), boeke.filter(b => !b.free).map(b => b.title))
+  kyk('geen boek dra n prys nie', boeke.every(b => !b.price), boeke.filter(b => b.price).map(b => b.title))
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')

@@ -17,13 +17,11 @@
    nie.
    ──────────────────────────────────────────────────────────── */
 
-import { hoopVir } from '../data/sorgVideos'
-import SorgVideo from './SorgVideo'
+import SorgWag from './SorgWag'
 import SorgNommers from './SorgNommers'
 
 export default function SorgKlaar({ uitslag, videoData, onSluit }) {
   const onderwerp = uitslag.onderwerp || 'ander'
-  const hoop = videoData ? hoopVir(onderwerp, videoData) : null
 
   return (
     <div className="sv-blok">
@@ -44,12 +42,15 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
         Pastorale Sorg-muur verskyn.
       </p>
 
-      {hoop && hoop.video && (
-        <>
-          <p className="sv-klaar-rede">Iets wat jou dalk nou kan help</p>
-          <SorgVideo video={hoop.video} />
-        </>
-      )}
+      {/* ── Terwyl jy wag ──
+
+          'n Video as daar een is, drie stemnotas, en een gratis e-boek.
+
+          Dit was net 'n video. Maar daar is nog nul Sorg-video's, dus was
+          hierdie plek leeg — presies waar iemand pas sy hart neergesit het
+          en die minste kan bekostig om niks te kry nie. Die stemnotas en die
+          e-boeke was al die tyd daar. */}
+      <SorgWag onderwerp={onderwerp} videoData={videoData} />
 
       <button className="sv-groot-knop" onClick={onSluit}>Terug na Pastorale Sorg</button>
     </div>

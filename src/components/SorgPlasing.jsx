@@ -33,6 +33,7 @@ import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { draSaam, draSaamReeds } from '../data/sorgMuur'
 import { hoopVir } from '../data/sorgVideos'
 import SorgVideo from './SorgVideo'
+import SorgWag from './SorgWag'
 import SorgDeelSteun from './SorgDeelSteun'
 import './SorgPlasing.css'
 
@@ -77,7 +78,7 @@ function egteAntwoord(a) {
   return null
 }
 
-export default function SorgPlasing({ plasing, videos = [] }) {
+export default function SorgPlasing({ plasing, videos = [], notas = null }) {
   const [saam, setSaam] = useState(plasing.saam || 0)
   const [gedra, setGedra] = useState(() => draSaamReeds(plasing.id))
 
@@ -153,14 +154,29 @@ export default function SorgPlasing({ plasing, videos = [] }) {
         </div>
       )}
 
-      {/* ── Is daar nog nie 'n antwoord nie, dan iets wat wel help ── */}
-      {!antwoord && video && (
+      {/* ── Is daar nog nie 'n antwoord nie, dan iets wat wel help ──
+
+          Op die MUUR bly dit by een ding. Die volle "Terwyl jy wag"-lys hoort
+          op die skerm na 'n indiening, waar iemand wag en tyd het. Sit 'n
+          mens hom onder elke plasing, word elke kaart 'n spyskaart en dan
+          lees niemand meer die mens se woorde nie.
+
+          Is daar glad geen video nie — en op die oomblik is daar nul — val
+          dit terug op EEN stemnota. Nooit net iemand se pyn alleen nie. */}
+      {!antwoord && (video ? (
         <div className="sp-hoop">
           <p className="sp-hoop-kop">Iets wat jou dalk nou kan help</p>
           <SorgVideo video={video} />
           <SorgDeelSteun soort="video" id={video.videoId} titel={video.titel} />
         </div>
-      )}
+      ) : (
+        /* GEEN omhulsel hier nie. Dit was 'n <div className="sp-hoop"> om
+           SorgWag, en wanneer SorgWag niks het om te wys nie, gee hy null
+           terug — maar die omhulsel het bly staan met sy marge. 'n Leë blok
+           onder iemand se woorde lyk soos iets wat nie gelaai het nie.
+           SorgWag dra sy eie spasie. */
+        <SorgWag onderwerp={plasing.onderwerp} notas={notas} kort />
+      ))}
 
       {/* ── Geselskap, nie 'n punt nie ── */}
       <button className={`sp-saam${gedra ? ' gedra' : ''}`} onClick={dra} disabled={gedra}>

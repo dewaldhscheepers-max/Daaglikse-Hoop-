@@ -502,6 +502,19 @@ export default function App() {
     } catch {}
   }, [])
 
+  /* ── 'n Boek oopmaak van elders af ──
+     Pastorale Sorg wys 'n gratis e-boek onder "Terwyl jy wag". Die knoppie
+     moet by daardie boek uitkom, nie net op die boekelys nie. */
+  useEffect(() => {
+    function onOpen(e) {
+      const id = e && e.detail && e.detail.id
+      setTab('meer')
+      if (id) setTargetBookId(id)
+    }
+    window.addEventListener('open-boek', onOpen)
+    return () => window.removeEventListener('open-boek', onOpen)
+  }, [])
+
   // ── Donation card CTA ──
   useEffect(() => {
     function onOpen() { setDonation(true) }

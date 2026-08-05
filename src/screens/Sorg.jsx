@@ -44,6 +44,7 @@ import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
 import { haalMuur } from '../data/sorgMuur'
+import { haalNotas } from '../data/sorgWag'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -85,6 +86,7 @@ export default function Sorg() {
   const [data, setData] = useState(null)      // null = besig
   const [woord, setWoord] = useState(null)
   const [muur, setMuur] = useState(null)      // null = besig
+  const [notas, setNotas] = useState(null)   // Luister se stemnotas
 
   useEffect(() => {
     let lewendig = true
@@ -94,6 +96,8 @@ export default function Sorg() {
       setWoord(vandagSeWoord(d))
     })
     haalMuur().then(p => { if (lewendig) setMuur(p) })
+    /* Een keer vir die hele blad, nie een keer per kaart nie. */
+    haalNotas().then(n => { if (lewendig) setNotas(n) })
     return () => { lewendig = false }
   }, [])
 
@@ -261,7 +265,7 @@ export default function Sorg() {
                 Elke boodskap hier is deur 'n mens gelees en met toestemming
                 geplaas. Niks kom outomaties op hierdie muur nie.
               </p>
-              {plasings.map(p => <SorgPlasing key={p.id} plasing={p} videos={videos} />)}
+              {plasings.map(p => <SorgPlasing key={p.id} plasing={p} videos={videos} notas={notas} />)}
             </>
           )
         )}
