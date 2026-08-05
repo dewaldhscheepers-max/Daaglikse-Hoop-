@@ -43,16 +43,48 @@ const cfg = await haalTeks(WERF + '/config.js')
 se('   status: ' + cfg.status + ' · ' + cfg.lyf.length + ' karakters')
 if (cfg.status !== 200) { se('   Kon dit nie kry nie. Ons hou op.'); process.exit(0) }
 
-const mUrl = cfg.lyf.match(/https:\/\/[a-z0-9-]+\.supabase\.co/i)
-/* 'n Supabase anon-sleutel is 'n JWT: drie base64-dele met punte tussenin. */
-const mSleutel = cfg.lyf.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/)
+/* Die hele lêer, want dit is klein en dit is wat elke besoeker se blaaier
+   in elk geval kry. Ons wil sien hoe die sleutel genoem word. */
+se('   inhoud:')
+se(cfg.lyf.split('\n').map(r => '     ' + r).join('\n'))
 
-if (!mUrl || !mSleutel) {
-  se('   Geen Supabase-adres of anon-sleutel in die config nie. Ons hou op.')
+const mUrl = cfg.lyf.match(/https:\/\/[a-z0-9-]+\.supabase\.co/i)
+
+/* Supabase het twee vorms: die ou anon-JWT (eyJ....eyJ....sig) en die nuwe
+   publiseerbare sleutel (sb_publishable_...). Ons aanvaar albei. */
+const mSleutel =
+  cfg.lyf.match(/sb_publishable_[A-Za-z0-9_-]{10,}/) ||
+  cfg.lyf.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/)
+
+let BASIS = mUrl && mUrl[0]
+let SLEUTEL = mSleutel && mSleutel[0]
+
+/* Staan die sleutel nie in config.js nie, sit hy in die Astro-bondel. */
+if (!SLEUTEL) {
+  se('')
+  se('   Geen sleutel in config.js. Ons kyk in die bondels.')
+  const tuis = await haalTeks(WERF + '/')
+  const bates = [...new Set(
+    [...tuis.lyf.matchAll(/(?:src|href)=["']([^"']+\.(?:js|mjs))(?:\?[^"']*)?["']/gi)].map(m => m[1])
+  )]
+  for (const b of bates.slice(0, 6)) {
+    await pouse(700)
+    const url = b.startsWith('http') ? b : WERF + (b.startsWith('/') ? b : '/' + b)
+    const d = await haalTeks(url)
+    const k = d.lyf.match(/sb_publishable_[A-Za-z0-9_-]{10,}/) ||
+              d.lyf.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/)
+    const u = d.lyf.match(/https:\/\/[a-z0-9-]+\.supabase\.co/i)
+    se(`     ${b} · ${d.lyf.length} karakters · sleutel: ${k ? 'JA' : 'nee'} · adres: ${u ? u[0] : 'nee'}`)
+    if (k && !SLEUTEL) SLEUTEL = k[0]
+    if (u && !BASIS) BASIS = u[0]
+  }
+}
+
+if (!BASIS || !SLEUTEL) {
+  se('')
+  se('   Geen Supabase-adres of openbare sleutel gekry nie. Ons hou op.')
   process.exit(0)
 }
-const BASIS = mUrl[0]
-const SLEUTEL = mSleutel[0]
 se('   Supabase: ' + BASIS)
 se('   anon-sleutel: ' + SLEUTEL.slice(0, 12) + '… (' + SLEUTEL.length + ' karakters, nie hier gestoor nie)')
 
