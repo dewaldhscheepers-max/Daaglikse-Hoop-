@@ -39,6 +39,7 @@ import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
 import SorgDeelSteun from '../components/SorgDeelSteun'
+import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
@@ -252,42 +253,19 @@ export default function Sorg() {
           )
         )}
 
-        {/* ── Die groot steunblok ──
+        {/* ── Die steunkaart ──
 
-            EEN keer, en heel onder — na die muur, na die video's, na alles.
+            Dieselfde komponent as op E-boeke, Bybel, Leesplanne en die
+            kinderboeke — nie 'n eie weergawe nie.
 
-            Dit was 'n rukkie voorwaardelik: dit sou net wys as daar 'n video
-            of 'n antwoord was. Die bedoeling was reg (geen versoek om geld
-            voordat iemand iets ontvang het nie), maar die uitvoering was
-            verkeerd: met nul video's en 'n lee muur het die HELE blok
-            verdwyn, en dit lyk of die knoppies weg is in plaas van dat hulle
-            wag.
+            Ek het eers 'n eie blok hier gebou met eie woorde en eie
+            knoppies. Dit was verkeerd: dieselfde versoek moet oral dieselfde
+            lyk. 'n Mens wat die groen "Word 'n Maandelikse Hoop-Vennoot"
+            elders leer ken het, moet hom hier herken sonder om te lees. En
+            wanneer die woorde eendag verander, verander hulle op EEN plek.
 
-            Die reel wat werklik saak maak, word in elk geval nagekom deur
-            SorgDeelSteun: daardie klein rytjies bestaan net waar daar 'n
-            video of 'n antwoord IS, want hulle hang aan die ding self. Die
-            een blok heel onderaan hoort altyd daar. */}
-        <div className="sorg-steun">
-          <p className="sorg-steun-kop">Help om Daaglikse Hoop gratis te hou</p>
-          <p className="sorg-steun-teks">
-            Alles hier is gratis en bly gratis. As dit vir jou iets beteken,
-            help dit ons om dit vir iemand anders oop te hou.
-          </p>
-          <div className="sorg-steun-knoppe">
-            <button
-              className="sorg-steun-knop primer"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
-            >
-              Ondersteun maandeliks
-            </button>
-            <button
-              className="sorg-steun-knop"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
-            >
-              Gee eenmalig
-            </button>
-          </div>
-        </div>
+            Dit staan heel onder, na die muur en na die video's. */}
+        <DonationCard />
 
         <p className="sorg-grens">{GRENSSIN}</p>
       </div>

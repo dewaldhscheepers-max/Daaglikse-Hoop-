@@ -296,10 +296,19 @@ Die klein rytjies hang aan die ding self, dus bestaan hulle vanself net waar
 daar 'n video of 'n antwoord IS. Dit is die reel wat saak maak, en dit word
 outomaties nagekom.
 
-Die GROOT blok onderaan is 'n rukkie voorwaardelik gemaak — hy sou net wys
-as daar 'n video of 'n antwoord was. Dit was verkeerd. Met nul video's en 'n
-lee muur het die hele blok verdwyn, en dan lyk dit of die knoppies weg is in
-plaas van dat hulle wag. Hy staan nou altyd heel onderaan.
+Heel onderaan staan die gewone **`<DonationCard />`** — dieselfde komponent
+as op E-boeke, Bybel, Leesplanne en die kinderboeke. Nie 'n eie weergawe nie.
+
+Ek het eers 'n eie blok hier gebou met eie woorde en eie knoppies. Dit was
+verkeerd op twee maniere: dieselfde versoek moet oral dieselfde LYK (iemand
+wat die groen "Word 'n Maandelikse Hoop-Vennoot" elders leer ken het, moet
+hom hier herken sonder om te lees), en wanneer die woorde eendag verander,
+moet hulle op EEN plek verander.
+
+Hy was ook 'n rukkie voorwaardelik — net as daar 'n video of 'n antwoord was.
+Met nul video's en 'n lee muur het die hele blok toe verdwyn, en dan lyk dit
+of die knoppies weggevat is in plaas van dat hulle wag. Hy staan nou altyd
+daar.
 
 Onder elke antwoord en elke video staan een klein rustige ry: **Deel** eerste
 en prominenter (groei is die prioriteit), dan **Ondersteun**. Nie "Maak 'n
