@@ -92,10 +92,24 @@ export function gabIndeks() {
   if (!indeksBelofte) {
     indeksBelofte = haalJson(`${BASIS}/indeks.json`)
       .then(d => {
-        if (!d || !Array.isArray(d.boeke) || !d.boeke.length) return null
+        if (!d || !Array.isArray(d.boeke) || !d.boeke.length) {
+          /* Nie 'n netwerkfout nie — die lêer is daar maar leeg of stukkend.
+             Dit gaan nie vanself regkom nie, dus onthou ons dit. */
+          return null
+        }
         return d
       })
-      .catch(() => null)
+      .catch(() => {
+        /* Dit MISLUK, en dit kan later slaag: die foon was aflyn, die
+           ontplooiing was halfpad, die netwerk het gehak.
+
+           Vroeer het ons die mislukking onthou, en dan het die Afrikaanse
+           Bybel weggebly tot die app heeltemal herbegin is — selfs nadat die
+           netwerk teruggekom het. Nou vergeet ons dit, sodat die volgende
+           poging weer probeer. */
+        indeksBelofte = null
+        return null
+      })
   }
   return indeksBelofte
 }

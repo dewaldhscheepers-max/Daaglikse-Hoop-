@@ -36,7 +36,18 @@ const NAME = {
   [GAB_AFK]: GAB_ERKENNING.naam,
 }
 
-let weergaweKas = null
+/* Net die ENGELSE lys word gekas.
+
+   Voorheen is die saamgevoegde lys gekas, en die effek het by elke oopmaak
+   dadelik teruggekeer as daar 'n kas was. Was die GAB op daardie oomblik nie
+   bereikbaar nie — die foon aflyn, die ontplooiing halfpad — het die
+   Afrikaans-afdeling weggebly tot die hele bladsy herlaai is. Toemaak en
+   weer oopmaak het niks gehelp nie.
+
+   Nou vra ons die GAB by elke oopmaak (gabIndeks() onthou 'n sukses en
+   herprobeer 'n mislukking), en net die Engelse lys — die duur netwerkoproep
+   — word gehou. */
+let engelsKas = null
 const hoofstukKas = {}
 const teksKas     = {}
 
@@ -118,7 +129,7 @@ function omhulVerse(root) {
 
 export default function Bybel({ onClose }) {
   const [view, setView]             = useState('boeke')
-  const [weergawes, setWeergawes]   = useState(weergaweKas || [])
+  const [weergawes, setWeergawes]   = useState([])
   const [weergaweId, setWeergaweId] = useState(() => lees('byb_weergawe', null))
   const [boek, setBoek]             = useState(null)
   const [hoofstukke, setHoofstukke] = useState([])
@@ -151,17 +162,22 @@ export default function Bybel({ onClose }) {
      hanteer. Is die netwerk weg, bly die Afrikaanse Bybel staan. Is die
      GAB-lêers nog nie ontplooi nie, is die app presies soos hy was. */
   useEffect(() => {
-    if (weergaweKas) return
+    let lewendig = true
     setLaai(true)
 
-    const engels = haal('/v1/bibles', { 'language_ranges[]': 'eng' })
-      .then(d => {
-        const rou = (d && (d.data || d.bibles)) || []
-        return rou.filter(w => goedgekeurdeSleutel(w.abbreviation))
-      })
-      .catch(() => null)   // null beteken "kon nie", [] beteken "niks gekry"
+    const engels = engelsKas
+      ? Promise.resolve(engelsKas)
+      : haal('/v1/bibles', { 'language_ranges[]': 'eng' })
+          .then(d => {
+            const rou = (d && (d.data || d.bibles)) || []
+            const lys = rou.filter(w => goedgekeurdeSleutel(w.abbreviation))
+            engelsKas = lys
+            return lys
+          })
+          .catch(() => null)   // null beteken "kon nie", [] beteken "niks gekry"
 
     Promise.all([gabIndeks(), engels]).then(([ind, eng]) => {
+      if (!lewendig) return
       const afr = ind ? [gabWeergawe(ind)] : []
       const lys = [...afr, ...(eng || [])]
 
@@ -172,16 +188,31 @@ export default function Bybel({ onClose }) {
       /* Is net die Engelses weg, is dit nie 'n fout wat die skerm moet oorneem
          nie — die Afrikaanse Bybel werk nog. Die vertalingblad wys dan bloot
          een vertaling. */
-      weergaweKas = lys
       setWeergawes(lys)
 
-      const gestoor = lees('byb_weergawe', null)
-      if (gestoor && lys.some(w => w.id === gestoor)) return
-      /* Die Afrikaanse een is die verstek in 'n Afrikaanse app. */
       const kies = k => lys.find(w => goedgekeurdeSleutel(w.abbreviation) === k)
+      const gestoor = lees('byb_weergawe', null)
+      const selfGekies = lees('byb_self_gekies', false)
+
+      if (gestoor && lys.some(w => w.id === gestoor)) {
+        /* Het die mens self gekies, bly ons daarby. Punt.
+
+           Het HY NIE gekies nie, is die gestoorde een net wat destyds
+           beskikbaar was — en toe was die GAB nog nie ontplooi nie, dus staan
+           die hele bestaande gebruikersbasis op 'n Engelse vertaling wat
+           niemand gevra het nie. Is die Afrikaanse een nou daar, skuif ons
+           hulle oor. Dit is 'n Afrikaanse app. */
+        const gab = kies(GAB_AFK)
+        if (!selfGekies && gab && gestoor !== gab.id) setWeergaweId(gab.id)
+        return
+      }
+
+      /* Die Afrikaanse een is die verstek in 'n Afrikaanse app. */
       const verstek = kies(GAB_AFK) || kies('KJV') || kies('NIV11') || lys[0]
       if (verstek) setWeergaweId(verstek.id)
-    }).finally(() => setLaai(false))
+    }).finally(() => { if (lewendig) setLaai(false) })
+
+    return () => { lewendig = false }
   }, [])
 
   const laaiHoofstukke = useCallback(async (kode, wId) => {
@@ -256,6 +287,8 @@ export default function Bybel({ onClose }) {
   // Een druk kies, maak toe, hou boek en hoofstuk
   function kiesWeergawe(id) {
     setWeergaweId(id)
+    /* Van nou af is dit die mens se eie keuse, en niks skuif dit weer nie. */
+    stoor('byb_self_gekies', true)
     setBlad(false)
     if (boek) laaiHoofstukke(boek, id)
     if (view === 'lees' && boek && hoofstuk) laaiTeks(boek, hoofstuk, id)
