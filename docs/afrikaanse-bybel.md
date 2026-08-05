@@ -183,9 +183,18 @@ Romeine 5:8, 1 Johannes 4:9-10, Romeine 8:32. Tik een en jy is daar.
 raak hulle nooit aan; net wie 'n vers aantik, trek daardie een boek s'n. Dit is
 in die blaaier bevestig.
 
+**Hulle werk vir elke vertaling, nie net die GAB nie.** 'n Kruisverwysing is
+bloot 'n plek — boek, hoofstuk, vers — en daardie plek is dieselfde in enige
+Bybel. Ons stoor geen teks nie, dus raak dit aan geen ander vertaling se
+lisensie nie. Tik een aan en jy spring soontoe in die vertaling wat jy nou
+lees. Verwysings na 'n boek wat die huidige vertaling nie het nie, word
+weggelaat, sodat 'n knoppie nooit nêrens heen gaan nie.
+
 Bron: *Treasury of Scripture Knowledge* (publieke domein) plus OpenBible.info
-se rangorde (CC BY 4.0). Die erkenning staan op "Oor hierdie vertaling" en
-**mag nie uitval nie** — CC BY vereis dit.
+se rangorde (CC BY 4.0). Die erkenning staan **by die verwysings self**, want
+hulle wys ook onder die Engelse vertalings waar die GAB se "Oor hierdie
+vertaling"-blad nie bestaan nie. CC BY vereis erkenning oral waar die
+materiaal wys — **dit mag nie uitval nie.**
 
 Die afkortings ("Joh 1:1-3") word by die INVOER opgelos, uit hul eie indeks se
 `abbr`- en `name`-velde, en as kodes gestoor. Die app ontleed dus niks. 'n

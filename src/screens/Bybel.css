@@ -789,3 +789,11 @@
   line-height: 1.5;
   color: #241B38;
 }
+
+.byb-kruis-bron {
+  margin: 11px 0 0;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--byb-sag);
+}

@@ -412,14 +412,27 @@ export default function Bybel({ onClose }) {
   }, [soek, sleutel])
 
   /* Die aangetikte vers se kruisverwysings. Dit trek een boek se lêer, en
-     net wanneer iemand werklik 'n vers aantik. */
+     net wanneer iemand werklik 'n vers aantik.
+
+     Dit werk vir ELKE vertaling, nie net die GAB nie. 'n Kruisverwysing is
+     bloot 'n plek — boek, hoofstuk, vers — en daardie plek is dieselfde in
+     enige Bybel. Ons stoor geen teks nie, dus is daar niks wat aan 'n
+     vertaling se lisensie raak nie. Tik jy een aan, spring jy soontoe in die
+     vertaling wat jy nou lees.
+
+     Ons wys net verwysings na boeke wat die huidige vertaling werklik het,
+     sodat 'n mens nooit 'n knoppie druk wat nêrens heen gaan nie. */
   useEffect(() => {
-    if (!gekose || sleutel !== GAB_AFK || !boek || !hoofstuk) { setVerwysings([]); return }
+    if (!gekose || !boek || !hoofstuk) { setVerwysings([]); return }
     let lewendig = true
     setWysAlleKruis(false)
-    gabVerwysings(boek, hoofstuk, Number(gekose.v)).then(v => { if (lewendig) setVerwysings(v) })
+    gabVerwysings(boek, hoofstuk, Number(gekose.v)).then(v => {
+      if (!lewendig) return
+      const het = new Set(boeke)
+      setVerwysings(het.size ? v.filter(([k]) => het.has(k)) : v)
+    })
     return () => { lewendig = false }
-  }, [gekose, sleutel, boek, hoofstuk])
+  }, [gekose, boek, hoofstuk, weergaweId])
 
   const aanbeveel = groep(AANBEVEEL)
   const meer      = groep(MEER)
@@ -673,6 +686,13 @@ export default function Bybel({ onClose }) {
                     Wys al {verwysings.length}
                   </button>
                 )}
+                {/* CC BY eis erkenning oral waar die materiaal wys. Die
+                    verwysings wys nou ook onder die Engelse vertalings, waar
+                    die GAB se "Oor hierdie vertaling"-blad nie bestaan nie —
+                    dus hoort die erkenning hier, by hulle. */}
+                <p className="byb-kruis-bron">
+                  Treasury of Scripture Knowledge · OpenBible.info (CC BY 4.0)
+                </p>
               </div>
             )}
           </div>
