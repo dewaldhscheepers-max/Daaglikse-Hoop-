@@ -128,6 +128,53 @@ function omhulVerse(root) {
   root.dataset.omhul = '1'
 }
 
+/* ── Ondersteun Daaglikse Hoop ──
+
+   Hierdie blok was 'n ruk lank heeltemal van die Bybelskerm af weg, want die
+   GAB se lisensie is NIE-KOMMERSIEEL en twee geldknoppies onder Bybelteks is
+   die prentjie wat dit ondermyn.
+
+   Dewald wou dit terug he, en na sy bewoording is dit verdedigbaar. CC se eie
+   uitleg is dat "nie-kommersieel" gaan oor gebruik wat HOOFSAAKLIK op
+   kommersiele voordeel gerig is — nie oor elke sent wat 'n bediening ooit
+   hanteer nie. Wat die saak maak of breek, is die konteks, en die konteks is
+   hier reg:
+
+     · die Bybel is gratis en toegang hang van geen betaling af nie;
+     · daar is geen betaalmuur en geen advertensie nie;
+     · dit is 'n bediening wat om ondersteuning vra, nie 'n winkel nie;
+     · en die eerste sin se dit hardop: "Die Bybel sal altyd gratis bly."
+
+   Daardie eerste sin is nie versiering nie. Dit is die ding wat die
+   nie-kommersiele posisie STERKER maak, en dit mag nie uitval nie.
+
+   Waar dit staan, maak ook saak. Dit is op die BOEKELYS, nie onder die
+   Skrifteks self nie. Die skerm waar 'n mens werklik lees, bly die een plek
+   in die app waar niemand ooit om geld gevra word nie. */
+function Steun() {
+  return (
+    <div className="byb-steun">
+      <p className="byb-steun-teks">
+        Die Bybel sal altyd gratis bly. As Daaglikse Hoop jou al bemoedig,
+        gehelp of nader aan God gebring het, kan jy help om hierdie bediening
+        gratis vir ander aan die gang te hou.
+      </p>
+      <button
+        className="byb-steun-knop byb-steun-primer"
+        onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}
+      >
+        Ondersteun Daaglikse Hoop — maandeliks
+      </button>
+      <button
+        className="byb-steun-knop byb-steun-spook"
+        onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}
+      >
+        Eenmalige bydrae
+      </button>
+    </div>
+  )
+}
+
 export default function Bybel({ onClose }) {
   const [view, setView]             = useState('boeke')
   const [weergawes, setWeergawes]   = useState([])
@@ -509,6 +556,7 @@ export default function Bybel({ onClose }) {
                   {nt.map(k => <button key={k} className="byb-boek" onClick={() => openBoek(k)}>{boekNaam(k)}</button>)}
                 </div>
               </>}
+              <Steun />
             </>
           )}
 

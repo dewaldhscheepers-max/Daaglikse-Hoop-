@@ -34,10 +34,22 @@ vertaalfout, **rapporteer dit by die projek** — moet dit nie hier regmaak nie.
 'n Reggemaakte teks is 'n afgeleide werk en mag nie versprei word nie.
 `skrifte/bou-gab.mjs` verander doelbewus niks behalwe wit spasie aan die punte.
 
-**3. Nie-kommersieel.** Geen betaalmuur, geen advertensie en geen versoek om
-geld op enige skerm waar hierdie teks wys nie. Daarom is die `Steun`-komponent
-heeltemal van `Bybel.jsx` af weg. Die Bybel is die een skerm in die app waar
-niemand ooit om geld gevra word nie. **Moet dit nie terugsit nie.**
+**3. Nie-kommersieel.** Geen betaalmuur, geen advertensie, en **niks wat om
+geld vra op die skerm waar die Skrifteks self wys nie.**
+
+Daar is wel 'n `Steun`-blok, maar hy staan op die **boekelys**, nooit onder 'n
+hoofstuk se teks nie. CC se eie uitleg is dat "nie-kommersieel" gaan oor
+gebruik wat hoofsaaklik op kommersiele voordeel gerig is — nie oor elke sent
+wat 'n bediening ooit hanteer nie. Wat die saak maak of breek, is die konteks:
+
+* die Bybel is gratis en toegang hang van geen betaling af nie;
+* geen betaalmuur, geen advertensie;
+* dit is 'n bediening wat om ondersteuning vra, nie 'n winkel nie;
+* en die eerste sin se dit hardop: *"Die Bybel sal altyd gratis bly."*
+
+Daardie eerste sin is nie versiering nie — dit is die ding wat die
+nie-kommersiele posisie sterker maak. **Dit mag nie uitval nie, en die blok
+mag nie na die leesskerm skuif nie.** 'n Blaaiertoets hou albei vas.
 
 Ter ondersteuning: elke e-boek in die app is gratis (`Meer.jsx` — "Elke e-boek
 is gratis"). Die `price`-velde in `src/data/books.js` is dooie data wat nie meer
