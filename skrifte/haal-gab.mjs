@@ -249,6 +249,87 @@ function verseUit(data) {
   })
 }
 
+/* ── Die kruisverwysings ──
+
+   Hul data dra by elke vers 'n "x": ["Joh 1:1-3", "Heb 11:3", ...]. Dit is
+   die Treasury of Scripture Knowledge (publieke domein) saam met
+   OpenBible.info se rangorde (CC BY 4.0) — sowat 340 000 verwysings, in
+   volgorde van hoe sterk hulle is.
+
+   Ons los die Afrikaanse afkortings HIER op, een keer, en stoor die antwoord
+   as kodes. Die app hoef dan niks te ontleed nie; sy wys net die naam en
+   spring. 'n Afkorting wat ons nie ken nie, kom hier uit — nie stil op
+   iemand se foon nie.
+
+   Die kaart word uit HUL EIE indeks gebou. Elke boek dra 'n "abbr" ("Gén")
+   en 'n "name" ("Génesis"), dus raai ons niks.
+
+   OpenBible se lisensie is CC BY 4.0 — erkenning verplig. Dit staan op die
+   "Oor hierdie vertaling"-blad. */
+
+const MAKS_PER_VERS = 20
+
+
+function bouAfkortings(lys) {
+  const plat = t => String(t).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\./g, '').replace(/\s+/g, ' ').trim()
+
+  const kaart = new Map()
+  for (const b of lys) {
+    const kode = naarKode(b)
+    if (!kode) continue
+    for (const vorm of [b.abbr, b.name, b.id]) {
+      if (vorm) kaart.set(plat(vorm), kode)
+    }
+    /* Ons eie Afrikaanse naam ook, vir die geval hulle iewers anders spel */
+    kaart.set(plat(BOEKE[kode]), kode)
+  }
+  return { kaart, plat }
+}
+
+/* "Joh 1:1-3" → ['JHN', 1, 1, 3] · "Heb 11:3" → ['HEB', 11, 3, null]
+   Gee null as ons dit nie kan lees nie; die roeper tel dit op. */
+function leesVerwysing(rou, kaart, plat) {
+  const m = String(rou).trim().match(/^([1-3]?\s*[^\d]+?)\s*(\d+)\s*[:.]\s*(\d+)(?:\s*[-–]\s*(\d+))?/)
+  if (!m) return null
+  const kode = kaart.get(plat(m[1]))
+  if (!kode) return { onbekend: plat(m[1]) }
+  const h = Number(m[2]), v = Number(m[3]), tot = m[4] ? Number(m[4]) : null
+  if (!h || !v) return null
+  return [kode, h, v, tot]
+}
+
+function verwysingsUit(data, kaart, plat, onbekendes) {
+  const h = data && data.chapters
+  if (!h || typeof h !== 'object') return null
+  const uit = {}
+  let aantal = 0
+
+  for (const [hNr, verse] of Object.entries(h)) {
+    if (!/^\d+$/.test(hNr) || !verse || typeof verse !== 'object') continue
+    for (const [vNr, vers] of Object.entries(verse)) {
+      if (!/^\d+$/.test(vNr)) continue
+      const rou = Array.isArray(vers && vers.x) ? vers.x : null
+      if (!rou || !rou.length) continue
+
+      const lys = []
+      for (const r of rou) {
+        if (lys.length >= MAKS_PER_VERS) break
+        const g = leesVerwysing(r, kaart, plat)
+        if (!g) continue
+        if (g.onbekend) { onbekendes.set(g.onbekend, (onbekendes.get(g.onbekend) || 0) + 1); continue }
+        lys.push(g)
+      }
+      if (!lys.length) continue
+      if (!uit[hNr]) uit[hNr] = {}
+      uit[hNr][vNr] = lys
+      aantal += lys.length
+    }
+  }
+  return { verwysings: uit, aantal }
+}
+
 /* ── Loop ── */
 fs.mkdirSync(ROU, { recursive: true })
 
@@ -366,6 +447,35 @@ for (const { kode, hoofstukke } of uitgee) {
   fs.writeFileSync(path.join(UIT, kode + '.json'), lyf)
   grepe += Buffer.byteLength(lyf)
 }
+
+/* ── Die kruisverwysings, in hul eie gids ──
+   Aparte lêers, want gewone lees moet hulle nooit laai nie. */
+se('')
+se('== Kruisverwysings ==')
+const { kaart: afkKaart, plat } = bouAfkortings(lys)
+const onbekendes = new Map()
+const XUIT = path.join(UIT, 'x')
+fs.mkdirSync(XUIT, { recursive: true })
+for (const f of fs.readdirSync(XUIT)) if (f.endsWith('.json')) fs.unlinkSync(path.join(XUIT, f))
+
+let xTotaal = 0, xGrepe = 0, xBoeke = 0
+for (const { kode } of uitgee) {
+  const r = verwysingsUit(boekData[kode], afkKaart, plat, onbekendes)
+  if (!r || !r.aantal) continue
+  const lyf = JSON.stringify({ boek: kode, weergawe, verwysings: r.verwysings })
+  fs.writeFileSync(path.join(XUIT, kode + '.json'), lyf)
+  xTotaal += r.aantal
+  xGrepe += Buffer.byteLength(lyf)
+  xBoeke++
+}
+se(`   ${xBoeke} boeke · ${xTotaal.toLocaleString('af-ZA')} verwysings · ${(xGrepe / 1048576).toFixed(1)} MB`)
+if (onbekendes.size) {
+  se('')
+  se(`   LET OP — ${onbekendes.size} afkorting(s) wat ons nie ken nie:`)
+  ;[...onbekendes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 30)
+    .forEach(([a, n]) => se(`     "${a}" × ${n}`))
+  se('   Hulle is oorgeslaan. Voeg hulle by en loop weer.')
+}
 fs.writeFileSync(path.join(UIT, 'indeks.json'),
   JSON.stringify({ weergawe, konsep: true, boeke: uitgee.map(x => x.kode) }))
 
@@ -382,6 +492,7 @@ fs.writeFileSync(HERKOMS, JSON.stringify({
   boeke: uitgee.length,
   hoofstukke: totaalHoofstukke,
   verse: totaalVerse,
+  kruisverwysings: { boeke: xBoeke, aantal: xTotaal, bron: 'Treasury of Scripture Knowledge (publieke domein) + OpenBible.info (CC BY 4.0)' },
   ontbrekendeBoeke: ontbreek,
   rou: Object.fromEntries(Object.entries(stand.boeke).map(([k, v]) => [k, v.sha256])),
 }, null, 2))
