@@ -105,15 +105,51 @@ export function naVelde(o) {
 
 /* ── Lees, skryf, vee uit ── */
 
-export async function lysDokke(versameling, { grootte = 300 } = {}) {
+/* ── Lys 'n hele versameling ──
+
+   HIERDIE FUNKSIE HET 'N STIL FOUT GEHAD, en dit is die soort een wat eers
+   oor 'n paar maande sou wys.
+
+   Firestore se REST-API gee die dokumente terug in volgorde van hul NAAM, en
+   dit gee net EEN bladsy op 'n slag met 'n `nextPageToken` vir die res. Ons
+   het daardie teken geignoreer.
+
+   Ons id's begin met die tyd: `b` + Date.now() in basis 36. Dit beteken
+   alfabetiese volgorde is TYDVOLGORDE, en die eerste bladsy is die OUDSTE
+   driehonderd. Sodra daar 'n dokument meer as driehonderd was, sou elke NUWE
+   boodskap agter die teken le en NOOIT verskyn nie — nie in Dewald se inbak
+   nie en nie op die muur nie. Niks sou breek nie. Dit sou net stil ophou.
+
+   Nou loop ons deur al die bladsye tot die versameling klaar is, of tot die
+   perk. Word die perk bereik, se ons dit hardop op die log in plaas van om
+   stil af te kap. */
+export async function lysDokke(versameling, { grootte = 300, maks = 3000 } = {}) {
   const token = await kryToken()
-  const r = await fetch(`${BASIS}/${versameling}?pageSize=${grootte}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  if (r.status === 404) return []          // die versameling bestaan nog nie
-  if (!r.ok) throw new Error(`kon ${versameling} nie lees nie (${r.status})`)
-  const d = await r.json()
-  return (d.documents || []).map(uitDok)
+  const uit = []
+  let teken = null
+
+  do {
+    const vraag = new URLSearchParams({ pageSize: String(Math.min(grootte, 300)) })
+    if (teken) vraag.set('pageToken', teken)
+
+    const r = await fetch(`${BASIS}/${versameling}?${vraag}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (r.status === 404) return uit        // die versameling bestaan nog nie
+    if (!r.ok) throw new Error(`kon ${versameling} nie lees nie (${r.status})`)
+
+    const d = await r.json()
+    for (const dok of d.documents || []) uit.push(uitDok(dok))
+    teken = d.nextPageToken || null
+  } while (teken && uit.length < maks)
+
+  if (teken) {
+    /* Geen stil afkapping nie. Sien dit 'n mens hier, is dit tyd om 'n regte
+       navraag met 'n volgorde en 'n perk te bou in plaas van om alles te
+       lees. */
+    console.warn(`[sorg] ${versameling} het meer as ${maks} dokumente — die res is nie gelees nie`)
+  }
+  return uit
 }
 
 export async function leesDok(versameling, id) {

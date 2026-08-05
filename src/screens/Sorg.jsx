@@ -33,7 +33,7 @@
    tik nie.
    ──────────────────────────────────────────────────────────── */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
@@ -98,12 +98,25 @@ export default function Sorg() {
   }, [])
 
   /* 'n Gedeelde skakel bring 'n mens direk by daardie plasing of video uit.
-     Kom hy nie van 'n skakel af nie, gebeur hier niks. */
+     Kom hy nie van 'n skakel af nie, gebeur hier niks.
+
+     Die `gespring`-merker is nie netheid nie: die effek hang van `muur` en
+     `data` af, want ons kan eers spring wanneer daardie goed gelaai het. Maar
+     die hash bly in die adresbalk staan, dus het die effek by ELKE nuwe data
+     weer geloop en die oortjie teruggeruk. Iemand wat die skakel oopmaak en
+     dan op "Die Video's" druk voordat die muur klaar gelaai het, is
+     teruggeslinger. Nou spring ons een keer en los dit dan. */
+  const gespring = useRef(false)
   useEffect(() => {
+    if (gespring.current) return
     const s = leesSorgSkakel()
     if (!s) return
     setAfdeling(s.soort === 'video' ? 'videos' : 'muur')
-    if (muur === null && s.soort !== 'video') return
+
+    /* Wag tot die ding waarheen ons spring, werklik daar is. */
+    if (s.soort === 'video' ? data === null : muur === null) return
+
+    gespring.current = true
     const el = document.getElementById(`sorg-${s.soort}-${s.id}`)
     if (el) el.scrollIntoView({ block: 'center' })
   }, [muur, data])

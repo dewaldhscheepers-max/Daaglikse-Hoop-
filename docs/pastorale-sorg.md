@@ -222,9 +222,22 @@ te stel, is erger as een wat glad nie werk nie.
 ## Toetse
 
 ```
-node src/data/sorg.toets.mjs      # 76 toetse
-node api/_sorg-videos.toets.mjs   # 22 toetse
+node src/data/sorg.toets.mjs        # die indiening en die krisisvloei
+node api/_sorgFirestore.toets.mjs   # die Firestore-laag en die blaai
+node api/_sorg-videos.toets.mjs     # die videologika
 ```
+
+### Die stil fout wat `_sorgFirestore.toets.mjs` vashou
+
+Firestore se REST-API gee dokumente terug in volgorde van hul **naam**, een
+bladsy op 'n slag, met 'n `nextPageToken` vir die res. Ons het daardie teken
+geignoreer.
+
+Ons id's begin met die tyd (`b` + `Date.now()` in basis 36), dus is
+alfabetiese volgorde **tydvolgorde**, en die eerste bladsy is die **oudste**
+driehonderd. Sodra daar een dokument meer as driehonderd was, sou elke NUWE
+boodskap agter die teken le en nooit verskyn nie — nie in die inbak nie en
+nie op die muur nie. Niks sou breek nie. Dit sou net stil ophou.
 
 Die eerste toets kyk spesifiek na die **karakterreeks-fout** — `[ -<>]` lyk
 soos vier karakters maar is 'n reeks van spasie tot `<`, en dit gooi

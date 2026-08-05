@@ -258,6 +258,10 @@ function Muur({ data, doen, besig }) {
             {m.antwoord ? ' · beantwoord' : ' · nog geen antwoord'}
             {m.saam ? ` · ${m.saam} dra dit saam` : ''}
           </div>
+          {/* Sonder hierdie merkie lyk 'n afgehaalde plasing presies soos een
+              wat op die muur staan, en dan haal 'n mens dieselfde een twee
+              keer af en wonder hoekom niks gebeur nie. */}
+          {m.gepubliseer === false && <div className="sk-kontak">Van die muur af</div>}
           <p className="sk-voorskou">{m.teks}</p>
 
           {oop === m.id ? (
@@ -311,8 +315,16 @@ function Muur({ data, doen, besig }) {
               }}>
                 {m.antwoord ? 'Verander die antwoord' : 'Antwoord'}
               </button>
-              <button className="sk-knop" disabled={besig} onClick={() => doen({ aksie: 'wysig', muurId: m.id, gepubliseer: false })}>
-                Haal van die muur af
+              {/* Afhaal moet omkeerbaar wees. Dit was dit nie: 'n mens kon
+                  'n plasing afhaal en dan was daar geen knoppie om hom terug
+                  te sit nie. Die enigste pad terug sou deur die Firebase-
+                  konsole gewees het. */}
+              <button
+                className="sk-knop"
+                disabled={besig}
+                onClick={() => doen({ aksie: 'wysig', muurId: m.id, gepubliseer: m.gepubliseer === false })}
+              >
+                {m.gepubliseer === false ? 'Sit terug op die muur' : 'Haal van die muur af'}
               </button>
             </div>
           )}

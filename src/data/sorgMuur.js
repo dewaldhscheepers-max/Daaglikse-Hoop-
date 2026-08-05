@@ -54,7 +54,16 @@ function onthouSaam(id) {
    gewerk, ook op 'n stadige lyn. */
 export async function draSaam(muurId) {
   if (draSaamReeds(muurId)) return null
-  onthouSaam(muurId)
+
+  /* Ons onthou dit eers NADAT die bediener dit bevestig het.
+
+     Voorheen het ons dit vooraf onthou. Iemand op 'n swak lyn — en 'n swak
+     lyn is in Suid-Afrika die gewone geval — het dan gedruk, die versoek het
+     misluk, en die telling het nooit getel nie. Maar die foon het onthou dat
+     hy dit "gedoen" het, dus kon hy dit ook nooit weer probeer nie.
+
+     Die skerm tel in elk geval self dadelik een by, sodat dit oombliklik
+     voel. Dit is net wat ONTHOU word wat op die bediener wag. */
   try {
     const r = await fetch(PAD, {
       method: 'POST',
@@ -62,6 +71,7 @@ export async function draSaam(muurId) {
       body: JSON.stringify({ muurId, toestel: toestelId() }),
     })
     const d = await r.json()
+    if (d && (d.ok || d.reeds)) onthouSaam(muurId)
     return typeof d.saam === 'number' ? d.saam : null
   } catch {
     return null
