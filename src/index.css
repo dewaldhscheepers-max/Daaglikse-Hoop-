@@ -170,9 +170,9 @@ body {
 }
 
 .nav-tab.active { color: var(--purple); }
-/* Sorg staan uit in goud. Dit is die een plek in die app waar iemand met
-   sy seer heen gaan, en dit moet gesien word. */
-.nav-tab-sorg { color: #B8860B; }
+/* Sorg staan uit, maar net die IKOON. Was die hele etiket goud, het dit soos
+   die gekose oortjie gelyk selfs wanneer 'n mens op Luister was. */
+.nav-tab-sorg svg { color: #B8860B; }
 .nav-tab-sorg.active { color: #B8860B; }
 
 .nav-tab svg {

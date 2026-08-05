@@ -920,42 +920,51 @@
 
 
 /* ── Die Bid Nou-kaart ──
-   Bid Nou het sy plek in die balk vir Sorg afgestaan, dus staan hy hier,
-   tweede op die blad. Net kleur op :active — sien CLAUDE.md. */
-.bidnou-kaart {
-  position: relative;
-  text-align: center;
-}
 
-.bidnou-nuut {
-  display: inline-block;
-  margin-bottom: 10px;
-  padding: 4px 11px;
-  border-radius: 999px;
-  background: #F2E8D5;
-  color: #8A6A2F;
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+   Dieselfde vorm as die Saamgebed-kaart direk daarbo: links belyn, dieselfde
+   titelgrootte, dieselfde randjie. Hy moet soos 'n broer van daardie kaart
+   lyk, nie soos 'n aankondiging nie.
+
+   Net kleur op :active — sien CLAUDE.md. */
+.bidnou-kaart {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-left: 3px solid var(--gold, #D4956A);
+  background: linear-gradient(135deg, #FBF2E8 0%, #FDFAF6 100%);
 }
 
 .bidnou-kaart-titel {
-  margin: 0 0 8px;
-  font-family: var(--font-serif);
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text-dark);
+}
+
+.bidnou-nuut {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #F0E2C8;
+  color: #8A6A2F;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .bidnou-kaart-teks {
-  margin: 0 0 16px;
-  font-size: 14.5px;
-  line-height: 1.65;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--text-muted);
 }
 
 .bidnou-kaart-knop {
-  width: 100%;
+  align-self: flex-start;
   -webkit-tap-highlight-color: transparent;
 }

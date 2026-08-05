@@ -703,7 +703,10 @@ export default function App() {
         </ErrorBoundary>
       </div>
 
-      <BottomNav active={tab} onChange={handleNav} onBybel={() => setShowBybel(true)} />
+      {/* Bid Nou is nie meer 'n oortjie nie — hy sit onder Bid Saam. Wys dus
+          Bid Saam as die aktiewe een terwyl 'n mens op Bid Nou is, anders lyk
+          dit of niks gekies is nie. */}
+      <BottomNav active={tab === 'bidnou' ? 'bidsaam' : tab} onChange={handleNav} onBybel={() => setShowBybel(true)} />
 
       {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {/* Die steunblad sit onder die twee betaalvensters, sodat 'n mens

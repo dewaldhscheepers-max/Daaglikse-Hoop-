@@ -113,8 +113,18 @@ export default function BidNou() {
     }
   }
 
-  function goToBidSaam() {
+  /* Terug na Bid Saam. `fokus` beteken: moenie bo oopmaak nie, gaan reguit na
+     die kassie waar 'n mens sy versoek tik.
+
+     Ons stuur dit deur sessionStorage en nie deur die gebeurtenis nie, want
+     die bidnou-navigate-luisteraar in App.jsx verwag 'n string en dit is
+     kode waaraan 'n mens nie ligtelik raak nie (sien CLAUDE.md). */
+  function goToBidSaam({ fokus } = {}) {
     setShowModal(false)
+    try {
+      if (fokus) sessionStorage.setItem('bidsaam_fokus', fokus)
+      else sessionStorage.removeItem('bidsaam_fokus')
+    } catch { /* privaat modus */ }
     window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
   }
 
@@ -136,7 +146,7 @@ export default function BidNou() {
           <p className="bidnou-modal-highlight">Haal asem. Drink water. Sê stadig: <em>"Here, help my deur vandag."</em></p>
           <p>Jy het vandag jou las by God neergesit.</p>
         </div>
-        <button className="bidnou-modal-cta" onClick={goToBidSaam}>
+        <button className="bidnou-modal-cta" onClick={() => goToBidSaam({ fokus: 'versoek' })}>
           Wil jy hê ons moet saam met jou bid?
         </button>
         <button className="bidnou-modal-dismiss" onClick={() => setShowModal(false)}>
@@ -237,6 +247,15 @@ export default function BidNou() {
   return (
     <div className="bidnou-screen">
       <div className="bidnou-header-main">
+        {/* Bid Nou was 'n oortjie in die balk; nou is dit 'n skerm onder Bid
+            Saam. Sonder hierdie knoppie is daar geen pad terug nie — 'n mens
+            sit vas. */}
+        <button className="bidnou-terug-bidsaam" onClick={goToBidSaam}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Bid Saam
+        </button>
         <h1 className="bidnou-heading">Bid Nou</h1>
         <div className="bidnou-info-card">
           <p className="bidnou-info-sub">Wanneer jy nie weet wat om te bid nie, begin hier.</p>

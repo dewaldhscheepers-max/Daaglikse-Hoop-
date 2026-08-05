@@ -279,6 +279,31 @@ export default function BidSaam() {
   /* Een keer per opening bepaal, sodat die strokie nie tydens 'n herteken
      wegflikker nie. */
   const [bidnouGesien] = useState(bidnouAlGesien)
+  const versoekRef = useRef(null)
+
+  /* Kom 'n mens van Bid Nou se "Wil jy hê ons moet saam met jou bid?", moet
+     hierdie blad by die TIKKASSIE oopmaak, nie heel bo nie. Hy het pas gebid
+     en wil nou skryf; om hom bo te laat begin, is om hom te laat soek.
+
+     App.jsx stel die skerm se scrollTop na 0 wanneer die oortjie verander,
+     dus wag ons een raam en skuif dan self. */
+  useEffect(() => {
+    let fokus = null
+    try {
+      fokus = sessionStorage.getItem('bidsaam_fokus')
+      if (fokus) sessionStorage.removeItem('bidsaam_fokus')
+    } catch { /* privaat modus */ }
+    if (fokus !== 'versoek') return
+
+    const t = setTimeout(() => {
+      const n = versoekRef.current
+      if (!n) return
+      n.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      const kassie = n.querySelector('textarea')
+      if (kassie) kassie.focus({ preventScroll: true })
+    }, 260)
+    return () => clearTimeout(t)
+  }, [])
   const [satVid,         setSatVid]         = useState({ active: false, videoId: '', title: '', subtitle: '' })
 
   useEffect(() => {
@@ -439,16 +464,16 @@ export default function BidSaam() {
             nie. Die bidnou-navigate-gebeurtenis is dieselfde een wat Bid Nou
             self gebruik om hierheen te kom — ons voeg niks nuuts by nie. */}
         <div className="card bidnou-kaart">
-          {!bidnouGesien && (
-            <div className="bidnou-nuut">Bid Nou sit nou hier</div>
-          )}
-          <h3 className="bidnou-kaart-titel">Bid Nou</h3>
+          <h3 className="bidnou-kaart-titel">
+            Bid Nou
+            {!bidnouGesien && <span className="bidnou-nuut">sit nou hier</span>}
+          </h3>
           <p className="bidnou-kaart-teks">
             Wanneer jy nie weet wat om te bid nie, begin hier. Kies hoe jy
             vandag voel, tik op die gevoel, en bid die gebed dadelik saam.
           </p>
           <button
-            className="btn-primary bidnou-kaart-knop"
+            className="bidnou-kaart-knop btn-primary"
             onClick={() => window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidnou' }))}
           >
             Maak Bid Nou oop
@@ -461,7 +486,7 @@ export default function BidSaam() {
         )}
 
         {/* ── Prayer input ── */}
-        <div className="card prayer-input-card">
+        <div className="card prayer-input-card" ref={versoekRef}>
           <div className="anon-badge">🔒 Anoniem — geen name word gestoor nie</div>
           <textarea
             className="prayer-textarea"
