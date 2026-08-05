@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import KinderAdmin from './KinderAdmin'
+import SorgAdmin from './SorgAdmin'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
@@ -607,6 +608,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'video' ? 'active' : ''}`} onClick={() => setActiveTab('video')}>
             📹 Video
           </button>
+          <button className={`admin-tab ${activeTab === 'sorg' ? 'active' : ''}`} onClick={() => setActiveTab('sorg')}>
+            🤍 Sorg
+          </button>
         </div>
 
         <div className="admin-body">
@@ -1093,6 +1097,7 @@ export default function Admin({ onClose }) {
 
           {/* ── KINDERS TAB ── */}
           {activeTab === 'kinders' && <KinderAdmin />}
+          {activeTab === 'sorg'    && <SorgAdmin />}
 
           {activeTab === 'video' && (
             <div className="admin-section">

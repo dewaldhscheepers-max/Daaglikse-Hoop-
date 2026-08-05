@@ -1,0 +1,101 @@
+/* 'n Video op die Sorg-blad.
+   Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md. */
+
+.sv-kaart {
+  background: #FFFFFF;
+  border: 1px solid rgba(107, 92, 158, 0.13);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.sv-groot {
+  border-color: rgba(184, 134, 11, 0.35);
+  box-shadow: 0 3px 16px rgba(42, 31, 66, 0.07);
+}
+
+.sv-etiket {
+  padding: 11px 15px 0;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #B8860B;
+}
+
+/* 16:9, sonder om die hoogte te laat spring terwyl die prentjie laai. */
+.sv-raam {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 10px;
+  background: #241B38;
+}
+
+.sv-speler,
+.sv-duim {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.sv-duim {
+  background-color: #241B38;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.sv-speel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(28, 20, 46, 0.72);
+  color: #FFFFFF;
+  padding-left: 4px;
+  transition: background-color 0.12s;
+}
+.sv-duim:active .sv-speel { background: rgba(28, 20, 46, 0.92); }
+
+.sv-onder {
+  padding: 13px 15px 15px;
+}
+
+.sv-titel {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text, #2D2040);
+}
+
+.sv-groot .sv-titel { font-size: 21px; }
+
+.sv-beskrywing {
+  margin: 6px 0 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.sv-uit-plasing {
+  margin: 9px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: #B8860B;
+}

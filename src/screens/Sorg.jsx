@@ -14,17 +14,26 @@
    muur onder, en daarom dra elke plasing op die muur iets by wat help.
 
    Die skryfknoppie sit binne die eerste skerm. Wie huil, moet nie eers verby
-   twee video's blaai nie.
+   twee video's blaai nie — daarom is daar EEN held bo en sak Vandag se woord
+   onder die knoppie.
 
-   En: geen versoek om geld op hierdie blad se skryfkant nie. Die
-   Hoopdraer-uitnodiging hoort net onder 'n antwoord of 'n video, nooit waar
-   iemand sy seer tik nie.
+   En: geen versoek om geld op die skryfkant nie. Die Hoopdraer-uitnodiging
+   hoort net onder 'n antwoord of 'n video, nooit waar iemand sy seer tik nie.
    ──────────────────────────────────────────────────────────── */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import SorgVideo from '../components/SorgVideo'
+import {
+  haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
+} from '../data/sorgVideos'
 import './Sorg.css'
 
-const NOODNOMMERS = [
+/* Die noodnommers staan in EEN lys. 'n Dooie noodnommer is die enigste ding
+   hier wat regtig verkeerd kan loop, en dan moet dit op een plek reggemaak
+   word — nie op ses skerms nie.
+
+   Hulle moet voor bekendstelling nagegaan word. */
+export const NOODNOMMERS = [
   { naam: 'Selfmoord of selfskade', diens: 'SADAG', nommer: '0800 567 567', nota: '24 uur' },
   { naam: 'Polisie of noodgeval',   diens: 'SAPS',  nommer: '10111' },
   { naam: 'Noodoproep vanaf \'n selfoon', diens: '', nommer: '112' },
@@ -67,23 +76,103 @@ export function HulpNou({ oop, onSluit }) {
   )
 }
 
+const AFDELINGS = [
+  { sleutel: 'antwoord', naam: 'Dewald antwoord' },
+  { sleutel: 'muur',     naam: 'Die Muur' },
+  { sleutel: 'videos',   naam: 'Die Video\'s' },
+]
+
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
+  const [afdeling, setAfdeling] = useState('antwoord')
+  const [data, setData] = useState(null)      // null = besig
+  const [woord, setWoord] = useState(null)
+
+  useEffect(() => {
+    let lewendig = true
+    haalVideos().then(d => {
+      if (!lewendig) return
+      setData(d)
+      setWoord(vandagSeWoord(d))
+    })
+    return () => { lewendig = false }
+  }, [])
+
+  const videos = (data && data.videos) || []
+  const held   = data ? weekVideo(data) : null
+  const groepe = volgensBehoefte(videos)
 
   return (
     <div className="sorg">
       <div className="sorg-header screen-header">
-        <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>
-          Hulp nou
-        </button>
+        <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
         <h1>Pastorale Sorg</h1>
         <p>Bring die swaar ding. Jy hoef dit nie alleen te dra nie.</p>
       </div>
 
       <div className="sorg-body">
-        <p className="sorg-binnekort">
-          Hierdie blad word nou gebou.
-        </p>
+
+        {/* ── Die held ── */}
+        {held && (
+          <SorgVideo video={held} groot etiket="Die week se video" />
+        )}
+
+        {/* ── Die knoppie, binne die eerste skerm ── */}
+        <button className="sorg-vertel" onClick={() => setAfdeling('muur')}>
+          <span className="sorg-vertel-hoof">Vertel my wat swaar is</span>
+          <span className="sorg-vertel-fyn">Anoniem as jy wil · Dewald lees dit self</span>
+        </button>
+
+        {/* ── Vandag se woord ──
+            Een bestaande video, elke dag 'n ander een. Dewald hoef niks
+            nuuts te maak nie. */}
+        {woord && (
+          <SorgVideo
+            video={woord}
+            etiket="Vandag se woord"
+            onSpeel={v => merkWoordGesien(v.id)}
+          />
+        )}
+
+        {/* ── Die drie afdelings ── */}
+        <div className="sorg-oortjies" role="tablist">
+          {AFDELINGS.map(a => (
+            <button
+              key={a.sleutel}
+              role="tab"
+              aria-selected={afdeling === a.sleutel}
+              className={`sorg-oortjie${afdeling === a.sleutel ? ' aktief' : ''}`}
+              onClick={() => setAfdeling(a.sleutel)}
+            >
+              {a.naam}
+            </button>
+          ))}
+        </div>
+
+        {afdeling === 'videos' && (
+          data === null ? (
+            <p className="sorg-leeg">Besig om te laai…</p>
+          ) : !videos.length ? (
+            <p className="sorg-leeg">Die eerste video's kom binnekort.</p>
+          ) : (
+            groepe.map(g => (
+              <div key={g.sleutel} className="sorg-groep">
+                <h2 className="sorg-groep-sin">{g.sin}</h2>
+                {g.videos.map(v => <SorgVideo key={v.id} video={v} />)}
+              </div>
+            ))
+          )
+        )}
+
+        {afdeling === 'muur' && (
+          <p className="sorg-leeg">Die muur maak binnekort oop.</p>
+        )}
+
+        {afdeling === 'antwoord' && (
+          <p className="sorg-leeg">Dewald se eerste antwoorde kom binnekort.</p>
+        )}
+
+        <p className="sorg-grens">{GRENSSIN}</p>
       </div>
 
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />

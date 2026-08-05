@@ -41,12 +41,101 @@
   padding: 18px 20px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 28px);
 }
 
-.sorg-binnekort {
-  padding: 40px 10px;
+/* ── Vertel my wat swaar is ──
+   Dit sit binne die eerste skerm, direk onder EEN video. Wie huil, moet nie
+   eers verby twee video's blaai nie. */
+.sorg-vertel {
+  display: block;
+  width: 100%;
+  margin: 4px 0 16px;
+  padding: 17px 18px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sorg-vertel:active { background: #4C4076; }
+
+.sorg-vertel-hoof {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sorg-vertel-fyn {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ── Die drie afdelings ── */
+.sorg-oortjies {
+  display: flex;
+  gap: 7px;
+  margin: 20px 0 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.sorg-oortjie {
+  flex: 0 0 auto;
+  padding: 9px 15px;
+  border: 1px solid rgba(107, 92, 158, 0.18);
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: var(--text-muted, #8A7E9A);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.sorg-oortjie:active { background: #F2EEE6; }
+
+.sorg-oortjie.aktief {
+  background: var(--purple-dark, #5C4E8E);
+  border-color: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+}
+
+/* ── Die biblioteek volgens behoefte ── */
+.sorg-groep { margin-bottom: 22px; }
+
+.sorg-groep-sin {
+  margin: 0 2px 10px;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.sorg-leeg {
+  padding: 30px 10px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 14.5px;
   line-height: 1.6;
+}
+
+/* ── Die grenssin ──
+   Dit moet daar wees en dit moet eerlik wees, maar dit moet nie skreeu nie. */
+.sorg-grens {
+  margin: 26px 2px 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(107, 92, 158, 0.13);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-muted, #8A7E9A);
 }
 
 /* ── Die Hulp nou-blad ── */

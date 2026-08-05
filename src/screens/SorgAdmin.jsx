@@ -1,0 +1,245 @@
+/* ────────────────────────────────────────────────────────────
+   Pastorale Sorg se admin — die video's.
+
+   ── Hoekom hier 'n geheim gevra word ──
+
+   Die res van die admin sit agter 'n PIN wat in die kode staan (2025). Vir
+   "watter stemnota is uitgelig" is dit heeltemal reg: die PIN staan in die
+   bondel wat elke besoeker aflaai, maar die skade is klein.
+
+   Pastorale Sorg is anders. Hierdie selfde geheim gaan later die boodskappe
+   ontsluit — mense se mishandeling, hul selfmoordgedagtes, hul name. 'n PIN
+   in die bondel sou beteken enigiemand kan dit lees.
+
+   Die geheim staan dus op Vercel (SORG_ADMIN_GEHEIM) en NOOIT in hierdie
+   kode nie. Dewald tik dit een keer; die blaaier hou dit plaaslik. Is dit
+   verkeerd, weier die bediener, en die kliënt kan niks daaraan doen nie.
+   ──────────────────────────────────────────────────────────── */
+
+import { useState, useEffect, useCallback } from 'react'
+import { ONDERWERPE } from '../data/sorgOnderwerpe'
+import { vergeetVideos } from '../data/sorgVideos'
+import './SorgAdmin.css'
+
+const GEHEIM_SLEUTEL = 'sorg_admin_geheim'
+
+function leesGeheim() {
+  try { return localStorage.getItem(GEHEIM_SLEUTEL) || '' } catch { return '' }
+}
+
+const LEEG = {
+  id: null, videoId: '', titel: '', beskrywing: '',
+  onderwerpe: [], datum: new Date().toISOString().slice(0, 10),
+  weekVideo: false, gepubliseer: true, uitPlasing: '',
+}
+
+export default function SorgAdmin() {
+  const [geheim, setGeheim] = useState(leesGeheim)
+  const [tikGeheim, setTikGeheim] = useState('')
+  const [videos, setVideos] = useState([])
+  const [vorm, setVorm] = useState(LEEG)
+  const [besig, setBesig] = useState(false)
+  const [boodskap, setBoodskap] = useState(null)
+
+  const haal = useCallback(async (g) => {
+    try {
+      const r = await fetch('/api/sorg-videos', { headers: g ? { 'x-sorg-geheim': g } : {} })
+      const d = await r.json()
+      setVideos(Array.isArray(d.videos) ? d.videos : [])
+    } catch { setVideos([]) }
+  }, [])
+
+  useEffect(() => { haal(geheim) }, [geheim, haal])
+
+  async function stuur(lyf) {
+    setBesig(true)
+    setBoodskap(null)
+    try {
+      const r = await fetch('/api/sorg-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify(lyf),
+      })
+      const d = await r.json()
+      if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return false }
+      vergeetVideos()
+      await haal(geheim)
+      return true
+    } catch (e) {
+      setBoodskap({ fout: String(e && e.message) })
+      return false
+    } finally { setBesig(false) }
+  }
+
+  async function stoor() {
+    const ok = await stuur({ ...vorm, uitPlasing: vorm.uitPlasing || null })
+    if (ok) {
+      setBoodskap({ goed: vorm.id ? 'Bygewerk.' : 'Video bygevoeg.' })
+      setVorm(LEEG)
+    }
+  }
+
+  async function vee(v) {
+    /* 'n Video wat uitgevee is, is weg. Dewald het gesê sy video's mag nooit
+       verwyder word nie, dus vra ons eers — en "versteek" is in byna elke
+       geval die regte knoppie. */
+    if (!window.confirm(`Vee "${v.titel}" heeltemal uit?\n\nVersteek is amper altyd beter — dan bly die video behoue.`)) return
+    const ok = await stuur({ aksie: 'vee', id: v.id })
+    if (ok) setBoodskap({ goed: 'Uitgevee.' })
+  }
+
+  function wissel(sleutel) {
+    setVorm(v => ({
+      ...v,
+      onderwerpe: v.onderwerpe.includes(sleutel)
+        ? v.onderwerpe.filter(x => x !== sleutel)
+        : [...v.onderwerpe, sleutel],
+    }))
+  }
+
+  /* ── Die geheim ── */
+  if (!geheim) {
+    return (
+      <div className="admin-section">
+        <div className="admin-section-title">🤍 Pastorale Sorg</div>
+        <p className="admin-books-note">
+          Hierdie afdeling het 'n eie wagwoord, apart van die PIN. Dieselfde
+          wagwoord gaan later die boodskappe ontsluit, en dié mag nooit in die
+          app se kode staan nie.
+        </p>
+        <div className="admin-field">
+          <label>Sorg-wagwoord</label>
+          <input
+            type="password"
+            value={tikGeheim}
+            onChange={e => setTikGeheim(e.target.value)}
+            placeholder="Die waarde van SORG_ADMIN_GEHEIM op Vercel"
+          />
+        </div>
+        <button
+          className="admin-save-btn"
+          disabled={tikGeheim.trim().length < 16}
+          onClick={() => {
+            const g = tikGeheim.trim()
+            try { localStorage.setItem(GEHEIM_SLEUTEL, g) } catch { /* privaat modus */ }
+            setGeheim(g)
+          }}
+        >
+          Ontsluit
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="admin-section">
+      <div className="admin-section-title">🤍 Pastorale Sorg — Video's</div>
+      <p className="admin-books-note">
+        'n Video is 'n YouTube-skakel, nie 'n lêer nie. Plak die skakel; ons
+        haal die ID self daaruit. Die oorspronklike lêer hou jy self.
+      </p>
+
+      <div className="admin-field">
+        <label>YouTube-skakel of ID *</label>
+        <input
+          value={vorm.videoId}
+          onChange={e => setVorm(v => ({ ...v, videoId: e.target.value }))}
+          placeholder="https://youtu.be/… of net die ID"
+        />
+      </div>
+
+      <div className="admin-field">
+        <label>Titel *</label>
+        <input
+          value={vorm.titel}
+          onChange={e => setVorm(v => ({ ...v, titel: e.target.value }))}
+          placeholder="bv. Wanneer jy moeg geword het om sterk te wees"
+        />
+        <div className="admin-books-note" style={{ marginTop: 6 }}>
+          Skryf die sin wat 'n mens oor homself sou sê, nie 'n onderwerp nie.
+        </div>
+      </div>
+
+      <div className="admin-field">
+        <label>Kort beskrywing</label>
+        <textarea
+          rows={2}
+          value={vorm.beskrywing}
+          onChange={e => setVorm(v => ({ ...v, beskrywing: e.target.value }))}
+        />
+      </div>
+
+      <div className="admin-field">
+        <label>Onderwerpe</label>
+        <div className="sa-onderwerpe">
+          {ONDERWERPE.map(o => (
+            <button
+              key={o.sleutel}
+              className={`sa-onderwerp${vorm.onderwerpe.includes(o.sleutel) ? ' gekies' : ''}`}
+              onClick={() => wissel(o.sleutel)}
+            >
+              {o.naam}
+            </button>
+          ))}
+        </div>
+        <div className="admin-books-note" style={{ marginTop: 6 }}>
+          Dít bepaal watter video iemand DADELIK kry wanneer hy sy boodskap
+          stuur. 'n Video sonder 'n onderwerp help niemand op daardie oomblik
+          nie.
+        </div>
+      </div>
+
+      <div className="admin-field">
+        <label>Datum</label>
+        <input type="date" value={vorm.datum} onChange={e => setVorm(v => ({ ...v, datum: e.target.value }))} />
+      </div>
+
+      <div className="admin-field">
+        <label className="sa-wissel">
+          <input type="checkbox" checked={vorm.weekVideo} onChange={e => setVorm(v => ({ ...v, weekVideo: e.target.checked }))} />
+          <span>Wys as <b>Die week se video</b> (bo-aan die blad)</span>
+        </label>
+        <label className="sa-wissel">
+          <input type="checkbox" checked={vorm.gepubliseer} onChange={e => setVorm(v => ({ ...v, gepubliseer: e.target.checked }))} />
+          <span>{vorm.gepubliseer ? '✅ Gepubliseer' : '⬜ Versteek'}</span>
+        </label>
+      </div>
+
+      {boodskap && boodskap.fout && <div className="admin-error">{boodskap.fout}</div>}
+      {boodskap && boodskap.goed && <div className="admin-success">✅ {boodskap.goed}</div>}
+
+      <button className="admin-save-btn" onClick={stoor} disabled={besig || !vorm.videoId.trim() || !vorm.titel.trim()}>
+        {besig ? 'Besig…' : vorm.id ? 'Werk by' : 'Voeg video by'}
+      </button>
+      {vorm.id && (
+        <button className="sa-kanselleer" onClick={() => setVorm(LEEG)}>Los</button>
+      )}
+
+      <div className="admin-section-title" style={{ marginTop: 26 }}>
+        {videos.length} video{videos.length === 1 ? '' : '\'s'}
+      </div>
+
+      {videos.map(v => (
+        <div key={v.id} className={`sa-ry${v.gepubliseer ? '' : ' versteek'}`}>
+          <div className="sa-ry-kop">
+            {v.weekVideo && <span className="sa-merk">Die week</span>}
+            {!v.gepubliseer && <span className="sa-merk sa-merk-af">Versteek</span>}
+            <span className="sa-ry-titel">{v.titel}</span>
+          </div>
+          <div className="sa-ry-fyn">
+            {v.datum} · {(v.onderwerpe || []).length
+              ? (v.onderwerpe || []).map(s => (ONDERWERPE.find(o => o.sleutel === s) || {}).naam).filter(Boolean).join(', ')
+              : 'geen onderwerp'}
+          </div>
+          <div className="sa-ry-knoppe">
+            <button onClick={() => setVorm({ ...LEEG, ...v, uitPlasing: v.uitPlasing || '' })}>Redigeer</button>
+            <button onClick={() => stuur({ ...v, gepubliseer: !v.gepubliseer })}>
+              {v.gepubliseer ? 'Versteek' : 'Publiseer'}
+            </button>
+            <button className="sa-vee" onClick={() => vee(v)}>Vee uit</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
