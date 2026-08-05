@@ -10,7 +10,9 @@
    sê: "Wanneer jy moeg geword het om sterk te wees".
    ──────────────────────────────────────────────────────────── */
 
-import { ONDERWERPE, onderwerpSin, BREE_ONDERWERP } from './sorgOnderwerpe'
+/* Met die .js-uitbreiding, sodat plain `node` hierdie lêer kan invoer — die
+   toetse loop sonder 'n toetsraamwerk en sonder Vite. */
+import { ONDERWERPE, onderwerpSin, BREE_ONDERWERP } from './sorgOnderwerpe.js'
 
 const PAD = '/api/sorg-videos'
 

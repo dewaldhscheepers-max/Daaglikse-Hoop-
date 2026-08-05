@@ -1,5 +1,10 @@
 /* Pastorale Sorg se admin. Net kleur op :active — sien CLAUDE.md. */
 
+.sa-instellings {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #E6E1EE;
+}
+
 .sa-onderwerpe {
   display: flex;
   flex-wrap: wrap;

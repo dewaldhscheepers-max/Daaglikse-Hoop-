@@ -40,6 +40,8 @@ export default function SorgAdmin() {
   const [vorm, setVorm] = useState(LEEG)
   const [besig, setBesig] = useState(false)
   const [boodskap, setBoodskap] = useState(null)
+  const [inst, setInst] = useState(null)
+  const [tikPlafon, setTikPlafon] = useState('')
 
   const haal = useCallback(async (g) => {
     try {
@@ -49,7 +51,35 @@ export default function SorgAdmin() {
     } catch { setVideos([]) }
   }, [])
 
+  const haalInst = useCallback(async (g) => {
+    if (!g) return
+    try {
+      const r = await fetch('/api/sorg-instellings', { headers: { 'x-sorg-geheim': g } })
+      const d = await r.json()
+      if (r.ok) { setInst(d); setTikPlafon(String(d.plafon)) }
+    } catch { /* dan wys die blok net nie */ }
+  }, [])
+
   useEffect(() => { haal(geheim) }, [geheim, haal])
+  useEffect(() => { haalInst(geheim) }, [geheim, haalInst])
+
+  async function stoorInst(volgende) {
+    setBesig(true)
+    setBoodskap(null)
+    try {
+      const r = await fetch('/api/sorg-instellings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify(volgende),
+      })
+      const d = await r.json()
+      if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return }
+      await haalInst(geheim)
+      setBoodskap({ goed: 'Gestoor.' })
+    } catch (e) {
+      setBoodskap({ fout: String(e && e.message) })
+    } finally { setBesig(false) }
+  }
 
   async function stuur(lyf) {
     setBesig(true)
@@ -133,7 +163,57 @@ export default function SorgAdmin() {
 
   return (
     <div className="admin-section">
-      <div className="admin-section-title">🤍 Pastorale Sorg — Video's</div>
+
+      {/* ── Hoeveel boodskappe 'n dag ──
+          Nie 'n tegniese perk nie: dit is hoeveel EEN MENS in 'n dag
+          behoorlik kan lees. Krisisboodskappe kom altyd deur, ook wanneer
+          die dag vol is. */}
+      {inst && (
+        <div className="sa-instellings">
+          <div className="admin-section-title">🤍 Pastorale Sorg — Boodskappe</div>
+          <p className="admin-books-note">
+            Vandag ({inst.dag}) het <b>{inst.vandag}</b> van <b>{inst.plafon}</b> mense
+            geskryf. Boodskappe waarin die krisiswoorde tref, kom altyd deur —
+            ook wanneer die dag vol is.
+          </p>
+
+          <div className="admin-field">
+            <label>Hoeveel boodskappe per dag</label>
+            <input
+              type="number"
+              min="0"
+              max="500"
+              value={tikPlafon}
+              onChange={e => setTikPlafon(e.target.value)}
+            />
+            <div className="admin-books-note" style={{ marginTop: 6 }}>
+              Sit dit op 0 wanneer jy weg is. Dan sien mense 'n vriendelike
+              boodskap in plaas van 'n ry wat niemand lees nie.
+            </div>
+          </div>
+
+          <label className="sa-wissel">
+            <input
+              type="checkbox"
+              checked={inst.oop}
+              onChange={e => stoorInst({ plafon: inst.plafon, oop: e.target.checked })}
+            />
+            <span>{inst.oop ? '✅ Mense kan skryf' : '⬜ Toe — niemand kan nou skryf nie'}</span>
+          </label>
+
+          <button
+            className="admin-save-btn"
+            disabled={besig || tikPlafon === '' || Number(tikPlafon) === inst.plafon}
+            onClick={() => stoorInst({ plafon: Number(tikPlafon), oop: inst.oop })}
+          >
+            {besig ? 'Besig…' : 'Stoor die plafon'}
+          </button>
+        </div>
+      )}
+
+      <div className="admin-section-title" style={{ marginTop: inst ? 26 : 0 }}>
+        🤍 Pastorale Sorg — Video's
+      </div>
       <p className="admin-books-note">
         'n Video is 'n YouTube-skakel, nie 'n lêer nie. Plak die skakel; ons
         haal die ID self daaruit. Die oorspronklike lêer hou jy self.

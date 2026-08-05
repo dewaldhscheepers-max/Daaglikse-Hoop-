@@ -1,0 +1,410 @@
+/* "Vertel my wat swaar is".
+
+   Twee reels uit CLAUDE.md geld hier soos oral:
+   • hoogte met 100svh, nooit 100dvh nie — dvh verander saam met Chrome se
+     adresbalk en dan hervorm die hele skerm by elke raam;
+   • geen transform of opacity op :active nie, net kleur.
+*/
+
+.sv-oor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100svh;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  background: #FBF8F2;
+}
+
+/* ── Die kop ── */
+.sv-kop {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(var(--safe-top, 0px) + 12px) 16px 12px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+}
+
+.sv-terug {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sv-terug:active { background: rgba(255, 255, 255, 0.3); border-color: #FFFFFF; }
+
+.sv-kop-titel {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* ── Die rolgebied ── */
+.sv-rol {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sv-blok {
+  padding: 20px 20px calc(var(--safe-bottom, 0px) + 40px);
+}
+
+/* ── Die gevaar-vraag ── */
+.sv-vraag {
+  margin: 6px 0 10px;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text, #2D2040);
+}
+
+.sv-fyn {
+  margin: 0 0 16px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted, #8A7E9A);
+}
+.sv-fyn-eng { margin: -4px 0 10px; font-size: 12.5px; }
+.sv-fyn-mid { text-align: center; margin: 14px 0; }
+
+/* ── Knoppe ── */
+.sv-groot-knop {
+  display: block;
+  width: 100%;
+  margin-bottom: 11px;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 15px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sv-groot-knop:active { background: #4C4076; }
+
+.sv-groot-knop:disabled {
+  background: #DCD6E4;
+  color: #9A92A8;
+}
+
+/* Die "dit is nou"-knoppie moet anders lyk as die res. Iemand wat vinnig
+   kyk, moet dit raaksien sonder om te lees. */
+.sv-rooi {
+  background: #A33A3A;
+}
+.sv-rooi:active { background: #8A2F2F; }
+
+.sv-stuur { margin-top: 18px; }
+
+.sv-klein-knop {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #D8D2E4;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sv-klein-knop:active { background: #F0ECFA; }
+.sv-vol { margin-top: 18px; }
+
+/* ── Die krisisband ──
+   Dit keer niks. Dit wys net die nommers, en dit maak dit onmoontlik om
+   hulle mis te kyk. */
+.sv-krisis {
+  margin-bottom: 20px;
+  padding: 15px 15px 16px;
+  border: 1px solid #E4B9B9;
+  border-radius: 16px;
+  background: #FFF4F4;
+}
+
+.sv-krisis-kop {
+  margin: 0 0 5px;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #8A2F2F;
+}
+
+.sv-krisis-teks {
+  margin: 0 0 13px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #7A5555;
+}
+
+/* Binne die band staan die nommers sonder die blad se buitemarge. */
+.sv-krisis .sorg-nommers { margin: 0; }
+
+/* ── Die velde ── */
+.sv-etiket {
+  display: block;
+  margin: 18px 0 7px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--purple-dark, #5C4E8E);
+}
+.sv-blok > .sv-etiket:first-child { margin-top: 2px; }
+
+.sv-teks {
+  display: block;
+  width: 100%;
+  min-height: 190px;
+  padding: 14px;
+  border: 1px solid #DDD6E6;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: var(--text, #2D2040);
+  font-family: var(--font-body);
+  font-size: 16px;          /* 16px keer dat iOS die blad inzoem */
+  line-height: 1.6;
+  resize: vertical;
+}
+.sv-teks:focus { outline: 2px solid #B9ACE0; outline-offset: -1px; }
+
+.sv-teller {
+  min-height: 17px;
+  margin: 5px 2px 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted, #8A7E9A);
+  text-align: right;
+}
+
+.sv-onderwerpe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.sv-onderwerp {
+  padding: 9px 14px;
+  border: 1px solid #D8D2E4;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #6E6455;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.sv-onderwerp:active { background: #F0ECFA; }
+.sv-onderwerp.gekies {
+  background: var(--purple-dark, #5C4E8E);
+  border-color: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+}
+
+.sv-naam-keuse {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sv-keuse {
+  flex: 1;
+  padding: 12px 8px;
+  border: 1px solid #D8D2E4;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #6E6455;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.sv-keuse:active { background: #F0ECFA; }
+.sv-keuse.gekies {
+  background: var(--purple-dark, #5C4E8E);
+  border-color: var(--purple-dark, #5C4E8E);
+  color: #FFFFFF;
+}
+
+.sv-naam {
+  display: block;
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #DDD6E6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--text, #2D2040);
+  font-family: var(--font-body);
+  font-size: 16px;
+}
+
+/* ── Die drie toestemmings ── */
+.sv-toestemmings {
+  margin-top: 20px;
+  padding: 15px 15px 6px;
+  border: 1px solid #E6E1EE;
+  border-radius: 15px;
+  background: #F6F3FB;
+}
+
+.sv-blok-merk {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 13px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #5A5165;
+  cursor: pointer;
+}
+
+.sv-blok-merk input {
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  margin-top: 1px;
+  accent-color: #5C4E8E;
+}
+
+.sv-fout {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #E4B9B9;
+  border-radius: 12px;
+  background: #FFF4F4;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #8A2F2F;
+}
+
+.sv-grens {
+  margin: 22px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid rgba(107, 92, 158, 0.13);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-muted, #8A7E9A);
+}
+
+/* ── Ná die stuur ── */
+.sv-klaar-kop {
+  margin: 4px 0 8px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text, #2D2040);
+}
+
+.sv-klaar-teks {
+  margin: 0 0 20px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  color: #5A5165;
+}
+
+.sv-klaar-rede {
+  margin: 4px 2px 9px;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+/* ── Die vers en die gebed ── */
+.sv-vers-blok {
+  margin: 20px 0;
+  padding: 17px 18px;
+  border-radius: 16px;
+  background: #F3EFE6;
+}
+
+.sv-vers {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 17.5px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--text, #2D2040);
+}
+
+.sv-vers-bron {
+  margin: 0 0 14px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: #8A7E6A;
+}
+
+.sv-gebed {
+  margin: 0;
+  padding-top: 13px;
+  border-top: 1px solid rgba(107, 92, 158, 0.14);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #5A5165;
+}
+
+/* ── Die kode ── */
+.sv-kode-blok {
+  margin: 20px 0 0;
+  padding: 16px 16px 14px;
+  border: 1px solid #E6E1EE;
+  border-radius: 15px;
+  background: #FFFFFF;
+}
+
+.sv-kode-kop {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.sv-kode {
+  margin: 0 0 9px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text, #2D2040);
+}
+
+.sv-kode-blok .sv-fyn { margin-bottom: 4px; font-size: 12.5px; }
+
+.sv-klaar-onderwerp {
+  margin: 20px 0 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted, #8A7E9A);
+  text-align: center;
+}

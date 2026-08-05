@@ -23,30 +23,19 @@
 
 import { useState, useEffect } from 'react'
 import SorgVideo from '../components/SorgVideo'
+import SorgNommers from '../components/SorgNommers'
+import SorgVorm from '../components/SorgVorm'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
+import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
 
-/* Die noodnommers staan in EEN lys. 'n Dooie noodnommer is die enigste ding
-   hier wat regtig verkeerd kan loop, en dan moet dit op een plek reggemaak
-   word — nie op ses skerms nie.
-
-   Hulle moet voor bekendstelling nagegaan word. */
-export const NOODNOMMERS = [
-  { naam: 'Selfmoord of selfskade', diens: 'SADAG', nommer: '0800 567 567', nota: '24 uur' },
-  { naam: 'Polisie of noodgeval',   diens: 'SAPS',  nommer: '10111' },
-  { naam: 'Noodoproep vanaf \'n selfoon', diens: '', nommer: '112' },
-  { naam: 'Ambulans',               diens: '',      nommer: '10177' },
-  { naam: '\'n Kind in gevaar',     diens: 'Childline', nommer: '116' },
-]
-
-export const GRENSSIN =
-  'Pastorale Sorg bied Bybelse hoop en bemoediging. Dit is nie \'n nooddiens, ' +
-  'terapie of mediese sorg nie en waarborg nie \'n persoonlike antwoord nie. ' +
-  'Hierdie muur word nie voortdurend gemonitor nie. Wanneer jy of iemand ' +
-  'anders in onmiddellike gevaar is, gebruik die hulpnommers en moenie hier ' +
-  'vir \'n antwoord wag nie.'
+/* Die noodnommers en die grenssin woon in `src/data/sorgNommers.js` — een
+   plek, want 'n dooie noodnommer is die enigste ding hier wat regtig
+   verkeerd kan loop. Hulle word hier weer uitgevoer sodat ouer invoere nie
+   breek nie. */
+export { NOODNOMMERS, GRENSSIN }
 
 export function HulpNou({ oop, onSluit }) {
   if (!oop) return null
@@ -60,16 +49,7 @@ export function HulpNou({ oop, onSluit }) {
           Is jy, 'n kind of iemand anders op hierdie oomblik in gevaar? Bel een
           van hierdie nommers. Moenie hier wag nie.
         </p>
-        <div className="sorg-nommers">
-          {NOODNOMMERS.map(n => (
-            <a key={n.nommer} className="sorg-nommer" href={`tel:${n.nommer.replace(/\s/g, '')}`}>
-              <span className="sorg-nommer-naam">{n.naam}</span>
-              <span className="sorg-nommer-syfer">
-                {n.nommer}{n.diens ? ` · ${n.diens}` : ''}{n.nota ? ` · ${n.nota}` : ''}
-              </span>
-            </a>
-          ))}
-        </div>
+        <SorgNommers />
         <button className="sorg-blad-toe" onClick={onSluit}>Maak toe</button>
       </div>
     </>
@@ -84,6 +64,7 @@ const AFDELINGS = [
 
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
+  const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('antwoord')
   const [data, setData] = useState(null)      // null = besig
   const [woord, setWoord] = useState(null)
@@ -118,7 +99,7 @@ export default function Sorg() {
         )}
 
         {/* ── Die knoppie, binne die eerste skerm ── */}
-        <button className="sorg-vertel" onClick={() => setAfdeling('muur')}>
+        <button className="sorg-vertel" onClick={() => setVormOop(true)}>
           <span className="sorg-vertel-hoof">Vertel my wat swaar is</span>
           <span className="sorg-vertel-fyn">Anoniem as jy wil · Dewald lees dit self</span>
         </button>
@@ -176,6 +157,10 @@ export default function Sorg() {
       </div>
 
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />
+
+      {/* Die vorm dek die hele skerm. Iemand wat sy swaarste ding tik, moet
+          niks anders sien nie — geen navigasie, geen ander video's. */}
+      <SorgVorm oop={vormOop} onSluit={() => setVormOop(false)} videoData={data} />
     </div>
   )
 }

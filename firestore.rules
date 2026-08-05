@@ -133,6 +133,40 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── Pastorale Sorg ──
+    //
+    // Hierdie is die enigste data in die hele app wat mense se mishandeling,
+    // hul selfmoordgedagtes en hul huwelike dra. Geen kliënt raak enigiets
+    // hier aan nie — nie lees nie en nie skryf nie. Die enigste pad in en uit
+    // is /api/sorg-*, met die diensrekening en die admin-geheim.
+    //
+    // Firestore weier klaar waar geen reel pas nie. Hierdie blokke staan hier
+    // sodat die bedoeling swart op wit is en niemand dit later per ongeluk
+    // oopmaak nie. As iemand ooit 'allow read: if true' hier bo-op sit, lees
+    // die hele internet 'n vrou se beskrywing van haar mishandeling.
+    match /sorg_inkomend/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+    match /sorg_config/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+    match /sorg_tellers/{dag} {
+      allow read:  if false;
+      allow write: if false;
+    }
+    match /sorg_videos/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+    // Die openbare muur: net wat 'n MENS goedgekeur en geredigeer het, kom
+    // hier — en dit kom hier deur die bediener, nooit van 'n kliënt af nie.
+    match /sorg_muur/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;

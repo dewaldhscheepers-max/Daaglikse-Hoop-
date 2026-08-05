@@ -25,6 +25,7 @@ node src/game/vrugtefees/oes.toets.mjs        # oes-lopie + herspeel, 252 toetse
 node src/game/vrugtefees/ranglys.toets.mjs    # bediener se keuring, 58 toetse
 node src/game/vrugtefees/vlakke.toets.mjs     # keur al 90 fases se moeilikheid
 node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
+node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 76 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op

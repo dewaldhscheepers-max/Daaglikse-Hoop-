@@ -231,6 +231,23 @@
   color: #A33A3A;
 }
 
+/* "Wys al die nommers" — net in die kompakte band. */
+.sorg-nommer-meer {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E4C4C4;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #A33A3A;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sorg-nommer-meer:active { background: #FBE4E4; }
+
 .sorg-blad-toe {
   display: block;
   width: calc(100% - 36px);
