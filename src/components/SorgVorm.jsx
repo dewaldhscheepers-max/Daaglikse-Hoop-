@@ -40,7 +40,10 @@ import SorgKlaar from './SorgKlaar'
 import './SorgVorm.css'
 
 const MIN_LENGTE = 15
-const MAKS_LENGTE = 2000
+/* Dieselfde getal as die bediener s'n. Loop hulle uitmekaar, kap die een
+   af wat die ander toelaat — dit is presies hoe die muur 'n vrou se
+   boodskap by 1188 karakters laat ophou het. */
+const MAKS_LENGTE = 4000
 
 /* Hoeveel onderwerpe dadelik wys.
 

@@ -27,7 +27,10 @@ const CONFIG   = 'sorg_config'
 const TELLERS  = 'sorg_tellers'
 
 const MIN_LENGTE = 15
-const MAKS_LENGTE = 2000
+/* Die muur laat 8000 toe; hier het 2000 gestaan. Twee getalle wat nie
+   ooreenstem nie, is presies hoe die vorige fout begin het. Vierduisend is
+   'n lang storie en steeds begrens. */
+const MAKS_LENGTE = 4000
 const PER_TOESTEL_PER_DAG = 3
 
 /* Die plafon is verstelbaar uit die admin, nie hard gekodeer nie. Twintig is
@@ -144,6 +147,24 @@ export default async function handler(req, res) {
   if (typeof lyf === 'string') { try { lyf = JSON.parse(lyf) } catch { lyf = null } }
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
+  /* ── Nooit stil afkap nie ──
+
+     Dit was `skoonTeks(lyf.teks, MAKS_LENGTE)` — 'n stil `.slice()`. Die
+     vorm keer wel by 2000 karakters, dus kon dit deur die skerm nie gebeur
+     nie; maar die reel wat op die MUUR stilweg afgekap het, was presies
+     hierdie vorm, en 'n vrou se boodskap het middel in 'n sin opgehou. Die
+     swaarste deel van haar storie was eenvoudig weg.
+
+     Waar iemand se eie woorde deur hierdie kode gaan, kap ons nooit weer af
+     nie. Ons se dit, en dan besluit sy self wat uitgaan. */
+  const rouTeks = String(lyf.teks || '').trim()
+  if (rouTeks.length > MAKS_LENGTE) {
+    return res.status(400).json({
+      fout: `Jou boodskap is ${rouTeks.length - MAKS_LENGTE} karakters te lank ` +
+            `(${rouTeks.length} van ${MAKS_LENGTE}). Kort dit asseblief 'n bietjie in — ` +
+            'dan gaan niks van wat jy geskryf het verlore nie.',
+    })
+  }
   const teks = skoonTeks(lyf.teks, MAKS_LENGTE)
   if (teks.length < MIN_LENGTE) {
     return res.status(400).json({ fout: 'Skryf asseblief net \'n bietjie meer, sodat ons kan verstaan.' })

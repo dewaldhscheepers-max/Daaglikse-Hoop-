@@ -115,7 +115,9 @@ function skoonAntwoord(a) {
   const bron = skoonTeks(a.bron, 400)
   /* Die vraag wat die antwoord beantwoord. Dit is die ding wat 'n mens laat
      druk op 'n klankgreep: nie "Dewald antwoord" nie, maar WAAROP. */
-  const titel = skoonTeks(a.titel, MAKS_TITEL)
+  const tt = skoonOfWeier(a.titel, MAKS_TITEL, 'Die opskrif van jou antwoord')
+  if (tt.fout) return { fout: tt.fout }
+  const titel = tt.teks
   const dat = new Date().toISOString().slice(0, 10)
 
   if (tipe === 'teks') {
@@ -215,6 +217,9 @@ export default async function handler(req, res) {
       const teks = kk.teks
       if (teks.length < 10) return res.status(400).json({ fout: 'die teks is te kort' })
 
+      const kt = skoonOfWeier(lyf.titel, MAKS_TITEL, 'Die opskrif')
+      if (kt.fout) return res.status(400).json({ fout: kt.fout })
+
       /* Laaste vangnet: 'n nommer of e-posadres wat bly staan het. Ons keer
          dit nie — Dewald besluit — maar hy moet dit sien voordat dit
          openbaar gaan. */
@@ -231,7 +236,7 @@ export default async function handler(req, res) {
         bronId: bron.id,
         /* Die vraag in een reel, soos Dewald dit skryf. Sonder dit begin die
            kaart as 'n blok teks en niemand weet waaroor dit gaan nie. */
-        titel: skoonTeks(lyf.titel, MAKS_TITEL),
+        titel: kt.teks,
         teks,
         naam: '',                 // die muur is anoniem, altyd
         onderwerp: keurOnderwerp(lyf.onderwerp || bron.onderwerp),
@@ -289,7 +294,11 @@ export default async function handler(req, res) {
         if (kk.fout) return res.status(400).json({ fout: kk.fout })
         velde.teks = kk.teks
       }
-      if (typeof lyf.titel === 'string') velde.titel = skoonTeks(lyf.titel, MAKS_TITEL)
+      if (typeof lyf.titel === 'string') {
+        const kt = skoonOfWeier(lyf.titel, MAKS_TITEL, 'Die opskrif')
+        if (kt.fout) return res.status(400).json({ fout: kt.fout })
+        velde.titel = kt.teks
+      }
       if (typeof lyf.gepubliseer === 'boolean') velde.gepubliseer = lyf.gepubliseer
       if (typeof lyf.sensitief === 'boolean') velde.sensitief = lyf.sensitief
       if (!Object.keys(velde).length) return res.status(400).json({ fout: 'niks om te verander nie' })
@@ -310,52 +319,6 @@ export default async function handler(req, res) {
       const status = lyf.wys ? 'wys' : 'weg'
       await skryfDok(WOORDE, id, { status, gerapporteer: 0 }, { velde: ['status', 'gerapporteer'] })
       return res.status(200).json({ ok: true, status })
-    }
-
-    /* ── Herstel wat afgesny is ──
-
-       Die muur se ou perk van 1200 karakters het stilweg afgekap. Wat reeds
-       so gestoor is, staan nog so, en om twintig plasings een vir een oop
-       te maak is werk wat 'n mens nie gaan doen nie.
-
-       Dit is met OPSET nie 'n blinde herstel nie.
-
-       Wat op die muur staan, is die GEREDIGEERDE teks. Dewald haal name,
-       dorpe en nommers uit — dit is presies hoe hy iemand beskerm. 'n
-       Herstel wat eenvoudig die rou boodskap teruggooi, sou daardie nommer
-       weer openbaar maak. Dit sou 'n erger fout wees as die een wat ons
-       regmaak.
-
-       Die toets is dus fyn: 'n AFGESNYDE teks is 'n PREFIKS van die rou
-       een. 'n Geredigeerde teks is nie. Ons herstel dus net waar die muur
-       se teks presies die begin van die rou boodskap is, en ons se hardop
-       watter plasings ons oorgeslaan het sodat hy hulle self kan nagaan. */
-    if (lyf.aksie === 'herstel') {
-      const muur = await lysDokke(MUUR, { grootte: 300 })
-      const inkomend = await lysDokke(INKOMEND, { grootte: 300 })
-      const rou = new Map(inkomend.map(b => [b.id, b]))
-
-      const uit = { herstel: 0, heel: 0, metdiehand: [] }
-
-      for (const m of muur) {
-        const bron = rou.get(m.bronId)
-        if (!bron || !bron.teks) { uit.heel++; continue }
-
-        const volledig = skoonTeks(bron.teks, MAKS_MUUR_TEKS)
-        const nou = String(m.teks || '')
-        if (volledig.length <= nou.length) { uit.heel++; continue }
-
-        if (!volledig.startsWith(nou.trimEnd())) {
-          /* Geredigeer, nie afgesny nie. Ons raak dit NIE aan nie. */
-          uit.metdiehand.push(m.titel || m.id)
-          continue
-        }
-
-        await skryfDok(MUUR, m.id, { teks: volledig }, { velde: ['teks'] })
-        uit.herstel++
-      }
-
-      return res.status(200).json({ ok: true, ...uit })
     }
 
     /* ── Verwyder ──
