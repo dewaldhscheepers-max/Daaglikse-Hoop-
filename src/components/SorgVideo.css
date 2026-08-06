@@ -56,14 +56,47 @@
    kyk sonder om te zoem.
 
    svh en nie dvh nie — sien CLAUDE.md. dvh verander saam met Chrome se
-   adresbalk en dan hervorm die raam by elke raam van daardie animasie. */
+   adresbalk en dan hervorm die raam by elke raam van daardie animasie.
+
+   ── En hoekom HOOGTE die raam dryf, nie breedte nie ──
+
+   Hier het `width: 100%` van `.sv-raam` bly staan, met net 'n `max-height`
+   daarby. Dit doen NIE wat dit lyk of dit doen nie: die breedte bly die volle
+   348px, `aspect-ratio` wil 619px hoogte he, en `max-height` knyp die hoogte
+   af — maar niks knyp die BREEDTE nie.
+
+   Die uitkoms is 'n raam van 348x371. Dit is 0,94 breed-tot-hoog waar 9:16
+   0,56 moet wees, dus is die boks amper vierkantig, en die regop video binne-in
+   kry swart blokke links en regs. Presies die ding wat hierdie hele reel
+   veronderstel was om reg te maak.
+
+   Toe die raam self 9:16 geword het, was hy 209px breed in 'n 348px-kaart —
+   'n smal strokie met wit weerskante. Reg, en lelik.
+
+   Dus is die RAAM vol breedte met die speler se donker kleur, en die VIDEO
+   staan 9:16 in die middel daarvan. Dit is hoe 'n mens 'n regop video oral
+   anders sien: 'n donker band met die video in die middel, nie 'n gaping in
+   die bladsy nie.
+
+   Gesentreer met `inset: 0` en `margin: auto`, NIE met
+   `transform: translateX(-50%)` nie. Daardie transform maak 'n permanente
+   saamgestelde laag, en dit is presies waar die gekleurde strepe op Android
+   vandaan gekom het. Sien CLAUDE.md. */
 .sv-raam.regop {
-  aspect-ratio: 9 / 16;
-  max-height: 44svh;
-  margin-left: auto;
-  margin-right: auto;
+  aspect-ratio: auto;
+  width: 100%;
+  height: 44svh;
 }
-.sv-kaart:not(.sv-groot) .sv-raam.regop { max-height: 32svh; }
+.sv-kaart:not(.sv-groot) .sv-raam.regop { height: 32svh; }
+
+.sv-raam.regop .sv-speler,
+.sv-raam.regop .sv-duim {
+  inset: 0;
+  margin: auto;
+  width: auto;
+  height: 100%;
+  aspect-ratio: 9 / 16;
+}
 
 /* YouTube se duimnael is ALTYD 480x360, ook vir 'n regop video — die regop
    raampie staan in die middel met swart weerskante, sowat 202px breed.
