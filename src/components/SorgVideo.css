@@ -33,6 +33,35 @@
   background: #241B38;
 }
 
+/* ── 'n REGOP video ──
+
+   Dewald neem met sy foon regop op, soos 'n selfievideo, en laai dit as 'n
+   YouTube Short. In 'n 16:9-raam is so 'n video 'n dun strokie: op 'n
+   390px-foon is die raam 219px hoog en die video 123px breed, met swart
+   weerskante. Vir die held-video bo-aan die blad lyk dit stukkend.
+
+   Die raam draai dus saam met die video. Hy kry ook 'n hoogte-perk — 'n
+   volle 9:16 op 'n foon is hoer as die skerm, en dan sien 'n mens die titel
+   nooit sonder om te rol nie. */
+.sv-raam.regop {
+  aspect-ratio: 9 / 16;
+  max-height: 62svh;
+  margin-left: auto;
+  margin-right: auto;
+}
+.sv-kaart:not(.sv-groot) .sv-raam.regop { max-height: 46svh; }
+
+/* YouTube se duimnael is ALTYD 480x360, ook vir 'n regop video — die regop
+   raampie staan in die middel met swart weerskante, sowat 202px breed.
+
+   Ons vergroot die prentjie met 480/202 = 237% sodat daardie middelste
+   strokie die hele raam vul. Die swart blokke val buite die raam uit. Geen
+   ekstra versoek, en dit werk vir elke Short. */
+.sv-raam.regop .sv-duim {
+  background-size: 237% auto;
+  background-position: center;
+}
+
 .sv-speler,
 .sv-duim {
   position: absolute;

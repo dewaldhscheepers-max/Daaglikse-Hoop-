@@ -29,7 +29,9 @@ export default function SorgVideo({ video, groot = false, etiket = null, etiketF
           word 'n video. */}
       {etiketFyn && <div className="sv-etiket-fyn">{etiketFyn}</div>}
 
-      <div className="sv-raam">
+      {/* Regop wanneer Dewald dit so gemerk het. Hy neem met sy foon op en
+          laai dit as 'n Short; 'n 16:9-raam sou dit 'n dun strokie maak. */}
+      <div className={`sv-raam${video.regop ? ' regop' : ''}`}>
         {speel ? (
           <iframe
             className="sv-speler"

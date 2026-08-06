@@ -66,6 +66,15 @@ function skoonVideo(lyf) {
       beskrywing: skoonTeks(lyf.beskrywing, 400),
       onderwerpe,
       datum: /^\d{4}-\d{2}-\d{2}$/.test(lyf.datum || '') ? lyf.datum : new Date().toISOString().slice(0, 10),
+      /* Dewald neem met sy foon op, regop, en laai dit as 'n Short. In 'n
+         16:9-raam is so 'n video 'n dun strokie met swart weerskante. Die
+         speler draai saam sodra hierdie merkie aan is.
+
+         Dit is 'n merkie en nie iets wat ons raai nie: YouTube se API sou
+         vir ons kon sê hoe die video lyk, maar dan hang die blad van 'n
+         tweede diens af om te weet hoe om 'n raam te teken. Een blokkie in
+         die admin is goedkoper en dit breek nooit. */
+      regop: !!lyf.regop,
       weekVideo: !!lyf.weekVideo,
       gepubliseer: lyf.gepubliseer !== false,
       /* Wanneer 'n video uit iemand se boodskap ontstaan het. Dit wys op die
