@@ -124,20 +124,51 @@ async function getWebPushSubscriptions(accessToken) {
 // gekry en die res het niks gekry nie, en die admin het 'n netwerkfout
 // gewys sonder om te sê hoekom.
 //
-// Nou loop hulle vyf-en-twintig op 'n slag. Vyfhonderd tokens is twintig
-// rondtes, sowat vyf sekondes. Vyf-en-twintig is met opset nie honderd nie:
-// FCM knyp 'n kliënt wat te vinnig stoot, en dan begin regte foute inkom.
-const GELYK = 25
+// Nou loop hulle vyftig op 'n slag. Ses duisend tokens is honderd-en-twintig
+// rondtes, sowat vier-en-twintig sekondes.
+//
+// Vyftig en nie tweehonderd nie: FCM knyp 'n kliënt wat te vinnig stoot, en
+// dan kom daar 429's terug wat NIKS met die foon te doen het nie. En vyftig
+// en nie vyf-en-twintig nie, want by ses duisend is die verskil tussen
+// vier-en-twintig en agt-en-veertig sekondes die verskil tussen ruim en
+// naby die rand — en op 'n Hobby-plan is die perk sestig sekondes, nie
+// driehonderd nie.
+const GELYK = 50
 
+/* ── Wat 'n tweede kans verdien ──
+   'n Foon wat die app verwyder het, gaan nooit werk nie — dit is klaar. Maar
+   'n 429 of 'n 503 is FCM wat sê "nie nou nie", en dit is presies die soort
+   fout wat by ses duisend begin voorkom. Om daardie mens 'n kennisgewing te
+   ontsê omdat Google 'n oomblik besig was, is 'n jammerte wat een herhaling
+   oplos. */
 async function inGroepe(items, doen) {
   let geslaag = 0
-  let misluk = 0
+  const weer = []
+
   for (let i = 0; i < items.length; i += GELYK) {
     const groep = items.slice(i, i + GELYK)
-    const uitslae = await Promise.all(groep.map(x => doen(x).catch(() => false)))
-    for (const ok of uitslae) ok ? geslaag++ : misluk++
+    const uitslae = await Promise.all(groep.map(async x => {
+      try { return await doen(x) } catch { return false }
+    }))
+    uitslae.forEach((ok, j) => { ok ? geslaag++ : weer.push(groep[j]) })
   }
-  return { geslaag, misluk }
+
+  /* Een herhaling, en net vir wat nie klaarblyklik dood is nie. */
+  const probeerWeer = weer.filter(x => !isDood(x))
+  let misluk = weer.length - probeerWeer.length
+
+  if (probeerWeer.length) {
+    await new Promise(r => setTimeout(r, 1200))
+    for (let i = 0; i < probeerWeer.length; i += GELYK) {
+      const groep = probeerWeer.slice(i, i + GELYK)
+      const uitslae = await Promise.all(groep.map(async x => {
+        try { return await doen(x) } catch { return false }
+      }))
+      for (const ok of uitslae) ok ? geslaag++ : misluk++
+    }
+  }
+
+  return { geslaag, misluk, herhaal: probeerWeer.length }
 }
 
 // ── Send one FCM message ───────────────────────────────────────────────────
@@ -166,14 +197,26 @@ async function sendFcm(token, title, body, accessToken, includeImage = true) {
        daardie token gaan vir altyd misluk en elke stuur stadiger maak. Ons
        tel hulle apart sodat Dewald weet hoeveel van sy lys dood is. */
     const kode = err && err.error && err.error.status
-    if (kode === 'UNREGISTERED' || kode === 'NOT_FOUND' || kode === 'INVALID_ARGUMENT') dood++
+    if (kode === 'UNREGISTERED' || kode === 'NOT_FOUND' || kode === 'INVALID_ARGUMENT') {
+      dood++
+      dooies.add(token)
+    }
     console.warn('FCM failed:', token.slice(0, 20), JSON.stringify(err))
   }
   return r.ok
 }
 
-/* Hoeveel tokens dood is. Dit word per oproep teruggestel. */
+/* Hoeveel tokens dood is, en WATTER. Word per oproep teruggestel.
+
+   Ons hou die dooies apart sodat 'n herhaling hulle nie weer probeer nie —
+   'n foon wat die app verwyder het, gaan nie oor 'n sekonde terugkom nie. */
 let dood = 0
+let dooies = new Set()
+
+function isDood(x) {
+  const sleutel = typeof x === 'string' ? x : (x && x.endpoint) || ''
+  return dooies.has(sleutel)
+}
 
 // ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
 async function sendWebPush(subscription, title, body, accessToken, includeImage = true) {
@@ -229,6 +272,7 @@ module.exports = async function handler(req, res) {
     const includeImage = !isCustom
 
     dood = 0
+    dooies = new Set()
 
     const f = await inGroepe(fcmTokens,
       t => sendFcm(t, notifTitle, notifBody, accessToken, includeImage))
@@ -236,8 +280,8 @@ module.exports = async function handler(req, res) {
       s => sendWebPush(s, notifTitle, notifBody, accessToken, includeImage))
 
     const result = {
-      fcm:     { sent: f.geslaag, misluk: f.misluk, total: fcmTokens.length },
-      webpush: { sent: w.geslaag, misluk: w.misluk, total: webPushSubs.length },
+      fcm:     { sent: f.geslaag, misluk: f.misluk, herhaal: f.herhaal, total: fcmTokens.length },
+      webpush: { sent: w.geslaag, misluk: w.misluk, herhaal: w.herhaal, total: webPushSubs.length },
       /* Tokens van fone wat die app verwyder het. Hulle gaan nooit weer werk
          nie; dit is nie 'n fout wat oorgaan nie. */
       dood,
