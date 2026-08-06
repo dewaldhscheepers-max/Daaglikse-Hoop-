@@ -24,24 +24,26 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react'
-import { haalNotas, notasVir, boekVir } from '../data/sorgWag'
+import { haalNotas, notasVir, haalBoeke, boekMetPdf } from '../data/sorgWag'
 import { hoopVir } from '../data/sorgVideos'
 import SorgVideo from './SorgVideo'
 import './SorgWag.css'
 
 export default function SorgWag({ onderwerp = 'ander', videoData = null }) {
   const [notas, setNotas] = useState(null)
+  const [boeke, setBoeke] = useState(null)
 
   useEffect(() => {
     let lewendig = true
     haalNotas().then(n => { if (lewendig) setNotas(n) })
+    haalBoeke().then(b => { if (lewendig) setBoeke(b) })
     return () => { lewendig = false }
   }, [])
 
   const hoop = videoData ? hoopVir(onderwerp, videoData) : null
   const video = hoop && hoop.video
   const gekies = notasVir(onderwerp, notas || [], 3)
-  const boek = boekVir(onderwerp)
+  const boek = boekMetPdf(onderwerp, boeke)
 
   /* Niks om te wys nie — dan wys ons niks. 'n Leë kop met 'n belofte is
      erger as stilte. */
@@ -72,17 +74,31 @@ export default function SorgWag({ onderwerp = 'ander', videoData = null }) {
         </div>
       )}
 
+      {/* ── Die e-boek ──
+
+          Dit maak die boek HIER oop, net soos die stemnotas hier speel.
+          Voorheen het dit die mens na die boekeblad gestuur; Dewald het dit
+          gestop en hy is reg. Iemand wat pas sy hart neergesit het en dan na
+          'n boekrak gestuur word, kom nie terug nie.
+
+          Geen e-posvorm, geen "kry gratis"-stap. Die boek is gratis; hy druk
+          en hy het dit. */}
       {boek && (
-        <button
-          className="sw-boek"
-          onClick={() => window.dispatchEvent(new CustomEvent('open-boek', { detail: { id: boek.id } }))}
-        >
-          <span className="sw-boek-ikoon" aria-hidden="true">{boek.emoji || '📖'}</span>
-          <span className="sw-boek-teks">
-            <span className="sw-boek-titel">{boek.title}</span>
-            <span className="sw-boek-fyn">Gratis om af te laai</span>
-          </span>
-        </button>
+        <div className="sw-boek-blok">
+          <p className="sw-onder-kop">Lees ook</p>
+          <a
+            className="sw-boek"
+            href={boek.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="sw-boek-ikoon" aria-hidden="true">{boek.emoji || '📖'}</span>
+            <span className="sw-boek-teks">
+              <span className="sw-boek-titel">{boek.title}</span>
+              <span className="sw-boek-fyn">Maak oop en laai af — gratis</span>
+            </span>
+          </a>
+        </div>
       )}
     </div>
   )

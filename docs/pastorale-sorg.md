@@ -421,6 +421,16 @@ Die e-boek staan **laaste en klein**, en dit is **altyd gratis** — daar is 'n
 toets wat dit vashou. Iemand wat pas geskryf het dat hy nie meer wil lewe
 nie, moet nie 'n boekrak in die gesig kry nie.
 
+Dit maak **hier** oop, net soos die stemnotas hier speel: 'n direkte skakel na
+die PDF, geen e-posvorm en geen "kry gratis"-stap nie. Vroeer het dit die mens
+na die boekeblad gestuur; iemand wat pas sy hart neergesit het en dan
+weggestuur word, kom nie terug nie.
+
+Die skakel kom uit Firestore se `books` (`haalBoeke`), want `books.js` hou die
+katalogus maar die `pdfUrl` staan daar op `null` — die PDF's word opgelaai.
+**Is daar geen skakel nie, wys ons GEEN boek nie.** 'n Boek wat 'n mens nie
+hier kan oopmaak nie, is 'n advertensie in plaas van hulp.
+
 ### Die keurpaneel
 
 `SorgKeur.jsx`, binne die Sorg-admin, agter `SORG_ADMIN_GEHEIM`. Vier hopies:

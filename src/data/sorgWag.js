@@ -46,6 +46,7 @@ const WOORDE = {
 }
 
 let notasBelofte = null
+let boekeBelofte = null
 
 /* Die stemnotas kom REGSTREEKS uit Firestore, want `notes` is klaar oop vir
    lees (sien firestore.rules) en Luister doen dit al so. Een keer per sessie
@@ -86,6 +87,42 @@ export function notasVir(onderwerp, notas, hoeveel = 3) {
     if (!uit.some(x => x.id === n.id)) uit.push(n)
   }
   return uit.slice(0, hoeveel)
+}
+
+/* ── Die boeke se PDF-skakels ──
+
+   `books.js` hou die katalogus, maar die pdfUrl staan daar op `null` — die
+   werklike skakel kom uit Firestore se `books`-versameling, want die PDF's
+   word opgelaai en nie in die kode gesit nie. Meer.jsx doen dit al so, en
+   `books` is klaar oop vir lees.
+
+   Sonder hierdie oproep sou ons 'n boek kon wys sonder 'n manier om dit te
+   kry, en dan is dit 'n advertensie in plaas van hulp. */
+export function haalBoeke() {
+  if (!boekeBelofte) {
+    boekeBelofte = (async () => {
+      const { db } = await import('../firebase')
+      const { collection, getDocs } = await import('firebase/firestore')
+      const k = await getDocs(collection(db, 'books'))
+      const uit = {}
+      k.forEach(d => { uit[d.id] = d.data() || {} })
+      return uit
+    })().catch(() => { boekeBelofte = null; return {} })
+  }
+  return boekeBelofte
+}
+
+/* Een gratis e-boek MET 'n werkende aflaaiskakel.
+
+   Is daar geen skakel nie, gee ons NIKS terug. Dewald was hieroor duidelik:
+   niemand word na die boekeblad gestuur nie. 'n Boek wat 'n mens nie hier kan
+   oopmaak nie, hoort dus glad nie hier nie. */
+export function boekMetPdf(onderwerp, oorskryf) {
+  const b = boekVir(onderwerp)
+  if (!b) return null
+  const ov = (oorskryf && oorskryf[b.id]) || {}
+  const pdfUrl = ov.pdfUrl || b.pdfUrl || null
+  return pdfUrl ? { ...b, pdfUrl } : null
 }
 
 /* Een gratis e-boek. Altyd gratis — nooit 'n prys op hierdie skerm nie. */

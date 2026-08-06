@@ -58,13 +58,15 @@
 /* ── Die e-boek ──
    Laaste en klein, en nooit met 'n prys nie. Iemand wat pas sy swaarste ding
    geskryf het, moet nie 'n boekrak in die gesig kry nie. */
+.sw-boek-blok { margin-top: 16px; }
+
 .sw-boek {
   display: flex;
+  text-decoration: none;
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin-top: 14px;
-  padding: 12px 14px;
+  padding: 13px 14px;
   border: 1px solid #E6E1EE;
   border-radius: 14px;
   background: #FBF8F2;

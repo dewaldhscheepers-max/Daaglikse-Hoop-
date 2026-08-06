@@ -23,7 +23,7 @@ import { krisisTreffers, kontakTreffers, hulpversoekTreffers, plat, isKrisis } f
 import { keurOnderwerp, ONDERWERPE, BREE_ONDERWERP, onderwerpBy } from './sorgOnderwerpe.js'
 import { hoopVir, volgensBehoefte, weekVideo } from './sorgVideos.js'
 import { sorgSkakel, leesSorgSkakel } from './sorgDeel.js'
-import { notasVir, boekVir } from './sorgWag.js'
+import { notasVir, boekVir, boekMetPdf } from './sorgWag.js'
 
 const hier = path.dirname(fileURLToPath(import.meta.url))
 const wortel = path.resolve(hier, '..', '..')
@@ -314,6 +314,18 @@ afdeling('Terwyl jy wag — stemnotas en n e-boek')
   /* Elke onderwerp moet iets kry sodra daar enige notas is. */
   kyk('elke onderwerp kry stemnotas', ONDERWERPE.every(o => notasVir(o.sleutel, N).length === 3),
       ONDERWERPE.filter(o => notasVir(o.sleutel, N).length !== 3).map(o => o.sleutel))
+
+  /* Die e-boek moet HIER oopmaak, nie die mens na die boekeblad stuur nie.
+     Sonder 'n pdfUrl wys ons dus NIKS — anders is dit 'n advertensie in
+     plaas van hulp. */
+  kyk('geen pdfUrl → geen boek', boekMetPdf('angs', {}) === null)
+  kyk('geen data → geen boek', boekMetPdf('angs', null) === null)
+  kyk('met n pdfUrl → die boek', (boekMetPdf('angs', { '7-leuens': { pdfUrl: 'https://x/y.pdf' } }) || {}).pdfUrl === 'https://x/y.pdf',
+      boekMetPdf('angs', { '7-leuens': { pdfUrl: 'https://x/y.pdf' } }))
+  kyk('n boek met n pdfUrl is steeds GRATIS', (boekMetPdf('angs', { '7-leuens': { pdfUrl: 'https://x/y.pdf' } }) || {}).free === true)
+  kyk('elke onderwerp kan n boek kry as daar n pdfUrl is',
+      ONDERWERPE.every(o => boekMetPdf(o.sleutel, { '7-leuens': { pdfUrl: 'https://x/y.pdf' }, 'bybel-hulpbron': { pdfUrl: 'https://x/z.pdf' } })),
+      ONDERWERPE.filter(o => !boekMetPdf(o.sleutel, { '7-leuens': { pdfUrl: 'https://x/y.pdf' }, 'bybel-hulpbron': { pdfUrl: 'https://x/z.pdf' } })).map(o => o.sleutel))
 
   /* Die e-boek moet ALTYD gratis wees. Nooit 'n prys waar iemand seer is. */
   const boeke = ONDERWERPE.map(o => boekVir(o.sleutel)).filter(Boolean)
