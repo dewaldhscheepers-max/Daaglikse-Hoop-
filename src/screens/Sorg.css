@@ -183,35 +183,65 @@
   text-align: center;
 }
 
-/* ── Die twee afdelings ── */
+/* ── Die twee afdelings ──
+
+   Dit was twee klein pilletjies wat maklik gelyk het soos etikette eerder as
+   knoppies. Nou is dit EEN balk wat die volle breedte vat, met 'n ikoon en
+   'n telling by elkeen — dan sien 'n mens sonder om te lees waar hy is en
+   wat agter die ander een wag.
+
+   Geen transform op :active nie; net kleur. Sien CLAUDE.md. */
 .sorg-oortjies {
   display: flex;
-  gap: 7px;
-  margin: 20px 0 14px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
+  gap: 4px;
+  margin: 22px 0 14px;
+  padding: 4px;
+  border: 1px solid var(--s-rand);
+  border-radius: 16px;
+  background: #F1EBE1;
 }
 
 .sorg-oortjie {
-  flex: 0 0 auto;
-  padding: 9px 15px;
-  border: 1px solid var(--s-rand);
-  border-radius: 999px;
-  background: #FFFFFF;
-  color: var(--text-muted, #8A7E9A);
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 11px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: #6E6455;
   font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+  transition: background-color 0.12s, color 0.12s, box-shadow 0.12s;
 }
-.sorg-oortjie:active { background: #F2EEE6; }
+.sorg-oortjie:active { background: #E9E1D4; }
+
+.sorg-oortjie-ikoon { font-size: 14px; line-height: 1; }
+.sorg-oortjie-naam { overflow: hidden; text-overflow: ellipsis; }
+
+/* Die telling sê wat agter die ander oortjie wag. */
+.sorg-oortjie-tel {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(48, 42, 58, 0.09);
+  font-size: 12px;
+  font-weight: 700;
+  color: #6E6455;
+}
 
 .sorg-oortjie.aktief {
+  background: var(--s-kaart);
+  color: var(--s-teks);
+  box-shadow: 0 1px 2px rgba(48, 42, 58, 0.06), 0 2px 8px rgba(48, 42, 58, 0.08);
+}
+.sorg-oortjie.aktief .sorg-oortjie-tel {
   background: var(--s-pers);
-  border-color: var(--purple-dark, #5C4E8E);
   color: #FFFFFF;
 }
 

@@ -34,8 +34,24 @@ import {
 } from '../src/data/sorgSaamstaan.js'
 
 const MUUR = 'sorg_muur'
+const VIDEOS = 'sorg_videos'
 const SAAM = 'sorg_saam'
 const WOORDE = 'sorg_woorde'
+
+/* ── Waaronder staan hierdie reaksie? ──
+
+   'n Video kry presies dieselfde balk as 'n plasing — hou van, reageer,
+   deel. Die tellings le op die video se eie dokument en die opmerkings in
+   dieselfde versameling as die muur s'n.
+
+   Dit werk sonder 'n tweede sleutelruimte omdat ons id's reeds geskei is:
+   'n muur-plasing begin met 'm', 'n video met 'v'. Hulle kan nooit bots
+   nie. Ons vra die klient tog EXPLISIET watter soort dit is en gaan dit na
+   — 'n stille aanname oor 'n eerste letter is die soort ding wat oor 'n
+   jaar breek wanneer iemand die id-vorm verander. */
+function versamelingVir(soort) {
+  return soort === 'video' ? VIDEOS : MUUR
+}
 
 /* Hoeveel woorde 'n toestel per dag mag stuur. Dit is nie 'n straf nie — dit
    keer dat een mens met 'n script die muur volskryf terwyl Dewald slaap. */
@@ -63,11 +79,12 @@ function skoonId(x) {
    aftrek verg, en 'n aftrek op 'n telling wat deur 'n paar toestelle
    gelyktydig verhoog word, is presies waar tellings verkeerd raak. Een
    druk, klaar. */
-async function doenReaksie(res, { muurId, toestel, reaksie }) {
+async function doenReaksie(res, { muurId, toestel, reaksie, waar }) {
   const soort = keurReaksie(reaksie)
   if (!soort) return res.status(400).json({ fout: 'onbekende reaksie' })
 
-  const plasing = await leesDok(MUUR, muurId)
+  const vers = versamelingVir(waar)
+  const plasing = await leesDok(vers, muurId)
   if (!plasing || plasing.gepubliseer === false) {
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
   }
@@ -90,7 +107,7 @@ async function doenReaksie(res, { muurId, toestel, reaksie }) {
 
   const tellings = { ...(plasing.reaksies || {}) }
   tellings[soort] = (Number(tellings[soort]) || 0) + 1
-  await skryfDok(MUUR, muurId, { reaksies: tellings }, { velde: ['reaksies'] })
+  await skryfDok(vers, muurId, { reaksies: tellings }, { velde: ['reaksies'] })
 
   return res.status(200).json({
     ok: true,
@@ -101,8 +118,8 @@ async function doenReaksie(res, { muurId, toestel, reaksie }) {
 }
 
 /* ── 'n Woord van ondersteuning ── */
-async function doenWoord(res, { muurId, toestel, woordSleutel, teks }) {
-  const plasing = await leesDok(MUUR, muurId)
+async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar }) {
+  const plasing = await leesDok(versamelingVir(waar), muurId)
   if (!plasing || plasing.gepubliseer === false) {
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
   }
@@ -179,15 +196,16 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks }) {
    duisend skryfwerke maak nie. */
 const MAKS_GELEES = 20
 
-async function doenGelees(res, lys) {
+async function doenGelees(res, lys, waar) {
+  const vers = versamelingVir(waar)
   const ids = [...new Set(lys.map(skoonId).filter(Boolean))].slice(0, MAKS_GELEES)
   if (!ids.length) return res.status(200).json({ ok: true, getel: 0 })
 
   let getel = 0
   for (const id of ids) {
-    const p = await leesDok(MUUR, id)
+    const p = await leesDok(vers, id)
     if (!p || p.gepubliseer === false) continue
-    await skryfDok(MUUR, id, { gelees: (Number(p.gelees) || 0) + 1 }, { velde: ['gelees'] })
+    await skryfDok(vers, id, { gelees: (Number(p.gelees) || 0) + 1 }, { velde: ['gelees'] })
     getel++
   }
   return res.status(200).json({ ok: true, getel })
@@ -228,7 +246,9 @@ export default async function handler(req, res) {
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
   try {
-    if (Array.isArray(lyf.gelees)) return await doenGelees(res, lyf.gelees)
+    if (Array.isArray(lyf.gelees)) {
+      return await doenGelees(res, lyf.gelees, lyf.soort === 'video' ? 'video' : 'muur')
+    }
 
     if (lyf.rapporteer) return await doenRapport(res, String(lyf.rapporteer).slice(0, 40))
 
@@ -240,10 +260,12 @@ export default async function handler(req, res) {
        ons liewer niks as om 'n telling te laat lieg. */
     if (!toestel) return res.status(200).json({ ok: true, reeds: true })
 
-    if (lyf.reaksie) return await doenReaksie(res, { muurId, toestel, reaksie: lyf.reaksie })
+    const waar = lyf.soort === 'video' ? 'video' : 'muur'
+
+    if (lyf.reaksie) return await doenReaksie(res, { muurId, toestel, reaksie: lyf.reaksie, waar })
     if (lyf.woord || typeof lyf.teks === 'string') {
       return await doenWoord(res, {
-        muurId, toestel,
+        muurId, toestel, waar,
         woordSleutel: lyf.woord ? String(lyf.woord).slice(0, 40) : '',
         teks: lyf.teks,
       })

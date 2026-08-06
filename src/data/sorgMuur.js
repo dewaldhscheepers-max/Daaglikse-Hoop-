@@ -140,12 +140,12 @@ function onthouReaksie(muurId, soort) {
    Soos by draSaam word dit eers ONTHOU nadat die bediener bevestig het. 'n
    Swak lyn is in Suid-Afrika die gewone geval, en 'n mens wat gedruk het
    terwyl die versoek misluk, moet weer kan probeer. */
-export async function stuurReaksie(muurId, soort) {
+export async function stuurReaksie(muurId, reaksie, soort = 'muur') {
   try {
     const r = await fetch(SAAM_PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ muurId, toestel: toestelId(), reaksie: soort }),
+      body: JSON.stringify({ muurId, toestel: toestelId(), reaksie, soort }),
     })
     const d = await r.json()
     if (d && (d.ok || d.reeds)) {
@@ -163,12 +163,12 @@ export async function stuurReaksie(muurId, soort) {
 
    `woord` is 'n SLEUTEL uit Dewald se klaargemaakte lys; `teks` is iemand se
    eie woorde. Nooit albei nie. */
-export async function stuurWoord(muurId, { woord = '', teks = '' } = {}) {
+export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort = 'muur') {
   try {
     const r = await fetch(SAAM_PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ muurId, toestel: toestelId(), ...(woord ? { woord } : { teks }) }),
+      body: JSON.stringify({ muurId, toestel: toestelId(), soort, ...(woord ? { woord } : { teks }) }),
     })
     return await r.json()
   } catch {

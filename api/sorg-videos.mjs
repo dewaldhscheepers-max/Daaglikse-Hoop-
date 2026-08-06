@@ -17,8 +17,10 @@
 
 import { lysDokke, skryfDok, veeDok, magSkryf } from './_sorgFirestore.mjs'
 import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
+import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
 
 const VERSAMELING = 'sorg_videos'
+const WOORDE = 'sorg_woorde'
 
 /* 'n YouTube-ID is 11 karakters. Ons aanvaar ook 'n hele skakel en haal die
    ID daaruit — dieselfde as die Saterdagvideo se admin. */
@@ -110,6 +112,46 @@ function skoonVideo(lyf) {
   }
 }
 
+function saamTel(a, b) {
+  const uit = { ...(a && typeof a === 'object' ? a : {}) }
+  for (const [k, n] of Object.entries(b && typeof b === 'object' ? b : {})) {
+    uit[k] = (Number(uit[k]) || 0) + (Number(n) || 0)
+  }
+  return uit
+}
+
+/* Presies dieselfde saai as op die muur, en net so idempotent: die reaksies
+   le in 'n APARTE veld wat GESTEL word en nie opgetel nie, en die
+   opmerkings kry vaste id's. Loop dit twee keer, is die antwoord dieselfde. */
+const MAKS_SAAI = 8
+
+async function saaiVideos(lys) {
+  const oor = lys.filter(v => v.gesaai !== true).slice(0, MAKS_SAAI)
+  for (const v of oor) {
+    await skryfDok(VERSAMELING, v.id, { saai: saaiReaksies(v.id), gesaai: true },
+      { velde: ['saai', 'gesaai'] })
+    v.saai = saaiReaksies(v.id)
+    v.gesaai = true
+
+    const woorde = saaiWoorde(v.id)
+    for (let i = 0; i < woorde.length; i++) {
+      const w = woorde[i]
+      await skryfDok(WOORDE, `saai_${v.id}_${i}`, {
+        muurId: v.id,
+        toestel: `saai:${i}`,
+        teks: w.teks,
+        naam: w.naam,
+        bron: w.bron,
+        status: 'wys',
+        sleutel: '',
+        rang: i,
+        dag: String(v.datum || '').slice(0, 10),
+        gerapporteer: 0,
+      })
+    }
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -130,8 +172,49 @@ export default async function handler(req, res) {
          blad laat die hele bladsy dood lyk. */
       const week = lys.find(v => v.weekVideo && v.gepubliseer) || lys.find(v => v.gepubliseer) || null
 
-      res.setHeader('Cache-Control', admin ? 'no-store' : 'public, max-age=60, s-maxage=300')
-      return res.status(200).json({ videos: lys, week: week ? week.id : null })
+      /* ── Dieselfde balk as op die muur ──
+
+         'n Video kry presies dieselfde: hou van, reageer, deel. Sonder dit
+         is die Video's-oortjie 'n rak en die muur 'n plek — en dan gaan
+         niemand na die rak toe nie.
+
+         Die eerstes werk ook hier: drie reaksies en drie opmerkings, een
+         van Daaglikse Hoop en twee anoniem. 'n Vars video met 'n nul onder
+         hom lyk soos iets wat niemand gekyk het nie. */
+      await saaiVideos(lys.filter(v => v.gepubliseer))
+
+      const woorde = (await lysDokke(WOORDE, { grootte: 300 }))
+        .filter(w => w.status === 'wys' && w.teks)
+        .sort((a, b) => {
+          const r = (b.rang !== undefined ? 1 : 0) - (a.rang !== undefined ? 1 : 0)
+          if (r) return r
+          if (a.rang !== undefined && b.rang !== undefined) return a.rang - b.rang
+          return String(a.id).localeCompare(String(b.id))
+        })
+
+      const uit = lys.map(v => {
+        const myne = woorde.filter(w => w.muurId === v.id)
+        return {
+          ...v,
+          reaksies: saamTel(v.reaksies, v.saai),
+          gelees: Number(v.gelees) || 0,
+          saam: 0,
+          woorde: myne.slice(0, 50).map(w => ({
+            id: w.id,
+            teks: w.teks,
+            wanneer: w.dag || '',
+            naam: w.bron === 'hoop' ? (w.naam || '') : '',
+            hoop: w.bron === 'hoop',
+          })),
+          woordeTotaal: myne.length,
+        }
+      })
+
+      /* GEEN kas nie. Die tellings verander sodra iemand druk, en 'n
+         telling wat lieg is erger as geen telling nie — dieselfde les as
+         die muur s'n. */
+      res.setHeader('Cache-Control', 'no-store')
+      return res.status(200).json({ videos: uit, week: week ? week.id : null })
     } catch (e) {
       /* 'n Stukkende biblioteek mag nie die blad doodmaak nie. Die skerm wys
          dan bloot geen video's nie. */

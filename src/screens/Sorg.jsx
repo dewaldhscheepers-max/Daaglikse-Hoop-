@@ -405,6 +405,13 @@ export default function Sorg() {
         )}
 
         {/* ── Twee afdelings ── */}
+        {/* ── Twee duidelike afdelings ──
+
+            Dit was twee klein pilletjies wat maklik gelyk het soos etikette
+            eerder as knoppies, en 'n mens moes raai wat aan is. Nou is dit
+            een balk wat die volle breedte vat, met 'n ikoon en 'n telling by
+            elkeen — dan sien 'n mens sonder om te lees waar hy is en wat
+            agter die ander een wag. */}
         <div className="sorg-oortjies" role="tablist">
           {AFDELINGS.map(a => (
             <button
@@ -414,7 +421,13 @@ export default function Sorg() {
               className={`sorg-oortjie${afdeling === a.sleutel ? ' aktief' : ''}`}
               onClick={() => setAfdeling(a.sleutel)}
             >
-              {a.naam}
+              <span className="sorg-oortjie-ikoon" aria-hidden="true">
+                {a.sleutel === 'muur' ? '🤍' : '▶'}
+              </span>
+              <span className="sorg-oortjie-naam">{a.naam}</span>
+              <span className="sorg-oortjie-tel">
+                {a.sleutel === 'muur' ? plasings.length : videos.length}
+              </span>
             </button>
           ))}
         </div>

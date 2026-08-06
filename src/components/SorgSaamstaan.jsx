@@ -30,6 +30,11 @@
    Op 'n SENSITIEWE plasing is daar geen vrye teks nie — die bediener besluit
    dit, nie hierdie kode nie. Sien `sorgSaamstaan.js`.
 
+   Dieselfde balk staan onder 'n VIDEO. `soort` sê vir die bediener in
+   watter versameling die tellings le; alles anders is identies. Sonder dit
+   is die Video's-oortjie 'n rak en die muur 'n plek, en dan gaan niemand na
+   die rak toe nie.
+
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
    ──────────────────────────────────────────────────────────── */
 
@@ -42,7 +47,7 @@ import './SorgSaamstaan.css'
 /* Die een wat die hart wys wanneer 'n mens nog niks gekies het nie. */
 const VOORAF = 'hoor'
 
-export default function SorgSaamstaan({ plasing }) {
+export default function SorgSaamstaan({ plasing, soort = 'muur' }) {
   const [tellings, setTellings] = useState(plasing.reaksies || {})
   const [myne, setMyne] = useState(() => myReaksie(plasing.id))
   const [woorde, setWoorde] = useState(plasing.woorde || [])
@@ -110,14 +115,14 @@ export default function SorgSaamstaan({ plasing }) {
     return () => { document.body.style.overflow = ou }
   }, [bladOop])
 
-  async function druk(soort) {
+  async function druk(keuse) {
     setKiesOop(false)
     if (myne || besig) return
     setBesig(true)
     /* Dadelik, ook op 'n stadige lyn. Die bediener se antwoord oorskryf dit. */
-    setMyne(soort)
-    setTellings(t => ({ ...t, [soort]: (Number(t[soort]) || 0) + 1 }))
-    const nuut = await stuurReaksie(plasing.id, soort)
+    setMyne(keuse)
+    setTellings(t => ({ ...t, [keuse]: (Number(t[keuse]) || 0) + 1 }))
+    const nuut = await stuurReaksie(plasing.id, keuse, soort)
     if (nuut) setTellings(nuut)
     setBesig(false)
   }
@@ -209,6 +214,7 @@ export default function SorgSaamstaan({ plasing }) {
 
       <SorgOpmerkings
         plasing={plasing}
+        soort={soort}
         oop={bladOop}
         onSluit={() => setBladOop(false)}
         woorde={woorde}

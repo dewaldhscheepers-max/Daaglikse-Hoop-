@@ -13,6 +13,7 @@
 */
 
 import { useState } from 'react'
+import SorgSaamstaan from './SorgSaamstaan'
 import './SorgVideo.css'
 
 export default function SorgVideo({ video, groot = false, etiket = null, etiketFyn = null, onSpeel = null }) {
@@ -66,6 +67,13 @@ export default function SorgVideo({ video, groot = false, etiket = null, etiketF
         {video.uitPlasing && (
           <p className="sv-uit-plasing">Hierdie video het by iemand se boodskap begin.</p>
         )}
+
+        {/* ── Dieselfde balk as op die muur ──
+
+            Hou van, reageer, deel. Sonder dit is die Video's-oortjie 'n RAK
+            en die muur 'n PLEK — en dan gaan niemand na die rak toe nie. 'n
+            Video wat mense kan beantwoord, is deel van dieselfde gesprek. */}
+        <SorgSaamstaan plasing={video} soort="video" />
       </div>
     </div>
   )

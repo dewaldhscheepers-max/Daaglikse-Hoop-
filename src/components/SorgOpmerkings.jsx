@@ -47,7 +47,7 @@ function skryfDag(d) {
   return `${Number(m[3])} ${MAANDE[Number(m[2]) - 1] || ''}`
 }
 
-export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, tellings }) {
+export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, woorde, onNuut, tellings }) {
   const [eie, setEie] = useState('')
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
@@ -80,7 +80,7 @@ export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, 
     if (besig) return
     setBesig(true)
     setFout('')
-    const d = await stuurWoord(plasing.id, sleutel ? { woord: sleutel } : { teks: eie.trim() })
+    const d = await stuurWoord(plasing.id, sleutel ? { woord: sleutel } : { teks: eie.trim() }, soort)
     setBesig(false)
     if (d && d.fout) { setFout(d.fout); return }
     setEie('')
