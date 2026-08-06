@@ -1,223 +1,281 @@
-/* Saamstaan. Net kleur op :active — sien CLAUDE.md. */
+/* Saamstaan — die voet van 'n storie, in die vorm wat elke mens ken.
+   Net kleur op :active — sien CLAUDE.md. */
 
-.ss {
-  margin-top: 14px;
-  padding-top: 13px;
-  border-top: 1px solid var(--s-rand, #EBE3D8);
-}
+.ss { margin-top: 14px; }
 
-/* ── Wat gestuur is ──
-   Die tekens van die reaksies wat WERKLIK gedruk is, en een groot totaal. */
-/* Dit moet WRAP. Met 'n vaste ry het "142 het gelees" by die regterkant
-   uitgehang en afgesny geraak sodra die totaal oor twee reels geloop het. */
+/* ── Die opsomming ──
+   Links wat gestuur is, regs die gesprek. Presies soos 'n mens dit elders
+   sien, en dus hoef niemand dit te leer nie. */
 .ss-som {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 7px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 2px 9px;
   font-family: var(--font-body);
   font-size: 13px;
+  color: var(--s-sag, #77717D);
 }
 
-.ss-tekens {
+.ss-som-links,
+.ss-som-regs {
   display: inline-flex;
-  font-size: 14px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ss-tekens { display: inline-flex; }
+
+/* Die tekens oorvleuel effens en elkeen kry 'n wit randjie, sodat hulle as
+   een groepie lees eerder as drie los emoji. */
+.ss-teken {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--s-kaart, #FFFFFF);
+  box-shadow: 0 0 0 1.5px var(--s-kaart, #FFFFFF);
+  font-size: 12px;
   line-height: 1;
 }
-/* Hulle oorvleuel effens, soos op enige muur — dit lees as een groepie. */
-.ss-tekens span + span { margin-left: -3px; }
+.ss-teken + .ss-teken { margin-left: -6px; }
 
-.ss-totaal {
-  font-weight: 700;
-  color: var(--s-pers, #624A84);
+.ss-totaal { font-weight: 600; }
+
+.ss-som-knop {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--s-sag, #77717D);
+  font-family: var(--font-body);
+  font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ss-gelees {
-  margin-left: auto;
   font-size: 11.5px;
-  color: var(--s-sag, #77717D);
+  color: #A29CAB;
   white-space: nowrap;
 }
-/* Loop die totaal oor twee reels, sak die leestelling op sy eie reel eerder
-   as om buite die kaart te hang. */
-@media (max-width: 400px) {
-  .ss-gelees { margin-left: 0; flex-basis: 100%; }
-}
+.ss-som-knop + .ss-gelees::before { content: '· '; }
 
-/* ── Die vier knoppies ──
-   Duimgrootte, en hulle rol as die skerm smal is eerder as om plat gedruk
-   te word. */
-.ss-knoppe {
+/* ── Die aksiebalk ──
+   Twee knoppies, dun lyne bo en onder. Vier knoppies met woorde op is 'n
+   keuselys; twee is 'n balk. */
+.ss-balk {
+  position: relative;
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  padding-bottom: 2px;
+  align-items: stretch;
+  border-top: 1px solid var(--s-rand, #EBE3D8);
+  border-bottom: 1px solid var(--s-rand, #EBE3D8);
 }
-.ss-knoppe::-webkit-scrollbar { display: none; }
 
-.ss-knop {
-  flex: 0 0 auto;
+.ss-aksie {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 9px 12px;
-  border: 1px solid var(--s-rand, #EBE3D8);
-  border-radius: 999px;
-  background: var(--s-reaksie, #F1EDF6);
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 8px;
+  border: 0;
+  background: none;
   color: var(--s-sag, #77717D);
   font-family: var(--font-body);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
-  white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+  transition: background-color 0.12s, color 0.12s;
 }
-.ss-knop:active { background: #E7DFF4; }
+.ss-aksie:active { background: #F3EFE6; }
+.ss-aksie.myne { color: var(--s-pers, #624A84); }
 
-.ss-knop-teken { font-size: 14px; line-height: 1; }
+.ss-aksie-teken { font-size: 16px; line-height: 1; }
 
-.ss-knop.myne {
-  background: #EDE6F7;
-  border-color: #C9B9E4;
-  color: var(--s-pers, #624A84);
+/* ── Die emoji-kiesers ──
+   Hulle dryf BO die balk, soos 'n lang druk op Facebook — maar 'n gewone
+   druk maak hulle oop, want 'n lang druk op die web is onbetroubaar en
+   niemand weet dit is daar nie. */
+.ss-kies {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 5px 7px;
+  border: 1px solid var(--s-rand, #EBE3D8);
+  border-radius: 999px;
+  background: var(--s-kaart, #FFFFFF);
+  box-shadow: 0 4px 18px rgba(48, 42, 58, 0.16);
 }
 
-/* 'n Mens wat klaar gedruk het, mag nie die ander knoppies as "af" sien nie
-   — hulle is nie stukkend nie, hy het net klaar gekies. */
-.ss-knop:disabled { opacity: 1; }
-.ss-knop:disabled:not(.myne) { color: #A29CAB; }
+.ss-kies-knop {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.ss-kies-knop:active { background: #F1EDF6; }
 
-/* ── Die woorde ── */
+/* ── Die opmerkings ── */
 .ss-woorde {
-  margin: 12px 0 0;
+  margin: 11px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .ss-woord {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 8px;
-  margin-bottom: 6px;
-  padding: 9px 12px;
-  border-radius: 13px;
-  background: #F7F4EE;
+  margin-bottom: 8px;
+}
+
+/* 'n Anonieme kring. Die muur is anoniem; 'n gesig sou 'n leuen wees. */
+.ss-avatar {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #EDE6F7;
+  border: 1px solid #E0D7EF;
+}
+
+.ss-borrel {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px 9px;
+  border-radius: 4px 16px 16px 16px;
+  background: #F4F0EA;
+}
+
+.ss-wie {
+  margin: 0 0 1px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--s-sag, #77717D);
+}
+
+.ss-woord-teks {
+  margin: 0;
   font-family: var(--font-body);
   font-size: 13.5px;
   line-height: 1.5;
   color: var(--s-teks, #302A3A);
+  overflow-wrap: anywhere;
 }
 
-.ss-meer,
-.ss-eie-knop {
-  padding: 4px 0;
+/* Klein met opset. Dit is 'n uitweg, nie 'n uitnodiging nie. */
+.ss-rap {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   border: 0;
   background: none;
-  color: var(--s-pers, #624A84);
+  color: #B7B0C0;
+  font-size: 16px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s;
+}
+.ss-rap:active { color: #A33A3A; }
+
+.ss-meer {
+  padding: 3px 2px 5px;
+  border: 0;
+  background: none;
+  color: var(--s-sag, #77717D);
   font-family: var(--font-body);
   font-size: 12.5px;
   font-weight: 700;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Self een stuur ── */
-.ss-klaar { margin-top: 12px; }
+/* ── Skryf iets ── */
+.ss-skryf { margin-top: 10px; }
 
-.ss-klaar-kop {
-  margin: 0 0 8px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--s-sag, #77717D);
-}
-
-/* Een ry wat rol, nie 'n stapel nie.
-
-   Gestapel was die vyf woorde sowat 250px hoog op ELKE kaart — op 'n muur
-   van ses kaarte is dit anderhalfduisend pixels knoppies. 'n Ry wat rol hou
-   dit op sowat veertig, en dit bly EEN druk om te stuur. Dit agter 'n
-   knoppie wegsteek sou twee drukke gemaak het van die maklikste manier om
-   iemand te laat weet jy sien haar. */
-.ss-klaar-lys {
+/* Dewald se sinne as vinnige keuses. Een ry wat rol — gestapel is dit sowat
+   250px op ELKE kaart. */
+.ss-vinnig {
   display: flex;
   gap: 6px;
-  align-items: center;
+  margin-bottom: 9px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   padding-bottom: 2px;
 }
-.ss-klaar-lys::-webkit-scrollbar { display: none; }
+.ss-vinnig::-webkit-scrollbar { display: none; }
 
-.ss-klaar-knop {
+.ss-vinnig-knop {
   flex: 0 0 auto;
   white-space: nowrap;
-  padding: 8px 12px;
+  padding: 8px 13px;
   border: 1px solid var(--s-rand, #EBE3D8);
   border-radius: 999px;
   background: var(--s-kaart, #FFFFFF);
   color: var(--s-teks, #302A3A);
   font-family: var(--font-body);
   font-size: 12.5px;
-  font-weight: 500;
-  text-align: left;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s, border-color 0.12s;
 }
-.ss-klaar-knop:active { background: #F3EFE6; border-color: var(--s-goud, #C69A32); }
-.ss-klaar-knop:disabled { color: #A29CAB; }
+.ss-vinnig-knop:active { background: #F3EFE6; border-color: var(--s-goud, #C69A32); }
+.ss-vinnig-knop:disabled { color: #A29CAB; }
 
-.ss-eie-knop {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 8px 10px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.ss-invoer-ry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-/* ── Die skryfblok ── */
-.ss-skryf { margin-top: 12px; }
-
 .ss-invoer {
-  display: block;
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #DDD6E6;
-  border-radius: 13px;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 13px;
+  border: 1px solid #E2DBEC;
+  border-radius: 18px;
   background: var(--s-kaart, #FFFFFF);
   color: var(--s-teks, #302A3A);
   font-family: var(--font-body);
-  font-size: 14.5px;
-  line-height: 1.55;
-  resize: vertical;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
 }
 
-.ss-riglyn {
-  margin: 6px 0 9px;
+.ss-skryf-voet {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ss-oor {
   font-family: var(--font-body);
   font-size: 11.5px;
-  line-height: 1.5;
-  color: var(--s-sag, #77717D);
+  color: #A29CAB;
 }
 
-.ss-skryf-knoppe { display: flex; gap: 7px; }
-
 .ss-stuur {
-  flex: 1;
-  padding: 11px 14px;
+  padding: 9px 20px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 999px;
   background: var(--s-pers, #624A84);
   color: #FFFFFF;
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s;
@@ -225,30 +283,12 @@
 .ss-stuur:active { background: var(--s-pers-diep, #4C3A6B); }
 .ss-stuur:disabled { background: #DCD6E4; color: #9A92A8; }
 
-.ss-los {
-  flex: 0 0 auto;
-  padding: 11px 16px;
-  border: 1px solid var(--s-rand, #EBE3D8);
-  border-radius: 12px;
-  background: var(--s-kaart, #FFFFFF);
-  color: var(--s-sag, #77717D);
+.ss-riglyn {
+  margin: 8px 0 0;
   font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s;
-}
-.ss-los:active { background: #F3EFE6; }
-
-.ss-dankie {
-  margin: 12px 0 0;
-  padding: 10px 13px;
-  border-radius: 13px;
-  background: #EDE6F7;
-  font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 11.5px;
   line-height: 1.5;
-  color: var(--s-pers, #624A84);
+  color: #A29CAB;
 }
 
 .ss-fout {
@@ -256,22 +296,5 @@
   font-family: var(--font-body);
   font-size: 12.5px;
   line-height: 1.5;
-  color: #A33A3A;
+  color: var(--s-pers, #624A84);
 }
-
-.ss-woord-teks { flex: 1; min-width: 0; }
-
-/* Klein met opset. Dit is 'n uitweg, nie 'n uitnodiging nie. */
-.ss-rap {
-  flex: 0 0 auto;
-  padding: 2px 0;
-  border: 0;
-  background: none;
-  color: #A9A2B4;
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 0.12s;
-}
-.ss-rap:active { color: #A33A3A; }

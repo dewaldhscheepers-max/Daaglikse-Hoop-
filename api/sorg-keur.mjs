@@ -45,6 +45,19 @@ const MAKS_MUUR_TEKS = 1200
    daardie werk klaar. */
 const MAKS_TITEL = 110
 
+/* ── Dewald se antwoord het GEEN praktiese perk nie ──
+
+   Dit was 1500 karakters, en dit is sowat 'n halwe bladsy. Party antwoorde
+   is 'n halwe bladsy; party is 'n brief. Die perk het stilweg afgekap — die
+   res van sy woorde het eenvoudig verdwyn sonder om hom iets te se, wat die
+   slegste soort perk is.
+
+   Twintigduisend is nie 'n redaksionele besluit nie; dit is 'n vangnet teen
+   'n dokument wat per ongeluk 'n megagreep word. Die kaart kap in elk geval
+   op ag reels af met 'Lees meer' daaronder, dus maak 'n lang antwoord nie
+   die muur onleesbaar nie. */
+const MAKS_ANTWOORD = 20000
+
 function skoonTeks(t, maks) {
   return String(t || '')
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, ' ')
@@ -60,7 +73,7 @@ function skoonTeks(t, maks) {
 function skoonAntwoord(a) {
   if (!a || typeof a !== 'object') return { fout: 'geen antwoord nie' }
   const tipe = ['oudio', 'video', 'teks'].includes(a.tipe) ? a.tipe : 'teks'
-  const teks = skoonTeks(a.teks, 1500)
+  const teks = skoonTeks(a.teks, MAKS_ANTWOORD)
   const bron = skoonTeks(a.bron, 400)
   /* Die vraag wat die antwoord beantwoord. Dit is die ding wat 'n mens laat
      druk op 'n klankgreep: nie "Dewald antwoord" nie, maar WAAROP. */

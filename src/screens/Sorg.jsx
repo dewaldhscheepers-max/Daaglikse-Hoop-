@@ -43,7 +43,7 @@ import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
-import { haalMuur, meldGelees, saamtel, haalMyPlasings } from '../data/sorgMuur'
+import { haalMuur, meldGelees, haalMyPlasings } from '../data/sorgMuur'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -162,7 +162,6 @@ export default function Sorg() {
 
   const videos = (data && data.videos) || []
   const held   = data ? weekVideo(data) : null
-  const tel    = saamtel()
   const groepe = volgensBehoefte(videos)
   const plasings = muur || []
 
@@ -188,26 +187,6 @@ export default function Sorg() {
             />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
-        )}
-
-        {/* ── Wat die gemeenskap saam gedra het ──
-
-            Dit tel wat AL OOIT gedra is, nie wat vandag gedra is nie. 'n
-            Strook wat "3 mense het vandag saamgebid" sê, laat die plek
-            eensamer lyk as stilte — en op 'n jong muur is dit presies wat 'n
-            dagtelling gaan sê. 'n Lopende totaal groei net, en dit is ewe
-            waar.
-
-            Onder die vloer wys dit glad nie. Ons wag liewer 'n week as om
-            met 'n klein getal te begin. */}
-        {tel && tel.saam + tel.woorde >= 12 && (
-          <div className="sorg-saamtel">
-            <p className="sorg-saamtel-kop">Ons dra dit saam</p>
-            <p className="sorg-saamtel-syfers">
-              <b>{tel.saam}</b> keer het iemand ’n storie hier saamgedra
-              {tel.woorde > 0 && <> · <b>{tel.woorde}</b> woorde van ondersteuning</>}
-            </p>
-          </div>
         )}
 
         {/* ── Die uitnodiging ──

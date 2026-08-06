@@ -68,7 +68,7 @@ function virDieSkerm(m, woorde) {
        storie te swaar is vir 'n vreemdeling se raad. */
     sensitief: m.sensitief === true,
     /* Die eerste twee woorde, en hoeveel daar in totaal is. */
-    woorde: myne.slice(0, 2).map(w => ({ id: w.id, teks: w.teks })),
+    woorde: myne.slice(0, 3).map(w => ({ id: w.id, teks: w.teks })),
     woordeTotaal: myne.length,
   }
 }
