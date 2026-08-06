@@ -19,7 +19,7 @@ import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
-import { krisisTreffers, kontakTreffers, plat, isKrisis } from './sorgKrisis.js'
+import { krisisTreffers, kontakTreffers, hulpversoekTreffers, plat, isKrisis } from './sorgKrisis.js'
 import { keurOnderwerp, ONDERWERPE, BREE_ONDERWERP, onderwerpBy } from './sorgOnderwerpe.js'
 import { versVir, SORG_VERSE } from './sorgVerse.js'
 import { hoopVir, volgensBehoefte, weekVideo } from './sorgVideos.js'
@@ -143,6 +143,41 @@ afdeling('Kontakbesonderhede word gemerk')
   kyk('adres', kontakTreffers('ek bly by 12 Kerkstraat').includes('n adres'), kontakTreffers('ek bly by 12 Kerkstraat'))
   kyk('gewone teks word nie gemerk nie', kontakTreffers('ek is moeg en ek weet nie meer nie').length === 0)
   kyk('dit verander die teks nie', typeof kontakTreffers('0821234567') === 'object')
+}
+
+afdeling('Versoeke om geld of goed word gemerk')
+{
+  const tref = t => hulpversoekTreffers(t).length > 0
+  kyk('n bed', tref('Ek het n bed nodig vir my kind'))
+  kyk('kospakkie', tref('Kan julle my help met n kospakkie'))
+  kyk('huur', tref('Ek kan nie my huur betaal nie'))
+  kyk('geld leen', tref('Kan ek asseblief geld leen'))
+  kyk('skoolgeld', tref('Ek soek hulp met skoolgeld'))
+
+  /* Pastorale vrae mag NIE hier tref nie — anders merk dit alles. */
+  kyk('n huweliksvraag tref NIE', !tref('My man en ek praat nie meer nie'), hulpversoekTreffers('My man en ek praat nie meer nie'))
+  kyk('rou tref NIE', !tref('My ma is oorlede en ek kan nie ophou huil nie'))
+  kyk('angs tref NIE', !tref('Ek word wakker met angs elke oggend'))
+  kyk('vergifnis tref NIE', !tref('Ek kan nie my pa vergewe nie'))
+  kyk('leeg tref NIE', !tref('') && !tref(null))
+
+  /* Dit KEER niks — dit gee net 'n lys terug. */
+  kyk('dit gee net n lys', Array.isArray(hulpversoekTreffers('n bed')))
+}
+
+afdeling('Die muur is ALTYD anoniem')
+{
+  /* Kommentaar tel nie — daar verduidelik ons juis hoekom die keuse weg is. */
+  const sonder = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+  const vorm = sonder(fs.readFileSync(path.join(wortel, 'src', 'components', 'SorgVorm.jsx'), 'utf8'))
+  const stuur = fs.readFileSync(path.join(wortel, 'api', 'sorg-stuur.mjs'), 'utf8')
+  const keur = fs.readFileSync(path.join(wortel, 'api', 'sorg-keur.mjs'), 'utf8')
+
+  kyk('geen naamkeuse op die vorm', !/Gebruik my voornaam|sv-keuse|sv-naam/.test(vorm),
+      vorm.match(/.{0,40}(voornaam|sv-keuse).{0,40}/))
+  kyk('die vorm stuur altyd anoniem', /anoniem: true/.test(vorm))
+  kyk('die bediener stoor geen naam', /const naam = ''/.test(stuur))
+  kyk('die muur kry geen naam', /naam: '',/.test(keur))
 }
 
 afdeling('Die onderwerpe')

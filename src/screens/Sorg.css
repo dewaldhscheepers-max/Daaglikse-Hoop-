@@ -114,6 +114,20 @@
 }
 .sorg-vertel:active { background: #4C4076; }
 
+/* Wat hierdie plek NIE is nie. Klein, maar duidelik — en met 'n lyn bo, want
+   dit is 'n ander soort sin as die res. */
+.sorg-uitnodig-grens {
+  margin: 4px 0 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(107, 92, 158, 0.13);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.sorg-uitnodig-teks + .sorg-uitnodig-teks { margin-top: -6px; }
+
 .sorg-uitnodig-fyn {
   margin: 9px 0 0;
   font-family: var(--font-body);

@@ -170,15 +170,40 @@ export default function Sorg() {
           <h2 className="sorg-uitnodig-titel">Waarmee kan ek jou help?</h2>
 
           <p className="sorg-uitnodig-teks">
-            Vertel my wat swaar is, vra jou vraag of deel jou storie. Jou
-            boodskap verskyn ná goedkeuring openbaar op die Pastorale
-            Sorg-muur. Ek antwoord met 'n stemboodskap waar ek kan.
+            Vertel my wat in jou lewe gebeur. Hier kan jy anoniem jou hart
+            uitpraat, jou storie deel en vra vir pastorale raad oor jou
+            huwelik, verhoudings, grense, vergifnis, angs, geloof of 'n
+            moeilike besluit.
+          </p>
+
+          <p className="sorg-uitnodig-teks">
+            Jou boodskap word ná goedkeuring anoniem op die openbare Pastorale
+            Sorg-muur geplaas, sodat ander wat deur dieselfde dinge gaan ook
+            daaruit kan leer. Ek deel pastorale begeleiding en praktiese
+            Bybelse wysheid, en antwoord van die boodskappe met 'n
+            stemboodskap.
+          </p>
+
+          <p className="sorg-uitnodig-teks">
+            Een keer per week deel ek ook 'n video waarin ek die belangrikste
+            vrae, stories en onderwerpe van die week saamvat.
+          </p>
+
+          {/* ── Wat hierdie plek NIE is nie ──
+
+              Mense het begin vra vir beddens en vir geld. Dit is nie wat
+              hierdie afdeling is nie, en dit is nie onvriendelik om dit te
+              sê nie — dis onvriendelik om iemand te laat skryf en wag vir
+              hulp wat nooit gaan kom nie. */}
+          <p className="sorg-uitnodig-grens">
+            Hierdie afdeling is vir pastorale begeleiding — nie vir geldelike
+            of materiële hulpversoeke nie.
           </p>
 
           <button className="sorg-vertel" onClick={() => setVormOop(true)}>
             Vertel my wat swaar is
           </button>
-          <p className="sorg-uitnodig-fyn">Jy kan anoniem bly.</p>
+          <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
 
         {/* ── Vandag se woord ── */}

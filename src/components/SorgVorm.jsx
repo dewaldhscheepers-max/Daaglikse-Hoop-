@@ -8,7 +8,7 @@
 
    Nou is dit EEN bladsy en ongeveer dertig sekondes:
 
-     tik → (onderwerp, as jy wil) → anoniem of voornaam → een blokkie → stuur
+     tik → (onderwerp, as jy wil) → een blokkie → stuur
 
    Wat opsetlik WEG is, en hoekom:
 
@@ -19,6 +19,10 @@
      Die bediener hou hom steeds — dit is hoe 'n plasing aan 'n toestel
      gekoppel bly — maar die mens sien hom nooit.
    · Twee van die drie toestemmings. Een blokkie sê alles wat gesê moet word.
+   · Die keuse tussen anoniem en 'n voornaam. Die kaart op die Sorg-blad sê
+     twee keer dat dit anoniem is; 'n vorm wat dan tog 'n naam vra, maak van
+     daardie belofte 'n leuen. Dit is nou altyd anoniem, van die skerm af tot
+     in die databasis.
 
    En die belangrikste verandering is nie 'n verwydering nie: dit staan nou
    BO die tekskassie dat die boodskap OPENBAAR gaan wees. Niemand mag later
@@ -41,8 +45,6 @@ const MAKS_LENGTE = 2000
 export default function SorgVorm({ oop, onSluit, videoData }) {
   const [teks, setTeks] = useState('')
   const [onderwerp, setOnderwerp] = useState('')
-  const [anoniem, setAnoniem] = useState(true)
-  const [naam, setNaam] = useState('')
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)
   const [besig, setBesig] = useState(false)
@@ -56,8 +58,6 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     if (!oop) return
     setTeks('')
     setOnderwerp('')
-    setAnoniem(true)
-    setNaam('')
     setToestem(false)
     setHulpOop(false)
     setBesig(false)
@@ -79,8 +79,11 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     const d = await stuurBoodskap({
       teks,
       onderwerp: onderwerp || 'ander',
-      naam: anoniem ? '' : naam,
-      anoniem,
+      /* ALTYD anoniem. Die kaart se dit twee keer, en 'n vorm wat dan
+         "Gebruik my voornaam" aanbied, maak van daardie belofte 'n leuen.
+         Die bediener stoor in elk geval geen naam meer nie. */
+      naam: '',
+      anoniem: true,
       toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
     })
     setBesig(false)
@@ -144,14 +147,17 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 Bo die kassie, nie onder nie, en nie in fyn druk nie. */}
             <div className="sv-openbaar">
               <p>
-                Jou boodskap sal, nadat dit nagegaan is, <b>openbaar op die
-                Pastorale Sorg-muur</b> verskyn, waar ander mense dit kan lees
-                en saam met jou kan bid.
+                Jou boodskap sal, nadat dit nagegaan is, <b>anoniem en openbaar
+                op die Pastorale Sorg-muur</b> verskyn, sodat ander wat deur
+                dieselfde dinge gaan ook daaruit kan leer.
               </p>
               <p>
-                Dit is nie 'n private boodskap net aan Dewald nie. Moenie name,
-                kontakbesonderhede of inligting deel wat iemand kan
-                identifiseer nie.
+                Jou naam wys nooit. Moenie name, kontakbesonderhede of
+                inligting deel wat iemand kan identifiseer nie.
+              </p>
+              <p>
+                Hierdie afdeling is vir pastorale begeleiding — nie vir
+                geldelike of materiële hulpversoeke nie.
               </p>
             </div>
 
@@ -183,31 +189,6 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 </button>
               ))}
             </div>
-
-            <label className="sv-etiket">Hoe moet jou naam wys?</label>
-            <div className="sv-naam-keuse">
-              <button
-                className={`sv-keuse${anoniem ? ' gekies' : ''}`}
-                onClick={() => setAnoniem(true)}
-              >
-                Anoniem
-              </button>
-              <button
-                className={`sv-keuse${!anoniem ? ' gekies' : ''}`}
-                onClick={() => setAnoniem(false)}
-              >
-                Gebruik my voornaam
-              </button>
-            </div>
-            {!anoniem && (
-              <input
-                className="sv-naam"
-                value={naam}
-                maxLength={24}
-                placeholder="Jou voornaam"
-                onChange={e => setNaam(e.target.value)}
-              />
-            )}
 
             {/* ── Een blokkie ── */}
             <label className="sv-blok-merk">

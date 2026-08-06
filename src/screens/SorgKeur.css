@@ -87,6 +87,16 @@
   font-weight: 700;
 }
 
+.sk-hulpversoek {
+  margin-bottom: 7px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #E4EAF5;
+  color: #3A5580;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .sk-voorskou {
   margin: 0;
   font-size: 14.5px;

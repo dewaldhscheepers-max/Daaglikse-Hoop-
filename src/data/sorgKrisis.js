@@ -83,3 +83,31 @@ export function kontakTreffers(teks) {
   if (/\b\d+\s+[A-Za-z]+(straat|laan|weg|rylaan|street|road|avenue)\b/i.test(t)) uit.push('n adres')
   return uit
 }
+
+/* ── Versoeke om geld of goed ──
+
+   Pastorale Sorg is vir raad en wysheid — huwelik, grense, vergifnis, angs,
+   geloof, 'n moeilike besluit. Mense het begin vra vir beddens, kos en geld.
+
+   Dit is nie hul skuld nie: 'n muur wat "vertel my wat swaar is" se, klink
+   soos 'n plek waar 'n mens om hulp vra. Die kaart en die vorm se dit nou
+   reguit. Hierdie merker is die res van die antwoord: Dewald sien dadelik
+   watter boodskappe daaroor gaan, sodat hy hulle nie een vir een hoef te
+   sorteer nie.
+
+   Dit KEER niks. Iemand wat vra vir 'n bed het steeds 'n mens nodig, en die
+   antwoord is dalk juis 'n pastorale een. Dit is 'n merkie, nie 'n hek. */
+export const HULPVERSOEK_WOORDE = [
+  'n bed', 'beddens', 'matras', 'meubels', 'klere vir', 'kos pakkie',
+  'kospakkie', 'voedselpakkie', 'kruideniers',
+  'geld leen', 'leen my', 'leen asseblief', 'help my met geld',
+  'kan u help met geld', 'kan jy help met geld', 'donasie', 'skenking',
+  'huur betaal', 'my huur', 'skool geld', 'skoolgeld', 'begrafnis koste',
+  'begrafniskoste', 'werk soek', 'soek werk', 'n werk kry',
+]
+
+export function hulpversoekTreffers(teks) {
+  const p = plat(teks)
+  if (!p) return []
+  return HULPVERSOEK_WOORDE.filter(w => p.includes(plat(w)))
+}

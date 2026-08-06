@@ -148,7 +148,7 @@ export default async function handler(req, res) {
       const doc = {
         bronId: bron.id,
         teks,
-        naam: lyf.anoniem === false ? skoonNaam(lyf.naam || bron.naam) : '',
+        naam: '',                 // die muur is anoniem, altyd
         onderwerp: keurOnderwerp(lyf.onderwerp || bron.onderwerp),
         datum: new Date().toISOString().slice(0, 10),
         geskep: new Date(),

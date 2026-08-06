@@ -192,6 +192,11 @@ export default function SorgKeur({ geheim }) {
           {(b.kontakWaarskuwing || []).length > 0 && (
             <div className="sk-kontak">Bevat {(b.kontakWaarskuwing || []).join(' en ')}</div>
           )}
+          {/* Vra om geld of goed. Dit keer niks — Dewald besluit. Dit spaar
+              hom net die sorteer. */}
+          {(b.hulpversoek || []).length > 0 && (
+            <div className="sk-hulpversoek">Vra om hulp met geld of goed</div>
+          )}
 
           {oop === b.id ? (
             <>

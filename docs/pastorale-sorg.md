@@ -57,6 +57,30 @@ reg. Nou is dit ongeveer dertig sekondes.
 | Die vers en die gebed op die bevestigingsblad | Iemand wat pas sy hart neergesit het, wil nie 'n bladsy lees nie. Die video was die deel wat werk. |
 | Die selfdiens-uitvee | Mense gee toestemming dat dit openbaar gaan. Hulle kan nie plaas en dan weer uitvee nie. |
 
+### Waarvoor hierdie plek IS, en waarvoor nie
+
+Mense het begin vra vir beddens, kos en geld. Dit is nie hul skuld nie: 'n
+muur wat "vertel my wat swaar is" sê, klink soos 'n plek waar 'n mens om hulp
+vra. Die kaart en die vorm sê dit nou albei reguit:
+
+> Hierdie afdeling is vir pastorale begeleiding — nie vir geldelike of
+> materiële hulpversoeke nie.
+
+Die res van die antwoord is 'n **merker in die keurpaneel**
+(`hulpversoekTreffers`). Dit KEER niks — iemand wat vra vir 'n bed het steeds
+'n mens nodig, en die antwoord is dalk juis 'n pastorale een. Dit spaar
+Dewald net die sorteer.
+
+### ALTYD anoniem
+
+Daar was 'n keuse tussen anoniem en 'n voornaam. Die kaart sê twee keer dat
+dit anoniem is, en 'n stelsel wat dan tog 'n naam stoor, breek daardie
+belofte — ook al druk net een mens die ander knoppie.
+
+Dit is nou anoniem van die skerm af tot in die databasis: geen keuse op die
+vorm, geen naam wat gestoor word, geen naam op die muur. Daar is toetse wat
+al drie vashou.
+
 ### Dit moet OPENBAAR wees, en dit moet BO staan
 
 Direk bo die tekskassie, nie in fyn druk onder nie:

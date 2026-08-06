@@ -20,7 +20,7 @@
 import crypto from 'node:crypto'
 import { leesDok, skryfDok } from './_sorgFirestore.mjs'
 import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
-import { krisisTreffers, kontakTreffers } from '../src/data/sorgKrisis.js'
+import { krisisTreffers, kontakTreffers, hulpversoekTreffers } from '../src/data/sorgKrisis.js'
 
 const INKOMEND = 'sorg_inkomend'
 const CONFIG   = 'sorg_config'
@@ -168,7 +168,17 @@ export default async function handler(req, res) {
   }
 
   const onderwerp = keurOnderwerp(lyf.onderwerp)
-  const naam = lyf.anoniem === false ? skoonNaam(lyf.naam) : ''
+
+  /* ALTYD anoniem.
+
+     Daar was 'n keuse tussen anoniem en 'n voornaam. Die kaart op die
+     Sorg-blad se nou twee keer dat dit anoniem is, en 'n stelsel wat dan
+     tog 'n naam stoor, breek daardie belofte — ook al het net EEN mens die
+     ander knoppie gedruk.
+
+     `skoonNaam` bly bestaan omdat die keurpaneel dit gebruik. Hier word dit
+     nie meer geroep nie. */
+  const naam = ''
   const toestel = hasToestel(lyf.toestel)
   const dag = vandagSAST()
 
@@ -176,6 +186,9 @@ export default async function handler(req, res) {
      JavaScript verander; hierdie kant nie. */
   const krisis = krisisTreffers(teks)
   const kontak = kontakTreffers(teks)
+  /* Vra hy om geld of goed? Dit keer niks — dit wys net vir Dewald waaroor
+     die boodskap gaan sodat hy nie hoef te sorteer nie. */
+  const hulpversoek = hulpversoekTreffers(teks)
 
   try {
     const { plafon, oop } = await haalInstellings()
@@ -214,14 +227,15 @@ export default async function handler(req, res) {
     await skryfDok(INKOMEND, id, {
       teks,                       // die rou teks — geen kliënt lees ooit hierdie versameling
       onderwerp,
-      naam,                       // leeg beteken anoniem
-      anoniem: !naam,
+      naam,                       // altyd leeg — sien hierbo
+      anoniem: true,
       toestel,
       dag,
       kode,
       status: krisis.length ? 'gevaar' : 'nuut',
       krisisWoorde: krisis.slice(0, 10),
       kontakWaarskuwing: kontak,
+      hulpversoek: hulpversoek.slice(0, 6),
       toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
       /* Waar en wanneer die toestemming gegee is. POPIA vra dat 'n mens kan
          wys dat daar toestemming was, nie net dat dit gevra is nie. */
