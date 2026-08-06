@@ -74,6 +74,39 @@ export const ANONIEME_WOORDE = [
   'Mag daar lig wees vir jou vandag.',
 ]
 
+/* ── Wat onder 'n VIDEO staan ──
+
+   Die woorde hierbo is vir die MUUR geskryf. Daar het iemand pas sy hart
+   uitgestort, en "Daar word vir jou gebid, jy is gesien" is presies reg.
+
+   Onder 'n video is dieselfde sin verkeerd. Niemand het iets gedeel nie —
+   dit is 'n video wat Dewald gemaak het. 'n Opmerking wat se "jy is nie
+   alleen nie" praat met 'n mens wat nie daar is nie, en dan lees die hele
+   ding vals.
+
+   Kyk 'n mens na wat mense WERKLIK onder sy Shorts skryf, is dit kort en
+   dit is meestal emoji. Dus is dit hier ook so.
+
+   Daaglikse Hoop se eie naam staan nie hier nie: dit is sy eie video, en 'n
+   kanaal wat sy eie video prys, lyk soos 'n kanaal wat niemand anders het
+   nie. */
+export const VIDEO_WOORDE = [
+  '\u{1F64F}\u{1F3FB}',
+  '\u{1F525}\u{1F64F}\u{1F3FB}',
+  '\u{1F64C}\u{1F3FB}\u{1F64F}\u{1F3FB}',
+  '\u2764\uFE0F\u{1F64F}\u{1F3FB}',
+  '\u{1F64F}\u{1F3FB}\u{1F64F}\u{1F3FB}\u{1F64F}\u{1F3FB}',
+  '\u{1F525}\u{1F525}\u{1F64F}\u{1F3FB}',
+  'Amen \u{1F64F}\u{1F3FB}',
+  'Dankie \u{1F64F}\u{1F3FB}',
+  '\u{1F64F}\u{1F3FB}\u2764\uFE0F',
+  '\u{1F525}\u{1F64C}\u{1F3FB}',
+  'Amen \u{1F525}\u{1F64F}\u{1F3FB}',
+  '\u{1F64F}\u{1F3FB}\u{1F525}',
+  '\u{1F64C}\u{1F3FB}\u{1F525}\u{1F64F}\u{1F3FB}',
+  'Dankie Pastoor \u{1F64F}\u{1F3FB}',
+]
+
 /* 'n Klein, stabiele has. Geen Math.random en geen Date.now nie — die
    bediener en die skerm moet by dieselfde antwoord uitkom. */
 export function saad(teks) {
@@ -98,23 +131,46 @@ export function saaiReaksies(muurId) {
   return uit
 }
 
-/* ── Drie opmerkings: een van Daaglikse Hoop, twee anoniem ──
-
-   Die volgorde is met opset: die bediening s'n eerste. Wie die blad oopmaak,
-   sien eerste die een wat 'n naam dra. */
-export function saaiWoorde(muurId) {
-  const h = saad('w:' + muurId)
-  const hoop = HOOP_WOORDE[h % HOOP_WOORDE.length]
-
-  /* Twee VERSKILLENDE anonieme sinne. 'n Tweede sprong wat nie 'n deler van
-     die lengte is nie, sodat hulle nooit op dieselfde een land nie. */
-  const n = ANONIEME_WOORDE.length
-  const a = h % n
+/* Twee VERSKILLENDE trekke uit dieselfde lys. Die tweede sprong is nooit
+   nul en nooit 'n veelvoud van die lengte nie, sodat hulle nie op dieselfde
+   een kan land nie. */
+function tweeUit(lys, muurId) {
+  const n = lys.length
+  const a = saad('w:' + muurId) % n
   const b = (a + 1 + (saad('b:' + muurId) % (n - 1))) % n
+  return [lys[a], lys[b]]
+}
+
+/* ── Wat onder 'n plasing of 'n video staan ──
+
+   Op die MUUR: een van Daaglikse Hoop, dan twee anoniem. Die volgorde is met
+   opset — wie die blad oopmaak, sien eerste die een wat 'n naam dra.
+
+   Onder 'n VIDEO: drie kort emoji-opmerkings en geen naam nie. Daar is
+   niemand om te troos; dit is Dewald se eie video. Sien `VIDEO_WOORDE`. */
+export function saaiWoorde(muurId, soort = 'muur') {
+  if (soort === 'video') {
+    const [a, b] = tweeUit(VIDEO_WOORDE, muurId)
+    const c = VIDEO_WOORDE[(saad('c:' + muurId) + 1) % VIDEO_WOORDE.length]
+    /* Die derde mag met een van die eerste twee bots — dan word dit die
+       volgende een in die lys. Twee dieselfde emoji onder mekaar lyk soos 'n
+       fout, ook al gebeur dit in die egte lewe heeltyd. */
+    const derde = (c === a || c === b)
+      ? VIDEO_WOORDE.find(w => w !== a && w !== b)
+      : c
+    return [
+      { bron: 'saai', naam: '', teks: a },
+      { bron: 'saai', naam: '', teks: b },
+      { bron: 'saai', naam: '', teks: derde },
+    ]
+  }
+
+  const hoop = HOOP_WOORDE[saad('w:' + muurId) % HOOP_WOORDE.length]
+  const [a, b] = tweeUit(ANONIEME_WOORDE, muurId)
 
   return [
     { bron: 'hoop', naam: DAAGLIKSE_HOOP, teks: hoop },
-    { bron: 'saai', naam: '', teks: ANONIEME_WOORDE[a] },
-    { bron: 'saai', naam: '', teks: ANONIEME_WOORDE[b] },
+    { bron: 'saai', naam: '', teks: a },
+    { bron: 'saai', naam: '', teks: b },
   ]
 }

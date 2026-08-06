@@ -4,7 +4,7 @@
    Die volgorde op hierdie blad is 'n besluit, nie 'n toeval nie:
 
      Hulp nou             — altyd bo, altyd bereikbaar
-     Die week se video    — een ding, die held
+     Vandag se video      — een ding, die held
      Waarmee kan ek jou help?
      Vandag se woord
      Die Muur · Die Video's
@@ -316,13 +316,13 @@ export default function Sorg() {
               video={held}
               groot
               etiket="Vandag se video"
-              etiketFyn="Oor die onderwerpe waaroor mense hierdie week gevra het."
+              etiketFyn="Oor die onderwerpe waaroor mense hier vra."
             />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
         ) : (
           /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
-             wat 'n weeklikse video belowe en niks daarvan wys nie, belowe
+             wat 'n daaglikse video belowe en niks daarvan wys nie, belowe
              niks. */
           <div className="sorg-week-leeg">
             <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
@@ -368,8 +368,8 @@ export default function Sorg() {
           </p>
 
           <p className="sorg-uitnodig-teks">
-            Een keer per week deel ek ook 'n video waarin ek die belangrikste
-            vrae, stories en onderwerpe van die week saamvat.
+            Elke dag deel ek ook 'n kort video oor die belangrikste vrae,
+            stories en onderwerpe wat hier gedeel word.
           </p>
 
           {/* Dit moet gesê word sodra vreemdelinge onder 'n storie kan skryf.
@@ -449,8 +449,8 @@ export default function Sorg() {
             <p className="sorg-leeg">Besig om te laai…</p>
           ) : !videos.length ? (
             <p className="sorg-leeg">
-              Die eerste weeklikse video kom binnekort. Dit sal saamgestel
-              word uit die vrae en onderwerpe wat mense hier op die Pastorale
+              Die eerste video kom binnekort. Dit sal saamgestel word uit
+              die vrae en onderwerpe wat mense hier op die Pastorale
               Sorg-muur deel.
             </p>
           ) : (
@@ -461,9 +461,9 @@ export default function Sorg() {
                  mense deel  →  hy luister  →  een video  →  baie word gehelp */
             <>
               <div className="sorg-kring">
-                <p className="sorg-kring-kop">Een video. Elke week.</p>
+                <p className="sorg-kring-kop">Elke dag 'n nuwe video.</p>
                 <p className="sorg-kring-teks">
-                  Elke week maak Dewald 'n pastorale video oor die onderwerpe
+                  Dewald maak elke dag 'n pastorale video oor die onderwerpe
                   en vrae wat die meeste op die muur gedeel word. So kan een
                   persoon se storie uiteindelik baie ander mense help.
                 </p>

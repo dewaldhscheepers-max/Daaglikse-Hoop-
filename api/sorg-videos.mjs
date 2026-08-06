@@ -126,15 +126,32 @@ function saamTel(a, b) {
    opmerkings kry vaste id's. Loop dit twee keer, is die antwoord dieselfde. */
 const MAKS_SAAI = 8
 
+/* ── Waarom hier 'n weergawe is ──
+
+   Die saai loop EEN keer per video en slaan daarna oor. Dit is reg — anders
+   sou elke oproep weer skryf.
+
+   Maar toe die woorde verander (die muur se sinne het onder 'n video vals
+   gelees), was die veertien video's reeds gesaai. Hulle sou vir altyd die ou
+   sinne gedra het, en die enigste manier om dit reg te kry, sou wees om met
+   die hand in Firestore te gaan krap.
+
+   'n Weergawe-nommer los dit: hoog dit op, en elke video saai weer met die
+   nuwe woorde. Die opmerkings behou dieselfde dokument-name (`saai_<id>_<i>`),
+   dus word hulle OORGESKRYF en nie bygevoeg nie. Loop dit tien keer, is die
+   antwoord dieselfde. */
+const SAAI_WEERGAWE = 2
+
 async function saaiVideos(lys) {
-  const oor = lys.filter(v => v.gesaai !== true).slice(0, MAKS_SAAI)
+  const oor = lys.filter(v => Number(v.saaiWeergawe || 0) < SAAI_WEERGAWE).slice(0, MAKS_SAAI)
   for (const v of oor) {
-    await skryfDok(VERSAMELING, v.id, { saai: saaiReaksies(v.id), gesaai: true },
-      { velde: ['saai', 'gesaai'] })
+    await skryfDok(VERSAMELING, v.id, { saai: saaiReaksies(v.id), gesaai: true, saaiWeergawe: SAAI_WEERGAWE },
+      { velde: ['saai', 'gesaai', 'saaiWeergawe'] })
     v.saai = saaiReaksies(v.id)
     v.gesaai = true
+    v.saaiWeergawe = SAAI_WEERGAWE
 
-    const woorde = saaiWoorde(v.id)
+    const woorde = saaiWoorde(v.id, 'video')
     for (let i = 0; i < woorde.length; i++) {
       const w = woorde[i]
       await skryfDok(WOORDE, `saai_${v.id}_${i}`, {

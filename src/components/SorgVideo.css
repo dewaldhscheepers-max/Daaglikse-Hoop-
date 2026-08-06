@@ -42,14 +42,28 @@
 
    Die raam draai dus saam met die video. Hy kry ook 'n hoogte-perk — 'n
    volle 9:16 op 'n foon is hoer as die skerm, en dan sien 'n mens die titel
-   nooit sonder om te rol nie. */
+   nooit sonder om te rol nie.
+
+   ── Die perk was te hoog ──
+
+   62svh en 46svh was steeds te veel. Op 'n gewone foon het EEN video die
+   hele skerm gevul: 'n mens kon nie die titel, die reaksies en die volgende
+   video saam sien nie, en dan lyk die blad soos een video eerder as 'n
+   biblioteek. Die punt van hierdie bladsy is dat daar BAIE is.
+
+   44 en 32 laat die titel en die hou-van-balk saam in beeld val, en 'n mens
+   sien dat daar nog iets onder is. Die video is steeds groot genoeg om na te
+   kyk sonder om te zoem.
+
+   svh en nie dvh nie — sien CLAUDE.md. dvh verander saam met Chrome se
+   adresbalk en dan hervorm die raam by elke raam van daardie animasie. */
 .sv-raam.regop {
   aspect-ratio: 9 / 16;
-  max-height: 62svh;
+  max-height: 44svh;
   margin-left: auto;
   margin-right: auto;
 }
-.sv-kaart:not(.sv-groot) .sv-raam.regop { max-height: 46svh; }
+.sv-kaart:not(.sv-groot) .sv-raam.regop { max-height: 32svh; }
 
 /* YouTube se duimnael is ALTYD 480x360, ook vir 'n regop video — die regop
    raampie staan in die middel met swart weerskante, sowat 202px breed.
