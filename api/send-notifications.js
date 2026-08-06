@@ -3,11 +3,37 @@ const webpush = require('web-push')
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 
-webpush.setVapidDetails(
-  'mailto:dewald.h.scheepers@gmail.com',
-  process.env.VAPID_PUBLIC_KEY  || 'BAnuOtTx2mu8dUar_e7CO-6a4edbIue7Qi2SMCav-ilvxJeh-W2uH4p93LCHNt4P_9A2uj3HyUoOfjulI2OmN5o',
-  process.env.VAPID_PRIVATE_KEY || ''
-)
+// ── VAPID mag NIE die hele funksie doodmaak nie ────────────────────────────
+//
+// Dit was 'n kaal `webpush.setVapidDetails(...)` op module-vlak met
+// `process.env.VAPID_PRIVATE_KEY || ''` daarin. `web-push` GOOI as die
+// sleutel leeg is — en dit gebeur by INVOER, voordat enige versoek eens by
+// die handler kom.
+//
+// Die gevolg: as VAPID_PRIVATE_KEY nie op Vercel opgestel is nie, val die
+// hele eindpunt om met 'n 500 en NIEMAND kry 'n kennisgewing nie. Nie een.
+// Die admin wys 'n netwerkfout sonder om te sê hoekom.
+//
+// En dit is 'n onnodige koppeling: FCM — waarmee Android en Chrome se
+// kennisgewings gaan — het glad nie VAPID nodig nie. Net egte nie-Google
+// eindpunte (Firefox) het dit nodig. 'n Ontbrekende sleutel behoort dus te
+// beteken "Firefox kry niks", nie "niemand kry iets nie".
+let vapidGereed = false
+try {
+  const geheim = process.env.VAPID_PRIVATE_KEY || ''
+  if (geheim) {
+    webpush.setVapidDetails(
+      'mailto:dewald.h.scheepers@gmail.com',
+      process.env.VAPID_PUBLIC_KEY  || 'BAnuOtTx2mu8dUar_e7CO-6a4edbIue7Qi2SMCav-ilvxJeh-W2uH4p93LCHNt4P_9A2uj3HyUoOfjulI2OmN5o',
+      geheim
+    )
+    vapidGereed = true
+  } else {
+    console.warn('[kennisgewings] VAPID_PRIVATE_KEY ontbreek — FCM werk, egte web-push nie')
+  }
+} catch (e) {
+  console.warn('[kennisgewings] VAPID kon nie opgestel word nie:', e.message)
+}
 
 // ── OAuth2 access token ────────────────────────────────────────────────────
 async function getAccessToken() {
@@ -88,6 +114,32 @@ async function getWebPushSubscriptions(accessToken) {
   return subs
 }
 
+// ── Stuur baie, maar nie een vir een nie ───────────────────────────────────
+//
+// Dit was 'n `for`-lus met 'n `await` in: elke token wag vir die vorige een.
+// Een FCM-oproep is 'n reis na Google en terug, sowat 'n vyfde van 'n
+// sekonde. Met vyfhonderd tokens is dit sowat honderd sekondes — en die
+// funksie het NIE 'n maxDuration gehad nie, dus het Vercel hom na tien
+// sekondes doodgemaak. Die eerste handjievol mense het die kennisgewing
+// gekry en die res het niks gekry nie, en die admin het 'n netwerkfout
+// gewys sonder om te sê hoekom.
+//
+// Nou loop hulle vyf-en-twintig op 'n slag. Vyfhonderd tokens is twintig
+// rondtes, sowat vyf sekondes. Vyf-en-twintig is met opset nie honderd nie:
+// FCM knyp 'n kliënt wat te vinnig stoot, en dan begin regte foute inkom.
+const GELYK = 25
+
+async function inGroepe(items, doen) {
+  let geslaag = 0
+  let misluk = 0
+  for (let i = 0; i < items.length; i += GELYK) {
+    const groep = items.slice(i, i + GELYK)
+    const uitslae = await Promise.all(groep.map(x => doen(x).catch(() => false)))
+    for (const ok of uitslae) ok ? geslaag++ : misluk++
+  }
+  return { geslaag, misluk }
+}
+
 // ── Send one FCM message ───────────────────────────────────────────────────
 async function sendFcm(token, title, body, accessToken, includeImage = true) {
   const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
@@ -109,10 +161,19 @@ async function sendFcm(token, title, body, accessToken, includeImage = true) {
   })
   if (!r.ok) {
     const err = await r.json().catch(() => ({}))
+    /* UNREGISTERED en INVALID_ARGUMENT beteken die foon het die app
+       verwyder of die token is verval. Dit is nie 'n fout wat oorgaan nie —
+       daardie token gaan vir altyd misluk en elke stuur stadiger maak. Ons
+       tel hulle apart sodat Dewald weet hoeveel van sy lys dood is. */
+    const kode = err && err.error && err.error.status
+    if (kode === 'UNREGISTERED' || kode === 'NOT_FOUND' || kode === 'INVALID_ARGUMENT') dood++
     console.warn('FCM failed:', token.slice(0, 20), JSON.stringify(err))
   }
   return r.ok
 }
+
+/* Hoeveel tokens dood is. Dit word per oproep teruggestel. */
+let dood = 0
 
 // ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
 async function sendWebPush(subscription, title, body, accessToken, includeImage = true) {
@@ -123,6 +184,7 @@ async function sendWebPush(subscription, title, body, accessToken, includeImage 
     return sendFcm(token, title, body, accessToken, includeImage)
   }
   // Genuine non-Google web push endpoint (e.g. Mozilla)
+  if (!vapidGereed) return false
   try {
     await webpush.sendNotification(
       subscription,
@@ -165,17 +227,23 @@ module.exports = async function handler(req, res) {
     const notifBody    = customBody || 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.'
     const includeImage = !isCustom
 
-    let fcmSent = 0
-    for (const token of fcmTokens) {
-      if (await sendFcm(token, notifTitle, notifBody, accessToken, includeImage)) fcmSent++
-    }
+    dood = 0
 
-    let wpSent = 0
-    for (const sub of webPushSubs) {
-      if (await sendWebPush(sub, notifTitle, notifBody, accessToken, includeImage)) wpSent++
-    }
+    const f = await inGroepe(fcmTokens,
+      t => sendFcm(t, notifTitle, notifBody, accessToken, includeImage))
+    const w = await inGroepe(webPushSubs,
+      s => sendWebPush(s, notifTitle, notifBody, accessToken, includeImage))
 
-    const result = { fcm: { sent: fcmSent, total: fcmTokens.length }, webpush: { sent: wpSent, total: webPushSubs.length } }
+    const result = {
+      fcm:     { sent: f.geslaag, misluk: f.misluk, total: fcmTokens.length },
+      webpush: { sent: w.geslaag, misluk: w.misluk, total: webPushSubs.length },
+      /* Tokens van fone wat die app verwyder het. Hulle gaan nooit weer werk
+         nie; dit is nie 'n fout wat oorgaan nie. */
+      dood,
+      /* Sonder VAPID gaan egte web-push (Firefox) nie deur nie. FCM werk
+         steeds, en dit is die oorgrote meerderheid. */
+      vapid: vapidGereed,
+    }
     console.log('send-notifications:', JSON.stringify(result))
     return res.status(200).json(result)
   } catch (e) {

@@ -201,9 +201,23 @@ export default function Admin({ onClose }) {
         body: JSON.stringify({ title: customTitle.trim(), body: customBody.trim() })
       })
       const data = await r.json().catch(() => ({}))
-      setSendAllResult(r.ok
-        ? `✅ Gestuur aan ${(data.fcm?.sent ?? 0) + (data.webpush?.sent ?? 0)} mense`
-        : `❌ Misluk: ${JSON.stringify(data)}`)
+      if (!r.ok) {
+        setSendAllResult(`❌ Misluk (HTTP ${r.status}): ${JSON.stringify(data)}`)
+      } else {
+        /* Die HELE prentjie, nie net die goeie helfte nie.
+
+           Dit het net "Gestuur aan N mense" gewys. Was daar duisend tokens
+           en het driehonderd deurgekom, sou dit "Gestuur aan 300 mense" se
+           en niks daarvan verklap dat sewehonderd misluk het nie. */
+        const gestuur = (data.fcm?.sent ?? 0) + (data.webpush?.sent ?? 0)
+        const totaal  = (data.fcm?.total ?? 0) + (data.webpush?.total ?? 0)
+        const misluk  = (data.fcm?.misluk ?? 0) + (data.webpush?.misluk ?? 0)
+        const dele = [`✅ Gestuur aan ${gestuur} van ${totaal}`]
+        if (misluk) dele.push(`${misluk} misluk`)
+        if (data.dood) dele.push(`${data.dood} fone het die app verwyder`)
+        if (data.vapid === false) dele.push('VAPID ontbreek — Firefox kry niks')
+        setSendAllResult(dele.join(' · '))
+      }
     } catch (e) {
       setSendAllResult('❌ Netwerkfout: ' + e.message)
     }
