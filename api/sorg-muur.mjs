@@ -30,6 +30,7 @@ import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 
 const MUUR = 'sorg_muur'
 const SAAM = 'sorg_saam'
+const WOORDE = 'sorg_woorde'
 
 function hasToestel(t) {
   const s = String(t || '').trim()
@@ -46,7 +47,8 @@ function volgorde(a, b) {
 
 /* Wat na die kliënt gaan. Nooit die bronId nie — dit wys na die rou
    boodskap, en niemand buite die admin het daarmee te doen nie. */
-function virDieSkerm(m) {
+function virDieSkerm(m, woorde) {
+  const myne = (woorde || []).filter(w => w.muurId === m.id)
   return {
     id: m.id,
     titel: m.titel || '',
@@ -56,6 +58,17 @@ function virDieSkerm(m) {
     datum: m.datum || '',
     antwoord: m.antwoord || null,
     saam: Number(m.saam) || 0,
+    reaksies: m.reaksies || {},
+    /* Onder die vloer wys die skerm niks; ons stuur die rou getal en laat
+       `wysGelees` daar besluit, sodat die reel op EEN plek staan. */
+    gelees: Number(m.gelees) || 0,
+    /* Die skerm moet dit weet om die skryfblok weg te laat. Dit is 'n
+       vlaggie, nie inligting oor die mens nie — dit se net dat hierdie
+       storie te swaar is vir 'n vreemdeling se raad. */
+    sensitief: m.sensitief === true,
+    /* Die eerste twee woorde, en hoeveel daar in totaal is. */
+    woorde: myne.slice(0, 2).map(w => ({ id: w.id, teks: w.teks })),
+    woordeTotaal: myne.length,
   }
 }
 
@@ -68,6 +81,14 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const alles = await lysDokke(MUUR, { grootte: 300 })
+
+      /* Net wat WYS. Wat vir Dewald se oog wag, en wat hy weggesteek het,
+         kom nooit hier uit nie. Oudste eerste binne 'n plasing — 'n gesprek
+         lees van bo af, nie andersom nie. */
+      const woorde = (await lysDokke(WOORDE, { grootte: 300 }))
+        .filter(w => w.status === 'wys' && w.teks)
+        .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+
       const lys = alles
         .filter(m => m.gepubliseer !== false && m.teks)
         /* Nuutste eerste. GEEN rangskikking volgens die telling nie.
@@ -82,7 +103,7 @@ export default async function handler(req, res) {
            korrek as teks. Ontbreek dit op 'n ou plasing, val ons terug op die
            dag en dan op die id (wat ook met die tyd begin). */
         .sort(volgorde)
-        .map(virDieSkerm)
+        .map(m => virDieSkerm(m, woorde))
 
       /* GEEN kas nie.
 

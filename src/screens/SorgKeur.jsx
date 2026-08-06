@@ -43,6 +43,10 @@ const HOPIES = [
   { sleutel: 'gevaar', naam: 'Gevaar' },
   { sleutel: 'nuut',   naam: 'Nuut' },
   { sleutel: 'gekeur', naam: 'Op die muur' },
+  /* Net die GEVLAGDE woorde. Wat reeds wys en niemand gepla het nie, kom
+     nooit hier nie — dit is die hele punt van die ontwerp: Dewald lees nie
+     elke woord nie, net dié waaroor iets gese is. */
+  { sleutel: 'woorde', naam: 'Woorde' },
   { sleutel: 'weg',    naam: 'Gelees' },
 ]
 
@@ -168,7 +172,9 @@ export default function SorgKeur({ geheim }) {
              een plasing uitvee of afhaal. */
           const n = h.sleutel === 'gekeur'
             ? (data.muur || []).length
-            : inkomend.filter(b => (b.status || 'nuut') === h.sleutel).length
+            : h.sleutel === 'woorde'
+              ? (data.woorde || []).length
+              : inkomend.filter(b => (b.status || 'nuut') === h.sleutel).length
           return (
             <button
               key={h.sleutel}
@@ -200,6 +206,8 @@ export default function SorgKeur({ geheim }) {
           tweede lys onderaan elke hopie nie. */}
       {hopie === 'gekeur' ? (
         <Muur data={data} doen={doen} besig={besig} />
+      ) : hopie === 'woorde' ? (
+        <Woorde data={data} doen={doen} besig={besig} />
       ) : (
         <>
       {!lys.length && <p className="sk-leeg">Niks in hierdie hopie nie.</p>}
@@ -315,6 +323,80 @@ function Voorskou({ teks }) {
           {oop ? 'Wys minder' : 'Wys alles'}
         </button>
       )}
+    </>
+  )
+}
+
+/* ── Die gevlagde woorde ──
+
+   Hier kom net twee soorte: wat outomaties gewag het (die eerste keer van 'n
+   mens, of iets met 'n nommer of skakel in), en wat iemand GERAPPORTEER het.
+
+   'n Gerapporteerde woord is reeds van die muur af — dit gebeur op die druk,
+   nie hier nie. Dewald besluit net of dit terug moet. Dit is met opset
+   ongebalanseerd: 'n goeie woord wat 'n uur weg was, is 'n klein skade; 'n
+   slegte woord wat 'n uur onder iemand se storie staan, is nie. */
+function Woorde({ data, doen, besig }) {
+  const woorde = data.woorde || []
+  if (!woorde.length) {
+    return <p className="sk-leeg">Niks wag op jou nie. Woorde wat deurgaan, wys sommer.</p>
+  }
+
+  /* Waarheen wys hierdie woord? Sonder die storie daarby is 'n los sin
+     onmoontlik om te beoordeel — "gaan hospitaal toe" is goeie raad op een
+     plasing en gevaarlik op 'n ander. */
+  const opMuur = new Map((data.muur || []).map(m => [m.id, m]))
+
+  return (
+    <>
+      <p className="sk-wag">
+        Net die gevlagdes en die gerapporteerdes kom hier. Al die ander woorde
+        wys sommer.
+      </p>
+
+      {woorde.map(w => {
+        const plasing = opMuur.get(w.muurId)
+        return (
+          <div key={w.id} className={`sk-ry${w.gerapporteer ? ' gevaar' : ''}`}>
+            <div className="sk-ry-fyn">
+              {w.dag} · {w.bron === 'klaar' ? 'klaargemaakte woord' : 'eie woorde'}
+              {w.gerapporteer ? ` · ${w.gerapporteer}× gerapporteer` : ''}
+              {w.rede && !w.gerapporteer ? ` · ${w.rede}` : ''}
+            </div>
+
+            {plasing && plasing.titel && (
+              <p className="sk-ry-titel">Onder: {plasing.titel}</p>
+            )}
+            {plasing && plasing.sensitief && (
+              <div className="sk-krisis">Dit is 'n sensitiewe plasing</div>
+            )}
+
+            <p className="sk-voorskou">{w.teks}</p>
+
+            <div className="sk-knoppe">
+              <button
+                className="sk-knop sk-plaas"
+                disabled={besig}
+                onClick={() => doen({ aksie: 'woord', woordId: w.id, wys: true })}
+              >
+                Laat wys
+              </button>
+              <button
+                className="sk-knop"
+                disabled={besig}
+                onClick={() => doen({ aksie: 'woord', woordId: w.id, wys: false })}
+              >
+                Hou weg
+              </button>
+              <button className="sk-knop sk-vee" disabled={besig} onClick={() => {
+                if (window.confirm('Vee hierdie woord heeltemal uit?')) {
+                  doen({ aksie: 'woord', woordId: w.id, vee: true })
+                }
+              }}>Vee uit</button>
+            </div>
+          </div>
+        )
+      })}
     </>
   )
 }

@@ -59,8 +59,8 @@
 
 import { useState } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
-import { draSaam, draSaamReeds } from '../data/sorgMuur'
 import SorgDeelSteun from './SorgDeelSteun'
+import SorgSaamstaan from './SorgSaamstaan'
 import './SorgPlasing.css'
 
 const MAANDE = [
@@ -106,8 +106,6 @@ function egteAntwoord(a) {
 }
 
 export default function SorgPlasing({ plasing }) {
-  const [saam, setSaam] = useState(plasing.saam || 0)
-  const [gedra, setGedra] = useState(() => draSaamReeds(plasing.id))
   const [oop, setOop] = useState(false)
   const [antwOop, setAntwOop] = useState(false)
 
@@ -124,19 +122,6 @@ export default function SorgPlasing({ plasing }) {
      is — sowat 320 karakters. 'n Stemnota of video word nooit afgekap
      nie; net woorde. */
   const antwLank = String(antwoord?.teks || '').length > 320
-
-  async function dra() {
-    if (gedra) return
-    setGedra(true)
-    setSaam(n => n + 1)          // dadelik, ook op 'n stadige lyn
-    const n = await draSaam(plasing.id)
-    if (typeof n === 'number') setSaam(n)
-  }
-
-  /* Het HIERDIE foon dit al gedra, wys ons die telling ook al is dit een.
-     Andersins sien 'n mens wat pas gedruk het weer "Ek dra dit saam met jou"
-     en dink sy druk het niks gedoen nie. */
-  const wysTelling = saam > 0 || gedra
 
   return (
     <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
@@ -239,13 +224,10 @@ export default function SorgPlasing({ plasing }) {
         </div>
       )}
 
-      {/* ── Geselskap, nie 'n punt nie ── */}
-      <button className={`sp-saam${gedra ? ' gedra' : ''}`} onClick={dra} disabled={gedra}>
-        <span className="sp-saam-hart" aria-hidden="true">♡</span>
-        {wysTelling
-          ? `${Math.max(saam, gedra ? 1 : 0)} ${Math.max(saam, gedra ? 1 : 0) === 1 ? 'mens dra' : 'mense dra'} dit saam met jou`
-          : 'Ek dra dit saam met jou'}
-      </button>
+      {/* ── Die gemeenskap ──
+          Vier reaksies en woorde van ondersteuning, in plaas van die een
+          knoppie wat op 'n jong muur "1 mens dra dit saam met jou" gesê het. */}
+      <SorgSaamstaan plasing={plasing} />
     </article>
   )
 }

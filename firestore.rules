@@ -172,6 +172,15 @@ service cloud.firestore {
       allow read:  if false;
       allow write: if false;
     }
+    // Woorde van ondersteuning onder 'n storie. Party WAG vir Dewald se oog —
+    // dit is die hele punt van die veld `status`. Sou 'n klient hier kon
+    // lees, sou hy juis die woorde sien wat NOG NIE goedgekeur is nie, en
+    // sou hy kon skryf, sou hy sy eie woord op 'wys' kon sit en die
+    // hersiening heeltemal omseil. Alles loop deur die bediener.
+    match /sorg_woorde/{id} {
+      allow read:  if false;
+      allow write: if false;
+    }
     // Die perk op raaipogings by die admin se slot. Sou 'n klient hieraan kon
     // skryf, kon hy sy eie teller op nul sit en onbeperk raai.
     match /sorg_slot/{id} {

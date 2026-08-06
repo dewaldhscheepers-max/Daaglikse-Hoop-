@@ -32,10 +32,11 @@
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok, veeDok, magSkryf } from './_sorgFirestore.mjs'
 import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
-import { kontakTreffers } from '../src/data/sorgKrisis.js'
+import { kontakTreffers, krisisTreffers } from '../src/data/sorgKrisis.js'
 
 const INKOMEND = 'sorg_inkomend'
 const MUUR = 'sorg_muur'
+const WOORDE = 'sorg_woorde'
 
 const MAKS_MUUR_TEKS = 1200
 
@@ -99,6 +100,14 @@ export default async function handler(req, res) {
     try {
       const inkomend = await lysDokke(INKOMEND, { grootte: 300 })
       const muur = await lysDokke(MUUR, { grootte: 300 })
+      const woorde = await lysDokke(WOORDE, { grootte: 300 })
+
+      /* Wat op Dewald se oog wag: die gevlagdes, en wat iemand
+         gerapporteer het. Wat reeds wys en niemand gepla het nie, hoef hy
+         nooit te sien nie — dit is die hele punt van hierdie ontwerp. */
+      const wagWoorde = woorde
+        .filter(w => w.status === 'wag' || (Number(w.gerapporteer) || 0) > 0)
+        .sort(nuutsteEerste)
 
       /* Gevaar heel bo, dan die nuutstes. Iemand wat vanaand geskryf het dat
          hy nie meer wil lewe nie, mag nie onder 'n week se gewone boodskappe
@@ -115,10 +124,12 @@ export default async function handler(req, res) {
       return res.status(200).json({
         inkomend,
         muur: muur.sort(nuutsteEerste),
+        woorde: wagWoorde,
         tellings: {
           gevaar: inkomend.filter(x => x.status === 'gevaar').length,
           nuut: inkomend.filter(x => x.status === 'nuut').length,
           opMuur: muur.length,
+          woorde: wagWoorde.length,
         },
       })
     } catch (e) {
@@ -178,6 +189,27 @@ export default async function handler(req, res) {
            ingedra word nie. */
         antwoord: null,
         saam: 0,
+        reaksies: {},
+        gelees: 0,
+        /* ── Die vlag wat vrye teks toemaak ──
+
+           Op 'n storie oor selfmoordgedagtes, of oor iemand wat weier om
+           hospitaal toe te gaan, mag 'n vreemdeling nie skryf nie. Nie omdat
+           mense sleg is nie, maar omdat verkeerde raad in mooi Afrikaans kom
+           en geen filter dit vang. "Hospitale het my ma doodgemaak" is 'n
+           sin waarop iemand kan handel.
+
+           Op sulke plasings bly net Dewald se klaargemaakte woorde oor.
+
+           Dit word HIER besluit, uit die rou boodskap se krisiswoorde en uit
+           die geredigeerde teks, en dit word op die plasing gestoor. Die
+           kliënt sê nooit vir die bediener of iets sensitief is nie — dan
+           sou 'n aanvaller eenvoudig "nee" sê. Dewald kan dit met 'wysig'
+           verander as hy anders besluit. */
+        sensitief:
+          bron.status === 'gevaar' ||
+          (bron.krisisWoorde || []).length > 0 ||
+          krisisTreffers(teks).length > 0,
       }
       await skryfDok(MUUR, muurId, doc)
       await skryfDok(INKOMEND, bron.id, { status: 'gekeur', muurId }, { velde: ['status', 'muurId'] })
@@ -200,9 +232,25 @@ export default async function handler(req, res) {
       if (typeof lyf.teks === 'string') velde.teks = skoonTeks(lyf.teks, MAKS_MUUR_TEKS)
       if (typeof lyf.titel === 'string') velde.titel = skoonTeks(lyf.titel, MAKS_TITEL)
       if (typeof lyf.gepubliseer === 'boolean') velde.gepubliseer = lyf.gepubliseer
+      if (typeof lyf.sensitief === 'boolean') velde.sensitief = lyf.sensitief
       if (!Object.keys(velde).length) return res.status(400).json({ fout: 'niks om te verander nie' })
       await skryfDok(MUUR, String(lyf.muurId), velde, { velde: Object.keys(velde) })
       return res.status(200).json({ ok: true })
+    }
+
+    /* ── 'n Woord van ondersteuning: laat wys, of haal weg ──
+
+       Net die gevlagdes kom ooit hier. Wat reeds wys, wys. */
+    if (lyf.aksie === 'woord') {
+      if (!lyf.woordId) return res.status(400).json({ fout: 'geen woordId nie' })
+      const id = String(lyf.woordId)
+      if (lyf.vee) {
+        await veeDok(WOORDE, id)
+        return res.status(200).json({ ok: true, gevee: true })
+      }
+      const status = lyf.wys ? 'wys' : 'weg'
+      await skryfDok(WOORDE, id, { status, gerapporteer: 0 }, { velde: ['status', 'gerapporteer'] })
+      return res.status(200).json({ ok: true, status })
     }
 
     /* ── Verwyder ──
