@@ -16,9 +16,17 @@
    Luister. Op 'n foon is dit die vinnigste pad: hy lees die boodskap, druk
    Opneem, praat, en dis klaar.
 
-   Die klanklêers le onder `sorg-antwoorde/`. NIE onder `audio/` saam met die
-   Luister-notas nie — dit is 'n ander soort ding met 'n ander lewe, en 'n
-   mens moet hulle later apart kan hanteer.
+   Die klanklêers le onder `audio/`, saam met die Luister-notas, met 'n
+   `sorg-antwoord_`-voorvoegsel sodat 'n mens hulle uitken.
+
+   Hulle het eers onder `sorg-antwoorde/` gegaan, wat netjieser was — maar
+   Firebase Storage se reels laat net sekere paaie toe, en daardie reels
+   staan in die Firebase-konsole en NIE in hierdie kodebasis nie. Die eerste
+   oplaai het met 'storage/unauthorized' gedruip. `audio/` werk klaar, want
+   die stemnotas gaan al jare daarheen.
+
+   Wil 'n mens hulle later apart he, moet die reel eers in die konsole
+   bygesit word — daarna is dit een reel hier.
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useRef, useEffect } from 'react'
@@ -122,8 +130,8 @@ export default function SorgOpname({ bron, onBron }) {
     setVordering(0)
     try {
       const ext = (lêer.name.split('.').pop() || 'webm').toLowerCase()
-      const id = `antwoord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-      const sRef = ref(storage, `sorg-antwoorde/${id}.${ext}`)
+      const id = `sorg-antwoord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+      const sRef = ref(storage, `audio/${id}.${ext}`)
       const url = await new Promise((klaar, breek) => {
         const taak = uploadBytesResumable(sRef, lêer)
         taak.on('state_changed',
