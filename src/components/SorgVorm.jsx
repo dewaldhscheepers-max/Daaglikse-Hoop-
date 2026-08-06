@@ -72,6 +72,17 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   const langGenoeg = teks.trim().length >= MIN_LENGTE
   const magStuur = langGenoeg && toestem && !besig
 
+  /* Vat hom na Bid Saam toe, tot IN die kassie.
+
+     `bidsaam_fokus` is dieselfde vlag wat Bid Saam self al lees — hy rol na
+     die versoek-kaart en sit die wyser in die teksblok. Ons maak die vorm
+     toe voordat ons navigeer, anders bly hy oor die blad staan. */
+  function naBidSaam() {
+    try { sessionStorage.setItem('bidsaam_fokus', 'versoek') } catch { /* privaat modus */ }
+    onSluit()
+    window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
+  }
+
   async function stuur() {
     if (magStuur === false) return
     setBesig(true)
@@ -160,6 +171,25 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 geldelike of materiële hulpversoeke nie.
               </p>
             </div>
+
+            {/* ── Soek jy net gebed? ──
+
+                Van die eerste boodskappe was gebedsversoeke: "bid asb vir
+                ons", "ek vra gebed vir genesing". Dit is nie verkeerd nie —
+                dit is net op die verkeerde blad. Daar is niks om te ANTWOORD
+                nie, en die mens wag dan vir 'n antwoord wat nooit kom nie.
+
+                Bid Saam bestaan presies daarvoor, en dit is vinniger: sy
+                versoek is dadelik daar en ander bid dadelik saam. Hierdie
+                knoppie vat hom reguit tot in die kassie — nie net na die
+                blad toe nie. Iemand wat op 'n blad afgelaai word en self
+                moet soek, doen dit nie. */}
+            <button className="sv-gebed" onClick={naBidSaam}>
+              <span className="sv-gebed-hoof">Soek jy net gebed?</span>
+              <span className="sv-gebed-fyn">
+                Plaas dit op Bid Saam — dan bid ander dadelik saam met jou →
+              </span>
+            </button>
 
             <textarea
               id="sv-teks"

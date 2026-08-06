@@ -71,6 +71,27 @@ Die res van die antwoord is 'n **merker in die keurpaneel**
 'n mens nodig, en die antwoord is dalk juis 'n pastorale een. Dit spaar
 Dewald net die sorteer.
 
+### Gebedsversoeke hoort op Bid Saam
+
+Van die eerste boodskappe was gebedsversoeke: *"bid asb vir ons"*, *"ek vra
+gebed vir genesing"*. Dit is nie verkeerd nie — dit is net op die verkeerde
+blad. Daar is niks om te ANTWOORD nie, en die mens wag dan vir 'n antwoord
+wat nooit kom nie.
+
+Direk bo die tikblok staan daarom:
+
+> **Soek jy net gebed?**
+> Plaas dit op Bid Saam — dan bid ander dadelik saam met jou →
+
+Dit vat hom tot **in die kassie** op Bid Saam, nie net na die blad toe nie.
+Dit loop deur `sessionStorage.bidsaam_fokus = 'versoek'`, dieselfde vlag wat
+BidSaam self al lees — hy rol na die versoek-kaart en sit die wyser in die
+teksblok. Iemand wat op 'n blad afgelaai word en self moet soek, doen dit
+nie.
+
+Dit staan BO die kassie, want dis waar 'n mens besluit wat hy gaan skryf.
+Onderaan sou hy dit eers sien nadat hy klaar getik het.
+
 ### ALTYD anoniem
 
 Daar was 'n keuse tussen anoniem en 'n voornaam. Die kaart sê twee keer dat

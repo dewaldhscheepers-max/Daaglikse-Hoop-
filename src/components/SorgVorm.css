@@ -387,3 +387,40 @@
   color: var(--text-muted, #8A7E9A);
   text-align: center;
 }
+
+/* ── Soek jy net gebed? ──
+   Dit staan DIREK bo die tikblok, want dis waar 'n mens besluit wat hy gaan
+   skryf. Onderaan sou hy dit eers sien nadat hy klaar getik het.
+
+   Dit lyk soos 'n uitnodiging en nie soos 'n hek nie: niemand word
+   weggewys nie, hy word na 'n beter plek gewys. */
+.sv-gebed {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #D8D2E4;
+  border-radius: 13px;
+  background: #F6F3FB;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sv-gebed:active { background: #EDE7F8; border-color: #B9ACE0; }
+
+.sv-gebed-hoof {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.sv-gebed-fyn {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted, #8A7E9A);
+}
