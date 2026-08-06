@@ -175,27 +175,6 @@ export async function gabTeks(kode, nr) {
   return { content: dele.join('\n'), gab: true, weergawe: d.weergawe || null }
 }
 
-/* Een vers, as gewone teks.
-
-   Dit bestaan vir Pastorale Sorg. Wanneer iemand sy boodskap gestuur het,
-   kry hy dadelik 'n vers — en daardie vers mag nie in die kode geskryf staan
-   nie. Afrikaanse verse wat 'n mens uit die geheue tik, is verkeerd; hierdie
-   een kom uit die Bybel wat reeds in die app is.
-
-   Gee null terug as die GAB nie beskikbaar is nie. Die skerm moet dan
-   eenvoudig sonder die vers aangaan. */
-export async function gabVers(kode, hoofstuk, vers) {
-  try {
-    const d = await haalBoek(kode)
-    const h = d.hoofstukke[hoofstuk - 1]
-    if (!Array.isArray(h)) return null
-    const t = h[vers - 1]
-    return typeof t === 'string' && t.trim() ? t : null
-  } catch {
-    return null
-  }
-}
-
 /* Hoeveel hoofstukke het hierdie boek? Word gebruik om 'n verwysing te
    keur voordat ons daarheen spring. */
 export async function gabHoofstukAantal(kode) {

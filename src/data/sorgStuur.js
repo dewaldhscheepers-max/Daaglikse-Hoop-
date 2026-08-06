@@ -4,9 +4,12 @@
    Twee dinge leef hier, en albei is klein met opset:
 
    1. Die stuur self. Die skerm hoef nie te weet van HTTP nie.
-   2. Wat OP HIERDIE FOON onthou word. Nooit die teks nie — net die
-      bestuurskode, die onderwerp en die datum, sodat 'n mens sy eie plasing
-      later kan terugkry of laat verwyder.
+   2. Die toestel se nommer, en niks anders nie.
+
+      Hier is 'n rukkie ook 'n lys van "my eie plasings" gestoor. Niks het dit
+      ooit gelees nie — die private kode is van die skerm af weg — dus was dit
+      data wat op mense se fone le vir geen doel nie. Op 'n blad oor
+      privaatheid is dit die verkeerde soort oorblyfsel.
 
    Die teks word nooit plaaslik gestoor nie, ook nie as 'n konsep nie. As
    iemand anders die foon optel, moet daar niks van daardie boodskap oor wees
@@ -15,16 +18,15 @@
 
 const PAD = '/api/sorg-stuur'
 const TOESTEL_SLEUTEL = 'sorg_toestel'
-const MYNE_SLEUTEL = 'sorg_myne'
 
 /* ── Die toestel ──
 
    'n Ewekansige nommer wat op hierdie foon bly. Dit is nie 'n identiteit
-   nie: die bediener sien net 'n has daarvan, en ons gebruik dit vir twee
-   dinge — 'n perk per dag, en "my eie plasings".
+   nie: die bediener sien net 'n has daarvan, en dit doen EEN ding — die perk
+   van drie boodskappe per dag.
 
-   Wie dit uitvee, verloor sy plasings se koppeling. Dit is reg so; die
-   bestuurskode is die egte sleutel. */
+   Wie dit uitvee, kry weer drie. Dit is reg so: die perk bestaan om die dag
+   se ry leesbaar te hou, nie om iemand uit te sluit nie. */
 export function toestelId() {
   try {
     let id = localStorage.getItem(TOESTEL_SLEUTEL)
@@ -39,18 +41,6 @@ export function toestelId() {
        plafon staan nog. */
     return ''
   }
-}
-
-/* ── My eie plasings ── */
-export function myPlasings() {
-  try { return JSON.parse(localStorage.getItem(MYNE_SLEUTEL) || '[]') } catch { return [] }
-}
-
-function onthouPlasing(p) {
-  try {
-    const lys = [p, ...myPlasings().filter(x => x.kode !== p.kode)].slice(0, 30)
-    localStorage.setItem(MYNE_SLEUTEL, JSON.stringify(lys))
-  } catch { /* privaat modus — die kode wys op die skerm, hy kan dit neerskryf */ }
 }
 
 /* ── Stuur ──
@@ -78,10 +68,7 @@ export async function stuurBoodskap({ teks, onderwerp, naam, anoniem, toestemmin
     try { d = await r.json() } catch { d = null }
 
     if (!d) return { ok: false, fout: 'Ons kon nie deurkom nie. Probeer asseblief weer.' }
-    if (d.ok) {
-      onthouPlasing({ kode: d.kode, onderwerp: d.onderwerp, datum: new Date().toISOString().slice(0, 10) })
-      return d
-    }
+    if (d.ok) return d
     if (d.vol) return d
     return { ok: false, fout: d.fout || 'Ons kon dit nie stoor nie. Probeer asseblief weer.' }
   } catch {

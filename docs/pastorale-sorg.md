@@ -201,18 +201,28 @@ muur en dan word elke indiening stadiger namate meer mense skryf.
 
 ---
 
-## Die vers ná die indiening
+## Wat AL uitgehaal is (moenie dit terugsit sonder om te dink nie)
 
-`src/data/sorgVerse.js` hou net **verwysings**, nooit versteks nie. Die
-woorde kom uit die Getroue Afrikaanse Bybel wat reeds in die app is
-(`gabVers`). Twee redes, albei hard:
+| Wat | Hoekom dit weg is |
+|---|---|
+| Die private kode op die skerm | Niemand wil 'n kode verstaan, kopieer en bêre nie. Die kode BESTAAN nog op die bediener, want Dewald wys 'n boodskap daarmee uit. |
+| Die naamkeuse | Die kaart sê twee keer dat dit anoniem is. 'n Stelsel wat tog 'n naam stoor, breek daardie belofte. |
+| Die vers en die gebed op die bevestigingsblad | Iemand wat pas sy hart neergesit het, wil nie 'n bladsy lees nie. `sorgVerse.js` en `gabVers` is saam weg. |
+| Video's en stemnotas op die muur | Die muur is Dewald se antwoorde. Sien hierbo. |
+| `sorg_myne` in localStorage | Dit is op mense se fone geskryf en deur niks gelees nie. Op 'n blad oor privaatheid is dit die verkeerde soort oorblyfsel. |
 
-1. 'n Afrikaanse vers wat 'n mens uit die geheue tik, is verkeerd.
-2. Die GAB is CC BY-NC-ND — die teks mag nooit verander word nie, ook nie per
-   ongeluk deur oortik nie, en die erkenning wys saam.
+---
 
-Die toets keur dit: `sorgVerse.js` mag geen `teks:`-veld hê nie, en elke
-boekkode moet in `bybelBoeke.js` bestaan.
+## Die ou vers ná die indiening (verwyder)
+
+Daar was 'n vers en 'n gebed op die bevestigingsblad. Dit is weg, en die
+lêer daarvoor ook.
+
+Die reël waarom dit gebou is, bly egter geld as iemand dit ooit terugbring:
+**geen Afrikaanse versteks in die kode nie.** 'n Vers wat 'n mens uit die
+geheue tik, is verkeerd, en die GAB is CC BY-NC-ND — die teks mag nie oorgetik
+word nie. Haal dit uit die Bybel wat klaar in die app is, en wys die
+erkenning saam.
 
 ---
 

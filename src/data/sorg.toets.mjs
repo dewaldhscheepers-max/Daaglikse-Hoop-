@@ -21,7 +21,6 @@ import path from 'node:path'
 
 import { krisisTreffers, kontakTreffers, hulpversoekTreffers, plat, isKrisis } from './sorgKrisis.js'
 import { keurOnderwerp, ONDERWERPE, BREE_ONDERWERP, onderwerpBy } from './sorgOnderwerpe.js'
-import { versVir, SORG_VERSE } from './sorgVerse.js'
 import { hoopVir, volgensBehoefte, weekVideo } from './sorgVideos.js'
 import { sorgSkakel, leesSorgSkakel } from './sorgDeel.js'
 import { notasVir, boekVir } from './sorgWag.js'
@@ -46,7 +45,7 @@ const bron = fs.readFileSync(path.join(wortel, 'api', 'sorg-stuur.mjs'), 'utf8')
 const begin = bron.indexOf('function vandagSAST')
 const eind = bron.indexOf('async function haalInstellings')
 const M = new Function('crypto', bron.slice(begin, eind) +
-  '\nreturn { vandagSAST, skoonTeks, skoonNaam, hasToestel, maakKode }')(
+  '\nreturn { vandagSAST, skoonTeks, hasToestel, maakKode }')(
   (await import('node:crypto')).default)
 
 afdeling('Beheerkarakters — die karakterreeks-fout')
@@ -74,17 +73,6 @@ afdeling('Beheerkarakters — die karakterreeks-fout')
   kyk('drie of meer nuwe reels word twee', T('een\n\n\n\ntwee', 100) === 'een\n\ntwee', T('een\n\n\n\ntwee', 100))
   kyk('afgekap op lengte', T('abcdefghij', 4) === 'abcd')
   kyk('leeg is leeg', T(null, 100) === '' && T(undefined, 100) === '')
-}
-
-afdeling('Die naam')
-{
-  const N = M.skoonNaam
-  kyk('voornaam bly', N('Dewald') === 'Dewald')
-  kyk('van val weg', N('Dewald Scheepers') === 'Dewald', N('Dewald Scheepers'))
-  kyk('nommer val weg', N('Dewald 0821234567') === 'Dewald', N('Dewald 0821234567'))
-  kyk('aksente bly', N('Reneé') === 'Reneé', N('Reneé'))
-  kyk('leeg is leeg', N('') === '' && N(null) === '')
-  kyk('net syfers gee niks', N('0821234567') === '', N('0821234567'))
 }
 
 afdeling('Die bestuurskode')
@@ -188,25 +176,6 @@ afdeling('Die onderwerpe')
   kyk('leeg word ander', keurOnderwerp('') === 'ander' && keurOnderwerp(null) === 'ander')
   kyk('bekende bly', keurOnderwerp('angs') === 'angs')
   kyk('die bree onderwerp bestaan', !!onderwerpBy(BREE_ONDERWERP))
-}
-
-afdeling('Die vers en die gebed')
-{
-  kyk('elke onderwerp het een', ONDERWERPE.every(o => !!SORG_VERSE[o.sleutel]), ONDERWERPE.filter(o => !SORG_VERSE[o.sleutel]).map(o => o.sleutel))
-  kyk('onbekend val terug', versVir('bloupers') === SORG_VERSE.ander)
-  kyk('elkeen het \'n verwysing en \'n gebed', Object.values(SORG_VERSE).every(v => v.verwysing && v.verwysing.kode && v.verwysing.hoofstuk && v.verwysing.vers && v.gebed))
-
-  /* GEEN VERSTEKS IN DIE KODE NIE. Die woorde kom uit die GAB in die app.
-     'n Afrikaanse vers wat 'n mens uit die geheue tik, is verkeerd, en die
-     GAB is CC BY-NC-ND — die teks mag nooit oorgetik word nie. */
-  kyk('geen versteks in die lêer nie', !fs.readFileSync(path.join(wortel, 'src', 'data', 'sorgVerse.js'), 'utf8').includes('teks:'))
-
-  /* Die boekkodes moet in die Bybel se lys bestaan, anders wys daar niks. */
-  const boeke = fs.readFileSync(path.join(wortel, 'src', 'data', 'bybelBoeke.js'), 'utf8')
-  const stukkend = Object.values(SORG_VERSE)
-    .map(v => v.verwysing.kode)
-    .filter(k => !new RegExp(`['"]?${k}['"]?\\s*:`).test(boeke))
-  kyk('elke boekkode bestaan', stukkend.length === 0, stukkend)
 }
 
 afdeling('Die onmiddellike hoop — daar mag nooit \'n leë hand wees nie')

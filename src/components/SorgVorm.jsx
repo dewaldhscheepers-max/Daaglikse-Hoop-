@@ -78,6 +78,15 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
      die versoek-kaart en sit die wyser in die teksblok. Ons maak die vorm
      toe voordat ons navigeer, anders bly hy oor die blad staan. */
   function naBidSaam() {
+    /* Het hy al iets getik, vra ons eers. Die knoppie staan bo die kassie,
+       dus druk die meeste mense dit voordat hulle tik — maar wie 'n paar
+       honderd woorde neergesit het en dit dan per ongeluk druk, verloor
+       alles sonder 'n woord. Dit is nie 'n plek waar 'n mens iemand se
+       woorde mag weggooi nie. */
+    if (teks.trim().length >= 40 &&
+        !window.confirm('Jy het al iets getik. Gaan jy na Bid Saam toe, gaan hierdie woorde verlore.\n\nWil jy voortgaan?')) {
+      return
+    }
     try { sessionStorage.setItem('bidsaam_fokus', 'versoek') } catch { /* privaat modus */ }
     onSluit()
     window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))

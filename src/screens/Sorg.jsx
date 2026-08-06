@@ -100,12 +100,18 @@ export default function Sorg() {
   /* 'n Gedeelde skakel bring 'n mens direk by daardie plasing of video uit.
      Kom hy nie van 'n skakel af nie, gebeur hier niks.
 
-     Die `gespring`-merker is nie netheid nie: die effek hang van `muur` en
-     `data` af, want ons kan eers spring wanneer daardie goed gelaai het. Maar
-     die hash bly in die adresbalk staan, dus het die effek by ELKE nuwe data
-     weer geloop en die oortjie teruggeruk. Iemand wat die skakel oopmaak en
-     dan op "Die Video's" druk voordat die muur klaar gelaai het, is
-     teruggeslinger. Nou spring ons een keer en los dit dan. */
+     Die `gespring`-merker keer dat die effek by ELKE nuwe data weer spring —
+     iemand wat die skakel oopmaak en dan op "Die Video's" druk voordat die
+     muur klaar gelaai het, sou teruggeslinger word.
+
+     Maar 'n merker alleen was nie genoeg nie. Sorg word AFGEBREEK wanneer 'n
+     mens 'n ander oortjie kies (`{tab === 'sorg' && <Sorg />}`), dus begin
+     die merker weer op false wanneer hy terugkom — en die hash staan nog in
+     die adresbalk. Die gevolg: elke keer wat hy na Sorg terugkeer, spring dit
+     weer na daardie een plasing. Die skakel het sy werk gedoen en bly toe
+     aanhou werk.
+
+     Ons vee die hash dus uit sodra ons gespring het. */
   const gespring = useRef(false)
   useEffect(() => {
     if (gespring.current) return
@@ -119,6 +125,7 @@ export default function Sorg() {
     gespring.current = true
     const el = document.getElementById(`sorg-${s.soort}-${s.id}`)
     if (el) el.scrollIntoView({ block: 'center' })
+    try { window.history.replaceState({}, '', '/') } catch { /* ou blaaier */ }
   }, [muur, data])
 
   const videos = (data && data.videos) || []

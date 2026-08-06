@@ -29,24 +29,19 @@ import { hoopVir } from '../data/sorgVideos'
 import SorgVideo from './SorgVideo'
 import './SorgWag.css'
 
-export default function SorgWag({ onderwerp = 'ander', videoData = null, kort = false, notas: gegee = null }) {
-  const [gehaal, setGehaal] = useState(null)
+export default function SorgWag({ onderwerp = 'ander', videoData = null }) {
+  const [notas, setNotas] = useState(null)
 
-  /* `notas` mag van buite af kom. Die muur laai hulle een keer en gee hulle
-     aan elke kaart, in plaas daarvan dat elke kaart self gaan haal. */
   useEffect(() => {
-    if (gegee) return
     let lewendig = true
-    haalNotas().then(n => { if (lewendig) setGehaal(n) })
+    haalNotas().then(n => { if (lewendig) setNotas(n) })
     return () => { lewendig = false }
-  }, [gegee])
-
-  const notas = gegee || gehaal
+  }, [])
 
   const hoop = videoData ? hoopVir(onderwerp, videoData) : null
   const video = hoop && hoop.video
-  const gekies = notasVir(onderwerp, notas || [], kort ? 1 : 3)
-  const boek = kort ? null : boekVir(onderwerp)
+  const gekies = notasVir(onderwerp, notas || [], 3)
+  const boek = boekVir(onderwerp)
 
   /* Niks om te wys nie — dan wys ons niks. 'n Leë kop met 'n belofte is
      erger as stilte. */
@@ -54,15 +49,13 @@ export default function SorgWag({ onderwerp = 'ander', videoData = null, kort = 
 
   return (
     <div className="sw">
-      <p className="sw-kop">
-        {kort ? 'Iets wat jou dalk nou kan help' : 'Terwyl jy wag'}
-      </p>
+      <p className="sw-kop">Terwyl jy wag</p>
 
       {video && <SorgVideo video={video} />}
 
       {gekies.length > 0 && (
         <div className="sw-notas">
-          {!kort && <p className="sw-onder-kop">Luister na Dewald</p>}
+          <p className="sw-onder-kop">Luister na Dewald</p>
           {gekies.map(n => (
             <div key={n.id} className="sw-nota">
               <p className="sw-nota-titel">{n.title}</p>

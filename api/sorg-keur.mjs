@@ -48,11 +48,6 @@ function skoonTeks(t, maks) {
     .slice(0, maks)
 }
 
-function skoonNaam(n) {
-  const s = skoonTeks(n, 24).replace(/[^\p{L}\s'-]/gu, '').trim()
-  return s.split(/\s+/)[0] || ''
-}
-
 /* 'n Antwoord is 'n SKAKEL na Dewald se eie stem, of 'n video, of geskrewe
    woorde. Geen opname vanuit die app nie — hy maak dit soos hy altyd doen en
    plak die skakel hier. */

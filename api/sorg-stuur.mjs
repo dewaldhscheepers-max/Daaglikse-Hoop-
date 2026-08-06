@@ -50,15 +50,8 @@ function skoonTeks(t, maks) {
     .slice(0, maks)
 }
 
-/* 'n Voornaam, of niks. Nooit 'n van, nooit 'n nommer. */
-function skoonNaam(n) {
-  const s = skoonTeks(n, 24).replace(/[^\p{L}\s'-]/gu, '').trim()
-  return s.split(/\s+/)[0] || ''
-}
-
-/* Die toestel word gehas, nooit rou gestoor nie. Ons het dit vir twee dinge
-   nodig — 'n perk per dag, en later "my eie plasings" — en vir albei is 'n
-   has genoeg. */
+/* Die toestel word gehas, nooit rou gestoor nie. Dit doen EEN ding — die
+   perk van drie boodskappe per dag — en daarvoor is 'n has genoeg. */
 function hasToestel(t) {
   const s = String(t || '').trim()
   /* Geen toestel nie — privaat modus, of localStorage is af. Dan is daar
@@ -176,8 +169,10 @@ export default async function handler(req, res) {
      tog 'n naam stoor, breek daardie belofte — ook al het net EEN mens die
      ander knoppie gedruk.
 
-     `skoonNaam` bly bestaan omdat die keurpaneel dit gebruik. Hier word dit
-     nie meer geroep nie. */
+     Daar was 'n `skoonNaam` wat 'n voornaam skoongemaak het. Dit is weg —
+     nie een plek roep dit meer nie. Die kommentaar het gese die keurpaneel
+     gebruik dit; dit was nie waar nie, en 'n kommentaar wat lieg, hou dooie
+     kode vir jare aan die lewe. */
   const naam = ''
   const toestel = hasToestel(lyf.toestel)
   const dag = vandagSAST()

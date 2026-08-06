@@ -2,11 +2,6 @@
 
 .sw { margin: 4px 0 18px; }
 
-/* Binne 'n muurkaart het dit lug bo nodig — anders sit die kop teen die naam
-   vas en lyk dit of dit by die naam hoort. */
-.sp-kaart > .sw { margin: 14px 0 0; }
-.sp-kaart > .sw .sw-kop { font-size: 15px; }
-
 .sw-kop {
   margin: 0 2px 10px;
   font-family: var(--font-serif);
