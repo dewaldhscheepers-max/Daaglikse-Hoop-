@@ -87,9 +87,9 @@ body {
    Pastorale Sorg het hy 'n reel teks of 'n knoppie bedek. Twee goed maak dit
    beter sonder om hom weg te steek — hy is klaar 'n bekende plek vir mense:
 
-   1. Kleiner (56 → 48) en laer, sodat hy meer oor die balk le en minder in
-      die inhoud in steek. Dit haal sowat 'n derde van die oppervlak weg wat
-      hy van die bladsy afvat.
+   1. Kleiner (56 → 48). Hy staan weer op sy ou hoogte, presies bokant
+      Luister — Dewald wou hom daar terug he — maar hy vat nou minder van
+      die bladsy af omdat hy self kleiner is.
    2. Die `transform: translateX(-50%)` is weg. Dit maak van hom vir ALTYD
       'n eie saamgestelde laag — presies wat CLAUDE.md oor `.bottom-nav` sê,
       en dieselfde reel geld hier. Ons sentreer met 'n negatiewe marge, wat
@@ -99,8 +99,8 @@ body {
   position: absolute;
   /* Die balk het 5 oortjies, dus sit Luister se middel op 10% */
   left: 10%;
-  margin-left: -24px;          /* die helfte van die breedte */
-  bottom: calc(100% - 14px);
+  margin-left: -24px;          /* die helfte van die breedte — presies op Luister se middel */
+  bottom: calc(100% - 2px);
   width: 48px;
   height: 48px;
   border-radius: 13px;
