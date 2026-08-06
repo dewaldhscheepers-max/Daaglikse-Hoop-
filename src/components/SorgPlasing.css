@@ -9,13 +9,48 @@
   background: #FFFFFF;
 }
 
+/* ── Die opskrif ──
+   Die vraag in een reel. Dit is die enigste ding wat 'n mens op 'n vol muur
+   laat besluit of hy gaan lees. */
+.sp-titel {
+  margin: 0 0 5px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.28;
+  color: var(--text, #2D2040);
+}
+
 .sp-teks {
-  margin: 0 0 9px;
+  margin: 10px 0 0;
   font-family: var(--font-body);
   font-size: 15.5px;
   line-height: 1.68;
   color: var(--text, #2D2040);
   white-space: pre-wrap;
+}
+
+/* ── Ses reels, dan "Lees verder" ──
+   -webkit-line-clamp werk in elke blaaier wat ons ondersteun, en dit meet
+   niks — dit knip op 'n REEL, nie op 'n karakter nie, dus lyk dit reg by
+   elke lettergrootte en elke skermbreedte. */
+.sp-teks.kort {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sp-meer {
+  margin-top: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sp-wie {
@@ -36,8 +71,17 @@
   border-left: 3px solid var(--purple-dark, #5C4E8E);
 }
 
+.sp-antwoord-titel {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text, #2D2040);
+}
+
 .sp-antwoord-kop {
-  margin: 0 0 9px;
+  margin: 0 0 4px;
   font-family: var(--font-serif);
   font-size: 15px;
   font-weight: 700;

@@ -4,16 +4,31 @@
    Die vorm is die hele punt, en dit is presies wat Dewald gevra het:
 
      ┌────────────────────────────────────┐
-     │  iemand se woorde                  │
-     │  — Anoniem · 5 Augustus            │
+     │  Moet ek die tablet koop?          │  ← die vraag, in een reel
+     │  Anoniem · 6 Augustus · Geld       │
+     │                                    │
+     │  iemand se woorde (ses reels)      │
+     │  Lees verder                       │
      │                                    │
      │  ┌──────────────────────────────┐  │
      │  │ Dewald antwoord              │  │  ← DIREK daaronder
+     │  │ Wanneer is 'n groot uitgawe  │  │  ← WAAROP hy antwoord
+     │  │ 'n wyse belegging?           │  │
      │  │ ▶ luister                    │  │
      │  └──────────────────────────────┘  │
      │                                    │
      │  ♡ 37 mense dra dit saam met jou   │
      └────────────────────────────────────┘
+
+   Die twee OPSKRIFTE is die belangrikste ding aan hierdie kaart.
+
+   Sonder hulle begin dit as 'n blok teks, en 'n mens moet vyftien reels lees
+   voordat hy weet waaroor dit gaan. Op 'n muur met dertig plasings lees
+   niemand dan meer nie — dit word 'n muur van uitputting.
+
+   Die storie word tot ses reels afgekort met 'Lees verder' daaronder. Wie
+   die opskrif interessant vind, maak dit oop; die res blaai verby sonder om
+   moeg te word.
 
    Die antwoord is nie 'n aparte blad nie en nie 'n draad nie — dit sit binne
    dieselfde kaart, want dit is die enigste manier waarop 'n mens sien dat
@@ -77,15 +92,21 @@ function egteAntwoord(a) {
   if (!a) return null
   const bron = veiligeSkakel(a.bron)
   const teks = String(a.teks || '').trim()
-  if (a.tipe === 'oudio' && bron) return { ...a, bron, teks }
-  if (a.tipe === 'video' && bron) return { ...a, bron, teks }
-  if (teks) return { ...a, tipe: 'teks', bron: '', teks }
+  const titel = String(a.titel || '').trim()
+  if (a.tipe === 'oudio' && bron) return { ...a, bron, teks, titel }
+  if (a.tipe === 'video' && bron) return { ...a, bron, teks, titel }
+  if (teks) return { ...a, tipe: 'teks', bron: '', teks, titel }
   return null
 }
 
 export default function SorgPlasing({ plasing }) {
   const [saam, setSaam] = useState(plasing.saam || 0)
   const [gedra, setGedra] = useState(() => draSaamReeds(plasing.id))
+  const [oop, setOop] = useState(false)
+
+  /* Kort stories het nie 'n "Lees verder" nodig nie — dan lyk dit net
+     lastig. Ses reels is sowat 240 karakters op 'n foon. */
+  const lank = String(plasing.teks || '').length > 260
 
   const antwoord = egteAntwoord(plasing.antwoord)
 
@@ -99,7 +120,7 @@ export default function SorgPlasing({ plasing }) {
 
   return (
     <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
-      <p className="sp-teks">{plasing.teks}</p>
+      {plasing.titel && <h3 className="sp-titel">{plasing.titel}</h3>}
 
       <p className="sp-wie">
         {plasing.naam || 'Anoniem'}
@@ -107,10 +128,16 @@ export default function SorgPlasing({ plasing }) {
         {onderwerpNaam(plasing.onderwerp) ? ` · ${onderwerpNaam(plasing.onderwerp)}` : ''}
       </p>
 
+      <p className={`sp-teks${lank && !oop ? ' kort' : ''}`}>{plasing.teks}</p>
+      {lank && !oop && (
+        <button className="sp-meer" onClick={() => setOop(true)}>Lees verder</button>
+      )}
+
       {/* ── Dewald se antwoord, DIREK onder die woorde ── */}
       {antwoord && (
         <div className="sp-antwoord">
           <p className="sp-antwoord-kop">Dewald antwoord</p>
+          {antwoord.titel && <p className="sp-antwoord-titel">{antwoord.titel}</p>}
 
           {antwoord.tipe === 'oudio' && (
             /* `preload="metadata"`, nie "none" nie. Met "none" weet die

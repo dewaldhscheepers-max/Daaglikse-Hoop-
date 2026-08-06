@@ -43,6 +43,7 @@ function hasToestel(t) {
 function virDieSkerm(m) {
   return {
     id: m.id,
+    titel: m.titel || '',
     teks: m.teks,
     naam: m.naam || '',
     onderwerp: m.onderwerp || 'ander',

@@ -326,6 +326,38 @@ hierdie week op die muur gedeel het."*
 gefiltreer. Dit het die blad ingewikkeld laat lyk sonder om iets by te voeg —
 die antwoord sit in elk geval BINNE die plasing.
 
+### Die kaart se vorm
+
+```
+Moet ek die tablet koop, of sal dit finansieel onwys wees?   ← die vraag
+Anoniem · 6 Augustus · Finansiële druk
+
+die persoon se woorde (ses reëls)
+Lees verder
+
+┌─ Dewald antwoord ─────────────────────────────┐
+│ Wanneer is 'n groot uitgawe 'n wyse belegging? │  ← WAAROP hy antwoord
+│ ▶ 3:02                                        │
+└───────────────────────────────────────────────┘
+
+♡ 37 mense dra dit saam met jou
+```
+
+Die **twee opskrifte** is die belangrikste ding aan die kaart. Sonder hulle
+begin dit as 'n blok teks en 'n mens moet vyftien reëls lees voordat hy weet
+waaroor dit gaan. Op 'n muur met dertig plasings lees niemand dan meer nie.
+
+Albei word in die keurpaneel getik en albei is **opsioneel** — sonder hulle
+werk die kaart soos vroeër.
+
+Die storie word tot **ses reëls** afgekort (`-webkit-line-clamp`, wat op 'n
+REËL knip en nie op 'n karakter nie) met "Lees verder" daaronder. 'n Storie
+korter as sowat 260 karakters kry glad nie 'n knoppie nie — dan lyk dit net
+lastig.
+
+Die geskrewe reël onder die klank bly bestaan, maar is nou opsioneel. Waar
+die opskrif die vraag klaar stel, laat 'n mens dit leeg.
+
 Dewald se antwoord sit **binne dieselfde kaart**, direk onder die persoon se
 woorde. Nie 'n aparte blad nie en nie 'n draad nie — dit is die enigste
 manier waarop iemand sien dat daar op SY ding geantwoord is.

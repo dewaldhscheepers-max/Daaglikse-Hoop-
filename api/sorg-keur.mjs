@@ -39,6 +39,11 @@ const MUUR = 'sorg_muur'
 
 const MAKS_MUUR_TEKS = 1200
 
+/* 'n Opskrif moet in EEN oogopslag lees. Word dit langer as dit, is dit nie
+   meer 'n opskrif nie — dan is dit 'n opsomming, en die storie self doen
+   daardie werk klaar. */
+const MAKS_TITEL = 110
+
 function skoonTeks(t, maks) {
   return String(t || '')
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, ' ')
@@ -56,15 +61,19 @@ function skoonAntwoord(a) {
   const tipe = ['oudio', 'video', 'teks'].includes(a.tipe) ? a.tipe : 'teks'
   const teks = skoonTeks(a.teks, 1500)
   const bron = skoonTeks(a.bron, 400)
+  /* Die vraag wat die antwoord beantwoord. Dit is die ding wat 'n mens laat
+     druk op 'n klankgreep: nie "Dewald antwoord" nie, maar WAAROP. */
+  const titel = skoonTeks(a.titel, MAKS_TITEL)
+  const dat = new Date().toISOString().slice(0, 10)
 
   if (tipe === 'teks') {
     if (!teks) return { fout: 'die antwoord het woorde nodig' }
-    return { antwoord: { tipe, teks, bron: '', datum: new Date().toISOString().slice(0, 10) } }
+    return { antwoord: { tipe, titel, teks, bron: '', datum: dat } }
   }
   if (!/^https?:\/\//i.test(bron)) {
     return { fout: 'die antwoord het \'n geldige skakel nodig' }
   }
-  return { antwoord: { tipe, teks, bron, datum: new Date().toISOString().slice(0, 10) } }
+  return { antwoord: { tipe, titel, teks, bron, datum: dat } }
 }
 
 export default async function handler(req, res) {
@@ -142,6 +151,9 @@ export default async function handler(req, res) {
       const muurId = 'm' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex')
       const doc = {
         bronId: bron.id,
+        /* Die vraag in een reel, soos Dewald dit skryf. Sonder dit begin die
+           kaart as 'n blok teks en niemand weet waaroor dit gaan nie. */
+        titel: skoonTeks(lyf.titel, MAKS_TITEL),
         teks,
         naam: '',                 // die muur is anoniem, altyd
         onderwerp: keurOnderwerp(lyf.onderwerp || bron.onderwerp),
@@ -174,6 +186,7 @@ export default async function handler(req, res) {
       if (!lyf.muurId) return res.status(400).json({ fout: 'geen muurId nie' })
       const velde = {}
       if (typeof lyf.teks === 'string') velde.teks = skoonTeks(lyf.teks, MAKS_MUUR_TEKS)
+      if (typeof lyf.titel === 'string') velde.titel = skoonTeks(lyf.titel, MAKS_TITEL)
       if (typeof lyf.gepubliseer === 'boolean') velde.gepubliseer = lyf.gepubliseer
       if (!Object.keys(velde).length) return res.status(400).json({ fout: 'niks om te verander nie' })
       await skryfDok(MUUR, String(lyf.muurId), velde, { velde: Object.keys(velde) })

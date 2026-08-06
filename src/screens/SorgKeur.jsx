@@ -43,6 +43,7 @@ export default function SorgKeur({ geheim }) {
   const [hopie, setHopie] = useState(null)
   const [oop, setOop] = useState(null)        // die id wat oop is
   const [teks, setTeks] = useState('')
+  const [titel, setTitel] = useState('')
   const [besig, setBesig] = useState(false)
   const [boodskap, setBoodskap] = useState(null)
 
@@ -94,6 +95,7 @@ export default function SorgKeur({ geheim }) {
   function maakOop(b) {
     setOop(b.id)
     setTeks(b.teks || '')
+    setTitel('')
     setBoodskap(null)
   }
 
@@ -110,6 +112,7 @@ export default function SorgKeur({ geheim }) {
     const d = await doen({
       aksie: 'keur',
       id: b.id,
+      titel,
       teks,
       onderwerp: b.onderwerp,
       anoniem: !b.naam,
@@ -200,6 +203,18 @@ export default function SorgKeur({ geheim }) {
 
           {oop === b.id ? (
             <>
+              <input
+                className="sk-video"
+                value={titel}
+                onChange={e => setTitel(e.target.value)}
+                maxLength={110}
+                placeholder="Die vraag in een reel — bv. Moet ek die tablet koop?"
+              />
+              <div className="admin-books-note">
+                Dit staan BO die storie op die muur. Sonder dit begin die kaart
+                as 'n blok teks en niemand weet waaroor dit gaan nie.
+              </div>
+
               <textarea
                 className="sk-teks"
                 value={teks}
@@ -266,13 +281,14 @@ function Muur({ data, doen, besig }) {
   const [tipe, setTipe] = useState('oudio')
   const [bron, setBron] = useState('')
   const [teks, setTeks] = useState('')
+  const [titel, setTitel] = useState('')
 
   const muur = data.muur || []
   if (!muur.length) return null
 
   async function stuur(m) {
-    const d = await doen({ aksie: 'antwoord', muurId: m.id, antwoord: { tipe, bron, teks } })
-    if (d && d.ok) { setOop(null); setBron(''); setTeks('') }
+    const d = await doen({ aksie: 'antwoord', muurId: m.id, antwoord: { tipe, titel, bron, teks } })
+    if (d && d.ok) { setOop(null); setBron(''); setTeks(''); setTitel('') }
   }
 
   return (
@@ -296,6 +312,18 @@ function Muur({ data, doen, besig }) {
 
           {oop === m.id ? (
             <>
+              <input
+                className="sk-video"
+                value={titel}
+                onChange={e => setTitel(e.target.value)}
+                maxLength={110}
+                placeholder="Waarop antwoord jy? — bv. Wanneer is 'n groot uitgawe wysheid?"
+              />
+              <div className="admin-books-note">
+                Dit staan bo die klankgreep. "Dewald antwoord" se nie waaroor
+                dit gaan nie; hierdie reel wel, en dis wat mense laat druk.
+              </div>
+
               <div className="sk-tipes">
                 {[['oudio', 'Stemnota'], ['video', 'Video'], ['teks', 'Geskrewe']].map(([k, n]) => (
                   <button key={k} className={`sk-tipe${tipe === k ? ' aktief' : ''}`} onClick={() => setTipe(k)}>
@@ -340,6 +368,7 @@ function Muur({ data, doen, besig }) {
               <button className="sk-knop sk-plaas" onClick={() => {
                 setOop(m.id)
                 setTipe((m.antwoord && m.antwoord.tipe) || 'oudio')
+                setTitel((m.antwoord && m.antwoord.titel) || '')
                 setBron((m.antwoord && m.antwoord.bron) || '')
                 setTeks((m.antwoord && m.antwoord.teks) || '')
               }}>
