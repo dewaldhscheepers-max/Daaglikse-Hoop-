@@ -99,12 +99,32 @@ export function merkWoordGesien(id) { if (id) onthouGesien(id) }
    nagekom word nie. */
 export function volgensBehoefte(videos) {
   const groepe = []
+
+  /* ── Elke video EEN keer ──
+
+     Hier het gestaan: 'n video wat aan twee onderwerpe gemerk is, verskyn by
+     albei, want 'n mens soek by die gevoel wat hy nou het.
+
+     Dit klink reg en dit lees verkeerd. Die meeste titels dra twee
+     onderwerpe — "geestelike aanvalle op jou huwelik en jou gesin" is huwelik
+     EN kinders, "verwerping laat jou voel jy is nie goed genoeg nie" is
+     eensaam EN waarde. Die helfte van die biblioteek het dus dubbel gewys, en
+     op 'n foon, waar 'n mens net drie kaarte op 'n slag sien, lyk dit soos 'n
+     fout eerder as 'n keuse.
+
+     Nou staan elke video onder sy EERSTE onderwerp — die eerste in
+     ONDERWERPE se volgorde, wat die sterkste een is. Niks gaan weg nie; niks
+     wys twee keer nie. */
+  const geplaas = new Set()
+
   for (const o of ONDERWERPE) {
     /* 'Ek is nie seker nie' en 'Iets anders' deel dieselfde sin; ons wys dit
        net een keer. */
     if (groepe.some(g => g.sin === o.sin)) continue
-    const inGroep = videos.filter(v => (v.onderwerpe || []).includes(o.sleutel))
+    const inGroep = videos.filter(v =>
+      !geplaas.has(v.id) && (v.onderwerpe || []).includes(o.sleutel))
     if (!inGroep.length) continue
+    inGroep.forEach(v => geplaas.add(v.id))
     groepe.push({ sleutel: o.sleutel, sin: o.sin, naam: o.naam, videos: inGroep })
   }
 

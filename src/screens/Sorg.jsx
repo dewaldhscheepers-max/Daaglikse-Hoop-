@@ -4,9 +4,8 @@
    Die volgorde op hierdie blad is 'n besluit, nie 'n toeval nie:
 
      Hulp nou             — altyd bo, altyd bereikbaar
-     Vandag se video      — een ding, die held
-     Waarmee kan ek jou help?
-     Vandag se woord
+     Waarmee kan ek jou help?  — die uitnodiging; dit is waarvoor die blad is
+     Vandag se video      — EEN video, een keer
      Die Muur · Die Video's
      Help om Daaglikse Hoop gratis te hou
 
@@ -41,7 +40,7 @@ import SorgPlasing from '../components/SorgPlasing'
 import SorgDeelSteun from '../components/SorgDeelSteun'
 import DonationCard from '../components/DonationCard'
 import {
-  haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
+  haalVideos, weekVideo, volgensBehoefte,
 } from '../data/sorgVideos'
 import { haalMuur, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
@@ -111,7 +110,6 @@ export default function Sorg() {
   const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('muur')
   const [data, setData] = useState(null)      // null = besig
-  const [woord, setWoord] = useState(null)
   const [muur, setMuur] = useState(null)      // null = besig
 
   /* Ses plasings, dan "Wys meer".
@@ -203,7 +201,6 @@ export default function Sorg() {
     haalVideos().then(d => {
       if (!lewendig) return
       setData(d)
-      setWoord(vandagSeWoord(d))
     })
     haalMuur().then(p => { if (lewendig) setMuur(p) })
     haalPlek().then(p => { if (lewendig) setPlek(p) })
@@ -243,7 +240,19 @@ export default function Sorg() {
 
   const videos = (data && data.videos) || []
   const held   = data ? weekVideo(data) : null
-  const groepe = volgensBehoefte(videos)
+
+  /* ── Die held staan NIE ook in die biblioteek nie ──
+
+     Hy wys reeds hier bo, op dieselfde skerm, met sy eie titel en sy eie
+     hou-van-balk. Sou hy ook onder sy onderwerp verskyn, sien 'n mens
+     dieselfde video twee keer as hy net 'n bietjie rol — en dit is presies
+     die klagte.
+
+     Die res van die biblioteek bly volledig. Niks gaan weg nie; die een wat
+     uitgehaal word, is die een wat 'n handbreedte hoër staan. Wanneer hy
+     more se video plaas, val hierdie een vanself terug in sy groep. */
+  const biblioteek = held ? videos.filter(v => v.id !== held.id) : videos
+  const groepe = volgensBehoefte(biblioteek)
   const plasings = muur || []
 
 
@@ -294,42 +303,6 @@ export default function Sorg() {
                 </p>
               </>
             )}
-          </div>
-        )}
-
-        {/* ── Die held ──
-
-            Die daaglikse video is die deel van hierdie blad wat SKAAL: een
-            video wat vyf mense se vraag saam beantwoord, bereik meer mense as
-            vyf antwoorde. En dit is die enigste rede om die app ELKE DAG oop
-            te maak — 'n muur verander stadig, 'n video is elke oggend nuut.
-
-            Dewald plaas in elk geval daagliks op TikTok en Facebook. Dit is
-            dus nie ekstra werk nie; dieselfde video kry net 'n permanente
-            huis. 'n TikTok van drie maande gelede is weg. Hier is dit, met
-            sy onderwerp gemerk, oor twee jaar nog vindbaar vir die mens wat
-            om tweeuur die oggend soek. */}
-        {held ? (
-          <>
-            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
-            <SorgVideo
-              video={held}
-              groot
-              etiket="Vandag se video"
-              etiketFyn="Oor die onderwerpe waaroor mense hier vra."
-            />
-            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
-          </>
-        ) : (
-          /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
-             wat 'n daaglikse video belowe en niks daarvan wys nie, belowe
-             niks. */
-          <div className="sorg-week-leeg">
-            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
-            <p className="sorg-week-teks">
-              Elke dag maak ek ’n kort video oor die onderwerpe waaroor mense
-              hier vra — hier bo-aan die blad.
-            </p>
           </div>
         )}
 
@@ -404,16 +377,45 @@ export default function Sorg() {
           <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
 
-        {/* ── Vandag se woord ── */}
-        {woord && (
+        {/* ── Die daaglikse video ──
+
+            EEN video, EEN keer op die blad, en NIE heel bo nie.
+
+            Hier het twee volle videospelers gestaan: "Vandag se video" heel
+            bo, en "Vandag se woord" 'n bietjie laer af — elkeen met sy eie
+            titel, sy eie hou-van-balk en sy eie opmerkings. Op 'n foon was
+            dit twee skerms vol video voordat 'n mens by die muur kom, en dit
+            het gelyk of dieselfde ding oor en oor wys.
+
+            "Vandag se woord" was 'n oplossing vir 'n probleem wat nie meer
+            bestaan nie. Toe die video WEEKLIKS was, moes daar op die ander
+            ses dae iets nuuts wees, en dus is 'n ou video elke dag uitgehaal.
+            Nou plaas hy elke dag een. Vandag se video IS vandag se woord.
+
+            En dit staan nou ONDER die uitnodiging. Hierdie blad is 'n plek
+            waar 'n mens sy hart uitpraat; die eerste ding wat 'n mens sien,
+            moet die uitnodiging wees, nie 'n videospeler nie. */}
+        {held ? (
           <>
             <SorgVideo
-              video={woord}
-              etiket="Vandag se woord"
-              onSpeel={v => merkWoordGesien(v.id)}
+              video={held}
+              groot
+              etiket="Vandag se video"
+              etiketFyn="Oor die onderwerpe waaroor mense hier vra."
             />
-            <SorgDeelSteun soort="video" id={woord.videoId} titel={woord.titel} />
+            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
+        ) : (
+          /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
+             wat 'n daaglikse video belowe en niks daarvan wys nie, belowe
+             niks. */
+          <div className="sorg-week-leeg">
+            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
+            <p className="sorg-week-teks">
+              Elke dag maak ek ’n kort video oor die onderwerpe waaroor mense
+              hier vra.
+            </p>
+          </div>
         )}
 
         {/* ── Twee afdelings ── */}
@@ -438,7 +440,10 @@ export default function Sorg() {
               </span>
               <span className="sorg-oortjie-naam">{a.naam}</span>
               <span className="sorg-oortjie-tel">
-                {a.sleutel === 'muur' ? plasings.length : videos.length}
+                {/* Wat WERKLIK in die oortjie is. Vandag se video staan
+                    hierbo en is uit die biblioteek gehaal, dus sou
+                    `videos.length` een meer belowe as wat 'n mens daar kry. */}
+                {a.sleutel === 'muur' ? plasings.length : biblioteek.length}
               </span>
             </button>
           ))}
@@ -447,11 +452,14 @@ export default function Sorg() {
         {afdeling === 'videos' && (
           data === null ? (
             <p className="sorg-leeg">Besig om te laai…</p>
-          ) : !videos.length ? (
+          ) : !biblioteek.length ? (
             <p className="sorg-leeg">
-              Die eerste video kom binnekort. Dit sal saamgestel word uit
-              die vrae en onderwerpe wat mense hier op die Pastorale
-              Sorg-muur deel.
+              {videos.length
+                /* Daar IS 'n video — dit is net die een hierbo. Om hier "die
+                   eerste video kom binnekort" te sê terwyl hy 'n handbreedte
+                   hoer speel, sou soos 'n stukkende blad lyk. */
+                ? 'Vandag se video staan hier bo. Môre kom die volgende een by.'
+                : 'Die eerste video kom binnekort. Dit sal saamgestel word uit die vrae en onderwerpe wat mense hier op die Pastorale Sorg-muur deel.'}
             </p>
           ) : (
             /* Sonder hierdie kop lyk die afdeling soos enige ander
@@ -464,8 +472,8 @@ export default function Sorg() {
                 <p className="sorg-kring-kop">Elke dag 'n nuwe video.</p>
                 <p className="sorg-kring-teks">
                   Dewald maak elke dag 'n pastorale video oor die onderwerpe
-                  en vrae wat die meeste op die muur gedeel word. So kan een
-                  persoon se storie uiteindelik baie ander mense help.
+                  en vrae wat die meeste hier gedeel word. So kan een persoon
+                  se storie uiteindelik baie ander mense help.
                 </p>
               </div>
               {groepe.map(g => (

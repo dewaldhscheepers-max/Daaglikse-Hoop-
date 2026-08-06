@@ -205,7 +205,19 @@ afdeling('Die biblioteek')
   const v = (id, onderwerpe) => ({ id, videoId: 'x' + id, titel: id, onderwerpe })
   const g = volgensBehoefte([v('a', ['angs']), v('b', ['angs', 'rou']), v('c', [])])
   kyk('geen leë groep nie', g.every(x => x.videos.length > 0))
-  kyk('n video by twee onderwerpe wys twee keer', g.filter(x => x.videos.some(y => y.id === 'b')).length === 2)
+  /* Dit het EEN KEER twee keer gewys, met opset: 'n mens soek by die gevoel
+     wat hy nou het, nie by 'n katalogusnommer nie.
+
+     Dit lees verkeerd. Die meeste titels dra twee onderwerpe — "geestelike
+     aanvalle op jou huwelik en jou gesin" is huwelik EN kinders — dus het
+     die helfte van die biblioteek dubbel gewys, en op 'n foon lyk dit soos 'n
+     fout. Nou staan elke video onder sy EERSTE onderwerp. */
+  kyk('n video by twee onderwerpe wys NET EEN keer', g.filter(x => x.videos.some(y => y.id === 'b')).length === 1)
+  kyk('en dit is die eerste onderwerp in ONDERWERPE se volgorde',
+      g.find(x => x.videos.some(y => y.id === 'b')).sleutel === 'angs')
+  const alle = g.flatMap(x => x.videos.map(y => y.id))
+  kyk('niks wys twee keer nie', alle.length === new Set(alle).size, alle)
+  kyk('en niks gaan weg nie', new Set(alle).size === 3, alle)
   kyk('ongemerkte video verdwyn nie', g.some(x => x.videos.some(y => y.id === 'c')))
   kyk('week se video is altyd iets', weekVideo({ videos: [v('a', [])], week: null }).id === 'a')
   kyk('geen video\'s gee null', weekVideo({ videos: [], week: null }) === null)
