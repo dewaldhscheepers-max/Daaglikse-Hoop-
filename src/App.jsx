@@ -498,7 +498,31 @@ export default function App() {
      oortjie oop. */
   useEffect(() => {
     try {
-      if (/^#sorg-(plasing|video)-/.test(window.location.hash || '')) setTab('sorg')
+      const h = window.location.hash || ''
+      const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
+
+      /* 'n Kaal #sorg (of /sorg) maak net die blad oop. Dit is die skakel wat
+         in 'n WhatsApp-groep geplak word: sonder dit land 'n mens op Luister
+         en moet hy self gaan soek — en dan gaan die helfte van hulle nie.
+
+         Die bedoeling gaan in sessionStorage, NIE net in die toestand nie.
+         Die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar
+         'n nuwe weergawe is, en dan is die hash weg. Presies dieselfde fout
+         het die Steun-blad gehad; sien die kommentaar daar bo. */
+      if (h === '#sorg' || pad === '/sorg') {
+        sessionStorage.setItem('sorg_versoek', '1')
+        window.history.replaceState({}, '', '/')
+      }
+      /* Die vlag word HIER nie uitgevee nie. Doen 'n mens dit, en die
+         diensketter herlaai die bladsy 'n oomblik later, is die bedoeling
+         weg en land hy weer op Luister. Hy word uitgevee wanneer die mens
+         self 'n ander oortjie kies — sien handleNav. */
+      if (sessionStorage.getItem('sorg_versoek') === '1') {
+        setTab('sorg')
+        return
+      }
+
+      if (/^#sorg-(plasing|video)-/.test(h)) setTab('sorg')
     } catch {}
   }, [])
 
@@ -640,6 +664,8 @@ export default function App() {
   }, [])
 
   function handleNav(id) {
+    /* Kies die mens self 'n ander oortjie, is die skakel se werk gedoen. */
+    try { if (id !== 'sorg') sessionStorage.removeItem('sorg_versoek') } catch {}
     if (id === 'nooiomy') { setNooimy(true); return }
     setTab(id)
     if (screenRef.current) screenRef.current.scrollTop = 0
