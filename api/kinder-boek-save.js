@@ -1,3 +1,4 @@
+const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 
 async function getAccessToken() {
@@ -32,9 +33,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' })
 
-  const { pin, book } = req.body || {}
+  const { book } = req.body || {}
 
-  if (pin !== '2025') return res.status(401).json({ error: 'Ongemagtig' })
+  if (!magAdminDing(req)) return res.status(401).json({ error: 'Ongemagtig' })
   if (!book) return res.status(400).json({ error: 'book is vereis' })
 
   let { id, title, description, ageRange, pages, status, audioUrl } = book

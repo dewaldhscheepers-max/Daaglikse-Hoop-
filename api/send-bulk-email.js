@@ -1,3 +1,4 @@
+const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 const { haalEnOntleed } = require('./_eposLys')
 
@@ -118,8 +119,12 @@ function buildHtml(body) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Not Allowed')
-  const { pin, subject, body } = req.body || {}
-  if (pin !== '2025') return res.status(403).send('Forbidden')
+  /* Hierdie eindpunt stuur e-pos aan Dewald se HELE inskrywerslys. Die slot
+     was `pin !== '2025'`, en daardie string het in die openbare bondel
+     gestaan — dieselfde fout as die ou `?secret=` op die kennisgewings.
+     Enigiemand wat die leer oopgemaak het, kon in sy naam aan almal skryf. */
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
+  const { subject, body } = req.body || {}
   if (!subject?.trim() || !body?.trim()) return res.status(400).json({ error: 'Onderwerp en boodskap is verpligtend' })
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'

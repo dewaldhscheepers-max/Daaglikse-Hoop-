@@ -1,5 +1,7 @@
 const crypto  = require('crypto')
 const webpush = require('web-push')
+const { wieMag } = require('./_geheim.js')
+const { saDatum, eisDag, geeDagTerug, merkKlaar, lopieVir } = require('./_dagslot.js')
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 
@@ -62,10 +64,22 @@ async function getAccessToken() {
 }
 
 // ── Today's note title ─────────────────────────────────────────────────────
-async function getTodayTitle() {
+/* Die titel van vandag se nota is die kennisgewing se opskrif. Dit is die
+   boodskap wat mense elke oggend sien, en dit moet nooit weer stilweg
+   'Daaglikse Hoop' word omdat 'n leesreel verander het nie.
+
+   Hierdie oproep het GEEN Authorization-kopstuk gehad nie — dit het net
+   gewerk omdat `notes` toevallig openbaar leesbaar is. Word daardie reel
+   ooit reggemaak (en dit moet), sou hierdie stil na die terugval val en die
+   oggendkennisgewing sou elke dag 'Daaglikse Hoop' se in plaas van die nota
+   se naam. Niks sou breek nie; dit sou net verkeerd wees.
+
+   Die diensrekening se teken is reeds in die hand en het `datastore` in sy
+   omvang. Gebruik hom. */
+async function getTodayTitle(accessToken) {
   try {
     const url  = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/notes?orderBy=publishedAt%20desc&pageSize=1`
-    const r    = await fetch(url)
+    const r    = await fetch(url, accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined)
     const data = await r.json()
     const doc  = data.documents?.[0]
     return doc?.fields?.title?.stringValue || 'Daaglikse Hoop'
@@ -213,9 +227,26 @@ async function sendFcm(token, title, body, accessToken, includeImage = true) {
 let dood = 0
 let dooies = new Set()
 
+/* ── Een sleutel vir dieselfde foon ──
+
+   Samsung Internet se web-push loop deur FCM: die intekening se endpoint is
+   `https://fcm.googleapis.com/…/<token>`, en `sendWebPush` haal daardie
+   token uit en stuur hom deur `sendFcm`. Wanneer FCM sê die foon het die app
+   verwyder, is dit dus die TOKEN wat in `dooies` beland.
+
+   `isDood` het toe die volle endpoint gaan opsoek. Dié stem nooit ooreen
+   nie, en die gevolg was stil: elke dooie Samsung-foon is by ELKE stuur
+   weer geprobeer, en dan 'n tweede keer as dood getel. Die toets het dit
+   uitgevang — 122 stuurpogings vir 120 intekenaars.
+
+   Nou normaliseer albei kante dieselfde. */
+function sleutelVir(x) {
+  const s = typeof x === 'string' ? x : (x && x.endpoint) || ''
+  return s.startsWith('https://fcm.googleapis.com/') ? s.split('/').pop() : s
+}
+
 function isDood(x) {
-  const sleutel = typeof x === 'string' ? x : (x && x.endpoint) || ''
-  return dooies.has(sleutel)
+  return dooies.has(sleutelVir(x))
 }
 
 // ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
@@ -259,31 +290,34 @@ async function sendWebPush(subscription, title, body, accessToken, includeImage 
      · die OGGEND-OPROEP stuur CRON_SECRET, want 'n cron kan nie 'n
        wagwoord tik nie.
 
-   Die vergelyking loop deur timingSafeEqual sodat 'n mens nie die geheim
-   karakter vir karakter kan uitmeet nie. */
-function selfdeGeheim(a, b) {
-  const x = Buffer.from(String(a || ''))
-  const y = Buffer.from(String(b || ''))
-  if (!x.length || x.length !== y.length) return false
-  return crypto.timingSafeEqual(x, y)
-}
-
+   Die vergelyking self staan in `_geheim.js`, want dieselfde slot sit ook op
+   die e-poswerkry en op die toets-e-pos, en 'n geheim wat op vier plekke
+   vergelyk word, is 'n geheim wat op drie plekke agterbly wanneer dit
+   verander. */
 module.exports = async function handler(req, res) {
-  const cron   = process.env.CRON_SECRET || ''
-  const admin  = process.env.SORG_ADMIN_GEHEIM || ''
-  const auth   = req.headers.authorization || ''
-  const query  = req.query?.secret || ''
-  const kopstuk = req.headers['x-sorg-geheim'] || ''
-
-  const magCron  = !!cron && (selfdeGeheim(auth, `Bearer ${cron}`) || selfdeGeheim(query, cron))
-  const magAdmin = admin.length >= 12 && selfdeGeheim(kopstuk, admin)
-
-  if (!magCron && !magAdmin) {
+  const wie = wieMag(req)
+  if (!wie) {
     return res.status(401).send('Unauthorized')
   }
 
+  const soek = req.query || {}
+  /* ── Wat as die OUTOMATIESE oggendlopie tel ──
+
+     Vercel se cron roep `/api/send-notifications?outo=1`. Maar hierdie
+     kennisgewing mag nie aan 'n navraagstring hang nie: laat 'n herskrywing
+     of 'n roete-reel daardie `?outo=1` ooit val, sou die oggendlopie as 'n
+     HANDLOPIE tel, en dan is die dag-slot weg en kan almal twee
+     kennisgewings kry.
+
+     Dus tel enige lopie wat met CRON_SECRET ingekom het as outomaties. Net
+     'n mens met die admin-wagwoord kry die vrye pad — en dit is presies
+     reg, want dit is die een wat moet kan stuur wanneer hy wil. */
+  const outomaties = wie === 'cron' || soek.outo === '1' || soek.outo === 'true'
+  /* 'n Droëloop. Gaan alles na en stuur vir niemand. */
+  const kykNet = soek.kyk === '1' || soek.kyk === 'true'
+
   if (!process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-    return res.status(500).send('Missing Firebase env vars')
+    return res.status(500).json({ fout: 'FIREBASE_CLIENT_EMAIL of FIREBASE_PRIVATE_KEY ontbreek op Vercel' })
   }
 
   const body = req.body || {}
@@ -292,10 +326,79 @@ module.exports = async function handler(req, res) {
   const isCustom    = !!(customTitle || customBody)
 
   const begin = Date.now()
+
+  /* ── Die droëloop ──
+
+     Alles wat 'n egte lopie doen, tot NET voor die stuur: die diensrekening
+     se teken, die twee lyste, die titel wat mense sou sien. Dan hou dit op.
+
+     Dit bestaan omdat die enigste ander manier om te toets, is om ses duisend
+     mense 'n kennisgewing te stuur. 'n Mens wil om nege-uur die aand kan weet
+     of half-sewe die oggend gaan werk. */
+  if (kykNet) {
+    try {
+      const accessToken = await getAccessToken()
+      const [titel, tokens, subs] = await Promise.all([
+        getTodayTitle(accessToken),
+        getFcmTokens(accessToken),
+        getWebPushSubscriptions(accessToken),
+      ])
+      const vandag = saDatum()
+      const [vandagLopie, gisterLopie] = await Promise.all([
+        lopieVir({ projectId: PROJECT_ID, accessToken, dag: vandag }),
+        lopieVir({ projectId: PROJECT_ID, accessToken, dag: saDatum(Date.now() - 86400000) }),
+      ])
+      return res.status(200).json({
+        kyk: true,
+        firebase: true,
+        vapid: vapidGereed,
+        cronGeheim: !!process.env.CRON_SECRET,
+        adminGeheim: (process.env.SORG_ADMIN_GEHEIM || '').length >= 12,
+        ontvangers: { fcm: tokens.length, webpush: subs.length, totaal: tokens.length + subs.length },
+        boodskap: {
+          titel: titel || 'Daaglikse Hoop',
+          teks:  'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.',
+        },
+        vandagSA: vandag,
+        oggendlopies: { vandag: vandagLopie, gister: gisterLopie },
+        sekondes: Math.round((Date.now() - begin) / 100) / 10,
+      })
+    } catch (e) {
+      return res.status(500).json({ kyk: true, fout: e.message })
+    }
+  }
+
+  /* ── Die dag-slot ──
+
+     Net vir die outomatiese lopie; 'n mens in die admin gaan altyd deur.
+     Sien `_dagslot.js` vir waarom dit atomies moet wees. */
+  const dag = saDatum()
+  let hetGeeis = false
+  let accessToken = null
+
+  /* Een teken vir die hele lopie. Dit was twee — een vir die slot en een vir
+     die stuur — en dit is twee kanse om te misluk waar een genoeg is. */
   try {
-    const accessToken = await getAccessToken()
+    accessToken = await getAccessToken()
+  } catch (e) {
+    console.error('send-notifications: geen toegangsteken', e)
+    return res.status(500).json({ fout: 'Firebase-diensrekening werk nie: ' + e.message })
+  }
+
+  if (outomaties) {
+    const eis = await eisDag({ projectId: PROJECT_ID, accessToken, dag })
+    if (!eis.geeis) {
+      console.log('send-notifications: oorgeslaan —', eis.rede)
+      return res.status(200).json({ oorgeslaan: true, dag, rede: eis.rede })
+    }
+    hetGeeis = true
+  }
+
+  let uitGestuur = 0
+
+  try {
     const [todayTitle, fcmTokens, webPushSubs] = await Promise.all([
-      customTitle ? Promise.resolve(customTitle) : getTodayTitle(),
+      customTitle ? Promise.resolve(customTitle) : getTodayTitle(accessToken),
       getFcmTokens(accessToken),
       getWebPushSubscriptions(accessToken),
     ])
@@ -308,9 +411,9 @@ module.exports = async function handler(req, res) {
     dooies = new Set()
 
     const f = await inGroepe(fcmTokens,
-      t => sendFcm(t, notifTitle, notifBody, accessToken, includeImage))
+      t => { uitGestuur++; return sendFcm(t, notifTitle, notifBody, accessToken, includeImage) })
     const w = await inGroepe(webPushSubs,
-      s => sendWebPush(s, notifTitle, notifBody, accessToken, includeImage))
+      s => { uitGestuur++; return sendWebPush(s, notifTitle, notifBody, accessToken, includeImage) })
 
     const result = {
       fcm:     { sent: f.geslaag, misluk: f.misluk, herhaal: f.herhaal, total: fcmTokens.length },
@@ -333,11 +436,35 @@ module.exports = async function handler(req, res) {
          dit kom weer, en dan is dit 'n groter groep of 'n tweede lopie —
          nie 'n verrassing nie. */
       sekondes: Math.round((Date.now() - begin) / 100) / 10,
+      ...(outomaties ? { outomaties: true, dag } : {}),
     }
+
+    if (hetGeeis) {
+      await merkKlaar({
+        projectId: PROJECT_ID, accessToken, dag,
+        uitslag: {
+          gestuur:  f.geslaag + w.geslaag,
+          totaal:   fcmTokens.length + webPushSubs.length,
+          misluk:   f.misluk + w.misluk,
+          sekondes: result.sekondes,
+        },
+      })
+    }
+
     console.log('send-notifications:', JSON.stringify(result))
     return res.status(200).json(result)
   } catch (e) {
     console.error('send-notifications error', e)
-    return res.status(500).send('Error: ' + e.message)
+
+    /* ── Gee die dag terug, maar net as niemand geraak is nie ──
+
+       Val dit om by die teken of by die lys van tokens, is daar nog geen
+       boodskap uit en 'n tweede probeerslag is skoon. Val dit halfpad om,
+       bly die slot staan: die helfte wat reeds gekry het, moenie dit weer
+       kry nie, en Dewald kan die res met die hand in die admin klaarmaak. */
+    if (hetGeeis && uitGestuur === 0) {
+      await geeDagTerug({ projectId: PROJECT_ID, accessToken, dag })
+    }
+    return res.status(500).json({ fout: e.message, dag, uitGestuur })
   }
 }

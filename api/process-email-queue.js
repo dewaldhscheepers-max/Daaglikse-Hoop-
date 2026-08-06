@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { magAdminDing } = require('./_geheim.js')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -106,22 +107,25 @@ module.exports = async function handler(req, res) {
      laat loop en Dewald se e-poskwota deurbrand.
 
      Nou net twee paaie, en albei se geheim bestaan NET op Vercel: die MENS
-     met SORG_ADMIN_GEHEIM in 'n kopstuk, of die CRON met CRON_SECRET. */
-  const crypto = require('crypto')
-  const selfde = (a, b) => {
-    const x = Buffer.from(String(a || ''))
-    const y = Buffer.from(String(b || ''))
-    if (!x.length || x.length !== y.length) return false
-    return crypto.timingSafeEqual(x, y)
-  }
-  const cron  = process.env.CRON_SECRET || ''
-  const admin = process.env.SORG_ADMIN_GEHEIM || ''
-  const gegee = req.query?.secret || req.body?.secret || ''
-  const kop   = req.headers['x-sorg-geheim'] || ''
+     met SORG_ADMIN_GEHEIM in 'n kopstuk, of die CRON met CRON_SECRET.
 
-  const magCron  = !!cron && selfde(gegee, cron)
-  const magAdmin = admin.length >= 12 && selfde(kop, admin)
-  if (!magCron && !magAdmin) return res.status(403).send('Forbidden')
+     ── Hoekom die cron se geheim NIE meer in die URL staan nie ──
+
+     In `vercel.json` het gestaan:
+
+         "path": "/api/process-email-queue?secret=DaaglikseHoop2025Cron"
+
+     Dieselfde geheim wat uit die openbare bondel gehaal is, net in 'n ander
+     leer. En erger: die dag wanneer CRON_SECRET op Vercel verander word, hou
+     hierdie cron op werk sonder dat iemand dit agterkom — 'n 403 om sewe-uur
+     die oggend wat niemand sien nie.
+
+     Vercel stuur sy eie crons met `Authorization: Bearer $CRON_SECRET`. Ons
+     lees dit daar, die pad dra niks meer nie, en 'n rotasie op Vercel is die
+     enigste ding wat ooit hoef te gebeur. Die ou `?secret=` bly aanvaar
+     word vir wat ook al nog so roep. Die vergelyking self staan in
+     `_geheim.js` — een plek, vir al vier die eindpunte wat dit gebruik. */
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
   let token

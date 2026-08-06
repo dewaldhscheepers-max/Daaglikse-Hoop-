@@ -1,7 +1,8 @@
+const { magAdminDing } = require('./_geheim.js')
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
-  const { pin, email, bookIds } = req.body || {}
-  if (pin !== '2025') return res.status(403).send('Forbidden')
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
+  const { email, bookIds } = req.body || {}
   if (!email || !bookIds) return res.status(400).send('Missing email or bookIds')
 
   // Reuse the ITN handler logic with fake payment data

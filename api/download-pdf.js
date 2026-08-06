@@ -1,12 +1,16 @@
 const crypto = require('crypto')
+const { tekenSleutel } = require('./_geheim.js')
 
 function todayStr() { return new Date().toISOString().slice(0, 10) }
 function yesterdayStr() {
   const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10)
 }
 
+/* Die sleutel het 'n openbare terugval gehad; sien `_geheim.js`. Die teken
+   self bly presies dieselfde vorm, dus verander niks aan hoe skakels werk
+   nie — net WIE een kan uitreken. */
 function makeToken(bookId, date) {
-  return crypto.createHmac('sha256', process.env.CRON_SECRET || 'DaaglikseHoop2025Cron')
+  return crypto.createHmac('sha256', tekenSleutel())
     .update(bookId + ':' + date).digest('hex').slice(0, 32)
 }
 

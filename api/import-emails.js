@@ -1,3 +1,4 @@
+const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 
 const INITIAL_EMAILS = [
@@ -328,8 +329,7 @@ async function fsWrite(projectId, token, path, fields) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Not Allowed')
-  const { pin } = req.body || {}
-  if (pin !== '2025') return res.status(403).send('Forbidden')
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
   let token

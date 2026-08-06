@@ -1,6 +1,14 @@
+const { magAdminDing } = require('./_geheim.js')
+
 module.exports = async function handler(req, res) {
-  const { secret, to } = req.query
-  if (secret !== 'DaaglikseHoop2025Cron') return res.status(403).send('Forbidden')
+  /* Hier het `secret !== 'DaaglikseHoop2025Cron'` gestaan — dieselfde string
+     wat in die openbare bondel was. Enigiemand kon dus e-pos deur Dewald se
+     Resend-rekening stuur, na enige adres, so dikwels as hy wil. Dit brand
+     nie net die kwota nie; dit brand die domein se reputasie, en dan land
+     die NUUSBRIEF in mense se gemorspos. */
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
+
+  const { to } = req.query
   if (!to) return res.status(400).send('?to= required')
 
   // Try with info@ first, then noreply@ as fallback

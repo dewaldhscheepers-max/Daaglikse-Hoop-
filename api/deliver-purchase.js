@@ -1,9 +1,12 @@
 const crypto = require('crypto')
+const { tekenSleutel } = require('./_geheim.js')
 
 function todayStr() { return new Date().toISOString().slice(0, 10) }
 
+/* Moet dieselfde sleutel en dieselfde vorm as `download-pdf.js` gebruik,
+   anders teken die een wat die ander nie kan lees nie. */
 function makeDownloadToken(bookId) {
-  return crypto.createHmac('sha256', process.env.CRON_SECRET || 'DaaglikseHoop2025Cron')
+  return crypto.createHmac('sha256', tekenSleutel())
     .update(bookId + ':' + todayStr()).digest('hex').slice(0, 32)
 }
 

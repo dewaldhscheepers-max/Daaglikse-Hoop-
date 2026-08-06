@@ -1,3 +1,4 @@
+const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 
 async function getAccessToken() {
@@ -32,7 +33,7 @@ module.exports = async function handler(req, res) {
 
   // GET ?pin=2025 — return current count
   if (req.method === 'GET') {
-    if (req.query.pin !== '2025') return res.status(403).json({ error: 'Forbidden' })
+    if (!magAdminDing(req)) return res.status(403).json({ error: 'Forbidden' })
     let token
     try { token = await getAccessToken() } catch (e) {
       return res.status(500).json({ error: 'Auth failed: ' + e.message })

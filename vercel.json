@@ -1,7 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/process-email-queue?secret=DaaglikseHoop2025Cron",
+      "path": "/api/send-notifications?outo=1",
+      "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/process-email-queue",
       "schedule": "0 7 * * *"
     }
   ],

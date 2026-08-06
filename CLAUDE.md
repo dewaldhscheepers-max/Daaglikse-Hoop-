@@ -27,6 +27,7 @@ node src/game/vrugtefees/vlakke.toets.mjs     # keur al 90 fases se moeilikheid
 node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
+node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 60 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -169,6 +170,99 @@ verwerp. Daar is toetse wat dit vashou; moenie hulle omseil nie.
 
 `api/*.js` is CommonJS (`api/package.json` sê so). `api/*.mjs` is ESM en kan
 uit `src/` invoer.
+
+---
+
+## Kennisgewings
+
+Ses duisend fone hang hieraan. Dit is die ding wat die app laat groei, en dit
+is al twee keer stil gebreek.
+
+**Die oggend-kennisgewing loop om 06:30 SA-tyd** as 'n Vercel-cron in
+`vercel.json` — `"30 4 * * *"`, want Vercel loop op UTC en SA is UTC+2 sonder
+somertyd. Vroeer is dit deur 'n diens BUITE die projek afgeskop; niemand weet
+meer watter een nie, en toe die geheim verander het, was daar niemand om dit
+te gaan verander nie. Hou dit binne.
+
+**Die boodskap** is nie in die kode nie: die opskrif is die titel van die
+nuutste `notes`-dokument en die teks is *"Jou Daaglikse Hoop vir vandag is
+gereed. Tik om te luister."* Verander die kode dus nie om 'n boodskap te
+verander nie — laai 'n nota.
+
+**Die dag-slot.** `api/_dagslot.js` skep `kennisgewing_dae/<SA-datum>` met
+Firestore se skep-met-'n-naam, wat 'n **409** gee as die naam bestaan. Dit is
+'n atomiese eis, nie 'n lees-dan-skryf nie: vuur twee dinge gelyktydig, wen
+presies een. Dit is die enigste ding wat keer dat ses duisend mense twee
+kennisgewings kry as daardie ou buite-diens ooit weer opduik.
+
+'n Mens in die admin gaan **altyd** deur — die slot geld net vir die
+outomatiese lopie. Daarom gee `wieMag()` in `_geheim.js` terug WIE ingekom
+het: `'admin'` (die wagwoord in `x-sorg-geheim`) of `'cron'` (CRON_SECRET).
+Enigiets wat met CRON_SECRET inkom, tel as die oggendlopie, ook al val die
+`?outo=1` weg.
+
+**Val dit om voor die eerste boodskap uit is, word die dag teruggegee** en 'n
+tweede probeerslag is skoon. Val dit halfpad om, bly die slot staan — die
+helfte wat reeds gekry het, moet dit nie weer kry nie.
+
+**Die droëloop.** `POST /api/send-notifications?kyk=1` gaan die hele pad na —
+diensrekening, albei lyste, die opskrif, of vanoggend s'n geloop het — en
+stuur vir **niemand**. Dit is die knoppie "🔍 Gaan die opstelling na" in die
+admin. Gebruik dit; die enigste ander manier om te toets is om ses duisend
+mense iets te stuur.
+
+**Waarom dit die vorige keer gebreek het** en wat 'n mens dus nie moet
+terugdraai nie:
+
+* Die stuur was 'n `for`-lus met 'n `await` in — een token op 'n slag, sowat
+  'n vyfde sekonde elk. Met geen `maxDuration` het Vercel hom na tien
+  sekondes doodgemaak, en die admin het "Failed to fetch" gewys. Die kode het
+  nie verander nie; die LYS het gegroei. Nou 50 gelyk, en `maxDuration: 300`.
+* `webpush.setVapidDetails(..., '')` op module-vlak **gooi by invoer**. Sonder
+  `VAPID_PRIVATE_KEY` het die HELE eindpunt 'n 500 gegee en niemand het iets
+  gekry nie — terwyl FCM, waarmee elke Android- en Chrome-foon werk, glad nie
+  VAPID nodig het nie. Dit is nou lui; 'n ontbrekende sleutel raak net Firefox.
+* 'n Dooie Samsung-intekening is by ELKE stuur weer geprobeer, want `dooies`
+  het die FCM-token gehou en `isDood` het die volle endpoint opgesoek. Sien
+  `sleutelVir()`.
+
+`api/_kennisgewings.toets.mjs` sit 'n vals Google agter die funksie en toets al
+hierdie dinge met 6000 tokens. Loop dit voor jy aan kennisgewings raak.
+
+---
+
+## Geheime
+
+Daar is **geen geheim in die app se kode** nie. Wat in `src/` staan, ship in
+'n openbare JavaScript-lêer wat enigiemand kan oopmaak.
+
+Hierdie projek het daardie fout vyf keer gemaak: `ADMIN_PIN = '2025'`,
+`?pin=2025` op ses eindpunte, `?secret=DaaglikseHoop2025Cron` op die stuur-aan-
+almal en op die e-poswerkry, dieselfde string as 'n TERUGVAL in twee lêers wat
+aflaaiskakels teken, en weer in `vercel.json` se cron-pad. Elke keer het dit
+soos 'n slot gelyk.
+
+Twee paaie in, en albei se waarde bestaan **net op Vercel**:
+
+| Wie | Hoe |
+|---|---|
+| 'n mens | `SORG_ADMIN_GEHEIM` in 'n `x-sorg-geheim`-kopstuk (minstens 12 karakters) |
+| 'n cron | `CRON_SECRET`, wat Vercel self as `Authorization: Bearer …` stuur |
+
+Die vergelyking staan **een keer**, in `api/_geheim.js` (`wieMag`,
+`magAdminDing`, `tekenSleutel`), deur `timingSafeEqual`. 'n Geheim wat op
+sewe plekke vergelyk word, is 'n geheim wat op ses plekke agterbly wanneer dit
+verander.
+
+Moet **nooit** 'n geheim in `vercel.json` se cron-pad sit nie. Vercel stuur sy
+crons se geheim self in 'n kopstuk, en 'n geheim in daardie lêer breek stil
+die dag wanneer die veranderlike geroteer word.
+
+Gaan dit na na elke bou:
+
+```
+grep -c DaaglikseHoop2025Cron dist/assets/*.js     # moet 0 wees
+```
 
 ---
 

@@ -147,7 +147,7 @@ export default function Admin({ onClose }) {
 
   useEffect(() => {
     if (!unlocked) return
-    fetch('/api/count-install?pin=2025')
+    fetch('/api/count-install', { headers: { 'x-sorg-geheim': geheim } })
       .then(r => r.json())
       .then(d => setInstallCount(d.total ?? 0))
       .catch(() => {})
@@ -237,8 +237,8 @@ export default function Admin({ onClose }) {
     try {
       const r = await fetch('/api/test-itn', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: '2025', email: testEmailAddr, bookIds: [testEmailBookId] })
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ email: testEmailAddr, bookIds: [testEmailBookId] })
       })
       const data = await r.json()
       setTestEmailResult(data)
@@ -272,14 +272,42 @@ export default function Admin({ onClose }) {
     try {
       const r = await fetch('/api/test-notification', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, pin: '2025' })
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ token })
       })
       const data = await r.json().catch(() => ({}))
       setNotifDetail(JSON.stringify(data))
       setNotifStatus(r.ok ? 'testsent' : 'fail')
     } catch (e) { setNotifDetail(e.message); setNotifStatus('fail') }
     setNotifBusy(false)
+  }
+
+  /* ── Die droëloop ──
+
+     Gaan die hele oggendpad na sonder om vir een mens iets te stuur: die
+     diensrekening, die twee lyste, die titel wat sou uitgaan, en of
+     vanoggend se outomatiese lopie geloop het.
+
+     Dit bestaan omdat die enigste ander manier om te weet of half-sewe gaan
+     werk, was om ses duisend mense 'n kennisgewing te stuur. */
+  const [kykBusy,   setKykBusy]   = useState(false)
+  const [kykUitslag, setKykUitslag] = useState(null)
+
+  async function handleKyk() {
+    setKykBusy(true)
+    setKykUitslag(null)
+    try {
+      const r = await fetch('/api/send-notifications?kyk=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+      })
+      const d = await r.json().catch(() => ({}))
+      if (!r.ok) { setKykUitslag({ fout: d.fout || `HTTP ${r.status}` }); setKykBusy(false); return }
+      setKykUitslag(d)
+    } catch (e) {
+      setKykUitslag({ fout: e.message })
+    }
+    setKykBusy(false)
   }
 
   // ── New book form ──
@@ -590,8 +618,8 @@ export default function Admin({ onClose }) {
     setBulkImporting(true)
     try {
       const r = await fetch('/api/import-emails', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: '2025' }),
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({}),
       })
       const data = await r.json()
       if (r.ok) { setBulkImported(true); setEmailCount(data.imported) }
@@ -605,8 +633,8 @@ export default function Admin({ onClose }) {
     setBulkSending(true); setBulkResult(null)
     try {
       const r = await fetch('/api/send-bulk-email', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: '2025', subject: bulkSubject, body: bulkBody }),
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ subject: bulkSubject, body: bulkBody }),
       })
       const data = await r.json()
       if (r.ok) {
@@ -1068,14 +1096,29 @@ export default function Admin({ onClose }) {
               {(() => {
                 const token = localStorage.getItem('fcmToken')
                 if (!token) return null
-                const url = `${window.location.origin}/api/test-notification?token=${encodeURIComponent(token)}&pin=2025`
+                /* Die skakel word op die BEDIENER geteken. Vroeer het hier
+                   `&pin=2025` gestaan, en daardie string was in die openbare
+                   bondel. Die blaaier het nie die sleutel nie en kan dus nie
+                   self 'n skakel maak nie — dit is die punt. */
                 return (
                   <div style={{ marginTop: 14 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Toets terwyl app TOE is:</div>
                     <button
                       className="admin-save-btn"
                       style={{ background: '#555', fontSize: 13 }}
-                      onClick={() => navigator.clipboard.writeText(url).catch(() => {})}
+                      onClick={async () => {
+                        try {
+                          const r = await fetch('/api/test-notification', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+                            body: JSON.stringify({ token, maakSkakel: true }),
+                          })
+                          const d = await r.json().catch(() => ({}))
+                          if (!d.pad) { setNotifDetail('Kon nie skakel maak nie: ' + JSON.stringify(d)); return }
+                          await navigator.clipboard.writeText(window.location.origin + d.pad).catch(() => {})
+                          setNotifDetail('✅ Skakel gekopieer — geldig tot môre.')
+                        } catch (e) { setNotifDetail(e.message) }
+                      }}
                     >
                       📋 Kopieer toets-skakel
                     </button>
@@ -1087,6 +1130,53 @@ export default function Admin({ onClose }) {
                   </div>
                 )
               })()}
+
+              {/* ── Gaan die oggend na, sonder om iets te stuur ── */}
+              <div className="admin-section-title" style={{ marginTop: 18, marginBottom: 8 }}>🌅 Die oggend-kennisgewing</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 8 }}>
+                Loop outomaties elke oggend <b>06:30</b> (SA-tyd) uit die projek self.
+                Hierdie knoppie gaan die hele pad na en stuur vir <b>niemand</b> nie.
+              </div>
+              <button
+                className="admin-save-btn"
+                style={{ background: '#8a6d1f' }}
+                onClick={handleKyk}
+                disabled={kykBusy}
+              >
+                {kykBusy ? 'Besig...' : '🔍 Gaan die opstelling na'}
+              </button>
+              {kykUitslag && (
+                <div style={{ fontSize: 12.5, background: '#f5f5f5', borderRadius: 8, padding: '10px 12px', marginTop: 8, lineHeight: 1.7 }}>
+                  {kykUitslag.fout ? (
+                    <div style={{ color: '#c0392b' }}>❌ {kykUitslag.fout}</div>
+                  ) : (
+                    <>
+                      <div>{kykUitslag.firebase ? '✅' : '❌'} Firebase-sleutels</div>
+                      <div>{kykUitslag.cronGeheim ? '✅' : '❌'} CRON_SECRET (die oggend-cron)</div>
+                      <div>{kykUitslag.adminGeheim ? '✅' : '❌'} Admin-wagwoord</div>
+                      <div>{kykUitslag.vapid ? '✅' : '⚠️'} VAPID {kykUitslag.vapid ? '' : '— net Firefox raak geraak'}</div>
+                      <div style={{ marginTop: 6 }}><b>{kykUitslag.ontvangers?.totaal ?? 0}</b> ontvangers
+                        {' '}({kykUitslag.ontvangers?.fcm ?? 0} FCM, {kykUitslag.ontvangers?.webpush ?? 0} web-push)</div>
+                      {/* Die opskrif is die NUUTSTE nota s'n. Laai jy môre 'n
+                          nuwe een, gaan daardie een uit — nie hierdie een nie. */}
+                      <div style={{ marginTop: 6 }}>Opskrif nou: <b>{kykUitslag.boodskap?.titel}</b></div>
+                      <div style={{ color: 'var(--text-muted)' }}>{kykUitslag.boodskap?.teks}</div>
+                      <div style={{ marginTop: 6 }}>
+                        Vandag ({kykUitslag.vandagSA}):{' '}
+                        {kykUitslag.oggendlopies?.vandag
+                          ? `✅ geloop — ${kykUitslag.oggendlopies.vandag.gestuur} van ${kykUitslag.oggendlopies.vandag.totaal}`
+                          : '— nog nie geloop nie'}
+                      </div>
+                      <div>
+                        Gister:{' '}
+                        {kykUitslag.oggendlopies?.gister
+                          ? `✅ geloop — ${kykUitslag.oggendlopies.gister.gestuur} van ${kykUitslag.oggendlopies.gister.totaal}`
+                          : '— geen rekord'}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1216,7 +1306,7 @@ export default function Admin({ onClose }) {
 
 
           {/* ── KINDERS TAB ── */}
-          {activeTab === 'kinders' && <KinderAdmin />}
+          {activeTab === 'kinders' && <KinderAdmin geheim={geheim} />}
           {activeTab === 'sorg'    && <SorgAdmin geheim={geheim} />}
 
           {activeTab === 'video' && (

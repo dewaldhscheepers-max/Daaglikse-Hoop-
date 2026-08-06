@@ -6,8 +6,6 @@ import { signInAnonymously } from 'firebase/auth'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import './KinderAdmin.css'
 
-const PIN = '2025'
-
 async function ensureAuth() {
   if (!auth.currentUser) await signInAnonymously(auth)
 }
@@ -30,7 +28,7 @@ function compressImage(file, maxWidth = 1500, quality = 0.82) {
   })
 }
 
-export default function KinderAdmin() {
+export default function KinderAdmin({ geheim = '' }) {
   const [books,          setBooks]          = useState([])
   const [loading,        setLoading]        = useState(true)
   const [editingBook,    setEditingBook]    = useState(null)
@@ -55,9 +53,8 @@ export default function KinderAdmin() {
       try {
         await fetch('/api/kinder-boek-save', {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
           body: JSON.stringify({
-            pin: PIN,
             book: {
               id:          book.id,
               title:       book.title,
@@ -204,8 +201,8 @@ export default function KinderAdmin() {
     try {
       const r = await fetch('/api/kinder-boek-save', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ pin: PIN, book: editingBook }),
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body:    JSON.stringify({ book: editingBook }),
       })
       const data = await r.json()
       if (data.ok) {
