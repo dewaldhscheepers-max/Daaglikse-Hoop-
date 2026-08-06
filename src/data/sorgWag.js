@@ -33,16 +33,28 @@ import { plat } from './sorgKrisis.js'
 /* Woorde wat by 'n onderwerp pas. Nie 'n woordeboek nie — net genoeg om 'n
    stemnota oor rou by iemand in rou uit te bring. */
 const WOORDE = {
-  angs:      ['angs', 'bekommer', 'vrees', 'bang', 'paniek', 'rus', 'vrede'],
-  rou:       ['rou', 'verlies', 'dood', 'oorlede', 'hartseer', 'treur'],
-  huwelik:   ['huwelik', 'man', 'vrou', 'verhouding', 'egskeiding', 'trou'],
-  vergifnis: ['vergifnis', 'vergewe', 'bitter', 'wrok'],
-  eensaam:   ['eensaam', 'alleen', 'verwerp', 'verwerping'],
-  kinders:   ['kind', 'kinders', 'ouer', 'ma', 'pa', 'familie', 'seun', 'dogter'],
-  twyfel:    ['twyfel', 'geloof', 'God', 'stil', 'vergeet', 'ver'],
-  geld:      ['geld', 'finansi', 'skuld', 'werk', 'werkloos', 'brood'],
-  onseker:   ['moeg', 'te veel', 'swaar', 'uitgeput', 'sterk'],
-  ander:     [],
+  angs:       ['angs', 'bekommer', 'vrees', 'bang', 'paniek', 'rus', 'vrede'],
+  donker:     ['depressie', 'donker', 'moedeloos', 'hopeloos', 'leeg', 'moeg'],
+  rou:        ['rou', 'verlies', 'dood', 'oorlede', 'hartseer', 'treur'],
+  sterwend:   ['sterf', 'sterwe', 'afskeid', 'laaste', 'dood', 'oorgee'],
+  siekte:     ['siek', 'gesondheid', 'pyn', 'hospitaal', 'kanker', 'genees', 'liggaam'],
+  ouerword:   ['ouer', 'oud', 'ma', 'pa', 'versorg', 'sorg'],
+  huwelik:    ['huwelik', 'man', 'vrou', 'verhouding', 'egskeiding', 'trou'],
+  skeiding:   ['egskeiding', 'skei', 'verlaat', 'huwelik', 'alleen'],
+  kinders:    ['kind', 'kinders', 'ouer', 'ma', 'pa', 'familie', 'seun', 'dogter'],
+  eensaam:    ['eensaam', 'alleen', 'verwerp', 'verwerping'],
+  vergifnis:  ['vergifnis', 'vergewe', 'bitter', 'wrok'],
+  woede:      ['woede', 'kwaad', 'bitter', 'wrok', 'haat'],
+  skaamte:    ['skaam', 'skaamte', 'skuld', 'sonde', 'genade', 'vergewe'],
+  waarde:     ['waarde', 'genoeg', 'selfbeeld', 'identiteit', 'minderwaardig'],
+  grense:     ['grens', 'grense', 'nee', 'oorweldig', 'uitgeput'],
+  besluit:    ['besluit', 'keuse', 'pad', 'rigting', 'wysheid', 'lei'],
+  twyfel:     ['twyfel', 'geloof', 'God', 'stil', 'vergeet', 'ver'],
+  verslawing: ['verslaaf', 'verslawing', 'drank', 'alkohol', 'dwelm', 'gewoonte', 'vry'],
+  geld:       ['geld', 'finansi', 'skuld', 'werkloos', 'brood'],
+  werk:       ['werk', 'roeping', 'beroep', 'werkloos', 'doel'],
+  onseker:    ['moeg', 'te veel', 'swaar', 'uitgeput', 'sterk'],
+  ander:      [],
 }
 
 let notasBelofte = null

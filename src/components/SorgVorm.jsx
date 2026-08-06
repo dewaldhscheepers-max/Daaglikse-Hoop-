@@ -42,11 +42,20 @@ import './SorgVorm.css'
 const MIN_LENGTE = 15
 const MAKS_LENGTE = 2000
 
+/* Hoeveel onderwerpe dadelik wys.
+
+   Daar is twee-en-twintig sodat die eerste keuse reeds die regte een kan
+   wees — niemand gaan dit agterna regmaak nie. Maar almal saam is 'n blok
+   van sowat 680px reg bo die toestemming en die stuurknoppie, en die veld
+   is OPSIONEEL. Die eerste tien dek die meeste; die res is een druk weg. */
+const WYS_EERS = 10
+
 export default function SorgVorm({ oop, onSluit, videoData }) {
   const [teks, setTeks] = useState('')
   const [onderwerp, setOnderwerp] = useState('')
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)
+  const [alleOnderwerpe, setAlleOnderwerpe] = useState(false)
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
   const [uitslag, setUitslag] = useState(null)
@@ -58,6 +67,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     if (!oop) return
     setTeks('')
     setOnderwerp('')
+    setAlleOnderwerpe(false)
     setToestem(false)
     setHulpOop(false)
     setBesig(false)
@@ -218,7 +228,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
 
             <label className="sv-etiket">Waaroor gaan dit? <span>Opsioneel</span></label>
             <div className="sv-onderwerpe">
-              {ONDERWERPE.map(o => (
+              {(alleOnderwerpe ? ONDERWERPE : ONDERWERPE.slice(0, WYS_EERS)).map(o => (
                 <button
                   key={o.sleutel}
                   className={`sv-onderwerp${onderwerp === o.sleutel ? ' gekies' : ''}`}
@@ -227,6 +237,11 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                   {o.naam}
                 </button>
               ))}
+              {!alleOnderwerpe && (
+                <button className="sv-meer-onderwerpe" onClick={() => setAlleOnderwerpe(true)}>
+                  Nog {ONDERWERPE.length - WYS_EERS} onderwerpe
+                </button>
+              )}
             </div>
 
             {/* ── Een blokkie ── */}

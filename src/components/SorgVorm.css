@@ -182,13 +182,13 @@
 }
 
 .sv-onderwerp {
-  padding: 9px 14px;
+  padding: 8px 12px;
   border: 1px solid #D8D2E4;
   border-radius: 999px;
   background: #FFFFFF;
   color: #6E6455;
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s, color 0.12s, border-color 0.12s;
@@ -199,6 +199,26 @@
   border-color: var(--purple-dark, #5C4E8E);
   color: #FFFFFF;
 }
+
+/* Die res van die onderwerpe, agter een druk.
+
+   Daar is twee-en-twintig, en almal saam is 'n blok van sowat 680px — 'n
+   hele skerm vol, vir 'n veld wat OPSIONEEL is, reg bo die toestemming en
+   die stuurknoppie. Die eerste tien dek die meeste; wie iets anders soek,
+   druk een keer. */
+.sv-meer-onderwerpe {
+  padding: 8px 12px;
+  border: 1px dashed #CFC7DE;
+  border-radius: 999px;
+  background: none;
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sv-meer-onderwerpe:active { background: #F0ECFA; }
 
 .sv-naam-keuse {
   display: flex;
