@@ -7,8 +7,37 @@
      Android-foon rou GPU-geheue gewys het.
 */
 
+/* ── Die palet ──
+
+   Die blad was vaal, en dit was nie die kleure self nie — dit was die
+   OORGANG. Die banier is warm perske en pers, en dan hou dit hard op en
+   alles daaronder is spierwit met dun gryslila lyne. Die warmte was 'n
+   belofte wat die res van die blad nie nagekom het nie.
+
+   Drie goed maak dit reg, en die derde is die belangrikste:
+     · warmer grys en 'n warmer swart, sodat niks blou lyk nie;
+     · goud wat ONDER die banier ook voorkom, nie net daarbo nie;
+     · 'n wassing wat die banier se kleur in die blad laat afloop in plaas
+       van 'n reguit sny.
+
+   Kaarte staan nou op die agtergrond met 'n sagte skaduwee eerder as om met
+   'n lyn uitgesny te wees. Dit is wat 'n bladsy laat lewe: dieptes, nie
+   omlyning nie. */
 .sorg {
   min-height: 100%;
+  --s-blad:      #FAF7F2;
+  --s-kaart:     #FFFFFF;
+  --s-antwoord:  #F5EFE3;
+  --s-pers:      #624A84;
+  --s-pers-diep: #4C3A6B;
+  --s-teks:      #302A3A;
+  --s-sag:       #77717D;
+  --s-goud:      #C69A32;
+  --s-reaksie:   #F1EDF6;
+  --s-hart:      #B96868;
+  --s-rand:      #EBE3D8;
+  --s-skadu:     0 1px 2px rgba(48, 42, 58, 0.04), 0 4px 14px rgba(48, 42, 58, 0.06);
+  background: var(--s-blad);
 }
 
 .sorg-header {
@@ -37,20 +66,36 @@
   border-color: #FFFFFF;
 }
 
+/* Die wassing. Dit sit op 'n ONDEURSIGTIGE agtergrond en dit is 'n
+   CSS-gradient, nie 'n beeld nie — sien CLAUDE.md oor volskerm-teksture en
+   die strepe wat hulle op Android veroorsaak het. 'n Gradient word in die
+   ouer se laag geverf en dra geen tekstuur nie. */
 .sorg-body {
   padding: 18px 20px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 96px);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(226, 176, 138, 0.20) 0%,
+      rgba(202, 172, 196, 0.10) 90px,
+      rgba(250, 247, 242, 0) 260px
+    ),
+    var(--s-blad);
 }
 
 /* ── Die uitnodiging ──
    "Vertel my wat swaar is" het geklink of 'n mens net probleme mag plaas.
    Mense mag ook 'n vraag vra of hul hele storie vertel. Die gesig is klein
    met opset: net genoeg om te wys daar is 'n regte mens aan die ander kant. */
+/* Die uitnodiging kry 'n goue randjie bo. Dit is die een kaart wat 'n mens
+   moet raaksien, en goud is die app se warm kleur. */
 .sorg-uitnodig {
-  margin: 14px 0 18px;
+  margin: 14px 0 20px;
   padding: 17px 18px 15px;
-  border: 1px solid rgba(107, 92, 158, 0.16);
-  border-radius: 18px;
-  background: #FFFFFF;
+  border: 1px solid var(--s-rand);
+  border-top: 3px solid var(--s-goud);
+  border-radius: 20px;
+  background: var(--s-kaart);
+  box-shadow: var(--s-skadu);
 }
 
 /* Die foto en die NAAM saam op een reel. Toe die opskrif hier gestaan het,
@@ -69,6 +114,7 @@
   border-radius: 50%;
   object-fit: cover;
   background: #E8E4EE;
+  box-shadow: 0 0 0 2px var(--s-kaart), 0 0 0 3.5px var(--s-goud);
 }
 
 .sorg-uitnodig-naam {
@@ -76,7 +122,7 @@
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: var(--text, #2D2040);
+  color: var(--s-teks);
 }
 
 /* Die opskrif kry sy eie volle breedte. */
@@ -86,7 +132,7 @@
   font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--text, #2D2040);
+  color: var(--s-teks);
 }
 
 .sorg-uitnodig-teks {
@@ -94,7 +140,7 @@
   font-family: var(--font-body);
   font-size: 14.5px;
   line-height: 1.62;
-  color: #5A5165;
+  color: #5F5867;
 }
 
 .sorg-vertel {
@@ -103,16 +149,17 @@
   padding: 15px 18px;
   border: 0;
   border-radius: 14px;
-  background: var(--purple-dark, #5C4E8E);
+  background: var(--s-pers);
   color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 700;
   text-align: center;
+  box-shadow: 0 3px 12px rgba(98, 74, 132, 0.28);
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s;
 }
-.sorg-vertel:active { background: #4C4076; }
+.sorg-vertel:active { background: var(--s-pers-diep); }
 
 /* Wat hierdie plek NIE is nie. Klein, maar duidelik — en met 'n lyn bo, want
    dit is 'n ander soort sin as die res. */
@@ -149,7 +196,7 @@
 .sorg-oortjie {
   flex: 0 0 auto;
   padding: 9px 15px;
-  border: 1px solid rgba(107, 92, 158, 0.18);
+  border: 1px solid var(--s-rand);
   border-radius: 999px;
   background: #FFFFFF;
   color: var(--text-muted, #8A7E9A);
@@ -163,7 +210,7 @@
 .sorg-oortjie:active { background: #F2EEE6; }
 
 .sorg-oortjie.aktief {
-  background: var(--purple-dark, #5C4E8E);
+  background: var(--s-pers);
   border-color: var(--purple-dark, #5C4E8E);
   color: #FFFFFF;
 }
@@ -389,7 +436,7 @@
   padding: 15px 16px;
   border-left: 3px solid var(--purple-dark, #5C4E8E);
   border-radius: 0 14px 14px 0;
-  background: #F3EFE6;
+  background: var(--s-antwoord);
 }
 
 .sorg-kring-kop {

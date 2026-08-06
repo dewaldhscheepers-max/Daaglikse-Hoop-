@@ -141,11 +141,26 @@ export default function SorgPlasing({ plasing }) {
     <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
       {plasing.titel && <h3 className="sp-titel">{plasing.titel}</h3>}
 
+      {/* ── Wie ──
+
+          Dit was "Anoniem · 6 Augustus · Angs en bekommernis" — 'n ry velde
+          uit 'n databasis. "Anoniem" op sy eie is 'n nul; dit se NIEMAND,
+          terwyl daar 'n mens agter sit wat besluit het om te praat.
+
+          "Anoniem het 'n boodskap gedeel" is dieselfde inligting, maar dit
+          is iemand wat iets DOEN. Die datum en die onderwerp sak na 'n
+          tweede, fyner reel — hulle is konteks, nie die hoofsaak nie. */}
       <p className="sp-wie">
-        {plasing.naam || 'Anoniem'}
-        {plasing.datum ? ` · ${skryfDatum(plasing.datum)}` : ''}
-        {onderwerpNaam(plasing.onderwerp) ? ` · ${onderwerpNaam(plasing.onderwerp)}` : ''}
+        <span className="sp-wie-naam">{plasing.naam || 'Anoniem'}</span>
+        {' het ’n boodskap gedeel'}
       </p>
+      {(plasing.datum || onderwerpNaam(plasing.onderwerp)) && (
+        <p className="sp-wanneer">
+          {skryfDatum(plasing.datum)}
+          {plasing.datum && onderwerpNaam(plasing.onderwerp) ? ' · ' : ''}
+          {onderwerpNaam(plasing.onderwerp)}
+        </p>
+      )}
 
       <p className={`sp-teks${lank && !oop ? ' kort' : ''}`}>{plasing.teks}</p>
       {lank && !oop && (
@@ -155,7 +170,30 @@ export default function SorgPlasing({ plasing }) {
       {/* ── Dewald se antwoord, DIREK onder die woorde ── */}
       {antwoord && (
         <div className="sp-antwoord">
-          <p className="sp-antwoord-kop">Dewald antwoord</p>
+          {/* ── Wie praat ──
+
+              "Dewald antwoord" is 'n etiket op 'n boks. Met die gesig
+              daarby is dit 'n mens wat praat, en dit is die hele verskil
+              tussen 'n vraag-en-antwoord-blad en 'n pastorale een.
+
+              "Vasgespeld" doen nog iets: sodra ander mense se woorde van
+              ondersteuning hieronder kom, sê dit hoekom hierdie een bo bly
+              staan. Dit maak van Dewald die stem met die meeste gewig
+              sonder om hom die enigste stem te maak. */}
+          <div className="sp-antwoord-wie">
+            <img
+              className="sp-antwoord-gesig"
+              src="/beelde/dewald.jpg"
+              alt="Dewald Scheepers"
+              width="34"
+              height="34"
+              loading="lazy"
+            />
+            <div className="sp-antwoord-wie-teks">
+              <p className="sp-antwoord-kop">Dewald se pastorale begeleiding</p>
+              <p className="sp-vasgespeld">Vasgespeld</p>
+            </div>
+          </div>
           {antwoord.titel && <p className="sp-antwoord-titel">{antwoord.titel}</p>}
 
           {antwoord.tipe === 'oudio' && (
