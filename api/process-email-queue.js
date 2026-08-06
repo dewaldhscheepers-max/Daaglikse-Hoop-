@@ -98,8 +98,30 @@ function buildHtml(body) {
 }
 
 module.exports = async function handler(req, res) {
-  const secret = req.query?.secret || req.body?.secret
-  if (secret !== 'DaaglikseHoop2025Cron' && secret !== '2025') return res.status(403).send('Forbidden')
+  /* ── Wie mag die e-poswerkry laat loop ──
+
+     Hier het twee geheime in die KODE gestaan — 'DaaglikseHoop2025Cron' en
+     '2025' — en die admin het die eerste een in die URL saamgestuur. Daardie
+     oproep sit in die app se openbare JavaScript, dus kon enigiemand die ry
+     laat loop en Dewald se e-poskwota deurbrand.
+
+     Nou net twee paaie, en albei se geheim bestaan NET op Vercel: die MENS
+     met SORG_ADMIN_GEHEIM in 'n kopstuk, of die CRON met CRON_SECRET. */
+  const crypto = require('crypto')
+  const selfde = (a, b) => {
+    const x = Buffer.from(String(a || ''))
+    const y = Buffer.from(String(b || ''))
+    if (!x.length || x.length !== y.length) return false
+    return crypto.timingSafeEqual(x, y)
+  }
+  const cron  = process.env.CRON_SECRET || ''
+  const admin = process.env.SORG_ADMIN_GEHEIM || ''
+  const gegee = req.query?.secret || req.body?.secret || ''
+  const kop   = req.headers['x-sorg-geheim'] || ''
+
+  const magCron  = !!cron && selfde(gegee, cron)
+  const magAdmin = admin.length >= 12 && selfde(kop, admin)
+  if (!magCron && !magAdmin) return res.status(403).send('Forbidden')
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
   let token

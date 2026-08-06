@@ -241,11 +241,44 @@ async function sendWebPush(subscription, title, body, accessToken, includeImage 
 }
 
 // ── Handler ────────────────────────────────────────────────────────────────
+/* ── Wie mag 'n kennisgewing aan ses duisend mense stuur ──
+
+   Hier het gestaan: 'n geheim in die URL, en die admin het dit as
+   `?secret=DaaglikseHoop2025Cron` saamgestuur. Daardie oproep sit in die
+   app se JavaScript, en daardie JavaScript is openbaar. Enigiemand wat die
+   lêer oopmaak, kon dus enige titel en enige boodskap aan al ses duisend
+   mense stuur.
+
+   Dit is presies dieselfde fout as die ou `ADMIN_PIN = '2025'` wat ons vir
+   Pastorale Sorg reggemaak het: 'n string in die bondel beskerm niks.
+
+   Nou is daar twee paaie in, en albei se geheim bestaan NET op Vercel:
+
+     · die MENS stuur SORG_ADMIN_GEHEIM in 'n kopstuk — dieselfde wagwoord
+       waarmee hy die admin oopgesluit het, wat nooit in die bondel is nie;
+     · die OGGEND-OPROEP stuur CRON_SECRET, want 'n cron kan nie 'n
+       wagwoord tik nie.
+
+   Die vergelyking loop deur timingSafeEqual sodat 'n mens nie die geheim
+   karakter vir karakter kan uitmeet nie. */
+function selfdeGeheim(a, b) {
+  const x = Buffer.from(String(a || ''))
+  const y = Buffer.from(String(b || ''))
+  if (!x.length || x.length !== y.length) return false
+  return crypto.timingSafeEqual(x, y)
+}
+
 module.exports = async function handler(req, res) {
-  const secret = process.env.CRON_SECRET
+  const cron   = process.env.CRON_SECRET || ''
+  const admin  = process.env.SORG_ADMIN_GEHEIM || ''
   const auth   = req.headers.authorization || ''
   const query  = req.query?.secret || ''
-  if (secret && auth !== `Bearer ${secret}` && query !== secret) {
+  const kopstuk = req.headers['x-sorg-geheim'] || ''
+
+  const magCron  = !!cron && (selfdeGeheim(auth, `Bearer ${cron}`) || selfdeGeheim(query, cron))
+  const magAdmin = admin.length >= 12 && selfdeGeheim(kopstuk, admin)
+
+  if (!magCron && !magAdmin) {
     return res.status(401).send('Unauthorized')
   }
 

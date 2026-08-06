@@ -195,9 +195,12 @@ export default function Admin({ onClose }) {
     setSendAllBusy(true)
     setSendAllResult(null)
     try {
-      const r = await fetch('/api/send-notifications?secret=DaaglikseHoop2025Cron', {
+      /* Die wagwoord waarmee hy pas oopgesluit het, in 'n kopstuk. Die ou
+         `?secret=…` het in die bondel gestaan en enigiemand kon dus 'n
+         boodskap aan almal stuur. */
+      const r = await fetch('/api/send-notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
         body: JSON.stringify({ title: customTitle.trim(), body: customBody.trim() })
       })
       const data = await r.json().catch(() => ({}))
@@ -621,7 +624,9 @@ export default function Admin({ onClose }) {
   async function handleProcessQueue() {
     setProcessResult(null)
     try {
-      const r = await fetch('/api/process-email-queue?secret=DaaglikseHoop2025Cron')
+      const r = await fetch('/api/process-email-queue', {
+        headers: { 'x-sorg-geheim': geheim },
+      })
       const data = await r.json()
       setProcessResult(data)
       if (data.remaining > 0) {
