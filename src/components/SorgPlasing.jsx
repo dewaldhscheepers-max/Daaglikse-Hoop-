@@ -118,6 +118,11 @@ export default function SorgPlasing({ plasing }) {
     if (typeof n === 'number') setSaam(n)
   }
 
+  /* Het HIERDIE foon dit al gedra, wys ons die telling ook al is dit een.
+     Andersins sien 'n mens wat pas gedruk het weer "Ek dra dit saam met jou"
+     en dink sy druk het niks gedoen nie. */
+  const wysTelling = saam > 0 || gedra
+
   return (
     <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
       {plasing.titel && <h3 className="sp-titel">{plasing.titel}</h3>}
@@ -167,8 +172,8 @@ export default function SorgPlasing({ plasing }) {
       {/* ── Geselskap, nie 'n punt nie ── */}
       <button className={`sp-saam${gedra ? ' gedra' : ''}`} onClick={dra} disabled={gedra}>
         <span className="sp-saam-hart" aria-hidden="true">♡</span>
-        {saam > 0
-          ? `${saam} ${saam === 1 ? 'mens dra' : 'mense dra'} dit saam met jou`
+        {wysTelling
+          ? `${Math.max(saam, gedra ? 1 : 0)} ${Math.max(saam, gedra ? 1 : 0) === 1 ? 'mens dra' : 'mense dra'} dit saam met jou`
           : 'Ek dra dit saam met jou'}
       </button>
     </article>

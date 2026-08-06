@@ -15,13 +15,26 @@ const PAD = '/api/sorg-muur'
 const SAAM_SLEUTEL = 'sorg_saam'
 
 let belofte = null
+let gehaalOp = 0
 
-/* Een keer per sessie gehaal. 'n Mislukking word NIE onthou nie — die foon
-   was dalk net 'n oomblik aflyn. Dieselfde fout het die Afrikaanse Bybel 'n
-   dag lank laat wegbly. */
+/* Twintig sekondes, nie 'n hele sessie nie.
+
+   Dit was een keer per sessie. Die gevolg: Dewald druk "Ek dra dit saam met
+   jou", sy vrou druk ook, hy kom terug na die muur — en die telling staan
+   nog op nul. Die skerm het dit eenvoudig nooit weer gaan haal nie.
+
+   Twintig sekondes is kort genoeg dat 'n mens wat wegstap en terugkom die
+   nuwe telling sien, en lank genoeg dat 'n paar vinnige oortjie-drukke nie
+   elke keer 'n oproep maak nie.
+
+   'n Mislukking word NIE onthou nie — die foon was dalk net 'n oomblik
+   aflyn. Dieselfde fout het die Afrikaanse Bybel 'n dag lank laat wegbly. */
+const VARS_MS = 20 * 1000
+
 export function haalMuur() {
-  if (!belofte) {
-    belofte = fetch(PAD, { headers: { accept: 'application/json' } })
+  if (!belofte || Date.now() - gehaalOp > VARS_MS) {
+    gehaalOp = Date.now()
+    belofte = fetch(PAD, { headers: { accept: 'application/json' }, cache: 'no-store' })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
       .then(d => (Array.isArray(d.plasings) ? d.plasings : []))
       .catch(() => { belofte = null; return [] })
@@ -29,7 +42,7 @@ export function haalMuur() {
   return belofte
 }
 
-export function vergeetMuur() { belofte = null }
+export function vergeetMuur() { belofte = null; gehaalOp = 0 }
 
 /* ── Wat hierdie foon reeds saamdra ── */
 export function saamLys() {

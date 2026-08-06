@@ -68,7 +68,18 @@ export default async function handler(req, res) {
         .sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || '')))
         .map(virDieSkerm)
 
-      res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=120')
+      /* GEEN kas nie.
+
+         Dit was `public, max-age=30, s-maxage=120`. Dit het gelyk soos 'n
+         goedkoop wins — die muur verander mos nie elke sekonde nie. Maar die
+         TELLING verander wel: Dewald het "Ek dra dit saam met jou" gedruk, sy
+         vrou ook, en toe hulle terugkom was die telling nog nul. Vercel se
+         rand het twee minute lank 'n ou kopie bedien.
+
+         'n Telling wat lieg, is erger as geen telling nie: die hele punt van
+         daardie knoppie is om iemand te wys dat ander mense sy ding saamdra.
+         Die muur is klein; hom elke keer vars haal kos niks. */
+      res.setHeader('Cache-Control', 'no-store')
       return res.status(200).json({ plasings: lys })
     } catch (e) {
       /* 'n Stukkende muur mag nie die blad doodmaak nie. */
