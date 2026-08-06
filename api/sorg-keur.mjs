@@ -76,6 +76,14 @@ function skoonAntwoord(a) {
   return { antwoord: { tipe, titel, teks, bron, datum: dat } }
 }
 
+/* Nuutste eerste, tot op die sekonde. `geskep` is 'n ISO-tydstempel en ISO
+   sorteer korrek as teks; ontbreek dit op 'n ou dokument, val ons terug op die
+   dag en dan op die id, wat ook met die tyd begin. */
+function nuutsteEerste(a, b) {
+  const t = x => String(x.geskep || x.datum || x.dag || '') + '|' + String(x.id || '')
+  return t(b).localeCompare(t(a))
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -94,15 +102,19 @@ export default async function handler(req, res) {
 
       /* Gevaar heel bo, dan die nuutstes. Iemand wat vanaand geskryf het dat
          hy nie meer wil lewe nie, mag nie onder 'n week se gewone boodskappe
-         le nie. */
+         le nie.
+
+         Binne 'n hopie op TYD, nie op dag nie: `dag` is net 'n datum, dus was
+         alles wat vandag ingekom het gelyk en het Firestore se eie volgorde
+         beslis — wat oudste-eerste is. Dewald het dus vanoggend se eerste
+         boodskap bo gesien in plaas van die nuutste. */
       const rang = s => (s === 'gevaar' ? 0 : s === 'nuut' ? 1 : 2)
       inkomend.sort((a, b) =>
-        rang(a.status) - rang(b.status) ||
-        String(b.dag || '').localeCompare(String(a.dag || '')))
+        rang(a.status) - rang(b.status) || nuutsteEerste(a, b))
 
       return res.status(200).json({
         inkomend,
-        muur: muur.sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || ''))),
+        muur: muur.sort(nuutsteEerste),
         tellings: {
           gevaar: inkomend.filter(x => x.status === 'gevaar').length,
           nuut: inkomend.filter(x => x.status === 'nuut').length,

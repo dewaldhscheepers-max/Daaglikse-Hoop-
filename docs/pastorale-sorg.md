@@ -308,7 +308,7 @@ nie:
 
 | Oortjie | Wat dit wys |
 |---|---|
-| Die Muur | almal, nuutste eerste |
+| Die Muur | almal, nuutste eerste — **ses op 'n slag**, dan "Wys meer" |
 | Die Video's | die biblioteek volgens behoefte |
 
 Bo-aan Die Video's staan **"Een video. Elke week."** met die verduideliking

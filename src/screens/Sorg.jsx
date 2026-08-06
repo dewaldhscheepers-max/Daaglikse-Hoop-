@@ -86,6 +86,14 @@ export default function Sorg() {
   const [woord, setWoord] = useState(null)
   const [muur, setMuur] = useState(null)      // null = besig
 
+  /* Ses plasings, dan "Wys meer".
+
+     Elke kaart dra 'n klankspeler en 'n hele storie. Dertig van hulle op een
+     slag beteken dertig spelers wat metadata gaan haal en 'n bladsy wat op 'n
+     swak sein nie klaar laai nie — en 'n swak sein is in Suid-Afrika die
+     gewone geval, nie die uitsondering nie. */
+  const [wysAantal, setWysAantal] = useState(6)
+
   useEffect(() => {
     let lewendig = true
     haalVideos().then(d => {
@@ -293,7 +301,14 @@ export default function Sorg() {
                 Elke boodskap hier is deur 'n mens gelees en met toestemming
                 geplaas. Niks kom outomaties op hierdie muur nie.
               </p>
-              {plasings.map(p => <SorgPlasing key={p.id} plasing={p} />)}
+              {plasings.slice(0, wysAantal).map(p => <SorgPlasing key={p.id} plasing={p} />)}
+
+              {plasings.length > wysAantal && (
+                <button className="sorg-meer" onClick={() => setWysAantal(n => n + 6)}>
+                  Wys meer
+                  <span>{plasings.length - wysAantal} nog</span>
+                </button>
+              )}
             </>
           )
         )}

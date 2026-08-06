@@ -16,6 +16,11 @@
    ──────────────────────────────────────────────────────────── */
 
 import crypto from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const wortel = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /* Die diensrekening word nagemaak sodat kryToken() nie regtig gaan haal nie.
    Ons raak NOOIT aan die lewende projek nie — sien CLAUDE.md. */
@@ -168,6 +173,50 @@ afdeling('Wie mag skryf')
   process.env.SORG_ADMIN_GEHEIM = bewaar
 
   kyk('die minimum is 12', MIN_WAGWOORD === 12, MIN_WAGWOORD)
+}
+
+afdeling('Nuutste eerste — ook binne dieselfde dag')
+{
+  /* Presies die fout: alles op dieselfde DAG, en die id's begin met die tyd
+     dus is Firestore se eie volgorde oudste-eerste. Sonder `geskep` in die
+     sortering het die dag se plasings agterstevoor gele. */
+  const bron = fs.readFileSync(path.join(wortel, 'api', 'sorg-muur.mjs'), 'utf8')
+  const begin = bron.indexOf('function volgorde')
+  const eind = bron.indexOf('/* Wat na die kliënt gaan')
+  const { volgorde } = new Function(bron.slice(begin, eind) + '\nreturn { volgorde }')()
+
+  const dag = '2026-08-06'
+  const lys = [
+    { id: 'm01', datum: dag, geskep: '2026-08-06T07:00:00.000Z' },
+    { id: 'm02', datum: dag, geskep: '2026-08-06T09:30:00.000Z' },
+    { id: 'm03', datum: dag, geskep: '2026-08-06T08:15:00.000Z' },
+  ]
+  const uit = [...lys].sort(volgorde).map(x => x.id)
+  kyk('die nuutste van vandag staan BO', uit[0] === 'm02', uit)
+  kyk('dan die middelste', uit[1] === 'm03', uit)
+  kyk('die oudste onder', uit[2] === 'm01', uit)
+
+  /* Oor dae heen */
+  const oorDae = [
+    { id: 'a', datum: '2026-08-04', geskep: '2026-08-04T20:00:00.000Z' },
+    { id: 'b', datum: '2026-08-06', geskep: '2026-08-06T06:00:00.000Z' },
+    { id: 'c', datum: '2026-08-05', geskep: '2026-08-05T23:00:00.000Z' },
+  ]
+  kyk('oor dae heen ook nuutste eerste',
+      JSON.stringify([...oorDae].sort(volgorde).map(x => x.id)) === '["b","c","a"]',
+      [...oorDae].sort(volgorde).map(x => x.id))
+
+  /* 'n Ou plasing sonder `geskep` mag nie alles breek nie */
+  const oud = [
+    { id: 'm05', datum: '2026-08-06' },
+    { id: 'm06', datum: '2026-08-06', geskep: '2026-08-06T10:00:00.000Z' },
+    { id: 'm04', datum: '2026-08-05' },
+  ]
+  const u2 = [...oud].sort(volgorde).map(x => x.id)
+  kyk('sonder geskep val dit terug op datum en id', u2[0] === 'm06' && u2[2] === 'm04', u2)
+
+  kyk('leeg breek nie', [].sort(volgorde).length === 0)
+  kyk('een breek nie', [{ id: 'x' }].sort(volgorde).length === 1)
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')

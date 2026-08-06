@@ -38,6 +38,12 @@ function hasToestel(t) {
   return crypto.createHash('sha256').update(sout + ':' + s).digest('hex').slice(0, 24)
 }
 
+/* Nuutste eerste, tot op die sekonde. */
+function volgorde(a, b) {
+  const t = x => String(x.geskep || x.datum || '') + '|' + String(x.id || '')
+  return t(b).localeCompare(t(a))
+}
+
 /* Wat na die kliënt gaan. Nooit die bronId nie — dit wys na die rou
    boodskap, en niemand buite die admin het daarmee te doen nie. */
 function virDieSkerm(m) {
@@ -64,8 +70,18 @@ export default async function handler(req, res) {
       const alles = await lysDokke(MUUR, { grootte: 300 })
       const lys = alles
         .filter(m => m.gepubliseer !== false && m.teks)
-        /* Nuutste eerste. GEEN rangskikking volgens die telling nie. */
-        .sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || '')))
+        /* Nuutste eerste. GEEN rangskikking volgens die telling nie.
+
+           Dit het op `datum` gesorteer, en `datum` is net 'n DAG. Alles wat
+           op dieselfde dag geplaas is, was dus gelyk, en dan het Firestore se
+           eie volgorde beslis — wat volgens die dokument se naam is, en ons
+           name begin met die tyd. Die gevolg: die dag se plasings het van
+           OUDSTE na nuutste gele, presies andersom as wat dit moet.
+
+           `geskep` is 'n regte tydstempel in ISO-vorm, en ISO-teks sorteer
+           korrek as teks. Ontbreek dit op 'n ou plasing, val ons terug op die
+           dag en dan op die id (wat ook met die tyd begin). */
+        .sort(volgorde)
         .map(virDieSkerm)
 
       /* GEEN kas nie.
