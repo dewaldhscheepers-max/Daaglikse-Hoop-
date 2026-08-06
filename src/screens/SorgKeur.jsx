@@ -283,12 +283,27 @@ function Muur({ data, doen, besig }) {
   const [teks, setTeks] = useState('')
   const [titel, setTitel] = useState('')
 
+  /* Redigeer wat REEDS op die muur staan.
+
+     Die opskrifte is later bygekom, dus het die eerste plasings nie een nie.
+     Sonder hierdie knoppie sou 'n mens die plasing moes uitvee en die hele
+     boodskap oordoen — en dan verloor jy die saamdra-telling en die
+     antwoord. */
+  const [wysigOop, setWysigOop] = useState(null)
+  const [wTitel, setWTitel] = useState('')
+  const [wTeks, setWTeks] = useState('')
+
   const muur = data.muur || []
   if (!muur.length) return null
 
   async function stuur(m) {
     const d = await doen({ aksie: 'antwoord', muurId: m.id, antwoord: { tipe, titel, bron, teks } })
     if (d && d.ok) { setOop(null); setBron(''); setTeks(''); setTitel('') }
+  }
+
+  async function stoorWysig(m) {
+    const d = await doen({ aksie: 'wysig', muurId: m.id, titel: wTitel, teks: wTeks })
+    if (d && d.ok) setWysigOop(null)
   }
 
   return (
@@ -309,6 +324,33 @@ function Muur({ data, doen, besig }) {
               keer af en wonder hoekom niks gebeur nie. */}
           {m.gepubliseer === false && <div className="sk-kontak">Van die muur af</div>}
           <p className="sk-voorskou">{m.teks}</p>
+
+          {wysigOop === m.id && (
+            <>
+              <input
+                className="sk-video"
+                value={wTitel}
+                onChange={e => setWTitel(e.target.value)}
+                maxLength={110}
+                placeholder="Die vraag in een reel"
+              />
+              <div className="admin-books-note">
+                Dit staan BO die storie op die muur.
+              </div>
+              <textarea
+                className="sk-teks"
+                rows={7}
+                value={wTeks}
+                onChange={e => setWTeks(e.target.value)}
+              />
+              <div className="sk-knoppe">
+                <button className="sk-knop sk-plaas" disabled={besig || wTeks.trim().length < 10} onClick={() => stoorWysig(m)}>
+                  Stoor
+                </button>
+                <button className="sk-knop" onClick={() => setWysigOop(null)}>Los</button>
+              </div>
+            </>
+          )}
 
           {oop === m.id ? (
             <>
@@ -365,6 +407,13 @@ function Muur({ data, doen, besig }) {
             </>
           ) : (
             <div className="sk-knoppe">
+              <button className="sk-knop" onClick={() => {
+                setWysigOop(m.id)
+                setWTitel(m.titel || '')
+                setWTeks(m.teks || '')
+              }}>
+                Redigeer
+              </button>
               <button className="sk-knop sk-plaas" onClick={() => {
                 setOop(m.id)
                 setTipe((m.antwoord && m.antwoord.tipe) || 'oudio')
