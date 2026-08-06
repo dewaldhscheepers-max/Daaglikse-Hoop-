@@ -117,3 +117,58 @@
 
 .sa-ry-knoppe .sa-vee { color: #A33A3A; border-color: #E4C4C4; }
 .sa-ry-knoppe .sa-vee:active { background: #FBE9E9; }
+
+/* ── Plak baie skakels ──
+   Dewald plaas elke dag; die video's bestaan reeds. Een vir een bytik is
+   veertig keer dieselfde vyf velde, en dan gebeur dit nie. */
+.sa-invoer {
+  margin-bottom: 18px;
+  padding: 13px 14px;
+  border: 1px dashed #CFC7DE;
+  border-radius: 14px;
+  background: #FBF9FF;
+}
+
+.sa-invoer-knop {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: #5C4E8E;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sa-invoer-knop:active { background: #F0ECFA; }
+
+.sa-invoer-teks {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 11px 12px;
+  border: 1px solid #DDD6E6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #2D2040;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.sa-invoer-knoppe {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+.sa-invoer-knoppe .admin-save-btn { flex: 1; margin: 0; }
+
+/* Die regop-merkie in die lys. */
+.sa-merk-regop {
+  background: #EDE6F7;
+  color: #5C4E8E;
+}

@@ -49,6 +49,30 @@ function skoonTeks(t, maks) {
     .slice(0, maks)
 }
 
+/* ── Die titel, van YouTube self ──
+
+   oEmbed is 'n oop eindpunt: geen sleutel, geen kwota, een oproep. Dit is
+   die verskil tussen veertig video's wat elkeen 'n titel moet kry en veertig
+   wat sommer ingaan.
+
+   Misluk dit — YouTube stadig, video privaat, verkeerde id — val ons terug
+   op die id in plaas van om die hele invoer te laat val. 'n Video met 'n
+   lelike naam is 'n naam wat Dewald kan regmaak; 'n video wat nie ingekom
+   het nie, is werk wat hy weer moet doen. */
+async function haalTitel(videoId) {
+  try {
+    const u = 'https://www.youtube.com/oembed?format=json&url=' +
+      encodeURIComponent('https://www.youtube.com/watch?v=' + videoId)
+    const r = await fetch(u, { headers: { accept: 'application/json' } })
+    if (!r.ok) return videoId
+    const d = await r.json()
+    const t = skoonTeks(d && d.title, 120)
+    return t || videoId
+  } catch {
+    return videoId
+  }
+}
+
 function skoonVideo(lyf) {
   const videoId = haalVideoId(lyf.videoId || lyf.skakel)
   if (!videoId) return { fout: 'geen geldige YouTube-skakel of ID nie' }
@@ -126,6 +150,61 @@ export default async function handler(req, res) {
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
   try {
+    /* ── Plak baie skakels op 'n slag ──
+
+       Dewald plaas elke dag op TikTok en Facebook. Daardie video's bestaan
+       reeds; hulle moet net 'n permanente huis kry. Een vir een bytik is
+       veertig keer dieselfde vyf velde, en dan gebeur dit nie.
+
+       Hy plak dus 'n lys skakels en die bediener doen die res:
+
+         · die video-id kom uit enige YouTube-vorm — /watch, youtu.be,
+           /shorts, /embed;
+         · 'n /shorts/-skakel is per definisie REGOP. Dit is die enigste
+           betroubare manier om dit te weet sonder om YouTube se API te vra,
+           en dit is presies hoe hy oplaai;
+         · die TITEL kom van YouTube self, via oEmbed. Geen sleutel nodig,
+           een oproep per video. Misluk dit, val ons terug op die id sodat
+           die video steeds inkom en hy dit self kan hernoem.
+
+       Wat NIE outomaties gebeur nie, is die ONDERWERP. Dit is die deel wat
+       die biblioteek bruikbaar maak, en net 'n mens weet waaroor 'n video
+       gaan. Hulle kom dus ONGEPUBLISEER in — dan kan hy hulle rustig merk
+       sonder dat 'n onbenoemde video intussen op die blad wys. */
+    if (lyf.aksie === 'invoer') {
+      const rou = String(lyf.skakels || '').split(/[\r\n,]+/).map(x => x.trim()).filter(Boolean)
+      if (!rou.length) return res.status(400).json({ fout: 'geen skakels nie' })
+      if (rou.length > 100) return res.status(400).json({ fout: 'hoogstens 100 op ’n slag' })
+
+      const bestaan = new Set((await lysDokke(VERSAMELING, { grootte: 500 })).map(v => v.videoId))
+      const uit = { bygevoeg: 0, oorgeslaan: 0, sleg: 0, name: [] }
+
+      for (const reel of rou) {
+        const videoId = haalVideoId(reel)
+        if (!videoId) { uit.sleg++; continue }
+        if (bestaan.has(videoId)) { uit.oorgeslaan++; continue }
+        bestaan.add(videoId)
+
+        const titel = await haalTitel(videoId)
+        const id = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+        await skryfDok(VERSAMELING, id, {
+          videoId,
+          titel,
+          beskrywing: '',
+          onderwerpe: [],
+          datum: new Date().toISOString().slice(0, 10),
+          regop: /\/shorts\//i.test(reel),
+          weekVideo: false,
+          /* Ongepubliseer totdat hy die onderwerp gemerk het. */
+          gepubliseer: false,
+          uitPlasing: null,
+        })
+        uit.bygevoeg++
+        uit.name.push(titel)
+      }
+      return res.status(200).json({ ok: true, ...uit })
+    }
+
     if (lyf.aksie === 'vee') {
       if (!lyf.id) return res.status(400).json({ fout: 'geen id nie' })
       await veeDok(VERSAMELING, lyf.id)

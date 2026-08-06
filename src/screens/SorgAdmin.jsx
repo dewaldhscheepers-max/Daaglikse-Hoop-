@@ -20,7 +20,7 @@ import SorgKeur from './SorgKeur'
 import './SorgAdmin.css'
 
 const LEEG = {
-  id: null, videoId: '', titel: '', beskrywing: '',
+  id: null, videoId: '', titel: '', beskrywing: '', regop: true,
   onderwerpe: [], datum: new Date().toISOString().slice(0, 10),
   weekVideo: false, gepubliseer: true, uitPlasing: '',
 }
@@ -28,6 +28,10 @@ const LEEG = {
 export default function SorgAdmin({ geheim = '' }) {
   const [videos, setVideos] = useState([])
   const [vorm, setVorm] = useState(LEEG)
+  const [invoerOop, setInvoerOop] = useState(false)
+  const [skakels, setSkakels] = useState('')
+  const [invoerBesig, setInvoerBesig] = useState(false)
+  const [invoerUit, setInvoerUit] = useState(null)
   const [besig, setBesig] = useState(false)
   const [boodskap, setBoodskap] = useState(null)
   const [inst, setInst] = useState(null)
@@ -89,6 +93,36 @@ export default function SorgAdmin({ geheim = '' }) {
       setBoodskap({ fout: String(e && e.message) })
       return false
     } finally { setBesig(false) }
+  }
+
+  /* ── Plak baie skakels ──
+
+     Dewald plaas elke dag op TikTok en Facebook. Daardie video's bestaan
+     reeds; hulle moet net 'n permanente huis kry. Een vir een bytik is
+     veertig keer dieselfde vyf velde, en dan gebeur dit eenvoudig nie.
+
+     Die bediener haal die titel van YouTube af en merk 'n /shorts/-skakel
+     as regop. Wat 'n MENS moet doen, is die onderwerp — daarom kom hulle
+     ongepubliseer in en wag hulle onder in die lys. */
+  async function voerIn() {
+    if (!skakels.trim() || invoerBesig) return
+    setInvoerBesig(true)
+    setInvoerUit(null)
+    setBoodskap(null)
+    try {
+      const r = await fetch('/api/sorg-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ aksie: 'invoer', skakels }),
+      })
+      const d = await r.json()
+      if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return }
+      setInvoerUit(d)
+      setSkakels('')
+      await haal(geheim)
+    } catch (e) {
+      setBoodskap({ fout: String(e && e.message) })
+    } finally { setInvoerBesig(false) }
   }
 
   async function stoor() {
@@ -180,6 +214,52 @@ export default function SorgAdmin({ geheim = '' }) {
         haal die ID self daaruit. Die oorspronklike lêer hou jy self.
       </p>
 
+      {/* ── Plak baie skakels ── */}
+      <div className="sa-invoer">
+        {!invoerOop ? (
+          <button className="sa-invoer-knop" onClick={() => setInvoerOop(true)}>
+            📋 Plak baie skakels op ’n slag
+          </button>
+        ) : (
+          <>
+            <label>Plak YouTube-skakels — een per reël</label>
+            <textarea
+              className="sa-invoer-teks"
+              rows={6}
+              value={skakels}
+              onChange={e => setSkakels(e.target.value)}
+              placeholder={'https://youtube.com/shorts/abc123\nhttps://youtu.be/def456\nhttps://youtube.com/watch?v=ghi789'}
+            />
+            <div className="admin-books-note">
+              Die titel kom vanself van YouTube af, en 'n <b>/shorts/</b>-skakel
+              word outomaties as <b>regop</b> gemerk. Hulle kom <b>versteek</b>
+              in — merk elkeen se onderwerp en publiseer dit dan. Die onderwerp
+              is wat bepaal wie hierdie video later kry.
+            </div>
+            <div className="sa-invoer-knoppe">
+              <button
+                className="admin-save-btn"
+                disabled={invoerBesig || !skakels.trim()}
+                onClick={voerIn}
+              >
+                {invoerBesig ? 'Besig… dit kan ’n oomblik vat' : 'Voer in'}
+              </button>
+              <button className="sa-kanselleer" onClick={() => { setInvoerOop(false); setSkakels(''); setInvoerUit(null) }}>
+                Los
+              </button>
+            </div>
+          </>
+        )}
+
+        {invoerUit && (
+          <div className="admin-success">
+            ✅ {invoerUit.bygevoeg} bygevoeg
+            {invoerUit.oorgeslaan > 0 && ` · ${invoerUit.oorgeslaan} was reeds daar`}
+            {invoerUit.sleg > 0 && ` · ${invoerUit.sleg} kon ek nie lees nie`}
+          </div>
+        )}
+      </div>
+
       <div className="admin-field">
         <label>YouTube-skakel of ID *</label>
         <input
@@ -236,9 +316,15 @@ export default function SorgAdmin({ geheim = '' }) {
       </div>
 
       <div className="admin-field">
+        {/* Dewald neem met sy foon op, regop, en laai dit as 'n Short. In 'n
+            16:9-raam is so 'n video 'n dun strokie met swart weerskante. */}
+        <label className="sa-wissel">
+          <input type="checkbox" checked={vorm.regop} onChange={e => setVorm(v => ({ ...v, regop: e.target.checked }))} />
+          <span>📱 <b>Regop video</b> (Short / TikTok-vorm)</span>
+        </label>
         <label className="sa-wissel">
           <input type="checkbox" checked={vorm.weekVideo} onChange={e => setVorm(v => ({ ...v, weekVideo: e.target.checked }))} />
-          <span>Wys as <b>Die week se video</b> (bo-aan die blad)</span>
+          <span>Wys as <b>Vandag se video</b> (bo-aan die blad)</span>
         </label>
         <label className="sa-wissel">
           <input type="checkbox" checked={vorm.gepubliseer} onChange={e => setVorm(v => ({ ...v, gepubliseer: e.target.checked }))} />
@@ -263,7 +349,8 @@ export default function SorgAdmin({ geheim = '' }) {
       {videos.map(v => (
         <div key={v.id} className={`sa-ry${v.gepubliseer ? '' : ' versteek'}`}>
           <div className="sa-ry-kop">
-            {v.weekVideo && <span className="sa-merk">Die week</span>}
+            {v.weekVideo && <span className="sa-merk">Vandag</span>}
+            {v.regop && <span className="sa-merk sa-merk-regop">📱 regop</span>}
             {!v.gepubliseer && <span className="sa-merk sa-merk-af">Versteek</span>}
             <span className="sa-ry-titel">{v.titel}</span>
           </div>

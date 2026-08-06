@@ -287,18 +287,24 @@ export default function Sorg() {
 
         {/* ── Die held ──
 
-            Die weeklikse video is die een ding wat Dewald elke week self
-            maak, en dit is die deel van hierdie blad wat SKAAL: een video
-            wat vyf mense se vraag saam beantwoord, bereik meer mense as vyf
-            antwoorde. Dit moet dus nie soos net nog 'n video lyk nie. */}
+            Die daaglikse video is die deel van hierdie blad wat SKAAL: een
+            video wat vyf mense se vraag saam beantwoord, bereik meer mense as
+            vyf antwoorde. En dit is die enigste rede om die app ELKE DAG oop
+            te maak — 'n muur verander stadig, 'n video is elke oggend nuut.
+
+            Dewald plaas in elk geval daagliks op TikTok en Facebook. Dit is
+            dus nie ekstra werk nie; dieselfde video kry net 'n permanente
+            huis. 'n TikTok van drie maande gelede is weg. Hier is dit, met
+            sy onderwerp gemerk, oor twee jaar nog vindbaar vir die mens wat
+            om tweeuur die oggend soek. */}
         {held ? (
           <>
-            <p className="sorg-week-kop">Elke week ’n nuwe video</p>
+            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
             <SorgVideo
               video={held}
               groot
-              etiket="Die week se video"
-              etiketFyn="Gebaseer op wat mense hierdie week op die muur gedeel het."
+              etiket="Vandag se video"
+              etiketFyn="Oor die onderwerpe waaroor mense hierdie week gevra het."
             />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
@@ -307,10 +313,10 @@ export default function Sorg() {
              wat 'n weeklikse video belowe en niks daarvan wys nie, belowe
              niks. */
           <div className="sorg-week-leeg">
-            <p className="sorg-week-kop">Elke week ’n nuwe video</p>
+            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
             <p className="sorg-week-teks">
-              Een keer per week vat ek die belangrikste vrae, stories en
-              onderwerpe van die week saam in een video — hier bo-aan die blad.
+              Elke dag maak ek ’n kort video oor die onderwerpe waaroor mense
+              hier vra — hier bo-aan die blad.
             </p>
           </div>
         )}
