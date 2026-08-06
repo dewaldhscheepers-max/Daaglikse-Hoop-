@@ -119,7 +119,9 @@ export default async function handler(req, res) {
          gerapporteer het. Wat reeds wys en niemand gepla het nie, hoef hy
          nooit te sien nie — dit is die hele punt van hierdie ontwerp. */
       const wagWoorde = woorde
-        .filter(w => w.status === 'wag' || (Number(w.gerapporteer) || 0) > 0)
+        .filter(w => w.status === 'wag' ||
+                     w.gevlag === true ||
+                     (Number(w.gerapporteer) || 0) > 0)
         .sort(nuutsteEerste)
 
       /* Gevaar heel bo, dan die nuutstes. Iemand wat vanaand geskryf het dat

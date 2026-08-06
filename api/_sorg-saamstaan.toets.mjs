@@ -183,15 +183,24 @@ afdeling('n Gewone woord WYS DADELIK')
       Object.values(winkel.sorg_woorde).some(w => w.status === 'wys' && w.bron === 'eie'),
       winkel.sorg_woorde)
 
-  /* Die vangnet bly staan. */
+  /* Ook wat gevlag is, WYS — die vlag keer niks, dit merk net. */
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
   r = await stuur({ muurId: 'gewoon', toestel: 'sanet', teks: 'bel my 082 123 4567' })
-  kyk('n telefoonnommer wag steeds', r.lyf.wag === true, r.lyf)
-  kyk('en dit wys nie', r.lyf.woord === null, r.lyf)
+  kyk('n telefoonnommer WYS ook', r.lyf.wag === false && !!r.lyf.woord, r.lyf)
+  kyk('maar dit is gemerk vir Dewald se oog',
+      Object.values(winkel.sorg_woorde).some(w => w.gevlag === true),
+      Object.values(winkel.sorg_woorde))
+  kyk('en dit staan op wys', Object.values(winkel.sorg_woorde).every(w => w.status === 'wys'),
+      Object.values(winkel.sorg_woorde))
 
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
   r = await stuur({ muurId: 'gewoon', toestel: 'piet', teks: 'kyk by https://x.co' })
-  kyk('n skakel wag steeds', r.lyf.wag === true, r.lyf)
+  kyk('n skakel WYS ook', r.lyf.wag === false && !!r.lyf.woord, r.lyf)
+
+  /* Die enigste ding wat vrye teks nog keer. */
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
+  r = await stuur({ muurId: 'swaar', toestel: 'jan', teks: 'Net bid.' })
+  kyk('n krisisplasing weier steeds', r.kode === 400, r.lyf)
 }
 
 afdeling('EEN mens mag meer as een keer praat')

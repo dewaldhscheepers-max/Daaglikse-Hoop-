@@ -151,6 +151,9 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks }) {
     doc = {
       muurId, toestel, teks: uitslag.teks, sleutel: '', bron: 'eie',
       status: uitslag.status,
+      /* Gevlag beteken NIE weggesteek nie. Dit wys saam met die res; die
+         vlag sê net vir Dewald waarna om te kyk. */
+      gevlag: (uitslag.vlae || []).length > 0,
       ...(uitslag.rede ? { rede: uitslag.rede } : {}),
     }
   }

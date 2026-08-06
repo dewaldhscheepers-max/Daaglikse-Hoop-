@@ -151,14 +151,21 @@ afdeling('n Gewone woord WYS DADELIK')
   kyk('dit hang van NIKS anders af nie',
       woordStatus({ ...gewoon, vertrou: false }).status === 'wys')
 
-  /* Die vangnet bly staan. */
-  kyk('n telefoonnommer wag steeds',
-      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false }).status === 'wag')
-  kyk('en die rede word gese',
-      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false }).rede
-        .includes('telefoonnommer'))
-  kyk('n skakel wag steeds',
-      woordStatus({ teks: 'kyk by https://x.co', sensitief: false }).status === 'wag')
+  /* Ook wat gevlag is, WYS. Die vlag keer niks — dit se net vir Dewald
+     waarna om te kyk, en die woord staan intussen op die muur. */
+  const nommer = woordStatus({ teks: 'bel my 082 123 4567', sensitief: false })
+  kyk('n telefoonnommer WYS ook', nommer.status === 'wys', nommer)
+  kyk('maar dit word gevlag', (nommer.vlae || []).length === 1, nommer)
+  kyk('en die rede word gese', String(nommer.rede).includes('telefoonnommer'), nommer)
+
+  const skakel = woordStatus({ teks: 'kyk by https://x.co', sensitief: false })
+  kyk('n skakel WYS ook', skakel.status === 'wys', skakel)
+  kyk('en word gevlag', (skakel.vlae || []).length === 1, skakel)
+
+  kyk('n skoon sin word NIE gevlag nie',
+      (woordStatus(gewoon).vlae || []).length === 0, woordStatus(gewoon))
+
+  /* Die enigste ding wat vrye teks nog keer. */
   kyk('n sensitiewe plasing weier steeds',
       woordStatus({ teks: 'Net bid.', sensitief: true }).status === 'weier')
 

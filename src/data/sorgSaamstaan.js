@@ -145,22 +145,31 @@ export function woordVlae(teks) {
       se "hospitale het my ma doodgemaak" onder hom kry nie. Geen filter vang
       daardie sin nie, want daar is niks verkeerd met die WOORDE nie.
 
-   2. Tref een van die vlae — 'n nommer, 'n skakel, 'n versoek om buite die
-      app kontak te maak — wag dit vir Dewald se oog.
+   2. Al die res WYS DADELIK. Alles. Altyd. Vir almal.
 
-   3. Al die res WYS DADELIK.
+   Daar was twee hekke voor hierdie een, en albei is weg omdat albei
+   dieselfde ding gedoen het: iemand se woorde laat verdwyn sonder dat hy
+   weet hoekom.
 
-   Punt 3 was nie so nie. Die eerste woord van elke toestel het gewag, en
-   vertroue is verdien. Dit het op papier goed gelyk en in die hand sleg
-   gewerk: die meeste mense skryf een keer, dus het die meeste mense hul
-   eie woord nooit gesien nie — dit lyk soos 'n app wat stukkend is, en 'n
-   mens probeer nie 'n tweede keer nie.
+   Die eerste was 'verdien vertroue': die eerste woord van elke toestel wag.
+   Die meeste mense skryf een keer, dus het die meeste mense hul eie woord
+   nooit gesien nie. Dit lyk soos 'n app wat stukkend is.
 
-   Die ruil is eerlik om te noem: 'n slegte sin wat nie 'n nommer of skakel
-   bevat nie, kan nou wys totdat iemand hom rapporteer. Daarteenoor staan
-   drie goed: krisisplasings laat glad nie vrye teks toe nie, Rapporteer
-   haal 'n woord DADELIK af met een druk, en alles wat gerapporteer is, land
-   in Dewald se hopie. */
+   Die tweede was 'n outomatiese hek op nommers en skakels. Dit vang party
+   slegte goed, en dit vang ook 'n vrou wat 'n Bybelvers verkeerd tik. 'n
+   Gesprek waar 'n mens nie weet of jou woorde deurgekom het nie, is nie 'n
+   gesprek nie.
+
+   Die vlae BESTAAN nog — hulle keer net niks meer nie. Wat 'n nommer of 'n
+   skakel bevat, wys saam met die res EN verskyn in Dewald se hopie met die
+   rede daarby, sodat hy dit kan sien sonder dat iemand se woorde intussen
+   in 'n laai gele het.
+
+   Wat oorbly om skade te keer, en dit is genoeg:
+     · 'n krisisplasing laat glad geen vrye teks toe nie — daar is net
+       Dewald se klaargemaakte sinne;
+     · Rapporteer haal 'n woord met EEN druk dadelik af;
+     · alles wat gerapporteer of gevlag is, land in die Woorde-hopie. */
 export function magVryeTeks({ sensitief }) {
   return !sensitief
 }
@@ -169,9 +178,13 @@ export function woordStatus({ teks, sensitief }) {
   if (sensitief) return { status: 'weier', rede: 'sensitiewe plasing' }
   const skoon = skoonWoord(teks)
   if (skoon.length < 2) return { status: 'weier', rede: 'te kort' }
+  /* Die vlae keer niks. Hulle sê net vir Dewald waarna om te kyk. */
   const vlae = woordVlae(skoon)
-  if (vlae.length) return { status: 'wag', rede: vlae.join(' en '), teks: skoon }
-  return { status: 'wys', teks: skoon }
+  return {
+    status: 'wys',
+    teks: skoon,
+    ...(vlae.length ? { vlae, rede: vlae.join(' en ') } : {}),
+  }
 }
 
 /* ── Hoeveel mense het gelees ──

@@ -362,6 +362,13 @@ function Woorde({ data, doen, besig }) {
               {w.dag} · {w.bron === 'klaar' ? 'klaargemaakte woord' : 'eie woorde'}
               {w.gerapporteer ? ` · ${w.gerapporteer}× gerapporteer` : ''}
               {w.rede && !w.gerapporteer ? ` · ${w.rede}` : ''}
+              {/* Die belangrikste ding op hierdie ry: staan dit NOU op die
+                  muur of nie? 'n Gevlagde woord wys; 'n gerapporteerde een is
+                  reeds af. Sonder hierdie reel weet 'n mens nie of hy haastig
+                  moet wees nie. */}
+              {w.status === 'wys'
+                ? <b className="sk-lewend"> · staan NOU op die muur</b>
+                : <span> · nie op die muur nie</span>}
             </div>
 
             {plasing && plasing.titel && (
