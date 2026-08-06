@@ -464,8 +464,50 @@ function Muur({ data, doen, besig }) {
 
   const wag = muur.filter(m => !m.antwoord && m.gepubliseer !== false).length
 
+  /* Hoeveel plasings is nog afgesny? Die ou perk van 1200 het stilweg
+     afgekap; hierdie tel dit sodat een druk almal kan regmaak. */
+  const gesny = muur.filter(m => {
+    const b = rou.get(m.bronId)
+    return b && b.teks && b.teks.length > (m.teks || '').length + 5
+  })
+
   return (
     <>
+      {gesny.length > 0 && (
+        <div className="sk-waarsku">
+          <p>
+            <b>{gesny.length} {gesny.length === 1 ? 'plasing is' : 'plasings is'} afgesny.</b>{' '}
+            Die ou perk van 1200 karakters het stilweg afgekap. Die volle
+            boodskappe le nog veilig in die inbak.
+          </p>
+          <p style={{ fontSize: '12.5px' }}>
+            Ek sit net terug wat AFGESNY is. Waar jy self iets uitgehaal het —
+            'n naam, 'n dorp, 'n nommer — bly dit uit, en ek se watter
+            plasings jy self moet nagaan.
+          </p>
+          <button
+            className="sk-knop sk-plaas"
+            disabled={besig}
+            onClick={async () => {
+              if (!window.confirm(
+                `Herstel ${gesny.length} afgesnyde ${gesny.length === 1 ? 'plasing' : 'plasings'}?` +
+                '\n\nNet wat afgekap is kom terug. Wat jy self geredigeer het, word nie aangeraak nie.'
+              )) return
+              const d = await doen({ aksie: 'herstel' })
+              if (d && d.ok) {
+                window.alert(
+                  `${d.herstel} herstel.` +
+                  (d.metdiehand && d.metdiehand.length
+                    ? `\n\nHierdie het jy self geredigeer, dus het ek hulle NIE aangeraak nie — kyk self of iets kort:\n\n· ${d.metdiehand.join('\n· ')}`
+                    : '')
+                )
+              }
+            }}
+          >
+            Herstel al {gesny.length} se volle teks
+          </button>
+        </div>
+      )}
       {wag > 0 && (
         <p className="sk-wag">
           {wag === 1 ? 'Een plasing wag nog op jou antwoord.' : `${wag} plasings wag nog op jou antwoord.`}

@@ -312,6 +312,52 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, status })
     }
 
+    /* ── Herstel wat afgesny is ──
+
+       Die muur se ou perk van 1200 karakters het stilweg afgekap. Wat reeds
+       so gestoor is, staan nog so, en om twintig plasings een vir een oop
+       te maak is werk wat 'n mens nie gaan doen nie.
+
+       Dit is met OPSET nie 'n blinde herstel nie.
+
+       Wat op die muur staan, is die GEREDIGEERDE teks. Dewald haal name,
+       dorpe en nommers uit — dit is presies hoe hy iemand beskerm. 'n
+       Herstel wat eenvoudig die rou boodskap teruggooi, sou daardie nommer
+       weer openbaar maak. Dit sou 'n erger fout wees as die een wat ons
+       regmaak.
+
+       Die toets is dus fyn: 'n AFGESNYDE teks is 'n PREFIKS van die rou
+       een. 'n Geredigeerde teks is nie. Ons herstel dus net waar die muur
+       se teks presies die begin van die rou boodskap is, en ons se hardop
+       watter plasings ons oorgeslaan het sodat hy hulle self kan nagaan. */
+    if (lyf.aksie === 'herstel') {
+      const muur = await lysDokke(MUUR, { grootte: 300 })
+      const inkomend = await lysDokke(INKOMEND, { grootte: 300 })
+      const rou = new Map(inkomend.map(b => [b.id, b]))
+
+      const uit = { herstel: 0, heel: 0, metdiehand: [] }
+
+      for (const m of muur) {
+        const bron = rou.get(m.bronId)
+        if (!bron || !bron.teks) { uit.heel++; continue }
+
+        const volledig = skoonTeks(bron.teks, MAKS_MUUR_TEKS)
+        const nou = String(m.teks || '')
+        if (volledig.length <= nou.length) { uit.heel++; continue }
+
+        if (!volledig.startsWith(nou.trimEnd())) {
+          /* Geredigeer, nie afgesny nie. Ons raak dit NIE aan nie. */
+          uit.metdiehand.push(m.titel || m.id)
+          continue
+        }
+
+        await skryfDok(MUUR, m.id, { teks: volledig }, { velde: ['teks'] })
+        uit.herstel++
+      }
+
+      return res.status(200).json({ ok: true, ...uit })
+    }
+
     /* ── Verwyder ──
        Vra iemand dat sy plasing weggaan (POPIA gee hom daardie reg), gaan
        ALBEI kante weg: die muur en die inbak. */
