@@ -76,6 +76,81 @@ export async function subscribeToNotifications() {
   return { ok: true }
 }
 
+/* ── Samsung Internet ──
+
+   Samsung Internet kry al hierdie tyd GEEN kennisgewing-vraag nie. Die app
+   wys hom 'n "maak in Chrome oop"-balkie en verder niks, en druk hy daardie
+   balkie weg, is dit vir altyd weg. Die bewys staan in Firestore: die
+   `webPushSubscriptions`-versameling het presies EEN inskrywing, en dit is
+   Dewald se eie toets.
+
+   Op 'n Suid-Afrikaanse app waar Samsung-fone oral is, is dit nie 'n randgeval
+   nie. Dit is 'n hele groep mense wat nooit gevra is nie.
+
+   Samsung Internet doen nie Firebase se `getToken()` nie, maar dit doen wel
+   die gewone `pushManager` van die web. En sy eindpunt is Google s'n —
+   `https://fcm.googleapis.com/…` — wat beteken die bediener herken dit en
+   stuur dit deur FCM met die diensrekening, presies soos 'n gewone token.
+   Daardie kode bestaan reeds in `api/send-notifications.js`; dit het net
+   nooit iemand gehad om na te stuur nie.
+
+   Dieselfde VAPID-sleutel as Firebase s'n, want die intekening moet aan
+   hierdie projek behoort. */
+function grepeUitBasis64(basis64) {
+  const opgevul = (basis64 + '='.repeat((4 - basis64.length % 4) % 4))
+    .replace(/-/g, '+').replace(/_/g, '/')
+  const rou = atob(opgevul)
+  const uit = new Uint8Array(rou.length)
+  for (let i = 0; i < rou.length; i++) uit[i] = rou.charCodeAt(i)
+  return uit
+}
+
+export async function subscribeSamsung() {
+  if (!('Notification' in window)) return { ok: false, reason: 'nie_ondersteun' }
+  if (!('PushManager' in window))  return { ok: false, reason: 'nie_ondersteun' }
+
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return { ok: false, reason: 'permission_denied' }
+
+  const swReg = await navigator.serviceWorker.ready
+
+  /* 'n Bestaande intekening word hergebruik. Sou ons blindelings weer
+     inteken, kry ons 'n fout omdat daar reeds een is — en dan sou dit lyk
+     of dit nie werk nie terwyl alles reg is. */
+  let sub = await swReg.pushManager.getSubscription()
+  if (!sub) {
+    sub = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: grepeUitBasis64(FCM_VAPID_KEY),
+    })
+  }
+  if (!sub) return { ok: false, reason: 'geen_intekening' }
+
+  const rou = sub.toJSON()
+  if (!rou.endpoint || !rou.keys?.p256dh || !rou.keys?.auth) {
+    return { ok: false, reason: 'onvolledige_intekening' }
+  }
+
+  /* Die dokument se naam is 'n has van die eindpunt, nie die eindpunt self
+     nie: 'n eindpunt is lank en bevat karakters wat nie in 'n Firestore-naam
+     mag wees nie. Dieselfde foon skryf dus altyd dieselfde dokument oor in
+     plaas van 'n nuwe een by te sit. */
+  const id = await hasVanTeks(rou.endpoint)
+  await setDoc(doc(db, 'webPushSubscriptions', id), {
+    subscription: { endpoint: rou.endpoint, keys: { p256dh: rou.keys.p256dh, auth: rou.keys.auth } },
+    subscribedAt: serverTimestamp(),
+  })
+  localStorage.setItem('webPushId', id)
+  return { ok: true }
+}
+
+async function hasVanTeks(teks) {
+  const grepe  = new TextEncoder().encode(teks)
+  const digest = await crypto.subtle.digest('SHA-256', grepe)
+  return [...new Uint8Array(digest)].slice(0, 16)
+    .map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 export async function ensureNotificationToken() {
   try {
     if (!('Notification' in window)) return

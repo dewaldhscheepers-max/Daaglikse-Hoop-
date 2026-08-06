@@ -86,6 +86,29 @@ async function getTodayTitle(accessToken) {
   } catch { return 'Daaglikse Hoop' }
 }
 
+/* ── Waar toestelle staan ──
+
+   Drie getalle uit `tellers/toestemming`: ja, geblokkeer, nog nie geantwoord
+   nie. Dit vervang 'n aftreksom tussen die installasie-teller en die aantal
+   FCM-tokens, wat na 'n feit gelyk het en dit nie was — die twee meet nie
+   dieselfde ding nie.
+
+   Bestaan die dokument nog nie (niemand het nog die nuwe app oopgemaak nie),
+   gee dit `null` en die admin sê so, eerder as om nulle te wys wat soos 'n
+   antwoord lyk. */
+async function leesToestemming(accessToken) {
+  try {
+    const r = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tellers/toestemming`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    )
+    if (!r.ok) return null
+    const f = (await r.json()).fields || {}
+    const g = k => Number(f[k]?.integerValue || 0)
+    return { ja: g('ja'), geblok: g('geblok'), stil: g('stil') }
+  } catch { return null }
+}
+
 // ── Fetch FCM tokens ───────────────────────────────────────────────────────
 async function getFcmTokens(accessToken) {
   const tokens = []
@@ -360,9 +383,10 @@ module.exports = async function handler(req, res) {
         getWebPushSubscriptions(accessToken),
       ])
       const vandag = saDatum()
-      const [vandagLopie, gisterLopie] = await Promise.all([
+      const [vandagLopie, gisterLopie, toestemming] = await Promise.all([
         lopieVir({ projectId: PROJECT_ID, accessToken, dag: vandag }),
         lopieVir({ projectId: PROJECT_ID, accessToken, dag: saDatum(Date.now() - 86400000) }),
+        leesToestemming(accessToken),
       ])
       return res.status(200).json({
         kyk: true,
@@ -377,6 +401,9 @@ module.exports = async function handler(req, res) {
         },
         vandagSA: vandag,
         oggendlopies: { vandag: vandagLopie, gister: gisterLopie },
+        /* Waar toestelle staan — getel, nie afgetrek nie. Sien
+           `api/tel-toestemming.js`. */
+        toestemming,
         sekondes: Math.round((Date.now() - begin) / 100) / 10,
       })
     } catch (e) {

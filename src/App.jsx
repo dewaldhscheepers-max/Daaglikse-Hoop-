@@ -11,7 +11,9 @@ import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
-import { subscribeToNotifications, ensureNotificationToken, isSamsungBrowser, isFacebookBrowser, db } from './firebase'
+import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, db } from './firebase'
+import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
+import KennisgewingAf from './components/KennisgewingAf'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
@@ -286,38 +288,104 @@ export default function App() {
     return () => window.removeEventListener('trigger-install-prompt', onInstallRequest)
   }, [installPrompt])
 
-  // ── Notification permission banner + silent auto-resubscribe ──
+  /* ── Kennisgewings: die stil deel ──
+
+     Hier het 'n tydhouer gestaan wat die balkie drie sekondes ná elke
+     oopmaak gewys het, sonder enige geheue. Sien `src/data/kennisgewingVra.js`
+     vir waarom dit teen homself gewerk het. Die VRAAG gebeur nou ná 'n nota
+     klaar gespeel het; hier bly net wat stil moet gebeur.
+
+     Samsung Internet val nie meer hier uit nie. Dit het `if (isSamsungBrowser)
+     return` gehad, en dit is die rede waarom `webPushSubscriptions` een
+     inskrywing het. */
   useEffect(() => {
-    if (isSamsungBrowser) return
     if (!('Notification' in window)) return
     const perm = Notification.permission
-    if (perm === 'granted' && localStorage.getItem('fcmToken')) {
-      ensureNotificationToken()
-      return
+
+    /* Tel waar hierdie toestel staan — drie getalle, niks wat na 'n mens
+       teruglei nie. Net wanneer dit VERANDER, sodat dieselfde foon nie elke
+       oggend weer getel word nie. */
+    const verandering = telVerandering({
+      toestemming: perm,
+      laasGetel: localStorage.getItem('toestemmingGetel') || '',
+    })
+    if (verandering) {
+      fetch('/api/tel-toestemming', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(verandering),
+      }).then(r => { if (r.ok) localStorage.setItem('toestemmingGetel', verandering.nuwe) })
+        .catch(() => {})
     }
-    if (perm === 'default' || (perm === 'granted' && !localStorage.getItem('fcmToken'))) {
-      // Installed: ask after 3s. Browser: ask after 20s (give time to install first).
-      const delay = isInstalled ? 3000 : 20000
-      const t = setTimeout(() => setNotifBanner(true), delay)
-      return () => clearTimeout(t)
+
+    /* Wie reeds ja gesê het: hou net die token vars.
+
+       Albei kante is nodig. Sou net die Chrome-kant hier gestaan het, sou 'n
+       Samsung-mens wat REEDS toestemming gegee het nooit 'n intekening kry
+       nie — hy word nie gevra nie (want hy het klaar ja gesê) en niks skryf
+       hom in nie. Hy sou vir altyd stil bly terwyl alles reg lyk.
+
+       `subscribeSamsung` hergebruik 'n bestaande intekening en die
+       toestemming is reeds gegee, dus wys dit niks en vra dit niks. */
+    if (perm === 'granted') {
+      if (isSamsungBrowser) subscribeSamsung().catch(() => {})
+      else                  ensureNotificationToken()
     }
-  }, [isInstalled])
+  }, [])
+
+  /* ── Die vraag self ──
+
+     Word geroep wanneer 'n nota klaar gespeel het. Op daardie oomblik het
+     iemand pas gekry waarvoor hy gekom het, en "wil jy môre weer hoor?" is
+     'n redelike vraag eerder as 'n onderbreking. */
+  function vraKennisgewingsDalk() {
+    if (!('Notification' in window)) return false
+    const mag = magVra({
+      toestemming: Notification.permission,
+      kere: parseInt(localStorage.getItem('vraKennisgewingKere') || '0', 10),
+      laas: parseInt(localStorage.getItem('vraKennisgewingLaas') || '0', 10),
+      nou:  Date.now(),
+    })
+    if (!mag) return false
+    setNotifBanner(true)
+    return true
+  }
+
+  /* Weggedruk of geantwoord — albei tel as 'n keer. Iemand wat drie keer
+     weggedruk het, het geantwoord, en ons vra nie 'n vierde keer nie. */
+  function merkGevra() {
+    const kere = parseInt(localStorage.getItem('vraKennisgewingKere') || '0', 10)
+    localStorage.setItem('vraKennisgewingKere', String(kere + 1))
+    localStorage.setItem('vraKennisgewingLaas', String(Date.now()))
+  }
 
   async function handleNotifYes() {
     setNotifBanner(false)
+    merkGevra()
     try {
-      const result = await subscribeToNotifications()
-      if (!result.ok) {
-        if (result.reason === 'permission_denied') {
-          alert('Kennisgewings is geblokkeer vir hierdie webtuiste.\n\nOm dit reg te stel:\n1. Tik die 🔒 slotjie in Chrome se adresbalk\n2. Kies "Site settings"\n3. Verander "Notifications" na "Allow"\n4. Herlaai die app')
-        } else {
-          alert('Kennisgewings kon nie geaktiveer word nie. (' + result.reason + ')')
-        }
+      /* Samsung Internet doen nie Firebase se getToken nie, maar wel die
+         gewone pushManager. Sien `subscribeSamsung`. */
+      const result = isSamsungBrowser
+        ? await subscribeSamsung()
+        : await subscribeToNotifications()
+
+      if (!result.ok && result.reason === 'permission_denied') {
+        /* Hy het nou net geblokkeer. Die blaaier gaan ons nooit weer laat
+           vra nie, dus wys ons van hier af die stil pad terug in plaas van
+           'n boodskap wat verdwyn. */
+        setToestemmingAf(true)
       }
     } catch (e) {
-      alert('Fout: ' + e.message)
+      setToestemmingAf(Notification.permission === 'denied')
     }
   }
+
+  /* Is kennisgewings geblokkeer, wys 'n stil reël met die stappe om dit self
+     aan te sit. Dit vra niks en onderbreek niks — dit is die enigste pad
+     terug wat bestaan, want die app self mag nie weer vra nie. */
+  const [toestemmingAf, setToestemmingAf] = useState(
+    () => typeof Notification !== 'undefined' && wysPadTerug(Notification.permission)
+  )
 
   useEffect(() => {
     const params   = new URLSearchParams(window.location.search)
@@ -732,7 +800,16 @@ export default function App() {
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
           <div style={tab !== 'luister' ? {display:'none'} : undefined}>
-            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => { if (shouldShowSharePopup()) setActivePopup({ type: 'share' }) }} onNavigate={handleNav} />
+            {/* Net vir wie geblokkeer het. Vir almal anders bestaan dit nie. */}
+            {toestemmingAf && <KennisgewingAf />}
+            <Luister onPlayingChange={onAudioPlayingChange} installBanner={samsungOpenInChromeBanner || persistBanner} onAdminAccess={() => setShowAdmin(true)} onNoteFinished={() => {
+              /* Die kennisgewing-vraag kry voorrang. Sy nie: dit gebeur
+                 hoogstens drie keer in 'n mens se lewe, en die deel-popup
+                 kom weer. Twee dinge op een slag is nie 'n keuse nie — dit
+                 is 'n muur. */
+              if (vraKennisgewingsDalk()) return
+              if (shouldShowSharePopup()) setActivePopup({ type: 'share' })
+            }} onNavigate={handleNav} />
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
@@ -904,7 +981,7 @@ export default function App() {
             Kry elke oggend 'n nuwe oordenking op jou skerm.
           </div>
           <button className="notif-banner-yes" onClick={handleNotifYes}>Ja, graag</button>
-          <button className="notif-banner-no" onClick={() => setNotifBanner(false)}>✕</button>
+          <button className="notif-banner-no" onClick={() => { setNotifBanner(false); merkGevra() }}>✕</button>
         </div>
       )}
 

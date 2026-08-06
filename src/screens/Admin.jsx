@@ -1200,6 +1200,21 @@ export default function Admin({ onClose }) {
                       <div>{kykUitslag.vapid ? '✅' : '⚠️'} VAPID {kykUitslag.vapid ? '' : '— net Firefox raak geraak'}</div>
                       <div style={{ marginTop: 6 }}><b>{kykUitslag.ontvangers?.totaal ?? 0}</b> ontvangers
                         {' '}({kykUitslag.ontvangers?.fcm ?? 0} FCM, {kykUitslag.ontvangers?.webpush ?? 0} web-push)</div>
+
+                      {/* Waar toestelle staan — getel, nie afgetrek nie. */}
+                      <div style={{ marginTop: 6 }}>
+                        {kykUitslag.toestemming ? (
+                          <>
+                            <div>✅ <b>{kykUitslag.toestemming.ja}</b> het kennisgewings aan</div>
+                            <div>🔕 <b>{kykUitslag.toestemming.geblok}</b> het geblokkeer — hulle sien nou die pad terug</div>
+                            <div>⏳ <b>{kykUitslag.toestemming.stil}</b> het nog nie geantwoord nie — hulle word gevra</div>
+                          </>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>
+                            Die toestemming-telling begin sodra mense die nuwe weergawe oopmaak.
+                          </span>
+                        )}
+                      </div>
                       {/* Die opskrif is die NUUTSTE nota s'n. Laai jy môre 'n
                           nuwe een, gaan daardie een uit — nie hierdie een nie. */}
                       <div style={{ marginTop: 6 }}>Opskrif nou: <b>{kykUitslag.boodskap?.titel}</b></div>

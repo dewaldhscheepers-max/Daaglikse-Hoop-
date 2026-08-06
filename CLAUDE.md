@@ -27,7 +27,8 @@ node src/game/vrugtefees/vlakke.toets.mjs     # keur al 90 fases se moeilikheid
 node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
-node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 60 toetse
+node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
+node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -228,6 +229,42 @@ terugdraai nie:
 
 `api/_kennisgewings.toets.mjs` sit 'n vals Google agter die funksie en toets al
 hierdie dinge met 6000 tokens. Loop dit voor jy aan kennisgewings raak.
+
+### Wie gevra word, en hoe
+
+Die reels staan in `src/data/kennisgewingVra.js` en is suiwer — die tyd kom
+altyd van buite af.
+
+**Vra NÁ 'n nota klaar gespeel het**, nooit op 'n tydhouer ná die app oopmaak
+nie. Hier het 'n balkie gestaan wat drie sekondes ná ELKE oopmaak gewys het,
+sonder enige geheue, en dit het teen homself gewerk: iemand druk dit weg, dit
+kom môre weer, en op 'n dag druk hy die BLAAIER se "Block" om daarvan ontslae
+te raak. Daardie besluit is **permanent** — `requestPermission()` gee van toe
+af dadelik `denied` sonder om iets te wys. Ons het mense met 'n balkie in 'n
+hoek gejaag waaruit die app hulle nie kan haal nie.
+
+Nou: hoogstens **drie keer in 'n leeftyd**, minstens **sewe dae** uitmekaar.
+
+**Samsung Internet.** `App.jsx` het `if (isSamsungBrowser) return` gehad —
+Samsung-gebruikers is nooit gevra nie. Die bewys was dat
+`webPushSubscriptions` presies EEN inskrywing gehad het. Samsung doen nie
+Firebase se `getToken()` nie maar wel die gewone `pushManager`, en sy eindpunt
+is Google s'n, wat beteken die bediener stuur dit deur FCM. Sien
+`subscribeSamsung()` in `src/firebase.js`. **Dit kan nie hier getoets word
+nie** — daar is geen egte pushdiens in 'n houer nie. Toets dit op 'n regte
+Samsung-foon.
+
+**Wie geblokkeer het, kry `KennisgewingAf`** — 'n stil reël met die stappe vir
+sy blaaier. Dit is die enigste pad terug wat bestaan. Die stappe verskil
+werklik per blaaier; Facebook se ingeboude blaaier kan dit glad nie doen nie
+en die enigste eerlike antwoord daar is "maak dit in 'n regte blaaier oop".
+
+**Moenie installasies van tokens aftrek om te raai hoeveel mense bereik word
+nie.** Die installasie-teller tel toestelle wat OOIT geïnstalleer het; die
+token-versameling is opgeblaas omdat 'n token gereeld verander en die ou
+dokument nooit uitgevee word nie. Daardie aftreksom lyk soos 'n feit en is
+dit nie. `api/tel-toestemming.js` tel die ding self: drie heelgetalle op
+`tellers/toestemming`, geen naam en geen toestel-id.
 
 ---
 
