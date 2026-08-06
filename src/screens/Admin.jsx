@@ -216,6 +216,9 @@ export default function Admin({ onClose }) {
         if (misluk) dele.push(`${misluk} misluk`)
         if (data.dood) dele.push(`${data.dood} fone het die app verwyder`)
         if (data.vapid === false) dele.push('VAPID ontbreek — Firefox kry niks')
+        /* Die getal wat waarsku voordat dit weer breek. Vercel kap by 300s
+           af; sien jy dit opkruip, kom dit weer. */
+        if (data.sekondes) dele.push(`${data.sekondes}s van 300`)
         setSendAllResult(dele.join(' · '))
       }
     } catch (e) {

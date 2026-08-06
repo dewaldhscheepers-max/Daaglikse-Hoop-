@@ -215,6 +215,7 @@ module.exports = async function handler(req, res) {
   const customBody  = body.body?.trim()
   const isCustom    = !!(customTitle || customBody)
 
+  const begin = Date.now()
   try {
     const accessToken = await getAccessToken()
     const [todayTitle, fcmTokens, webPushSubs] = await Promise.all([
@@ -243,6 +244,18 @@ module.exports = async function handler(req, res) {
       /* Sonder VAPID gaan egte web-push (Firefox) nie deur nie. FCM werk
          steeds, en dit is die oorgrote meerderheid. */
       vapid: vapidGereed,
+      /* Hoe lank dit gevat het.
+
+         Dit is die getal wat 'n mens waarsku VOORDAT dit weer breek. Die
+         vorige weergawe het een-vir-een gestuur, en toe die lys groei het
+         die stuur oor Vercel se perk gegaan — die verbinding is halfpad
+         gesny en die admin het 'Failed to fetch' gewys. Die kode het nie
+         verander nie; die GETAL het.
+
+         Sien Dewald hierdie sekondes opkruip na driehonderd toe, weet hy
+         dit kom weer, en dan is dit 'n groter groep of 'n tweede lopie —
+         nie 'n verrassing nie. */
+      sekondes: Math.round((Date.now() - begin) / 100) / 10,
     }
     console.log('send-notifications:', JSON.stringify(result))
     return res.status(200).json(result)
