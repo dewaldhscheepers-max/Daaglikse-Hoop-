@@ -509,3 +509,92 @@
   color: var(--s-sag, #77717D);
 }
 .sorg-saamtel-syfers b { color: var(--s-pers, #624A84); }
+
+/* ── Hoeveel plek daar vandag is ──
+   Bo-aan die blad, voor alles. Dit is 'n belofte, nie 'n meter nie — sien
+   Sorg.jsx. */
+.sorg-plek {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--s-rand, #EBE3D8);
+  border-left: 3px solid var(--s-goud, #C69A32);
+  border-radius: 16px;
+  background: var(--s-kaart, #FFFFFF);
+  box-shadow: var(--s-skadu);
+}
+
+.sorg-plek-kop {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.32;
+  color: var(--s-teks, #302A3A);
+}
+
+/* Die balkie. Geen transform en geen animasie nie — net 'n breedte. */
+.sorg-plek-balk {
+  height: 6px;
+  margin: 11px 0 8px;
+  border-radius: 999px;
+  background: #EFE8DC;
+  overflow: hidden;
+}
+.sorg-plek-balk span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--s-goud, #C69A32);
+}
+
+.sorg-plek-fyn {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--s-sag, #77717D);
+}
+.sorg-plek-fyn b { color: var(--s-teks, #302A3A); }
+
+/* Vol is nie 'n fout nie — dit is 'n mens wat vir vandag klaar is. Dit lyk
+   dus warm en nie rooi nie. */
+.sorg-plek.vol {
+  border-left-color: var(--s-pers, #624A84);
+  background: var(--s-antwoord, #F5EFE3);
+}
+.sorg-plek.vol .sorg-plek-fyn { color: #5F5867; }
+
+.sorg-vertel:disabled {
+  background: #DCD6E4;
+  color: #7A7288;
+  box-shadow: none;
+}
+
+/* ── Elke week n nuwe video ── */
+.sorg-week-kop {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--s-goud, #C69A32);
+}
+
+/* Wat wys wanneer daar nog GEEN video is nie. Die belofte moet staan, ook
+   voordat die eerste een daar is. */
+.sorg-week-leeg {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px dashed #DCD2C2;
+  border-radius: 16px;
+  background: var(--s-antwoord, #F5EFE3);
+}
+
+.sorg-week-teks {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #5F5867;
+}

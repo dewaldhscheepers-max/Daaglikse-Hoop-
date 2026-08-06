@@ -44,6 +44,7 @@ import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
 import { haalMuur, meldGelees, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
+import { haalPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -149,6 +150,10 @@ export default function Sorg() {
     return () => { lewendig = false }
   }, [muur])
 
+  /* Hoeveel plek daar vandag is. Kom dit nie deur nie, wys ons eenvoudig
+     niks — 'n blad sonder die reel is reg, een met 'n verkeerde getal nie. */
+  const [plek, setPlek] = useState(null)
+
   useEffect(() => {
     let lewendig = true
     haalVideos().then(d => {
@@ -157,6 +162,7 @@ export default function Sorg() {
       setWoord(vandagSeWoord(d))
     })
     haalMuur().then(p => { if (lewendig) setMuur(p) })
+    haalPlek().then(p => { if (lewendig) setPlek(p) })
     return () => { lewendig = false }
   }, [])
 
@@ -207,9 +213,55 @@ export default function Sorg() {
 
       <div className="sorg-body">
 
-        {/* ── Die held ── */}
-        {held && (
+        {/* ── Hoeveel plek daar vandag is ──
+
+            Dit is 'n BELOFTE, nie 'n meter nie. Dit sê drie goed tegelyk vir
+            iemand wat oorweeg om te skryf: daar gaan werklik na jou boodskap
+            gekyk word, daar is 'n MENS aan die ander kant met 'n grens, en
+            die plek is nie oneindig nie.
+
+            Die getal kom uit dieselfde teller wat 'n indiening laat deurgaan
+            of keer. Daar is nie 'n tweede som op die skerm nie — dan sou die
+            blad plek kon belowe wat die vorm dan weier. */}
+        {plek && (
+          <div className={`sorg-plek${plek.vol ? ' vol' : ''}`}>
+            {plek.vol ? (
+              <>
+                <p className="sorg-plek-kop">Vandag se plekke is vol</p>
+                <p className="sorg-plek-fyn">
+                  Dankie dat jy hier is. Ek kan vandag nie meer boodskappe
+                  behoorlik lees nie, maar môre maak ek weer plek. Kom asseblief
+                  terug — en as dit dringend is, is <b>Hulp nou</b> bo-aan die
+                  blad daar, dag en nag.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="sorg-plek-kop">
+                  Vandag maak ek plek vir {plek.plafon} mense wat pastorale
+                  begeleiding nodig het
+                </p>
+                <div className="sorg-plek-balk" aria-hidden="true">
+                  <span style={{ width: `${Math.min(100, Math.round((plek.vandag / plek.plafon) * 100))}%` }} />
+                </div>
+                <p className="sorg-plek-fyn">
+                  <b>{plek.vandag} van {plek.plafon}</b> reeds ingestuur
+                  {plek.oor > 0 && <> · nog {plek.oor} {plek.oor === 1 ? 'plek' : 'plekke'} oop</>}
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── Die held ──
+
+            Die weeklikse video is die een ding wat Dewald elke week self
+            maak, en dit is die deel van hierdie blad wat SKAAL: een video
+            wat vyf mense se vraag saam beantwoord, bereik meer mense as vyf
+            antwoorde. Dit moet dus nie soos net nog 'n video lyk nie. */}
+        {held ? (
           <>
+            <p className="sorg-week-kop">Elke week ’n nuwe video</p>
             <SorgVideo
               video={held}
               groot
@@ -218,6 +270,17 @@ export default function Sorg() {
             />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
+        ) : (
+          /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
+             wat 'n weeklikse video belowe en niks daarvan wys nie, belowe
+             niks. */
+          <div className="sorg-week-leeg">
+            <p className="sorg-week-kop">Elke week ’n nuwe video</p>
+            <p className="sorg-week-teks">
+              Een keer per week vat ek die belangrikste vrae, stories en
+              onderwerpe van die week saam in een video — hier bo-aan die blad.
+            </p>
+          </div>
         )}
 
         {/* ── Die uitnodiging ──
@@ -279,8 +342,14 @@ export default function Sorg() {
             of materiële hulpversoeke nie.
           </p>
 
-          <button className="sorg-vertel" onClick={() => setVormOop(true)}>
-            Vertel my wat swaar is
+          {/* Is die dag vol, sê die knoppie so eerder as om iemand 'n vorm
+              te laat volskryf wat dan geweier word. */}
+          <button
+            className="sorg-vertel"
+            onClick={() => setVormOop(true)}
+            disabled={!!(plek && plek.vol)}
+          >
+            {plek && plek.vol ? 'Vandag se plekke is vol — môre weer' : 'Vertel my wat swaar is'}
           </button>
           <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
