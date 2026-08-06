@@ -222,19 +222,23 @@ export default function SorgAdmin({ geheim = '' }) {
           </button>
         ) : (
           <>
-            <label>Plak YouTube-skakels — een per reël</label>
+            <label>Plak jou lys — titel op een reël, skakel op die volgende</label>
             <textarea
               className="sa-invoer-teks"
-              rows={6}
+              rows={8}
               value={skakels}
               onChange={e => setSkakels(e.target.value)}
-              placeholder={'https://youtube.com/shorts/abc123\nhttps://youtu.be/def456\nhttps://youtube.com/watch?v=ghi789'}
+              placeholder={'4 Dinge wat vergifnis nie beteken nie\nhttps://youtu.be/abc123\n\nGod sien jou moegheid\nhttps://youtube.com/shorts/def456'}
             />
             <div className="admin-books-note">
-              Die titel kom vanself van YouTube af, en 'n <b>/shorts/</b>-skakel
-              word outomaties as <b>regop</b> gemerk. Hulle kom <b>versteek</b>
-              in — merk elkeen se onderwerp en publiseer dit dan. Die onderwerp
-              is wat bepaal wie hierdie video later kry.
+              Plak dit net soos jy dit in WhatsApp het. Jou <b>eie titel</b> word
+              gebruik; los jy hom uit, gaan haal ons hom by YouTube.
+              'n <b>/shorts/</b>-skakel word as <b>regop</b> gemerk, en die
+              <b> onderwerp word uit die titel geraai</b> — kry dit niks, kom
+              die video steeds in en jy merk hom self.
+              <br /><br />
+              <b>Die volgorde tel:</b> die eerste een in jou lys kom <b>onder</b>,
+              die laaste een <b>bo</b>.
             </div>
             <div className="sa-invoer-knoppe">
               <button
@@ -252,11 +256,26 @@ export default function SorgAdmin({ geheim = '' }) {
         )}
 
         {invoerUit && (
-          <div className="admin-success">
-            ✅ {invoerUit.bygevoeg} bygevoeg
-            {invoerUit.oorgeslaan > 0 && ` · ${invoerUit.oorgeslaan} was reeds daar`}
-            {invoerUit.sleg > 0 && ` · ${invoerUit.sleg} kon ek nie lees nie`}
-          </div>
+          <>
+            <div className="admin-success">
+              ✅ {invoerUit.bygevoeg} bygevoeg en gepubliseer
+              {invoerUit.oorgeslaan > 0 && ` · ${invoerUit.oorgeslaan} was reeds daar`}
+              {invoerUit.sleg > 0 && ` · ${invoerUit.sleg} kon ek nie lees nie`}
+            </div>
+            {/* Wat sonder onderwerp deurgekom het. Hulle is op die blad, maar
+                hulle word aan niemand se boodskap gekoppel nie — en dit is
+                die enigste ding wat 'n mens hier nog met die hand moet doen. */}
+            {invoerUit.sonderOnderwerp?.length > 0 && (
+              <div className="admin-books-note" style={{ marginTop: 8 }}>
+                <b>{invoerUit.sonderOnderwerp.length} sonder onderwerp</b> — hulle wys
+                onder “Nog boodskappe van hoop”, maar word nie aan iemand se
+                boodskap gekoppel nie. Merk hulle wanneer jy kans het:
+                <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                  {invoerUit.sonderOnderwerp.map((t, i) => <li key={i}>{t}</li>)}
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -83,3 +83,100 @@ export function onderwerpSin(sleutel) {
 export function keurOnderwerp(sleutel) {
   return OP_SLEUTEL.has(sleutel) ? sleutel : 'ander'
 }
+
+/* ────────────────────────────────────────────────────────────
+   Raai die onderwerp uit 'n video se titel.
+
+   ── Waarom ──
+
+   Dewald plaas elke dag 'n video, en die onderwerp is die ding wat bepaal
+   wie daardie video later kry — iemand wat pas sy hart uitgestort het oor
+   angs, moet 'n video oor angs sien, nie een oor geld nie. Dit is dus die
+   belangrikste veld op 'n video, en dit is ook die veld wat 'n mens laaste
+   invul en die eerste oorslaan wanneer hy haastig is.
+
+   Hy het dit self so gestel: "ek wil nie elkeen self onder onderwerpe sit
+   nie, ek het nie die tyd daarvoor nie."
+
+   ── Waarom dit KONSERWATIEF raai ──
+
+   'n Verkeerde onderwerp is erger as geen onderwerp nie. Iemand wat oor die
+   dood van sy kind geskryf het en 'n video oor finansiële druk terugkry, is
+   nie 'n klein irritasie nie — dit is die blad wat wys dat niemand geluister
+   het nie.
+
+   Daarom raai dit net op DUIDELIKE woorde. Kry dit niks, gee dit niks terug,
+   en die video land onder "Nog boodskappe van hoop" waar hy niemand seermaak
+   nie. 'n Leë antwoord is 'n geldige antwoord.
+
+   ── Waarom hele woorde ──
+
+   'rou' sit in 'vrou', 'grou' en 'berou'. 'skuld' sit in 'skuldig'. 'n
+   Substring-soektog sou 'n video oor 'n huwelik onder Rou en verlies sit.
+   Alles hier loop dus teen woordgrense.
+   ──────────────────────────────────────────────────────────── */
+
+/* Let op wat NIE hier is nie: 'skuld' (dit beteken in Afrikaans skuld-geld
+   en skuld-gevoel, en die raaiskoot sou albei kere kon misluk), en 'werk'
+   (te algemeen — "wat werk" staan in enige titel). Waar 'n woord dubbelsinnig
+   is, bly hy uit. */
+const RAAI_WOORDE = {
+  angs:       ['angs', 'angstig', 'angstige', 'bekommernis', 'bekommerd', 'paniek', 'onrus', 'rusteloos', 'rustelose', 'negatiewe', 'wakker'],
+  donker:     ['depressie', 'donkerte', 'moeg', 'moegheid', 'uitgebrand', 'hopeloos', 'opgee'],
+  rou:        ['rou', 'verlies', 'verloor', 'treur', 'begrafnis'],
+  sterwend:   ['sterwend', 'sterwe'],
+  siekte:     ['siekte', 'siek', 'kanker', 'gesondheid'],
+  huwelik:    ['huwelik', 'huwelike', 'eggenoot', 'verhouding'],
+  skeiding:   ['egskeiding'],
+  kinders:    ['kind', 'kinders', 'gesin', 'familie', 'seun', 'dogter'],
+  eensaam:    ['verwerping', 'verwerp', 'eensaam', 'eensaamheid', 'alleen'],
+  vergifnis:  ['vergifnis', 'vergewe', 'vergeef'],
+  woede:      ['woede', 'bitter', 'bitterheid', 'wrok', 'haat', 'kwaad'],
+  skaamte:    ['skaamte', 'skaam', 'skuldig', 'skande'],
+  waarde:     ['selfbeeld', 'waardeloos'],
+  grense:     ['grense', 'geselskap', 'vriende'],
+  besluit:    ['besluit'],
+  twyfel:     ['twyfel', 'geloof'],
+  verslawing: ['verslawing', 'verslaaf', 'drank', 'dwelms', 'pornografie'],
+  geld:       ['geld', 'finansies', 'finansiële', 'finansiele', 'skulde', 'armoede'],
+  werk:       ['werkloos', 'roeping', 'afgedank'],
+}
+
+/* Frases wat 'n hele gedagte dra en nie uit een woord blyk nie. */
+const RAAI_FRASES = [
+  ['nie goed genoeg', 'waarde'],
+  ['nie genoeg nie',  'waarde'],
+  ['nee kan sê',      'grense'],
+  ['nee te sê',       'grense'],
+  ['god vergeet',     'twyfel'],
+  ['seergemaak',      'woede'],
+  ['seermaak',        'woede'],
+]
+
+function normaliseer(teks) {
+  return String(teks || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+export function raaiOnderwerpe(titel) {
+  const t = normaliseer(titel)
+  if (!t) return []
+
+  /* Hele woorde: alles wat nie 'n letter of syfer is nie, is 'n grens. */
+  const woorde = new Set(t.split(/[^a-z0-9]+/).filter(Boolean))
+  const kry = []
+
+  for (const [sleutel, lys] of Object.entries(RAAI_WOORDE)) {
+    if (lys.some(w => woorde.has(normaliseer(w)))) kry.push(sleutel)
+  }
+  for (const [frase, sleutel] of RAAI_FRASES) {
+    if (t.includes(normaliseer(frase)) && !kry.includes(sleutel)) kry.push(sleutel)
+  }
+
+  /* Hoogstens drie. 'n Video wat onder ses onderwerpe hang, is 'n video wat
+     oral opduik en nêrens spesifiek is nie. Die volgorde volg ONDERWERPE
+     s'n, sodat die uitslag altyd dieselfde is vir dieselfde titel. */
+  const rang = new Map(ONDERWERPE.map((o, i) => [o.sleutel, i]))
+  return kry.sort((a, b) => rang.get(a) - rang.get(b)).slice(0, 3)
+}

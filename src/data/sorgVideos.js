@@ -141,3 +141,68 @@ export function hoopVir(onderwerp, { videos, week }) {
   if (held) return { video: held, rede: null }
   return { video: videos[0], rede: null }
 }
+
+/* ────────────────────────────────────────────────────────────
+   Ontleed 'n geplakte lys video's.
+
+   Dewald stuur sy video's soos hy hulle in WhatsApp het: 'n titel op een
+   reël, die skakel op die volgende, 'n oop reël tussenin.
+
+       Slegte Geselskap Bederf Jou Stadig‼️
+       https://youtube.com/shorts/zJFAjk0qIV8?si=81ys3radTZUBE49g
+
+       4 Dinge wat vergifnis nie beteken nie🔥‼️
+       https://youtu.be/yGDuxCjp3mo?si=pu6FhBXxsL7jVVUo
+
+   Die ou invoerder het elke reël as 'n skakel probeer lees. Die titels het
+   dus as "sleg" getel, en die name wat wél ingekom het, is by YouTube gaan
+   haal — nie Dewald se eie name nie. Sy titels is beter: hulle is in sy
+   stem, en die emoji is deel van hoe die blad lyk.
+
+   ── Waarom 'n reël 'n SKAKEL moet wees, nie net 'n ID nie ──
+
+   `haalVideoId` aanvaar ook 'n kaal id — enige string van 6 tot 20 letters,
+   syfers, koppel- of onderstreep. Dit is reg vir die enkel-video-veld, waar
+   'n mens net 'n id kan plak.
+
+   Hier is dit 'n slaggat: 'n titel van EEN woord, soos "Vergifnis", pas
+   presies daardie patroon. Sy sou dan as 'n video-id ingekom het en die
+   egte skakel daaronder sou sy titel geword het. Nie een van vandag se
+   veertien titels is een woord nie, dus sou dit vandag gewerk het en môre
+   stilweg gebreek het.
+
+   In 'n geplakte lys moet 'n skakel dus soos 'n skakel lyk.
+   ──────────────────────────────────────────────────────────── */
+const SKAKEL_LYK = /(?:youtu\.be\/|youtube\.com\/|youtube-nocookie\.com\/|^https?:\/\/)/i
+
+export function isVideoSkakel(reel) {
+  return SKAKEL_LYK.test(String(reel || '').trim())
+}
+
+export function ontleedPlak(teks) {
+  const reels = String(teks || '').split(/\r?\n/)
+  const uit = []
+  let wagTitel = ''
+
+  for (const rou of reels) {
+    const reel = rou.trim()
+    if (!reel) continue
+
+    if (isVideoSkakel(reel)) {
+      /* Party mense plak "Titel — https://…" op een reël. Dan is die titel
+         wat vóór die skakel staan beter as niks. */
+      const waar = reel.search(/https?:\/\//i)
+      const voor = waar > 0 ? reel.slice(0, waar).replace(/[\s–—:-]+$/, '').trim() : ''
+      uit.push({ skakel: waar > 0 ? reel.slice(waar) : reel, titel: wagTitel || voor })
+      wagTitel = ''
+      continue
+    }
+
+    /* Nog nie 'n skakel nie — dit is 'n titel wat op sy video wag. Staan daar
+       twee titels agtermekaar, wen die naaste een; die ander was waarskynlik
+       'n kopstuk of 'n los reël. */
+    wagTitel = reel
+  }
+
+  return uit
+}

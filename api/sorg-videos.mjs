@@ -16,7 +16,8 @@
    ──────────────────────────────────────────────────────────── */
 
 import { lysDokke, skryfDok, veeDok, magSkryf } from './_sorgFirestore.mjs'
-import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
+import { keurOnderwerp, raaiOnderwerpe } from '../src/data/sorgOnderwerpe.js'
+import { ontleedPlak } from '../src/data/sorgVideos.js'
 import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
 
 const VERSAMELING = 'sorg_videos'
@@ -165,7 +166,21 @@ export default async function handler(req, res) {
       const admin = magSkryf(req).ok
       const lys = alles
         .filter(v => v.videoId && (admin || v.gepubliseer))
-        .sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || '')))
+        /* Datum eerste, dan die id AFLOPEND.
+
+           'n Hele invoer kry dieselfde datum, en sonder 'n tweede sleutel
+           was die volgorde binne 'n dag wat ook al Firestore teruggegee het.
+           Dewald plak van oudste na nuutste, en elke ingevoerde video kry 'n
+           oplopende `volgorde`, dus sit die laaste een wat hy geplak het bo.
+           Video's van voor hierdie verandering het geen volgorde en val op
+           nul terug — wat reg is, want hulle is ouer. */
+        .sort((a, b) => {
+          const d = String(b.datum || '').localeCompare(String(a.datum || ''))
+          if (d) return d
+          const v = (Number(b.volgorde) || 0) - (Number(a.volgorde) || 0)
+          if (v) return v
+          return String(b.id || '').localeCompare(String(a.id || ''))
+        })
 
       /* Die week se video: die een wat gemerk is, anders die nuutste. Daar
          moet ALTYD een wees as daar enige video is — 'n leë held bo-aan die
@@ -254,35 +269,74 @@ export default async function handler(req, res) {
        gaan. Hulle kom dus ONGEPUBLISEER in — dan kan hy hulle rustig merk
        sonder dat 'n onbenoemde video intussen op die blad wys. */
     if (lyf.aksie === 'invoer') {
-      const rou = String(lyf.skakels || '').split(/[\r\n,]+/).map(x => x.trim()).filter(Boolean)
-      if (!rou.length) return res.status(400).json({ fout: 'geen skakels nie' })
-      if (rou.length > 100) return res.status(400).json({ fout: 'hoogstens 100 op ’n slag' })
+      const items = ontleedPlak(lyf.skakels)
+      if (!items.length) return res.status(400).json({ fout: 'geen skakels nie' })
+      if (items.length > 100) return res.status(400).json({ fout: 'hoogstens 100 op ’n slag' })
 
       const bestaan = new Set((await lysDokke(VERSAMELING, { grootte: 500 })).map(v => v.videoId))
-      const uit = { bygevoeg: 0, oorgeslaan: 0, sleg: 0, name: [] }
+      const uit = { bygevoeg: 0, oorgeslaan: 0, sleg: 0, name: [], sonderOnderwerp: [] }
 
-      for (const reel of rou) {
-        const videoId = haalVideoId(reel)
+      /* ── Die VOLGORDE ──
+
+         Dewald plak sy lys van oudste na nuutste — die eerste een moet
+         onder wees en die laaste een bo. Die blad sorteer op datum, en 'n
+         hele invoer kry dieselfde datum, dus sou hulle in 'n ewekansige
+         volgorde beland het.
+
+         Ons skryf hulle dus in die volgorde waarin hy hulle geplak het, en
+         die id dra 'n oplopende toonbank. Die lys sorteer op datum en dan op
+         id AFLOPEND, sodat die LAASTE een wat ingekom het, bo staan. Geen
+         vals datums, en 'n tweede invoer more val natuurlik bo vandag s'n. */
+      let toonbank = 0
+
+      for (const item of items) {
+        const videoId = haalVideoId(item.skakel)
         if (!videoId) { uit.sleg++; continue }
         if (bestaan.has(videoId)) { uit.oorgeslaan++; continue }
         bestaan.add(videoId)
 
-        const titel = await haalTitel(videoId)
+        /* SY titel wen. Hy het dit self geskryf, dit is in sy stem, en die
+           emoji is deel van hoe die blad lyk. Net as hy niks gegee het nie,
+           gaan haal ons dit by YouTube. */
+        const titel = skoonTeks(item.titel, 120) || await haalTitel(videoId)
+
+        /* Die onderwerp uit die titel. Konserwatief — sien `raaiOnderwerpe`.
+           Kry dit niks, kom die video steeds in, net onder "Nog boodskappe
+           van hoop" waar hy niemand verkeerd bedien nie. */
+        const onderwerpe = raaiOnderwerpe(titel)
+
+        /* 'n EKSPLISIETE getal, nie die id se vorm nie.
+
+           Ek het dit eers op die id gesorteer. Dit sou stil verkeerd gewees
+           het: ou id's is base36 en begin met 'n LETTER, nuwes sou met 'n
+           syfer begin het, en '0' sorteer voor 'm'. Elke ou video sou dus bo
+           elke nuwe een gestaan het op dieselfde dag.
+
+           'n Getal wat ek self skryf, kan nie so breek nie. Video's van voor
+           hierdie verandering het niks, en `Number(undefined) || 0` maak
+           hulle nul — wat reg is, want hulle is ouer. */
+        const volgorde = Date.now() * 1000 + (toonbank++)
         const id = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
         await skryfDok(VERSAMELING, id, {
           videoId,
           titel,
+          volgorde,
           beskrywing: '',
-          onderwerpe: [],
+          onderwerpe,
           datum: new Date().toISOString().slice(0, 10),
-          regop: /\/shorts\//i.test(reel),
+          regop: /\/shorts\//i.test(item.skakel),
           weekVideo: false,
-          /* Ongepubliseer totdat hy die onderwerp gemerk het. */
-          gepubliseer: false,
+          /* Hulle kom GEPUBLISEER in. Vroeer het hulle gewag totdat 'n mens
+             die onderwerp gemerk het — maar die onderwerp word nou geraai,
+             en 'n video wat in die admin le, help niemand nie. Wat sonder
+             onderwerp deurkom, word hier onder gelys sodat hy dit kan
+             regmaak. */
+          gepubliseer: true,
           uitPlasing: null,
         })
         uit.bygevoeg++
         uit.name.push(titel)
+        if (!onderwerpe.length) uit.sonderOnderwerp.push(titel)
       }
       return res.status(200).json({ ok: true, ...uit })
     }

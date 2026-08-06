@@ -25,6 +25,8 @@ node src/game/vrugtefees/oes.toets.mjs        # oes-lopie + herspeel, 252 toetse
 node src/game/vrugtefees/ranglys.toets.mjs    # bediener se keuring, 58 toetse
 node src/game/vrugtefees/vlakke.toets.mjs     # keur al 90 fases se moeilikheid
 node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
+node src/data/sorgVideos.toets.mjs            # die geplakte video-lys, 17 toetse
+node src/data/sorgOnderwerpe.toets.mjs        # raai die onderwerp uit 'n titel, 23 toetse
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
