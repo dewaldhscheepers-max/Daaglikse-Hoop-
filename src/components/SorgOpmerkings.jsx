@@ -32,7 +32,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useRef } from 'react'
-import { KLAAR_WOORDE, wysReaksies, MAKS_WOORD } from '../data/sorgSaamstaan'
+import { klaarWoordeVir, wysReaksies, MAKS_WOORD } from '../data/sorgSaamstaan'
 import { stuurWoord, rapporteerWoord } from '../data/sorgMuur'
 import './SorgOpmerkings.css'
 
@@ -175,9 +175,15 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
               is 'n gesprek; niemand word na een sin toegemaak nie. */}
           {(
             <>
-              {/* Dewald se sinne, vir wie nie weet wat om te sê nie. */}
+              {/* Vir wie nie weet wat om te sê nie.
+
+                  Op die MUUR is dit sinne: daar het iemand pas sy hart
+                  uitgestort. Onder 'n VIDEO is dit emoji — daar is niemand om
+                  saam mee te bid nie, dit is 'n video wat Dewald gemaak het,
+                  en "jy is nie alleen nie" praat met iemand wat nie daar is
+                  nie. */}
               <div className="op-vinnig">
-                {KLAAR_WOORDE.map(w => (
+                {klaarWoordeVir(soort).map(w => (
                   <button
                     key={w.sleutel}
                     className="op-vinnig-knop"

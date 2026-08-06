@@ -87,7 +87,33 @@ export const KLAAR_WOORDE = [
   { sleutel: 'dink',   teks: 'Ek dink aan jou.' },
 ]
 
-const WOORD_OP_SLEUTEL = new Map(KLAAR_WOORDE.map(w => [w.sleutel, w]))
+/* ── Wat 'n mens onder 'n VIDEO kan tik ──
+
+   Dieselfde fout as met die eerste opmerkings: die lys hierbo is vir die
+   MUUR geskryf. Daar het iemand pas sy hart uitgestort en "Ek bid vandag
+   saam met jou" is presies reg.
+
+   Onder 'n video is dit verkeerd. Daar is niemand om saam mee te bid nie —
+   dit is 'n video wat Dewald gemaak het. 'n Voorgestelde woord wat se "jy is
+   nie alleen nie" laat die hele ding vals lyk.
+
+   Die sleutels verskil van die muur s'n, want die bediener soek die teks op
+   sleutel op en die twee lyste woon in dieselfde naamruimte. */
+export const VIDEO_KLAAR = [
+  { sleutel: 'v_bid',    teks: '\u{1F64F}\u{1F3FB}' },
+  { sleutel: 'v_amen',   teks: 'Amen \u{1F64F}\u{1F3FB}' },
+  { sleutel: 'v_vuur',   teks: '\u{1F525}\u{1F64F}\u{1F3FB}' },
+  { sleutel: 'v_dankie', teks: 'Dankie \u{1F64F}\u{1F3FB}' },
+  { sleutel: 'v_hart',   teks: '\u2764\uFE0F\u{1F64F}\u{1F3FB}' },
+]
+
+/* Watter lys hoort by hierdie soort plasing. */
+export function klaarWoordeVir(soort) {
+  return soort === 'video' ? VIDEO_KLAAR : KLAAR_WOORDE
+}
+
+const WOORD_OP_SLEUTEL = new Map(
+  [...KLAAR_WOORDE, ...VIDEO_KLAAR].map(w => [w.sleutel, w]))
 
 /* Die kliënt stuur 'n SLEUTEL, nooit die teks nie. Stuur hy die teks, kan
    iemand met 'n gereedskapstuk enigiets in daardie veld sit en dit sou as 'n

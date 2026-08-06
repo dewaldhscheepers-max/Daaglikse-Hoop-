@@ -13,7 +13,7 @@
 
 import {
   REAKSIES, keurReaksie, reaksieBy, wysReaksies,
-  KLAAR_WOORDE, klaarWoordTeks, MAKS_WOORD,
+  KLAAR_WOORDE, VIDEO_KLAAR, klaarWoordeVir, klaarWoordTeks, MAKS_WOORD,
   skoonWoord, woordVlae, magVryeTeks, woordStatus,
 } from './sorgSaamstaan.js'
 
@@ -174,6 +174,41 @@ afdeling('n Gewone woord WYS DADELIK')
       woordStatus({ teks: '  Ek   bid  ', sensitief: false }).teks === 'Ek bid')
   kyk('dit word afgekap op 200',
       woordStatus({ teks: 'a'.repeat(500), sensitief: false }).teks.length === MAKS_WOORD)
+}
+
+
+afdeling('Die voorgestelde woorde — muur teenoor video')
+{
+  const muur  = klaarWoordeVir('muur')
+  const video = klaarWoordeVir('video')
+
+  kyk('albei lyste is ewe lank', muur.length === video.length && muur.length === 5)
+
+  /* Die klagte: onder 'n video het "Ek bid vandag saam met jou" gestaan.
+     Daar is niemand om saam mee te bid nie — dit is Dewald se eie video. */
+  kyk('geen muur-sin onder n video nie',
+      video.every(v => !muur.some(m => m.teks === v.teks)), video.map(v => v.teks))
+  kyk('en geen emoji-blokkie op die muur nie',
+      muur.every(m => !video.some(v => v.teks === m.teks)))
+
+  /* Elke video-blokkie moet KORT wees. 'n Sin hier is presies die fout. */
+  kyk('elke video-blokkie is kort', video.every(v => v.teks.length <= 14), video.map(v => v.teks))
+  kyk('en elkeen dra n emoji', video.every(v => /\p{Extended_Pictographic}/u.test(v.teks)))
+
+  /* Die sleutels woon in EEN naamruimte, want die bediener soek die teks op
+     sleutel op. Bots hulle, kry 'n mens die verkeerde sin onder sy video. */
+  const alle = [...muur, ...video].map(w => w.sleutel)
+  kyk('geen sleutel bots nie', alle.length === new Set(alle).size, alle)
+
+  for (const w of [...muur, ...video]) {
+    kyk('die bediener vind ' + w.sleutel, klaarWoordTeks(w.sleutel) === w.teks)
+  }
+  kyk('n onbekende sleutel gee niks', klaarWoordTeks('bestaan-nie') === '')
+
+  /* Wat NIE 'video' is nie, moet die muur se lys kry. 'n Tikfout in `soort`
+     mag nooit 'n leë ry blokkies gee nie. */
+  kyk('onbekende soort val op die muur terug',
+      klaarWoordeVir('wat').length === 5 && klaarWoordeVir(undefined)[0].teks === muur[0].teks)
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')
