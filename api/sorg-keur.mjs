@@ -38,7 +38,26 @@ const INKOMEND = 'sorg_inkomend'
 const MUUR = 'sorg_muur'
 const WOORDE = 'sorg_woorde'
 
-const MAKS_MUUR_TEKS = 1200
+/* ── Hoekom dit nie 1200 is nie ──
+
+   Dit WAS 1200, en dit het stil afgekap. 'n Vrou het 'n boodskap van
+   sowat 1400 karakters gestuur; die muur het by 1188 opgehou, middel in 'n
+   sin. Wat weggeval het, was die swaarste deel — dat sy in 'n paar maande
+   twee-en-twintig kilogram verloor het. Dewald se antwoord het daaroor
+   gepraat, en op die muur het daardie sin nie meer bestaan nie.
+
+   Twee goed het hier verkeerd geloop, en die tweede is die erger een:
+
+     1. die perk was te laag. Die vorm laat 2000 toe; die muur het 1200
+        gevat. Die twee getalle het nooit ooreengestem nie.
+     2. dit het STIL afgekap. `.slice()` sê niks. 'n Perk wat 'n mens
+        waarsku, is 'n perk; een wat woorde uitvee sonder om 'n woord te
+        rep, is dataverlies.
+
+   Nou is die perk ruim, en gaan dit oor, WEIER die bediener met 'n
+   boodskap wat sê hoeveel te veel dit is. Niks word ooit weer stilweg
+   afgekap nie. */
+const MAKS_MUUR_TEKS = 8000
 
 /* 'n Opskrif moet in EEN oogopslag lees. Word dit langer as dit, is dit nie
    meer 'n opskrif nie — dan is dit 'n opsomming, en die storie self doen
@@ -67,13 +86,32 @@ function skoonTeks(t, maks) {
     .slice(0, maks)
 }
 
+/* Skoon, MAAR gooi as dit oor die perk is.
+
+   Dit is die hele les van die 22 kg: 'n perk wat stilweg afkap, is
+   dataverlies met 'n vriendelike gesig. Gaan iets oor, moet 'n MENS dit
+   hoor en self besluit wat uit. */
+function skoonOfWeier(t, maks, wat) {
+  const rou = String(t || '').trim()
+  const skoon = skoonTeks(t, maks + 1)
+  if (skoon.length > maks) {
+    return {
+      fout: `${wat} is ${rou.length - maks} karakters te lank (${rou.length} van ${maks}). ` +
+            'Kort dit self in — dan besluit jy wat uitgaan, nie die rekenaar nie.',
+    }
+  }
+  return { teks: skoon }
+}
+
 /* 'n Antwoord is 'n SKAKEL na Dewald se eie stem, of 'n video, of geskrewe
    woorde. Geen opname vanuit die app nie — hy maak dit soos hy altyd doen en
    plak die skakel hier. */
 function skoonAntwoord(a) {
   if (!a || typeof a !== 'object') return { fout: 'geen antwoord nie' }
   const tipe = ['oudio', 'video', 'teks'].includes(a.tipe) ? a.tipe : 'teks'
-  const teks = skoonTeks(a.teks, MAKS_ANTWOORD)
+  const kk = skoonOfWeier(a.teks, MAKS_ANTWOORD, 'Jou antwoord')
+  if (kk.fout) return { fout: kk.fout }
+  const teks = kk.teks
   const bron = skoonTeks(a.bron, 400)
   /* Die vraag wat die antwoord beantwoord. Dit is die ding wat 'n mens laat
      druk op 'n klankgreep: nie "Dewald antwoord" nie, maar WAAROP. */
@@ -172,7 +210,9 @@ export default async function handler(req, res) {
       const bron = await leesDok(INKOMEND, String(lyf.id || ''))
       if (!bron) return res.status(404).json({ fout: 'daardie boodskap bestaan nie' })
 
-      const teks = skoonTeks(lyf.teks, MAKS_MUUR_TEKS)
+      const kk = skoonOfWeier(lyf.teks, MAKS_MUUR_TEKS, 'Die teks')
+      if (kk.fout) return res.status(400).json({ fout: kk.fout })
+      const teks = kk.teks
       if (teks.length < 10) return res.status(400).json({ fout: 'die teks is te kort' })
 
       /* Laaste vangnet: 'n nommer of e-posadres wat bly staan het. Ons keer
@@ -244,7 +284,11 @@ export default async function handler(req, res) {
     if (lyf.aksie === 'wysig') {
       if (!lyf.muurId) return res.status(400).json({ fout: 'geen muurId nie' })
       const velde = {}
-      if (typeof lyf.teks === 'string') velde.teks = skoonTeks(lyf.teks, MAKS_MUUR_TEKS)
+      if (typeof lyf.teks === 'string') {
+        const kk = skoonOfWeier(lyf.teks, MAKS_MUUR_TEKS, 'Die teks')
+        if (kk.fout) return res.status(400).json({ fout: kk.fout })
+        velde.teks = kk.teks
+      }
       if (typeof lyf.titel === 'string') velde.titel = skoonTeks(lyf.titel, MAKS_TITEL)
       if (typeof lyf.gepubliseer === 'boolean') velde.gepubliseer = lyf.gepubliseer
       if (typeof lyf.sensitief === 'boolean') velde.sensitief = lyf.sensitief

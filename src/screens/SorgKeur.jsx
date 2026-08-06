@@ -439,6 +439,16 @@ function Muur({ data, doen, besig }) {
      Die bediener stuur die muur reeds nuutste-eerste; ons hou daardie
      volgorde binne elke groep (sort is stabiel in elke blaaier wat ons
      ondersteun). */
+  /* ── Die ROU boodskap, soos die mens dit gestuur het ──
+
+     Die muur dra 'n GEREDIGEERDE kopie; die oorspronklike bly in die inbak.
+     Dit het 'n mens gered toe die muur se perk 'n vrou se boodskap by 1188
+     karakters afgekap het en die swaarste sin — dat sy 22 kg verloor het —
+     eenvoudig verdwyn het. Die volle teks was al die tyd hier.
+
+     Nou kan Dewald dit met een druk terugtrek. */
+  const rou = new Map((data.inkomend || []).map(b => [b.id, b]))
+
   const muur = [...(data.muur || [])].sort((a, b) => rangMuur(a) - rangMuur(b))
   if (!muur.length) return <p className="sk-leeg">Niks op die muur nie.</p>
 
@@ -494,10 +504,35 @@ function Muur({ data, doen, besig }) {
               </div>
               <textarea
                 className="sk-teks"
-                rows={7}
+                rows={9}
                 value={wTeks}
                 onChange={e => setWTeks(e.target.value)}
               />
+              <div className="admin-books-note">
+                {wTeks.length} karakters
+                {rou.get(m.bronId) && rou.get(m.bronId).teks && rou.get(m.bronId).teks.length > wTeks.length && (
+                  <b> · die oorspronklike is {rou.get(m.bronId).teks.length} — daar is teks wat NIE hier is nie</b>
+                )}
+              </div>
+
+              {/* Trek die volle boodskap terug soos die mens dit gestuur het.
+                  Dit is die pad terug wanneer iets uit die muur se kopie
+                  weggeraak het. */}
+              {rou.get(m.bronId) && rou.get(m.bronId).teks && (
+                <button
+                  className="sk-knop"
+                  onClick={() => {
+                    if (wTeks.trim() && !window.confirm(
+                      'Vervang wat hier staan met die VOLLE boodskap soos sy dit gestuur het?' +
+                      '\n\nJou redigering gaan verlore. Jy kan dit daarna weer regmaak voor jy stoor.'
+                    )) return
+                    setWTeks(rou.get(m.bronId).teks)
+                  }}
+                >
+                  ↩ Haal die volle oorspronklike terug
+                </button>
+              )}
+
               <div className="sk-knoppe">
                 <button className="sk-knop sk-plaas" disabled={besig || wTeks.trim().length < 10} onClick={() => stoorWysig(m)}>
                   Stoor
