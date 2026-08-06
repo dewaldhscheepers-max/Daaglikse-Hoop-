@@ -1,5 +1,7 @@
 /* Saamstaan — die voet van 'n storie, in die vorm wat elke mens ken.
-   Net kleur op :active — sien CLAUDE.md. */
+
+   Die opmerkings self woon in SorgOpmerkings; hier is net die opsomming,
+   die balk, en 'n voorskou van twee. Net kleur op :active — sien CLAUDE.md. */
 
 .ss { margin-top: 14px; }
 
@@ -125,176 +127,59 @@
 }
 .ss-kies-knop:active { background: #F1EDF6; }
 
-/* ── Die opmerkings ── */
-.ss-woorde {
-  margin: 11px 0 0;
+
+/* ── Die voorskou ──
+   Twee opmerkings soos 'n mens dit in 'n stroom sien. Die HELE ding is een
+   knoppie: waar 'n mens ook al druk, gaan die blad oop. */
+.ss-voorskou {
+  display: block;
+  width: 100%;
+  margin-top: 11px;
   padding: 0;
-  list-style: none;
+  border: 0;
+  background: none;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ss-woord {
+.ss-voorskou-ry {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-/* 'n Anonieme kring. Die muur is anoniem; 'n gesig sou 'n leuen wees. */
 .ss-avatar {
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #EDE6F7;
   border: 1px solid #E0D7EF;
 }
 
-.ss-borrel {
+/* Twee reels, dan hou dit op. 'n Voorskou wat oor ses reels loop, is nie 'n
+   voorskou nie — dan is die blad se hele bestaansrede weg. */
+.ss-voorskou-teks {
   flex: 1;
   min-width: 0;
-  padding: 8px 12px 9px;
-  border-radius: 4px 16px 16px 16px;
-  background: #F4F0EA;
-}
-
-.ss-wie {
-  margin: 0 0 1px;
-  font-family: var(--font-body);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--s-sag, #77717D);
-}
-
-.ss-woord-teks {
-  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-family: var(--font-body);
   font-size: 13.5px;
   line-height: 1.5;
   color: var(--s-teks, #302A3A);
   overflow-wrap: anywhere;
 }
+.ss-voorskou-teks b { font-weight: 700; }
 
-/* Klein met opset. Dit is 'n uitweg, nie 'n uitnodiging nie. */
-.ss-rap {
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: #B7B0C0;
-  font-size: 16px;
-  line-height: 1;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 0.12s;
-}
-.ss-rap:active { color: #A33A3A; }
-
-.ss-meer {
-  padding: 3px 2px 5px;
-  border: 0;
-  background: none;
+.ss-voorskou-meer {
+  display: block;
+  padding: 2px 0 4px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
   color: var(--s-sag, #77717D);
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  font-weight: 700;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ── Skryf iets ── */
-.ss-skryf { margin-top: 10px; }
-
-/* Dewald se sinne as vinnige keuses. Een ry wat rol — gestapel is dit sowat
-   250px op ELKE kaart. */
-.ss-vinnig {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 9px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-.ss-vinnig::-webkit-scrollbar { display: none; }
-
-.ss-vinnig-knop {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 8px 13px;
-  border: 1px solid var(--s-rand, #EBE3D8);
-  border-radius: 999px;
-  background: var(--s-kaart, #FFFFFF);
-  color: var(--s-teks, #302A3A);
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s, border-color 0.12s;
-}
-.ss-vinnig-knop:active { background: #F3EFE6; border-color: var(--s-goud, #C69A32); }
-.ss-vinnig-knop:disabled { color: #A29CAB; }
-
-.ss-invoer-ry {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.ss-invoer {
-  flex: 1;
-  min-width: 0;
-  padding: 9px 13px;
-  border: 1px solid #E2DBEC;
-  border-radius: 18px;
-  background: var(--s-kaart, #FFFFFF);
-  color: var(--s-teks, #302A3A);
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.5;
-  resize: none;
-}
-
-.ss-skryf-voet {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.ss-oor {
-  font-family: var(--font-body);
-  font-size: 11.5px;
-  color: #A29CAB;
-}
-
-.ss-stuur {
-  padding: 9px 20px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--s-pers, #624A84);
-  color: #FFFFFF;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 700;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s;
-}
-.ss-stuur:active { background: var(--s-pers-diep, #4C3A6B); }
-.ss-stuur:disabled { background: #DCD6E4; color: #9A92A8; }
-
-.ss-riglyn {
-  margin: 8px 0 0;
-  font-family: var(--font-body);
-  font-size: 11.5px;
-  line-height: 1.5;
-  color: #A29CAB;
-}
-
-.ss-fout {
-  margin: 9px 0 0;
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--s-pers, #624A84);
 }

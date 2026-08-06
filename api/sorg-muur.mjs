@@ -68,7 +68,18 @@ function virDieSkerm(m, woorde) {
        storie te swaar is vir 'n vreemdeling se raad. */
     sensitief: m.sensitief === true,
     /* Die eerste twee woorde, en hoeveel daar in totaal is. */
-    woorde: myne.slice(0, 3).map(w => ({ id: w.id, teks: w.teks })),
+    /* AL die opmerkings, nie net die eerste paar nie.
+
+       Die kaart wys twee; die blad wat oopgaan wanneer 'n mens die
+       spraakborrel druk, wys almal. Sou ons net drie stuur, moes daardie
+       blad 'n tweede oproep doen net om oop te gaan — en dan kyk 'n mens na
+       'n leë blad terwyl dit laai. Hulle is hoogstens tweehonderd
+       karakters elk; vyftig van hulle is kleiner as een foto. */
+    woorde: myne.slice(0, 50).map(w => ({
+      id: w.id,
+      teks: w.teks,
+      wanneer: w.dag || '',
+    })),
     woordeTotaal: myne.length,
   }
 }

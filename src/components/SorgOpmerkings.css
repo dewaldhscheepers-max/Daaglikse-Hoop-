@@ -1,0 +1,256 @@
+/* Die opmerkings-blad. 100svh en nie 100dvh nie, en net kleur op :active —
+   sien CLAUDE.md. */
+
+.op-agter {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100svh;
+  z-index: 300;
+  background: rgba(30, 22, 48, 0.5);
+}
+
+/* Gesentreer met marges, nie met 'n transform nie. 'n Permanente transform op
+   'n position:fixed element maak dit vir altyd 'n eie saamgestelde laag. */
+.op-blad {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 480px;
+  height: 82svh;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px 20px 0 0;
+  background: var(--s-kaart, #FFFFFF);
+  box-shadow: 0 -8px 34px rgba(48, 42, 58, 0.22);
+  overflow: hidden;
+}
+
+/* Die greep. Dit is 'n knoppie, nie 'n versiering nie — 'n mens moet die
+   blad kan toemaak sonder om vir 'n klein kruisie te mik. */
+.op-greep {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 11px 0 9px;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.op-greep::before {
+  content: '';
+  display: block;
+  width: 42px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: #D8D2E4;
+}
+.op-greep:active::before { background: #B9AFCE; }
+
+/* ── Die kop ── */
+.op-kop {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 18px 12px;
+  border-bottom: 1px solid var(--s-rand, #EBE3D8);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--s-sag, #77717D);
+}
+
+.op-kop-links { display: inline-flex; align-items: center; gap: 8px; }
+.op-kop-regs { white-space: nowrap; }
+
+.op-tekens { display: inline-flex; }
+
+.op-teken {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--s-kaart, #FFFFFF);
+  box-shadow: 0 0 0 1.5px var(--s-kaart, #FFFFFF);
+  font-size: 12px;
+  line-height: 1;
+}
+.op-teken + .op-teken { margin-left: -6px; }
+
+.op-totaal { font-weight: 600; }
+
+/* ── Die lys ── */
+.op-lys {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 14px 18px 6px;
+}
+
+.op-leeg {
+  margin: 26px 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--s-sag, #77717D);
+  text-align: center;
+}
+
+.op-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* Die muur is anoniem. 'n Gesig sou 'n leuen wees. */
+.op-avatar {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #EDE6F7;
+  border: 1px solid #E0D7EF;
+}
+
+.op-item-teks { flex: 1; min-width: 0; }
+
+.op-wie {
+  margin: 0 0 2px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--s-teks, #302A3A);
+}
+
+.op-wanneer {
+  font-weight: 500;
+  color: var(--s-sag, #77717D);
+}
+
+/* Plat teks, nie 'n borrel nie. Op 'n blad waar mense oor 'n sterwende ma
+   skryf, lees borrels soos 'n kletsprogram. */
+.op-teks {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--s-teks, #302A3A);
+  overflow-wrap: anywhere;
+}
+
+.op-rap {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #B7B0C0;
+  font-size: 17px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s;
+}
+.op-rap:active { color: #A33A3A; }
+
+/* ── Die voet, VAS ──
+   Dit is die hele rede waarom 'n mens hierdie blad oopmaak. */
+.op-voet {
+  flex: 0 0 auto;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--s-rand, #EBE3D8);
+  background: var(--s-blad, #FAF7F2);
+}
+
+.op-vinnig {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 9px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.op-vinnig::-webkit-scrollbar { display: none; }
+
+.op-vinnig-knop {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 8px 13px;
+  border: 1px solid var(--s-rand, #EBE3D8);
+  border-radius: 999px;
+  background: var(--s-kaart, #FFFFFF);
+  color: var(--s-teks, #302A3A);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.op-vinnig-knop:active { background: #F3EFE6; border-color: var(--s-goud, #C69A32); }
+.op-vinnig-knop:disabled { color: #A29CAB; }
+
+.op-tik {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.op-invoer {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 15px;
+  border: 1px solid #E2DBEC;
+  border-radius: 999px;
+  background: var(--s-kaart, #FFFFFF);
+  color: var(--s-teks, #302A3A);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.op-plaas {
+  flex: 0 0 auto;
+  padding: 10px 17px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--s-pers, #624A84);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.op-plaas:active { background: var(--s-pers-diep, #4C3A6B); }
+.op-plaas:disabled { background: #DCD6E4; color: #9A92A8; }
+
+.op-riglyn,
+.op-fout,
+.op-dankie {
+  margin: 6px 2px 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.op-riglyn { color: #A29CAB; }
+.op-fout   { color: var(--s-pers, #624A84); }
+
+.op-dankie {
+  margin: 4px 2px;
+  padding: 10px 13px;
+  border-radius: 13px;
+  background: #EDE6F7;
+  font-size: 13px;
+  color: var(--s-pers, #624A84);
+}

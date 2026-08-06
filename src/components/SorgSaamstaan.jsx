@@ -35,7 +35,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { REAKSIES, KLAAR_WOORDE, wysReaksies, wysGelees, MAKS_WOORD } from '../data/sorgSaamstaan'
-import { stuurReaksie, stuurWoord, myReaksie, rapporteerWoord } from '../data/sorgMuur'
+import { stuurReaksie, myReaksie } from '../data/sorgMuur'
+import SorgOpmerkings from './SorgOpmerkings'
 import './SorgSaamstaan.css'
 
 /* Die een wat die hart wys wanneer 'n mens nog niks gekies het nie. */
@@ -45,14 +46,9 @@ export default function SorgSaamstaan({ plasing }) {
   const [tellings, setTellings] = useState(plasing.reaksies || {})
   const [myne, setMyne] = useState(() => myReaksie(plasing.id))
   const [woorde, setWoorde] = useState(plasing.woorde || [])
-  const [totaalWoorde, setTotaalWoorde] = useState(plasing.woordeTotaal || 0)
-  const [alleWoorde, setAlleWoorde] = useState(false)
   const [kiesOop, setKiesOop] = useState(false)
-  const [skryfOop, setSkryfOop] = useState(false)
-  const [eie, setEie] = useState('')
+  const [bladOop, setBladOop] = useState(false)
   const [besig, setBesig] = useState(false)
-  const [gestuur, setGestuur] = useState(false)
-  const [fout, setFout] = useState('')
   const balkRef = useRef(null)
 
   const { gewys, totaal } = wysReaksies(tellings, plasing.saam)
@@ -68,6 +64,14 @@ export default function SorgSaamstaan({ plasing }) {
     return () => document.removeEventListener('pointerdown', weg)
   }, [kiesOop])
 
+  /* Terwyl die blad oop is, mag die muur agter hom nie rol nie. */
+  useEffect(() => {
+    if (!bladOop) return
+    const ou = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = ou }
+  }, [bladOop])
+
   async function druk(soort) {
     setKiesOop(false)
     if (myne || besig) return
@@ -80,65 +84,18 @@ export default function SorgSaamstaan({ plasing }) {
     setBesig(false)
   }
 
-  function hartDruk() {
-    if (myne) return          // klaar gekies; die kiesers help nie meer nie
-    setKiesOop(o => !o)
+  /* Die blad gee 'n nuwe opmerking terug, of 'n id om weg te vat. */
+  function opmerkingVerander(nuut, weg) {
+    if (weg) { setWoorde(w => w.filter(x => x.id !== weg)); return }
+    if (nuut) setWoorde(w => [...w, nuut])
   }
-
-  async function stuurKlaar(sleutel) {
-    if (besig || gestuur) return
-    setBesig(true)
-    setFout('')
-    const d = await stuurWoord(plasing.id, { woord: sleutel })
-    setBesig(false)
-    if (d && d.fout) { setFout(d.fout); return }
-    klaarNaStuur(d)
-  }
-
-  async function stuurEie() {
-    const t = eie.trim()
-    if (!t || besig || gestuur) return
-    setBesig(true)
-    setFout('')
-    const d = await stuurWoord(plasing.id, { teks: t })
-    setBesig(false)
-    if (d && d.fout) { setFout(d.fout); return }
-    klaarNaStuur(d)
-  }
-
-  /* Een plek waar 'n geslaagde stuur afgehandel word.
-
-     Dit was twee plekke, en die een het die woord by die lys gesit terwyl
-     die ander 'n aparte "dankie"-blokkie met DIESELFDE sin gewys het. Op die
-     skerm het jou opmerking dus twee keer verskyn. */
-  function klaarNaStuur(d) {
-    setEie('')
-    setSkryfOop(false)
-    setGestuur(true)
-    if (d && d.woord) {
-      setWoorde(w => [...w, { id: d.woord.id, teks: d.woord.teks, myne: true }])
-      setTotaalWoorde(n => n + 1)
-      setAlleWoorde(true)          // wys dit, ook al is dit die derde
-    } else if (d && d.wag) {
-      setFout('Dankie. Dewald kyk gou daarna voor dit wys.')
-    }
-  }
-
-  async function rapporteer(id) {
-    if (!window.confirm('Rapporteer hierdie opmerking?\n\nDit gaan dadelik weg en Dewald kyk daarna.')) return
-    setWoorde(w => w.filter(x => x.id !== id))
-    setTotaalWoorde(n => Math.max(0, n - 1))
-    await rapporteerWoord(id)
-  }
-
-  const sigbaar = alleWoorde ? woorde : woorde.slice(0, 2)
-  const versteek = totaalWoorde - sigbaar.length
 
   return (
     <div className="ss">
 
-      {/* ── Die opsomming ── */}
-      {(totaal > 0 || totaalWoorde > 0 || gelees > 0) && (
+      {/* ── Die opsomming ──
+          Links wat gestuur is; regs die leestelling. */}
+      {(totaal > 0 || gelees > 0) && (
         <div className="ss-som">
           {totaal > 0 && (
             <span className="ss-som-links">
@@ -148,20 +105,15 @@ export default function SorgSaamstaan({ plasing }) {
               <span className="ss-totaal">{totaal}</span>
             </span>
           )}
-          <span className="ss-som-regs">
-            {totaalWoorde > 0 && (
-              <button className="ss-som-knop" onClick={() => setAlleWoorde(true)}>
-                {totaalWoorde} {totaalWoorde === 1 ? 'opmerking' : 'opmerkings'}
-              </button>
-            )}
-            {gelees > 0 && <span className="ss-gelees">{gelees} gelees</span>}
-          </span>
+          {gelees > 0 && <span className="ss-gelees">{gelees} gelees</span>}
         </div>
       )}
 
-      {/* ── Die aksiebalk ── */}
+      {/* ── Die aksiebalk ──
+          Ikoon met die GETAL langsaan, soos elke muur wat 'n mens ken. Sonder
+          die getal is die knoppie 'n bevel; met die getal is dit 'n plek waar
+          iets gebeur het. */}
       <div className="ss-balk" ref={balkRef}>
-        {/* Die kiesers dryf BO die balk, soos op Facebook. */}
         {kiesOop && (
           <div className="ss-kies" role="menu">
             {REAKSIES.map(r => (
@@ -181,7 +133,7 @@ export default function SorgSaamstaan({ plasing }) {
 
         <button
           className={`ss-aksie${myne ? ' myne' : ''}`}
-          onClick={hartDruk}
+          onClick={() => { if (!myne) setKiesOop(o => !o) }}
           aria-expanded={kiesOop}
         >
           <span className="ss-aksie-teken" aria-hidden="true">{myReak ? myReak.teken : '♡'}</span>
@@ -190,101 +142,40 @@ export default function SorgSaamstaan({ plasing }) {
 
         <button
           className="ss-aksie"
-          onClick={() => { setKiesOop(false); setSkryfOop(o => !o); setAlleWoorde(true) }}
+          onClick={() => { setKiesOop(false); setBladOop(true) }}
         >
           <span className="ss-aksie-teken" aria-hidden="true">💬</span>
-          <span>Reageer</span>
+          <span>{woorde.length > 0 ? `${woorde.length}` : 'Reageer'}</span>
         </button>
       </div>
 
-      {/* ── Die opmerkings ── */}
-      {sigbaar.length > 0 && (
-        <ul className="ss-woorde">
-          {sigbaar.map(w => (
-            <li key={w.id} className="ss-woord">
+      {/* ── Twee opmerkings as voorskou ──
+          Soos 'n mens dit in 'n stroom sien: die gesprek is daar, maar dit
+          neem nie die kaart oor nie. Druk op enigeen maak die blad oop. */}
+      {woorde.length > 0 && (
+        <button className="ss-voorskou" onClick={() => setBladOop(true)}>
+          {woorde.slice(0, 2).map(w => (
+            <span key={w.id} className="ss-voorskou-ry">
               <span className="ss-avatar" aria-hidden="true" />
-              <div className="ss-borrel">
-                <p className="ss-wie">{w.myne ? 'Jy' : 'Anoniem'}</p>
-                <p className="ss-woord-teks">{w.teks}</p>
-              </div>
-              {!w.myne && (
-                <button
-                  className="ss-rap"
-                  aria-label="Rapporteer hierdie opmerking"
-                  title="Rapporteer"
-                  onClick={() => rapporteer(w.id)}
-                >
-                  ⋯
-                </button>
-              )}
-            </li>
+              <span className="ss-voorskou-teks">
+                <b>{w.myne ? 'Jy' : 'Anoniem'}</b> {w.teks}
+              </span>
+            </span>
           ))}
-        </ul>
-      )}
-
-      {versteek > 0 && (
-        <button className="ss-meer" onClick={() => setAlleWoorde(true)}>
-          Wys al {totaalWoorde} opmerkings
+          {woorde.length > 2 && (
+            <span className="ss-voorskou-meer">Wys al {woorde.length} opmerkings</span>
+          )}
         </button>
       )}
-      {alleWoorde && woorde.length > 2 && (
-        <button className="ss-meer" onClick={() => setAlleWoorde(false)}>Wys minder</button>
-      )}
 
-      {/* ── Skryf iets ── */}
-      {skryfOop && !gestuur && (
-        <div className="ss-skryf">
-          {/* Dewald se sinne as vinnige keuses, nie as 'n opskrif met 'n
-              instruksie nie. Wie wil tik, tik; wie nie weet wat om te sê nie,
-              druk een. */}
-          <div className="ss-vinnig">
-            {KLAAR_WOORDE.map(w => (
-              <button
-                key={w.sleutel}
-                className="ss-vinnig-knop"
-                disabled={besig}
-                onClick={() => stuurKlaar(w.sleutel)}
-              >
-                {w.teks}
-              </button>
-            ))}
-          </div>
-
-          {!plasing.sensitief && (
-            <>
-              <div className="ss-invoer-ry">
-                <span className="ss-avatar" aria-hidden="true" />
-                <textarea
-                  className="ss-invoer"
-                  value={eie}
-                  onChange={e => setEie(e.target.value.slice(0, MAKS_WOORD))}
-                  maxLength={MAKS_WOORD}
-                  rows={2}
-                  placeholder="Skryf iets sags…"
-                />
-              </div>
-              <div className="ss-skryf-voet">
-                <span className="ss-oor">{MAKS_WOORD - eie.length}</span>
-                <button className="ss-stuur" disabled={besig || !eie.trim()} onClick={stuurEie}>
-                  Plaas
-                </button>
-              </div>
-              <p className="ss-riglyn">
-                Hou dit kort en sag. Geen raad, diagnoses of kontakbesonderhede nie.
-              </p>
-            </>
-          )}
-
-          {plasing.sensitief && (
-            <p className="ss-riglyn">
-              Hierdie storie is swaar. Kies een van die woorde hier bo — dit is
-              genoeg, en dit is die veiligste ding om te stuur.
-            </p>
-          )}
-        </div>
-      )}
-
-      {fout && <p className="ss-fout">{fout}</p>}
+      <SorgOpmerkings
+        plasing={plasing}
+        oop={bladOop}
+        onSluit={() => setBladOop(false)}
+        woorde={woorde}
+        onNuut={opmerkingVerander}
+        tellings={tellings}
+      />
     </div>
   )
 }
