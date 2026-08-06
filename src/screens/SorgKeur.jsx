@@ -310,8 +310,10 @@ function Voorskou({ teks }) {
   return (
     <>
       <p className={`sk-voorskou${lank && !oop ? ' kort' : ''}`}>{teks}</p>
-      {lank && !oop && (
-        <button className="sk-meer" onClick={() => setOop(true)}>Wys alles</button>
+      {lank && (
+        <button className="sk-meer" onClick={() => setOop(o => !o)}>
+          {oop ? 'Wys minder' : 'Wys alles'}
+        </button>
       )}
     </>
   )

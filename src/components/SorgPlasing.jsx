@@ -28,7 +28,8 @@
 
    Die storie word tot ses reels afgekort met 'Lees verder' daaronder. Wie
    die opskrif interessant vind, maak dit oop; die res blaai verby sonder om
-   moeg te word.
+   moeg te word. Dieselfde knoppie maak dit weer toe — sonder dit bly 'n kaart
+   wat 'n mens eenmaal oopgemaak het vir altyd uitgestrek.
 
    'n GESKREWE antwoord word net so afgekort, met 'Lees meer'. Dewald skryf
    soms lank, en dan is een kaart drie skerms hoog en die volgende plasing
@@ -163,8 +164,14 @@ export default function SorgPlasing({ plasing }) {
       )}
 
       <p className={`sp-teks${lank && !oop ? ' kort' : ''}`}>{plasing.teks}</p>
-      {lank && !oop && (
-        <button className="sp-meer" onClick={() => setOop(true)}>Lees verder</button>
+      {/* Dit gaan OOP en dit gaan weer TOE. Die knoppie het verdwyn sodra 'n
+          mens dit oopgemaak het, en dan was daar geen pad terug nie — die
+          kaart bly vir altyd uitgestrek en 'n mens moet verby die hele storie
+          scroll om by die volgende plasing te kom. */}
+      {lank && (
+        <button className="sp-meer" onClick={() => setOop(o => !o)}>
+          {oop ? 'Wys minder' : 'Lees verder'}
+        </button>
       )}
 
       {/* ── Dewald se antwoord, DIREK onder die woorde ── */}
@@ -218,8 +225,10 @@ export default function SorgPlasing({ plasing }) {
               <p className={`sp-antwoord-teks${antwLank && !antwOop ? ' kort' : ''}`}>
                 {antwoord.teks}
               </p>
-              {antwLank && !antwOop && (
-                <button className="sp-meer" onClick={() => setAntwOop(true)}>Lees meer</button>
+              {antwLank && (
+                <button className="sp-meer" onClick={() => setAntwOop(o => !o)}>
+                  {antwOop ? 'Wys minder' : 'Lees meer'}
+                </button>
               )}
             </>
           )}
