@@ -292,6 +292,32 @@ export default function Admin({ onClose }) {
      werk, was om ses duisend mense 'n kennisgewing te stuur. */
   const [kykBusy,   setKykBusy]   = useState(false)
   const [kykUitslag, setKykUitslag] = useState(null)
+  const [repBusy,   setRepBusy]   = useState(false)
+  const [repUitslag, setRepUitslag] = useState('')
+
+  /* ── Die repetisie ──
+     Die egte oggendlopie, met die egte opskrif uit die egte nota, maar die
+     ontvangerslys is net hierdie foon. */
+  async function handleRepetisie() {
+    const token = localStorage.getItem('fcmToken')
+    if (!token) { setRepUitslag('❌ Geen token op hierdie foon — tik eers "Registreer".'); return }
+    setRepBusy(true)
+    setRepUitslag('')
+    try {
+      const r = await fetch('/api/send-notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ net: token }),
+      })
+      const d = await r.json().catch(() => ({}))
+      if (!r.ok)               setRepUitslag(`❌ ${d.fout || `HTTP ${r.status}`}`)
+      else if (d.fcm?.sent)    setRepUitslag(`✅ Gestuur — kyk jou kennisgewings.\n“${d.opskrif}”\n${d.teks}`)
+      else                     setRepUitslag(`❌ FCM het dit nie aanvaar nie${d.dood ? ' — hierdie foon se token is dood; tik "Registreer".' : '.'}`)
+    } catch (e) {
+      setRepUitslag('❌ Netwerkfout: ' + e.message)
+    }
+    setRepBusy(false)
+  }
 
   async function handleKyk() {
     setKykBusy(true)
@@ -1145,6 +1171,23 @@ export default function Admin({ onClose }) {
               >
                 {kykBusy ? 'Besig...' : '🔍 Gaan die opstelling na'}
               </button>
+
+              {/* Die egte oggendlopie, net na hierdie foon toe. */}
+              <button
+                className="admin-save-btn"
+                style={{ background: '#27713f', marginTop: 4 }}
+                onClick={handleRepetisie}
+                disabled={repBusy}
+              >
+                {repBusy ? 'Besig...' : '🌅 Stuur die oggendboodskap NET aan my'}
+              </button>
+              {repUitslag && (
+                <div style={{ fontSize: 12.5, background: '#f5f5f5', borderRadius: 8, padding: '10px 12px',
+                  marginTop: 8, lineHeight: 1.6, whiteSpace: 'pre-line',
+                  color: repUitslag.startsWith('✅') ? '#1a6b2e' : '#c0392b' }}>
+                  {repUitslag}
+                </div>
+              )}
               {kykUitslag && (
                 <div style={{ fontSize: 12.5, background: '#f5f5f5', borderRadius: 8, padding: '10px 12px', marginTop: 8, lineHeight: 1.7 }}>
                   {kykUitslag.fout ? (

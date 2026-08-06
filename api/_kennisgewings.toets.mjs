@@ -223,6 +223,38 @@ console.log('\n── Val die ?outo=1 weg, tel dit STEEDS as die oggendlopie ─
   is('en stuur vir niemand', w2.fcmGestuur.length, 0)
 }
 
+console.log('\n── Die repetisie: die egte oggendboodskap, net aan een foon ──')
+{
+  const dae = new Set()
+  const w = maakWereld({ tokens: 6000, subs: 200, dae })
+  const res = await loop({ ...ADMIN, body: { net: 'my-eie-token' } }, w)
+  is('gee 200', res.kode, 200)
+  is('EEN ontvanger, en dit is myne', w.fcmGestuur, ['my-eie-token'])
+  is('die 6000 se lyste word nie eens gehaal nie', res.lyf.fcm.total, 1)
+  is('en geen web-push nie', res.lyf.webpush.total, 0)
+  is('dieselfde opskrif as die oggend', res.lyf.opskrif, 'Die Here is my Herder')
+  is('dieselfde teks', res.lyf.teks, 'Jou Daaglikse Hoop vir vandag is gereed. Tik om te luister.')
+  is('met die daaglikse prent', [...w.metPrent], [true])
+  waar('gemerk as repetisie', res.lyf.repetisie)
+
+  /* Die belangrikste een: 'n repetisie mag NOOIT die oggendlopie
+     stilmaak nie. Toets dit deur die egte lopie hierna te laat loop. */
+  is('die dag is NIE geeis nie', w.eise, 0)
+  const w2 = maakWereld({ tokens: 30, dae })
+  const oggend = await loop(CRON, w2)
+  is('die oggendlopie loop steeds', oggend.lyf.fcm.sent > 0, true)
+  is('en stuur aan almal', w2.fcmGestuur.length, 30)
+}
+
+console.log('\n── \'n Cron mag NOOIT \'n repetisie doen nie ──')
+{
+  const w = maakWereld({ tokens: 40 })
+  const res = await loop({ ...CRON, method: 'POST', body: { net: 'my-eie-token' } }, w)
+  is('die cron stuur aan ALMAL, nie aan een nie', w.fcmGestuur.length, 40)
+  is('en \'net\' word geïgnoreer', res.lyf.fcm.total, 40)
+  is('en die dag word wel geeis', w.eise, 1)
+}
+
 console.log('\n── Die droëloop stuur vir niemand ──')
 {
   const w = maakWereld({ tokens: 6000, subs: 40 })

@@ -325,6 +325,22 @@ module.exports = async function handler(req, res) {
   const customBody  = body.body?.trim()
   const isCustom    = !!(customTitle || customBody)
 
+  /* ── Die repetisie ──
+
+     Die droëloop hierbo gaan alles na behalwe die een ding wat 'n mens
+     werklik wil weet: kom daar 'n kennisgewing op 'n foon uit?
+
+     Dit is die volle oggendlopie — dieselfde opskrif uit dieselfde nota,
+     dieselfde teks, dieselfde prent, dieselfde stuurkode — maar die
+     ontvangerslys is EEN token in plaas van ses duisend.
+
+     Net 'n mens met die admin-wagwoord mag dit doen. 'n Cron nooit: dit sou
+     beteken 'n verkeerd opgestelde cron kan stilweg net vir een mens stuur
+     terwyl alles reg lyk. */
+  const netEen = wie === 'admin' && typeof body.net === 'string' && body.net.trim()
+    ? body.net.trim()
+    : ''
+
   const begin = Date.now()
 
   /* ── Die droëloop ──
@@ -373,6 +389,10 @@ module.exports = async function handler(req, res) {
      Net vir die outomatiese lopie; 'n mens in die admin gaan altyd deur.
      Sien `_dagslot.js` vir waarom dit atomies moet wees. */
   const dag = saDatum()
+  /* 'n Repetisie eis nooit die dag op nie. Sou dit, sou 'n toets om
+     tienuur die aand die egte oggendlopie stilweg laat oorslaan het — en
+     dan sou ses duisend mense niks gekry het nie, presies omdat iemand
+     seker wou maak dit werk. */
   let hetGeeis = false
   let accessToken = null
 
@@ -385,7 +405,7 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ fout: 'Firebase-diensrekening werk nie: ' + e.message })
   }
 
-  if (outomaties) {
+  if (outomaties && !netEen) {
     const eis = await eisDag({ projectId: PROJECT_ID, accessToken, dag })
     if (!eis.geeis) {
       console.log('send-notifications: oorgeslaan —', eis.rede)
@@ -399,8 +419,11 @@ module.exports = async function handler(req, res) {
   try {
     const [todayTitle, fcmTokens, webPushSubs] = await Promise.all([
       customTitle ? Promise.resolve(customTitle) : getTodayTitle(accessToken),
-      getFcmTokens(accessToken),
-      getWebPushSubscriptions(accessToken),
+      /* By 'n repetisie word die lyste glad nie gehaal nie. Dit is nie 'n
+         optimering nie: dit maak dit onmoontlik dat 'n repetisie ooit by
+         iemand anders se foon uitkom. */
+      netEen ? Promise.resolve([netEen]) : getFcmTokens(accessToken),
+      netEen ? Promise.resolve([])       : getWebPushSubscriptions(accessToken),
     ])
 
     const notifTitle   = todayTitle || 'Daaglikse Hoop'
@@ -436,7 +459,8 @@ module.exports = async function handler(req, res) {
          dit kom weer, en dan is dit 'n groter groep of 'n tweede lopie —
          nie 'n verrassing nie. */
       sekondes: Math.round((Date.now() - begin) / 100) / 10,
-      ...(outomaties ? { outomaties: true, dag } : {}),
+      ...(netEen ? { repetisie: true, opskrif: notifTitle, teks: notifBody } : {}),
+      ...(outomaties && !netEen ? { outomaties: true, dag } : {}),
     }
 
     if (hetGeeis) {
