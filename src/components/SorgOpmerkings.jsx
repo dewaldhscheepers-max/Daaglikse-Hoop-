@@ -134,15 +134,19 @@ export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, 
 
           {woorde.map(w => (
             <div key={w.id} className="op-item">
-              <span className="op-avatar" aria-hidden="true" />
+              <span className={`op-avatar${w.hoop ? ' hoop' : ''}`} aria-hidden="true" />
               <div className="op-item-teks">
                 <p className="op-wie">
-                  {w.myne ? 'Jy' : 'Anoniem'}
+                  {w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')}
+                  {/* Die merkie sê wie praat. Dit is die enigste opmerking op
+                      die hele muur wat 'n naam dra, en dit moet duidelik wees
+                      dat dit die bediening is en nie 'n vreemdeling nie. */}
+                  {w.hoop && <span className="op-merk" aria-label="Geverifieer">✓</span>}
                   {w.wanneer ? <span className="op-wanneer"> · {skryfDag(w.wanneer)}</span> : null}
                 </p>
                 <p className="op-teks">{w.teks}</p>
               </div>
-              {!w.myne && (
+              {!w.myne && !w.hoop && (
                 <button
                   className="op-rap"
                   aria-label="Rapporteer hierdie opmerking"

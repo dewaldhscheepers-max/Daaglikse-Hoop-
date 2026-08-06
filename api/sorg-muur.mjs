@@ -27,6 +27,7 @@
 
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
+import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
 
 const MUUR = 'sorg_muur'
 const SAAM = 'sorg_saam'
@@ -40,6 +41,52 @@ function hasToestel(t) {
   return crypto.createHash('sha256').update(sout + ':' + s).digest('hex').slice(0, 24)
 }
 
+/* ── Die eerste reaksies en woorde ──
+
+   Drie reaksies en drie opmerkings — een van Daaglikse Hoop, twee anoniem.
+   Sien `sorgSaai.js` vir wat dit is en wat dit nie is nie.
+
+   Dit is IDEMPOTENT, en dit is die hele truuk:
+
+     · die reaksies le in 'n APARTE veld (`saai`) wat GESTEL word, nie
+       opgetel nie. Loop dit twee keer, is die antwoord dieselfde;
+     · die opmerkings kry vaste id's (`saai_<muurId>_<n>`), dus oorskryf 'n
+       tweede lopie hulle in plaas van om hulle te verdubbel.
+
+   Dit is nodig omdat dit LUI gebeur: wanneer die muur gelees word en 'n
+   plasing nog nie gesaai is nie. So kry alles wat reeds op die muur staan
+   dit vanself, sonder dat iemand aan die databasis raak — en twee besoekers
+   op dieselfde oomblik kan niks verdubbel nie. */
+const MAKS_SAAI_PER_OPROEP = 8
+
+async function saai(plasings) {
+  const oor = plasings.filter(m => m.gesaai !== true).slice(0, MAKS_SAAI_PER_OPROEP)
+  for (const m of oor) {
+    await skryfDok(MUUR, m.id, { saai: saaiReaksies(m.id), gesaai: true },
+      { velde: ['saai', 'gesaai'] })
+    m.saai = saaiReaksies(m.id)
+    m.gesaai = true
+
+    const woorde = saaiWoorde(m.id)
+    for (let i = 0; i < woorde.length; i++) {
+      const w = woorde[i]
+      await skryfDok(WOORDE, `saai_${m.id}_${i}`, {
+        muurId: m.id,
+        toestel: `saai:${i}`,
+        teks: w.teks,
+        naam: w.naam,
+        bron: w.bron,
+        status: 'wys',
+        sleutel: '',
+        rang: i,
+        dag: String(m.datum || '').slice(0, 10),
+        gerapporteer: 0,
+      })
+    }
+  }
+  return oor.length
+}
+
 /* Nuutste eerste, tot op die sekonde. */
 function volgorde(a, b) {
   const t = x => String(x.geskep || x.datum || '') + '|' + String(x.id || '')
@@ -48,6 +95,14 @@ function volgorde(a, b) {
 
 /* Wat na die kliënt gaan. Nooit die bronId nie — dit wys na die rou
    boodskap, en niemand buite die admin het daarmee te doen nie. */
+function saamTel(a, b) {
+  const uit = { ...(a && typeof a === 'object' ? a : {}) }
+  for (const [k, n] of Object.entries(b && typeof b === 'object' ? b : {})) {
+    uit[k] = (Number(uit[k]) || 0) + (Number(n) || 0)
+  }
+  return uit
+}
+
 function virDieSkerm(m, woorde) {
   const myne = (woorde || []).filter(w => w.muurId === m.id)
   return {
@@ -59,7 +114,9 @@ function virDieSkerm(m, woorde) {
     datum: m.datum || '',
     antwoord: m.antwoord || null,
     saam: Number(m.saam) || 0,
-    reaksies: m.reaksies || {},
+    /* Wat mense gedruk het, PLUS die eerstes. Hulle le apart sodat die
+       saai-lopie nooit iemand se regte druk kan oorskryf nie. */
+    reaksies: saamTel(m.reaksies, m.saai),
     /* Onder die vloer wys die skerm niks; ons stuur die rou getal en laat
        `wysGelees` daar besluit, sodat die reel op EEN plek staan. */
     gelees: Number(m.gelees) || 0,
@@ -79,6 +136,10 @@ function virDieSkerm(m, woorde) {
       id: w.id,
       teks: w.teks,
       wanneer: w.dag || '',
+      /* Net Daaglikse Hoop dra 'n naam. Alles anders bly anoniem, soos die
+         hele muur. */
+      naam: w.bron === 'hoop' ? (w.naam || '') : '',
+      hoop: w.bron === 'hoop',
     })),
     woordeTotaal: myne.length,
   }
@@ -97,9 +158,21 @@ export default async function handler(req, res) {
       /* Net wat WYS. Wat vir Dewald se oog wag, en wat hy weggesteek het,
          kom nooit hier uit nie. Oudste eerste binne 'n plasing — 'n gesprek
          lees van bo af, nie andersom nie. */
+      /* Vul aan wat nog nie gesaai is nie — dit dek ALLES wat reeds op die
+         muur staan, sonder dat iemand aan die databasis raak. */
+      await saai(alles.filter(m => m.gepubliseer !== false && m.teks))
+
       const woorde = (await lysDokke(WOORDE, { grootte: 300 }))
         .filter(w => w.status === 'wys' && w.teks)
-        .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+        /* Die eerstes bo, in hul eie volgorde (Daaglikse Hoop heel eerste),
+           dan wat mense werklik gestuur het, in die volgorde waarin dit
+           gekom het. */
+        .sort((a, b) => {
+          const s = (b.rang !== undefined ? 1 : 0) - (a.rang !== undefined ? 1 : 0)
+          if (s) return s
+          if (a.rang !== undefined && b.rang !== undefined) return a.rang - b.rang
+          return String(a.id).localeCompare(String(b.id))
+        })
 
       const lys = alles
         .filter(m => m.gepubliseer !== false && m.teks)

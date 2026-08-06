@@ -34,6 +34,14 @@ let gehaalOp = 0
    aflyn. Dieselfde fout het die Afrikaanse Bybel 'n dag lank laat wegbly. */
 const VARS_MS = 20 * 1000
 
+/* Hoe gereeld die muur self weer gaan kyk terwyl iemand daarna staar.
+
+   Dertig sekondes. Kort genoeg dat 'n mens wat 'n rukkie lees, ander se
+   reaksies sien inkom; lank genoeg dat 'n foon wat 'n uur oop le nie 'n
+   honderd oproepe maak nie. Die muur is klein en die antwoord is 'n paar
+   kilogreep. */
+export const POLS_MS = 30 * 1000
+
 let laasteSaamtel = null
 
 export function haalMuur() {

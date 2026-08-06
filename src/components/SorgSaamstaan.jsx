@@ -55,6 +55,44 @@ export default function SorgSaamstaan({ plasing }) {
   const gelees = wysGelees(plasing.gelees)
   const myReak = myne ? REAKSIES.find(r => r.sleutel === myne) : null
 
+  /* ── Wat van die bediener af inkom, wen ──
+
+     Die muur verfris homself elke halfminuut. Sonder hierdie stuk sou 'n
+     kaart sy eerste getalle vir altyd vashou en niemand sou ooit iemand
+     anders se reaksie sien nie — die hele punt van 'n lewendige muur weg.
+
+     Ons vat die HOOGSTE van die twee per reaksie, nie eenvoudig die
+     bediener s'n nie. Anders gebeur dit: 'n mens druk, ons tel dadelik een
+     by (want 'n stadige lyn mag nie soos 'n stukkende knoppie voel nie), en
+     dan land 'n verfrissing wat 'n oomblik voor sy druk gehaal is — en die
+     telling spring terug. */
+  useEffect(() => {
+    const nuut = plasing.reaksies || {}
+    setTellings(ou => {
+      const uit = { ...ou }
+      let anders = false
+      for (const k of new Set([...Object.keys(ou), ...Object.keys(nuut)])) {
+        const w = Math.max(Number(ou[k]) || 0, Number(nuut[k]) || 0)
+        if (w !== (Number(ou[k]) || 0)) anders = true
+        uit[k] = w
+      }
+      return anders ? uit : ou
+    })
+  }, [plasing.reaksies])
+
+  /* Dieselfde vir die opmerkings: alles wat die bediener stuur, plus wat
+     hierdie foon pas bygesit het en die bediener nog nie teruggegee het nie. */
+  useEffect(() => {
+    const bediener = plasing.woorde || []
+    setWoorde(ou => {
+      const ids = new Set(bediener.map(w => w.id))
+      const myne = ou.filter(w => w.myne && !ids.has(w.id))
+      if (!myne.length && bediener.length === ou.length &&
+          bediener.every((w, i) => w.id === ou[i].id)) return ou
+      return [...bediener, ...myne]
+    })
+  }, [plasing.woorde])
+
   /* Druk 'n mens buite die kiesers, gaan hulle toe. Sonder dit bly hulle oop
      terwyl 'n mens verder lees, en dan is daar drie oop kiesers op die skerm. */
   useEffect(() => {
@@ -156,9 +194,11 @@ export default function SorgSaamstaan({ plasing }) {
         <button className="ss-voorskou" onClick={() => setBladOop(true)}>
           {woorde.slice(0, 2).map(w => (
             <span key={w.id} className="ss-voorskou-ry">
-              <span className="ss-avatar" aria-hidden="true" />
+              <span className={`ss-avatar${w.hoop ? ' hoop' : ''}`} aria-hidden="true" />
               <span className="ss-voorskou-teks">
-                <b>{w.myne ? 'Jy' : 'Anoniem'}</b> {w.teks}
+                <b>{w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')}</b>
+                {w.hoop && <span className="ss-merk" aria-hidden="true">✓</span>}
+                {' '}{w.teks}
               </span>
             </span>
           ))}

@@ -123,6 +123,28 @@
   border: 1px solid #E0D7EF;
 }
 
+/* Daaglikse Hoop se kring dra die app se kleur, sodat 'n mens sonder om te
+   lees sien dat hierdie een anders is. */
+.op-avatar.hoop {
+  background: var(--s-pers, #624A84);
+  border-color: var(--s-pers, #624A84);
+}
+
+.op-merk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: var(--s-pers, #624A84);
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
 .op-item-teks { flex: 1; min-width: 0; }
 
 .op-wie {

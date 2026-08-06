@@ -43,7 +43,7 @@ import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
-import { haalMuur, meldGelees, haalMyPlasings } from '../data/sorgMuur'
+import { haalMuur, meldGelees, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -108,6 +108,37 @@ export default function Sorg() {
     if (afdeling !== 'muur' || !muur || !muur.length) return
     meldGelees(muur.slice(0, wysAantal).map(p => p.id))
   }, [muur, wysAantal, afdeling])
+
+  /* ── Die muur bly lewendig ──
+
+     Iemand druk 'n reaksie of skryf 'n opmerking; almal anders moet dit
+     sien sonder om die app toe te maak en weer oop te maak. Ons gaan kyk
+     elke dertig sekondes solank die muur op die skerm is.
+
+     Twee reels hou dit goedkoop en stil:
+       · dit loop NET op die muur-oortjie. Op Die Video's is daar niks om te
+         verfris nie;
+       · dit staan stil wanneer die blad weggesteek is — 'n foon in iemand se
+         sak moet niks doen nie. */
+  useEffect(() => {
+    if (afdeling !== 'muur') return
+    let lewendig = true
+
+    const verfris = () => {
+      if (!lewendig || document.hidden) return
+      vergeetMuur()
+      haalMuur().then(d => { if (lewendig) setMuur(d) })
+    }
+
+    const tik = setInterval(verfris, POLS_MS)
+    /* Kom 'n mens terug na die app toe, wag ons nie eers dertig sekondes nie. */
+    document.addEventListener('visibilitychange', verfris)
+    return () => {
+      lewendig = false
+      clearInterval(tik)
+      document.removeEventListener('visibilitychange', verfris)
+    }
+  }, [afdeling])
 
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])

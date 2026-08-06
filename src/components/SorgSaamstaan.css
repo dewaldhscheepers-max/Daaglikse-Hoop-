@@ -183,3 +183,23 @@
   font-weight: 700;
   color: var(--s-sag, #77717D);
 }
+
+.ss-avatar.hoop {
+  background: var(--s-pers, #624A84);
+  border-color: var(--s-pers, #624A84);
+}
+
+.ss-merk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--s-pers, #624A84);
+  color: #FFFFFF;
+  font-size: 8.5px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
