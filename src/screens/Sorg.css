@@ -195,10 +195,16 @@
   display: flex;
   gap: 4px;
   margin: 22px 0 14px;
-  padding: 4px;
-  border: 1px solid var(--s-rand);
-  border-radius: 16px;
-  background: #F1EBE1;
+  padding: 5px;
+  border: 0;
+  border-radius: 18px;
+  /* Die banier se sonsondergang, dieper gemaak. 'n Ligte baan met 'n ligte
+     pil daarop gee amper geen kontras nie — 'n mens moes kyk om te sien wat
+     aan is. Op 'n donker baan spring 'n wit pil uit. */
+  background: linear-gradient(100deg, #6E4E96 0%, #A2617F 52%, #C9834F 100%);
+  box-shadow:
+    inset 0 1px 3px rgba(30, 22, 48, 0.3),
+    0 2px 10px rgba(48, 42, 58, 0.16);
 }
 
 .sorg-oortjie {
@@ -206,39 +212,48 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 5px;
   min-width: 0;
-  padding: 11px 8px;
+  padding: 11px 4px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 13px;
   background: none;
-  color: #6E6455;
+  /* 'n Vaste kleur, nie opacity nie. 'n Deursigtige laag op 'n gradient is
+     'n saamgestelde laag wat by elke druk gemaak word — sien CLAUDE.md. */
+  color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-body);
-  font-size: 14px;
+  /* 13px, nie 13.5 nie. Op 'n 320px-skerm het "Die Muur 10" met 13.5px net
+     nie gepas nie en die naam het "Die M…" geword — 'n afgekapte etiket is
+     erger as 'n klein een. */
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s, color 0.12s, box-shadow 0.12s;
 }
-.sorg-oortjie:active { background: #E9E1D4; }
+.sorg-oortjie:active { background: rgba(255, 255, 255, 0.16); }
 
-.sorg-oortjie-ikoon { font-size: 14px; line-height: 1; }
+.sorg-oortjie-ikoon { flex: 0 0 auto; font-size: 13px; line-height: 1; }
 .sorg-oortjie-naam { overflow: hidden; text-overflow: ellipsis; }
 
 /* Die telling sê wat agter die ander oortjie wag. */
 .sorg-oortjie-tel {
-  padding: 2px 7px;
+  flex: 0 0 auto;
+  min-width: 18px;
+  padding: 2px 5px;
   border-radius: 999px;
-  background: rgba(48, 42, 58, 0.09);
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.24);
+  font-size: 11.5px;
   font-weight: 700;
-  color: #6E6455;
+  color: #FFFFFF;
 }
 
+/* Wit op die sonsondergang. Dit is die hele punt: 'n mens moet van oorkant
+   die kamer af sien watter een aan is. */
 .sorg-oortjie.aktief {
-  background: var(--s-kaart);
+  background: #FFFFFF;
   color: var(--s-teks);
-  box-shadow: 0 1px 2px rgba(48, 42, 58, 0.06), 0 2px 8px rgba(48, 42, 58, 0.08);
+  box-shadow: 0 2px 7px rgba(30, 22, 48, 0.28);
 }
 .sorg-oortjie.aktief .sorg-oortjie-tel {
   background: var(--s-pers);
