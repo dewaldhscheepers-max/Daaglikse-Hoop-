@@ -129,7 +129,7 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks }) {
     if (!klaar) return res.status(400).json({ fout: 'onbekende woord' })
     doc = { muurId, toestel, teks: klaar, sleutel: woordSleutel, bron: 'klaar', status: 'wys' }
   } else {
-    const uitslag = woordStatus({ teks, sensitief, vertrou: myne.some(w => w.status === 'wys' && w.bron === 'eie') })
+    const uitslag = woordStatus({ teks, sensitief })
     if (uitslag.status === 'weier') {
       const rede = uitslag.rede === 'sensitiewe plasing'
         ? 'Op hierdie storie kan jy een van die woorde hier onder stuur.'

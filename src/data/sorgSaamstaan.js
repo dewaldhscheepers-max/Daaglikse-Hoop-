@@ -145,23 +145,32 @@ export function woordVlae(teks) {
       se "hospitale het my ma doodgemaak" onder hom kry nie. Geen filter vang
       daardie sin nie, want daar is niks verkeerd met die WOORDE nie.
 
-   2. Tref een van die vlae, wag dit vir Dewald.
+   2. Tref een van die vlae — 'n nommer, 'n skakel, 'n versoek om buite die
+      app kontak te maak — wag dit vir Dewald se oog.
 
-   3. Wie se woord al 'n keer goedgekeur is, se volgende gaan dadelik deur.
-      Vertroue word verdien, per toestel. Die eerste keer wag — maar dan het
-      daardie mens steeds die klaargemaakte woorde, dadelik, so hy staan nie
-      met leë hande nie. */
+   3. Al die res WYS DADELIK.
+
+   Punt 3 was nie so nie. Die eerste woord van elke toestel het gewag, en
+   vertroue is verdien. Dit het op papier goed gelyk en in die hand sleg
+   gewerk: die meeste mense skryf een keer, dus het die meeste mense hul
+   eie woord nooit gesien nie — dit lyk soos 'n app wat stukkend is, en 'n
+   mens probeer nie 'n tweede keer nie.
+
+   Die ruil is eerlik om te noem: 'n slegte sin wat nie 'n nommer of skakel
+   bevat nie, kan nou wys totdat iemand hom rapporteer. Daarteenoor staan
+   drie goed: krisisplasings laat glad nie vrye teks toe nie, Rapporteer
+   haal 'n woord DADELIK af met een druk, en alles wat gerapporteer is, land
+   in Dewald se hopie. */
 export function magVryeTeks({ sensitief }) {
   return !sensitief
 }
 
-export function woordStatus({ teks, sensitief, vertrou }) {
+export function woordStatus({ teks, sensitief }) {
   if (sensitief) return { status: 'weier', rede: 'sensitiewe plasing' }
   const skoon = skoonWoord(teks)
   if (skoon.length < 2) return { status: 'weier', rede: 'te kort' }
   const vlae = woordVlae(skoon)
   if (vlae.length) return { status: 'wag', rede: vlae.join(' en '), teks: skoon }
-  if (!vertrou) return { status: 'wag', rede: 'eerste keer', teks: skoon }
   return { status: 'wys', teks: skoon }
 }
 

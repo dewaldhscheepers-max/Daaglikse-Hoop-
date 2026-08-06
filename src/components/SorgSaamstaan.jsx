@@ -132,15 +132,14 @@ export default function SorgSaamstaan({ plasing }) {
     <div className="ss">
 
       {/* ── Die opsomming ──
-          Links wat gestuur is; regs die leestelling. */}
-      {(totaal > 0 || gelees > 0) && (
+          Net WATTER reaksies gestuur is, en die leestelling. Die GETAL staan
+          nie meer hier nie — dit hoort langs die hartjie, waar 'n mens dit
+          soek en waar elke ander muur dit sit. */}
+      {(gewys.length > 0 || gelees > 0) && (
         <div className="ss-som">
-          {totaal > 0 && (
-            <span className="ss-som-links">
-              <span className="ss-tekens" aria-hidden="true">
-                {gewys.map(r => <span key={r.sleutel} className="ss-teken">{r.teken}</span>)}
-              </span>
-              <span className="ss-totaal">{totaal}</span>
+          {gewys.length > 0 && (
+            <span className="ss-tekens" aria-hidden="true">
+              {gewys.map(r => <span key={r.sleutel} className="ss-teken">{r.teken}</span>)}
             </span>
           )}
           {gelees > 0 && <span className="ss-gelees">{gelees} gelees</span>}
@@ -175,7 +174,7 @@ export default function SorgSaamstaan({ plasing }) {
           aria-expanded={kiesOop}
         >
           <span className="ss-aksie-teken" aria-hidden="true">{myReak ? myReak.teken : '♡'}</span>
-          <span>{myReak ? myReak.naam : 'Hou van'}</span>
+          <span>{totaal > 0 ? totaal : 'Hou van'}</span>
         </button>
 
         <button

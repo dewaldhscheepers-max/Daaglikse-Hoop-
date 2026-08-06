@@ -136,31 +136,38 @@ afdeling('SENSITIEWE plasings kry GEEN vrye teks nie')
   kyk('n gewone plasing wel', magVryeTeks({ sensitief: false }) === true)
   kyk('sonder die vlag is dit toegelaat', magVryeTeks({}) === true)
 
-  const s = woordStatus({ teks: 'Net bid, God sal haar genees.', sensitief: true, vertrou: true })
-  kyk('selfs n vertroude mens word geweier op n sensitiewe plasing', s.status === 'weier', s)
-
-  const s2 = woordStatus({ teks: 'Net bid.', sensitief: true, vertrou: false })
-  kyk('en n nuwe mens ook', s2.status === 'weier', s2)
+  const s = woordStatus({ teks: 'Net bid, God sal haar genees.', sensitief: true })
+  kyk('vrye teks word geweier op n sensitiewe plasing', s.status === 'weier', s)
 }
 
-afdeling('Vertroue word verdien')
+afdeling('n Gewone woord WYS DADELIK')
 {
+  /* Dit was nie so nie: die eerste woord van elke toestel het gewag. Die
+     meeste mense skryf een keer, dus het die meeste mense hul eie woord
+     nooit gesien nie — en dit lyk soos 'n app wat stukkend is. */
   const gewoon = { teks: 'Ek dink aan jou vandag.', sensitief: false }
-  kyk('die eerste keer wag dit', woordStatus({ ...gewoon, vertrou: false }).status === 'wag')
-  kyk('daarna gaan dit deur', woordStatus({ ...gewoon, vertrou: true }).status === 'wys')
+  kyk('die eerste keer wys dadelik', woordStatus(gewoon).status === 'wys')
+  kyk('en die tweede ook', woordStatus(gewoon).status === 'wys')
+  kyk('dit hang van NIKS anders af nie',
+      woordStatus({ ...gewoon, vertrou: false }).status === 'wys')
 
-  kyk('n gevlagde woord wag, ook by n vertroude mens',
-      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false, vertrou: true }).status === 'wag')
+  /* Die vangnet bly staan. */
+  kyk('n telefoonnommer wag steeds',
+      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false }).status === 'wag')
   kyk('en die rede word gese',
-      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false, vertrou: true }).rede
+      woordStatus({ teks: 'bel my 082 123 4567', sensitief: false }).rede
         .includes('telefoonnommer'))
+  kyk('n skakel wag steeds',
+      woordStatus({ teks: 'kyk by https://x.co', sensitief: false }).status === 'wag')
+  kyk('n sensitiewe plasing weier steeds',
+      woordStatus({ teks: 'Net bid.', sensitief: true }).status === 'weier')
 
   kyk('te kort word geweier',
-      woordStatus({ teks: ' ', sensitief: false, vertrou: true }).status === 'weier')
+      woordStatus({ teks: ' ', sensitief: false }).status === 'weier')
   kyk('die skoongemaakte teks kom saam terug',
-      woordStatus({ teks: '  Ek   bid  ', sensitief: false, vertrou: true }).teks === 'Ek bid')
+      woordStatus({ teks: '  Ek   bid  ', sensitief: false }).teks === 'Ek bid')
   kyk('dit word afgekap op 200',
-      woordStatus({ teks: 'a'.repeat(500), sensitief: false, vertrou: true }).teks.length === MAKS_WOORD)
+      woordStatus({ teks: 'a'.repeat(500), sensitief: false }).teks.length === MAKS_WOORD)
 }
 
 afdeling('n Klein leestelling word nie gewys nie')

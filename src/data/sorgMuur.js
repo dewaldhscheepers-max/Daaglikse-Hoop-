@@ -36,11 +36,13 @@ const VARS_MS = 20 * 1000
 
 /* Hoe gereeld die muur self weer gaan kyk terwyl iemand daarna staar.
 
-   Dertig sekondes. Kort genoeg dat 'n mens wat 'n rukkie lees, ander se
-   reaksies sien inkom; lank genoeg dat 'n foon wat 'n uur oop le nie 'n
-   honderd oproepe maak nie. Die muur is klein en die antwoord is 'n paar
-   kilogreep. */
-export const POLS_MS = 30 * 1000
+   Vyftien sekondes. Dit was dertig, en op 'n muur waar twee mense saam kyk,
+   voel dertig sekondes soos "dit werk nie". Die antwoord is 'n paar
+   kilogreep en die muur is klein; vyftien kos niks en dit voel lewendig.
+
+   Dit staan in elk geval stil sodra die blad weggesteek is, dus maak 'n
+   foon in iemand se sak geen oproepe nie. */
+export const POLS_MS = 15 * 1000
 
 let laasteSaamtel = null
 

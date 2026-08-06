@@ -171,35 +171,27 @@ afdeling('Die teks van n klaargemaakte woord kom uit die LYS')
       r.lyf.woord.teks === 'Ek bid vandag saam met jou.', r.lyf)
 }
 
-afdeling('Vrye teks: wat wag en wat wys')
+afdeling('n Gewone woord WYS DADELIK')
 {
+  /* Die eerste woord van elke toestel het gewag, en die meeste mense skryf
+     een keer — dus het die meeste mense hul eie woord nooit gesien nie. */
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
   let r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'Ek dink aan jou vandag.' })
-  kyk('die eerste keer wag dit', r.lyf.wag === true, r.lyf)
-  kyk('en dit wys nog nie', r.lyf.woord === null, r.lyf)
-
-  /* Wie se woord al goedgekeur is, gaan dadelik deur. */
-  stelWinkel({
-    sorg_muur: MUUR,
-    sorg_woorde: { w1: { muurId: 'ander', toestel: 'x', bron: 'eie', status: 'wys', dag: '2020-01-01' } },
-  })
-  const has = (await import('node:crypto')).createHash('sha256')
-    .update('daaglikse-hoop-sorg:jan').digest('hex').slice(0, 24)
-  stelWinkel({
-    sorg_muur: MUUR,
-    sorg_woorde: { w1: { muurId: 'ander', toestel: has, bron: 'eie', status: 'wys', dag: '2020-01-01' } },
-  })
-  r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'Ek dink aan jou vandag.' })
-  kyk('n vertroude mens gaan dadelik deur', r.lyf.wag === false, r.lyf)
+  kyk('die eerste keer wys dadelik', r.lyf.wag === false, r.lyf)
   kyk('en die woord kom terug', r.lyf.woord && r.lyf.woord.teks === 'Ek dink aan jou vandag.', r.lyf)
+  kyk('en dit is op wys gestoor',
+      Object.values(winkel.sorg_woorde).some(w => w.status === 'wys' && w.bron === 'eie'),
+      winkel.sorg_woorde)
 
-  /* 'n Nommer wag, ook by 'n vertroude mens. */
-  stelWinkel({
-    sorg_muur: MUUR,
-    sorg_woorde: { w1: { muurId: 'ander', toestel: has, bron: 'eie', status: 'wys', dag: '2020-01-01' } },
-  })
-  r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'bel my 082 123 4567' })
+  /* Die vangnet bly staan. */
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
+  r = await stuur({ muurId: 'gewoon', toestel: 'sanet', teks: 'bel my 082 123 4567' })
   kyk('n telefoonnommer wag steeds', r.lyf.wag === true, r.lyf)
+  kyk('en dit wys nie', r.lyf.woord === null, r.lyf)
+
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
+  r = await stuur({ muurId: 'gewoon', toestel: 'piet', teks: 'kyk by https://x.co' })
+  kyk('n skakel wag steeds', r.lyf.wag === true, r.lyf)
 }
 
 afdeling('Een reaksie per toestel per plasing')
