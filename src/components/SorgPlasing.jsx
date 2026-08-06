@@ -30,6 +30,11 @@
    die opskrif interessant vind, maak dit oop; die res blaai verby sonder om
    moeg te word.
 
+   'n GESKREWE antwoord word net so afgekort, met 'Lees meer'. Dewald skryf
+   soms lank, en dan is een kaart drie skerms hoog en die volgende plasing
+   sien niemand. 'n Stemnota of video word nooit afgekap nie — daar is niks
+   om af te kap nie.
+
    Die antwoord is nie 'n aparte blad nie en nie 'n draad nie — dit sit binne
    dieselfde kaart, want dit is die enigste manier waarop 'n mens sien dat
    daar op sy ding geantwoord is.
@@ -103,12 +108,21 @@ export default function SorgPlasing({ plasing }) {
   const [saam, setSaam] = useState(plasing.saam || 0)
   const [gedra, setGedra] = useState(() => draSaamReeds(plasing.id))
   const [oop, setOop] = useState(false)
+  const [antwOop, setAntwOop] = useState(false)
 
   /* Kort stories het nie 'n "Lees verder" nodig nie — dan lyk dit net
      lastig. Ses reels is sowat 240 karakters op 'n foon. */
   const lank = String(plasing.teks || '').length > 260
 
   const antwoord = egteAntwoord(plasing.antwoord)
+
+  /* 'n GESKREWE antwoord kry dieselfde behandeling as die storie.
+     Dewald skryf soms lank, en dan is die kaart 'n muur van teks en die
+     volgende plasing is drie skerms ver. Ag reels, want die antwoord is
+     kleiner geset as die storie en dit is die deel waarvoor 'n mens hier
+     is — sowat 320 karakters. 'n Stemnota of video word nooit afgekap
+     nie; net woorde. */
+  const antwLank = String(antwoord?.teks || '').length > 320
 
   async function dra() {
     if (gedra) return
@@ -161,7 +175,16 @@ export default function SorgPlasing({ plasing }) {
             </a>
           )}
 
-          {antwoord.teks && <p className="sp-antwoord-teks">{antwoord.teks}</p>}
+          {antwoord.teks && (
+            <>
+              <p className={`sp-antwoord-teks${antwLank && !antwOop ? ' kort' : ''}`}>
+                {antwoord.teks}
+              </p>
+              {antwLank && !antwOop && (
+                <button className="sp-meer" onClick={() => setAntwOop(true)}>Lees meer</button>
+              )}
+            </>
+          )}
 
           {/* Deel eerste. 'n Antwoord wat iemand gehelp het, is die beste
               ding wat gedeel kan word — en elke deel bring iemand nuut. */}

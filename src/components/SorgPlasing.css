@@ -120,6 +120,16 @@
   white-space: pre-wrap;
 }
 
+/* 'n Geskrewe antwoord word net so afgekort as die storie. Ag reels hier
+   teenoor ses bo, want dit is kleiner geset en dit is die deel waarvoor 'n
+   mens die kaart oopmaak. */
+.sp-antwoord-teks.kort {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ── Geselskap ──
    Een reaksie, en dit is nie 'n punt nie. Geen rangskikking, geen wedstryd. */
 .sp-saam {
