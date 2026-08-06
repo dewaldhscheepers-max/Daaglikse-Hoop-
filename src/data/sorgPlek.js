@@ -17,8 +17,15 @@
    op die skerm nie; dan sou die twee kon uitmekaar loop en die blad sou 'n
    plek belowe wat die vorm dan weier.
 
-   Die telling word LUI gehaal en kort gekas. Dit is 'n reel op 'n bladsy,
-   nie 'n horlosie nie.
+   Die kas is kort en die skerm vra dit doelbewus weer op drie oomblikke:
+   elke vyftien sekondes, wanneer 'n mens na die app toe terugkeer, en
+   DADELIK wanneer die vorm toemaak.
+
+   Daardie laaste een is die belangrikste. Sonder dit het die reel "8 van
+   20" gewys terwyl daar reeds twintig was, en dan skryf iemand 'n hele
+   boodskap vol wat dan geweier word. Die bediener het altyd reg gekeer —
+   dit was die SKERM wat gelieg het, en dit is die soort ding wat 'n mens
+   laat ophou probeer.
    ──────────────────────────────────────────────────────────── */
 
 const PAD = '/api/sorg-instellings'

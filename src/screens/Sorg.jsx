@@ -33,7 +33,7 @@
    tik nie.
    ──────────────────────────────────────────────────────────── */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
@@ -44,7 +44,7 @@ import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
 import { haalMuur, meldGelees, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
-import { haalPlek } from '../data/sorgPlek'
+import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -153,6 +153,38 @@ export default function Sorg() {
   /* Hoeveel plek daar vandag is. Kom dit nie deur nie, wys ons eenvoudig
      niks — 'n blad sonder die reel is reg, een met 'n verkeerde getal nie. */
   const [plek, setPlek] = useState(null)
+
+  /* ── Die telling moet DADELIK bykom ──
+
+     Dit het een keer gelaai en dan 'n minuut lank gekas. Die bediener keer
+     wel dat iemand oor die plafon skryf, maar die REEL OP DIE SKERM het
+     gelieg: dit het "8 van 20" gewys terwyl daar twintig was, en dan skryf
+     iemand 'n hele boodskap vol wat dan geweier word. Dit is die soort ding
+     wat 'n mens laat ophou probeer.
+
+     Nou kom dit by op drie oomblikke: elke vyftien sekondes soos die muur,
+     die oomblik as 'n mens terugkeer na die app toe, en dadelik wanneer die
+     vorm toemaak — want dan het HIERDIE mens pas 'n plek gevat. */
+  const verfrisPlek = useCallback(() => {
+    vergeetPlek()
+    return haalPlek().then(setPlek)
+  }, [])
+
+  useEffect(() => {
+    let lewendig = true
+    const tik = () => {
+      if (!lewendig || document.hidden) return
+      vergeetPlek()
+      haalPlek().then(p => { if (lewendig) setPlek(p) })
+    }
+    const id = setInterval(tik, POLS_MS)
+    document.addEventListener('visibilitychange', tik)
+    return () => {
+      lewendig = false
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', tik)
+    }
+  }, [])
 
   useEffect(() => {
     let lewendig = true
@@ -470,7 +502,14 @@ export default function Sorg() {
       {/* Die vorm dek die hele skerm. Iemand wat sy swaarste ding tik, moet
           niks anders sien nie — geen navigasie, geen ander video's, en geen
           versoek om geld nie. */}
-      <SorgVorm oop={vormOop} onSluit={() => setVormOop(false)} videoData={data} />
+      {/* Maak die vorm toe, het hierdie mens dalk pas 'n plek gevat. Ons vra
+          die telling dadelik weer, sodat die reel bo nooit meer plek belowe
+          as wat daar is nie. */}
+      <SorgVorm
+        oop={vormOop}
+        onSluit={() => { setVormOop(false); verfrisPlek(); vergeetMuur() }}
+        videoData={data}
+      />
     </div>
   )
 }
