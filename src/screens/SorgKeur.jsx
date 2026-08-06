@@ -488,6 +488,25 @@ function Muur({ data, doen, besig }) {
               wat op die muur staan, en dan haal 'n mens dieselfde een twee
               keer af en wonder hoekom niks gebeur nie. */}
           {m.gepubliseer === false && <div className="sk-kontak">Van die muur af</div>}
+
+          {/* ── Is hierdie plasing AFGESNY? ──
+
+              Die muur het 'n perk van 1200 karakters gehad en het stilweg
+              afgekap. 'n Vrou se boodskap het by 1188 opgehou, middel in 'n
+              sin, en die swaarste deel — dat sy 22 kg verloor het — was
+              eenvoudig weg.
+
+              Die perk is nou ruim en dit weier eerder as om te sny, maar wat
+              REEDS afgesny is, staan nog so. 'n Mens moet dit kan SIEN
+              sonder om elke plasing oop te maak. */}
+          {rou.get(m.bronId) && rou.get(m.bronId).teks &&
+           rou.get(m.bronId).teks.length > (m.teks || '').length + 5 && (
+            <div className="sk-krisis">
+              Afgesny — {rou.get(m.bronId).teks.length - (m.teks || '').length} karakters
+              van haar boodskap wys nie. Druk Redigeer en haal dit terug.
+            </div>
+          )}
+
           <Voorskou teks={m.teks} />
 
           {wysigOop === m.id && (
@@ -579,11 +598,16 @@ function Muur({ data, doen, besig }) {
               )}
               <textarea
                 className="sk-teks"
-                rows={4}
+                rows={tipe === 'teks' ? 10 : 4}
                 value={teks}
                 onChange={e => setTeks(e.target.value)}
                 placeholder={tipe === 'teks' ? 'Jou antwoord' : 'Iets daarby, as jy wil (opsioneel)'}
               />
+              {/* Die antwoord het by 1500 karakters stilweg afgekap en die
+                  einde van 'n paar antwoorde is so verlore. Die perk is nou
+                  20 000 en dit weier eerder as om te sny — maar die telling
+                  staan hier sodat dit nooit weer 'n verrassing is nie. */}
+              <div className="admin-books-note">{teks.length} karakters</div>
               <div className="sk-knoppe">
                 <button
                   className="sk-knop sk-plaas"
