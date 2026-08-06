@@ -194,6 +194,34 @@ afdeling('n Gewone woord WYS DADELIK')
   kyk('n skakel wag steeds', r.lyf.wag === true, r.lyf)
 }
 
+afdeling('EEN mens mag meer as een keer praat')
+{
+  /* Die fout wat dit stil laat verdwyn het: 'n tweede opmerking op dieselfde
+     plasing het `reeds: true` teruggegee — geen woord, geen fout, en niks
+     gestoor nie. Die skerm het 'n dankie gewys terwyl daar niks verskyn het
+     nie, en dit was ook nerens om goed te keur nie. */
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
+  let r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'Ek bid vir jou.' })
+  kyk('die eerste kom deur', r.lyf.woord && r.lyf.woord.teks === 'Ek bid vir jou.', r.lyf)
+
+  r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'Ek bid ook vir jou.' })
+  kyk('die TWEEDE kom ook deur', r.lyf.woord && r.lyf.woord.teks === 'Ek bid ook vir jou.', r.lyf)
+  kyk('en dit is nie stilweg weggegooi nie', r.lyf.reeds !== true, r.lyf)
+  kyk('albei is gestoor',
+      Object.values(winkel.sorg_woorde).filter(w => w.bron === 'eie').length === 2,
+      Object.values(winkel.sorg_woorde).map(w => w.teks))
+
+  /* Die daaglikse perk is die ding wat spam keer. */
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
+  const has = crypto.createHash('sha256').update('daaglikse-hoop-sorg:jan').digest('hex').slice(0, 24)
+  const dag = new Date().toISOString().slice(0, 10)
+  const vol = {}
+  for (let i = 0; i < 20; i++) vol['w' + i] = { toestel: has, dag, bron: 'eie', status: 'wys', muurId: 'x' }
+  stelWinkel({ sorg_muur: MUUR, sorg_woorde: vol })
+  r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: 'Nog een.' })
+  kyk('die daaglikse perk keer wel, en dit SE so', r.kode === 429 && !!r.lyf.fout, r.lyf)
+}
+
 afdeling('Een reaksie per toestel per plasing')
 {
   stelWinkel({ sorg_muur: MUUR, sorg_saam: {}, sorg_woorde: {} })

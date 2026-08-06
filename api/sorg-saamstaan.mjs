@@ -117,9 +117,21 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks }) {
   if (myne.filter(w => w.dag === vandag).length >= WOORDE_PER_DAG) {
     return res.status(429).json({ fout: 'Jy het vandag genoeg woorde gestuur. Môre is daar weer.' })
   }
-  if (myne.some(w => w.muurId === muurId)) {
-    return res.status(200).json({ ok: true, reeds: true })
-  }
+
+  /* ── EEN mens mag meer as een keer praat ──
+
+     Hier het gestaan: het hierdie toestel al 'n woord op hierdie plasing,
+     gee `reeds: true` terug en doen niks. Dit het bedoel om spam te keer, en
+     dit het iets heeltemal anders gedoen.
+
+     Dewald het 'n tweede opmerking geskryf. Die bediener het `reeds: true`
+     gestuur — nie 'n fout nie, nie 'n woord nie, NIKS — en die skerm het 'n
+     dankie gewys terwyl daar niks verskyn het nie. Dit was ook nerens om
+     goed te keur nie, want dit is nooit gestoor nie. Stil weggegooi.
+
+     'n Gesprek is 'n gesprek: 'n mens kan twee keer iets sê. Die daaglikse
+     perk hierbo is die ding wat spam keer, en dit doen dit sonder om iemand
+     se woorde te laat verdwyn. */
 
   let doc
 

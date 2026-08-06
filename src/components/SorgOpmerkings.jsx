@@ -50,7 +50,6 @@ function skryfDag(d) {
 export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, tellings }) {
   const [eie, setEie] = useState('')
   const [besig, setBesig] = useState(false)
-  const [gestuur, setGestuur] = useState(false)
   const [fout, setFout] = useState('')
   const lysRef = useRef(null)
 
@@ -63,7 +62,6 @@ export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, 
     if (!oop) return
     setEie('')
     setBesig(false)
-    setGestuur(false)
     setFout('')
   }, [oop])
 
@@ -79,23 +77,36 @@ export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, 
   if (!oop) return null
 
   async function stuur(sleutel) {
-    if (besig || gestuur) return
+    if (besig) return
     setBesig(true)
     setFout('')
     const d = await stuurWoord(plasing.id, sleutel ? { woord: sleutel } : { teks: eie.trim() })
     setBesig(false)
     if (d && d.fout) { setFout(d.fout); return }
     setEie('')
-    setGestuur(true)
+
     if (d && d.woord) {
       onNuut({ id: d.woord.id, teks: d.woord.teks, myne: true })
+      setFout('')
       /* Rol na die nuwe een toe, sodat 'n mens sien dit is daar. */
       setTimeout(() => {
         if (lysRef.current) lysRef.current.scrollTop = lysRef.current.scrollHeight
       }, 60)
-    } else if (d && d.wag) {
-      setFout('Dankie. Dewald kyk gou daarna voordat dit wys.')
+      return
     }
+
+    if (d && d.wag) {
+      setFout('Dankie. Dewald kyk gou daarna voordat dit wys.')
+      return
+    }
+
+    /* ── Nooit stil nie ──
+
+       Kom daar geen woord en geen wag terug nie, HET iets misgeloop. Dit het
+       vroeer 'n dankie gewys terwyl niks verskyn het nie, en dan lyk die app
+       stukkend op die presiese oomblik waarop iemand moed bymekaargeskraap
+       het om iets te sê. */
+    setFout('Ons kon dit nie plaas nie. Probeer asseblief weer.')
   }
 
   async function rapporteer(id) {
@@ -162,9 +173,9 @@ export default function SorgOpmerkings({ plasing, oop, onSluit, woorde, onNuut, 
 
         {/* ── Die tikbalk, VAS onderaan ── */}
         <div className="op-voet">
-          {gestuur ? (
-            <p className="op-dankie">Dankie dat jy saam met hierdie mens gaan staan het.</p>
-          ) : (
+          {/* Die tikbalk bly staan nadat 'n mens iets gestuur het. 'n Gesprek
+              is 'n gesprek; niemand word na een sin toegemaak nie. */}
+          {(
             <>
               {/* Dewald se sinne, vir wie nie weet wat om te sê nie. */}
               <div className="op-vinnig">
