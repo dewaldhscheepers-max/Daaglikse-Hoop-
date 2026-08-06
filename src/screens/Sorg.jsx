@@ -43,7 +43,7 @@ import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
-import { haalMuur, meldGelees } from '../data/sorgMuur'
+import { haalMuur, meldGelees, saamtel, haalMyPlasings } from '../data/sorgMuur'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
@@ -109,6 +109,15 @@ export default function Sorg() {
     meldGelees(muur.slice(0, wysAantal).map(p => p.id))
   }, [muur, wysAantal, afdeling])
 
+  /* ── Watter plasing op die muur is hierdie mens s'n ── */
+  const [myPlasings, setMyPlasings] = useState([])
+  useEffect(() => {
+    if (!muur || !muur.length) return
+    let lewendig = true
+    haalMyPlasings().then(lys => { if (lewendig) setMyPlasings(lys) })
+    return () => { lewendig = false }
+  }, [muur])
+
   useEffect(() => {
     let lewendig = true
     haalVideos().then(d => {
@@ -153,6 +162,7 @@ export default function Sorg() {
 
   const videos = (data && data.videos) || []
   const held   = data ? weekVideo(data) : null
+  const tel    = saamtel()
   const groepe = volgensBehoefte(videos)
   const plasings = muur || []
 
@@ -178,6 +188,26 @@ export default function Sorg() {
             />
             <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
           </>
+        )}
+
+        {/* ── Wat die gemeenskap saam gedra het ──
+
+            Dit tel wat AL OOIT gedra is, nie wat vandag gedra is nie. 'n
+            Strook wat "3 mense het vandag saamgebid" sê, laat die plek
+            eensamer lyk as stilte — en op 'n jong muur is dit presies wat 'n
+            dagtelling gaan sê. 'n Lopende totaal groei net, en dit is ewe
+            waar.
+
+            Onder die vloer wys dit glad nie. Ons wag liewer 'n week as om
+            met 'n klein getal te begin. */}
+        {tel && tel.saam + tel.woorde >= 12 && (
+          <div className="sorg-saamtel">
+            <p className="sorg-saamtel-kop">Ons dra dit saam</p>
+            <p className="sorg-saamtel-syfers">
+              <b>{tel.saam}</b> keer het iemand ’n storie hier saamgedra
+              {tel.woorde > 0 && <> · <b>{tel.woorde}</b> woorde van ondersteuning</>}
+            </p>
+          </div>
         )}
 
         {/* ── Die uitnodiging ──
@@ -217,6 +247,15 @@ export default function Sorg() {
           <p className="sorg-uitnodig-teks">
             Een keer per week deel ek ook 'n video waarin ek die belangrikste
             vrae, stories en onderwerpe van die week saamvat.
+          </p>
+
+          {/* Dit moet gesê word sodra vreemdelinge onder 'n storie kan skryf.
+              Iemand wat dit nie verwag nie, skrik — en dit is presies die
+              soort verrassing wat 'n mens nie op hierdie blad wil hê nie. */}
+          <p className="sorg-uitnodig-teks">
+            Ander wat op die muur lees, kan met 'n kort woord van ondersteuning
+            saam met jou staan. Niemand gee raad nie en niemand kan jou
+            antwoord nie — dit is net mense wat laat weet hulle dra dit saam.
           </p>
 
           {/* ── Wat hierdie plek NIE is nie ──
@@ -316,7 +355,9 @@ export default function Sorg() {
                 Elke boodskap hier is deur 'n mens gelees en met toestemming
                 geplaas. Niks kom outomaties op hierdie muur nie.
               </p>
-              {plasings.slice(0, wysAantal).map(p => <SorgPlasing key={p.id} plasing={p} />)}
+              {plasings.slice(0, wysAantal).map(p => (
+                <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} />
+              ))}
 
               {plasings.length > wysAantal && (
                 <button className="sorg-meer" onClick={() => setWysAantal(n => n + 6)}>

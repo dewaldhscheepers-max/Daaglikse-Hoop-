@@ -482,3 +482,30 @@
   font-weight: 500;
   color: var(--text-muted, #8A7E9A);
 }
+
+/* ── Wat die gemeenskap saam gedra het ──
+   'n Lopende totaal, nie 'n dagtelling nie. Sien Sorg.jsx. */
+.sorg-saamtel {
+  margin: 0 0 16px;
+  padding: 13px 16px;
+  border: 1px solid var(--s-rand, #EBE3D8);
+  border-radius: 16px;
+  background: var(--s-reaksie, #F1EDF6);
+}
+
+.sorg-saamtel-kop {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--s-pers, #624A84);
+}
+
+.sorg-saamtel-syfers {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--s-sag, #77717D);
+}
+.sorg-saamtel-syfers b { color: var(--s-pers, #624A84); }

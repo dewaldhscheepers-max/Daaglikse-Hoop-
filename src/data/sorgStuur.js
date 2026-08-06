@@ -68,7 +68,15 @@ export async function stuurBoodskap({ teks, onderwerp, naam, anoniem, toestemmin
     try { d = await r.json() } catch { d = null }
 
     if (!d) return { ok: false, fout: 'Ons kon nie deurkom nie. Probeer asseblief weer.' }
-    if (d.ok) return d
+    if (d.ok) {
+      /* Stil onthou. Dit word nooit gewys nie — dit is net hoe die foon
+         later weet watter plasing op die muur hierdie mens s'n is. */
+      try {
+        const { onthouMyKode } = await import('./sorgMuur')
+        onthouMyKode(d.kode)
+      } catch { /* dan is daar bloot geen "Jou storie"-merkie nie */ }
+      return d
+    }
     if (d.vol) return d
     return { ok: false, fout: d.fout || 'Ons kon dit nie stoor nie. Probeer asseblief weer.' }
   } catch {

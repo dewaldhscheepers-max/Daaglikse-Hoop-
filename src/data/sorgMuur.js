@@ -34,16 +34,24 @@ let gehaalOp = 0
    aflyn. Dieselfde fout het die Afrikaanse Bybel 'n dag lank laat wegbly. */
 const VARS_MS = 20 * 1000
 
+let laasteSaamtel = null
+
 export function haalMuur() {
   if (!belofte || Date.now() - gehaalOp > VARS_MS) {
     gehaalOp = Date.now()
     belofte = fetch(PAD, { headers: { accept: 'application/json' }, cache: 'no-store' })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
-      .then(d => (Array.isArray(d.plasings) ? d.plasings : []))
+      .then(d => {
+        laasteSaamtel = d && d.saamtel ? d.saamtel : null
+        return Array.isArray(d.plasings) ? d.plasings : []
+      })
       .catch(() => { belofte = null; return [] })
   }
   return belofte
 }
+
+/* Die getalle vir die gemeenskapstrook, uit dieselfde oproep. */
+export function saamtel() { return laasteSaamtel }
 
 export function vergeetMuur() { belofte = null; gehaalOp = 0 }
 
@@ -201,5 +209,44 @@ export async function rapporteerWoord(woordId) {
     return !!(d && d.ok)
   } catch {
     return false
+  }
+}
+
+/* ── "Jou storie" ──
+
+   Die mens wat geskryf het, sien nooit dat ander haar dra nie. Sy plaas, sy
+   verdwyn. Die private kode is doelbewus van die skerm af weg — niemand wil
+   'n kode onthou nie — maar hy bestaan nog, want Dewald het hom nodig.
+
+   Die foon hou hom stil, en die bediener ruil hom om vir die muur-id. Geen
+   rekening, geen kode om te onthou, en niks wat lek nie: 'n mens moet die
+   kode besit, en net wie geskryf het, het hom. */
+const MYNE_SLEUTEL = 'sorg_my_kodes'
+
+export function onthouMyKode(kode) {
+  if (!kode) return
+  try {
+    const lys = JSON.parse(localStorage.getItem(MYNE_SLEUTEL) || '[]')
+    localStorage.setItem(MYNE_SLEUTEL, JSON.stringify([...new Set([kode, ...lys])].slice(0, 40)))
+  } catch { /* privaat modus */ }
+}
+
+export function myKodes() {
+  try { return JSON.parse(localStorage.getItem(MYNE_SLEUTEL) || '[]') } catch { return [] }
+}
+
+export async function haalMyPlasings() {
+  const kodes = myKodes()
+  if (!kodes.length) return []
+  try {
+    const r = await fetch(PAD, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kodes }),
+    })
+    const d = await r.json()
+    return Array.isArray(d.myne) ? d.myne : []
+  } catch {
+    return []
   }
 }

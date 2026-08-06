@@ -31,6 +31,7 @@ import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 const MUUR = 'sorg_muur'
 const SAAM = 'sorg_saam'
 const WOORDE = 'sorg_woorde'
+const INKOMEND = 'sorg_inkomend'
 
 function hasToestel(t) {
   const s = String(t || '').trim()
@@ -116,8 +117,26 @@ export default async function handler(req, res) {
          'n Telling wat lieg, is erger as geen telling nie: die hele punt van
          daardie knoppie is om iemand te wys dat ander mense sy ding saamdra.
          Die muur is klein; hom elke keer vars haal kos niks. */
+      /* ── Die gemeenskapstrook ──
+
+         Dit tel wat AL OOIT gedra is, nie wat vandag gedra is nie. 'n Blad
+         wat "3 mense het vandag saamgebid" sê, laat die plek eensamer lyk
+         as stilte, en op 'n jong muur is dit wat 'n dagtelling gaan sê. 'n
+         Lopende totaal groei net, en dit is ewe waar.
+
+         Dit kos ook niks ekstra nie: die getalle sit reeds in wat ons pas
+         gelees het. */
+      const saamTotaal = lys.reduce((n, m) => {
+        const r = m.reaksies || {}
+        return n + Object.values(r).reduce((a, b) => a + (Number(b) || 0), 0) + (Number(m.saam) || 0)
+      }, 0)
+      const woordeTotaal = lys.reduce((n, m) => n + (Number(m.woordeTotaal) || 0), 0)
+
       res.setHeader('Cache-Control', 'no-store')
-      return res.status(200).json({ plasings: lys })
+      return res.status(200).json({
+        plasings: lys,
+        saamtel: { saam: saamTotaal, woorde: woordeTotaal, stories: lys.length },
+      })
     } catch (e) {
       /* 'n Stukkende muur mag nie die blad doodmaak nie. */
       res.setHeader('Cache-Control', 'no-store')
@@ -131,6 +150,32 @@ export default async function handler(req, res) {
   let lyf = req.body
   if (typeof lyf === 'string') { try { lyf = JSON.parse(lyf) } catch { lyf = null } }
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
+
+  /* ── Watter van hierdie plasings is MYNE? ──
+
+     Die mens wat geskryf het, het nooit gesien dat mense haar dra nie. Sy
+     plaas, sy verdwyn, en daar is geen pad terug nie — die private kode is
+     doelbewus van die skerm af weg, want niemand wil 'n kode onthou nie.
+
+     Die kode BESTAAN egter nog, want Dewald het hom nodig. Die foon hou hom
+     stil, en hier ruil ons hom om vir die muur-id. Dit lek niks: 'n mens
+     moet die kode besit, en net wie geskryf het, het hom.
+
+     Ons stuur NIE die inkomende id terug nie — net die muur-id, wat in elk
+     geval al openbaar is. */
+  if (Array.isArray(lyf.kodes)) {
+    try {
+      const kodes = new Set(lyf.kodes.map(k => String(k || '').slice(0, 60)).filter(Boolean).slice(0, 40))
+      if (!kodes.size) return res.status(200).json({ myne: [] })
+      const inkomend = await lysDokke(INKOMEND, { grootte: 300 })
+      const myne = inkomend
+        .filter(b => kodes.has(b.kode) && b.muurId)
+        .map(b => b.muurId)
+      return res.status(200).json({ myne })
+    } catch (e) {
+      return res.status(200).json({ myne: [], fout: String(e && e.message) })
+    }
+  }
 
   const muurId = String(lyf.muurId || '').slice(0, 40)
   if (!/^[a-zA-Z0-9]+$/.test(muurId)) return res.status(400).json({ fout: 'geen plasing nie' })

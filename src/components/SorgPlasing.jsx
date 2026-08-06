@@ -68,6 +68,18 @@ const MAANDE = [
   'Julie', 'Augustus', 'September', 'Oktober', 'November', 'Desember',
 ]
 
+/* 1:42. 'n Opname sonder 'n lengte laat 'n mens wonder of dit twintig
+   minute is, en dan druk hy nie. Kom die lengte nie deur nie — party
+   bedieners stuur nie 'n lengte vir 'n stroom nie — wys ons eenvoudig niks
+   eerder as 'n leuen soos 0:00. */
+function skryfDuur(sekondes) {
+  const s = Number(sekondes)
+  if (!Number.isFinite(s) || s <= 0) return ''
+  const m = Math.floor(s / 60)
+  const r = Math.round(s % 60)
+  return `${m}:${String(r === 60 ? 0 : r).padStart(2, '0')}`
+}
+
 function skryfDatum(d) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''))
   if (!m) return ''
@@ -105,9 +117,10 @@ function egteAntwoord(a) {
   return null
 }
 
-export default function SorgPlasing({ plasing }) {
+export default function SorgPlasing({ plasing, myne = false }) {
   const [oop, setOop] = useState(false)
   const [antwOop, setAntwOop] = useState(false)
+  const [duur, setDuur] = useState('')
 
   /* Kort stories het nie 'n "Lees verder" nodig nie — dan lyk dit net
      lastig. Ses reels is sowat 240 karakters op 'n foon. */
@@ -124,7 +137,16 @@ export default function SorgPlasing({ plasing }) {
   const antwLank = String(antwoord?.teks || '').length > 320
 
   return (
-    <article className="sp-kaart" id={`sorg-plasing-${plasing.id}`}>
+    <article className={`sp-kaart${myne ? ' myne' : ''}`} id={`sorg-plasing-${plasing.id}`}>
+      {/* ── Jou storie ──
+
+          Die mens wat geskryf het, het nooit gesien dat ander haar dra nie.
+          Sy plaas, sy verdwyn, en daar is geen pad terug nie. Hierdie merkie
+          is die hele emosionele betaling van die blad: sy kom terug en sien
+          dat vier-en-twintig mense haar ding saamdra.
+
+          Dit wys NET op haar eie foon. Niemand anders sien dit nie. */}
+      {myne && <p className="sp-myne">Jou storie</p>}
       {plasing.titel && <h3 className="sp-titel">{plasing.titel}</h3>}
 
       {/* ── Wie ──
@@ -194,9 +216,24 @@ export default function SorgPlasing({ plasing }) {
                0:00 / 0:00 — dit lyk stukkend, en 'n mens druk dit nie. Net
                die metadata is 'n paar kilogreep; die klank self laai steeds
                eers wanneer iemand speel. */
-            <audio className="sp-oudio" controls preload="metadata" src={antwoord.bron}>
-              Jou blaaier kan nie hierdie opname speel nie.
-            </audio>
+            <>
+              {/* Die lengte, sodra die blaaier dit weet. Dit is die verskil
+                  tussen "gaan dit 'n minuut of twintig vat?" en 'n mens wat
+                  druk. Ons stoor dit nie — dit kom uit die lêer self. */}
+              <p className="sp-oudio-kop">
+                Luister na Dewald se begeleiding
+                {duur ? <span className="sp-duur"> · {duur}</span> : null}
+              </p>
+              <audio
+                className="sp-oudio"
+                controls
+                preload="metadata"
+                src={antwoord.bron}
+                onLoadedMetadata={e => setDuur(skryfDuur(e.target.duration))}
+              >
+                Jou blaaier kan nie hierdie opname speel nie.
+              </audio>
+            </>
           )}
 
           {antwoord.tipe === 'video' && (
