@@ -4,7 +4,6 @@
      POST /api/sorg-saamstaan { muurId, toestel, reaksie }   → 'n reaksie
      POST /api/sorg-saamstaan { muurId, toestel, woord }     → 'n klaar woord
      POST /api/sorg-saamstaan { muurId, toestel, teks }      → 'n eie woord
-     POST /api/sorg-saamstaan { gelees: [muurId, ...] }      → leestellings
 
    Die reels self staan in `src/data/sorgSaamstaan.js`, wat suiwer is en met
    plain `node` getoets word. Hierdie lêer doen die Firestore-werk.
@@ -185,32 +184,6 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar }) {
   })
 }
 
-/* ── Hoeveel mense het gelees ──
-
-   Die kliënt onthou self watter plasings hierdie toestel al gesien het en
-   stuur elkeen net EEN keer. Dit is nie waterdig nie — wie sy berging
-   uitvee, tel weer — maar dit is 'n leestelling, nie 'n ranglys nie, en die
-   koste van 'n dokument per toestel per plasing is dit nie werd nie.
-
-   Wat wel waterdig moet wees, is die perk: 'n lys van duisend id's mag nie
-   duisend skryfwerke maak nie. */
-const MAKS_GELEES = 20
-
-async function doenGelees(res, lys, waar) {
-  const vers = versamelingVir(waar)
-  const ids = [...new Set(lys.map(skoonId).filter(Boolean))].slice(0, MAKS_GELEES)
-  if (!ids.length) return res.status(200).json({ ok: true, getel: 0 })
-
-  let getel = 0
-  for (const id of ids) {
-    const p = await leesDok(vers, id)
-    if (!p || p.gepubliseer === false) continue
-    await skryfDok(vers, id, { gelees: (Number(p.gelees) || 0) + 1 }, { velde: ['gelees'] })
-    getel++
-  }
-  return res.status(200).json({ ok: true, getel })
-}
-
 /* ── Rapporteer ──
 
    Een druk haal die woord DADELIK van die muur af en sit dit in Dewald se
@@ -246,10 +219,6 @@ export default async function handler(req, res) {
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
   try {
-    if (Array.isArray(lyf.gelees)) {
-      return await doenGelees(res, lyf.gelees, lyf.soort === 'video' ? 'video' : 'muur')
-    }
-
     if (lyf.rapporteer) return await doenRapport(res, String(lyf.rapporteer).slice(0, 40))
 
     const muurId = skoonId(lyf.muurId)

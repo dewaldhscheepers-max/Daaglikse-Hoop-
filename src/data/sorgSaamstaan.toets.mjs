@@ -15,7 +15,6 @@ import {
   REAKSIES, keurReaksie, reaksieBy, wysReaksies,
   KLAAR_WOORDE, klaarWoordTeks, MAKS_WOORD,
   skoonWoord, woordVlae, magVryeTeks, woordStatus,
-  LEES_VLOER, wysGelees,
 } from './sorgSaamstaan.js'
 
 let gedruip = 0
@@ -175,18 +174,6 @@ afdeling('n Gewone woord WYS DADELIK')
       woordStatus({ teks: '  Ek   bid  ', sensitief: false }).teks === 'Ek bid')
   kyk('dit word afgekap op 200',
       woordStatus({ teks: 'a'.repeat(500), sensitief: false }).teks.length === MAKS_WOORD)
-}
-
-afdeling('n Klein leestelling word nie gewys nie')
-{
-  kyk('drie lesers wys niks', wysGelees(3) === 0)
-  kyk('nege ook nie', wysGelees(LEES_VLOER - 1) === 0)
-  kyk('tien wys wel', wysGelees(LEES_VLOER) === LEES_VLOER)
-  kyk('honderd-en-twee-en-veertig wys', wysGelees(142) === 142)
-  kyk('nul wys niks', wysGelees(0) === 0)
-  kyk('negatief breek nie', wysGelees(-5) === 0)
-  kyk('teks breek nie', wysGelees('baie') === 0)
-  kyk('null breek nie', wysGelees(null) === 0)
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')

@@ -43,7 +43,7 @@ import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, vandagSeWoord, merkWoordGesien, volgensBehoefte,
 } from '../data/sorgVideos'
-import { haalMuur, meldGelees, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
+import { haalMuur, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
@@ -94,21 +94,6 @@ export default function Sorg() {
      swak sein nie klaar laai nie — en 'n swak sein is in Suid-Afrika die
      gewone geval, nie die uitsondering nie. */
   const [wysAantal, setWysAantal] = useState(6)
-
-  /* ── Wie lees ──
-
-     Dewald het gesê dit voel of niemand reageer nie. Maar die blad het nog
-     nooit getel hoeveel mense LEES nie — net hoeveel druk. Op enige muur
-     reageer sowat een uit vyftig, dus kon tweehonderd mense 'n storie gelees
-     het terwyl die telling op 1 staan.
-
-     Elke plasing tel EEN keer per toestel; die foon onthou wat hy gesien
-     het. Ons meld net wat werklik op die skerm is, en een oproep vir almal
-     saam — nie een per kaart nie. */
-  useEffect(() => {
-    if (afdeling !== 'muur' || !muur || !muur.length) return
-    meldGelees(muur.slice(0, wysAantal).map(p => p.id))
-  }, [muur, wysAantal, afdeling])
 
   /* ── Die muur bly lewendig ──
 

@@ -39,7 +39,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useRef, useEffect } from 'react'
-import { REAKSIES, KLAAR_WOORDE, wysReaksies, wysGelees, MAKS_WOORD } from '../data/sorgSaamstaan'
+import { REAKSIES, wysReaksies } from '../data/sorgSaamstaan'
 import { stuurReaksie, myReaksie } from '../data/sorgMuur'
 import SorgOpmerkings from './SorgOpmerkings'
 import './SorgSaamstaan.css'
@@ -57,7 +57,6 @@ export default function SorgSaamstaan({ plasing, soort = 'muur' }) {
   const balkRef = useRef(null)
 
   const { gewys, totaal } = wysReaksies(tellings, plasing.saam)
-  const gelees = wysGelees(plasing.gelees)
   const myReak = myne ? REAKSIES.find(r => r.sleutel === myne) : null
 
   /* ── Wat van die bediener af inkom, wen ──
@@ -137,17 +136,14 @@ export default function SorgSaamstaan({ plasing, soort = 'muur' }) {
     <div className="ss">
 
       {/* ── Die opsomming ──
-          Net WATTER reaksies gestuur is, en die leestelling. Die GETAL staan
-          nie meer hier nie — dit hoort langs die hartjie, waar 'n mens dit
-          soek en waar elke ander muur dit sit. */}
-      {(gewys.length > 0 || gelees > 0) && (
+          Net WATTER reaksies gestuur is. Die getal staan langs die hartjie,
+          waar 'n mens dit soek. Die LEESTELLING is heeltemal weg van hier af
+          — sien `sorgSaamstaan.js`. */}
+      {gewys.length > 0 && (
         <div className="ss-som">
-          {gewys.length > 0 && (
-            <span className="ss-tekens" aria-hidden="true">
-              {gewys.map(r => <span key={r.sleutel} className="ss-teken">{r.teken}</span>)}
-            </span>
-          )}
-          {gelees > 0 && <span className="ss-gelees">{gelees} gelees</span>}
+          <span className="ss-tekens" aria-hidden="true">
+            {gewys.map(r => <span key={r.sleutel} className="ss-teken">{r.teken}</span>)}
+          </span>
         </div>
       )}
 

@@ -58,13 +58,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.ss-gelees {
-  font-size: 11.5px;
-  color: #A29CAB;
-  white-space: nowrap;
-}
-.ss-som-knop + .ss-gelees::before { content: '· '; }
-
 /* ── Die aksiebalk ──
    Twee knoppies, dun lyne bo en onder. Vier knoppies met woorde op is 'n
    keuselys; twee is 'n balk. */

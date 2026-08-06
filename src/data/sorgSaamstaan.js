@@ -186,15 +186,3 @@ export function woordStatus({ teks, sensitief }) {
     ...(vlae.length ? { vlae, rede: vlae.join(' en ') } : {}),
   }
 }
-
-/* ── Hoeveel mense het gelees ──
-
-   'n Klein getal is erger as geen getal nie. "3 mense het dit gelees" laat
-   'n storie eensamer lyk as stilte. Onder die vloer wys ons niks — nie 'n
-   nul nie, niks. */
-export const LEES_VLOER = 10
-
-export function wysGelees(n) {
-  const g = Math.max(0, Number(n) || 0)
-  return g >= LEES_VLOER ? g : 0
-}

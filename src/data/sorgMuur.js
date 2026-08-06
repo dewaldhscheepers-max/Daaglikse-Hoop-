@@ -15,7 +15,6 @@ const PAD = '/api/sorg-muur'
 const SAAM_PAD = '/api/sorg-saamstaan'
 const SAAM_SLEUTEL = 'sorg_saam'
 const REAKSIE_SLEUTEL = 'sorg_reaksies'
-const GELEES_SLEUTEL = 'sorg_gelees'
 
 let belofte = null
 let gehaalOp = 0
@@ -174,33 +173,6 @@ export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort =
   } catch {
     return { fout: 'Ons kon nie deurkom nie. Probeer asseblief weer.' }
   }
-}
-
-/* ── Die leestelling ──
-
-   Elke plasing tel EEN keer per toestel. Die foon onthou wat hy al gesien
-   het; die bediener tel net op. Dit is nie waterdig nie, maar dit is 'n
-   leestelling en nie 'n ranglys nie.
-
-   Dit loop een keer per bladlaai met 'n lys, nie een oproep per kaart nie. */
-function geleesLys() {
-  try { return JSON.parse(localStorage.getItem(GELEES_SLEUTEL) || '[]') } catch { return [] }
-}
-
-export function meldGelees(ids) {
-  const gesien = new Set(geleesLys())
-  const nuut = [...new Set(ids)].filter(id => id && !gesien.has(id)).slice(0, 20)
-  if (!nuut.length) return
-  try {
-    localStorage.setItem(GELEES_SLEUTEL, JSON.stringify([...nuut, ...gesien].slice(0, 800)))
-  } catch { /* privaat modus */ }
-  /* Ons wag nie hierop nie en ons wys nooit 'n fout nie. Misluk dit, is die
-     enigste gevolg dat een lees nie getel is nie. */
-  fetch(SAAM_PAD, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ gelees: nuut }),
-  }).catch(() => {})
 }
 
 /* ── Rapporteer 'n woord ──

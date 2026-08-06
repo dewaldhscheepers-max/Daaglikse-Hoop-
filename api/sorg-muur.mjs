@@ -117,9 +117,6 @@ function virDieSkerm(m, woorde) {
     /* Wat mense gedruk het, PLUS die eerstes. Hulle le apart sodat die
        saai-lopie nooit iemand se regte druk kan oorskryf nie. */
     reaksies: saamTel(m.reaksies, m.saai),
-    /* Onder die vloer wys die skerm niks; ons stuur die rou getal en laat
-       `wysGelees` daar besluit, sodat die reel op EEN plek staan. */
-    gelees: Number(m.gelees) || 0,
     /* Die skerm moet dit weet om die skryfblok weg te laat. Dit is 'n
        vlaggie, nie inligting oor die mens nie — dit se net dat hierdie
        storie te swaar is vir 'n vreemdeling se raad. */

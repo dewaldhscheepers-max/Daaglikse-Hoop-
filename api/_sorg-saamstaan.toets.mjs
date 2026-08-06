@@ -126,9 +126,9 @@ async function stuur(lyf) {
 }
 
 const MUUR = {
-  gewoon: { teks: 'x', gepubliseer: true, saam: 0, reaksies: {}, gelees: 0, sensitief: false },
-  swaar:  { teks: 'y', gepubliseer: true, saam: 0, reaksies: {}, gelees: 0, sensitief: true },
-  af:     { teks: 'z', gepubliseer: false, saam: 0, reaksies: {}, gelees: 0, sensitief: false },
+  gewoon: { teks: 'x', gepubliseer: true, saam: 0, reaksies: {}, sensitief: false },
+  swaar:  { teks: 'y', gepubliseer: true, saam: 0, reaksies: {}, sensitief: true },
+  af:     { teks: 'z', gepubliseer: false, saam: 0, reaksies: {}, sensitief: false },
 }
 
 afdeling('n SENSITIEWE plasing kry GEEN vrye teks nie')
@@ -254,26 +254,6 @@ afdeling('Een reaksie per toestel per plasing')
 
   r = await stuur({ muurId: 'gewoon', toestel: '', reaksie: 'bid' })
   kyk('sonder n toestel tel ons niks eerder as om te lieg', r.lyf.reeds === true, r.lyf)
-}
-
-afdeling('Die leestelling')
-{
-  stelWinkel({ sorg_muur: MUUR, sorg_saam: {}, sorg_woorde: {} })
-  let r = await stuur({ gelees: ['gewoon', 'swaar'] })
-  kyk('twee plasings word getel', r.lyf.getel === 2, r.lyf)
-  kyk('en die telling loop op', winkel.sorg_muur.gewoon.gelees === 1, winkel.sorg_muur.gewoon)
-
-  stelWinkel({ sorg_muur: MUUR, sorg_saam: {}, sorg_woorde: {} })
-  r = await stuur({ gelees: Array.from({ length: 200 }, () => 'gewoon') })
-  kyk('duplikate tel een keer', r.lyf.getel === 1, r.lyf)
-
-  stelWinkel({ sorg_muur: MUUR, sorg_saam: {}, sorg_woorde: {} })
-  r = await stuur({ gelees: Array.from({ length: 200 }, (_, i) => 'p' + i) })
-  kyk('n lang lys word afgekap op 20', r.lyf.getel <= 20, r.lyf)
-
-  stelWinkel({ sorg_muur: MUUR, sorg_saam: {}, sorg_woorde: {} })
-  r = await stuur({ gelees: ['../../../etc/passwd', 'x y', ''] })
-  kyk('rommel-id\'s tel niks', r.lyf.getel === 0, r.lyf)
 }
 
 afdeling('Die gewone weiering')

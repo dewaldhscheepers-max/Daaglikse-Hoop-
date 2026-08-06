@@ -4,7 +4,7 @@
    Druk 'n mens die spraakborrel, skuif hierdie blad van onder af oop:
 
      ─────────                                   ← die greep
-     🙏❤️🤗 24                          142 gelees
+     🙏❤️🤗 24                          3 opmerkings
      ─────────────────────────────────────────────
      ◯  Anoniem · 6 Augustus
         Jy is nie alleen nie.
@@ -32,7 +32,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useEffect, useRef } from 'react'
-import { KLAAR_WOORDE, wysReaksies, wysGelees, MAKS_WOORD } from '../data/sorgSaamstaan'
+import { KLAAR_WOORDE, wysReaksies, MAKS_WOORD } from '../data/sorgSaamstaan'
 import { stuurWoord, rapporteerWoord } from '../data/sorgMuur'
 import './SorgOpmerkings.css'
 
@@ -54,7 +54,6 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
   const lysRef = useRef(null)
 
   const { gewys, totaal } = wysReaksies(tellings, plasing.saam)
-  const gelees = wysGelees(plasing.gelees)
 
   /* Elke keer wat dit oopmaak, begin dit skoon. In baie huise is die foon
      gedeel, en niemand se halwe sin mag vir die volgende mens wag nie. */
@@ -132,7 +131,6 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
           )}
           <span className="op-kop-regs">
             {woorde.length} {woorde.length === 1 ? 'opmerking' : 'opmerkings'}
-            {gelees > 0 && ` · ${gelees} gelees`}
           </span>
         </div>
 

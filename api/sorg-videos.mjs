@@ -197,7 +197,6 @@ export default async function handler(req, res) {
         return {
           ...v,
           reaksies: saamTel(v.reaksies, v.saai),
-          gelees: Number(v.gelees) || 0,
           saam: 0,
           woorde: myne.slice(0, 50).map(w => ({
             id: w.id,
