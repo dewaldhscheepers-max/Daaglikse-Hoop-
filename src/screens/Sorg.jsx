@@ -76,8 +76,35 @@ export function HulpNou({ oop, onSluit }) {
 
 const AFDELINGS = [
   { sleutel: 'muur',   naam: 'Die Muur' },
-  { sleutel: 'videos', naam: 'Die Video\'s' },
+  /* "Video's", nie "Die Video's" nie. Met 'n ikoon, 'n naam en 'n telling
+     langs mekaar het "Die Video's" op 'n 320px-skerm nie gepas nie. */
+  { sleutel: 'videos', naam: 'Video\'s' },
 ]
+
+/* ── Die twee ikone ──
+
+   Lyntekeninge, nie emoji nie. 'n Emoji word deur die stelsel geteken: op
+   een foon is dit plat, op 'n ander blink, en dit erf nooit die knoppie se
+   kleur nie. Op 'n pers pil moet die ikoon wit word saam met die teks, en
+   dit kan net gebeur as dit 'n SVG met `currentColor` is. */
+function HartIkoon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" />
+    </svg>
+  )
+}
+
+function SpeelIkoon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+         strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="3.5" />
+      <path d="M10.4 9.1v5.8l4.8-2.9z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
 
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
@@ -407,7 +434,7 @@ export default function Sorg() {
               onClick={() => setAfdeling(a.sleutel)}
             >
               <span className="sorg-oortjie-ikoon" aria-hidden="true">
-                {a.sleutel === 'muur' ? '🤍' : '▶'}
+                {a.sleutel === 'muur' ? <HartIkoon /> : <SpeelIkoon />}
               </span>
               <span className="sorg-oortjie-naam">{a.naam}</span>
               <span className="sorg-oortjie-tel">
