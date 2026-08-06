@@ -278,19 +278,41 @@
   font-family: var(--font-body);
 }
 
-/* ─── Tabs ─── */
+/* ─── Tabs ───
+
+   Sewe oortjies is 423px breed. Elke foon wat ons ondersteun is smaller:
+   320, 360, 390, 412. Die strook het dus by ELKE grootte oor die rand
+   gehang, en die laaste oortjie — 🤍 Sorg — het van 370 tot 423 gele.
+
+   Daar was geen `overflow-x` nie, en `.admin-overlay` is `overflow: hidden`.
+   Die gevolg was tweeledig: die Sorg-oortjie was halfpad (of heeltemal)
+   buite die skerm, en wanneer iets hom tog in die oog gebring het, het die
+   HELE paneel links geskuif en daar gebly — met `overflow: hidden` kan 'n
+   mens dit nie terugskuif nie.
+
+   Die strook rol nou self. `flex: 0 0 auto` in plaas van `flex: 1` sodat 'n
+   oortjie sy breedte hou eerder as om plat gedruk te word (dit is hoekom
+   "E-pos" oor twee reels geloop het), en `overscroll-behavior-x: contain`
+   sodat 'n swiep aan die einde nie die blaaier laat terugblaai nie. */
 .admin-tabs {
   display: flex;
   border-bottom: 1.5px solid var(--border);
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.admin-tabs::-webkit-scrollbar { display: none; }
 
 .admin-tab {
-  flex: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
   background: none;
   border: none;
-  padding: 12px 8px;
-  font-size: 14px;
+  padding: 12px 10px;
+  font-size: 13.5px;
   font-weight: 600;
   font-family: var(--font-body);
   color: var(--text-muted);

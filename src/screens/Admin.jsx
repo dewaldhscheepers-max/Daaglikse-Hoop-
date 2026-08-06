@@ -28,6 +28,18 @@ function leesGeheim() {
   try { return localStorage.getItem(GEHEIM_SLEUTEL) || '' } catch { return '' }
 }
 
+const OORTJIE_SLEUTEL = 'admin_oortjie'
+const OORTJIES = ['notes', 'books', 'kinders', 'notif', 'email', 'video', 'sorg']
+
+/* Wat uit localStorage kom, word nagegaan. 'n Onbekende waarde sou elke
+   oortjie leeg laat en soos 'n stukkende admin lyk. */
+function leesOortjie() {
+  try {
+    const o = localStorage.getItem(OORTJIE_SLEUTEL)
+    return OORTJIES.includes(o) ? o : 'notes'
+  } catch { return 'notes' }
+}
+
 function extractYoutubeId(input) {
   const s = (input || '').trim()
   const shorts = s.match(/shorts\/([a-zA-Z0-9_-]+)/)
@@ -47,7 +59,13 @@ export default function Admin({ onClose }) {
   const [unlocked, setUnlocked] = useState(false)
   const [pinError, setPinError] = useState('')
   const [pinBesig, setPinBesig] = useState(false)
-  const [activeTab, setActiveTab] = useState('notes') // 'notes' | 'books' | 'kinders' | 'notif' | 'email' | 'video'
+  /* Die oortjie waarop 'n mens laas gewerk het.
+
+     Sewe oortjies pas nie op 'n foon nie — die strook rol, en Sorg is die
+     laaste een. Sorg is deesdae die oortjie wat die meeste werk vra, en om
+     elke keer eers daarheen te swiep is 'n irritasie wat elke dag herhaal.
+     Dit onthou dus waar jy laas was en gaan reguit daarheen. */
+  const [activeTab, setActiveTab] = useState(leesOortjie)
 
   // ── Saturday video state ──
   const [svActive,   setSvActive]   = useState(false)
@@ -340,6 +358,19 @@ export default function Admin({ onClose }) {
     clearInterval(timerRef.current)
     setRecording(false)
   }
+
+  /* Onthou die oortjie, en bring hom in die strook in sig.
+
+     Sonder die tweede helfte help die eerste helfte niks: die admin sou op
+     Sorg oopmaak terwyl die Sorg-oortjie self buite die strook se rand le,
+     en dan lyk dit of niks gekies is nie. `inline: 'nearest'` skuif net die
+     strook — nie die bladsy en nie die paneel nie. */
+  const strookRef = useRef(null)
+  useEffect(() => {
+    try { localStorage.setItem(OORTJIE_SLEUTEL, activeTab) } catch { /* privaat modus */ }
+    const el = strookRef.current && strookRef.current.querySelector('.admin-tab.active')
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [activeTab, unlocked])
 
   /* Die bediener besluit, nie hierdie kode nie. */
   async function keurWagwoord(w) {
@@ -656,7 +687,7 @@ export default function Admin({ onClose }) {
           <button className="admin-x" onClick={onClose}>✕</button>
         </div>
 
-        <div className="admin-tabs">
+        <div className="admin-tabs" ref={strookRef}>
           <button className={`admin-tab ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
             🎙️ Notas
           </button>

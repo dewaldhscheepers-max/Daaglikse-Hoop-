@@ -105,6 +105,55 @@
   white-space: pre-wrap;
 }
 
+/* Vier reels, dan "Wys alles". Sonder dit is elke ry so hoog soos die
+   boodskap, en die knoppie waarna 'n mens soek le skerms ver. */
+.sk-voorskou.kort {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sk-meer {
+  margin-top: 5px;
+  padding: 3px 0;
+  border: 0;
+  background: none;
+  color: #5C4E8E;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Die opskrif op 'n muur-ry — waarmee 'n mens die plasing uitken. */
+.sk-ry-titel {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #2D2040;
+}
+
+/* Wat nog op 'n antwoord wag. Geen transform nie — net kleur. */
+.sk-ry.wag {
+  border-color: #CFC4E8;
+  background: #FBF9FF;
+}
+
+.sk-wag {
+  margin: 0 0 12px;
+  padding: 10px 13px;
+  border: 1px solid #DDD6E6;
+  border-radius: 12px;
+  background: #F6F3FB;
+  color: #5C4E8E;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .sk-teks {
   display: block;
   width: 100%;

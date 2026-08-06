@@ -17,6 +17,19 @@
    Die Gevaar-hopie staan eerste en wys WATTER woorde getref het, sodat
    Dewald dadelik sien hoekom.
 
+   ── Een hopie, een lys ──
+
+   Dit was nie so nie, en dit was 'n gemors om te gebruik. Die muur is onder
+   ELKE hopie geteken, en die oortjie "Op die muur" het boonop die verkeerde
+   lys gewys: die rou inkomende kopiee van wat goedgekeur is, met die egte
+   muur eers daaronder. Om een antwoord by te sit, moes 'n mens verby elke
+   plasing scroll om by die tweede lys uit te kom.
+
+   Nou wys elke oortjie presies een lys, en "Op die muur" is die muur self.
+
+   Binne die muur staan die plasings SONDER 'n antwoord eerste. Dit is die
+   werk wat wag; die res is klaar.
+
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
    ──────────────────────────────────────────────────────────── */
 
@@ -150,7 +163,12 @@ export default function SorgKeur({ geheim }) {
 
       <div className="sk-hopies">
         {HOPIES.map(h => {
-          const n = inkomend.filter(b => (b.status || 'nuut') === h.sleutel).length
+          /* "Op die muur" tel die MUUR, nie die inkomende kopiee nie. Dit was
+             die inkomendes, en die twee getalle loop uitmekaar sodra 'n mens
+             een plasing uitvee of afhaal. */
+          const n = h.sleutel === 'gekeur'
+            ? (data.muur || []).length
+            : inkomend.filter(b => (b.status || 'nuut') === h.sleutel).length
           return (
             <button
               key={h.sleutel}
@@ -178,6 +196,12 @@ export default function SorgKeur({ geheim }) {
         </div>
       )}
 
+      {/* Een hopie, een lys. Die muur is 'n hopie soos die ander, nie 'n
+          tweede lys onderaan elke hopie nie. */}
+      {hopie === 'gekeur' ? (
+        <Muur data={data} doen={doen} besig={besig} />
+      ) : (
+        <>
       {!lys.length && <p className="sk-leeg">Niks in hierdie hopie nie.</p>}
 
       {lys.map(b => (
@@ -238,7 +262,7 @@ export default function SorgKeur({ geheim }) {
             </>
           ) : (
             <>
-              <p className="sk-voorskou">{b.teks}</p>
+              <Voorskou teks={b.teks} />
               <div className="sk-knoppe">
                 {b.status !== 'gekeur' && (
                   /* In die Gevaar-hopie staan daar NIE "Lees en keur" nie.
@@ -269,10 +293,34 @@ export default function SorgKeur({ geheim }) {
           )}
         </div>
       ))}
-
-      <Muur data={data} doen={doen} besig={besig} />
+        </>
+      )}
     </div>
   )
+}
+
+/* ── 'n Voorskou wat nie die bladsy oorneem nie ──
+   Dit het die VOLLE teks gewys. Tien boodskappe van agthonderd karakters en
+   die knoppie waarna 'n mens soek, is vier skerms ver. Vier reels, en dan
+   "Wys alles" vir wie meer wil sien. Die rou teks gaan nêrens heen nie — dit
+   staan heel in die redigeerblok sodra 'n mens die ry oopmaak. */
+function Voorskou({ teks }) {
+  const [oop, setOop] = useState(false)
+  const lank = String(teks || '').length > 200
+  return (
+    <>
+      <p className={`sk-voorskou${lank && !oop ? ' kort' : ''}`}>{teks}</p>
+      {lank && !oop && (
+        <button className="sk-meer" onClick={() => setOop(true)}>Wys alles</button>
+      )}
+    </>
+  )
+}
+
+/* Onbeantwoord eerste, dan die klaardes, dan wat afgehaal is. */
+function rangMuur(m) {
+  if (m.gepubliseer === false) return 2
+  return m.antwoord ? 1 : 0
 }
 
 /* ── Wat reeds op die muur is, en Dewald se antwoord daaronder ── */
@@ -293,8 +341,15 @@ function Muur({ data, doen, besig }) {
   const [wTitel, setWTitel] = useState('')
   const [wTeks, setWTeks] = useState('')
 
-  const muur = data.muur || []
-  if (!muur.length) return null
+  /* Wat nog nie beantwoord is nie, staan BO. Dit is die enigste rede om
+     hierdie lys oop te maak: iets wag op 'n antwoord. Die res is klaar en
+     hoef nie in die pad te wees nie. Afgehaalde plasings gaan heel onder.
+
+     Die bediener stuur die muur reeds nuutste-eerste; ons hou daardie
+     volgorde binne elke groep (sort is stabiel in elke blaaier wat ons
+     ondersteun). */
+  const muur = [...(data.muur || [])].sort((a, b) => rangMuur(a) - rangMuur(b))
+  if (!muur.length) return <p className="sk-leeg">Niks op die muur nie.</p>
 
   async function stuur(m) {
     const d = await doen({ aksie: 'antwoord', muurId: m.id, antwoord: { tipe, titel, bron, teks } })
@@ -306,24 +361,33 @@ function Muur({ data, doen, besig }) {
     if (d && d.ok) setWysigOop(null)
   }
 
+  const wag = muur.filter(m => !m.antwoord && m.gepubliseer !== false).length
+
   return (
     <>
-      <div className="admin-section-title" style={{ marginTop: 26 }}>
-        Op die muur ({muur.length})
-      </div>
+      {wag > 0 && (
+        <p className="sk-wag">
+          {wag === 1 ? 'Een plasing wag nog op jou antwoord.' : `${wag} plasings wag nog op jou antwoord.`}
+          {' '}Hulle staan hier bo.
+        </p>
+      )}
 
       {muur.map(m => (
-        <div key={m.id} className="sk-ry">
+        <div key={m.id} className={`sk-ry${!m.antwoord && m.gepubliseer !== false ? ' wag' : ''}`}>
           <div className="sk-ry-fyn">
             {m.datum} · {m.naam || 'Anoniem'}
             {m.antwoord ? ' · beantwoord' : ' · nog geen antwoord'}
             {m.saam ? ` · ${m.saam} dra dit saam` : ''}
           </div>
+          {/* Die opskrif, sodat 'n mens 'n plasing kan uitken sonder om die
+              storie te lees. Op 'n vol muur is dit die verskil tussen soek en
+              raaksien. */}
+          {m.titel && <p className="sk-ry-titel">{m.titel}</p>}
           {/* Sonder hierdie merkie lyk 'n afgehaalde plasing presies soos een
               wat op die muur staan, en dan haal 'n mens dieselfde een twee
               keer af en wonder hoekom niks gebeur nie. */}
           {m.gepubliseer === false && <div className="sk-kontak">Van die muur af</div>}
-          <p className="sk-voorskou">{m.teks}</p>
+          <Voorskou teks={m.teks} />
 
           {wysigOop === m.id && (
             <>
@@ -408,6 +472,7 @@ function Muur({ data, doen, besig }) {
           ) : (
             <div className="sk-knoppe">
               <button className="sk-knop" onClick={() => {
+                setOop(null)
                 setWysigOop(m.id)
                 setWTitel(m.titel || '')
                 setWTeks(m.teks || '')
@@ -415,6 +480,7 @@ function Muur({ data, doen, besig }) {
                 Redigeer
               </button>
               <button className="sk-knop sk-plaas" onClick={() => {
+                setWysigOop(null)
                 setOop(m.id)
                 setTipe((m.antwoord && m.antwoord.tipe) || 'oudio')
                 setTitel((m.antwoord && m.antwoord.titel) || '')
@@ -434,6 +500,18 @@ function Muur({ data, doen, besig }) {
               >
                 {m.gepubliseer === false ? 'Sit terug op die muur' : 'Haal van die muur af'}
               </button>
+              {/* Vra iemand dat sy ding heeltemal weggaan — POPIA gee hom
+                  daardie reg — moet ALBEI kante weg: die muur en die rou
+                  boodskap in die inbak. `bronId` wys na daardie kopie.
+
+                  Hierdie knoppie het voorheen net op die inkomende lys
+                  gestaan. Daardie lys wys nie meer hier nie, dus sou die
+                  enigste volledige uitvee-pad verdwyn het. */}
+              <button className="sk-knop sk-vee" disabled={besig} onClick={() => {
+                if (window.confirm("Vee hierdie plasing heeltemal uit?\n\nDit gaan van die muur EN uit die inbak weg, saam met die antwoord en die saamdra-telling. Dit is wat 'n mens doen wanneer die persoon self vra dat dit weggaan.")) {
+                  doen({ aksie: 'vee', muurId: m.id, id: m.bronId })
+                }
+              }}>Vee uit</button>
             </div>
           )}
         </div>
