@@ -28,6 +28,7 @@
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
+import { saamTelReaksies } from '../src/data/sorgSaamstaan.js'
 
 const MUUR = 'sorg_muur'
 const SAAM = 'sorg_saam'
@@ -95,13 +96,11 @@ function volgorde(a, b) {
 
 /* Wat na die kliënt gaan. Nooit die bronId nie — dit wys na die rou
    boodskap, en niemand buite die admin het daarmee te doen nie. */
-function saamTel(a, b) {
-  const uit = { ...(a && typeof a === 'object' ? a : {}) }
-  for (const [k, n] of Object.entries(b && typeof b === 'object' ? b : {})) {
-    uit[k] = (Number(uit[k]) || 0) + (Number(n) || 0)
-  }
-  return uit
-}
+/* Die somtelling woon in `src/data/sorgSaamstaan.js`, saam met die druk-pad
+   s'n. Hier het 'n eie kopie gestaan, en die druk-pad het glad nie saamgetel
+   nie — 'n mens sien 3, druk een keer, en die getal spring na 1. Een funksie,
+   een antwoord. */
+const saamTel = saamTelReaksies
 
 function virDieSkerm(m, woorde) {
   const myne = (woorde || []).filter(w => w.muurId === m.id)

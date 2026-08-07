@@ -74,6 +74,29 @@ export function wysReaksies(tellings, ouSaam = 0) {
   return { gewys, totaal }
 }
 
+/* ── Die eerste reaksies plus die egte ──
+
+   'n Plasing dra twee tellings: `reaksies` is wat mense werklik gedruk het,
+   en `saai` is die drie eerstes waarmee sy begin het. Hulle le APART sodat 'n
+   herhaalde saai-lopie nooit iemand se egte druk kan oorskryf nie.
+
+   Dit beteken die twee moet OORAL saamgetel word, en dit is presies waar dit
+   gebreek het: die lees-pad het saamgetel, die druk-pad het net `reaksies`
+   teruggegee. 'n Mens sien 3, druk een keer, en die skerm spring na 1 — sy
+   eie druk, sonder die eerstes.
+
+   Daarom woon die somtelling nou hier, een keer, en albei paaie roep dit. */
+export function saamTelReaksies(...dele) {
+  const uit = {}
+  for (const deel of dele) {
+    if (!deel || typeof deel !== 'object') continue
+    for (const [sleutel, getal] of Object.entries(deel)) {
+      uit[sleutel] = (Number(uit[sleutel]) || 0) + (Number(getal) || 0)
+    }
+  }
+  return uit
+}
+
 /* ── Dewald se klaargemaakte woorde ──
 
    Kort, sag, en nie een is raad nie. Dit is die toets wat elkeen moet slaag:

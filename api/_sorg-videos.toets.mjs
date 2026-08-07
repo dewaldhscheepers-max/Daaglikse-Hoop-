@@ -13,11 +13,17 @@
 import fs from 'node:fs'
 const bron = fs.readFileSync(new URL('./sorg-videos.mjs', import.meta.url), 'utf8')
 const { keurOnderwerp } = await import(new URL('../src/data/sorgOnderwerpe.js', import.meta.url).href)
+/* Die snit hieronder verwys na goed wat die lêer INVOER. Wat hy nodig het,
+   word hier ingegee — anders druip die toets op 'n invoer eerder as op 'n
+   fout in die kode wat hy toets. */
+const { saamTelReaksies } = await import(new URL('../src/data/sorgSaamstaan.js', import.meta.url).href)
+const { saaiReaksies, saaiWoorde } = await import(new URL('../src/data/sorgSaai.js', import.meta.url).href)
 
 const begin = bron.indexOf('function haalVideoId')
 const eind  = bron.indexOf('export default')
-const M = new Function('keurOnderwerp',
-  bron.slice(begin, eind) + '\nreturn { haalVideoId, skoonTeks, skoonVideo }')(keurOnderwerp)
+const M = new Function('keurOnderwerp', 'saamTelReaksies', 'saaiReaksies', 'saaiWoorde',
+  bron.slice(begin, eind) + '\nreturn { haalVideoId, skoonTeks, skoonVideo }')(
+  keurOnderwerp, saamTelReaksies, saaiReaksies, saaiWoorde)
 
 let gedruip = 0
 const kyk = (n, w, e) => {

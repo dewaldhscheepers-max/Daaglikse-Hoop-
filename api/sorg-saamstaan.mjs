@@ -29,7 +29,7 @@
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 import {
-  keurReaksie, klaarWoordTeks, woordStatus, REAKSIES,
+  keurReaksie, klaarWoordTeks, woordStatus, saamTelReaksies, REAKSIES,
 } from '../src/data/sorgSaamstaan.js'
 
 const MUUR = 'sorg_muur'
@@ -88,13 +88,27 @@ async function doenReaksie(res, { muurId, toestel, reaksie, waar }) {
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
   }
 
+  /* ── Wat die skerm terugkry, moet dieselfde vorm he as wat hy gelaai het ──
+
+     Die lees-pad gee `reaksies + saai` terug — die egte drukke plus die drie
+     eerstes. Hier het net `reaksies` teruggegaan.
+
+     Die gevolg was sigbaar en dit het soos 'n stukkende teller gelyk: 'n mens
+     sien 3, hy druk een keer, en die getal SPRING NA 1 — sy eie druk, sonder
+     die eerstes. Dit lyk of sy druk die ander drie doodgemaak het.
+
+     'n Video wys `saam: 0` op die lees-pad (die ou los teller is daar in die
+     reaksies gevou), 'n muur-plasing wys syne. Ons volg dieselfde reel. */
+  const eerstes = plasing.saai
+  const ouSaam = waar === 'video' ? 0 : (Number(plasing.saam) || 0)
+
   const merkId = `${muurId}_${toestel}`
   const reeds = await leesDok(SAAM, merkId)
   if (reeds) {
     return res.status(200).json({
       ok: true, reeds: true,
-      reaksies: plasing.reaksies || {},
-      saam: Number(plasing.saam) || 0,
+      reaksies: saamTelReaksies(plasing.reaksies, eerstes),
+      saam: ouSaam,
       myne: reeds.reaksie || '',
     })
   }
@@ -110,8 +124,8 @@ async function doenReaksie(res, { muurId, toestel, reaksie, waar }) {
 
   return res.status(200).json({
     ok: true,
-    reaksies: tellings,
-    saam: Number(plasing.saam) || 0,
+    reaksies: saamTelReaksies(tellings, eerstes),
+    saam: ouSaam,
     myne: soort,
   })
 }

@@ -19,6 +19,7 @@ import { lysDokke, skryfDok, veeDok, magSkryf } from './_sorgFirestore.mjs'
 import { keurOnderwerp, raaiOnderwerpe } from '../src/data/sorgOnderwerpe.js'
 import { ontleedPlak } from '../src/data/sorgVideos.js'
 import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
+import { saamTelReaksies } from '../src/data/sorgSaamstaan.js'
 
 const VERSAMELING = 'sorg_videos'
 const WOORDE = 'sorg_woorde'
@@ -113,13 +114,11 @@ function skoonVideo(lyf) {
   }
 }
 
-function saamTel(a, b) {
-  const uit = { ...(a && typeof a === 'object' ? a : {}) }
-  for (const [k, n] of Object.entries(b && typeof b === 'object' ? b : {})) {
-    uit[k] = (Number(uit[k]) || 0) + (Number(n) || 0)
-  }
-  return uit
-}
+/* Die somtelling woon in `src/data/sorgSaamstaan.js`, saam met die druk-pad
+   s'n. Hier het 'n eie kopie gestaan, en die druk-pad het glad nie saamgetel
+   nie — 'n mens sien 3, druk een keer, en die getal spring na 1. Een funksie,
+   een antwoord. */
+const saamTel = saamTelReaksies
 
 /* Presies dieselfde saai as op die muur, en net so idempotent: die reaksies
    le in 'n APARTE veld wat GESTEL word en nie opgetel nie, en die

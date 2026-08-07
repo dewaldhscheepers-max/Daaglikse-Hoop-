@@ -14,6 +14,7 @@
 import {
   REAKSIES, keurReaksie, reaksieBy, wysReaksies,
   KLAAR_WOORDE, VIDEO_KLAAR, klaarWoordeVir, klaarWoordTeks, MAKS_WOORD,
+  saamTelReaksies,
   skoonWoord, woordVlae, magVryeTeks, woordStatus,
 } from './sorgSaamstaan.js'
 
@@ -209,6 +210,38 @@ afdeling('Die voorgestelde woorde — muur teenoor video')
      mag nooit 'n leë ry blokkies gee nie. */
   kyk('onbekende soort val op die muur terug',
       klaarWoordeVir('wat').length === 5 && klaarWoordeVir(undefined)[0].teks === muur[0].teks)
+}
+
+
+afdeling('Die telling na ’n druk — 3 eerstes plus myne is 4')
+{
+  /* Dewald: "as ek op video react dan wys dit een inplaas van 4."
+
+     'n Video begin met DRIE eerste reaksies in `saai`. Hy druk een keer, en
+     die skerm het 1 gewys — sy eie druk, sonder die eerstes. Dit het gelyk of
+     sy druk die ander drie doodgemaak het.
+
+     Die oorsaak: die LEES-pad het `reaksies + saai` teruggegee, die DRUK-pad
+     net `reaksies`. */
+  const eerstes = { bid: 1, hoor: 1, vas: 1 }        // wat saaiReaksies gee
+  const egte    = { bid: 1 }                          // sy druk
+
+  const naDruk = saamTelReaksies(egte, eerstes)
+  const { totaal } = wysReaksies(naDruk, 0)
+  kyk('drie eerstes plus een druk is VIER', totaal === 4, { naDruk, totaal })
+  kyk('en sy reaksie tel twee', naDruk.bid === 2, naDruk)
+
+  /* Voor hy druk, moet dit drie wees. */
+  kyk('voor die druk is dit drie', wysReaksies(saamTelReaksies({}, eerstes), 0).totaal === 3)
+
+  /* Die lees-pad en die druk-pad moet by dieselfde getal uitkom. Dit is die
+     hele fout in een reel. */
+  kyk('lees-pad en druk-pad stem ooreen',
+      JSON.stringify(saamTelReaksies(egte, eerstes)) === JSON.stringify(saamTelReaksies(eerstes, egte)))
+
+  kyk('niks gee niks', JSON.stringify(saamTelReaksies(null, undefined)) === '{}')
+  kyk('gemors word geignoreer', JSON.stringify(saamTelReaksies({ bid: 'x' }, { bid: 2 })) === '{"bid":2}')
+  kyk('n plasing sonder eerstes werk ook', saamTelReaksies({ bid: 5 }, undefined).bid === 5)
 }
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')
