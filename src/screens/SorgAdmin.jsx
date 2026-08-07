@@ -380,6 +380,19 @@ export default function SorgAdmin({ geheim = '' }) {
           </div>
           <div className="sa-ry-knoppe">
             <button onClick={() => setVorm({ ...LEEG, ...v, uitPlasing: v.uitPlasing || '' })}>Redigeer</button>
+            {/* ── Een tik, nie vier nie ──
+
+                'n `/shorts/`-skakel word outomaties as regop gemerk; 'n
+                `youtu.be`-skakel nie, want YouTube gee daardie vorm gewoonlik
+                aan 'n 16:9-oplaai. Wanneer die raaiskoot verkeerd is, moes 'n
+                mens Redigeer druk, die blokkie tik, afrol en Werk by druk —
+                vier dinge, keer die aantal video's wat verkeerd geraai is.
+
+                Dit is dieselfde soort knoppie as Versteek/Publiseer hiernaas
+                en dit stoor dadelik. Lyk dit verkeerd, tik dit terug. */}
+            <button onClick={() => stuur({ ...v, regop: !v.regop })}>
+              {v.regop ? '↔ Maak wyd' : '📱 Maak regop'}
+            </button>
             <button onClick={() => stuur({ ...v, gepubliseer: !v.gepubliseer })}>
               {v.gepubliseer ? 'Versteek' : 'Publiseer'}
             </button>
