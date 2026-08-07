@@ -103,6 +103,70 @@
 }
 .sv-duim:active .sv-speel { background: rgba(28, 20, 46, 0.92); }
 
+/* ── Die toegemaakte kaartjie ──
+
+   Klein duimnael links, titel regs. Effens groter as die eerste weergawe —
+   Dewald het gevra vir sowat vyf millimeter, en 128x80 teenoor 108x68 is
+   omtrent dit op 'n gewone foon. */
+.sv-ry {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 11px 15px;
+  border: 0;
+  background: none;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sv-ry:active { background: #F6F1E8; }
+
+/* YouTube se duimnael is altyd 480x360; `cover` sny die swart bo en onder
+   weg sonder 'n tweede versoek. */
+.sv-ry-duim {
+  position: relative;
+  flex: 0 0 auto;
+  width: 128px;
+  height: 80px;
+  border-radius: 10px;
+  background-color: #241B38;
+  background-size: cover;
+  background-position: center;
+}
+
+.sv-ry-speel {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(28, 20, 46, 0.72);
+  color: #FFFFFF;
+  padding-left: 3px;
+}
+
+/* Drie reels, dan hou dit op. 'n Titel wat oor ses reels loop, maak van die
+   kaartjie weer 'n blok. */
+.sv-ry-titel {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--s-teks, #2D2040);
+  overflow-wrap: anywhere;
+}
+
 .sv-titel {
   margin: 0;
   padding: 13px 15px 0;
@@ -113,7 +177,7 @@
   color: var(--text, #2D2040);
 }
 
-.sv-groot .sv-titel { font-size: 21px; }
+
 
 .sv-beskrywing {
   margin: 6px 0 0;

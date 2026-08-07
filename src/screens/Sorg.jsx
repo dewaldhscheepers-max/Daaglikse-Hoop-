@@ -379,44 +379,28 @@ export default function Sorg() {
           <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
 
-        {/* ── Die daaglikse video, KLEIN ──
+        {/* ── Die daaglikse video ──
 
-            Die volle speler was 74% van die skerm. Dit is 'n muur, nie 'n
-            video nie: 'n mens moes daarverby rol voor hy by die muur kom.
+            Dieselfde kaartjie as in die biblioteek, en dit SPEEL waar dit
+            staan. Die eerste weergawe het na die Video's-oortjie genavigeer;
+            'n mens druk 'n speel-driehoek en verwag dat dit speel, nie dat
+            die blad onder hom uitskuif nie.
 
-            Maar hy mag ook nie heeltemal weg nie. Die volgorde op hierdie
-            blad is HOOP VOOR PYN — iemand wat in krisis aankom en dadelik
-            veertig plasings van ander se lyding lees, gaan slegter weg. Die
-            video staan hier as 'n buffer, nie as inhoud nie.
+            Sonder die aksiebalk — die hoofblad se werk is die uitnodiging en
+            die muur. Wie wil reageer of deel, kry dit op die Video's-oortjie
+            waar dieselfde video met sy volle balk staan.
 
-            Dus: 'n kaartjie van sowat 'n kwart van die skerm. Een tik neem
-            hom na die Video's-oortjie waar dit groot speel. Hoop kom steeds
-            eerste; dit blokkeer net nie meer die pad nie.
+            Hy bly hier omdat die volgorde op hierdie blad HOOP VOOR PYN is:
+            iemand wat in krisis aankom en dadelik veertig plasings van ander
+            se lyding lees, gaan slegter weg.
 
             NET op die muur-oortjie. Die kaartjie sit bo die oortjies, dus sou
             hy andersins ook op die Video's-oortjie wys — en dan staan
-            dieselfde video twee keer op een skerm: die kaartjie bo en die
-            volle speler net daaronder. Op die Video's-oortjie is die video
-            self reeds die eerste ding; 'n kaartjie wat daarheen wys, wys na
-            homself. */}
+            dieselfde video twee keer op een skerm. */}
         {held && afdeling === 'muur' && (
-          <button className="sorg-vandag" onClick={() => setAfdeling('videos')}>
-            <span
-              className="sorg-vandag-duim"
-              style={{ backgroundImage: `url(https://i.ytimg.com/vi/${held.videoId}/hqdefault.jpg)` }}
-              aria-hidden="true"
-            >
-              <span className="sorg-vandag-speel">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                  <polygon points="7,4 20,12 7,20" />
-                </svg>
-              </span>
-            </span>
-            <span className="sorg-vandag-teks">
-              <span className="sorg-vandag-etiket">Vandag se video</span>
-              <span className="sorg-vandag-titel">{held.titel}</span>
-            </span>
-          </button>
+          <div className="sorg-vandag">
+            <SorgVideo video={held} etiket="Vandag se video" wysBalk={false} />
+          </div>
         )}
 
         {/* ── Twee afdelings ── */}
@@ -487,7 +471,7 @@ export default function Sorg() {
               {held && (
                 <div className="sorg-nuut" id={`sorg-video-${held.videoId}`}>
                   <span className="sorg-nuut-merk">Nuut vandag</span>
-                  <SorgVideo video={held} groot />
+                  <SorgVideo video={held} />
                   <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} wysDeel={false} />
                 </div>
               )}

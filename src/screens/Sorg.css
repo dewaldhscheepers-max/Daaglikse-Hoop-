@@ -547,14 +547,9 @@
   flex: 1;
   min-width: 0;
   font-family: var(--font-body);
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--s-sag, #77717D);
-}
-.sds-dankie-teks b {
-  display: block;
   font-size: 14px;
   font-weight: 700;
+  line-height: 1.35;
   color: #7A5E12;
 }
 
@@ -733,89 +728,21 @@
   color: #5F5867;
 }
 
-/* ── Vandag se video, klein, op die hoofblad ──
+/* ── Vandag se video op die hoofblad ──
 
-   Die volle speler was 74% van die skerm — 'n muur waarby 'n mens moes
-   verbyrol voor hy die muur bereik. Maar hy mag ook nie weg nie: die
-   volgorde op hierdie blad is HOOP VOOR PYN, en hy staan hier as 'n buffer.
-
-   Dus 'n kaartjie. Een tik neem 'n mens na die Video's-oortjie waar dit
-   groot speel. Net kleur op :active — sien CLAUDE.md. */
+   Dit is nou dieselfde `SorgVideo`-kaartjie as in die biblioteek, net sonder
+   die aksiebalk. Die eie duimnael-en-titel-opmaak wat hier gestaan het, is
+   weg — twee komponente wat dieselfde ding teken, dryf uitmekaar, en dan lyk
+   een van hulle op 'n dag verkeerd sonder dat iemand weet hoekom. */
 .sorg-vandag {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin: 0 0 16px;
-  padding: 10px;
+  margin-bottom: 16px;
   border: 1px solid var(--s-rand, #EBE3D8);
   border-radius: 14px;
   background: var(--s-kaart, #FFFFFF);
-  text-align: left;
   box-shadow: var(--s-skadu);
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s;
-}
-.sorg-vandag:active { background: #F6F1E8; }
-
-/* Die duimnael is 16:9 en YouTube s'n is altyd 480x360 — `cover` sny die
-   swart bo en onder weg sonder 'n tweede versoek. */
-.sorg-vandag-duim {
-  position: relative;
-  flex: 0 0 auto;
-  width: 108px;
-  height: 68px;
-  border-radius: 10px;
-  background-color: #241B38;
-  background-size: cover;
-  background-position: center;
-}
-
-.sorg-vandag-speel {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(28, 20, 46, 0.72);
-  color: #FFFFFF;
-  padding-left: 3px;
-}
-
-.sorg-vandag-teks {
-  flex: 1;
-  min-width: 0;
-}
-
-.sorg-vandag-etiket {
-  display: block;
-  margin-bottom: 3px;
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--s-goud, #C69A32);
-}
-
-/* Twee reels, dan hou dit op. 'n Titel wat oor vier reels loop, maak die
-   kaartjie weer 'n blok. */
-.sorg-vandag-titel {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
-  font-family: var(--font-serif);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--s-teks, #302A3A);
-  overflow-wrap: anywhere;
 }
+.sorg-vandag .sv-kaart { border-top: 0; margin-bottom: 0; }
 
 /* ── Nuut vandag, in die Video's-oortjie ──
    Die merkie sê in een woord waarom hierdie een bo staan. */

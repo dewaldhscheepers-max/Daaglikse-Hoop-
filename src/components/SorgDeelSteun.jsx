@@ -7,6 +7,11 @@
    (Op die muur staan hierdie ry binne die `antwoord`-blok, dus gebeur dit
    vanself.)
 
+   Een reel, nie twee nie. "Help om Pastorale Sorg gratis te hou" het onder
+   die dankie gestaan en dit weer 'n versoek gemaak: die eerste reel se
+   dankie, die tweede se gee. Die knoppie doen sy werk sonder om homself te
+   verduidelik.
+
    ── Waarom "Stuur vir Dewald 'n dankie" ──
 
    Hier het net "Ondersteun" gestaan. Dit is 'n woord uit 'n bemarkingsblad:
@@ -51,10 +56,7 @@ export default function SorgDeelSteun({ soort, id, titel, wysDeel = true }) {
 
         <button className="sds-dankie" onClick={() => setSteunOop(true)}>
           <span className="sds-dankie-hart" aria-hidden="true">♡</span>
-          <span className="sds-dankie-teks">
-            <b>Stuur vir Dewald ’n dankie</b>
-            Help om Pastorale Sorg gratis te hou.
-          </span>
+          <span className="sds-dankie-teks">Stuur vir Dewald ’n dankie</span>
         </button>
       </div>
 
