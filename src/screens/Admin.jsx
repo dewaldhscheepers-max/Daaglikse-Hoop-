@@ -1248,6 +1248,13 @@ export default function Admin({ onClose }) {
                                 {l.dood > 0 && <> · <b>{l.dood}</b> fone het die app verwyder</>}
                                 {l.misluk - l.dood > 0 && <> · {l.misluk - l.dood} ander mislukkings</>}
                                 {l.sekondes > 0 && <> · {l.sekondes}s van 300</>}
+                                {/* Wat Google GESE het. Sonder dit is die
+                                    volgende stap raaiwerk. */}
+                                {l.redes && (
+                                  <div style={{ fontFamily: 'monospace', fontSize: 11.5, color: '#8a3b3b', marginTop: 2 }}>
+                                    {l.redes}
+                                  </div>
+                                )}
                               </>
                             ) : '— geen rekord'}
                           </div>

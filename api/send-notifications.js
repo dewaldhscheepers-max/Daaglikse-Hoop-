@@ -170,7 +170,11 @@ async function getWebPushSubscriptions(accessToken) {
 // vier-en-twintig en agt-en-veertig sekondes die verskil tussen ruim en
 // naby die rand — en op 'n Hobby-plan is die perk sestig sekondes, nie
 // driehonderd nie.
-const GELYK = 50
+/* Vyf-en-twintig, nie vyftig nie. Vanoggend het 1288 LEWENDE tokens niks
+   gekry nie terwyl die lopie net 35 sekondes gevat het — daar is dus ruimte
+   om stadiger te wees. By 25 is 4651 tokens sowat 40 sekondes, ver binne die
+   300 wat Vercel toelaat, en dit gee Google minder rede om ons te knyp. */
+const GELYK = 25
 
 /* ── Wat 'n tweede kans verdien ──
    'n Foon wat die app verwyder het, gaan nooit werk nie — dit is klaar. Maar
@@ -185,27 +189,42 @@ async function inGroepe(items, doen) {
   for (let i = 0; i < items.length; i += GELYK) {
     const groep = items.slice(i, i + GELYK)
     const uitslae = await Promise.all(groep.map(async x => {
-      try { return await doen(x) } catch { return false }
+      try { return await doen(x) } catch (e) { tekenRede('gooi:' + String(e && e.message).slice(0, 30)); return false }
     }))
     uitslae.forEach((ok, j) => { ok ? geslaag++ : weer.push(groep[j]) })
   }
 
-  /* Een herhaling, en net vir wat nie klaarblyklik dood is nie. */
-  const probeerWeer = weer.filter(x => !isDood(x))
-  let misluk = weer.length - probeerWeer.length
+  /* ── Herhaal, met groeiende rus ──
 
-  if (probeerWeer.length) {
-    await new Promise(r => setTimeout(r, 1200))
-    for (let i = 0; i < probeerWeer.length; i += GELYK) {
-      const groep = probeerWeer.slice(i, i + GELYK)
+     Hier was EEN herhaling na 1,2 sekondes. Dit is te min as Google ons knyp:
+     'n 429 beteken "nie nou nie", en 'n tweede poging 'n sekonde later kry
+     dieselfde antwoord.
+
+     Nou drie rondtes met 2 en dan 6 sekondes tussenin. Dooies word elke keer
+     uitgehaal — 'n foon wat die app verwyder het, gaan nie oor ses sekondes
+     terugkom nie, en om hom te herprobeer maak net die rus langer vir die
+     mense wat wel kan kry. */
+  let oor = weer.filter(x => !isDood(x))
+  let misluk = weer.length - oor.length
+  const herhaal = oor.length
+
+  for (const rus of [2000, 6000]) {
+    if (!oor.length) break
+    await new Promise(r => setTimeout(r, rus))
+    const nogSteeds = []
+    for (let i = 0; i < oor.length; i += GELYK) {
+      const groep = oor.slice(i, i + GELYK)
       const uitslae = await Promise.all(groep.map(async x => {
-        try { return await doen(x) } catch { return false }
+        try { return await doen(x) } catch (e) { tekenRede('gooi:' + String(e && e.message).slice(0, 30)); return false }
       }))
-      for (const ok of uitslae) ok ? geslaag++ : misluk++
+      uitslae.forEach((ok, j) => { ok ? geslaag++ : nogSteeds.push(groep[j]) })
     }
+    oor = nogSteeds.filter(x => !isDood(x))
+    misluk = nogSteeds.length - oor.length + misluk
   }
+  misluk += oor.length
 
-  return { geslaag, misluk, herhaal: probeerWeer.length }
+  return { geslaag, misluk, herhaal }
 }
 
 /* ── Vra FCM watter tokens dood is, sonder om iets te stuur ──
@@ -224,9 +243,22 @@ async function isTokenLewendig(token, accessToken) {
     const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      /* PRESIES dieselfde boodskap as 'n egte stuur, net met
+         `validate_only`. As iets aan die BOODSKAP self keer dat 'n derde van
+         die lys dit kry — die prent, die webpush-kopstukke, enigiets — dan
+         wys dit hier, gratis en sonder om iemand te steur. 'n Nagaan met 'n
+         ander boodskap sou 'n ander vraag beantwoord het. */
       body: JSON.stringify({
         validate_only: true,
-        message: { token, notification: { title: 'x', body: 'x' } },
+        message: {
+          token,
+          notification: { title: 'Daaglikse Hoop', body: 'Toets' },
+          data: {
+            image: 'https://dewaldscheepers.com/notification-image.jpg',
+            url: 'https://dewaldscheepers.com/',
+          },
+          webpush: { headers: { Urgency: 'high', TTL: '86400' } },
+        },
       }),
     })
     if (r.ok) return true
@@ -265,13 +297,38 @@ async function sendFcm(token, title, body, accessToken, includeImage = true) {
        daardie token gaan vir altyd misluk en elke stuur stadiger maak. Ons
        tel hulle apart sodat Dewald weet hoeveel van sy lys dood is. */
     const kode = err && err.error && err.error.status
+    tekenRede(kode || ('HTTP' + r.status))
     if (kode === 'UNREGISTERED' || kode === 'NOT_FOUND' || kode === 'INVALID_ARGUMENT') {
       dood++
       dooies.add(token)
     }
-    console.warn('FCM failed:', token.slice(0, 20), JSON.stringify(err))
+    console.warn('FCM failed:', token.slice(0, 20), r.status, JSON.stringify(err).slice(0, 200))
   }
   return r.ok
+}
+
+/* ── Waarom 'n stuur misluk het ──
+
+   Vanoggend het 2589 van 4651 deurgekom. Google se eie nagaan se 3877 van
+   daardie tokens leef nog — dus het 1288 LEWENDE fone niks gekry nie, en
+   "misluk" alleen se nie hoekom nie.
+
+   Sonder hierdie lys is die volgende stap raaiwerk: 'n mens verander die
+   spoed, of die herhalings, of die boodskap, en dan wag hy 'n dag om te sien
+   of dit gehelp het. Met die lys weet hy more-oggend presies of dit 429
+   (Google knyp ons), 503 (Google is besig), of iets aan die boodskap self is.
+
+   Net die kode word gehou, nooit die token nie. */
+const redes = new Map()
+function tekenRede(sleutel) {
+  redes.set(sleutel, (redes.get(sleutel) || 0) + 1)
+}
+function redesOpsomming() {
+  return [...redes.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([k, n]) => `${k}:${n}`)
+    .join(' ')
 }
 
 /* Hoeveel tokens dood is, en WATTER. Word per oproep teruggestel.
@@ -508,6 +565,7 @@ module.exports = async function handler(req, res) {
 
     dood = 0
     dooies = new Set()
+    redes.clear()
 
     const f = await inGroepe(fcmTokens,
       t => { uitGestuur++; return sendFcm(t, notifTitle, notifBody, accessToken, includeImage) })
@@ -535,6 +593,9 @@ module.exports = async function handler(req, res) {
          dit kom weer, en dan is dit 'n groter groep of 'n tweede lopie —
          nie 'n verrassing nie. */
       sekondes: Math.round((Date.now() - begin) / 100) / 10,
+      /* Wat Google GESE het toe dit misluk het. Sonder dit is die volgende
+         stap raaiwerk. */
+      redes: redesOpsomming(),
       ...(netEen ? { repetisie: true, opskrif: notifTitle, teks: notifBody } : {}),
       ...(outomaties && !netEen ? { outomaties: true, dag } : {}),
     }
@@ -551,6 +612,7 @@ module.exports = async function handler(req, res) {
              verwyder het en of daar iets stukkend is nie. Dit is die verskil
              tussen "die lys is oud" en "dit werk nie". */
           dood:     dood,
+          redes:    redesOpsomming(),
           sekondes: result.sekondes,
         },
       })
