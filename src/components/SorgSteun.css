@@ -1,0 +1,117 @@
+/* Die ondersteuning-blad op Pastorale Sorg.
+
+   Dieselfde pers en goud as die res van die blad, en dieselfde vorm as die
+   "Hulp nou"-blad wat reeds bestaan — 'n mens moet nie 'n tweede taal hoef
+   te leer nie.
+
+   Net kleur op :active, geen transform en geen opacity. Sien CLAUDE.md. */
+
+.sst-agter {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(30, 22, 46, 0.5);
+}
+
+.sst {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  max-height: 88svh;
+  overflow-y: auto;
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background: var(--s-kaart, #FFFFFF);
+}
+
+.sst-gryp {
+  width: 38px;
+  height: 4px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: #DED6E8;
+}
+
+.sst-titel {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--s-teks, #302A3A);
+}
+
+.sst-teks {
+  margin: 0 0 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--s-sag, #77717D);
+}
+
+.sst-kop {
+  margin: 0 0 9px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--s-goud, #C69A32);
+}
+
+.sst-ry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* Die bedrae is die BESLUIT, dus lyk hulle soos knoppies en nie soos
+   etikette nie: 'n volle rand, donker teks, genoeg hoogte vir 'n duim. */
+.sst-bedrag {
+  flex: 1 1 auto;
+  min-width: 68px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--s-pers, #624A84);
+  border-radius: 12px;
+  background: var(--s-kaart, #FFFFFF);
+  color: var(--s-pers, #624A84);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s;
+}
+.sst-bedrag:active {
+  background: var(--s-pers, #624A84);
+  color: #FFFFFF;
+}
+
+/* "Eie bedrag" is 'n uitweg, nie 'n aanbeveling nie — dus sagter. */
+.sst-eie {
+  flex: 1 1 100%;
+  border-color: #DCD4E4;
+  color: var(--s-sag, #77717D);
+  font-weight: 600;
+}
+.sst-eie:active { background: #F2EEF7; color: var(--s-pers, #624A84); }
+
+/* 'n Blad oor geld op 'n plek waar mense hul seer bring, moet 'n duidelike
+   pad UIT he. Sonder dit voel dit soos 'n hek. */
+.sst-nie {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--s-sag, #77717D);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sst-nie:active { background: #F3EFE6; }

@@ -38,6 +38,7 @@ import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
 import SorgDeelSteun from '../components/SorgDeelSteun'
+import SorgSteun from '../components/SorgSteun'
 import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo, volgensBehoefte,
@@ -107,6 +108,7 @@ function SpeelIkoon() {
 
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
+  const [steunOop, setSteunOop] = useState(false)
   const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('muur')
   const [data, setData] = useState(null)      // null = besig
@@ -259,7 +261,16 @@ export default function Sorg() {
   return (
     <div className="sorg">
       <div className="sorg-header screen-header">
-        <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
+        {/* Twee knoppies, en albei moet gesien word. "Hulp nou" is die
+            dringende een en bly eerste; "Ondersteun" staan langs hom in
+            dieselfde vorm sodat dit soos 'n knoppie lyk en nie soos 'n
+            etiket nie. */}
+        <div className="sorg-hero-knoppe">
+          <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
+          <button className="sorg-steun-knop" onClick={() => setSteunOop(true)}>
+            <span aria-hidden="true">♡</span> Ondersteun
+          </button>
+        </div>
         <h1>Pastorale Sorg</h1>
         <p>Bring die swaar ding. Jy hoef dit nie alleen te dra nie.</p>
       </div>
@@ -534,6 +545,7 @@ export default function Sorg() {
       </div>
 
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />
+      <SorgSteun oop={steunOop} onSluit={() => setSteunOop(false)} />
 
       {/* Die vorm dek die hele skerm. Iemand wat sy swaarste ding tik, moet
           niks anders sien nie — geen navigasie, geen ander video's, en geen

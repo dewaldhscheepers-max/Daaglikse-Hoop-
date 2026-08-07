@@ -595,15 +595,19 @@ export default function App() {
   }, [])
 
   // ── Donation card CTA ──
+  /* Die bedrag wat 'n mens reeds gekies het, byvoorbeeld op Pastorale Sorg
+     se Ondersteun-blad. Niks gestuur nie, dan begin die modaal soos altyd. */
+  const [steunBedrag, setSteunBedrag] = useState(null)
+
   useEffect(() => {
-    function onOpen() { setDonation(true) }
+    function onOpen(e) { setSteunBedrag(e?.detail?.bedrag ?? null); setDonation(true) }
     window.addEventListener('open-donation', onOpen)
     return () => window.removeEventListener('open-donation', onOpen)
   }, [])
 
   // ── Maandelikse Hoop-Vennoot CTA ──
   useEffect(() => {
-    function onOpen() { setShowHoopVennoot(true) }
+    function onOpen(e) { setSteunBedrag(e?.detail?.bedrag ?? null); setShowHoopVennoot(true) }
     window.addEventListener('open-hoop-vennoot', onOpen)
     return () => window.removeEventListener('open-hoop-vennoot', onOpen)
   }, [])
@@ -831,7 +835,7 @@ export default function App() {
         setWysSteun(false)
         try { sessionStorage.removeItem('steun_versoek') } catch {}
       }} />}
-      {showDonation && <DonationModal onClose={() => setDonation(false)} />}
+      {showDonation && <DonationModal beginBedrag={steunBedrag} onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 
       {activePopup?.type === 'ebook' && (
@@ -893,7 +897,7 @@ export default function App() {
       )}
 
       {showHoopVennoot && (
-        <HoopVennoot onClose={() => setShowHoopVennoot(false)} />
+        <HoopVennoot beginBedrag={steunBedrag} onClose={() => setShowHoopVennoot(false)} />
       )}
 
       {showBybelMaklik && (

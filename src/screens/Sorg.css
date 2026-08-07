@@ -46,10 +46,19 @@
 
 /* Hulp nou staan altyd bo, op elke Sorg-skerm. Dit is die een knoppie wat
    nooit weggerol of weggesteek mag word nie. */
-.sorg-hulp-knop {
+/* Die twee hero-knoppies staan saam in een ry regs bo. Voorheen was "Hulp
+   nou" absoluut geposisioneer; nou dra die ry die posisie en die knoppies
+   staan langs mekaar sonder dat een die ander oorskryf. */
+.sorg-hero-knoppe {
   position: absolute;
   top: 14px;
   right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sorg-hulp-knop {
   padding: 8px 15px;
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 999px;
@@ -65,6 +74,31 @@
   background: rgba(255, 255, 255, 0.3);
   border-color: #FFFFFF;
 }
+
+/* ── Ondersteun ──
+
+   VOL goud, nie 'n deurskynende rand nie. Die "Hulp nou"-knoppie is
+   deurskynend omdat hy op 'n foto-agtige wassing staan en nie mag skree nie —
+   maar 'n tweede deurskynende knoppie langs hom sou vaal lees en soos 'n
+   etiket lyk. 'n Vol vlak op die goud van die res van die blad maak hom 'n
+   knoppie sonder om harder as "Hulp nou" te wees, want hy is kleiner. */
+.sorg-steun-knop {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--s-goud, #C69A32);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sorg-steun-knop:active { background: #A8811F; }
 
 /* Die wassing. Dit sit op 'n ONDEURSIGTIGE agtergrond en dit is 'n
    CSS-gradient, nie 'n beeld nie — sien CLAUDE.md oor volskerm-teksture en
@@ -435,45 +469,92 @@
    Een klein rustige ry. Deel staan eerste en is prominenter, want groei is
    die prioriteit. 'n Klein teksry raak nooit te veel nie; groot
    donasieblokke oral WEL. */
+/* ── Deel · Stuur vir Dewald 'n dankie ──
+
+   Twee heeltemal verskillende dinge, dus lyk hulle verskillend. Deel is 'n
+   klein aksie langs die kant; die dankie is 'n uitnodiging met twee reels wat
+   se wat dit is en waarvoor dit gaan.
+
+   Hulle staan onder mekaar en nie langs mekaar nie: op 'n 320px-skerm sou
+   twee knoppies met woorde op mekaar verdring, en dan word albei klein. */
 .sds {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   margin: -4px 4px 16px;
 }
 
-.sds-deel,
-.sds-steun {
+/* Deel staan nou UIT. Dit was deurskynend met net teks; nou dra dit 'n sagte
+   pers vlak en 'n rand, sodat 'n duim sien dat dit 'n knoppie is. Groei is
+   die prioriteit en dit is die knoppie wat dit doen. */
+.sds-deel {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
+  gap: 7px;
+  padding: 9px 15px;
+  border: 1px solid rgba(98, 74, 132, 0.28);
+  border-radius: 999px;
+  background: #F4F0FA;
+  color: var(--s-pers, #624A84);
   font-family: var(--font-body);
-  font-size: 13px;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s;
-}
-
-.sds-deel {
-  color: var(--purple-dark, #5C4E8E);
+  font-size: 13.5px;
   font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
 }
-.sds-deel:active { background: #F0ECFA; }
-
-.sds-punt { color: #C8C0D4; }
-
-.sds-steun {
-  color: var(--text-muted, #8A7E9A);
-  font-weight: 500;
+.sds-deel:active {
+  background: var(--s-pers, #624A84);
+  border-color: var(--s-pers, #624A84);
+  color: #FFFFFF;
 }
-.sds-steun:active { background: #F2EEE6; }
+
+/* Die dankie. Goud, want dit is die enigste plek op hierdie blad waar oor
+   geld gepraat word en dit moet nie soos die res van die blad lyk nie — maar
+   sag goud, nie 'n vol vlak nie. Dit vra; dit eis nie. */
+.sds-dankie {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(198, 154, 50, 0.4);
+  border-radius: 12px;
+  background: #FDF8EC;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sds-dankie:active {
+  background: #F7EFDA;
+  border-color: var(--s-goud, #C69A32);
+}
+
+.sds-dankie-hart {
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--s-goud, #C69A32);
+}
+
+.sds-dankie-teks {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--s-sag, #77717D);
+}
+.sds-dankie-teks b {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #7A5E12;
+}
 
 /* Binne 'n antwoord sit die ry teen die kant van die blok. */
-.sp-antwoord .sds { margin: 10px 0 -4px -11px; }
-.sp-hoop .sds { margin: 6px 0 -4px -11px; }
+.sp-antwoord .sds { margin: 12px 0 0; }
+.sp-hoop .sds { margin: 10px 0 0; }
 
 /* ── Een video. Elke week. ──
    Sonder hierdie kop lyk die afdeling soos enige videobiblioteek. Mense moet

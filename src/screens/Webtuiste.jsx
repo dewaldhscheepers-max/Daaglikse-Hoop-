@@ -5,10 +5,13 @@ import './Webtuiste.css'
 
 const PRESET_AMOUNTS = [50, 100, 250, 1000]
 
-export function DonationModal({ onClose }) {
-  const [selected, setSelected] = useState(100)
+export function DonationModal({ onClose, beginBedrag = null }) {
+  const preset = PRESET_AMOUNTS.includes(beginBedrag) ? beginBedrag : null
+  const [selected, setSelected] = useState(preset || 100)
   const [custom, setCustom]     = useState('')
-  const [showCustom, setShowCustom] = useState(false)
+  /* Sien HoopVennoot: 'n bedrag wat nie 'n knoppie is nie, maak die eie-veld
+     dadelik oop sodat niemand twee keer hoef te kies nie. */
+  const [showCustom, setShowCustom] = useState(beginBedrag != null && preset === null)
   const [showEft, setShowEft]   = useState(false)
   const [email, setEmail]       = useState('')
   const [error, setError]       = useState('')

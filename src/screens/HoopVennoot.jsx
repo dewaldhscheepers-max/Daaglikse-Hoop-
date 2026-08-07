@@ -4,10 +4,17 @@ import './HoopVennoot.css'
 
 const PRESET_AMOUNTS = [30, 50, 100, 200]
 
-export default function HoopVennoot({ onClose }) {
-  const [selected, setSelected]   = useState(50)
+/* `beginBedrag` kom van die Ondersteun-blad op Pastorale Sorg, waar 'n mens
+   die bedrag REEDS gekies het. Sonder dit sou hy dit twee keer moes kies, en
+   die tweede keuse maak die eerste een 'n leuen. Niks gestuur nie, dan begin
+   dit soos altyd. */
+export default function HoopVennoot({ onClose, beginBedrag = null }) {
+  const preset = PRESET_AMOUNTS.includes(beginBedrag) ? beginBedrag : null
+  const [selected, setSelected]   = useState(preset || 50)
   const [custom, setCustom]       = useState('')
-  const [showCustom, setShowCustom] = useState(false)
+  /* Is 'n bedrag gevra wat NIE 'n knoppie is nie — of "Eie bedrag" — maak
+     die eie-veld dadelik oop. */
+  const [showCustom, setShowCustom] = useState(beginBedrag !== null && preset === null)
   const [email, setEmail]         = useState('')
   const [busy, setBusy]           = useState(false)
   const [error, setError]         = useState('')
