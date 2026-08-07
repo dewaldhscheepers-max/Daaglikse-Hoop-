@@ -40,7 +40,10 @@
   --s-groen:     #2E7D4F;
   --s-reaksie:   #F1EDF6;
   --s-hart:      #B96868;
-  --s-rand:      #EBE3D8;
+  /* Die rand was #EBE3D8 en het op 'n foon in die son eenvoudig verdwyn —
+     die kaarte het in mekaar geloop. Effens donkerder, en steeds warm: dit
+     is 'n rand, nie 'n lyn wat skree nie. */
+  --s-rand:      #DDD2C0;
   --s-skadu:     0 1px 2px rgba(48, 42, 58, 0.04), 0 4px 14px rgba(48, 42, 58, 0.06);
   background: var(--s-blad);
 }
@@ -515,43 +518,42 @@
   color: #FFFFFF;
 }
 
-/* Die dankie. Goud, want dit is die enigste plek op hierdie blad waar oor
-   geld gepraat word en dit moet nie soos die res van die blad lyk nie — maar
-   sag goud, nie 'n vol vlak nie. Dit vra; dit eis nie. */
+/* ── Die dankie ──
+
+   Dit was 'n vol kaart oor die hele breedte, met 'n groot goue opskrif. Dit
+   het die hele onderkant van elke video oorgeneem — 'n mens sien eerste 'n
+   versoek en dan eers die video.
+
+   Nou is dit 'n stil reeltjie: 'n hartjie en die woorde, in dieselfde
+   grootte as "Deel" hierbo. Dit vra; dit staan nie in die pad nie. */
 .sds-dankie {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid rgba(198, 154, 50, 0.4);
-  border-radius: 12px;
-  background: #FDF8EC;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.12s, border-color 0.12s;
+  transition: background-color 0.12s;
 }
-.sds-dankie:active {
-  background: #F7EFDA;
-  border-color: var(--s-goud, #C69A32);
-}
+.sds-dankie:active { background: #F7EFDA; }
 
 .sds-dankie-hart {
   flex: 0 0 auto;
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
   color: var(--s-goud, #C69A32);
 }
 
 .sds-dankie-teks {
-  flex: 1;
-  min-width: 0;
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: #7A5E12;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8A6C1C;
 }
+
 
 /* Binne 'n antwoord sit die ry teen die kant van die blok. */
 .sp-antwoord .sds { margin: 12px 0 0; }

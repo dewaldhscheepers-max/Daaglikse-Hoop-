@@ -1,15 +1,22 @@
 /* 'n Video op die Sorg-blad.
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md. */
 
-/* Plat, soos 'n Facebook-inskrywing: 'n wit blok van rand tot rand, met 'n
-   dun lyn tussen inskrywings. Geen ronde hoeke, geen skaduwee, geen goue
-   rand om die held nie — daardie goed het die kaart soos 'n advertensie laat
-   lyk. Die video is die ding; die houer moet padgee. */
+/* ── Die kaart ──
+
+   'n Plat blok van rand tot rand was reg toe elke video 'n volle speler was:
+   die video het die kaart se werk gedoen. Nou dat dit kaartjies is, sit vyf
+   van hulle op een skerm, en sonder 'n rand loop hulle in mekaar.
+
+   Dus: ronde hoeke en 'n rand wat 'n mens KAN SIEN — dieselfde `--s-rand` as
+   die muur se kaarte, sodat die twee soorte kaarte dieselfde taal praat. Twee
+   verskillende rande op een blad lees soos twee verskillende programme. */
 .sv-kaart {
   background: #FFFFFF;
-  border-top: 1px solid rgba(107, 92, 158, 0.12);
-  margin-bottom: 10px;
-  padding-bottom: 2px;
+  border: 1px solid var(--s-rand, #DDD2C0);
+  border-radius: 16px;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  overflow: hidden;
 }
 
 /* 16:9, sonder om die hoogte te laat spring terwyl die prentjie laai. */

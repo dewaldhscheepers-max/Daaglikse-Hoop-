@@ -91,6 +91,18 @@ export function merkWoordGesien(id) { if (id) onthouGesien(id) }
 
 /* ── Die biblioteek volgens behoefte ──
 
+   NIE MEER OP DIE SKERM NIE. Elke video het 'n pers opskrif bo hom gehad —
+   die sin waaronder hy gegroepeer is. Dit het gewerk toe elke video 'n volle
+   speler was en 'n mens een op 'n slag gesien het. Nou dat hulle kaartjies
+   is, staan daar 'n opskrif tussen elke twee kaartjies en die lys word 'n
+   trap in plaas van 'n lys.
+
+   Dit bly hier omdat die ONDERWERPE self bly: hulle bepaal steeds watter
+   video iemand kry nadat hy sy boodskap gestuur het (sien `hoopVir`). Wil 'n
+   mens die groepe ooit terugbring, is die logika reg en getoets.
+
+   ── Hoe dit werk ── */
+
    Gee 'n lys groepe terug, elkeen met die SIN wat 'n mens oor homself sou
    sê. 'n Video wat aan twee onderwerpe gemerk is, verskyn by albei — 'n mens
    soek immers by die gevoel wat hy nou het, nie by 'n katalogusnommer nie.

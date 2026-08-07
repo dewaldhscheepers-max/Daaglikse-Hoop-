@@ -41,7 +41,7 @@ import SorgDeelSteun from '../components/SorgDeelSteun'
 import SorgSteun from '../components/SorgSteun'
 import DonationCard from '../components/DonationCard'
 import {
-  haalVideos, weekVideo, volgensBehoefte,
+  haalVideos, weekVideo,
 } from '../data/sorgVideos'
 import { haalMuur, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
@@ -254,7 +254,6 @@ export default function Sorg() {
      uitgehaal word, is die een wat 'n handbreedte hoër staan. Wanneer hy
      more se video plaas, val hierdie een vanself terug in sy groep. */
   const biblioteek = held ? videos.filter(v => v.id !== held.id) : videos
-  const groepe = volgensBehoefte(biblioteek)
   const plasings = muur || []
 
 
@@ -466,7 +465,7 @@ export default function Sorg() {
                   hoofblad dra net 'n kaartjie wat hierheen wys. Dit maak van
                   die oortjie 'n bestemming in plaas van 'n tweede kopie.
 
-                  Hy bly uit die groepe hieronder uit — sien `biblioteek` —
+                  Hy bly uit die lys hieronder uit — sien `biblioteek` —
                   sodat hy nooit twee keer op een skerm staan nie. */}
               {held && (
                 <div className="sorg-nuut" id={`sorg-video-${held.videoId}`}>
@@ -476,20 +475,26 @@ export default function Sorg() {
                 </div>
               )}
 
-              {groepe.length > 0 && (
+              {biblioteek.length > 0 && (
                 <p className="sorg-meer-kop">Meer pastorale video's</p>
               )}
 
-              {groepe.map(g => (
-              <div key={g.sleutel} className="sorg-groep">
-                <h2 className="sorg-groep-sin">{g.sin}</h2>
-                {g.videos.map(v => (
-                  <div key={v.id} id={`sorg-video-${v.videoId}`}>
-                    <SorgVideo video={v} />
-                    <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} wysDeel={false} />
-                  </div>
-                ))}
-              </div>
+              {/* ── 'n Plat lys, nie groepe nie ──
+
+                  Elke kaartjie het 'n pers opskrif bo hom gehad — die sin
+                  waaronder hy gegroepeer is. Dit het gewerk toe elke video 'n
+                  volle speler was en 'n mens een op 'n slag gesien het. Nou
+                  dat hulle kaartjies is, staan daar 'n opskrif tussen elke
+                  twee kaartjies en die lys word 'n trap in plaas van 'n lys.
+
+                  Die onderwerpe verdwyn nie — hulle bepaal steeds watter video
+                  iemand kry nadat hy sy boodskap gestuur het. Hulle word net
+                  nie meer as koppe geteken nie. */}
+              {biblioteek.map(v => (
+                <div key={v.id} id={`sorg-video-${v.videoId}`}>
+                  <SorgVideo video={v} />
+                  <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} wysDeel={false} />
+                </div>
               ))}
             </>
           )
