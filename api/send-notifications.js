@@ -208,6 +208,37 @@ async function inGroepe(items, doen) {
   return { geslaag, misluk, herhaal: probeerWeer.length }
 }
 
+/* ── Vra FCM watter tokens dood is, sonder om iets te stuur ──
+
+   FCM se `validate_only` doen ALLES wat 'n gewone stuur doen — dit gaan die
+   boodskap na en dit gaan die TOKEN na — en lewer dan niks af nie. Dit is die
+   enigste manier om te weet hoeveel van 'n lys nog leef sonder om vir almal
+   'n kennisgewing te stuur.
+
+   Dit is nodig omdat 'n token gereeld verander en `ensureNotificationToken`
+   'n NUWE dokument skryf sonder om die oue uit te vee. Die versameling groei
+   dus vinniger as die aantal mense, en die verhouding "gestuur van totaal"
+   lyk elke maand slegter sonder dat iets breek. */
+async function isTokenLewendig(token, accessToken) {
+  try {
+    const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        validate_only: true,
+        message: { token, notification: { title: 'x', body: 'x' } },
+      }),
+    })
+    if (r.ok) return true
+    const err = await r.json().catch(() => ({}))
+    const kode = err && err.error && err.error.status
+    if (kode === 'UNREGISTERED' || kode === 'NOT_FOUND' || kode === 'INVALID_ARGUMENT') return false
+    /* 'n 429 of 'n 503 se niks oor die foon nie. Ons noem dit lewendig —
+       liewer 'n dooie token oorskat as 'n lewende een doodverklaar. */
+    return true
+  } catch { return true }
+}
+
 // ── Send one FCM message ───────────────────────────────────────────────────
 async function sendFcm(token, title, body, accessToken, includeImage = true) {
   const r = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
@@ -382,6 +413,23 @@ module.exports = async function handler(req, res) {
         getFcmTokens(accessToken),
         getWebPushSubscriptions(accessToken),
       ])
+      /* ── Tel die dooies, sonder om te stuur ──
+
+         Dit loop deur ELKE token met `validate_only`, dus vat dit sowat 'n
+         halwe minuut by vyfduisend. Daarom is dit 'n APARTE knoppie en nie
+         deel van die gewone nagaan nie — 'n mens wil nie dertig sekondes wag
+         net om te sien of CRON_SECRET daar is nie. */
+      let dooieTelling = null
+      if (soek.dooies === '1') {
+        let dooies = 0, lewend = 0
+        for (let i = 0; i < tokens.length; i += GELYK) {
+          const groep = tokens.slice(i, i + GELYK)
+          const uitslae = await Promise.all(groep.map(x => isTokenLewendig(x, accessToken)))
+          for (const ok of uitslae) ok ? lewend++ : dooies++
+        }
+        dooieTelling = { dooies, lewend, totaal: tokens.length }
+      }
+
       const vandag = saDatum()
       const [vandagLopie, gisterLopie, toestemming] = await Promise.all([
         lopieVir({ projectId: PROJECT_ID, accessToken, dag: vandag }),
@@ -401,6 +449,7 @@ module.exports = async function handler(req, res) {
         },
         vandagSA: vandag,
         oggendlopies: { vandag: vandagLopie, gister: gisterLopie },
+        dooieTelling,
         /* Waar toestelle staan — getel, nie afgetrek nie. Sien
            `api/tel-toestemming.js`. */
         toestemming,
@@ -497,6 +546,11 @@ module.exports = async function handler(req, res) {
           gestuur:  f.geslaag + w.geslaag,
           totaal:   fcmTokens.length + webPushSubs.length,
           misluk:   f.misluk + w.misluk,
+          /* Sonder hierdie getal is 'n lopie van "2589 van 4651" nie te
+             verklaar nie: 'n mens weet nie of tweeduisend fone die app
+             verwyder het en of daar iets stukkend is nie. Dit is die verskil
+             tussen "die lys is oud" en "dit werk nie". */
+          dood:     dood,
           sekondes: result.sekondes,
         },
       })

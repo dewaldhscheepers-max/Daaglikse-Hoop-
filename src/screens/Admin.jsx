@@ -319,11 +319,11 @@ export default function Admin({ onClose }) {
     setRepBusy(false)
   }
 
-  async function handleKyk() {
+  async function handleKyk(metDooies = false) {
     setKykBusy(true)
     setKykUitslag(null)
     try {
-      const r = await fetch('/api/send-notifications?kyk=1', {
+      const r = await fetch(`/api/send-notifications?kyk=1${metDooies ? '&dooies=1' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
       })
@@ -1166,10 +1166,23 @@ export default function Admin({ onClose }) {
               <button
                 className="admin-save-btn"
                 style={{ background: '#8a6d1f' }}
-                onClick={handleKyk}
+                onClick={() => handleKyk(false)}
                 disabled={kykBusy}
               >
                 {kykBusy ? 'Besig...' : '🔍 Gaan die opstelling na'}
+              </button>
+
+              {/* Vra Google oor ELKE token. Dit stuur niks — FCM se
+                  `validate_only` gaan die token na en lewer nie af nie — maar
+                  dit vat sowat 'n halwe minuut by vyfduisend, en daarom is dit
+                  'n aparte knoppie. */}
+              <button
+                className="admin-save-btn"
+                style={{ background: '#6b5b95', marginTop: 4 }}
+                onClick={() => handleKyk(true)}
+                disabled={kykBusy}
+              >
+                {kykBusy ? 'Besig… dit vat ’n halwe minuut' : '🗑️ Tel hoeveel tokens dood is'}
               </button>
 
               {/* Die egte oggendlopie, net na hierdie foon toe. */}
@@ -1219,18 +1232,36 @@ export default function Admin({ onClose }) {
                           nuwe een, gaan daardie een uit — nie hierdie een nie. */}
                       <div style={{ marginTop: 6 }}>Opskrif nou: <b>{kykUitslag.boodskap?.titel}</b></div>
                       <div style={{ color: 'var(--text-muted)' }}>{kykUitslag.boodskap?.teks}</div>
-                      <div style={{ marginTop: 6 }}>
-                        Vandag ({kykUitslag.vandagSA}):{' '}
-                        {kykUitslag.oggendlopies?.vandag
-                          ? `✅ geloop — ${kykUitslag.oggendlopies.vandag.gestuur} van ${kykUitslag.oggendlopies.vandag.totaal}`
-                          : '— nog nie geloop nie'}
-                      </div>
-                      <div>
-                        Gister:{' '}
-                        {kykUitslag.oggendlopies?.gister
-                          ? `✅ geloop — ${kykUitslag.oggendlopies.gister.gestuur} van ${kykUitslag.oggendlopies.gister.totaal}`
-                          : '— geen rekord'}
-                      </div>
+                      {/* Die VOLLE uitslag. "2589 van 4651" alleen is nie te
+                          verklaar nie — 'n mens weet nie of tweeduisend fone
+                          die app verwyder het en of daar iets stukkend is
+                          nie. Dood en misluk is twee heeltemal verskillende
+                          probleme. */}
+                      {['vandag', 'gister'].map(w => {
+                        const l = kykUitslag.oggendlopies?.[w]
+                        return (
+                          <div key={w} style={{ marginTop: w === 'vandag' ? 6 : 0 }}>
+                            {w === 'vandag' ? `Vandag (${kykUitslag.vandagSA})` : 'Gister'}:{' '}
+                            {l ? (
+                              <>
+                                ✅ <b>{l.gestuur}</b> van {l.totaal}
+                                {l.dood > 0 && <> · <b>{l.dood}</b> fone het die app verwyder</>}
+                                {l.misluk - l.dood > 0 && <> · {l.misluk - l.dood} ander mislukkings</>}
+                                {l.sekondes > 0 && <> · {l.sekondes}s van 300</>}
+                              </>
+                            ) : '— geen rekord'}
+                          </div>
+                        )
+                      })}
+
+                      {kykUitslag.dooieTelling && (
+                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #ddd' }}>
+                          <b>Google se antwoord oor die lys:</b><br />
+                          ✅ <b>{kykUitslag.dooieTelling.lewend}</b> tokens leef nog<br />
+                          🗑️ <b>{kykUitslag.dooieTelling.dooies}</b> is dood — die foon het die app verwyder
+                          of die token het verander en die ou een is nooit uitgevee nie
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
