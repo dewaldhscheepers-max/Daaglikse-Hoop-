@@ -176,6 +176,26 @@ async function getWebPushSubscriptions(accessToken) {
    300 wat Vercel toelaat, en dit gee Google minder rede om ons te knyp. */
 const GELYK = 25
 
+/* ── Rus tussen groepe ──
+
+   Die bewys dat spoed die probleem is, kom uit twee lopies met dieselfde
+   tokens en dieselfde boodskap:
+
+     nagaan (validate_only)  4651 versoeke  →  3877 goed, 773 dood, 0 oor
+     egte stuur              4651 versoeke  →  2589 goed, 773 dood, 1288 OOR
+
+   Die enigste verskil is dat die een werklik AFLEWER. Die boodskap is dus
+   reg, die tokens is reg, die netwerk is reg — Google knyp die aflewering.
+   Vanoggend was dit 2589 in 35 sekondes, sowat 74 per sekonde.
+
+   Met 400ms tussen groepe van 25 loop dit teen sowat 41 per sekonde en vat
+   4651 tokens omtrent 112 sekondes. Dit laat nog byna drie minute oor vir die
+   twee herhalings binne Vercel se 300.
+
+   Vinniger is nie beter nie. 'n Kennisgewing wat 'n minuut later kom, is 'n
+   kennisgewing; een wat glad nie kom nie, is niks. */
+const RUS_MS = 400
+
 /* ── Wat 'n tweede kans verdien ──
    'n Foon wat die app verwyder het, gaan nooit werk nie — dit is klaar. Maar
    'n 429 of 'n 503 is FCM wat sê "nie nou nie", en dit is presies die soort
@@ -187,6 +207,7 @@ async function inGroepe(items, doen) {
   const weer = []
 
   for (let i = 0; i < items.length; i += GELYK) {
+    if (i) await new Promise(r => setTimeout(r, RUS_MS))
     const groep = items.slice(i, i + GELYK)
     const uitslae = await Promise.all(groep.map(async x => {
       try { return await doen(x) } catch (e) { tekenRede('gooi:' + String(e && e.message).slice(0, 30)); return false }
@@ -213,6 +234,7 @@ async function inGroepe(items, doen) {
     await new Promise(r => setTimeout(r, rus))
     const nogSteeds = []
     for (let i = 0; i < oor.length; i += GELYK) {
+      if (i) await new Promise(r => setTimeout(r, RUS_MS))
       const groep = oor.slice(i, i + GELYK)
       const uitslae = await Promise.all(groep.map(async x => {
         try { return await doen(x) } catch (e) { tekenRede('gooi:' + String(e && e.message).slice(0, 30)); return false }
