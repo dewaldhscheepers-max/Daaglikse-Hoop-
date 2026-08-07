@@ -1,3 +1,4 @@
+import InstallTelling from './InstallTelling'
 import { useState, useEffect } from 'react'
 import './PopupStyles.css'
 
@@ -31,6 +32,10 @@ export function InstallPopup({ onInstall, onLater, onHelp }) {
         <p className="popup-body">
           Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.
         </p>
+        {/* Die getal staan HIER, op die oomblik van die besluit. 'n Mens wat
+            twyfel of dit die moeite werd is, kry die antwoord van ander mense
+            eerder as van 'n knoppie. */}
+        <InstallTelling klas="popup-telling" />
         <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
         <button className="popup-btn-secondary" onClick={onLater}>Later</button>
         <button

@@ -1,4 +1,3 @@
-const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 
 async function getAccessToken() {
@@ -31,9 +30,19 @@ module.exports = async function handler(req, res) {
   const docPath   = `projects/${projectId}/databases/(default)/documents/counters/installs`
   const baseUrl   = `https://firestore.googleapis.com/v1/${docPath}`
 
-  // GET ?pin=2025 — return current count
+  /* ── GET: die telling, en dit is OPENBAAR ──
+
+     Dit was 'n rukkie admin-alleen. Dit was reg toe die getal net in die
+     admin gestaan het, maar dit staan nou op die skerm vir elke mens wat die
+     blad oopmaak — 'n getal wat gedruk word, kan nie 'n geheim wees nie.
+
+     Daar is niks om te beskerm nie: dit is EEN heelgetal. Geen naam, geen
+     toestel, niks wat na iemand teruglei nie.
+
+     Die rand hou dit vyf minute, sodat ses duisend fone wat die blad oopmaak
+     nie ses duisend keer by Firestore gaan vra nie. */
   if (req.method === 'GET') {
-    if (!magAdminDing(req)) return res.status(403).json({ error: 'Forbidden' })
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300')
     let token
     try { token = await getAccessToken() } catch (e) {
       return res.status(500).json({ error: 'Auth failed: ' + e.message })

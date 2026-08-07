@@ -14,6 +14,7 @@ import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, db } from './firebase'
 import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
 import KennisgewingAf from './components/KennisgewingAf'
+import InstallTelling from './components/InstallTelling'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
 import DaeVanVrede from './screens/DaeVanVrede'
@@ -784,6 +785,9 @@ export default function App() {
       <div className="install-persist-text">
         <strong>Sit Daaglikse Hoop op jou foon</strong>
         <span>Luister maklik elke oggend sonder om deur jou browser te soek.</span>
+        {/* Die getal oorreed beter as die sin daarbo. Iemand wat twyfel, wil
+            weet of ander mense dit gedoen het. */}
+        <InstallTelling klas="install-persist-telling" />
       </div>
       <div className="install-persist-actions">
         {installPrompt && (

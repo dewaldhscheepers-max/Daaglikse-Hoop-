@@ -32,6 +32,7 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
+node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
