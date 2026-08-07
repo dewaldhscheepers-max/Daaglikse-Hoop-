@@ -25,7 +25,12 @@
    omlyning nie. */
 .sorg {
   min-height: 100%;
-  --s-blad:      #FAF7F2;
+  /* Die blad was 'n warm room (#FAF7F2). Dewald wil dieselfde ligte pers as
+     Luister he — daar is `.luister-body` rgba(248,245,255,0.90), wat op die
+     app se agtergrond as sowat #F8F5FF lees. Een app, een agtergrond: 'n
+     mens wat van Luister af hierheen swiep, moet nie voel hy is in 'n ander
+     program nie. */
+  --s-blad:      #F8F5FF;
   --s-kaart:     #FFFFFF;
   --s-antwoord:  #F5EFE3;
   --s-pers:      #624A84;
@@ -41,9 +46,10 @@
   --s-reaksie:   #F1EDF6;
   --s-hart:      #B96868;
   /* Die rand was #EBE3D8 en het op 'n foon in die son eenvoudig verdwyn —
-     die kaarte het in mekaar geloop. Effens donkerder, en steeds warm: dit
-     is 'n rand, nie 'n lyn wat skree nie. */
-  --s-rand:      #DDD2C0;
+     die kaarte het in mekaar geloop. Nou donkerder EN koeler: 'n warm beige
+     rand op 'n pers blad lees geel, en dan lyk elke kaart vuil. Dit is 'n
+     rand, nie 'n lyn wat skree nie. */
+  --s-rand:      #D9D2E4;
   --s-skadu:     0 1px 2px rgba(48, 42, 58, 0.04), 0 4px 14px rgba(48, 42, 58, 0.06);
   background: var(--s-blad);
 }
@@ -112,15 +118,19 @@
 /* Die wassing. Dit sit op 'n ONDEURSIGTIGE agtergrond en dit is 'n
    CSS-gradient, nie 'n beeld nie — sien CLAUDE.md oor volskerm-teksture en
    die strepe wat hulle op Android veroorsaak het. 'n Gradient word in die
-   ouer se laag geverf en dra geen tekstuur nie. */
+   ouer se laag geverf en dra geen tekstuur nie.
+
+   Die wassing loop van die kopstuk se warm sonsondergang af na die blad se
+   ligte pers. Die middelste stop was room; hy is nou lavendel, anders sou
+   die oorgang halfpad van kleur verander en 'n vuil band maak. */
 .sorg-body {
   padding: 18px 20px calc(var(--nav-height, 68px) + var(--safe-bottom, 0px) + 96px);
   background:
     linear-gradient(
       180deg,
-      rgba(226, 176, 138, 0.20) 0%,
-      rgba(202, 172, 196, 0.10) 90px,
-      rgba(250, 247, 242, 0) 260px
+      rgba(226, 176, 138, 0.18) 0%,
+      rgba(196, 176, 232, 0.14) 90px,
+      rgba(248, 245, 255, 0) 260px
     ),
     var(--s-blad);
 }
