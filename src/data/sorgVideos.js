@@ -101,14 +101,11 @@ export function merkWoordGesien(id) { if (id) onthouGesien(id) }
    video iemand kry nadat hy sy boodskap gestuur het (sien `hoopVir`). Wil 'n
    mens die groepe ooit terugbring, is die logika reg en getoets.
 
-   ── Hoe dit werk ── */
+   ── Hoe dit werk ──
 
    Gee 'n lys groepe terug, elkeen met die SIN wat 'n mens oor homself sou
-   sê. 'n Video wat aan twee onderwerpe gemerk is, verskyn by albei — 'n mens
-   soek immers by die gevoel wat hy nou het, nie by 'n katalogusnommer nie.
-
-   Onderwerpe sonder video's val weg. 'n Leë afdeling is 'n belofte wat nie
-   nagekom word nie. */
+   sê. Onderwerpe sonder video's val weg — 'n leë afdeling is 'n belofte wat
+   nie nagekom word nie. */
 export function volgensBehoefte(videos) {
   const groepe = []
 
