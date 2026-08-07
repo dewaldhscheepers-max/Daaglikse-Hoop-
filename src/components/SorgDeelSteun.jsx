@@ -17,9 +17,13 @@
 
 import { deelSorg } from '../data/sorgDeel'
 
-export default function SorgDeelSteun({ soort, id, titel }) {
+/* `wysDeel={false}` vir 'n video: daar sit Deel reeds in die aksiebalk, saam
+   met reageer en opmerk, soos op Facebook. Twee Deel-knoppies op een kaart
+   is 'n mens wat wonder of hulle dieselfde ding doen. */
+export default function SorgDeelSteun({ soort, id, titel, wysDeel = true }) {
   return (
     <div className="sds">
+      {wysDeel && <>
       <button className="sds-deel" onClick={() => deelSorg(soort, id, titel)}>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
@@ -28,6 +32,7 @@ export default function SorgDeelSteun({ soort, id, titel }) {
         Deel
       </button>
       <span className="sds-punt" aria-hidden="true">·</span>
+      </>}
       <button
         className="sds-steun"
         onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}

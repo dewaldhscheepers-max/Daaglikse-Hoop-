@@ -1,27 +1,15 @@
 /* 'n Video op die Sorg-blad.
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md. */
 
+/* Plat, soos 'n Facebook-inskrywing: 'n wit blok van rand tot rand, met 'n
+   dun lyn tussen inskrywings. Geen ronde hoeke, geen skaduwee, geen goue
+   rand om die held nie — daardie goed het die kaart soos 'n advertensie laat
+   lyk. Die video is die ding; die houer moet padgee. */
 .sv-kaart {
   background: #FFFFFF;
-  border: 1px solid rgba(107, 92, 158, 0.13);
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-.sv-groot {
-  border-color: rgba(184, 134, 11, 0.35);
-  box-shadow: 0 3px 16px rgba(42, 31, 66, 0.07);
-}
-
-.sv-etiket {
-  padding: 11px 15px 0;
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: #B8860B;
+  border-top: 1px solid rgba(107, 92, 158, 0.12);
+  margin-bottom: 10px;
+  padding-bottom: 2px;
 }
 
 /* 16:9, sonder om die hoogte te laat spring terwyl die prentjie laai. */
@@ -35,66 +23,36 @@
 
 /* ── 'n REGOP video ──
 
-   Dewald neem met sy foon regop op, soos 'n selfievideo, en laai dit as 'n
-   YouTube Short. In 'n 16:9-raam is so 'n video 'n dun strokie: op 'n
-   390px-foon is die raam 219px hoog en die video 123px breed, met swart
-   weerskante. Vir die held-video bo-aan die blad lyk dit stukkend.
+   Dewald neem met sy foon regop op en laai dit as 'n YouTube Short.
 
-   Die raam draai dus saam met die video. Hy kry ook 'n hoogte-perk — 'n
-   volle 9:16 op 'n foon is hoer as die skerm, en dan sien 'n mens die titel
-   nooit sonder om te rol nie.
+   Die reel is nou een sin: DIE RAAM NEEM DIE VIDEO SE EIE VERHOUDING AAN.
+   'n Regop video kry 'n 9:16-raam oor die volle breedte, 'n gewone video 'n
+   16:9-raam. In albei gevalle vul die video sy raam presies en is daar
+   NERENS 'n swart kant nie.
 
-   ── Die perk was te hoog ──
+   ── Wat hier alles verkeerd was ──
 
-   62svh en 46svh was steeds te veel. Op 'n gewone foon het EEN video die
-   hele skerm gevul: 'n mens kon nie die titel, die reaksies en die volgende
-   video saam sien nie, en dan lyk die blad soos een video eerder as 'n
-   biblioteek. Die punt van hierdie bladsy is dat daar BAIE is.
+   Eers was 'n regop video in 'n 16:9-raam gedwing: 'n dun strokie met swart
+   weerskante.
 
-   44 en 32 laat die titel en die hou-van-balk saam in beeld val, en 'n mens
-   sien dat daar nog iets onder is. Die video is steeds groot genoeg om na te
-   kyk sonder om te zoem.
+   Toe het ek `aspect-ratio: 9/16` bygesit met 'n `max-height` daarby — maar
+   `width: 100%` het bly staan, en niks knyp die BREEDTE nie. Die raam was
+   348x371, amper vierkantig, en die video het weer swart kante gekry.
 
-   svh en nie dvh nie — sien CLAUDE.md. dvh verander saam met Chrome se
-   adresbalk en dan hervorm die raam by elke raam van daardie animasie.
+   Toe het ek die hoogte die raam laat dryf. Die verhouding was toe reg, maar
+   die raam was 209px breed in 'n 348px-kaart — 'n smal strokie met WIT kante.
 
-   ── En hoekom HOOGTE die raam dryf, nie breedte nie ──
+   Toe het ek die raam vol gemaak met die speler se donker kleur en die video
+   in die middel gesit. Die verhouding was reg en die kante was donker in
+   plaas van wit — steeds kante.
 
-   Hier het `width: 100%` van `.sv-raam` bly staan, met net 'n `max-height`
-   daarby. Dit doen NIE wat dit lyk of dit doen nie: die breedte bly die volle
-   348px, `aspect-ratio` wil 619px hoogte he, en `max-height` knyp die hoogte
-   af — maar niks knyp die BREEDTE nie.
+   Al vier kere was dieselfde denkfout: die raam moes 'n grootte he wat ek
+   gekies het, en die video moes inpas. Dit is andersom. Die video het 'n
+   verhouding; die raam volg dit.
 
-   Die uitkoms is 'n raam van 348x371. Dit is 0,94 breed-tot-hoog waar 9:16
-   0,56 moet wees, dus is die boks amper vierkantig, en die regop video binne-in
-   kry swart blokke links en regs. Presies die ding wat hierdie hele reel
-   veronderstel was om reg te maak.
-
-   Toe die raam self 9:16 geword het, was hy 209px breed in 'n 348px-kaart —
-   'n smal strokie met wit weerskante. Reg, en lelik.
-
-   Dus is die RAAM vol breedte met die speler se donker kleur, en die VIDEO
-   staan 9:16 in die middel daarvan. Dit is hoe 'n mens 'n regop video oral
-   anders sien: 'n donker band met die video in die middel, nie 'n gaping in
-   die bladsy nie.
-
-   Gesentreer met `inset: 0` en `margin: auto`, NIE met
-   `transform: translateX(-50%)` nie. Daardie transform maak 'n permanente
-   saamgestelde laag, en dit is presies waar die gekleurde strepe op Android
-   vandaan gekom het. Sien CLAUDE.md. */
+   'n Volle 9:16 op 'n 390px-foon is 619px hoog. Dit is baie, en dit is reg:
+   dit is die video, heel, soos op Facebook en TikTok. */
 .sv-raam.regop {
-  aspect-ratio: auto;
-  width: 100%;
-  height: 44svh;
-}
-.sv-kaart:not(.sv-groot) .sv-raam.regop { height: 32svh; }
-
-.sv-raam.regop .sv-speler,
-.sv-raam.regop .sv-duim {
-  inset: 0;
-  margin: auto;
-  width: auto;
-  height: 100%;
   aspect-ratio: 9 / 16;
 }
 
@@ -145,12 +103,9 @@
 }
 .sv-duim:active .sv-speel { background: rgba(28, 20, 46, 0.92); }
 
-.sv-onder {
-  padding: 13px 15px 15px;
-}
-
 .sv-titel {
   margin: 0;
+  padding: 13px 15px 0;
   font-family: var(--font-serif);
   font-size: 18px;
   font-weight: 700;
@@ -162,6 +117,7 @@
 
 .sv-beskrywing {
   margin: 6px 0 0;
+  padding: 0 15px;
   font-family: var(--font-body);
   font-size: 13.5px;
   line-height: 1.55;
@@ -170,17 +126,17 @@
 
 .sv-uit-plasing {
   margin: 9px 0 0;
+  padding: 0 15px;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
   color: #B8860B;
 }
 
-/* Hoekom hierdie een die week se video is. */
-.sv-etiket-fyn {
-  margin: -4px 14px 10px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-muted, #8A7E9A);
+
+/* Die aksiebalk sit nou direk in die kaart (die `.sv-onder`-omhulsel is weg),
+   dus dra hy sy eie kantruimte. */
+.sv-kaart > .ss {
+  margin-top: 0;
+  padding: 0 15px;
 }

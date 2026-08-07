@@ -1,13 +1,26 @@
 /* 'n Video op die Sorg-blad.
 
-   Die speler laai NIE totdat 'n mens hom druk nie. 'n YouTube-iframe trek
-   sowat 'n halwe megagreep sodra hy op die bladsy staan, en op hierdie blad
-   is daar 'n held bo, Vandag se woord, en 'n hele biblioteek. Sou hulle almal
-   dadelik laai, sou die blad op 'n swak sein onbruikbaar wees — en 'n swak
-   sein is in Suid-Afrika die gewone geval, nie die uitsondering nie.
+   Die vorm is Facebook s'n, want dit is die vorm wat elke mens in hierdie
+   land al ken:
 
-   Ons wys dus YouTube se eie duimnael (een prentjie, 'n paar kilogreep) en
-   ruil dit vir die speler by die eerste druk.
+       Titel                      ← bo, plat, sonder etiket
+       [ volle video, geen kante ]
+       👍  💬  ↗                  ← reageer · opmerk · deel
+       Ondersteun
+
+   Wat WEG is en hoekom:
+
+   · Die "VANDAG SE VIDEO"-etiket en sy verduidelikende sin. Twee reels bo
+     elke video wat niks byvoeg nie — die titel se reeds waaroor dit gaan.
+   · Die titel wat ONDER die video gestaan het. Op Facebook staan die woorde
+     bo en die video onder, en 'n mens lees eers waaroor dit gaan voordat hy
+     besluit om te druk.
+
+   Die speler laai NIE totdat 'n mens hom druk nie. 'n YouTube-iframe trek
+   sowat 'n halwe megagreep sodra hy op die bladsy staan, en 'n bladsy vol
+   video's sou op 'n swak sein nooit klaar laai nie — en 'n swak sein is in
+   Suid-Afrika die gewone geval. Ons wys dus YouTube se eie duimnael (een
+   prentjie, 'n paar kilogreep) en ruil dit vir die speler by die eerste druk.
 
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
 */
@@ -16,7 +29,7 @@ import { useState } from 'react'
 import SorgSaamstaan from './SorgSaamstaan'
 import './SorgVideo.css'
 
-export default function SorgVideo({ video, groot = false, etiket = null, etiketFyn = null, onSpeel = null }) {
+export default function SorgVideo({ video, groot = false, onSpeel = null }) {
   const [speel, setSpeel] = useState(false)
   if (!video || !video.videoId) return null
 
@@ -24,14 +37,20 @@ export default function SorgVideo({ video, groot = false, etiket = null, etiketF
 
   return (
     <div className={`sv-kaart${groot ? ' sv-groot' : ''}`}>
-      {etiket && <div className="sv-etiket">{etiket}</div>}
-      {/* Hoekom hierdie een die week se video is. Sonder dit lyk dit soos
-          enige video; met dit sien 'n mens die kring: mense deel, en dit
-          word 'n video. */}
-      {etiketFyn && <div className="sv-etiket-fyn">{etiketFyn}</div>}
+      {/* Die titel staan BO die video, soos op Facebook. */}
+      <h3 className="sv-titel">{video.titel}</h3>
+      {video.beskrywing && <p className="sv-beskrywing">{video.beskrywing}</p>}
 
-      {/* Regop wanneer Dewald dit so gemerk het. Hy neem met sy foon op en
-          laai dit as 'n Short; 'n 16:9-raam sou dit 'n dun strokie maak. */}
+      {/* Dit wys mense dat hul eerlike boodskappe werklik bepaal wat gemaak
+          word. Geen mededinger kan dit namaak nie, want hulle het nie 'n
+          muur en hulle het nie sy stem nie. */}
+      {video.uitPlasing && (
+        <p className="sv-uit-plasing">Hierdie video het by iemand se boodskap begin.</p>
+      )}
+
+      {/* Regop wanneer Dewald dit so gemerk het. Die raam neem die video se
+          eie verhouding aan, dus is daar NOOIT 'n swart kant nie — nie 'n
+          strokie in 'n wye raam nie en nie 'n donker band weerskante nie. */}
       <div className={`sv-raam${video.regop ? ' regop' : ''}`}>
         {speel ? (
           <iframe
@@ -57,24 +76,14 @@ export default function SorgVideo({ video, groot = false, etiket = null, etiketF
         )}
       </div>
 
-      <div className="sv-onder">
-        <h3 className="sv-titel">{video.titel}</h3>
-        {video.beskrywing && <p className="sv-beskrywing">{video.beskrywing}</p>}
-
-        {/* Dit wys mense dat hul eerlike boodskappe werklik bepaal wat gemaak
-            word. Geen mededinger kan dit namaak nie, want hulle het nie 'n
-            muur en hulle het nie sy stem nie. */}
-        {video.uitPlasing && (
-          <p className="sv-uit-plasing">Hierdie video het by iemand se boodskap begin.</p>
-        )}
-
-        {/* ── Dieselfde balk as op die muur ──
-
-            Hou van, reageer, deel. Sonder dit is die Video's-oortjie 'n RAK
-            en die muur 'n PLEK — en dan gaan niemand na die rak toe nie. 'n
-            Video wat mense kan beantwoord, is deel van dieselfde gesprek. */}
-        <SorgSaamstaan plasing={video} soort="video" />
-      </div>
+      {/* Reageer · opmerk · deel, in EEN ry. Deel het voorheen in 'n aparte
+          reeltjie onder die kaart gestaan; op Facebook is dit die derde
+          knoppie in dieselfde balk, en dit is waar 'n mens dit soek. */}
+      <SorgSaamstaan
+        plasing={video}
+        soort="video"
+        deel={{ soort: 'video', id: video.videoId, titel: video.titel }}
+      />
     </div>
   )
 }

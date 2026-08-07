@@ -397,13 +397,10 @@ export default function Sorg() {
             moet die uitnodiging wees, nie 'n videospeler nie. */}
         {held ? (
           <>
-            <SorgVideo
-              video={held}
-              groot
-              etiket="Vandag se video"
-              etiketFyn="Oor die onderwerpe waaroor mense hier vra."
-            />
-            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} />
+            {/* Geen etiket. Die titel se reeds waaroor dit gaan, en twee
+                reels bo elke video het niks bygevoeg nie. */}
+            <SorgVideo video={held} groot />
+            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} wysDeel={false} />
           </>
         ) : (
           /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
@@ -482,7 +479,7 @@ export default function Sorg() {
                 {g.videos.map(v => (
                   <div key={v.id} id={`sorg-video-${v.videoId}`}>
                     <SorgVideo video={v} />
-                    <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} />
+                    <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} wysDeel={false} />
                   </div>
                 ))}
               </div>
