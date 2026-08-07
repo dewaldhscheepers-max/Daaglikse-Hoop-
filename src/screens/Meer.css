@@ -887,3 +887,25 @@
   text-align: center;
   line-height: 1.35;
 }
+
+/* ── Die privaatheidsbeleid, heel onder ──
+   Google Play vra dat die beleid ook BINNE die app bereikbaar is, nie net op
+   die winkelblad nie. Dit moet dus regtig daar wees — maar dit hoef niks te
+   verkoop nie, so dit is 'n stil grys reël wat niemand in die pad is nie.
+
+   Geen `transform` op `:active` nie. Sien CLAUDE.md — dit is die reël wat die
+   gekleurde strepe op Android veroorsaak het. */
+.meer-privaatheid {
+  text-align: center;
+  padding: 26px 0 8px;
+  margin: 0;
+}
+
+.meer-privaatheid a {
+  font-size: 13px;
+  color: var(--muted, #8A7E9A);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.meer-privaatheid a:active { color: var(--purple-dark, #5C4E8E); }

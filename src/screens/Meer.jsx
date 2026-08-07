@@ -253,6 +253,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             ))}
           </div>
         </div>
+
+        {/* ── Die privaatheidsbeleid ──
+             Google Play se User Data-beleid vra dat die beleid op TWEE plekke
+             staan: op die winkelblad EN binne die app self. Een van die twee is
+             nie genoeg nie — dit is 'n gewone rede vir 'n afgekeurde aansoek.
+
+             Dit staan hier onderaan die Meer-blad omdat dit die enigste skerm is
+             waar 'n mens tot heel onder rol en waar 'n stil reël niks in die pad
+             is nie. Dit is 'n gewone <a>, nie 'n roete in die app nie: die
+             bladsy is 'n statiese HTML-lêer wat laai al sou die app se
+             JavaScript val, en Google se keurders maak dit in 'n blaaier oop. */}
+        <p className="meer-privaatheid">
+          <a href="/privaatheid" target="_blank" rel="noopener noreferrer">Privaatheidsbeleid</a>
+        </p>
       </div>
 
       {showKinderBibloteek && (

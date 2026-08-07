@@ -55,6 +55,10 @@
       "dest": "/go.html"
     },
     {
+      "src": "/privaatheid",
+      "dest": "/privaatheid.html"
+    },
+    {
       "handle": "filesystem"
     },
     {
