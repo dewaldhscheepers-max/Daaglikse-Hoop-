@@ -376,6 +376,13 @@
   background: #F3EFE6;
 }
 
+/* Die kop maak van 'n blok teks 'n BLOK. Sonder hom lyk vyf paragrawe soos
+   fyn druk wat 'n mens oorslaan; met hom lyk dit soos iets om te lees. */
+.sv-openbaar-kop {
+  font-weight: 700;
+  color: var(--s-teks, #302A3A);
+}
+
 .sv-openbaar p {
   margin: 0;
   font-family: var(--font-body);

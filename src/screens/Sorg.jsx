@@ -336,41 +336,32 @@ export default function Sorg() {
 
           <h2 className="sorg-uitnodig-titel">Waarmee kan ek jou help?</h2>
 
+          {/* ── Net genoeg om die doel duidelik te maak ──
+
+              Hier het vier paragrawe gestaan. Hulle was nie verkeerd nie —
+              hulle het net twee verskillende werke gedoen op dieselfde plek:
+              'n UITNODIGING (kom, vertel my) en 'n KONTRAK (dit is wat met
+              jou woorde gaan gebeur).
+
+              Die uitnodiging hoort waar iemand besluit of hy wil. Die kontrak
+              hoort op die oomblik van verbintenis — reg voor hy stuur. Die
+              reels oor die openbare muur, die privaatheid en die ander wat 'n
+              woord kan laat, staan nou op die indieningskerm, waar ELKEEN wat
+              stuur hulle sien. Vantevore het iemand wat via 'n kennisgewing
+              reguit na die vorm gegaan het, hulle nooit gesien nie. */}
           <p className="sorg-uitnodig-teks">
             Vertel my wat in jou lewe gebeur. Hier kan jy anoniem jou hart
-            uitpraat, jou storie deel en vra vir pastorale raad oor jou
-            huwelik, verhoudings, grense, vergifnis, angs, geloof of 'n
-            moeilike besluit.
+            uitpraat, jou storie deel en vra vir pastorale raad en praktiese
+            Bybelse wysheid oor jou huwelik, verhoudings, grense, vergifnis,
+            angs, geloof of 'n moeilike besluit.
           </p>
 
           <p className="sorg-uitnodig-teks">
-            Jou boodskap word ná goedkeuring anoniem op die openbare Pastorale
-            Sorg-muur geplaas, sodat ander wat deur dieselfde dinge gaan ook
-            daaruit kan leer. Ek deel pastorale begeleiding en praktiese
-            Bybelse wysheid, en antwoord van die boodskappe met 'n
-            stemboodskap.
+            Ek lees die boodskappe en antwoord van hulle persoonlik met
+            pastorale begeleiding. Die stories en antwoorde kan ook ander mense
+            help wat deur dieselfde dinge gaan.
           </p>
 
-          <p className="sorg-uitnodig-teks">
-            Elke dag deel ek ook 'n kort video oor die belangrikste vrae,
-            stories en onderwerpe wat hier gedeel word.
-          </p>
-
-          {/* Dit moet gesê word sodra vreemdelinge onder 'n storie kan skryf.
-              Iemand wat dit nie verwag nie, skrik — en dit is presies die
-              soort verrassing wat 'n mens nie op hierdie blad wil hê nie. */}
-          <p className="sorg-uitnodig-teks">
-            Ander wat op die muur lees, kan met 'n kort woord van ondersteuning
-            saam met jou staan. Niemand gee raad nie en niemand kan jou
-            antwoord nie — dit is net mense wat laat weet hulle dra dit saam.
-          </p>
-
-          {/* ── Wat hierdie plek NIE is nie ──
-
-              Mense het begin vra vir beddens en vir geld. Dit is nie wat
-              hierdie afdeling is nie, en dit is nie onvriendelik om dit te
-              sê nie — dis onvriendelik om iemand te laat skryf en wag vir
-              hulp wat nooit gaan kom nie. */}
           <p className="sorg-uitnodig-grens">
             Hierdie afdeling is vir pastorale begeleiding — nie vir geldelike
             of materiële hulpversoeke nie.
@@ -388,42 +379,44 @@ export default function Sorg() {
           <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
 
-        {/* ── Die daaglikse video ──
+        {/* ── Die daaglikse video, KLEIN ──
 
-            EEN video, EEN keer op die blad, en NIE heel bo nie.
+            Die volle speler was 74% van die skerm. Dit is 'n muur, nie 'n
+            video nie: 'n mens moes daarverby rol voor hy by die muur kom.
 
-            Hier het twee volle videospelers gestaan: "Vandag se video" heel
-            bo, en "Vandag se woord" 'n bietjie laer af — elkeen met sy eie
-            titel, sy eie hou-van-balk en sy eie opmerkings. Op 'n foon was
-            dit twee skerms vol video voordat 'n mens by die muur kom, en dit
-            het gelyk of dieselfde ding oor en oor wys.
+            Maar hy mag ook nie heeltemal weg nie. Die volgorde op hierdie
+            blad is HOOP VOOR PYN — iemand wat in krisis aankom en dadelik
+            veertig plasings van ander se lyding lees, gaan slegter weg. Die
+            video staan hier as 'n buffer, nie as inhoud nie.
 
-            "Vandag se woord" was 'n oplossing vir 'n probleem wat nie meer
-            bestaan nie. Toe die video WEEKLIKS was, moes daar op die ander
-            ses dae iets nuuts wees, en dus is 'n ou video elke dag uitgehaal.
-            Nou plaas hy elke dag een. Vandag se video IS vandag se woord.
+            Dus: 'n kaartjie van sowat 'n kwart van die skerm. Een tik neem
+            hom na die Video's-oortjie waar dit groot speel. Hoop kom steeds
+            eerste; dit blokkeer net nie meer die pad nie.
 
-            En dit staan nou ONDER die uitnodiging. Hierdie blad is 'n plek
-            waar 'n mens sy hart uitpraat; die eerste ding wat 'n mens sien,
-            moet die uitnodiging wees, nie 'n videospeler nie. */}
-        {held ? (
-          <>
-            {/* Geen etiket. Die titel se reeds waaroor dit gaan, en twee
-                reels bo elke video het niks bygevoeg nie. */}
-            <SorgVideo video={held} groot />
-            <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} wysDeel={false} />
-          </>
-        ) : (
-          /* Is daar nog nie een nie, moet die BELOFTE steeds staan. 'n Blad
-             wat 'n daaglikse video belowe en niks daarvan wys nie, belowe
-             niks. */
-          <div className="sorg-week-leeg">
-            <p className="sorg-week-kop">Elke dag ’n nuwe video</p>
-            <p className="sorg-week-teks">
-              Elke dag maak ek ’n kort video oor die onderwerpe waaroor mense
-              hier vra.
-            </p>
-          </div>
+            NET op die muur-oortjie. Die kaartjie sit bo die oortjies, dus sou
+            hy andersins ook op die Video's-oortjie wys — en dan staan
+            dieselfde video twee keer op een skerm: die kaartjie bo en die
+            volle speler net daaronder. Op die Video's-oortjie is die video
+            self reeds die eerste ding; 'n kaartjie wat daarheen wys, wys na
+            homself. */}
+        {held && afdeling === 'muur' && (
+          <button className="sorg-vandag" onClick={() => setAfdeling('videos')}>
+            <span
+              className="sorg-vandag-duim"
+              style={{ backgroundImage: `url(https://i.ytimg.com/vi/${held.videoId}/hqdefault.jpg)` }}
+              aria-hidden="true"
+            >
+              <span className="sorg-vandag-speel">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <polygon points="7,4 20,12 7,20" />
+                </svg>
+              </span>
+            </span>
+            <span className="sorg-vandag-teks">
+              <span className="sorg-vandag-etiket">Vandag se video</span>
+              <span className="sorg-vandag-titel">{held.titel}</span>
+            </span>
+          </button>
         )}
 
         {/* ── Twee afdelings ── */}
@@ -460,14 +453,11 @@ export default function Sorg() {
         {afdeling === 'videos' && (
           data === null ? (
             <p className="sorg-leeg">Besig om te laai…</p>
-          ) : !biblioteek.length ? (
+          ) : !videos.length ? (
             <p className="sorg-leeg">
-              {videos.length
-                /* Daar IS 'n video — dit is net die een hierbo. Om hier "die
-                   eerste video kom binnekort" te sê terwyl hy 'n handbreedte
-                   hoer speel, sou soos 'n stukkende blad lyk. */
-                ? 'Vandag se video staan hier bo. Môre kom die volgende een by.'
-                : 'Die eerste video kom binnekort. Dit sal saamgestel word uit die vrae en onderwerpe wat mense hier op die Pastorale Sorg-muur deel.'}
+              Die eerste video kom binnekort. Dit sal saamgestel word uit die
+              vrae en onderwerpe wat mense hier op die Pastorale Sorg-muur
+              deel.
             </p>
           ) : (
             /* Sonder hierdie kop lyk die afdeling soos enige ander
@@ -484,6 +474,28 @@ export default function Sorg() {
                   se storie uiteindelik baie ander mense help.
                 </p>
               </div>
+
+              {/* ── Vandag se video, heel bo en groot ──
+
+                  Hierdie oortjie was 'n herhaling van die hoofblad: dieselfde
+                  video het op albei gespeel. Nou speel hy HIER, en die
+                  hoofblad dra net 'n kaartjie wat hierheen wys. Dit maak van
+                  die oortjie 'n bestemming in plaas van 'n tweede kopie.
+
+                  Hy bly uit die groepe hieronder uit — sien `biblioteek` —
+                  sodat hy nooit twee keer op een skerm staan nie. */}
+              {held && (
+                <div className="sorg-nuut" id={`sorg-video-${held.videoId}`}>
+                  <span className="sorg-nuut-merk">Nuut vandag</span>
+                  <SorgVideo video={held} groot />
+                  <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} wysDeel={false} />
+                </div>
+              )}
+
+              {groepe.length > 0 && (
+                <p className="sorg-meer-kop">Meer pastorale video's</p>
+              )}
+
               {groepe.map(g => (
               <div key={g.sleutel} className="sorg-groep">
                 <h2 className="sorg-groep-sin">{g.sin}</h2>

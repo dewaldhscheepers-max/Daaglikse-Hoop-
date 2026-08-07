@@ -33,6 +33,11 @@
   --s-teks:      #302A3A;
   --s-sag:       #77717D;
   --s-goud:      #C69A32;
+  /* Groen vir Ondersteun. Dit is die enigste plek op hierdie blad waar oor
+     geld gepraat word, en dit MOET van die pers en goud verskil — 'n knoppie
+     wat soos die res lyk, word deel van die agtergrond. #2E7D4F word reeds
+     elders in die app gebruik. */
+  --s-groen:     #2E7D4F;
   --s-reaksie:   #F1EDF6;
   --s-hart:      #B96868;
   --s-rand:      #EBE3D8;
@@ -80,8 +85,9 @@
    VOL goud, nie 'n deurskynende rand nie. Die "Hulp nou"-knoppie is
    deurskynend omdat hy op 'n foto-agtige wassing staan en nie mag skree nie —
    maar 'n tweede deurskynende knoppie langs hom sou vaal lees en soos 'n
-   etiket lyk. 'n Vol vlak op die goud van die res van die blad maak hom 'n
-   knoppie sonder om harder as "Hulp nou" te wees, want hy is kleiner. */
+   etiket lyk. 'n Vol groen vlak maak hom 'n knoppie sonder om harder as
+   "Hulp nou" te wees, want hy is kleiner — en groen lees as "gee" waar goud
+   soos die res van die blad se aksente sou lees. */
 .sorg-steun-knop {
   display: inline-flex;
   align-items: center;
@@ -89,7 +95,7 @@
   padding: 8px 14px;
   border: 0;
   border-radius: 999px;
-  background: var(--s-goud, #C69A32);
+  background: var(--s-groen, #2E7D4F);
   color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 13px;
@@ -98,7 +104,7 @@
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s;
 }
-.sorg-steun-knop:active { background: #A8811F; }
+.sorg-steun-knop:active { background: #256540; }
 
 /* Die wassing. Dit sit op 'n ONDEURSIGTIGE agtergrond en dit is 'n
    CSS-gradient, nie 'n beeld nie — sien CLAUDE.md oor volskerm-teksture en
@@ -725,4 +731,116 @@
   font-size: 13.5px;
   line-height: 1.6;
   color: #5F5867;
+}
+
+/* ── Vandag se video, klein, op die hoofblad ──
+
+   Die volle speler was 74% van die skerm — 'n muur waarby 'n mens moes
+   verbyrol voor hy die muur bereik. Maar hy mag ook nie weg nie: die
+   volgorde op hierdie blad is HOOP VOOR PYN, en hy staan hier as 'n buffer.
+
+   Dus 'n kaartjie. Een tik neem 'n mens na die Video's-oortjie waar dit
+   groot speel. Net kleur op :active — sien CLAUDE.md. */
+.sorg-vandag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 10px;
+  border: 1px solid var(--s-rand, #EBE3D8);
+  border-radius: 14px;
+  background: var(--s-kaart, #FFFFFF);
+  text-align: left;
+  box-shadow: var(--s-skadu);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.sorg-vandag:active { background: #F6F1E8; }
+
+/* Die duimnael is 16:9 en YouTube s'n is altyd 480x360 — `cover` sny die
+   swart bo en onder weg sonder 'n tweede versoek. */
+.sorg-vandag-duim {
+  position: relative;
+  flex: 0 0 auto;
+  width: 108px;
+  height: 68px;
+  border-radius: 10px;
+  background-color: #241B38;
+  background-size: cover;
+  background-position: center;
+}
+
+.sorg-vandag-speel {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(28, 20, 46, 0.72);
+  color: #FFFFFF;
+  padding-left: 3px;
+}
+
+.sorg-vandag-teks {
+  flex: 1;
+  min-width: 0;
+}
+
+.sorg-vandag-etiket {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--s-goud, #C69A32);
+}
+
+/* Twee reels, dan hou dit op. 'n Titel wat oor vier reels loop, maak die
+   kaartjie weer 'n blok. */
+.sorg-vandag-titel {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--s-teks, #302A3A);
+  overflow-wrap: anywhere;
+}
+
+/* ── Nuut vandag, in die Video's-oortjie ──
+   Die merkie sê in een woord waarom hierdie een bo staan. */
+.sorg-nuut { margin-bottom: 8px; }
+
+.sorg-nuut-merk {
+  display: inline-block;
+  margin: 0 0 8px 15px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--s-goud, #C69A32);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sorg-meer-kop {
+  margin: 22px 15px 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--s-sag, #77717D);
 }

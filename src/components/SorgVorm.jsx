@@ -177,8 +177,20 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
             )}
 
             {/* ── Dit gaan openbaar wees ──
-                Bo die kassie, nie onder nie, en nie in fyn druk nie. */}
+
+                Bo die kassie, nie onder nie, en nie in fyn druk nie.
+
+                Hierdie blok het gegroei omdat die hoofblad se lang
+                verduideliking hierheen geskuif is. Dit hoort hier: 'n
+                uitnodiging hoort waar iemand besluit OF hy wil, 'n kontrak
+                hoort op die oomblik van verbintenis.
+
+                Dit is ook sterker so. Toe die reels bo op die blad gestaan
+                het, het iemand wat via 'n kennisgewing of 'n gedeelde skakel
+                reguit hierheen kom, hulle NOOIT gesien nie. Nou sien elkeen
+                wat stuur, hulle. */}
             <div className="sv-openbaar">
+              <p className="sv-openbaar-kop">Voor jy jou boodskap deel</p>
               <p>
                 Jou boodskap sal, nadat dit nagegaan is, <b>anoniem en openbaar
                 op die Pastorale Sorg-muur</b> verskyn, sodat ander wat deur
@@ -187,6 +199,20 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               <p>
                 Jou naam wys nooit. Moenie name, kontakbesonderhede of
                 inligting deel wat iemand kan identifiseer nie.
+              </p>
+              <p>
+                Dewald kan jou boodskap verkort of liggies aanpas om jou en
+                ander mense se privaatheid te beskerm.
+              </p>
+              {/* Dit is 'n TOESTEMMINGSITEM, nie 'n kenmerk nie. Iemand wat sy
+                  hart uitstort en dan vreemdelinge onder sy storie sien skryf,
+                  skrik — en dit is presies die verrassing wat 'n mens op
+                  hierdie blad nie wil he nie. */}
+              <p>
+                Ander wat op die muur lees, kan met 'n kort woord van
+                ondersteuning saam met jou staan. Niemand gee raad nie en
+                niemand kan jou antwoord nie — dit is net mense wat laat weet
+                hulle dra dit saam.
               </p>
               <p>
                 Hierdie afdeling is vir pastorale begeleiding — nie vir

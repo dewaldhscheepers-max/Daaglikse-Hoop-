@@ -278,8 +278,18 @@ afdeling('Wat NIE meer op die skerm mag wees nie')
   const iKassie = vorm.indexOf('<textarea')
   kyk('die openbaar-waarskuwing staan BO die tekskassie', iOpenbaar > 0 && iOpenbaar < iKassie, [iOpenbaar, iKassie])
 
-  /* Geen versoek om geld op die skryfkant nie. */
-  kyk('geen steunversoek op die vorm', !/Ondersteun|donation|hoop-vennoot/i.test(vorm + klaar),
+  /* ── Geen versoek om GELD op die skryfkant nie ──
+
+     Die toets het op die woord "Ondersteun" gesoek. Dit was te breed: die
+     toestemmingsblok se nou dat ander "met 'n kort woord van ONDERSTEUNING
+     saam met jou kan staan", en dit gaan oor bemoediging, nie oor geld nie.
+     'n Toets wat op 'n woord soek in plaas van op die DING, druip op die
+     verkeerde reel.
+
+     Nou soek dit na wat werklik verbode is: 'n knoppie of 'n gebeurtenis wat
+     'n betaling begin. */
+  kyk('geen steunversoek op die vorm',
+      !/open-donation|open-hoop-vennoot|SorgSteun|Stuur vir Dewald|Skenk|Donasie|bydrae maak/i.test(vorm + klaar),
       (vorm + klaar).match(/.{0,30}(Ondersteun|donation).{0,30}/i))
 }
 
