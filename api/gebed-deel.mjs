@@ -66,6 +66,10 @@ export function magWys(gebed, { nou = Date.now() } = {}) {
   if (kontakTreffers(teks).length) return { mag: false, rede: 'kontak' }
   if (gebed.deelbaar !== true)     return { mag: false, rede: 'geen-toestemming' }
 
+  /* Die mens het self gese hy is klaar. Dan is die skakel dood, ook al le hy
+     nog op iemand se WhatsApp. Dit is die hele punt daarvan. */
+  if (gebed.gesluit === true)      return { mag: false, rede: 'gesluit' }
+
   const geskep = gebed.createdAt ? new Date(gebed.createdAt).getTime() : NaN
   if (isFinite(geskep) && (nou - geskep) > DAE_GELDIG * 86400000) {
     return { mag: false, rede: 'verval' }
@@ -136,7 +140,7 @@ async function telOp(id, toestel) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
@@ -173,6 +177,34 @@ export default async function handler(req, res) {
         saam: Number(gebed.prayedCount) || 0,
       },
     })
+  }
+
+  /* ── Sluit my versoek af ──
+
+     Op die oomblik bly 'n versoek 30 dae deelbaar. 'n Mens wat more spyt is,
+     kan niks doen nie -- die skakel le op iemand anders se foon en werk nog.
+     Dit is nie 'n kenmerk nie; dit is 'n mens se reg om sy eie woorde terug te
+     trek.
+
+     Wat dit doen: die skakel gee van nou af 404, en die versoek verdwyn uit
+     die deel-vloei. Die TEKS bly staan -- dit is nie 'n uitvee-knoppie nie, en
+     ons se dit ook so op die skerm. Wie dit heeltemal uitgevee wil he, vra dit
+     per e-pos; sien /vee-my-data-uit.
+
+     Wie mag dit doen? Die mens wat die versoek geplaas het. Ons het geen
+     rekeninge nie, dus is die bewys dat hy die id in sy eie localStorage het.
+     Dit is swak bewys -- iemand met 'n gedeelde skakel het ook die id. Maar
+     die ERGSTE wat 'n vreemdeling daarmee kan doen, is iemand se versoek stil
+     maak. Hy kan niks lees, niks verander en niks stuur nie. 'n Aanmeldstelsel
+     bou om dit te keer, kos meer as wat dit werd is. */
+  if (req.method === 'PATCH' || (req.method === 'POST' && req.body && req.body.sluit === true)) {
+    if (!magBid(gebed).mag) return res.status(404).json({ fout: 'Nie gevind nie' })
+    try {
+      await skryfDok(VERSAMELING, id, { gesluit: true, gesluitOp: new Date() })
+    } catch (e) {
+      return res.status(500).json({ fout: String(e.message || e).slice(0, 200) })
+    }
+    return res.status(200).json({ ok: true, gesluit: true })
   }
 
   if (req.method === 'POST') {

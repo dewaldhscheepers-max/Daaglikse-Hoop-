@@ -117,7 +117,13 @@ function formatDuration(secs) {
 const MY_SLEUTEL = 'myGebede'
 
 function leesMyne() {
-  try { return JSON.parse(localStorage.getItem(MY_SLEUTEL) || '[]') } catch { return [] }
+  try {
+    /* Afgeslote versoeke val by die VOLGENDE oopmaak weg, nie dadelik nie.
+       Haal 'n mens dit dadelik uit die lys, verdwyn die hele kaart -- en saam
+       daarmee die reel wat se dat dit afgesluit is. Dan lyk dit of die knoppie
+       die bladsy gebreek het. */
+    return JSON.parse(localStorage.getItem(MY_SLEUTEL) || '[]').filter(m => !m.gesluit)
+  } catch { return [] }
 }
 function skryfMyne(lys) {
   try { localStorage.setItem(MY_SLEUTEL, JSON.stringify(lys.slice(0, 20))) } catch {}
@@ -126,6 +132,8 @@ function skryfMyne(lys) {
 function MyVersoek({ prayers }) {
   const [myne, setMyne] = useState(leesMyne)
   const [dankie, setDankie] = useState(false)
+  const [vraSluit, setVraSluit] = useState(false)
+  const [gesluit, setGesluit] = useState(false)
 
   /* Die nuutste een. Meer as een sou 'n lys word, en 'n lys van jou eie
      swaarkry is nie wat 'n mens wil sien wanneer jy die app oopmaak nie. */
@@ -146,13 +154,54 @@ function MyVersoek({ prayers }) {
     if (beter) setDankie(true)
   }
 
+  /* ── Sluit my versoek af ──
+
+     'n Versoek bly 30 dae deelbaar. Iemand wat more spyt is, moes tot nou toe
+     niks kon doen nie -- die skakel le op iemand anders se foon en werk nog.
+
+     Ons se PRESIES wat gebeur en wat NIE gebeur nie. "Sluit af" wat stilweg
+     ook uitvee, of wat stilweg niks uitvee nie, is albei 'n leuen op 'n plek
+     waar 'n mens dit die minste kan bekostig. */
+  async function sluitAf() {
+    try {
+      await fetch('/api/gebed-deel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: myne0.id, sluit: true }),
+      })
+    } catch { /* die skerm se nog steeds klaar; die volgende oopmaak probeer weer */ }
+    /* Merk dit, moenie dit uithaal nie -- sien leesMyne(). Die kaart bly staan
+       met die bevestiging, en by die volgende oopmaak is dit weg. */
+    const nuut = myne.map((m, i) => (i === 0 ? { ...m, gesluit: true } : m))
+    skryfMyne(nuut)
+    setGesluit(true)
+  }
+
   return (
     <div className="card mv-kaart">
       <p className="mv-kop">Jou gebedsversoek</p>
       <p className="mv-saam">{saamSin(saam)}</p>
 
-      {dankie ? (
-        <p className="mv-dankie">Ons is dankbaar saam met jou. 🙏🏻</p>
+      {gesluit ? (
+        <p className="mv-dankie">Jou versoek is afgesluit. Die skakel werk nie meer nie. 🙏🏻</p>
+      ) : vraSluit ? (
+        <div className="mv-sluit">
+          <p className="mv-sluit-vra">Sluit hierdie versoek af?</p>
+          <p className="mv-sluit-fyn">
+            Die skakel wat jy gestuur het, hou dadelik op werk. Jou woorde word
+            nie uitgevee nie — wil jy dit ook uitgevee hê, skryf aan
+            info@dewaldscheepers.com.
+          </p>
+          <div className="mv-knoppe">
+            <button className="mv-knop" onClick={sluitAf}>Ja, sluit dit af</button>
+            <button className="mv-knop mv-knop-lig" onClick={() => setVraSluit(false)}>Nee, los dit oop</button>
+          </div>
+        </div>
+      ) : dankie ? (
+        <>
+          <p className="mv-dankie">Ons is dankbaar saam met jou. 🙏🏻</p>
+          <button className="mv-sluit-skakel" onClick={() => setVraSluit(true)}>Sluit hierdie versoek af</button>
+        </>
       ) : magVra ? (
         <>
           <p className="mv-vra">Hoe gaan dit vandag?</p>
@@ -160,8 +209,13 @@ function MyVersoek({ prayers }) {
             <button className="mv-knop" onClick={() => merkGevra(true)}>Dit gaan beter ❤️</button>
             <button className="mv-knop mv-knop-lig" onClick={() => merkGevra(false)}>Bid asseblief steeds saam 🙏🏻</button>
           </div>
+          <button className="mv-sluit-skakel" onClick={() => setVraSluit(true)}>Ek wil my versoek afsluit</button>
         </>
-      ) : null}
+      ) : (
+        /* Ook sonder die "hoe gaan dit"-vraag moet 'n mens kan ophou. Dit is
+           nie 'n stap in 'n vloei nie -- dit moet altyd daar wees. */
+        <button className="mv-sluit-skakel" onClick={() => setVraSluit(true)}>Sluit hierdie versoek af</button>
+      )}
     </div>
   )
 }

@@ -1149,3 +1149,38 @@
   padding-top: 14px;
   border-top: 1px solid #EFEAF6;
 }
+
+/* ── Sluit my versoek af ──
+   'n Stil skakel, nie 'n knoppie nie. Dit moet altyd daar wees en nooit die
+   eerste ding wees wat 'n mens sien nie. */
+.mv-sluit-skakel {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: 0;
+  color: #9C93AC;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 6px 4px;
+}
+.mv-sluit-skakel:active { color: #6F6480; }
+
+.mv-sluit {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #EFEAF6;
+}
+.mv-sluit-vra {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2D2040;
+  margin-bottom: 8px;
+}
+.mv-sluit-fyn {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #6F6480;
+  margin-bottom: 14px;
+}
