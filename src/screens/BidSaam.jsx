@@ -5,7 +5,8 @@ import {
   serverTimestamp, orderBy, query, where, limit,
   increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
-import { magDeel, gebedSkakel, deelBoodskap } from '../data/gebedDeel'
+import { magDeel, gebedSkakel, deelBoodskap, saamSin, magVraHoeGaanDit } from '../data/gebedDeel'
+import { toestelId } from '../data/sorgStuur'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
 import SaturdayVideoCard from '../components/SaturdayVideoCard'
@@ -94,6 +95,75 @@ function formatDate(dateStr) {
 function formatDuration(secs) {
   if (!secs || isNaN(secs)) return ''
   return `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   "Jou gebedsversoek" — wat die mens sien wat GEVRA het.
+
+   Dit was die gat in fase 1. Die hele funksie se punt is hierdie oomblik:
+
+     "Ek het gedink ek dra dit alleen. Maar veertien mense het vandag saam met
+      my voor God gestaan."
+
+   Sonder hierdie kaart kon 'n mens 'n versoek plaas, dit stuur, en nooit weet
+   of iemand gebid het nie.
+
+   Die id's van 'n mens se eie versoeke le in localStorage — nie op 'n bediener
+   nie, want dan sou daar 'n rekord wees van WIE wat gevra het, en die hele
+   Bid Saam is anoniem. Die prys is dat 'n mens dit op 'n ander foon nie sien
+   nie. Dit is die regte prys.
+   ──────────────────────────────────────────────────────────── */
+const MY_SLEUTEL = 'myGebede'
+
+function leesMyne() {
+  try { return JSON.parse(localStorage.getItem(MY_SLEUTEL) || '[]') } catch { return [] }
+}
+function skryfMyne(lys) {
+  try { localStorage.setItem(MY_SLEUTEL, JSON.stringify(lys.slice(0, 20))) } catch {}
+}
+
+function MyVersoek({ prayers }) {
+  const [myne, setMyne] = useState(leesMyne)
+  const [dankie, setDankie] = useState(false)
+
+  /* Die nuutste een. Meer as een sou 'n lys word, en 'n lys van jou eie
+     swaarkry is nie wat 'n mens wil sien wanneer jy die app oopmaak nie. */
+  const myne0 = myne[0]
+  if (!myne0) return null
+
+  const uitMuur = prayers.find(p => p.id === myne0.id)
+  const saam = uitMuur ? (uitMuur.prayedCount || 0) : (myne0.saam || 0)
+
+  const magVra = magVraHoeGaanDit({
+    geplaasOp: myne0.op, laasGevraOp: myne0.gevraOp || null, nou: new Date().toISOString(),
+  })
+
+  function merkGevra(beter) {
+    const nuut = myne.map((m, i) => (i === 0 ? { ...m, gevraOp: new Date().toISOString() } : m))
+    setMyne(nuut)
+    skryfMyne(nuut)
+    if (beter) setDankie(true)
+  }
+
+  return (
+    <div className="card mv-kaart">
+      <p className="mv-kop">Jou gebedsversoek</p>
+      <p className="mv-saam">{saamSin(saam)}</p>
+
+      {dankie ? (
+        <p className="mv-dankie">Ons is dankbaar saam met jou. 🙏🏻</p>
+      ) : magVra ? (
+        <>
+          <p className="mv-vra">Hoe gaan dit vandag?</p>
+          <div className="mv-knoppe">
+            <button className="mv-knop" onClick={() => merkGevra(true)}>Dit gaan beter ❤️</button>
+            <button className="mv-knop mv-knop-lig" onClick={() => merkGevra(false)}>Bid asseblief steeds saam 🙏🏻</button>
+          </div>
+        </>
+      ) : null}
+    </div>
+  )
 }
 
 /* ── Community prayer flow — full-screen, one by one ── */
@@ -387,10 +457,8 @@ export default function BidSaam() {
          gebid het. Net die id en die datum; die teks bly op die bediener. */
       if (keuring.mag) {
         try {
-          const myne = JSON.parse(localStorage.getItem('myGebede') || '[]')
-          localStorage.setItem('myGebede', JSON.stringify(
-            [{ id: ref.id, op: new Date().toISOString() }, ...myne].slice(0, 20)
-          ))
+          const myne = leesMyne()
+          skryfMyne([{ id: ref.id, op: new Date().toISOString(), saam: 0 }, ...myne])
         } catch {}
       }
 
@@ -427,6 +495,19 @@ export default function BidSaam() {
     }
   }
 
+  /* ── Die muur se "Gebid"-knoppie ──
+
+     Hier het `updateDoc(doc(db, 'prayers', id), { prayedCount: increment(1) })`
+     gestaan, in 'n try/catch wat niks doen nie.
+
+     firestore.rules se `allow update: if false` op prayers. Daardie skryf het
+     dus ELKE KEER stil misluk. Die getal het net plaaslik opgeloop -- op die
+     mens se eie foon, in sy eie sessie -- en het nog NOOIT in die databasis
+     opgegaan nie. Elke telling wat enigiemand tot vandag op hierdie muur
+     gesien het, was syne alleen.
+
+     Dit gaan nou deur dieselfde eindpunt as die gedeelde skakel, met die
+     diensrekening. Een pad, een gedrag. */
   async function togglePrayed(id) {
     if (prayed.has(id)) return
     const next = new Set(prayed)
@@ -437,8 +518,17 @@ export default function BidSaam() {
     setPrayedToast(true)
     setTimeout(() => setPrayedToast(false), 3500)
     try {
-      await updateDoc(doc(db, 'prayers', id), { prayedCount: increment(1) })
-    } catch {}
+      const r = await fetch('/api/gebed-deel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, toestel: toestelId() }),
+      })
+      const d = await r.json().catch(() => ({}))
+      /* Die bediener se getal wen -- ander mense het intussen ook gebid. */
+      if (typeof d.saam === 'number') {
+        setPrayers(ps => ps.map(p => p.id === id ? { ...p, prayedCount: d.saam } : p))
+      }
+    } catch { /* die gebed het gebeur, ook al het die telling nie */ }
   }
 
   async function submitTestimony() {
@@ -602,6 +692,8 @@ export default function BidSaam() {
             </div>
           )}
         </div>
+
+        <MyVersoek prayers={prayers} />
 
         <h3 className="section-title">Gebedsversoeke</h3>
 
