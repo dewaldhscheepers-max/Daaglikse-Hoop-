@@ -59,6 +59,10 @@
       "dest": "/privaatheid.html"
     },
     {
+      "src": "/vee-my-data-uit",
+      "dest": "/vee-my-data-uit.html"
+    },
+    {
       "handle": "filesystem"
     },
     {

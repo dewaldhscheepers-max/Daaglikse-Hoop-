@@ -207,10 +207,6 @@
   background: #e0d8f5;
 }
 
-
-  flex-shrink: 0;
-}
-
 /* ─── Install to home screen banner ─── */
 .install-banner {
   position: fixed;
