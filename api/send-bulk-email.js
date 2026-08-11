@@ -1,6 +1,7 @@
 const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 const { haalEnOntleed } = require('./_eposLys')
+const { stuurBondel } = require('./_eposStuur')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -145,34 +146,24 @@ module.exports = async function handler(req, res) {
   let failedCount = 0
   const mislukteBondels = []
 
+  /* Die bondel-lus sit nou in _eposStuur.js. Weier Resend 'n bondel, word
+     daardie honderd een vir een oorgestuur in plaas van almal saam afgeskryf
+     -- sien die nota daar. */
+  const slegteAdresse = []
   for (let i = 0; i < emails.length; i += 100) {
-    const chunk = emails.slice(i, i + 100)
-    try {
-      const r = await fetch('https://api.resend.com/emails/batch', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(chunk.map(to => ({
-          from:     'Daaglikse Hoop <info@dewaldscheepers.com>',
-          to,
-          reply_to: 'info@dewaldscheepers.com',
-          subject:  subject.trim(),
-          html,
-        }))),
-      })
-      const result = await r.json()
-      if (r.ok) sentCount += chunk.length
-      else {
-        /* 'n Bondel van honderd wat misluk, het vroeer NIKS bygetel nie en
-           net in die log beland. Die paneel het toe 'n kleiner getal gewys
-           sonder om te se hoekom. Nou tel ons dit. */
-        failedCount += chunk.length
-        mislukteBondels.push(String((result && (result.message || result.name)) || r.status))
-        console.error('Resend batch error:', JSON.stringify(result))
-      }
-    } catch (e) {
-      failedCount += chunk.length
-      mislukteBondels.push(e.message)
-      console.error('Send error:', e.message)
+    const uitslag = await stuurBondel({
+      sleutel:    process.env.RESEND_API_KEY,
+      adresse:    emails.slice(i, i + 100),
+      van:        'Daaglikse Hoop <info@dewaldscheepers.com>',
+      antwoordNa: 'info@dewaldscheepers.com',
+      onderwerp:  subject.trim(),
+      html,
+    })
+    sentCount   += uitslag.gestuur
+    failedCount += uitslag.misluk
+    for (const s of uitslag.slegtes) {
+      slegteAdresse.push(s)
+      if (mislukteBondels.length < 20) mislukteBondels.push(`${s.adres}: ${s.rede}`)
     }
   }
 
@@ -187,6 +178,8 @@ module.exports = async function handler(req, res) {
     lysTotaal:     { integerValue: String(lys.totaal) },
     lysUitgesluit: { integerValue: String(lys.uitgesluit) },
     pendingEmails: { arrayValue: { values: [] } },
+    /* Wie geweier is, en waarom -- anders is 'n mislukking net 'n getal. */
+    slegteAdresse: { arrayValue: { values: slegteAdresse.slice(0, 200).map(s => ({ stringValue: `${s.adres} — ${s.rede}` })) } },
     createdAt:     { timestampValue: new Date().toISOString() },
     completedAt:   { timestampValue: new Date().toISOString() },
   })
@@ -197,6 +190,7 @@ module.exports = async function handler(req, res) {
     total:     emails.length,
     sentCount,
     failedCount,
+    slegteAdresse: slegteAdresse.slice(0, 50),
     remaining: 0,
     // Waar die verskil tussen die rou lys en die gestuurde lys vandaan kom.
     lys: {

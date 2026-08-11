@@ -22,9 +22,28 @@
    onder by `afgemeld`.
    ──────────────────────────────────────────────────────────── */
 
-// Doelbewus ruim. Ons wil net klaarblyklike gemors uithou, nie oor
-// randgevalle in die RFC stry nie.
-const ADRES = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+/* ── Wat as 'n adres tel ──
+
+   Dit was `/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/` — doelbewus ruim, om nie oor die
+   RFC te stry nie. Te ruim, soos ons duur uitgevind het.
+
+   Daardie patroon laat deur: 'n dubbele punt (piet@gmail..com), 'n
+   kommapunt aan die einde (piet@gmail.com;), 'n TLD met syfers in, en enige
+   nie-ASCII letter. Resend weier al daardie met "Invalid `to` field", en die
+   stuur gaan in bondels van honderd — een slegte adres het dus 99 onskuldige
+   mense hul e-pos gekos. Sien `_eposStuur.js`.
+
+   Nou:
+     · net ASCII, want dit is al wat Resend aanvaar
+     · geen twee punte langs mekaar nie, aan geen kant nie
+     · die plaaslike deel mag nie met 'n punt begin of eindig nie
+     · die TLD is LETTERS, minstens twee
+
+   Dit is strenger, en dit gaan 'n handjievol werklike adresse uithou wat
+   vantevore deurgegaan het. Dit is die regte kant om op te fouteer: 'n adres
+   wat ons uithou, kry nie 'n e-pos nie; 'n adres wat ons deurlaat en Resend
+   weier, kos negentig ander mense hulle e-pos. */
+const ADRES = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/
 
 function ontleedLys(documents) {
   const rou = documents || []

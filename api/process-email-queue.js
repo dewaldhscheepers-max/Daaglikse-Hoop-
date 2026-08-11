@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { stuurBondel } = require('./_eposStuur')
 const { magAdminDing } = require('./_geheim.js')
 
 async function getAccessToken() {
@@ -152,25 +153,20 @@ module.exports = async function handler(req, res) {
   const html = buildHtml(campaign.body)
   let sentCount = 0
 
+  /* Dieselfde bondel-probleem as in send-bulk-email.js: 'n bondel wat Resend
+     weier, het hier NIKS getel nie en net in die log beland -- die wagry het
+     dus stil honderd mense oorgeslaan. Sien _eposStuur.js. */
   for (let i = 0; i < campaign.pendingEmails.length; i += 100) {
-    const chunk = campaign.pendingEmails.slice(i, i + 100)
-    try {
-      const r = await fetch('https://api.resend.com/emails/batch', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(chunk.map(to => ({
-          from:     'Daaglikse Hoop <info@dewaldscheepers.com>',
-          to,
-          reply_to: 'info@dewaldscheepers.com',
-          subject:  campaign.subject,
-          html,
-        }))),
-      })
-      if (r.ok) sentCount += chunk.length
-      else console.error('Resend error:', await r.text())
-    } catch (e) {
-      console.error('Send error:', e.message)
-    }
+    const uitslag = await stuurBondel({
+      sleutel:    process.env.RESEND_API_KEY,
+      adresse:    campaign.pendingEmails.slice(i, i + 100),
+      van:        'Daaglikse Hoop <info@dewaldscheepers.com>',
+      antwoordNa: 'info@dewaldscheepers.com',
+      onderwerp:  campaign.subject,
+      html,
+    })
+    sentCount += uitslag.gestuur
+    for (const s of uitslag.slegtes) console.error('Geweier:', s.adres, '—', s.rede)
   }
 
   const newSentCount = campaign.sentCount + sentCount
