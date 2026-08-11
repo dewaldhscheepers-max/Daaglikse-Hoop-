@@ -10,6 +10,7 @@ import './HuiseVanHoop.css'
 import KinderBibloteek from './KinderBibloteek'
 import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
+import { boekeWatWys } from '../data/kinderBoekeWys'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 
@@ -81,6 +82,24 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       snap.docs.forEach(d => { overrides[d.id] = d.data() })
       setBookOverrides(overrides)
     })
+    return unsub
+  }, [])
+
+  /* ── Hoeveel kinderboeke daar WERKLIK is ──
+
+     Die banier het `KINDER_BOEKE.length` gewys — die ingeboude lys. Dit staan
+     vir altyd op sewe, ook nadat 'n agtste boek opgelaai is. Die banier het
+     dus 'n ander getal gewys as die blad waarheen hy lei.
+
+     Dieselfde reel as die biblioteek self, uit dieselfde lêer, sodat die twee
+     nie weer kan verskil nie. */
+  const [kinderBoeke, setKinderBoeke] = useState(KINDER_BOEKE)
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, 'kinderBoeke'),
+      snap => setKinderBoeke(boekeWatWys(snap.docs.map(d => ({ id: d.id, ...d.data() })), KINDER_BOEKE)),
+      () => setKinderBoeke(KINDER_BOEKE),
+    )
     return unsub
   }, [])
 
@@ -191,7 +210,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
               <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
               <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2–5 jaar.</p>
               <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant God se waarheid in klein hartjies.</p>
-              <div className="kinder-promo-count">{KINDER_BOEKE.length} gratis kinderboeke beskikbaar</div>
+              <div className="kinder-promo-count">{kinderBoeke.length} gratis kinderboeke beskikbaar</div>
             </div>
             <div className="kinder-promo-covers" aria-hidden="true">
               {[KINDER_BOEKE[0], KINDER_BOEKE[3], KINDER_BOEKE[4]].map((b, i) => (
