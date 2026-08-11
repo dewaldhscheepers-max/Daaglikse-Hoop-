@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { magAdminDing } = require('./_geheim.js')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -43,13 +44,17 @@ module.exports.config = { api: { bodyParser: { sizeLimit: '20mb' } } }
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-sorg-geheim')
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' })
 
-  const { pin, bookId, filename, imageBase64, fileBase64, isAudio } = req.body || {}
+  /* Hier het `if (pin !== '2025')` gestaan. Daardie string het in die
+     openbare bondel geship, en hierdie eindpunt skryf met die diensrekening
+     na Firebase Storage -- enigiemand wat die pad geken het, kon lêers in
+     die emmer gooi. Sien CLAUDE.md se afdeling oor geheime. */
+  if (!magAdminDing(req)) return res.status(401).json({ error: 'Ongemagtig' })
 
-  if (pin !== '2025') return res.status(401).json({ error: 'Ongemagtig' })
+  const { bookId, filename, imageBase64, fileBase64, isAudio } = req.body || {}
 
   const base64Data = fileBase64 || imageBase64
   if (!bookId || !filename || !base64Data) {

@@ -1,13 +1,46 @@
 import { useState, useEffect, useRef } from 'react'
-import { db, storage, auth } from '../firebase'
+import { db } from '../firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { signInAnonymously } from 'firebase/auth'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import './KinderAdmin.css'
 
-async function ensureAuth() {
-  if (!auth.currentUser) await signInAnonymously(auth)
+/* ────────────────────────────────────────────────────────────
+   Waarom die oplaai deur die BEDIENER gaan.
+
+   Hier het `uploadBytesResumable` gestaan — die blaaier het direk na
+   Firebase Storage geskryf, ná 'n anonieme aanmelding. Dit het opgehou werk
+   met `storage/unauthorized`, en dit is die reels wat hul werk doen.
+
+   Dit kan ook nie anders nie. 'n Anonieme aanmelding is nie 'n admin nie;
+   dit is enige besoeker aan die app. Wil 'n mens hierdie skryf toelaat, moet
+   die Storage-reels dit vir ELKE besoeker toelaat, en dan kan enigiemand
+   lêers in die emmer gooi.
+
+   `api/kinder-upload.js` doen dit reeds reg: dit skryf met die diensrekening
+   en dit vra vir die admin se geheim. Dit is net nooit gebruik nie.
+   ──────────────────────────────────────────────────────────── */
+function naBasis64(blob) {
+  return new Promise((resolve, reject) => {
+    const leser = new FileReader()
+    /* 'n Data-URL lyk soos "data:image/jpeg;base64,AAAA…" — die bediener wil
+       net die deel ná die komma hê. */
+    leser.onload  = () => resolve(String(leser.result).split(',')[1] || '')
+    leser.onerror = () => reject(new Error('Kon nie die lêer lees nie'))
+    leser.readAsDataURL(blob)
+  })
+}
+
+async function stuurNaBediener({ geheim, bookId, filename, basis64, isAudio }) {
+  const r = await fetch('/api/kinder-upload', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+    body:    JSON.stringify({ bookId, filename, fileBase64: basis64, isAudio: !!isAudio }),
+  })
+  const data = await r.json().catch(() => ({}))
+  if (!r.ok || !data.ok || !data.url) {
+    throw new Error(data.error || `HTTP ${r.status}`)
+  }
+  return data.url
 }
 
 function compressImage(file, maxWidth = 1500, quality = 0.82) {
@@ -129,15 +162,9 @@ export default function KinderAdmin({ geheim = '' }) {
     if (!bookId) { alert('Voer eers die boektitel in'); return }
 
     setUploading(true)
-    setUploadMsg('Aanmeld...')
+    setUploadMsg('Begin...')
     const uploaded = []
     let lastError = ''
-
-    try { await ensureAuth() } catch (err) {
-      setUploading(false)
-      setUploadMsg('Aanmeldfout: ' + err.message)
-      return
-    }
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
@@ -145,15 +172,11 @@ export default function KinderAdmin({ geheim = '' }) {
         setUploadMsg(`Komprimeer prent ${i + 1} van ${files.length}...`)
         const blob = await compressImage(file)
         if (!blob) { lastError = 'Kon nie prent komprimeer nie'; continue }
-        const sizeKB  = Math.round(blob.size / 1024)
+        const sizeKB   = Math.round(blob.size / 1024)
         const filename = `page_${String(Date.now()).slice(-6)}_${String(i + 1).padStart(3, '0')}.jpg`
         setUploadMsg(`Stuur ${sizeKB}KB... (${i + 1} van ${files.length})`)
-        const storageRef = ref(storage, `kinder-boeke/${bookId}/${filename}`)
-        await new Promise((resolve, reject) => {
-          uploadBytesResumable(storageRef, blob, { contentType: 'image/jpeg' })
-            .on('state_changed', null, reject, resolve)
-        })
-        uploaded.push(await getDownloadURL(storageRef))
+        const basis64 = await naBasis64(blob)
+        uploaded.push(await stuurNaBediener({ geheim, bookId, filename, basis64 }))
       } catch (err) {
         lastError = `Upload misluk: ${err.message}`
       }
@@ -177,14 +200,18 @@ export default function KinderAdmin({ geheim = '' }) {
     setAudioMsg('Stemopname word opgelaai...')
 
     try {
-      await ensureAuth()
-      const ext        = file.name.split('.').pop().toLowerCase() || 'mp3'
-      const storageRef = ref(storage, `kinder-boeke/${bookId}/audio.${ext}`)
-      await new Promise((resolve, reject) => {
-        uploadBytesResumable(storageRef, file)
-          .on('state_changed', null, reject, resolve)
+      /* Basis64 maak 'n lêer 'n derde groter, en die bediener se liggaam is op
+         20 MB gestel. Ons keer hier, met 'n boodskap wat sê wat fout is, in
+         plaas van 'n 413 wat soos 'n stukkende app lyk. */
+      const MAKS = 14 * 1024 * 1024
+      if (file.size > MAKS) {
+        throw new Error(`Die lêer is ${Math.round(file.size / 1024 / 1024)}MB. Hou dit onder 14MB.`)
+      }
+      const ext     = file.name.split('.').pop().toLowerCase() || 'mp3'
+      const basis64 = await naBasis64(file)
+      const url = await stuurNaBediener({
+        geheim, bookId, filename: `audio.${ext}`, basis64, isAudio: true,
       })
-      const url = await getDownloadURL(storageRef)
       setEditingBook(prev => ({ ...prev, audioUrl: url }))
       setAudioMsg('✅ Opgelaai! Stoor die boek om te bevestig.')
     } catch (err) {

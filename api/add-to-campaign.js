@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { magAdminDing } = require('./_geheim.js')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -26,8 +27,11 @@ async function getAccessToken() {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Not Allowed')
-  const { pin, emails } = req.body || {}
-  if (pin !== '2025') return res.status(403).send('Forbidden')
+  /* Hier het `if (pin !== '2025')` gestaan -- 'n openbare string as slot.
+     Sien CLAUDE.md: die vergelyking hoort een keer, in _geheim.js. */
+  if (!magAdminDing(req)) return res.status(403).send('Forbidden')
+
+  const { emails } = req.body || {}
   if (!emails || emails.length === 0) return res.status(400).json({ error: 'Geen e-posadresse nie' })
 
   const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
