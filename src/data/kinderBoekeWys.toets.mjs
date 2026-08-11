@@ -78,5 +78,25 @@ is('die oorspronklike lys word nie omgekrap nie', (() => {
   return in_.map(b => b.id)
 })(), ['b','a'])
 
+console.log("\n── Boeke wat voor createdAt opgelaai is ──")
+/* Presies Dewald se data op 11 Augustus: sewe ingeboudes wat 'n ruk gelede
+   gesaai is, en twee wat vandag opgelaai is. Nie een het 'n createdAt nie. */
+const soosVandag = [
+  ...['klein-leeu','klein-leeu-leer-luister','die-donker','foutjies','lelike-woorde','my-woorde','gevoelens']
+     .map(id => ({ id, pages: ['a'], updatedAt: '2026-06-01T10:00:00.000Z' })),
+  { id: 'ek-luister-na-my-magie', pages: Array(11).fill('a'), updatedAt: '2026-08-11T15:41:00.000Z' },
+  { id: 'klein-proe',             pages: Array(9).fill('a'),  updatedAt: '2026-08-11T15:52:00.000Z' },
+]
+is('albei nuwes staan bo, sonder dat iemand hulle oopmaak',
+   boekeWatWys(soosVandag, STATIES).slice(0, 2).map(b => b.id),
+   ['klein-proe', 'ek-luister-na-my-magie'])
+
+is("createdAt wen bo updatedAt",
+   boekeWatWys([
+     { id: 'oud-maar-nou-gewysig', pages: ['a'], createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-08-11T17:00:00.000Z' },
+     { id: 'nuut',                 pages: ['a'], createdAt: '2026-08-01T00:00:00.000Z' },
+   ], STATIES).map(b => b.id),
+   ['nuut', 'oud-maar-nou-gewysig'])
+
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

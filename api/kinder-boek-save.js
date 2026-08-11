@@ -100,7 +100,14 @@ module.exports = async function handler(req, res) {
       fields.createdAt = { timestampValue: new Date().toISOString() }
     } else {
       const doc = await bestaan.json()
-      if (!doc?.fields?.createdAt) fields.createdAt = { timestampValue: new Date().toISOString() }
+      if (!doc?.fields?.createdAt) {
+        /* 'n Boek wat voor hierdie veld bestaan het. Ons vul createdAt in met
+           sy BESTAANDE updatedAt, nie met vandag se datum nie -- anders spring
+           elke ou boek boontoe die eerste keer dat 'n mens hom oopmaak en
+           Stoor druk. */
+        const oudDatum = doc?.fields?.updatedAt?.timestampValue
+        fields.createdAt = { timestampValue: oudDatum || new Date().toISOString() }
+      }
     }
   } catch {
     /* Kan ons nie kyk nie, laat createdAt uit. 'n Boek sonder een val onder in

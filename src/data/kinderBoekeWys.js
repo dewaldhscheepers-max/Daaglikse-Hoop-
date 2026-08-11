@@ -31,9 +31,21 @@
    volgorde waarin hulle altyd was — 'n leë string sorteer laaste, en
    `localeCompare` op die id hou hulle onderling stabiel sodat die lys nie by
    elke oopmaak skommel nie. */
+function datumVan(b) {
+  /* createdAt is die regte antwoord, maar boeke wat voor hierdie veld
+     opgelaai is, het net 'n updatedAt. Sonder die terugval sou hulle saam met
+     die ingeboude sewe onder val, en dan moet 'n mens elkeen gaan oopmaak en
+     Stoor druk net om die volgorde reg te kry.
+
+     Die terugval is veilig omdat createdAt wen sodra dit daar is, en
+     kinder-boek-save vul dit by die volgende stoor met die dokument se BESTAANDE
+     updatedAt in -- nie met vandag se datum nie. Die geskiedenis bly dus staan. */
+  return (b && (b.createdAt || b.updatedAt)) || ''
+}
+
 function nuutsteEerste(a, b) {
-  const da = (a && a.createdAt) || ''
-  const db = (b && b.createdAt) || ''
+  const da = datumVan(a)
+  const db = datumVan(b)
   if (da !== db) return da < db ? 1 : -1
   return String((a && a.id) || '').localeCompare(String((b && b.id) || ''))
 }
