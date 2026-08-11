@@ -76,6 +76,37 @@ module.exports = async function handler(req, res) {
   }
 
   const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/kinderBoeke/${id}`
+
+  /* ── createdAt, en waarom dit nie updatedAt is nie ──
+
+     Nuwe kinderboeke moet bo-aan die biblioteek staan. Daarvoor is 'n datum
+     nodig, en `updatedAt` lyk soos die voor die hand liggende keuse.
+
+     Dit is dit nie. Wysig 'n mens 'n drie jaar oue boek se beskrywing, spring
+     hy boontoe asof hy vanoggend gemaak is. Die volgorde sou dan wys wanneer
+     iets laas AANGERAAK is, nie wanneer dit BYGEKOM het nie.
+
+     Daarom lees ons eers of die dokument reeds 'n createdAt het. Het hy een,
+     bly dit staan -- die PATCH stuur die veld glad nie, en Firestore laat 'n
+     veld wat nie in die liggaam is nie, onaangeraak. Is dit 'n nuwe boek, sit
+     ons dit nou.
+
+     Die sewe ingeboude boeke het nie een nie en kry ook nie een nie; hulle val
+     dus onder in die lys, wat presies reg is. */
+  try {
+    const bestaan = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    if (!bestaan.ok) {
+      /* 404 beteken 'n splinternuwe boek. */
+      fields.createdAt = { timestampValue: new Date().toISOString() }
+    } else {
+      const doc = await bestaan.json()
+      if (!doc?.fields?.createdAt) fields.createdAt = { timestampValue: new Date().toISOString() }
+    }
+  } catch {
+    /* Kan ons nie kyk nie, laat createdAt uit. 'n Boek sonder een val onder in
+       die lys; dit is beter as om 'n bestaande een te oorskryf. */
+  }
+
   let r
   try {
     r = await fetch(url, {

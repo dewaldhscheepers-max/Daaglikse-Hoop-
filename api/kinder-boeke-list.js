@@ -37,6 +37,9 @@ function parseDoc(fsDoc) {
     status:      f.status?.stringValue       || 'draft',
     audioUrl:    f.audioUrl?.stringValue     || '',
     pages:       (f.pages?.arrayValue?.values || []).map(v => v.stringValue || '').filter(Boolean),
+    /* Die biblioteek sorteer hierop -- nuutste bo. Sien kinderBoekeWys.js. */
+    createdAt:   f.createdAt?.timestampValue   || '',
+    updatedAt:   f.updatedAt?.timestampValue   || '',
   }
 }
 

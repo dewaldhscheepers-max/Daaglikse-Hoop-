@@ -43,5 +43,40 @@ console.log('\n── Ou data ──')
 is('geen pages-veld nie', boekeWatWys([{ id: 'oud', status: 'published' }], STATIES).length, 7)
 is('n stukkende inskrywing breek nie', boekeWatWys([null, { id: 'goed', pages: ['a'] }], STATIES).map(b => b.id), ['goed'])
 
+console.log("\n── Die volgorde: nuutste bo ──")
+const metDatums = [
+  { id: 'oud',   pages: ['a'], createdAt: '2026-01-05T08:00:00.000Z' },
+  { id: 'nuut',  pages: ['a'], createdAt: '2026-08-11T15:00:00.000Z' },
+  { id: 'middel',pages: ['a'], createdAt: '2026-05-20T08:00:00.000Z' },
+]
+is('nuutste eerste', boekeWatWys(metDatums, STATIES).map(b => b.id), ['nuut','middel','oud'])
+
+is('boeke sonder \'n datum val onder',
+   boekeWatWys([
+     { id: 'ingebou-a', pages: ['a'] },
+     { id: 'nuut',      pages: ['a'], createdAt: '2026-08-11T15:00:00.000Z' },
+     { id: 'ingebou-b', pages: ['a'] },
+   ], STATIES).map(b => b.id),
+   ['nuut','ingebou-a','ingebou-b'])
+
+is('sonder datums bly die volgorde stabiel',
+   boekeWatWys([{ id: 'c', pages: ['a'] }, { id: 'a', pages: ['a'] }, { id: 'b', pages: ['a'] }], STATIES).map(b => b.id),
+   ['a','b','c'])
+
+/* updatedAt mag NIE die volgorde bepaal nie -- 'n ou boek wat gewysig word,
+   moet bly waar hy is. */
+is("'n ou boek wat vandag gewysig is, bly onder",
+   boekeWatWys([
+     { id: 'oud',  pages: ['a'], createdAt: '2026-01-05T08:00:00.000Z', updatedAt: '2026-08-11T16:00:00.000Z' },
+     { id: 'nuut', pages: ['a'], createdAt: '2026-08-01T08:00:00.000Z', updatedAt: '2026-08-01T08:00:00.000Z' },
+   ], STATIES).map(b => b.id),
+   ['nuut','oud'])
+
+is('die oorspronklike lys word nie omgekrap nie', (() => {
+  const in_ = [{ id: 'b', pages: ['a'], createdAt: '2026-01-01' }, { id: 'a', pages: ['a'], createdAt: '2026-09-01' }]
+  boekeWatWys(in_, STATIES)
+  return in_.map(b => b.id)
+})(), ['b','a'])
+
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)
