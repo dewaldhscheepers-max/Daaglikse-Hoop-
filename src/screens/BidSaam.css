@@ -968,3 +968,122 @@
   align-self: flex-start;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ────────────────────────────────────────────────────────────
+   "Bid vir my" — die toestemming, die sagte skerm ná die indiening,
+   en die krisisnommers.
+
+   Geen transform of opacity op :active nie — sien CLAUDE.md.
+   ──────────────────────────────────────────────────────────── */
+
+.bvm-toestem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0 4px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #6F6480;
+  cursor: pointer;
+}
+.bvm-toestem input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #5C4E8E;
+}
+
+/* ── Ná die indiening ──
+   Sag, en die knoppie kom heel laaste. Die eerste gevoel moet "ek is gehoor"
+   wees, nie "deel nou" nie. */
+.bvm-na {
+  margin-top: 16px;
+  padding: 18px 16px;
+  background: #F6F2FB;
+  border: 1px solid #E4DEEE;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.bvm-na-kop {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D2040;
+  margin-bottom: 6px;
+}
+
+.bvm-na-sag {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #6F6480;
+}
+
+.bvm-na-vra {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #2D2040;
+  margin: 16px 0 12px;
+}
+
+.bvm-na-knop {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  background: #5C4E8E;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 15px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bvm-na-knop:active { background: #4A3E75; }
+
+/* ── Die krisisnommers ──
+   Rooi genoeg om raakgesien te word, nie so rooi dat dit skrik nie. Dit staan
+   apart van die deel-blok, want dit het niks met deel te doen nie. */
+.bvm-krisis {
+  margin-top: 14px;
+  padding: 18px 16px;
+  background: #FFF6F4;
+  border: 1px solid #F2D3CC;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.bvm-krisis-kop {
+  font-size: 16px;
+  font-weight: 800;
+  color: #8C3A28;
+  margin-bottom: 8px;
+}
+
+.bvm-krisis-teks {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #6F5A55;
+  margin-bottom: 14px;
+}
+
+.bvm-krisis-nommer {
+  display: block;
+  background: #B14A32;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 14px 12px;
+  margin-bottom: 9px;
+}
+.bvm-krisis-nommer:active { background: #963C28; }
+
+.bvm-krisis-fyn {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #8A7E7A;
+  margin-top: 6px;
+}

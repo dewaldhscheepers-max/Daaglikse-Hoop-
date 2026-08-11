@@ -5,6 +5,7 @@ import {
   serverTimestamp, orderBy, query, where, limit,
   increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
+import { magDeel, gebedSkakel, deelBoodskap } from '../data/gebedDeel'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
 import SaturdayVideoCard from '../components/SaturdayVideoCard'
@@ -251,6 +252,12 @@ export default function BidSaam() {
   const [herlaai, setHerlaai]     = useState(0)
   const [error, setError]         = useState('')
   const [submitted, setSubmitted] = useState(false)
+  /* "Bid vir my" — sien gebedDeel.js. `nuweId` is die id van die versoek wat
+     pas geplaas is; is dit null, was die versoek nie deelbaar nie en wys ons
+     geen deel-knoppie nie. */
+  const [magDeelVra,  setMagDeelVra]  = useState(false)
+  const [nuweId,      setNuweId]      = useState(null)
+  const [krisisGewys, setKrisisGewys] = useState(false)
   const [prayedToast, setPrayedToast] = useState(false)
   const [reported, setReported]   = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('reportedPrayers') || '[]')) }
@@ -356,18 +363,69 @@ export default function BidSaam() {
 
   async function submit() {
     if (!text.trim()) return
+
+    /* Die hek loop VOOR die skryf, sodat `deelbaar` reeds reg op die dokument
+       staan. Die bediener doen dit weer — 'n kliënt kan lieg — maar dit hou
+       die data self skoon. */
+    const keuring = magDeel({ teks: text, toestemming: magDeelVra })
+
     try {
-      await addDoc(collection(db, 'prayers'), {
+      const ref = await addDoc(collection(db, 'prayers'), {
         text: text.trim(),
         prayedCount: 0,
         createdAt: serverTimestamp(),
-        reported: false
+        reported: false,
+        deelbaar: keuring.mag,
       })
+
+      /* Wys die krisisnommers wanneer die woorde daarop dui. Dit gebeur ook
+         wanneer die mens NIE gevra het om te deel nie — die hulp hang nie van
+         'n blokkie af nie. */
+      setKrisisGewys(keuring.rede === 'krisis')
+      setNuweId(keuring.mag ? ref.id : null)
+
+      /* Onthou my eie versoeke, sodat ek later kan sien hoeveel mense saam
+         gebid het. Net die id en die datum; die teks bly op die bediener. */
+      if (keuring.mag) {
+        try {
+          const myne = JSON.parse(localStorage.getItem('myGebede') || '[]')
+          localStorage.setItem('myGebede', JSON.stringify(
+            [{ id: ref.id, op: new Date().toISOString() }, ...myne].slice(0, 20)
+          ))
+        } catch {}
+      }
+
       setText('')
+      setMagDeelVra(false)
       setSubmitted(true)
-      setTimeout(() => setSubmitted(false), 4000)
+      /* Nie meer 'n tydhouer van vier sekondes nie. Is daar 'n deel-knoppie,
+         moet dit bly staan tot die mens self kies. */
+      if (!keuring.mag && keuring.rede !== 'krisis') {
+        setTimeout(() => setSubmitted(false), 6000)
+      }
     } catch {
       setError('Kon nie stuur nie. Probeer asseblief weer.')
+    }
+  }
+
+  /* ── Stuur my gebedsversoek ──
+
+     Die gewone deelvenster van die foon, met WhatsApp as die natuurlike
+     keuse. Die boodskap vra een ding en noem nie die app nie — sien
+     deelBoodskap(). */
+  async function stuurMyVersoek() {
+    if (!nuweId) return
+    const skakel = gebedSkakel(nuweId, window.location.origin)
+    const teks   = deelBoodskap(skakel)
+    if (navigator.share) {
+      try { await navigator.share({ text: teks }) } catch {}
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(teks)
+      alert('Die boodskap is gekopieer. Plak dit in WhatsApp.')
+    } catch {
+      window.prompt('Kopieer hierdie boodskap:', teks)
     }
   }
 
@@ -496,14 +554,72 @@ export default function BidSaam() {
             rows={4}
             maxLength={500}
           />
+          {/* ── Toestemming om te deel ──
+
+              Dit is nie 'n bemarkingsblokkie nie. Sonder dit mag die versoek
+              nooit 'n skakel kry nie — sien magDeel() in gebedDeel.js en die
+              hek op die bediener.
+
+              Dit staan ONDER die kassie en dit is nie vooraf gemerk nie. 'n
+              Mens wat swaarkry, moet nie per ongeluk sy woorde oor WhatsApp
+              stuur nie. */}
+          <label className="bvm-toestem">
+            <input
+              type="checkbox"
+              checked={magDeelVra}
+              onChange={e => setMagDeelVra(e.target.checked)}
+            />
+            <span>Ek wil hierdie versoek kan stuur aan mense wat ek vertrou, sodat hulle saam kan bid.</span>
+          </label>
+
           <div className="input-footer">
             <span className="char-count">{text.length}/500</span>
             <button className="btn-primary submit-btn" onClick={submit} disabled={!text.trim()}>
               Deel jou gebedsversoek
             </button>
           </div>
+
+          {/* ── Ná die indiening ──
+
+              Die eerste gevoel moet wees "ek is gehoor", nie "DEEL NOU" nie.
+              Daarom die sagte reël eerste, die vraag daarna, en die knoppie
+              heel laaste. */}
           {submitted && (
-            <div className="submitted-msg">🙏 Jou gebedsversoek is gedeel. Ander mense bid ook vir jou. Jy is nie alleen nie.</div>
+            <div className="bvm-na">
+              <p className="bvm-na-kop">Jou gebedsversoek is geplaas. 🙏🏻</p>
+              <p className="bvm-na-sag">Jy hoef nie alleen hiermee te staan nie.</p>
+
+              {nuweId ? (
+                <>
+                  <p className="bvm-na-vra">Wil jy iemand wat jy vertrou vra om saam met jou te bid?</p>
+                  <button className="bvm-na-knop" onClick={stuurMyVersoek}>
+                    Stuur my gebedsversoek
+                  </button>
+                </>
+              ) : (
+                /* Geen skakel nie. Dit gebeur wanneer die versoek nie deelbaar
+                   is nie — geen toestemming, 'n nommer in die teks, of die
+                   krisishek. In AL daardie gevalle sê ons niks oor hoekom.
+                   Die versoek is geplaas en dit is wat saak maak. */
+                <p className="bvm-na-sag">Ander mense bid ook vir jou. Jy is nie alleen nie.</p>
+              )}
+            </div>
+          )}
+
+          {/* Die krisisvloei. Dit is die enigste ding wat hier BO die res
+              uitkom, en dit het niks met deel te doen nie. */}
+          {krisisGewys && (
+            <div className="bvm-krisis">
+              <p className="bvm-krisis-kop">Ons wil seker maak jy is veilig.</p>
+              <p className="bvm-krisis-teks">
+                Wat jy geskryf het, klink of dit dringend is. Praat asseblief nou met iemand:
+              </p>
+              <a className="bvm-krisis-nommer" href="tel:0800567567">SADAG · 0800 567 567</a>
+              <a className="bvm-krisis-nommer" href="tel:10111">Nood · 10111</a>
+              <p className="bvm-krisis-fyn">
+                Jou versoek is geplaas en mense bid daarvoor. Hierdie een word net nie met 'n skakel gedeel nie.
+              </p>
+            </div>
           )}
         </div>
 

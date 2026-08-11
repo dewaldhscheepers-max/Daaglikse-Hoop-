@@ -37,6 +37,8 @@ import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
+import BidVirMy from './components/BidVirMy'
+import { idUitPad } from './data/gebedDeel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -595,6 +597,47 @@ export default function App() {
     } catch {}
   }, [])
 
+  /* ── 'n Gedeelde gebedsversoek ──
+
+     /bid/<id> — iemand het aan 'n vriend gestuur: "Sal jy asseblief saam met
+     my bid?" Daardie vriend moet DADELIK by die versoek land, sonder om die
+     app te installeer en sonder om iets te registreer.
+
+     Dieselfde sessionStorage-patroon as Sorg en Steun hierbo, en om dieselfde
+     rede: die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar
+     'n nuwe weergawe is, en dan is die pad weg. Sonder die vlag land 'n
+     splinternuwe mens op Luister en die gebed is verlore.
+
+     Die id bly in die toestand nadat die pad uit die adresbalk gevee is —
+     anders sit dit in die geskiedenis en 'n mens deel per ongeluk sy eie
+     blaaierblad. */
+  const [gebedId, setGebedId] = useState(null)
+  useEffect(() => {
+    try {
+      const pad = window.location.pathname || ''
+      const uitPad = idUitPad(pad)
+      if (uitPad) {
+        sessionStorage.setItem('gebed_versoek', uitPad)
+        window.history.replaceState({}, '', '/')
+      }
+      const onthou = sessionStorage.getItem('gebed_versoek')
+      if (onthou) setGebedId(onthou)
+    } catch {}
+  }, [])
+
+  /* Die blad is klaar. Wat nou gebeur, hang af van wat sy gekies het.
+
+     'bidsaam' beteken sy wil self 'n versoek plaas — dan vat ons haar tot IN
+     die kassie, dieselfde vlag wat Bid Saam self al lees. */
+  function gebedKlaar(waarheen) {
+    try { sessionStorage.removeItem('gebed_versoek') } catch {}
+    setGebedId(null)
+    if (waarheen === 'bidsaam') {
+      try { sessionStorage.setItem('bidsaam_fokus', '1') } catch {}
+      setTab('bidsaam')
+    }
+  }
+
   // ── Donation card CTA ──
   /* Die bedrag wat 'n mens reeds gekies het, byvoorbeeld op Pastorale Sorg
      se Ondersteun-blad. Niks gestuur nie, dan begin die modaal soos altyd. */
@@ -831,6 +874,14 @@ export default function App() {
           Bid Saam as die aktiewe een terwyl 'n mens op Bid Nou is, anders lyk
           dit of niks gekies is nie. */}
       <BottomNav active={tab === 'bidnou' ? 'bidsaam' : tab} onChange={handleNav} onBybel={() => setShowBybel(true)} />
+
+      {/* 'n Gedeelde gebedsversoek sit BO-OP alles.
+
+          Die mens wat hier land, het waarskynlik nog nooit van Daaglikse Hoop
+          gehoor nie. Sy het 'n boodskap van iemand gekry wat vra dat sy bid.
+          Sien sy eers 'n tuisblad, 'n installasie-uitklap en 'n onderste
+          navigasie, is sy weg voor sy by die gebed kom. */}
+      {gebedId && <BidVirMy id={gebedId} onKlaar={gebedKlaar} />}
 
       {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {/* Die steunblad sit onder die twee betaalvensters, sodat 'n mens

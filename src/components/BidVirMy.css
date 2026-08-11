@@ -1,0 +1,160 @@
+/* Die blad wat 'n vreemdeling sien wanneer sy 'n gebedskakel oopmaak.
+
+   Sy het waarskynlik nog nooit van Daaglikse Hoop gehoor nie. Die blad moet
+   dus op sy eie staan: rustig, een ding om te doen, en niks wat soos 'n app
+   se binnekant lyk nie.
+
+   Geen `transform` of `opacity` op :active nie, en geen `100dvh` nie — sien
+   CLAUDE.md se afdeling oor Android en gekleurde strepe. Hierdie blad is die
+   EERSTE ding wat 'n nuwe mens van die app sien; dit is die laaste plek waar
+   'n mens strepe oor die skerm wil hê. */
+
+.bvm {
+  position: fixed;
+  inset: 0;
+  /* Bo ALLES. Dit was 6000, en .fb-browser-banner sit op 10000 — daardie
+     balk ("maak dit in Chrome oop") sou dus oor die gebed gekom het, en 'n
+     gedeelde gebedskakel word juis dikwels in Facebook se blaaier oopgemaak.
+     Die res word in elk geval versteek terwyl hierdie blad oop is; sien
+     .gebed-oop hieronder. */
+  z-index: 12000;
+  background: linear-gradient(160deg, #FAF8F5 0%, #F3EEF8 55%, #EAE2F4 100%);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.bvm-kaart {
+  background: #fff;
+  border: 1px solid #E4DEEE;
+  border-radius: 22px;
+  padding: 30px 22px 26px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 10px 40px rgba(92, 78, 142, 0.10);
+  text-align: center;
+}
+
+.bvm-hande {
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.bvm-inlei {
+  font-size: 16px;
+  color: #6F6480;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+/* Die versoek self. Dit is die enigste ding op die blad wat groot is. */
+.bvm-teks {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 19px;
+  line-height: 1.6;
+  color: #2D2040;
+  text-align: left;
+  margin: 0 0 14px;
+  padding: 18px 18px;
+  background: #FAF8FC;
+  border-left: 3px solid #7C6FAF;
+  border-radius: 0 14px 14px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bvm-anoniem {
+  font-size: 13px;
+  color: #8A7E9A;
+  margin-bottom: 22px;
+}
+
+.bvm-kop {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #2D2040;
+  margin-bottom: 12px;
+}
+
+.bvm-sag {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #6F6480;
+  margin-bottom: 22px;
+}
+
+.bvm-knop {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: #5C4E8E;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 16px 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+/* Net kleur op :active — geen transform, geen opacity. */
+.bvm-knop:active { background: #4A3E75; }
+.bvm-knop:disabled { background: #9C93BC; }
+
+.bvm-knop-lig {
+  background: transparent;
+  color: #5C4E8E;
+  border: 1px solid #D9D2E4;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.bvm-knop-lig:active { background: #F0EBF8; }
+
+/* Die getal staan ONDER die knoppie en klein. Dit is nie 'n telling van
+   gewildheid nie, en dit mag nie die eerste ding wees wat 'n mens sien nie. */
+.bvm-reeds {
+  font-size: 13.5px;
+  color: #8A7E9A;
+  margin-top: 14px;
+}
+
+.bvm-nooi {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid #EFEAF6;
+}
+
+.bvm-nooi-vra {
+  font-size: 16px;
+  color: #2D2040;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.bvm-laai {
+  font-size: 15px;
+  color: #8A7E9A;
+  padding: 30px 0;
+}
+
+
+/* ── Wat weg is terwyl 'n gebed oop is ──
+
+   Die mens wat hier land, het waarskynlik nog nooit van Daaglikse Hoop gehoor
+   nie. 'n Installasie-uitklap, 'n "maak in Chrome oop"-balk of die onderste
+   navigasie bo-op iemand se gebedsversoek maak van 'n oomblik 'n advertensie.
+
+   'n Klas op <body> eerder as ses z-indekse wat teen mekaar meeding. */
+body.gebed-oop .install-banner,
+body.gebed-oop .install-persist,
+body.gebed-oop .fb-browser-banner,
+body.gebed-oop .popup-backdrop,
+body.gebed-oop .install-popup-backdrop,
+body.gebed-oop .bottom-nav {
+  display: none !important;
+}
