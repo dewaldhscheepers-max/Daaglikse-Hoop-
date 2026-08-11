@@ -153,8 +153,12 @@
 body.gebed-oop .install-banner,
 body.gebed-oop .install-persist,
 body.gebed-oop .fb-browser-banner,
-body.gebed-oop .popup-backdrop,
 body.gebed-oop .install-popup-backdrop,
 body.gebed-oop .bottom-nav {
   display: none !important;
-}
+}/* ── Ná die gebed tree die blad terug ──
+
+   .popup-backdrop sit op z-index 400. Solank hierdie blad op 12000 staan, kom
+   die app se installasie-uitklap agter hom uit en dit lyk of die knoppie niks
+   doen nie. Sodra sy gebid het, sak ons onder daardie 400 in. */
+.bvm.bvm-gebid { z-index: 300; }

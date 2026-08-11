@@ -27,7 +27,7 @@ import { toestelId } from '../data/sorgStuur'
 import { saamSinVirOntvanger } from '../data/gebedDeel'
 import './BidVirMy.css'
 
-export default function BidVirMy({ id, onKlaar }) {
+export default function BidVirMy({ id, onKlaar, onGebid }) {
   const [gebed,  setGebed]  = useState(null)
   const [laai,   setLaai]   = useState(true)
   const [weg,    setWeg]    = useState(false)
@@ -37,10 +37,25 @@ export default function BidVirMy({ id, onKlaar }) {
   /* Terwyl hierdie blad oop is, wys die app niks anders nie — geen
      installasie-balk, geen uitklap, geen onderste navigasie. Sien die
      .gebed-oop-reels in BidVirMy.css. */
+  /* ── Wanneer die app weer mag praat ──
+
+     Terwyl sy die versoek lees en bid, wys die app niks anders nie: geen
+     installasie-uitklap, geen kennisgewing-balk, geen navigasie. Sy het gekom
+     om vir iemand te bid.
+
+     Sodra sy gebid het, val daardie stilte weg. Dan is dit presies die oomblik
+     waarop die app normaalweg vra — sy het pas iets gekry en gegee, en "wil jy
+     dit op jou foon hê?" is 'n redelike vraag eerder as 'n onderbreking. Dit
+     is dieselfde vloei wat 'n nuwe mens kry wat die app in 'n blaaier oopmaak;
+     ons doen niks nuuts nie, ons stel dit net uit tot ná die gebed. */
   useEffect(() => {
+    if (gebid) {
+      document.body.classList.remove('gebed-oop')
+      return
+    }
     document.body.classList.add('gebed-oop')
     return () => document.body.classList.remove('gebed-oop')
-  }, [])
+  }, [gebid])
 
   useEffect(() => {
     let lewendig = true
@@ -67,6 +82,8 @@ export default function BidVirMy({ id, onKlaar }) {
       if (d && typeof d.saam === 'number') setGebed(g => (g ? { ...g, saam: d.saam } : g))
     } catch { /* die gebed het gebeur, ook al het die telling nie */ }
     setBesig(false)
+    /* App vat dit oor: die installasie-uitklap, en daarna die kennisgewings. */
+    if (onGebid) onGebid()
   }
 
   if (laai) {
@@ -92,7 +109,7 @@ export default function BidVirMy({ id, onKlaar }) {
   const reeds = saamSinVirOntvanger(gebed.saam)
 
   return (
-    <div className="bvm">
+    <div className={`bvm${gebid ? ' bvm-gebid' : ''}`}>
       <div className="bvm-kaart">
 
         {!gebid ? (
@@ -130,6 +147,7 @@ export default function BidVirMy({ id, onKlaar }) {
                 Kyk wat Daaglikse Hoop is
               </button>
             </div>
+
           </>
         )}
 

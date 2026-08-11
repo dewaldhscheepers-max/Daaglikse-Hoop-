@@ -112,6 +112,13 @@ export default function App() {
   const [showArk, setShowArk]                     = useState(false)
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
+  /* Die id van 'n gedeelde gebedsversoek — /bid/<id>. Dit staan HIER by die
+     res van die toestand en nie langs sy eie effek nie: die
+     installasie-uitklap se effek noem dit in sy afhanklikheidslys, en daardie
+     lys word tydens die render gelees. Staan die verklaring later, val die
+     hele app om met "Cannot access before initialization". */
+  const [gebedId, setGebedId] = useState(null)
+  const [gebedGebid, setGebedGebid] = useState(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -162,6 +169,14 @@ export default function App() {
   // ── Once-per-day install popup (3s delay, not while audio plays) ──
   useEffect(() => {
     if (isInstalled) return
+    /* Nie oor 'n gedeelde gebedsversoek nie. Die mens wat daar land, het 'n
+       boodskap gekry wat vra dat sy vir iemand bid — 'n installasie-uitklap
+       drie sekondes later maak van daardie oomblik 'n advertensie.
+
+       Dit is UITGESTEL, nie afgeskakel nie. Sodra sy gebid het, mag die app
+       vra -- presies dieselfde vloei as 'n nuwe mens wat die app in 'n
+       blaaier oopmaak. Sien gebedGebidHanteer(). */
+    if (gebedId && !gebedGebid) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
     const t = setTimeout(() => {
@@ -171,7 +186,7 @@ export default function App() {
       }
     }, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled])
+  }, [isInstalled, gebedId, gebedGebid])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -282,7 +297,12 @@ export default function App() {
     }
   }
 
-  function dismissInstallPopup() { setShowInstallPopup(false) }
+  function dismissInstallPopup() {
+    setShowInstallPopup(false)
+    /* Kom die uitklap uit die gebedsvloei, is die kennisgewing-vraag die
+       volgende stap. Andersins bly alles soos dit was. */
+    if (gebedGebid) vraKennisgewingsDalk()
+  }
 
   // ── Forward install requests from FreeBookModal ──
   useEffect(() => {
@@ -611,7 +631,6 @@ export default function App() {
      Die id bly in die toestand nadat die pad uit die adresbalk gevee is —
      anders sit dit in die geskiedenis en 'n mens deel per ongeluk sy eie
      blaaierblad. */
-  const [gebedId, setGebedId] = useState(null)
   useEffect(() => {
     try {
       const pad = window.location.pathname || ''
@@ -629,9 +648,28 @@ export default function App() {
 
      'bidsaam' beteken sy wil self 'n versoek plaas — dan vat ons haar tot IN
      die kassie, dieselfde vlag wat Bid Saam self al lees. */
+  /* ── Sy het gebid ──
+
+     Nou doen die app wat hy vir enige nuwe mens doen: vra of sy dit op haar
+     foon wil hê, en daarna of sy kennisgewings wil kry. Niks nuuts nie —
+     dieselfde twee vensters, net op die regte oomblik.
+
+     Die volgorde is installasie eerst, kennisgewings daarna. Vra 'n mens vir
+     kennisgewings in 'n blaaier waar die app nie geinstalleer is nie, is die
+     toestemming in elk geval minder werd. */
+  function gebedGebidHanteer() {
+    setGebedGebid(true)
+    if (!isInstalled) {
+      setShowInstallPopup(true)
+    } else {
+      vraKennisgewingsDalk()
+    }
+  }
+
   function gebedKlaar(waarheen) {
     try { sessionStorage.removeItem('gebed_versoek') } catch {}
     setGebedId(null)
+    setGebedGebid(false)
     if (waarheen === 'bidsaam') {
       try { sessionStorage.setItem('bidsaam_fokus', '1') } catch {}
       setTab('bidsaam')
@@ -881,7 +919,13 @@ export default function App() {
           gehoor nie. Sy het 'n boodskap van iemand gekry wat vra dat sy bid.
           Sien sy eers 'n tuisblad, 'n installasie-uitklap en 'n onderste
           navigasie, is sy weg voor sy by die gebed kom. */}
-      {gebedId && <BidVirMy id={gebedId} onKlaar={gebedKlaar} />}
+      {gebedId && (
+        <BidVirMy
+          id={gebedId}
+          onKlaar={gebedKlaar}
+          onGebid={gebedGebidHanteer}
+        />
+      )}
 
       {showAdmin    && <Admin onClose={() => setShowAdmin(false)} />}
       {/* Die steunblad sit onder die twee betaalvensters, sodat 'n mens
