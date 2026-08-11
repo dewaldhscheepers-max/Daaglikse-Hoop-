@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.dewaldscheepers.daagliksehoop",
+      "package_name": "com.dewaldscheepers.daaglikshoop",
       "sha256_cert_fingerprints": [
-        "C2:41:3F:0E:7A:56:5E:8D:2A:D8:14:7A:7E:B3:F5:B1:5F:99:16:C9:49:FE:0E:18:A9:90:CC:E0:43:FA:05:32"
+        "72:37:D1:1F:67:77:C7:CD:CD:9F:9B:EA:4B:11:BD:25:87:2F:C6:8E:37:B8:23:25:EE:5B:93:DE:D7:E0:E4:D9"
       ]
     }
   }
