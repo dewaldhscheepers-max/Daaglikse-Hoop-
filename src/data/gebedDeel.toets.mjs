@@ -4,8 +4,8 @@
    nie, want dit is 'n funksie wat 'n mens se swaarste woorde oor WhatsApp
    stuur.
 
-   Die belangrikste een: 'n krisisversoek mag nooit deelbaar wees nie, ook nie
-   wanneer die persoon self die toestemmingsblokkie gemerk het nie. */
+   Die belangrikste een: 'n krisisversoek mag nooit deelbaar wees nie. Die hek
+   loop op die TEKS, sodat niks wat 'n mens elders kies dit kan omseil nie. */
 
 import {
   magDeel, saamSin, saamSinVirOntvanger, gebedSkakel, idUitPad,
@@ -25,8 +25,8 @@ for (const teks of [
   'My man slaan my en ek is bang vir my lewe',
   'Ek wil nie meer lewe nie asseblief bid vir my',
 ]) {
-  const u = magDeel({ teks, toestemming: true })
-  is(`geweier ondanks toestemming: "${teks.slice(0, 34)}…"`, u.mag, false)
+  const u = magDeel({ teks })
+  is(`geweier: "${teks.slice(0, 34)}…"`, u.mag, false)
   is('  en die rede is krisis', u.rede, 'krisis')
   is('  en die woorde word genoem', u.krisis.length > 0, true)
 }
@@ -36,21 +36,25 @@ for (const teks of [
   'Bid asseblief vir my, bel my by 0821234567 as jy wil',
   'My nommer is 083 555 1234, bid vir my huwelik asseblief',
 ]) {
-  const u = magDeel({ teks, toestemming: true })
+  const u = magDeel({ teks })
   is(`geweier: "${teks.slice(0, 34)}…"`, u.mag, false)
   is('  en die rede is kontak', u.rede, 'kontak')
 }
 
-console.log('\n── Toestemming is nie opsioneel nie ──')
-is('sonder toestemming, geen deel',
-   magDeel({ teks: 'Bid asseblief vir my huwelik, dit gaan swaar', toestemming: false }).mag, false)
-is('  rede', magDeel({ teks: 'Bid asseblief vir my huwelik, dit gaan swaar', toestemming: false }).rede, 'geen-toestemming')
+console.log("\n── Die toestemmingsblokkie is weg ──")
+/* Daar was 'n derde hek: 'n blokkie wat 'n mens vooraf moes merk. Dit is weg,
+   want die deel-AKSIE self is die toestemming — 'n mens sien wat gestuur word
+   en kies vir wie. Wat bly, is die twee hekke oor die TEKS.
+
+   Die hek wat NIE mag verslap nie, is die krisis-een hierbo. */
+is('magDeel vra nie meer na toestemming nie',
+   magDeel({ teks: 'Bid asseblief vir my huwelik, dit gaan swaar' }).mag, true)
 
 console.log('\n── Te kort ──')
-is(`onder ${MIN_LENGTE} karakters`, magDeel({ teks: 'bid', toestemming: true }).mag, false)
-is('  rede', magDeel({ teks: 'bid', toestemming: true }).rede, 'te-kort')
-is('leeg', magDeel({ teks: '', toestemming: true }).mag, false)
-is('niks', magDeel({ teks: null, toestemming: true }).mag, false)
+is(`onder ${MIN_LENGTE} karakters`, magDeel({ teks: 'bid' }).mag, false)
+is('  rede', magDeel({ teks: 'bid' }).rede, 'te-kort')
+is('leeg', magDeel({ teks: '' }).mag, false)
+is('niks', magDeel({ teks: null }).mag, false)
 
 console.log('\n── Wat WEL deur moet kom ──')
 for (const teks of [
@@ -58,7 +62,7 @@ for (const teks of [
   'My werk is weg en ek weet nie hoe ek volgende maand gaan betaal nie.',
   'Ek is bang oor my kind se toekoms en ek slaap sleg.',
   'Bid asseblief vir my ma se gesondheid.',
-]) is(`deur: "${teks.slice(0, 40)}…"`, magDeel({ teks, toestemming: true }).mag, true)
+]) is(`deur: "${teks.slice(0, 40)}…"`, magDeel({ teks }).mag, true)
 
 console.log('\n── Die teller. 0 mag NOOIT as "0 mense" wys nie ──')
 is('nul is stil en warm', saamSin(0), 'Jou gebedsversoek is nou deel van ons gebedsgemeenskap.')

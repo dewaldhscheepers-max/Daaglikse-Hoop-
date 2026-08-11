@@ -255,7 +255,6 @@ export default function BidSaam() {
   /* "Bid vir my" — sien gebedDeel.js. `nuweId` is die id van die versoek wat
      pas geplaas is; is dit null, was die versoek nie deelbaar nie en wys ons
      geen deel-knoppie nie. */
-  const [magDeelVra,  setMagDeelVra]  = useState(false)
   const [nuweId,      setNuweId]      = useState(null)
   const [krisisGewys, setKrisisGewys] = useState(false)
   const [prayedToast, setPrayedToast] = useState(false)
@@ -367,7 +366,7 @@ export default function BidSaam() {
     /* Die hek loop VOOR die skryf, sodat `deelbaar` reeds reg op die dokument
        staan. Die bediener doen dit weer — 'n kliënt kan lieg — maar dit hou
        die data self skoon. */
-    const keuring = magDeel({ teks: text, toestemming: magDeelVra })
+    const keuring = magDeel({ teks: text })
 
     try {
       const ref = await addDoc(collection(db, 'prayers'), {
@@ -396,7 +395,6 @@ export default function BidSaam() {
       }
 
       setText('')
-      setMagDeelVra(false)
       setSubmitted(true)
       /* Nie meer 'n tydhouer van vier sekondes nie. Is daar 'n deel-knoppie,
          moet dit bly staan tot die mens self kies. */
@@ -554,28 +552,10 @@ export default function BidSaam() {
             rows={4}
             maxLength={500}
           />
-          {/* ── Toestemming om te deel ──
-
-              Dit is nie 'n bemarkingsblokkie nie. Sonder dit mag die versoek
-              nooit 'n skakel kry nie — sien magDeel() in gebedDeel.js en die
-              hek op die bediener.
-
-              Dit staan ONDER die kassie en dit is nie vooraf gemerk nie. 'n
-              Mens wat swaarkry, moet nie per ongeluk sy woorde oor WhatsApp
-              stuur nie. */}
-          <label className="bvm-toestem">
-            <input
-              type="checkbox"
-              checked={magDeelVra}
-              onChange={e => setMagDeelVra(e.target.checked)}
-            />
-            <span>Ek wil hierdie versoek kan stuur aan mense wat ek vertrou, sodat hulle saam kan bid.</span>
-          </label>
-
           <div className="input-footer">
             <span className="char-count">{text.length}/500</span>
             <button className="btn-primary submit-btn" onClick={submit} disabled={!text.trim()}>
-              Deel jou gebedsversoek
+              Plaas my gebedsversoek
             </button>
           </div>
 
@@ -586,14 +566,14 @@ export default function BidSaam() {
               heel laaste. */}
           {submitted && (
             <div className="bvm-na">
-              <p className="bvm-na-kop">Jou gebedsversoek is geplaas. 🙏🏻</p>
-              <p className="bvm-na-sag">Jy hoef nie alleen hiermee te staan nie.</p>
+              <p className="bvm-na-kop">Dankie. Jou gebedsversoek is geplaas. 🙏🏻</p>
+              <p className="bvm-na-sag">Ons bid saam met jou.</p>
 
               {nuweId ? (
                 <>
-                  <p className="bvm-na-vra">Wil jy iemand wat jy vertrou vra om saam met jou te bid?</p>
+                  <p className="bvm-na-vra">Wil jy dit ook vir iemand stuur wat jy vertrou?</p>
                   <button className="bvm-na-knop" onClick={stuurMyVersoek}>
-                    Stuur my gebedsversoek
+                    Stuur vir iemand
                   </button>
                 </>
               ) : (

@@ -30,13 +30,26 @@ export const MAKS_LENGTE = 600
 
 /* ── Mag hierdie versoek gedeel word? ──
 
-   Drie hekke, en die volgorde maak saak: die krisishek eerste, want dit is
-   die een wat 'n mens nooit met 'n toestemmingsblokkie mag omseil nie.
+   Twee hekke, en albei gaan oor die TEKS. Daar was 'n derde — 'n
+   toestemmingsblokkie onder die kassie — en dit is weg.
+
+   Die rede: die deel-aksie self IS die toestemming. 'n Mens plaas sy versoek,
+   sien dan "Wil jy dit ook vir iemand stuur wat jy vertrou?", en druk die
+   knoppie. Dit is 'n vrywillige, spesifieke en ingeligte keuse op die oomblik
+   dat dit gebeur — hy sien presies wat gestuur word en aan wie hy dit stuur.
+
+   Die blokkie het gevra dat iemand vooraf besluit oor iets wat hy dalk nooit
+   gaan doen nie, op die presiese oomblik dat hy net gebed wil vra. Dit het die
+   skerm administratief laat voel op die plek waar dit menslik moet wees.
+
+   Toestemming vir die OPENBARE MUUR is 'n aparte ding en bly waar dit was —
+   dit is wat die "Anoniem, geen name word gestoor nie"-reël bo die kassie doen.
+   Die twee moet nie deurmekaar geraak nie: op die muur verskyn is nie
+   dieselfde as om 'n skakel aan jou suster te stuur nie.
 
    Gee 'n rede terug, nie net 'n ja of nee nie — die skerm moet kan sê wat
-   fout is, en die admin moet later kan sien hoekom iets nie versprei het
-   nie. */
-export function magDeel({ teks, toestemming }) {
+   fout is. */
+export function magDeel({ teks }) {
   const krisis = krisisTreffers(teks)
   if (krisis.length) {
     return { mag: false, rede: 'krisis', krisis, kontak: [] }
@@ -45,10 +58,6 @@ export function magDeel({ teks, toestemming }) {
   const kontak = kontakTreffers(teks)
   if (kontak.length) {
     return { mag: false, rede: 'kontak', krisis: [], kontak }
-  }
-
-  if (!toestemming) {
-    return { mag: false, rede: 'geen-toestemming', krisis: [], kontak: [] }
   }
 
   const skoon = String(teks || '').trim()
