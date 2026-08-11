@@ -571,9 +571,9 @@ export default function BidSaam() {
 
               {nuweId ? (
                 <>
-                  <p className="bvm-na-vra">Wil jy dit ook vir iemand stuur wat jy vertrou?</p>
+                  <p className="bvm-na-vra">Wil jy iemand wat jy vertrou vra om ook saam met jou te bid?</p>
                   <button className="bvm-na-knop" onClick={stuurMyVersoek}>
-                    Stuur vir iemand
+                    Vra iemand om saam te bid
                   </button>
                 </>
               ) : (
