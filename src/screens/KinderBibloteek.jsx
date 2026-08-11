@@ -72,8 +72,19 @@ export default function KinderBibloteek({ onClose }) {
       collection(db, 'kinderBoeke'),
       snap => {
         const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        const published = fetched.filter(b => b.status === 'published')
-        setBooks(published.length > 0 ? published : KINDER_BOEKE)
+
+        /* Hier het gestaan: `fetched.filter(b => b.status === 'published')`.
+           'n Nuwe boek het op 'draft' begin, en die keuselys om dit te
+           verander was maklik om te mis. 'n Mens laai dan die bladsye op, druk
+           Stoor, en die boek verskyn eenvoudig nie — sonder dat enigiets se
+           hoekom. Die keuselys is weg; sien KinderAdmin.jsx.
+
+           Wat 'n boek nou laat wys, is of hy BLADSYE het. Dit is dieselfde
+           beskerming sonder 'n knoppie om te vergeet: 'n halfklaar boek wys
+           nie, want daar is niks om te wys nie, en dit word vanself reg sodra
+           die bladsye opgelaai is. */
+        const metBladsye = fetched.filter(b => (b.pages || []).length > 0)
+        setBooks(metBladsye.length > 0 ? metBladsye : KINDER_BOEKE)
         setFsLoading(false)
       },
       () => {

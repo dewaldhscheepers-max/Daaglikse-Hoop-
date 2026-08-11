@@ -122,7 +122,7 @@ export default function KinderAdmin({ geheim = '' }) {
   }
 
   function openNewBook() {
-    setEditingBook({ id: '', title: '', description: '', ageRange: '2–5 jaar', pages: [], status: 'draft', audioUrl: '' })
+    setEditingBook({ id: '', title: '', description: '', ageRange: '2–5 jaar', pages: [], status: 'published', audioUrl: '' })
     setSaveMsg('')
     setAudioMsg('')
     setDeleteConfirm(false)
@@ -297,8 +297,14 @@ export default function KinderAdmin({ geheim = '' }) {
                 <div className="ka-book-info">
                   <div className="ka-book-title">{book.title || '(Sonder titel)'}</div>
                   <div className="ka-book-meta">
-                    <span className={`ka-badge ${book.status === 'published' ? 'ka-badge-pub' : 'ka-badge-draft'}`}>
-                      {book.status === 'published' ? 'Gepubliseer' : 'Konsep'}
+                    {/* Die etiket wys nou wat WERKLIK bepaal of 'n boek in die
+                        app verskyn: of hy bladsye het. Dit het vantevore
+                        `status` gewys, en 'n boek kon "Gepubliseer" sê terwyl
+                        hy leeg was — of "Konsep" terwyl hy klaar was. */}
+                    <span className={`ka-badge ${(book.pages || []).length ? 'ka-badge-pub' : 'ka-badge-draft'}`}>
+                      {(book.pages || []).length
+                        ? `${book.pages.length} bladsye · wys in die app`
+                        : 'Geen bladsye · wys nie'}
                     </span>
                     {book.audioUrl && <span className="ka-audio-badge">🎵 Oudio</span>}
                   </div>
@@ -350,17 +356,18 @@ export default function KinderAdmin({ geheim = '' }) {
         />
       </div>
 
-      <div className="admin-field">
-        <label>Status</label>
-        <select
-          className="ka-select"
-          value={editingBook.status}
-          onChange={e => setEditingBook(prev => ({ ...prev, status: e.target.value }))}
-        >
-          <option value="draft">Konsep</option>
-          <option value="published">Gepubliseer</option>
-        </select>
-      </div>
+      {/* Hier was 'n keuselys tussen Konsep en Gepubliseer. Dit is weg.
+
+          Die biblioteek het net op 'status === "published"' gewys, en 'n nuwe
+          boek het op 'draft' begin. 'n Mens laai dus die bladsye op, druk
+          Stoor, en niks gebeur — sonder dat enigiets se hoekom. Die enigste
+          ding wat daardie keuselys ooit gedoen het, was om 'n boek weg te
+          steek wat klaar gemaak is.
+
+          Nou publiseer alles. Wat 'n boek laat wys, is of hy BLADSYE het —
+          sien KinderBibloteek.jsx. Dit is dieselfde beskerming sonder 'n
+          knoppie om te vergeet: 'n leë boek wys nie, want daar is niks om te
+          wys nie. */}
 
       {/* ── Stemopname / Audio ── */}
       <div className="ka-audio-section">
