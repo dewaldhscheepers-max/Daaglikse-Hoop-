@@ -5,6 +5,9 @@
       "namespace": "android_app",
       "package_name": "com.dewaldscheepers.daaglikshoop",
       "sha256_cert_fingerprints": [
+        "58:43:BF:64:D9:FD:64:F6:E0:8E:D5:73:F3:D4:92:EE:C9:FD:97:95:8B:0E:56:5F:C7:9E:61:CB:00:1F:2F:73",
+        "1B:A9:35:57:9F:36:0A:A6:A3:90:90:CF:77:91:38:34:5A:E7:21:A5:58:1E:D1:C4:5D:47:E9:61:3A:93:A5:C8",
+        "8E:18:95:26:1C:3C:40:1A:80:83:8A:4D:A2:F7:05:D0:B0:11:5B:BE:7E:66:9F:FB:E6:1B:64:43:29:12:B9:10",
         "72:37:D1:1F:67:77:C7:CD:CD:9F:9B:EA:4B:11:BD:25:87:2F:C6:8E:37:B8:23:25:EE:5B:93:DE:D7:E0:E4:D9"
       ]
     }
