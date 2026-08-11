@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot } from 'firebase/firestore'
-import { db } from '../firebase'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { boekeWatWys } from '../data/kinderBoekeWys'
 import KinderBoekLeser from './KinderBoekLeser'
@@ -68,22 +66,38 @@ export default function KinderBibloteek({ onClose }) {
   const [books, setBooks]             = useState(null)
   const [fsLoading, setFsLoading]     = useState(true)
 
+  /* ── Waarom dit deur die bediener lees en nie deur Firestore nie ──
+
+     Hier het `onSnapshot(collection(db, 'kinderBoeke'))` gestaan. Dit het
+     STIL misluk: daar is geen `match /kinderBoeke/{id}` in firestore.rules
+     nie, en Firestore weier by verstek. Die foutgeval het toe die ingeboude
+     lys gewys, en dit lyk soos 'n app wat werk. Sewe boeke, altyd sewe, hoeveel
+     'n mens ook al oplaai — en niks in die app se ooit hoekom nie.
+
+     'n Mens kon 'n reel bygevoeg het, maar dan moet iemand dit in Firebase
+     gaan ontplooi voor dit iets doen. /api/kinder-boeke-list bestaan reeds,
+     lees met die diensrekening, en die admin gebruik dit al die hele tyd.
+
+     Wat ons verloor is die lewende opdatering — 'n boek wat NOU opgelaai word,
+     verskyn by die volgende oopmaak in plaas van dadelik. Vir 'n biblioteek wat
+     'n paar keer per maand verander, is dit niks. */
   useEffect(() => {
-    const unsub = onSnapshot(
-      collection(db, 'kinderBoeke'),
-      snap => {
-        const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    let lewendig = true
+    fetch('/api/kinder-boeke-list', { headers: { accept: 'application/json' } })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+      .then(d => {
+        if (!lewendig) return
         /* Die reel staan in src/data/kinderBoekeWys.js, want die telling op
            die promo-kaart moet dieselfde antwoord kry. */
-        setBooks(boekeWatWys(fetched, KINDER_BOEKE))
+        setBooks(boekeWatWys(d.books, KINDER_BOEKE))
         setFsLoading(false)
-      },
-      () => {
+      })
+      .catch(() => {
+        if (!lewendig) return
         setBooks(KINDER_BOEKE)
         setFsLoading(false)
-      }
-    )
-    return unsub
+      })
+    return () => { lewendig = false }
   }, [])
 
   const displayBooks = books ?? KINDER_BOEKE

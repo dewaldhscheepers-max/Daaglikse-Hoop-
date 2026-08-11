@@ -95,12 +95,12 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
      nie weer kan verskil nie. */
   const [kinderBoeke, setKinderBoeke] = useState(KINDER_BOEKE)
   useEffect(() => {
-    const unsub = onSnapshot(
-      collection(db, 'kinderBoeke'),
-      snap => setKinderBoeke(boekeWatWys(snap.docs.map(d => ({ id: d.id, ...d.data() })), KINDER_BOEKE)),
-      () => setKinderBoeke(KINDER_BOEKE),
-    )
-    return unsub
+    let lewendig = true
+    fetch('/api/kinder-boeke-list', { headers: { accept: 'application/json' } })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+      .then(d => { if (lewendig) setKinderBoeke(boekeWatWys(d.books, KINDER_BOEKE)) })
+      .catch(() => {})
+    return () => { lewendig = false }
   }, [])
 
   // Load rgCount from campaign-count API
