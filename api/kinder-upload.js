@@ -67,9 +67,7 @@ module.exports = async function handler(req, res) {
   }
 
   const bucket      = 'daaglikse-hoop.firebasestorage.app'
-  const storagePath = isAudio
-    ? `kinder-boeke/${bookId}/${filename}`
-    : `kinder-boeke/${bookId}/${filename}`
+  const storagePath = `kinder-boeke/${bookId}/${filename}`
   const contentType = getContentType(filename, isAudio)
 
   let buffer
@@ -79,21 +77,65 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Ongeldige lêerdata: ' + e.message })
   }
 
+  /* ── Die aflaai-teken ──
+
+     Toe die blaaier nog self opgelaai het, het `getDownloadURL()` 'n URL met
+     `?alt=media&token=…` teruggegee. Daardie teken is wat 'n prent laat wys
+     sonder dat die Storage-reels dit vir die wereld hoef oop te maak.
+
+     Ons moet dit dus SELF skep. Storage lees die teken uit die objek se eie
+     metadata, uit 'n veld met die naam `firebaseStorageDownloadTokens`. Skryf
+     'n mens die objek sonder daardie veld -- soos hierdie eindpunt vroeer
+     gedoen het -- laai die prent wel op, maar elke poging om hom te WYS gee
+     403. Die admin sou gese het dit is opgelaai, en die boek sou leeg gewees
+     het.
+
+     Daarom die multipart-oplaai: een versoek wat die metadata EN die grepe
+     saam stuur. */
+  const afTeken = crypto.randomUUID()
+  const grens   = 'grens-' + crypto.randomBytes(12).toString('hex')
+  const metadata = {
+    name:        storagePath,
+    contentType,
+    metadata:    { firebaseStorageDownloadTokens: afTeken },
+    cacheControl: 'public, max-age=31536000',
+  }
+
+  const lyf = Buffer.concat([
+    Buffer.from(
+      `--${grens}\r\n` +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      `--${grens}\r\n` +
+      `Content-Type: ${contentType}\r\n\r\n`
+    ),
+    buffer,
+    Buffer.from(`\r\n--${grens}--\r\n`),
+  ])
+
   try {
-    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?uploadType=media&name=${encodeURIComponent(storagePath)}`
+    /* Die gewone Cloud Storage-API, nie die Firebase-een nie. Dit is presies
+       wat die rol "Storage Object Admin" toelaat, en dit aanvaar die
+       metadata saam met die grepe. */
+    const uploadUrl = `https://storage.googleapis.com/upload/storage/v1/b/${bucket}/o?uploadType=multipart`
     const r = await fetch(uploadUrl, {
       method:  'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': contentType },
-      body:    buffer,
+      headers: {
+        Authorization:  `Bearer ${token}`,
+        'Content-Type': `multipart/related; boundary=${grens}`,
+      },
+      body: lyf,
     })
     if (!r.ok) {
       const err = await r.text()
-      return res.status(500).json({ error: 'Storage upload misluk: ' + err })
+      return res.status(500).json({ error: `Storage upload misluk (${r.status}): ` + err.slice(0, 400) })
     }
   } catch (e) {
     return res.status(500).json({ error: 'Storage fout: ' + e.message })
   }
 
-  const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(storagePath)}?alt=media`
+  const downloadUrl =
+    `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/` +
+    `${encodeURIComponent(storagePath)}?alt=media&token=${afTeken}`
   return res.status(200).json({ ok: true, url: downloadUrl })
 }
