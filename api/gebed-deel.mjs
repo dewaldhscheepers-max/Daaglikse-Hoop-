@@ -191,12 +191,22 @@ export default async function handler(req, res) {
      ons se dit ook so op die skerm. Wie dit heeltemal uitgevee wil he, vra dit
      per e-pos; sien /vee-my-data-uit.
 
-     Wie mag dit doen? Die mens wat die versoek geplaas het. Ons het geen
-     rekeninge nie, dus is die bewys dat hy die id in sy eie localStorage het.
-     Dit is swak bewys -- iemand met 'n gedeelde skakel het ook die id. Maar
-     die ERGSTE wat 'n vreemdeling daarmee kan doen, is iemand se versoek stil
-     maak. Hy kan niks lees, niks verander en niks stuur nie. 'n Aanmeldstelsel
-     bou om dit te keer, kos meer as wat dit werd is. */
+     DAAR IS GEEN KNOPPIE HIERVOOR IN DIE APP NIE, en dit is 'n keuse.
+
+     Ek het een gebou en dit weer uitgehaal. 'n Versoek is anoniem, dit dra geen
+     naam of nommer nie, dit val na 30 dae uit die deel-vloei, en die muur wys
+     net die laaste sewe dae. Die skerm om dit toe te maak het meer bygedra tot
+     wat 'n mens moet lees en besluit as tot wat dit beskerm -- op presies die
+     blad wat menslik moet voel.
+
+     Die EINDPUNT bly, want dit kos niks en dit is die enigste manier om 'n
+     gedeelde skakel dood te maak wanneer iemand vra. Vra 'n mens dit per e-pos
+     (sien /vee-my-data-uit), kan dit van hier af gedoen word.
+
+     Wie mag dit roep? Enigiemand met die id. Dit is swak, maar die ERGSTE wat
+     'n vreemdeling daarmee kan doen, is 'n versoek stil maak -- hy kan niks
+     lees, niks verander en niks stuur nie. 'n Aanmeldstelsel bou om dit te
+     keer, kos meer as wat dit werd is. */
   if (req.method === 'PATCH' || (req.method === 'POST' && req.body && req.body.sluit === true)) {
     if (!magBid(gebed).mag) return res.status(404).json({ fout: 'Nie gevind nie' })
     try {
