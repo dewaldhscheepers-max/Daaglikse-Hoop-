@@ -159,30 +159,6 @@ export default function Sorg() {
      Eenmalig, want React se ontwikkelingsmodus roep effekte twee keer. */
   useEffect(() => { telSorg('oop', { eenmalig: true }) }, [])
 
-  /* ── Iemand kom van Luister af, en wil skryf ──
-
-     Die deur op Luister sit 'n vlag en navigeer hierheen. Sonder hierdie
-     stuk sou 'n mens hier land en dan self die knoppie moet gaan soek —
-     wat hy nie doen nie.
-
-     Die vlag word DADELIK uit sessionStorage gehaal, anders maak die vorm
-     weer oop die volgende keer wat hierdie oortjie gekies word. Hy word in
-     'n ref gehou omdat ons nog nie kan besluit nie: `plek` is op hierdie
-     oomblik nog nul en ons weet nie of die dag vol is nie.
-
-     Dat hy die uitnodiging op die blad mis, is reg — die vorm dra self die
-     hele kontrak ("Voor jy jou boodskap deel"), juis vir mense wat reguit
-     hierheen kom. */
-  const wilSkryf = useRef(false)
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem('sorg_fokus') === 'vorm') {
-        wilSkryf.current = true
-        sessionStorage.removeItem('sorg_fokus')
-      }
-    } catch { /* privaat modus */ }
-  }, [])
-
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])
   useEffect(() => {
@@ -212,20 +188,10 @@ export default function Sorg() {
     return haalPlek().then(setPlek)
   }, [])
 
-  /* Nou eers kan die vorm oopmaak vir iemand wat van Luister af kom: ons
-     weet nou of daar vandag plek is.
-
-     Is die dag vol, gebeur daar NIKS — hy land op die blad, waar die eerste
-     ding wat hy sien "Vandag se plekke is vol" is, met die rede daarby. Die
-     alternatief is dat hy 'n hele boodskap vol skryf wat dan geweier word,
-     en dit is presies die ding wat 'n mens laat ophou probeer. */
-  useEffect(() => {
-    if (!plek || !wilSkryf.current) return
-    wilSkryf.current = false
-    if (plek.vol) return
-    telSorg('vorm')
-    setVormOop(true)
-  }, [plek])
+  /* Die deur op Luister het eers reguit hierdie vorm oopgemaak. Dit was te
+     vinnig: iemand wat daar druk, is nuuskierig — hy het nog nie besluit om
+     sy swaarste ding te tik nie, en 'n vorm wat oor sy skerm oopklap, vra
+     dit voordat hy weet wat hierdie plek is. Nou land hy op die blad. */
 
   useEffect(() => {
     let lewendig = true

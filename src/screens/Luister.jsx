@@ -683,15 +683,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     setWpBesig(false)
   }
 
-  /* ── Na Pastorale Sorg, en reguit tot in die vorm ──
-
-     Dieselfde patroon as SorgVorm se knoppie na Bid Saam toe: 'n vlag in
-     sessionStorage plus die navigasie-gebeurtenis wat reeds bestaan.
-
-     Die vlag is die belangrike deel. Iemand wat op 'n blad afgelaai word en
-     dan self die knoppie moet gaan soek, doen dit nie. */
+  /* Na Pastorale Sorg. Dieselfde navigasie-gebeurtenis wat BidNou en
+     SorgVorm reeds gebruik. */
   function naSorg() {
-    try { sessionStorage.setItem('sorg_fokus', 'vorm') } catch { /* privaat modus */ }
     window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'sorg' }))
   }
 
@@ -811,14 +805,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           en land HIER, op Luister — die hele gehoor kom elke oggend by die
           voordeur in en niks het gesê Sorg bestaan nie.
 
-          Dit is nie 'n bemarkingsblok nie. Dit is een vraag en een knoppie,
-          en dit staan onder die speler omdat 'n mens dit eers ná die
-          boodskap moet sien, nie in plaas daarvan nie. */}
+          Dit staan onder die speler omdat 'n mens dit eers ná die boodskap
+          moet sien, nie in plaas daarvan nie.
+
+          EEN reel, en dit moet soos 'n KNOPPIE lyk. Dit was 'n kaart met 'n
+          opskrif en twee reels daaronder, en dit het soos nog 'n blok teks
+          gelyk — 'n mens lees dit en druk dit nie.
+
+          Dit gaan na die Sorg-BLAD, nie na die vorm nie. Iemand wat hier
+          druk, is nuuskierig; hy het nog nie besluit om sy swaarste ding te
+          tik nie. 'n Vorm wat oor sy skerm oopklap, is te vinnig. */}
       <button className="sorg-deur" onClick={naSorg}>
-        <span className="sorg-deur-vra">Dra jy iets swaars?</span>
-        <span className="sorg-deur-fyn">
-          Vertel my daarvan — anoniem, en 'n mens lees elke boodskap self.
-        </span>
+        Dra jy iets swaars? Vertel my daarvan →
       </button>
 
       {nlState !== 'done' && <div className="luister-newsletter">
