@@ -229,6 +229,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [bookmarkToast, setBookmarkToast]   = useState(false)
   const [listenShareNote, setListenShareNote] = useState(null)
   const [wpBesig, setWpBesig]         = useState(false)
+  const [wpFout, setWpFout]           = useState(null)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -565,46 +566,88 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
      WhatsApp, Facebook, Instagram, e-pos, alles. Dieselfde patroon as
      Vredepad se vers-kaart, wat al maande werk.
 
-     Die terugval is 'n gewone aflaai. Op 'n rekenaar, of in 'n blaaier wat
-     nie lêers kan deel nie, kry 'n mens die prent in sy Aflaaie -- steeds
-     beter as 'n instruksie om lank te druk. */
+     ── Waarom die prent deur ons eie bediener kom ──
+
+     Die eerste weergawe het `fetch(today.wallpaperUrl)` direk gedoen en dit
+     het NIE gewerk nie: die prent le op firebasestorage.googleapis.com en
+     daardie emmer het geen CORS-opstelling nie. 'n <img> wys hom sonder
+     moeite, maar 'n `fetch` van 'n ander domein af word geblokkeer. Die
+     kode het toe stil na teks-alleen teruggeval, en op WhatsApp het net 'n
+     skakel geland -- dit LYK of dit werk.
+
+     `prentPad()` stuur enige vreemde domein deur /api/wallpaper, wat dit
+     vanaf ons eie domein teruggee. Daar is geen CORS-vraag oor jou eie
+     domein nie.
+
+     ── En as dit steeds misluk ──
+
+     Dan word dit GESE. 'n Stille terugval na teks is presies hoe hierdie
+     fout die eerste keer verby gekom het. */
+  function prentPad(url) {
+    /* 'n Relatiewe pad of ons eie domein: haal dit soos dit is. */
+    try {
+      const u = new URL(url, window.location.href)
+      if (u.origin === window.location.origin) return u.toString()
+      return `/api/wallpaper?u=${encodeURIComponent(u.toString())}`
+    } catch {
+      return url
+    }
+  }
+
   async function deelWallpaper() {
     if (!today?.wallpaperUrl || wpBesig) return
     setWpBesig(true)
+    setWpFout(null)
     const boodskap = `${today.title || 'Daaglikse Hoop'}\n\nElke oggend 'n kort woord van hoop, in Afrikaans.\nhttps://dewaldscheepers.com/go`
-    try {
-      const r = await fetch(today.wallpaperUrl, { mode: 'cors' })
-      if (!r.ok) throw new Error('kon nie haal nie')
-      const blob = await r.blob()
-      const lêer = new File([blob], 'daaglikse-hoop.jpg', { type: blob.type || 'image/jpeg' })
 
-      /* canShare({ files }) is die enigste betroubare toets. navigator.share
-         bestaan op baie blaaiers wat NIE lêers kan deel nie, en dan gooi dit
-         eers wanneer 'n mens dit roep. */
-      if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
-        await navigator.share({ files: [lêer], text: boodskap })
-        setWpBesig(false)
-        return
+    let blob = null
+    try {
+      const r = await fetch(prentPad(today.wallpaperUrl))
+      if (r.ok) {
+        const b = await r.blob()
+        /* 'n Foutbladsy is ook 'n geldige antwoord. Net 'n prent tel. */
+        if (/^image\//.test(b.type) && b.size > 1024) blob = b
+      }
+    } catch {}
+
+    if (blob) {
+      const lêer = new File([blob], 'daaglikse-hoop.jpg', { type: blob.type })
+      try {
+        /* canShare({ files }) is die enigste betroubare toets. navigator.share
+           bestaan op baie blaaiers wat NIE lêers kan deel nie, en dan gooi dit
+           eers wanneer 'n mens dit roep. */
+        if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
+          await navigator.share({ files: [lêer], text: boodskap })
+          setWpBesig(false)
+          return
+        }
+      } catch (e) {
+        /* Die mens het die deelvenster toegemaak. Dit is nie 'n fout nie. */
+        if (e && e.name === 'AbortError') { setWpBesig(false); return }
       }
 
-      /* Geen lêer-deel nie: laai dit af. */
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'daaglikse-hoop.jpg'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      setTimeout(() => URL.revokeObjectURL(url), 4000)
-      setShareToast(true)
-      setTimeout(() => setShareToast(false), 2500)
-    } catch {
-      /* Die prent kon nie gehaal word nie -- deel dan darem die woorde. */
+      /* Die blaaier kan nie lêers deel nie (meestal 'n rekenaar): laai af. */
       try {
-        if (navigator.share) await navigator.share({ text: boodskap })
-        else { await navigator.clipboard.writeText(boodskap); setShareToast(true); setTimeout(() => setShareToast(false), 2500) }
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'daaglikse-hoop.jpg'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        setTimeout(() => URL.revokeObjectURL(url), 4000)
+        setWpFout('Die prent is na jou Aflaaie toe. Stuur dit van daar af.')
+        setWpBesig(false)
+        return
       } catch {}
     }
+
+    /* Die prent kon glad nie gekry word nie. Stuur die woorde, en se dit. */
+    try {
+      if (navigator.share) await navigator.share({ text: boodskap })
+      else await navigator.clipboard.writeText(boodskap)
+    } catch {}
+    setWpFout('Die prent kon nie gestuur word nie — net die skakel is gestuur. Hou jou vinger op die foto en kies "Save image".')
     setWpBesig(false)
   }
 
@@ -761,6 +804,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               {wpBesig ? 'Een oomblik…' : 'Deel hierdie prent'}
             </button>
             <div className="wp-card-fyn">Sit dit op jou WhatsApp-status, of stuur dit vir iemand.</div>
+            {wpFout && <div className="wp-card-fout">{wpFout}</div>}
           </div>
         ) : null}
         {installBanner}

@@ -872,3 +872,17 @@
   text-align: center;
   margin-top: 8px;
 }
+
+/* Kon die prent nie gestuur word nie, word dit gesê. 'n Stille terugval na
+   teks-alleen is hoe hierdie fout die eerste keer verby gekom het. */
+.wp-card-fout {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #8A5A3C;
+  background: #FDF3EA;
+  border: 1px solid #F0DCC9;
+  border-radius: 10px;
+  text-align: center;
+  margin-top: 10px;
+  padding: 9px 11px;
+}
