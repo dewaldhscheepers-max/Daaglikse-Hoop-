@@ -5,7 +5,7 @@ import {
   serverTimestamp, orderBy, query, where, limit,
   increment, Timestamp, onSnapshot
 } from 'firebase/firestore'
-import { magDeel, gebedSkakel, deelBoodskap, saamSin, magVraHoeGaanDit } from '../data/gebedDeel'
+import { magDeel, gebedSkakel, deelBoodskap } from '../data/gebedDeel'
 import { toestelId } from '../data/sorgStuur'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
@@ -98,79 +98,21 @@ function formatDuration(secs) {
 }
 
 
-/* ────────────────────────────────────────────────────────────
-   "Jou gebedsversoek" — wat die mens sien wat GEVRA het.
+/* ── Hier was "Jou gebedsversoek" ──
 
-   Dit was die gat in fase 1. Die hele funksie se punt is hierdie oomblik:
+   'n Kaart bo-aan Bid Saam wat gese het hoeveel mense saam met jou gebid het,
+   en 'n paar dae later gevra het hoe dit gaan.
 
-     "Ek het gedink ek dra dit alleen. Maar veertien mense het vandag saam met
-      my voor God gestaan."
+   Dit is weg. Die skerm het met drie kaarte bo mekaar oopgemaak voordat 'n
+   mens by die versoeke self gekom het, en die getal het in elk geval op die
+   muur onder jou eie versoek gestaan.
 
-   Sonder hierdie kaart kon 'n mens 'n versoek plaas, dit stuur, en nooit weet
-   of iemand gebid het nie.
-
-   Die id's van 'n mens se eie versoeke le in localStorage — nie op 'n bediener
-   nie, want dan sou daar 'n rekord wees van WIE wat gevra het, en die hele
-   Bid Saam is anoniem. Die prys is dat 'n mens dit op 'n ander foon nie sien
-   nie. Dit is die regte prys.
-   ──────────────────────────────────────────────────────────── */
-const MY_SLEUTEL = 'myGebede'
-
-function leesMyne() {
-  try {
-    /* 'n Afgeslote versoek wys nie meer op hierdie kaart nie. Daar is nie 'n
-       knoppie in die app om dit toe te maak nie -- sien die nota by die
-       sluit-eindpunt in api/gebed-deel.mjs -- maar die veld bestaan, en as dit
-       ooit gesit word, moet die kaart daarby hou. */
-    return JSON.parse(localStorage.getItem(MY_SLEUTEL) || '[]').filter(m => !m.gesluit)
-  } catch { return [] }
-}
-function skryfMyne(lys) {
-  try { localStorage.setItem(MY_SLEUTEL, JSON.stringify(lys.slice(0, 20))) } catch {}
-}
-
-function MyVersoek({ prayers }) {
-  const [myne, setMyne] = useState(leesMyne)
-  const [dankie, setDankie] = useState(false)
-
-  /* Die nuutste een. Meer as een sou 'n lys word, en 'n lys van jou eie
-     swaarkry is nie wat 'n mens wil sien wanneer jy die app oopmaak nie. */
-  const myne0 = myne[0]
-  if (!myne0) return null
-
-  const uitMuur = prayers.find(p => p.id === myne0.id)
-  const saam = uitMuur ? (uitMuur.prayedCount || 0) : (myne0.saam || 0)
-
-  const magVra = magVraHoeGaanDit({
-    geplaasOp: myne0.op, laasGevraOp: myne0.gevraOp || null, nou: new Date().toISOString(),
-  })
-
-  function merkGevra(beter) {
-    const nuut = myne.map((m, i) => (i === 0 ? { ...m, gevraOp: new Date().toISOString() } : m))
-    setMyne(nuut)
-    skryfMyne(nuut)
-    if (beter) setDankie(true)
-  }
-
-  return (
-    <div className="card mv-kaart">
-      <p className="mv-kop">Jou gebedsversoek</p>
-      <p className="mv-saam">{saamSin(saam)}</p>
-
-      {dankie ? (
-        <p className="mv-dankie">Ons is dankbaar saam met jou. 🙏🏻</p>
-      ) : magVra ? (
-        <>
-          <p className="mv-vra">Hoe gaan dit vandag?</p>
-          <div className="mv-knoppe">
-            <button className="mv-knop" onClick={() => merkGevra(true)}>Dit gaan beter ❤️</button>
-            <button className="mv-knop mv-knop-lig" onClick={() => merkGevra(false)}>Bid asseblief steeds saam 🙏🏻</button>
-          </div>
-        </>
-      ) : null}
-    </div>
-  )
-}
+   Saam daarmee is die localStorage-boekhouding weg. Dit het die id's van 'n
+   mens se eie versoeke op sy foon gehou net sodat hierdie kaart hulle kon
+   opsoek; niks anders het dit ooit gelees nie, en 'n lys van jou eie
+   gebedsversoeke op 'n toestel is nie iets om te stoor as niemand dit gebruik
+   nie. `saamSin` en `magVraHoeGaanDit` bly in src/data/gebedDeel.js met hul
+   toetse -- die reels is reg; die kaart was net in die pad. */
 
 /* ── Community prayer flow — full-screen, one by one ── */
 function SaamgebedFlow({ prayers, prayed, gereed, fout, onClose, onPray, onHerprobeer }) {
@@ -459,15 +401,6 @@ export default function BidSaam() {
       setKrisisGewys(keuring.rede === 'krisis')
       setNuweId(keuring.mag ? ref.id : null)
 
-      /* Onthou my eie versoeke, sodat ek later kan sien hoeveel mense saam
-         gebid het. Net die id en die datum; die teks bly op die bediener. */
-      if (keuring.mag) {
-        try {
-          const myne = leesMyne()
-          skryfMyne([{ id: ref.id, op: new Date().toISOString(), saam: 0 }, ...myne])
-        } catch {}
-      }
-
       setText('')
       setSubmitted(true)
       /* Nie meer 'n tydhouer van vier sekondes nie. Is daar 'n deel-knoppie,
@@ -698,8 +631,6 @@ export default function BidSaam() {
             </div>
           )}
         </div>
-
-        <MyVersoek prayers={prayers} />
 
         <h3 className="section-title">Gebedsversoeke</h3>
 
