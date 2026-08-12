@@ -172,3 +172,40 @@
   background: #EDE6F7;
   color: #5C4E8E;
 }
+
+/* ── Die trechter ──
+   Drie getalle onder mekaar, die getal groot en die verduideliking klein.
+   Die punt is om met een oog te sien WAAR die val is. */
+.sa-trechter {
+  margin-bottom: 22px;
+}
+
+.sa-trechter-rye {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 8px;
+}
+
+.sa-trechter-ry {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 12px;
+  background: #F6F3FB;
+  border-left: 3px solid #7C6FAF;
+}
+.sa-trechter-ry:first-child { border-radius: 10px 10px 0 0; }
+.sa-trechter-ry:last-child  { border-radius: 0 0 10px 10px; }
+
+.sa-trechter-ry b {
+  font-size: 21px;
+  color: #2D2040;
+  min-width: 58px;
+}
+
+.sa-trechter-ry span {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #6F6480;
+}

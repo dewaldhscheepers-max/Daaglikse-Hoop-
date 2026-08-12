@@ -36,6 +36,7 @@ export default function SorgAdmin({ geheim = '' }) {
   const [boodskap, setBoodskap] = useState(null)
   const [inst, setInst] = useState(null)
   const [tikPlafon, setTikPlafon] = useState('')
+  const [trechter, setTrechter] = useState(null)
 
   const haal = useCallback(async (g) => {
     try {
@@ -54,8 +55,18 @@ export default function SorgAdmin({ geheim = '' }) {
     } catch { /* dan wys die blok net nie */ }
   }, [])
 
+  const haalTrechter = useCallback(async (g) => {
+    if (!g) return
+    try {
+      const r = await fetch('/api/tel-sorg', { headers: { 'x-sorg-geheim': g } })
+      const d = await r.json()
+      if (r.ok) setTrechter(d)
+    } catch { /* dan wys die blok net nie */ }
+  }, [])
+
   useEffect(() => { haal(geheim) }, [geheim, haal])
   useEffect(() => { haalInst(geheim) }, [geheim, haalInst])
+  useEffect(() => { haalTrechter(geheim) }, [geheim, haalTrechter])
 
   async function stoorInst(volgende) {
     setBesig(true)
@@ -158,6 +169,50 @@ export default function SorgAdmin({ geheim = '' }) {
           Eerste, want dít is die werk. Die video's en die plafon is
           onderhoud; die boodskappe is mense wat wag. */}
       <SorgKeur geheim={geheim} />
+
+      {/* ── Die trechter ──
+
+          Drie getalle wat 'n vraag beantwoord wat vantevore onbeantwoordbaar
+          was: "net 3 mense het gister geskryf — wat gaan aan?" Sonder 'n
+          noemer sê 3 niks. Sien api/tel-sorg.js.
+
+          Val dit tussen OOP en VORM, is die blad die probleem. Val dit
+          tussen VORM en GESTUUR, is die vorm die probleem. Is OOP self
+          klein, is dit nie 'n bladprobleem nie maar 'n padprobleem, en dan
+          help geen herontwerp nie.
+
+          Dit tel oopmake sedert die dag waarop dit aangeskakel is, nie mense
+          en nie per dag nie. Skryf die getalle een keer per week neer as jy
+          'n dagsyfer wil hê. */}
+      {trechter && (
+        <div className="sa-trechter">
+          <div className="admin-section-title">📊 Pastorale Sorg — die pad na 'n boodskap</div>
+          <div className="sa-trechter-rye">
+            <div className="sa-trechter-ry">
+              <b>{trechter.oop}</b>
+              <span>het die blad oopgemaak</span>
+            </div>
+            <div className="sa-trechter-ry">
+              <b>{trechter.vorm}</b>
+              <span>
+                het "Vertel my wat swaar is" gedruk
+                {trechter.oop > 0 && ` · ${Math.round((trechter.vorm / trechter.oop) * 100)}%`}
+              </span>
+            </div>
+            <div className="sa-trechter-ry">
+              <b>{trechter.gestuur}</b>
+              <span>
+                het werklik gestuur
+                {trechter.vorm > 0 && ` · ${Math.round((trechter.gestuur / trechter.vorm) * 100)}% van wie begin het`}
+              </span>
+            </div>
+          </div>
+          <p className="admin-books-note">
+            Geen naam, geen toestel en niks van wat iemand getik het nie —
+            drie heelgetalle. Dit tel oopmake, nie mense nie.
+          </p>
+        </div>
+      )}
 
       {/* ── Hoeveel boodskappe 'n dag ──
           Nie 'n tegniese perk nie: dit is hoeveel EEN MENS in 'n dag

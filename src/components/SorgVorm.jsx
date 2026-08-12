@@ -35,6 +35,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ONDERWERPE } from '../data/sorgOnderwerpe'
 import { krisisTreffers } from '../data/sorgKrisis'
 import { stuurBoodskap } from '../data/sorgStuur'
+import { telSorg } from '../data/telSorg'
 import SorgNommers from './SorgNommers'
 import SorgKlaar from './SorgKlaar'
 import './SorgVorm.css'
@@ -59,6 +60,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)
   const [alleOnderwerpe, setAlleOnderwerpe] = useState(false)
+  const [reelsOop, setReelsOop] = useState(false)
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
   const [uitslag, setUitslag] = useState(null)
@@ -71,6 +73,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setTeks('')
     setOnderwerp('')
     setAlleOnderwerpe(false)
+    setReelsOop(false)
     setToestem(false)
     setHulpOop(false)
     setBesig(false)
@@ -91,11 +94,11 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
      die versoek-kaart en sit die wyser in die teksblok. Ons maak die vorm
      toe voordat ons navigeer, anders bly hy oor die blad staan. */
   function naBidSaam() {
-    /* Het hy al iets getik, vra ons eers. Die knoppie staan bo die kassie,
-       dus druk die meeste mense dit voordat hulle tik — maar wie 'n paar
-       honderd woorde neergesit het en dit dan per ongeluk druk, verloor
-       alles sonder 'n woord. Dit is nie 'n plek waar 'n mens iemand se
-       woorde mag weggooi nie. */
+    /* Het hy al iets getik, vra ons eers. Die knoppie staan nou ONDER die
+       kassie, dus is dit nog waarskynliker dat daar reeds woorde is wanneer
+       iemand dit druk. Wie 'n paar honderd woorde neergesit het en dit dan
+       per ongeluk druk, verloor alles sonder 'n woord, en dit is nie 'n plek
+       waar 'n mens iemand se woorde mag weggooi nie. */
     if (teks.trim().length >= 40 &&
         !window.confirm('Jy het al iets getik. Gaan jy na Bid Saam toe, gaan hierdie woorde verlore.\n\nWil jy voortgaan?')) {
       return
@@ -122,6 +125,9 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setBesig(false)
 
     if (d.ok) {
+      /* Die laaste sport van die trechter, en die enigste een wat werklik
+         tel. Sien api/tel-sorg.js. */
+      telSorg('gestuur')
       setTeks('')          // uit die geheue uit; ons het dit nie meer nodig nie
       setUitslag(d)
       if (bo.current) bo.current.scrollTop = 0
@@ -178,17 +184,23 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
 
             {/* ── Dit gaan openbaar wees ──
 
-                Bo die kassie, nie onder nie, en nie in fyn druk nie.
+                Bo die kassie, nie onder nie, en nie in fyn druk nie. 'n
+                Uitnodiging hoort waar iemand besluit OF hy wil; 'n kontrak
+                hoort op die oomblik van verbintenis, en dit is hier. Iemand
+                wat via 'n kennisgewing of 'n gedeelde skakel reguit hierheen
+                kom, sien niks anders nie — hy moet dit HIER sien.
 
-                Hierdie blok het gegroei omdat die hoofblad se lang
-                verduideliking hierheen geskuif is. Dit hoort hier: 'n
-                uitnodiging hoort waar iemand besluit OF hy wil, 'n kontrak
-                hoort op die oomblik van verbintenis.
+                ── Waarom dit ingevou is ──
 
-                Dit is ook sterker so. Toe die reels bo op die blad gestaan
-                het, het iemand wat via 'n kennisgewing of 'n gedeelde skakel
-                reguit hierheen kom, hulle NOOIT gesien nie. Nou sien elkeen
-                wat stuur, hulle. */}
+                Dit was ses paragrawe, en dit was die eerste ding tussen "Ek
+                luister" en die kassie. Iemand wat gekom het om sy swaarste
+                ding te tik, het eers 'n muur van reels gekry. Elke woord was
+                waar en nie een was oorbodig nie — maar 'n mens LEES nie ses
+                paragrawe reels nie, hy sien 'n muur en gaan terug.
+
+                Die twee dinge wat 'n mens MOET weet voordat hy tik, staan nou
+                oop: dit word openbaar, en moenie name gebruik nie. Die res is
+                een druk weg en dit bly volledig — niks is weggegooi nie. */}
             <div className="sv-openbaar">
               <p className="sv-openbaar-kop">Voor jy jou boodskap deel</p>
               <p>
@@ -200,44 +212,33 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 Jou naam wys nooit. Moenie name, kontakbesonderhede of
                 inligting deel wat iemand kan identifiseer nie.
               </p>
-              <p>
-                Dewald kan jou boodskap verkort of liggies aanpas om jou en
-                ander mense se privaatheid te beskerm.
-              </p>
-              {/* Dit is 'n TOESTEMMINGSITEM, nie 'n kenmerk nie. Iemand wat sy
-                  hart uitstort en dan vreemdelinge onder sy storie sien skryf,
-                  skrik — en dit is presies die verrassing wat 'n mens op
-                  hierdie blad nie wil he nie. */}
-              <p>
-                Ander wat op die muur lees, kan met 'n kort woord van
-                ondersteuning saam met jou staan. Niemand gee raad nie en
-                niemand kan jou antwoord nie — dit is net mense wat laat weet
-                hulle dra dit saam.
-              </p>
-              <p>
-                Hierdie afdeling is vir pastorale begeleiding — nie vir
-                geldelike of materiële hulpversoeke nie.
-              </p>
+              {reelsOop ? (
+                <>
+                  <p>
+                    Dewald kan jou boodskap verkort of liggies aanpas om jou en
+                    ander mense se privaatheid te beskerm.
+                  </p>
+                  {/* Dit is 'n TOESTEMMINGSITEM, nie 'n kenmerk nie. Iemand wat
+                      sy hart uitstort en dan vreemdelinge onder sy storie sien
+                      skryf, skrik — en dit is presies die verrassing wat 'n mens
+                      op hierdie blad nie wil he nie. */}
+                  <p>
+                    Ander wat op die muur lees, kan met 'n kort woord van
+                    ondersteuning saam met jou staan. Niemand gee raad nie en
+                    niemand kan jou antwoord nie — dit is net mense wat laat weet
+                    hulle dra dit saam.
+                  </p>
+                  <p>
+                    Hierdie afdeling is vir pastorale begeleiding — nie vir
+                    geldelike of materiële hulpversoeke nie.
+                  </p>
+                </>
+              ) : (
+                <button className="sv-openbaar-meer" onClick={() => setReelsOop(true)}>
+                  Lees die res van die reels
+                </button>
+              )}
             </div>
-
-            {/* ── Soek jy net gebed? ──
-
-                Van die eerste boodskappe was gebedsversoeke: "bid asb vir
-                ons", "ek vra gebed vir genesing". Dit is nie verkeerd nie —
-                dit is net op die verkeerde blad. Daar is niks om te ANTWOORD
-                nie, en die mens wag dan vir 'n antwoord wat nooit kom nie.
-
-                Bid Saam bestaan presies daarvoor, en dit is vinniger: sy
-                versoek is dadelik daar en ander bid dadelik saam. Hierdie
-                knoppie vat hom reguit tot in die kassie — nie net na die
-                blad toe nie. Iemand wat op 'n blad afgelaai word en self
-                moet soek, doen dit nie. */}
-            <button className="sv-gebed" onClick={naBidSaam}>
-              <span className="sv-gebed-hoof">Soek jy net gebed?</span>
-              <span className="sv-gebed-fyn">
-                Plaas dit op Bid Saam — dan bid ander dadelik saam met jou →
-              </span>
-            </button>
 
             <textarea
               id="sv-teks"
@@ -254,6 +255,30 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                   ? 'Skryf net \'n bietjie meer, sodat ons kan verstaan.'
                   : ' '}
             </div>
+
+            {/* ── Soek jy net gebed? ──
+
+                Van die eerste boodskappe was gebedsversoeke: "bid asb vir
+                ons", "ek vra gebed vir genesing". Dit is nie verkeerd nie —
+                dit is net op die verkeerde blad. Daar is niks om te ANTWOORD
+                nie, en die mens wag dan vir 'n antwoord wat nooit kom nie.
+
+                Bid Saam bestaan presies daarvoor, en dit is vinniger: sy
+                versoek is dadelik daar en ander bid dadelik saam. Hierdie
+                knoppie vat hom reguit tot in die kassie — nie net na die
+                blad toe nie.
+
+                Dit het BO die kassie gestaan, en dit was verkeerd: dit is
+                'n afrit wat voor die oprit staan. Die eerste ding wat 'n
+                mens sien wanneer hy kom skryf het, was 'n makliker uitweg.
+                Nou staan dit onder die kassie, waar dit help vir wie dit
+                nodig het en niemand anders keer nie. */}
+            <button className="sv-gebed" onClick={naBidSaam}>
+              <span className="sv-gebed-hoof">Soek jy net gebed?</span>
+              <span className="sv-gebed-fyn">
+                Plaas dit op Bid Saam — dan bid ander dadelik saam met jou →
+              </span>
+            </button>
 
             <label className="sv-etiket">Waaroor gaan dit? <span>Opsioneel</span></label>
             <div className="sv-onderwerpe">

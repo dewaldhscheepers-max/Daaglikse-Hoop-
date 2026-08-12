@@ -39,6 +39,7 @@ node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mens
 node api/_adminSlot.toets.mjs                 # die admin-geheim op drie eindpunte, 13 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
+node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op

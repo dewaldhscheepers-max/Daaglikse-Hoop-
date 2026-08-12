@@ -451,3 +451,21 @@
   line-height: 1.5;
   color: var(--text-muted, #8A7E9A);
 }
+
+/* "Lees die res van die reels".
+   'n Skakel, nie 'n knoppie nie — dit mag nooit meeding met "Deel my
+   boodskap" nie. Geen transform op :active; sien CLAUDE.md. */
+.sv-openbaar-meer {
+  display: block;
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple-dark, #5C4E8E);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sv-openbaar-meer:active { color: #4A3E75; }

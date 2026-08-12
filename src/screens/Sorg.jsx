@@ -38,7 +38,6 @@ import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
 import SorgDeelSteun from '../components/SorgDeelSteun'
-import SorgSteun from '../components/SorgSteun'
 import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo,
@@ -46,6 +45,7 @@ import {
 import { haalMuur, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
+import { telSorg } from '../data/telSorg'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
 
@@ -108,7 +108,6 @@ function SpeelIkoon() {
 
 export default function Sorg() {
   const [hulpOop, setHulpOop] = useState(false)
-  const [steunOop, setSteunOop] = useState(false)
   const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('muur')
   const [data, setData] = useState(null)      // null = besig
@@ -153,6 +152,37 @@ export default function Sorg() {
     }
   }, [afdeling])
 
+  /* ── Die blad is oopgemaak ──
+
+     Die eerste sport van die trechter. Sien src/data/telSorg.js en
+     api/tel-sorg.js: drie heelgetalle, geen naam en geen toestel-id.
+     Eenmalig, want React se ontwikkelingsmodus roep effekte twee keer. */
+  useEffect(() => { telSorg('oop', { eenmalig: true }) }, [])
+
+  /* ── Iemand kom van Luister af, en wil skryf ──
+
+     Die deur op Luister sit 'n vlag en navigeer hierheen. Sonder hierdie
+     stuk sou 'n mens hier land en dan self die knoppie moet gaan soek —
+     wat hy nie doen nie.
+
+     Die vlag word DADELIK uit sessionStorage gehaal, anders maak die vorm
+     weer oop die volgende keer wat hierdie oortjie gekies word. Hy word in
+     'n ref gehou omdat ons nog nie kan besluit nie: `plek` is op hierdie
+     oomblik nog nul en ons weet nie of die dag vol is nie.
+
+     Dat hy die uitnodiging op die blad mis, is reg — die vorm dra self die
+     hele kontrak ("Voor jy jou boodskap deel"), juis vir mense wat reguit
+     hierheen kom. */
+  const wilSkryf = useRef(false)
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('sorg_fokus') === 'vorm') {
+        wilSkryf.current = true
+        sessionStorage.removeItem('sorg_fokus')
+      }
+    } catch { /* privaat modus */ }
+  }, [])
+
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])
   useEffect(() => {
@@ -181,6 +211,21 @@ export default function Sorg() {
     vergeetPlek()
     return haalPlek().then(setPlek)
   }, [])
+
+  /* Nou eers kan die vorm oopmaak vir iemand wat van Luister af kom: ons
+     weet nou of daar vandag plek is.
+
+     Is die dag vol, gebeur daar NIKS — hy land op die blad, waar die eerste
+     ding wat hy sien "Vandag se plekke is vol" is, met die rede daarby. Die
+     alternatief is dat hy 'n hele boodskap vol skryf wat dan geweier word,
+     en dit is presies die ding wat 'n mens laat ophou probeer. */
+  useEffect(() => {
+    if (!plek || !wilSkryf.current) return
+    wilSkryf.current = false
+    if (plek.vol) return
+    telSorg('vorm')
+    setVormOop(true)
+  }, [plek])
 
   useEffect(() => {
     let lewendig = true
@@ -260,15 +305,22 @@ export default function Sorg() {
   return (
     <div className="sorg">
       <div className="sorg-header screen-header">
-        {/* Twee knoppies, en albei moet gesien word. "Hulp nou" is die
-            dringende een en bly eerste; "Ondersteun" staan langs hom in
-            dieselfde vorm sodat dit soos 'n knoppie lyk en nie soos 'n
-            etiket nie. */}
+        {/* ── Een knoppie, en dit gaan oor hulp ──
+
+            Hier het 'n groen "♡ Ondersteun" langs "Hulp nou" gestaan. Dit
+            was die TWEEDE ding wat 'n mens op hierdie blad gesien het.
+
+            Iemand wie se kind pas alle kontak verbreek het, maak hierdie
+            blad oop en die eerste twee dinge is 'n noodnommer en 'n versoek
+            om geld. Hierdie lêer se eie kop sê dit al: "geen versoek om
+            geld op die skryfkant nie. Nooit waar iemand sy seer tik nie."
+            Die kop het daardie reel gebreek.
+
+            Die versoek is nie weg nie — dit staan heel onder, ná die muur
+            en ná die video's, in dieselfde DonationCard as oral elders. Dit
+            is die plek daarvoor: ná die hulp, nie voor nie. */}
         <div className="sorg-hero-knoppe">
           <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
-          <button className="sorg-steun-knop" onClick={() => setSteunOop(true)}>
-            <span aria-hidden="true">♡</span> Ondersteun
-          </button>
         </div>
         <h1>Pastorale Sorg</h1>
         <p>Bring die swaar ding. Jy hoef dit nie alleen te dra nie.</p>
@@ -300,16 +352,32 @@ export default function Sorg() {
               </>
             ) : (
               <>
+                {/* ── Aandag, nie 'n aftelling nie ──
+
+                    Hier het 'n balk gestaan met "2 van 7 reeds ingestuur ·
+                    nog 5 plekke oop".
+
+                    Die bedoeling was 'n belofte. Wat dit WYS is iets anders:
+                    by 2 uit 7 is die balk 'n derde vol, en 'n balk wat leeg
+                    staan sê "dit is stil hier". Dit is sosiale bewys wat
+                    agteruit loop. En 'n aftelling laat 'n hurtende mens
+                    dink iemand anders het daardie plek nodiger as ek — juis
+                    die mens wat ons wil hê moet skryf, kies homself uit.
+
+                    Skaarsheid werk net wanneer dit amper op is. Met 'n
+                    handjievol boodskappe per dag gaan daardie balk nooit vol
+                    wees nie, dus is die meganisme self verkeerd, nie die
+                    woorde nie.
+
+                    Die limiet BLY — dit is hoeveel een mens in 'n dag
+                    behoorlik kan lees, en die bediener hou dit in elk geval
+                    af. Dit word net nie meer as 'n telling gewys nie. */}
                 <p className="sorg-plek-kop">
-                  Vandag maak ek plek vir {plek.plafon} mense wat pastorale
-                  begeleiding nodig het
+                  Elke boodskap word deur 'n mens gelees
                 </p>
-                <div className="sorg-plek-balk" aria-hidden="true">
-                  <span style={{ width: `${Math.min(100, Math.round((plek.vandag / plek.plafon) * 100))}%` }} />
-                </div>
                 <p className="sorg-plek-fyn">
-                  <b>{plek.vandag} van {plek.plafon}</b> reeds ingestuur
-                  {plek.oor > 0 && <> · nog {plek.oor} {plek.oor === 1 ? 'plek' : 'plekke'} oop</>}
+                  Ek neem elke dag 'n beperkte aantal boodskappe aan sodat
+                  elkeen werklik aandag kry.
                 </p>
               </>
             )}
@@ -370,7 +438,7 @@ export default function Sorg() {
               te laat volskryf wat dan geweier word. */}
           <button
             className="sorg-vertel"
-            onClick={() => setVormOop(true)}
+            onClick={() => { telSorg('vorm'); setVormOop(true) }}
             disabled={!!(plek && plek.vol)}
           >
             {plek && plek.vol ? 'Vandag se plekke is vol — môre weer' : 'Vertel my wat swaar is'}
@@ -546,7 +614,6 @@ export default function Sorg() {
       </div>
 
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />
-      <SorgSteun oop={steunOop} onSluit={() => setSteunOop(false)} />
 
       {/* Die vorm dek die hele skerm. Iemand wat sy swaarste ding tik, moet
           niks anders sien nie — geen navigasie, geen ander video's, en geen

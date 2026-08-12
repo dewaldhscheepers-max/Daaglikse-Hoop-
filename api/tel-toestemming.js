@@ -74,10 +74,16 @@ module.exports = async function handler(req, res) {
   if (typeof lyf === 'string') { try { lyf = JSON.parse(lyf) } catch { lyf = null } }
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
-  const opVeld = VELDE[lyf.nuwe]
+  /* `hasOwnProperty`, nie net `VELDE[...]` nie. `nuwe: "__proto__"` gee 'n
+     leë voorwerp terug en `nuwe: "constructor"` gee die Object-funksie —
+     albei is waarheidswaardig, albei kom deur die hek, en albei beland as
+     'n `fieldPath` by Firestore, wat elke sulke oproep 'n 500 maak. */
+  const opVeld = Object.prototype.hasOwnProperty.call(VELDE, lyf.nuwe) ? VELDE[lyf.nuwe] : undefined
   /* Die ou toestand mag leeg wees — dit is die eerste keer dat hierdie
      toestel getel word. Dan word net opgetel. */
-  const afVeld = lyf.oue ? VELDE[lyf.oue] : null
+  const afVeld = lyf.oue
+    ? (Object.prototype.hasOwnProperty.call(VELDE, lyf.oue) ? VELDE[lyf.oue] : undefined)
+    : null
   if (!opVeld) return res.status(400).json({ fout: 'onbekende toestand' })
   if (lyf.oue && !afVeld) return res.status(400).json({ fout: 'onbekende ou toestand' })
   if (afVeld === opVeld) return res.status(200).json({ ok: true, niks: true })

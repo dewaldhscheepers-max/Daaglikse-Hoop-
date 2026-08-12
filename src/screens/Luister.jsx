@@ -683,6 +683,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     setWpBesig(false)
   }
 
+  /* ── Na Pastorale Sorg, en reguit tot in die vorm ──
+
+     Dieselfde patroon as SorgVorm se knoppie na Bid Saam toe: 'n vlag in
+     sessionStorage plus die navigasie-gebeurtenis wat reeds bestaan.
+
+     Die vlag is die belangrike deel. Iemand wat op 'n blad afgelaai word en
+     dan self die knoppie moet gaan soek, doen dit nie. */
+  function naSorg() {
+    try { sessionStorage.setItem('sorg_fokus', 'vorm') } catch { /* privaat modus */ }
+    window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'sorg' }))
+  }
+
   async function handleListenShare() {
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
@@ -791,6 +803,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           </div>
         </div>
       </div>
+
+      {/* ── Die deur na Pastorale Sorg ──
+
+          Sorg het presies EEN deur gehad: die oortjie onderaan. Niks het
+          daarheen gewys nie. Die oggendkennisgewing gaan na duisende fone
+          en land HIER, op Luister — die hele gehoor kom elke oggend by die
+          voordeur in en niks het gesê Sorg bestaan nie.
+
+          Dit is nie 'n bemarkingsblok nie. Dit is een vraag en een knoppie,
+          en dit staan onder die speler omdat 'n mens dit eers ná die
+          boodskap moet sien, nie in plaas daarvan nie. */}
+      <button className="sorg-deur" onClick={naSorg}>
+        <span className="sorg-deur-vra">Dra jy iets swaars?</span>
+        <span className="sorg-deur-fyn">
+          Vertel my daarvan — anoniem, en 'n mens lees elke boodskap self.
+        </span>
+      </button>
 
       {nlState !== 'done' && <div className="luister-newsletter">
         <div className="nl-text">

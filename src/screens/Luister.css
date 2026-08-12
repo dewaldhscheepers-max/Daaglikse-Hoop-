@@ -900,3 +900,38 @@
   margin-top: 10px;
   padding: 9px 11px;
 }
+
+/* ── Die deur na Pastorale Sorg ──
+   Een vraag, een knoppie, onder die speler. Sag genoeg om nie soos 'n
+   advertensie te lyk nie, en groot genoeg om raakgesien te word.
+   Geen transform op :active nie — sien CLAUDE.md. */
+.sorg-deur {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 14px 16px 0;
+  border: 1px solid #E0D8F0;
+  border-left: 3px solid #7C6FAF;
+  border-radius: 14px;
+  background: #F7F4FC;
+  padding: 15px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.sorg-deur:active { background: #EFE9F8; }
+
+.sorg-deur-vra {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17.5px;
+  font-weight: 700;
+  color: #2D2040;
+  margin-bottom: 4px;
+}
+
+.sorg-deur-fyn {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6F6480;
+}
