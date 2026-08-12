@@ -228,6 +228,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [shareToast, setShareToast]         = useState(false)
   const [bookmarkToast, setBookmarkToast]   = useState(false)
   const [listenShareNote, setListenShareNote] = useState(null)
+  const [wpBesig, setWpBesig]         = useState(false)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -548,6 +549,65 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
+  /* ── Deel vandag se wallpaper ──
+
+     Dit was 'n prent met 'n byskrif wat gese het: "hou jou vinger op die foto
+     vir 2 sek en kies Download image". Dit is drie stappe, dit werk anders op
+     elke blaaier, en die helfte van die mense doen dit nooit.
+
+     Die prent is klaar 9:16 en die skakel is klaar daarop ingebrand. Dit is
+     presies wat 'n mens op WhatsApp Status plaas -- en 'n Status word deur
+     ELKE kontak gesien, sonder dat 'n algoritme dit filter. Dit is die
+     goedkoopste manier waarop hierdie app kan groei, en dit het agter 'n lang
+     druk weggekruip.
+
+     navigator.share met 'n `files`-skikking gee die foon se eie deelvenster:
+     WhatsApp, Facebook, Instagram, e-pos, alles. Dieselfde patroon as
+     Vredepad se vers-kaart, wat al maande werk.
+
+     Die terugval is 'n gewone aflaai. Op 'n rekenaar, of in 'n blaaier wat
+     nie lêers kan deel nie, kry 'n mens die prent in sy Aflaaie -- steeds
+     beter as 'n instruksie om lank te druk. */
+  async function deelWallpaper() {
+    if (!today?.wallpaperUrl || wpBesig) return
+    setWpBesig(true)
+    const boodskap = `${today.title || 'Daaglikse Hoop'}\n\nElke oggend 'n kort woord van hoop, in Afrikaans.\nhttps://dewaldscheepers.com/go`
+    try {
+      const r = await fetch(today.wallpaperUrl, { mode: 'cors' })
+      if (!r.ok) throw new Error('kon nie haal nie')
+      const blob = await r.blob()
+      const lêer = new File([blob], 'daaglikse-hoop.jpg', { type: blob.type || 'image/jpeg' })
+
+      /* canShare({ files }) is die enigste betroubare toets. navigator.share
+         bestaan op baie blaaiers wat NIE lêers kan deel nie, en dan gooi dit
+         eers wanneer 'n mens dit roep. */
+      if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
+        await navigator.share({ files: [lêer], text: boodskap })
+        setWpBesig(false)
+        return
+      }
+
+      /* Geen lêer-deel nie: laai dit af. */
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'daaglikse-hoop.jpg'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    } catch {
+      /* Die prent kon nie gehaal word nie -- deel dan darem die woorde. */
+      try {
+        if (navigator.share) await navigator.share({ text: boodskap })
+        else { await navigator.clipboard.writeText(boodskap); setShareToast(true); setTimeout(() => setShareToast(false), 2500) }
+      } catch {}
+    }
+    setWpBesig(false)
+  }
+
   async function handleListenShare() {
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
@@ -695,8 +755,12 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           </div>
         ) : today.wallpaperUrl ? (
           <div className="wp-card">
-            <div className="wp-card-label">📱 Vandag se wallpaper — hou jou vinger op die foto vir 2 sek en kies "Download image"</div>
+            <div className="wp-card-label">📱 Vandag se wallpaper</div>
             <img src={today.wallpaperUrl} className="wp-card-img" alt="Wallpaper" />
+            <button className="wp-deel-knop" onClick={deelWallpaper} disabled={wpBesig}>
+              {wpBesig ? 'Een oomblik…' : 'Deel hierdie prent'}
+            </button>
+            <div className="wp-card-fyn">Sit dit op jou WhatsApp-status, of stuur dit vir iemand.</div>
           </div>
         ) : null}
         {installBanner}

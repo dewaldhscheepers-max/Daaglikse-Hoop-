@@ -844,3 +844,31 @@
   border: none;
   display: block;
 }
+
+/* ── Deel vandag se wallpaper ──
+   Die prent is klaar 9:16 met die skakel ingebrand. Die knoppie gee die foon
+   se eie deelvenster; geen transform op :active nie, sien CLAUDE.md. */
+.wp-deel-knop {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 13px;
+  background: #5C4E8E;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 15px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.wp-deel-knop:active   { background: #4A3E75; }
+.wp-deel-knop:disabled { background: #9C93BC; }
+
+.wp-card-fyn {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #8A7E9A;
+  text-align: center;
+  margin-top: 8px;
+}
