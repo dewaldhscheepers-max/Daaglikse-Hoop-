@@ -230,6 +230,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [listenShareNote, setListenShareNote] = useState(null)
   const [wpBesig, setWpBesig]         = useState(false)
   const [wpFout, setWpFout]           = useState(null)
+  const [wpNota, setWpNota]           = useState(null)
   const [search, setSearch]           = useState('')
   const [allNotes, setAllNotes]       = useState([])
   const [loadingAll, setLoadingAll]   = useState(false)
@@ -579,10 +580,25 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
      vanaf ons eie domein teruggee. Daar is geen CORS-vraag oor jou eie
      domein nie.
 
-     ── En as dit steeds misluk ──
+     ── WhatsApp gooi die byskrif weg ──
+
+     `navigator.share({ files, text })` stuur albei. Elke ander app gebruik
+     die teks -- Telegram, Instagram, e-pos, SMS -- maar WhatsApp ignoreer
+     dit sodra daar 'n prent by is. Die prent land, die skakel nie. Dit is
+     WhatsApp se kant en daar is geen manier om dit van 'n webblad af te
+     verander nie.
+
+     Daarom word die sin EERSTE op die knipbord gesit, in dieselfde tik as
+     die klik (die knipbord vereis 'n vars aanraking, dus voor die fetch),
+     en die kaart se dit dan: plak dit as 'n tweede boodskap. Dit is een
+     ekstra lang druk vir die mens, en dit is die enigste ding wat werk.
+
+     ── En as die prent glad nie kom nie ──
 
      Dan word dit GESE. 'n Stille terugval na teks is presies hoe hierdie
      fout die eerste keer verby gekom het. */
+  const DEEL_SIN = 'Luister die volle boodskap by https://dewaldscheepers.com/go'
+
   function prentPad(url) {
     /* 'n Relatiewe pad of ons eie domein: haal dit soos dit is. */
     try {
@@ -598,7 +614,18 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     if (!today?.wallpaperUrl || wpBesig) return
     setWpBesig(true)
     setWpFout(null)
-    const boodskap = `${today.title || 'Daaglikse Hoop'}\n\nElke oggend 'n kort woord van hoop, in Afrikaans.\nhttps://dewaldscheepers.com/go`
+    setWpNota(null)
+    const boodskap = `${today.title || 'Daaglikse Hoop'}\n\n${DEEL_SIN}`
+
+    /* Voor enige `await`. Die knipbord werk net terwyl die tik nog "vars" is,
+       en 'n fetch oor 'n stadige netwerk kan daardie venster verby laat gaan. */
+    let gekopieer = false
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(boodskap)
+        gekopieer = true
+      }
+    } catch {}
 
     let blob = null
     try {
@@ -618,6 +645,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
            eers wanneer 'n mens dit roep. */
         if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
           await navigator.share({ files: [lêer], text: boodskap })
+          setWpNota(gekopieer
+            ? 'Die prent is gestuur. WhatsApp los die woorde uit by \'n prent — die skakel is gekopieer, plak dit as \'n tweede boodskap.'
+            : `Die prent is gestuur. Stuur die skakel ook: ${DEEL_SIN}`)
           setWpBesig(false)
           return
         }
@@ -636,7 +666,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         a.click()
         a.remove()
         setTimeout(() => URL.revokeObjectURL(url), 4000)
-        setWpFout('Die prent is na jou Aflaaie toe. Stuur dit van daar af.')
+        setWpNota(gekopieer
+          ? 'Die prent is na jou Aflaaie toe, en die skakel is gekopieer.'
+          : 'Die prent is na jou Aflaaie toe. Stuur dit van daar af.')
         setWpBesig(false)
         return
       } catch {}
@@ -804,6 +836,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
               {wpBesig ? 'Een oomblik…' : 'Deel hierdie prent'}
             </button>
             <div className="wp-card-fyn">Sit dit op jou WhatsApp-status, of stuur dit vir iemand.</div>
+            {wpNota && <div className="wp-card-nota">{wpNota}</div>}
             {wpFout && <div className="wp-card-fout">{wpFout}</div>}
           </div>
         ) : null}
