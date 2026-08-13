@@ -152,18 +152,28 @@ module.exports = async function handler(req, res) {
   }
 
   // Always send a delivery email — PDF link if available, "coming soon" if not
+  /* Die twee knoppies gaan na /go/support, NIE na /go nie.
+
+     Hulle het na /go gewys — die installasieblad. Iemand wat op "Maandelikse
+     Vennoot" druk, het dus 'n bladsy gekry wat hom vra om die app te
+     installeer, en van die gee was daar niks meer te sien nie. Die ander drie
+     e-posse (die werkry, die herstuur en die grootstuur) wys al lankal na
+     /go/support; hierdie een het agtergebly.
+
+     /go/support werk sonder 'n eie bladsy: App.jsx herken die pad en maak die
+     Steun-blad oop. Sien die lys paaie daar. */
   const donateBlock = `
     <hr style="border:none;border-top:1px solid #e8e4f0;margin:28px 0 24px;">
     <p style="font-size:15px;font-weight:700;color:#2d2d2d;margin:0 0 18px;text-align:center;">Help sodat die volgende persoon ook gratis hoop kan ontvang:</p>
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="padding:0 4px 10px 0;" width="50%">
-          <a href="https://www.dewaldscheepers.com/go" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
+          <a href="https://www.dewaldscheepers.com/go/support" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
             💜 Maandelikse Vennoot
           </a>
         </td>
         <td style="padding:0 0 10px 4px;" width="50%">
-          <a href="https://www.dewaldscheepers.com/go" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
+          <a href="https://www.dewaldscheepers.com/go/support" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
             🙏 Eenmalige Bydrae
           </a>
         </td>
