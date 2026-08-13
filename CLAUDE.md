@@ -35,6 +35,7 @@ node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 to
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
+node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 38 toetse
 node api/_adminSlot.toets.mjs                 # die admin-geheim op drie eindpunte, 13 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse

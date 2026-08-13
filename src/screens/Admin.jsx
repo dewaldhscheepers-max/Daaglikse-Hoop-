@@ -595,6 +595,12 @@ export default function Admin({ onClose }) {
         value:  Math.round(parseFloat(newValue) || 50),
         emoji:  newEmoji || '📚',
         color:  '#EDE8F8',
+        /* Sodat die blad weet wat nuut is. Die id dra reeds `-${Date.now()}`
+           en `boekTyd()` kan dit daaruit lees — hierdie veld is die
+           betroubare een, en dit is die enigste manier om 'n boek later te
+           herrangskik sonder om sy id te verander. Sien
+           src/data/eboekeVolgorde.js. */
+        createdAt: new Date().toISOString(),
       })
       setNewTitle(''); setNewDesc(''); setNewValue(''); setNewEmoji('📚')
       setBookAdded(true)

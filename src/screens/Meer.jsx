@@ -10,6 +10,7 @@ import './HuiseVanHoop.css'
 import KinderBibloteek from './KinderBibloteek'
 import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
+import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
 import { boekeWatWys } from '../data/kinderBoekeWys'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
@@ -146,14 +147,23 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   }, [bookOverrides])
 
   const BOOKS = [
-    // Dynamic Firestore books not in static list (featured at top)
-    ...Object.entries(bookOverrides)
-      .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
-      .map(([id, d]) => {
-        const isRG = id === 'rustelose-gedagtes' || (d.title || '').toLowerCase().includes('rustelose')
-        return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT', isRG: true } : {}) }
-      })
-      .sort((a, b) => { if (a.badge === 'NUUT') return -1; if (b.badge === 'NUUT') return 1; return 0 }),
+    /* ── Die opgelaaide boeke, NUUTSTE BO ──
+
+       Hier het 'n sortering gestaan wat net die een boek met die
+       NUUT-baadjie laat dryf het. Al die ander het gebly in die volgorde
+       waarin Firestore hulle gee — alfabeties op die dokument se id — dus
+       het 'n vars opgelaaide boek iewers in die middel geland.
+
+       Die reel is nou een reel, en dit staan met sy toetse in
+       src/data/eboekeVolgorde.js: uitgelig eerste, dan nuutste eerste. */
+    ...sorteerNuutsteBo(
+      Object.entries(bookOverrides)
+        .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
+        .map(([id, d]) => {
+          const isRG = id === 'rustelose-gedagtes' || (d.title || '').toLowerCase().includes('rustelose')
+          return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT', isRG: true } : {}) }
+        })
+    ),
     // Static books with Firestore overrides for pdfUrl/coverUrl
     ...STATIC_BOOKS.map(b => {
       const ov = bookOverrides[b.id] || {}
