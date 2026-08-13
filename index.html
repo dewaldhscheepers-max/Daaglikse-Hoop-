@@ -9,6 +9,113 @@
         window.__installPrompt = e;
       });
     </script>
+    <!-- ── Die wit skerm maak homself reg ──
+
+         'n Geïnstalleerde PWA laai sy HTML uit die diensketter se vooraf-kas.
+         Word daar 'n paar keer op een dag ontplooi, kan daardie ou HTML na
+         `/assets/index-OUHASH.js` wys — 'n lêer wat nie meer op die bediener
+         is nie. Die skrip gee 'n 404, React begin nooit, en die mens sien 'n
+         WIT SKERM. Toemaak help nie, want dieselfde ou HTML kom weer uit die
+         kas uit.
+
+         Die diensketter maak dit gewoonlik self reg wanneer hy opdateer,
+         maar "gewoonlik" is nie goed genoeg wanneer die app iemand se enigste
+         pad na hulp toe is.
+
+         Hierdie skrip is die vangnet. Dit staan HIER, inlyn in die kop, want
+         dit is die enigste kode wat nog loop wanneer die bundel nie laai nie.
+         Dit gebruik geen module, geen invoer en geen moderne sintaksis nie —
+         dit moet in elke blaaier loop, ook die oues.
+
+         Wat dit doen: gaan ná agt sekondes kyk of React iets in #root gesit
+         het. Is dit nog leeg, is die app dood. Dan word ELKE diensketter
+         afgeskryf, ELKE kas uitgevee, en die bladsy een keer herlaai. Dit is
+         presies wat 'n herinstallasie doen, sonder dat die mens dit weet.
+
+         Dit mag NIE in 'n lus beland nie. Slaag die herstel nie, wag dit ses
+         uur voor dit weer probeer, en wys intussen woorde en 'n knoppie — 'n
+         mens moet nooit na 'n wit skerm sit en kyk nie. -->
+    <script>
+      (function () {
+        var WAG = 8000
+        var SLEUTEL = 'dh_herstel_op'
+        var WEER_NA = 6 * 60 * 60 * 1000
+        var besig = false
+
+        function onlangs() {
+          try {
+            var op = parseInt(localStorage.getItem(SLEUTEL) || '0', 10)
+            return op > 0 && (Date.now() - op) < WEER_NA
+          } catch (e) { return false }
+        }
+
+        function boodskap() {
+          var root = document.getElementById('root')
+          if (!root) return
+          root.innerHTML =
+            '<div style="font-family:system-ui,sans-serif;max-width:22rem;margin:18vh auto;padding:0 24px;' +
+            'text-align:center;color:#2D2040;line-height:1.6">' +
+            '<div style="font-size:19px;font-weight:700;margin-bottom:10px">Daaglikse Hoop kon nie oopmaak nie</div>' +
+            '<div style="font-size:14.5px;color:#6F6480;margin-bottom:20px">' +
+            'Iets is verkeerd met die weergawe op hierdie foon. Druk hieronder — dit maak dit skoon en probeer weer.</div>' +
+            '<button id="dh-herstel" style="border:0;border-radius:14px;background:#5C4E8E;color:#fff;' +
+            'font-size:16px;font-weight:700;padding:14px 22px;font-family:inherit">Maak skoon en probeer weer</button>' +
+            '<div style="font-size:12.5px;color:#8A7E9A;margin-top:18px">' +
+            'Werk dit steeds nie, verwyder die app en gaan na dewaldscheepers.com/go</div></div>'
+          var k = document.getElementById('dh-herstel')
+          if (k) k.onclick = function () { herstel(true) }
+        }
+
+        function herstel(metHand) {
+          if (besig) return
+          besig = true
+          try { localStorage.setItem(SLEUTEL, String(Date.now())) } catch (e) {}
+
+          var werk = []
+          try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              werk.push(navigator.serviceWorker.getRegistrations().then(function (lys) {
+                return Promise.all(lys.map(function (r) { return r.unregister() }))
+              }))
+            }
+          } catch (e) {}
+          try {
+            if (window.caches && caches.keys) {
+              werk.push(caches.keys().then(function (name) {
+                return Promise.all(name.map(function (n) { return caches.delete(n) }))
+              }))
+            }
+          } catch (e) {}
+
+          /* Die herlaai mag nie van die opruiming afhang nie: gaan een van
+             hulle staan, moet ons steeds herlaai. Vandaar die tydhouer. */
+          var klaar = false
+          function gaan() {
+            if (klaar) return
+            klaar = true
+            location.reload()
+          }
+          setTimeout(gaan, metHand ? 6000 : 4000)
+          Promise.all(werk).then(gaan)['catch'](gaan)
+        }
+
+        function kyk() {
+          var root = document.getElementById('root')
+          if (root && root.childElementCount > 0) return   /* die app loop */
+          if (onlangs()) { boodskap(); return }
+          herstel(false)
+        }
+
+        window.addEventListener('load', function () { setTimeout(kyk, WAG) })
+        /* Val die bundel dadelik om, hoef ons nie agt sekondes te wag nie. */
+        window.addEventListener('error', function (e) {
+          var t = e && e.target
+          if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return
+          setTimeout(kyk, 1200)
+        }, true)
+      })()
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#C97D3A" />
     <meta name="color-scheme" content="light" />

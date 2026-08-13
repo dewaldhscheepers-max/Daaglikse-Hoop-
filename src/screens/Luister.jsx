@@ -10,6 +10,13 @@ import DonationCard from '../components/DonationCard'
 const NOTES_TTL  = 5 * 60 * 1000
 const PAGE_SIZE  = 20
 
+/* Hoe lank ons vir Firestore wag voordat ons dit 'n mislukking noem.
+
+   `getDocs` het self geen tydgrens nie. Sonder hierdie getal kan die belofte
+   ná 'n opgeskorte oortjie vir altyd hang, en dan bly die skerm vir altyd op
+   "Besig om boodskappe te laai..." staan. Sien fetchNotes. */
+const HAAL_TYDGRENS = 12000
+
 function readCache() {
   try {
     const notes = JSON.parse(localStorage.getItem('cachedNotes') || '[]')
@@ -247,6 +254,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const tapTimerRef   = useRef(null)
   const fetchingRef   = useRef(false)
   const lastDocRef    = useRef(null)
+  /* Wat ons NOU het. `fetchNotes` het 'n leë afhanklikheidslys en sou
+     andersins vir altyd na die eerste render se notas kyk. */
+  const notasRef      = useRef(cached)
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
@@ -272,26 +282,81 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     return unsub
   }, [])
 
-  // ── Fetch first page ──
+  /* ── Haal die eerste bladsy ──
+
+     Hierdie funksie het twee foute gehad wat albei net opgeduik het wanneer
+     'n mens die app 'n rukkie los en dan terugkom. Altwee is gerapporteer as
+     dieselfde ding: "dit se Besig om boodskappe te laai en dan is daar niks".
+
+     ── 1. Dit kon vir altyd vashaak ──
+
+     `getDocs` van die Firestore-SDK het GEEN tydgrens nie. Wanneer Android
+     die oortjie opskort, sterf die SDK se verbinding, en op 'n slegte
+     terugkeer los die belofte nie op EN verwerp dit nie. Dit hang net.
+
+     En dan:
+       · `fetchingRef.current` bly vir altyd `true`, dus loop ELKE latere
+         oproep — ook die een by visibilitychange wat juis moes red — reguit
+         teen die hek vas en doen niks;
+       · `setLoading(false)` word nooit bereik nie, dus bly "Besig om
+         boodskappe te laai..." vir altyd staan.
+
+     Die app kon homself dus nie herstel nie. 'n Mens moes hom doodmaak.
+
+     Nou is daar 'n tydgrens, en die slot word in 'n `finally` losgelaat —
+     nooit weer 'n dooie hek nie.
+
+     ── 2. 'n Halwe antwoord het die goeie data uitgevee ──
+
+     Is die SDK vanlyn, bedien `getDocs` uit sy EIE kas. Daardie kas hou net
+     wat die SDK al gesien het — en die enigste ander luisteraar hier vra
+     `limit(1)`. Die antwoord was dus soms EEN nota.
+
+     Die ou kode het dit sonder om te kyk aanvaar: `setNotes(loaded)` en
+     `writeCache(loaded)`. Twintig notas is met een vervang, en dit is in
+     localStorage geskryf, dus het dit 'n herlaai OORLEEF. Dit is presies die
+     skermkiekie: die wallpaper wys nog (dis nota 0), en onder die soekkassie
+     is daar niks — geen lys, geen "Laai meer", geen "Dit was alles".
+
+     Nou word 'n antwoord wat KLEINER is as wat ons reeds het, weggegooi. Ons
+     hou eerder ou data as om goeie data met 'n halwe kas te vervang. */
   const fetchNotes = useCallback(async (silent = false) => {
     if (fetchingRef.current) return
     fetchingRef.current = true
     if (!silent) setLoadingMore(true)
     try {
-      const q    = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(PAGE_SIZE))
-      const snap = await getDocs(q)
+      const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(PAGE_SIZE))
+      const snap = await Promise.race([
+        getDocs(q),
+        new Promise((_, nee) => setTimeout(() => nee(new Error('te lank')), HAAL_TYDGRENS)),
+      ])
       const loaded = snap.docs.map(mapDoc)
-      lastDocRef.current = snap.docs[snap.docs.length - 1] || null
-      setHasMore(snap.docs.length === PAGE_SIZE)
-      setNotes(loaded)
-      setActiveId(prev => prev || loaded[0]?.id || null)
+
+      /* Aanvaar dit net as dit nie minder is as wat ons reeds het nie. 'n Leë
+         of halwe antwoord beteken die verbinding is stukkend, nie dat die
+         notas weg is nie.
+
+         `notasRef` en nie `notes` nie: hierdie useCallback het 'n leë
+         afhanklikheidslys, dus sou dit vir altyd na die eerste render se
+         notas kyk. */
+      const genoeg = loaded.length >= Math.min(PAGE_SIZE, notasRef.current.length)
+      if (loaded.length && genoeg) {
+        lastDocRef.current = snap.docs[snap.docs.length - 1] || null
+        setHasMore(snap.docs.length === PAGE_SIZE)
+        setNotes(loaded)
+        setActiveId(vorige => vorige || loaded[0]?.id || null)
+        writeCache(loaded)
+      }
       setLoading(false)
-      writeCache(loaded)
     } catch {
+      /* Kon dit nie kry nie. Het ons reeds notas uit die kas, wys hulle
+         eerder as 'n leë skerm; het ons niks, wys die leë skerm met sy
+         "Probeer weer"-knoppie. */
       setLoading(false)
+    } finally {
+      fetchingRef.current = false
+      if (!silent) setLoadingMore(false)
     }
-    fetchingRef.current = false
-    if (!silent) setLoadingMore(false)
   }, [])
 
   // ── Fetch next page ──
@@ -308,6 +373,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     } catch {}
     setLoadingMore(false)
   }, [loadingMore])
+
+  useEffect(() => { notasRef.current = notes }, [notes])
 
   // ── On mount: always fetch to set up pagination cursor ──
   useEffect(() => {

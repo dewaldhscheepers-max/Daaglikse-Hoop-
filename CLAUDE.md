@@ -128,6 +128,49 @@ daarna.
 
 ---
 
+## Die wit skerm
+
+'n Geïnstalleerde PWA laai sy HTML uit die diensketter se vooraf-kas. Word
+daar 'n paar keer op een dag ontplooi, kan daardie ou HTML na
+`/assets/index-OUHASH.js` wys — 'n lêer wat nie meer op die bediener is nie.
+Die skrip gee 'n 404, React begin nooit, en die mens sien 'n **wit skerm**.
+Toemaak help nie; dieselfde ou HTML kom weer uit die kas.
+
+Daar is 'n vangnet **inlyn in `index.html` se kop**. Dit moet daar bly en dit
+moet ES5 bly: dit is die enigste kode wat nog loop wanneer die bundel nie
+laai nie. Ná agt sekondes kyk dit of React iets in `#root` gesit het; is dit
+leeg, skryf dit elke diensketter af, vee elke kas uit en herlaai een keer.
+Slaag dit nie, wag dit ses uur en wys intussen woorde en 'n knoppie — nooit
+'n leë wit skerm nie.
+
+Toets dit met `kykWitSkerm.mjs` in die scratchpad: dit gee die bundel 'n 404
+en eis dat die app homself regmaak, dat dit nie in 'n lus beland nie, en dat
+'n **gesonde** app nooit geraak word nie.
+
+---
+
+## Firestore se `getDocs` het geen tydgrens nie
+
+Dit het Luister twee keer stilweg gebreek, en albei kere lyk dieselfde vir
+die mens: *"dit sê Besig om boodskappe te laai en dan is daar niks."*
+
+**Dit kan vir altyd hang.** Wanneer Android die oortjie opskort, sterf die
+SDK se verbinding, en op 'n slegte terugkeer los die belofte nie op EN
+verwerp dit nie. Enige `if (besigRef.current) return`-slot bly dan vir altyd
+toe, en elke latere probeerslag — ook die een by `visibilitychange` wat juis
+moes red — loop teen die hek vas. Die app kan homself nie herstel nie.
+Wikkel dit dus in 'n `Promise.race` met 'n tydgrens en laat die slot in 'n
+`finally` los.
+
+**Dit kan 'n halwe antwoord gee.** Is die SDK vanlyn, bedien `getDocs` uit sy
+eie kas, en daardie kas hou net wat die SDK al gesien het. Met 'n
+`limit(1)`-luisteraar iewers is die antwoord soms EEN dokument. Skryf dit
+sonder om te kyk na die skerm en na localStorage, en twintig notas is met een
+vervang — wat 'n herlaai oorleef. **Aanvaar nooit 'n antwoord wat kleiner is
+as wat jy reeds het nie.**
+
+---
+
 ## Die Afrikaanse Bybel
 
 Die Bybelgenootskap van SA het skriftelik geweier dat hul teks (1953, 1983,
