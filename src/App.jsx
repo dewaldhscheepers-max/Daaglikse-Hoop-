@@ -29,6 +29,7 @@ import WanneerAngsToeslaan from './screens/WanneerAngsToeslaan'
 import RustelosGedagtes from './screens/RustelosGedagtes'
 import AsAllesWegval from './screens/AsAllesWegval'
 import AngsDetox from './screens/AngsDetox'
+import WatIsMyne from './screens/WatIsMyne'
 import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
@@ -104,6 +105,7 @@ export default function App() {
   const [showRustelosGedagtes, setShowRustelosGedagtes] = useState(false)
   const [showAsAllesWegval,    setShowAsAllesWegval]    = useState(false)
   const [showAngsDetox,        setShowAngsDetox]        = useState(false)
+  const [showWatIsMyne,        setShowWatIsMyne]        = useState(false)
   const [showDinkNuut,         setShowDinkNuut]         = useState(false)
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showToksies,            setShowToksies]            = useState(false)
@@ -508,6 +510,13 @@ export default function App() {
     function onOpen() { setShowAngsDetox(true) }
     window.addEventListener('open-angs-detox', onOpen)
     return () => window.removeEventListener('open-angs-detox', onOpen)
+  }, [])
+
+  // ── WAT IS MYNE OM TE DRA? leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowWatIsMyne(true) }
+    window.addEventListener('open-wat-is-myne', onOpen)
+    return () => window.removeEventListener('open-wat-is-myne', onOpen)
   }, [])
 
   // ── Dink Nuut, Leef Nuut leesplan ──
@@ -1013,6 +1022,9 @@ export default function App() {
       )}
       {showAngsDetox && (
         <AngsDetox onClose={() => setShowAngsDetox(false)} />
+      )}
+      {showWatIsMyne && (
+        <WatIsMyne onClose={() => setShowWatIsMyne(false)} />
       )}
       {showDinkNuut && (
         <DinkNuutLeefNuut onClose={() => setShowDinkNuut(false)} />

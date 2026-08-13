@@ -41,7 +41,24 @@ const ICONS = {
   ),
 }
 
+/* Die volgorde van hierdie lys IS die volgorde op die skerm. Wat nuut is,
+   staan bo — dieselfde reel as die e-boeke. */
 const PLANS = [
+  {
+    id:           'wat-is-myne',
+    countKey:     'rp_counted_wimotd',
+    bookId:       'wat-is-myne',
+    event:        'open-wat-is-myne',
+    icon:         'hands',
+    tint:         '#F3EFE6',
+    stroke:       '#8A6D3B',
+    title:        'WAT IS MYNE OM TE DRA?',
+    desc:         "’n Kort Bybelse gids vir wanneer jy te veel probeer dra, beheer of regmaak. Dit help jou onderskei tussen wat jou verantwoordelikheid is, wat aan ander behoort, en wat jy weer in God se hande moet plaas.",
+    meta:         '5 dae · gratis',
+    completedKey: 'wimotd_completed',
+    lastDayKey:   'wimotd_lastDay',
+    total:        5,
+  },
   {
     id:           'angs-detox',
     countKey:     'rp_counted_angsd',
