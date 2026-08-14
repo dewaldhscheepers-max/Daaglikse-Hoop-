@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { isInApp } from '../firebase'
 import { blaaierSoort } from '../data/kennisgewingVra'
 import './KennisgewingAf.css'
 
@@ -21,6 +22,25 @@ import './KennisgewingAf.css'
    ──────────────────────────────────────────────────────────── */
 
 const STAPPE = {
+  /* ── Die GEÏNSTALLEERDE app ──
+
+     Dit is die belangrikste geval en dit het ontbreek. In die Play-app is
+     daar geen adresbalk, geen slotjie en geen ⋮-knoppie nie — al die
+     blaaier-stappe hieronder wys na knoppies wat eenvoudig nie daar is
+     nie, en verkeerde stappe is erger as geen stappe nie.
+
+     Op Android 13 en later moet die APP self toestemming hê om
+     kennisgewings te wys. Die stelsel vra dit een keer, en druk 'n mens
+     "Moenie toelaat nie", word elke latere web-vraag dadelik geweier
+     sonder om iets te wys — presies hoe dit lyk of die app stukkend is.
+
+     Die enigste pad terug is Android se eie instellings. */
+  app: [
+    'Hou jou vinger op die Daaglikse Hoop-ikoon op jou tuisskerm',
+    'Tik die ⓘ (Programinligting)',
+    'Kies “Kennisgewings” en sit dit aan',
+    'Maak die app weer oop',
+  ],
   chrome: [
     'Tik die 🔒 slotjie links in die adresbalk',
     'Kies “Permissions” of “Site settings”',
@@ -52,7 +72,13 @@ const STAPPE = {
 
 export default function KennisgewingAf() {
   const [oop, setOop] = useState(false)
-  const soort  = blaaierSoort(typeof navigator !== 'undefined' ? navigator.userAgent : '')
+  /* In die geïnstalleerde app tel die blaaier se naam nie. Die Play-app
+     word deur die foon se verstekblaaier gehuisves — op 'n Samsung sê die
+     user agent dus "SamsungBrowser" — maar die mens sien geen blaaier nie.
+     Wat hy moet verander, sit in Android se instellings. */
+  const soort  = isInApp
+    ? 'app'
+    : blaaierSoort(typeof navigator !== 'undefined' ? navigator.userAgent : '')
   const stappe = STAPPE[soort] || STAPPE.chrome
 
   return (
