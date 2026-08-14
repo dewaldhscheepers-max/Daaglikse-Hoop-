@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
+        <!-- Hoe die oggendkennisgewing lyk.
+
+             Sonder hierdie twee reels neem Android die LANCEERIKOON en maak
+             'n silhoeet daarvan vir die statusbalk. Ons ikoon is 'n vol
+             prentjie, en 'n vol prentjie word 'n grys blok. Die reel is dat
+             'n statusbalk-ikoon net wit-op-deursigtig mag wees; daarom
+             ic_stat_hoop.
+
+             Die kleur is die tint agter die klein ikoon in die uitgetrekte
+             kennisgewing. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_hoop" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
+    </application>
+
+    <!-- Permissions -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Vanaf Android 13 is dit nie meer genoeg om net 'n kennisgewing te
+         stuur nie — die mens moet dit toestaan, met dieselfde soort venster
+         as vir die kamera. Sonder hierdie reel word daar nooit gevra nie en
+         val elke kennisgewing stilweg op die vloer.
+
+         Dit is wat die vorige weergawe van hierdie app se sonde was: die
+         toestemming het bestaan, maar dit was die BLAAIER s'n, nie ons s'n
+         nie, en Samsung Internet het dit nooit oorhandig nie. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+</manifest>

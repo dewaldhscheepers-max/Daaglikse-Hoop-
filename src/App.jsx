@@ -12,6 +12,7 @@ import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup,
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
+import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
 import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
 import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
@@ -324,17 +325,21 @@ export default function App() {
      return` gehad, en dit is die rede waarom `webPushSubscriptions` een
      inskrywing het. */
   useEffect(() => {
-    if (!('Notification' in window)) return
-    const perm = Notification.permission
-
     /* Tel waar hierdie toestel staan — drie getalle, niks wat na 'n mens
        teruglei nie. Net wanneer dit VERANDER, sodat dieselfde foon nie elke
-       oggend weer getel word nie. */
-    const verandering = telVerandering({
-      toestemming: perm,
-      laasGetel: localStorage.getItem('toestemmingGetel') || '',
-    })
-    if (verandering) {
+       oggend weer getel word nie.
+
+       In die Android-app moet dit die INHEEMSE toestemming tel. Die WebView
+       se `Notification.permission` is 'n ander ding en het niks te doen met
+       of hierdie foon die oggendboodskap gaan kry nie; dit sou die drie
+       getalle stilweg bederf. */
+    function tel(perm) {
+      if (!perm) return
+      const verandering = telVerandering({
+        toestemming: perm,
+        laasGetel: localStorage.getItem('toestemmingGetel') || '',
+      })
+      if (!verandering) return
       fetch('/api/tel-toestemming', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -351,7 +356,20 @@ export default function App() {
        hom in nie. Hy sou vir altyd stil bly terwyl alles reg lyk.
 
        `subscribeSamsung` hergebruik 'n bestaande intekening en die
-       toestemming is reeds gegee, dus wys dit niks en vra dit niks. */
+       toestemming is reeds gegee, dus wys dit niks en vra dit niks.
+       `houInheemseTokenVars` kyk self na die toestemming en doen niks as dit
+       nie gegee is nie — daarom hoef ons hier nie te wag nie. */
+    if (isInheems) {
+      houInheemseTokenVars()
+      inheemseToestemming().then(staat => {
+        tel(staat === 'granted' ? 'granted' : staat === 'denied' ? 'denied' : 'default')
+      })
+      return
+    }
+
+    if (!('Notification' in window)) return
+    const perm = Notification.permission
+    tel(perm)
     if (perm === 'granted') {
       if (isSamsungBrowser) subscribeSamsung().catch(() => {})
       else                  ensureNotificationToken()
@@ -363,10 +381,43 @@ export default function App() {
      Word geroep wanneer 'n nota klaar gespeel het. Op daardie oomblik het
      iemand pas gekry waarvoor hy gekom het, en "wil jy môre weer hoor?" is
      'n redelike vraag eerder as 'n onderbreking. */
+  /* ── Wie se toestemming tel? ──
+
+     In die Android-app is `Notification.permission` die WEBVIEW se
+     toestemming, en dit is nie die een wat saak maak nie. Die een wat saak
+     maak is POST_NOTIFICATIONS, wat aan die APP behoort.
+
+     Die twee stem nie ooreen nie. 'n WebView wat nooit gevra is nie, gee
+     dikwels `denied` terug — en `magVra` sou dan vir altyd nee se en die
+     mens sou nooit die vraag sien nie, in presies die app waar dit die
+     meeste saak maak.
+
+     Ons lees dus die INHEEMSE staat een keer by die oopmaak en hou dit in 'n
+     ref, want `vraKennisgewingsDalk` moet sinchroon 'n antwoord gee.
+     'prompt' en 'prompt-with-rationale' is Android se manier om "nog nooit
+     gevra nie" te se — dieselfde as die web se 'default'. */
+  const inheemsePermRef = useRef(null)
+  useEffect(() => {
+    if (!isInheems) return
+    let leef = true
+    inheemseToestemming().then(staat => {
+      if (!leef || !staat) return
+      inheemsePermRef.current =
+        staat === 'granted' ? 'granted' : staat === 'denied' ? 'denied' : 'default'
+    })
+    return () => { leef = false }
+  }, [])
+
+  function huidigeToestemming() {
+    if (isInheems) return inheemsePermRef.current || 'default'
+    return 'Notification' in window ? Notification.permission : null
+  }
+
   function vraKennisgewingsDalk() {
-    if (!('Notification' in window)) return false
+    const toestemming = huidigeToestemming()
+    if (!toestemming) return false
     const mag = magVra({
-      toestemming: Notification.permission,
+      toestemming,
       kere: parseInt(localStorage.getItem('vraKennisgewingKere') || '0', 10),
       laas: parseInt(localStorage.getItem('vraKennisgewingLaas') || '0', 10),
       nou:  Date.now(),
@@ -375,6 +426,15 @@ export default function App() {
     setNotifBanner(true)
     return true
   }
+
+  /* Druk iemand die oggendkennisgewing, maak Android die app oop. Bring hom
+     na Luister toe — dit is waar die boodskap sit. Dieselfde bestemming as
+     die web-kennisgewing se `data.url`. */
+  useEffect(() => {
+    let opruim = () => {}
+    luisterInheemseTikke(() => setTab('luister')).then(f => { opruim = f })
+    return () => opruim()
+  }, [])
 
   /* ── In die GEÏNSTALLEERDE app vra ons by die oopmaak ──
 
@@ -429,11 +489,23 @@ export default function App() {
   const [wysStappe, setWysStappe] = useState(false)
 
   async function probeerKennisgewings() {
-    /* Samsung Internet doen nie Firebase se getToken nie, maar wel die
-       gewone pushManager. Sien `subscribeSamsung`. */
-    const result = isSamsungBrowser
-      ? await subscribeSamsung()
-      : await subscribeToNotifications()
+    /* Drie paaie, en presies EEN mag loop.
+
+       1. Die Android-app uit Google Play. Ons praat self met Android deur
+          Firebase se inheemse SDK — geen blaaier in die middel nie. Dit is
+          die enigste pad wat op 'n Samsung werk.
+       2. Samsung Internet as blaaier. Doen nie Firebase se getToken nie,
+          maar wel die gewone pushManager. Sien `subscribeSamsung`.
+       3. Alles anders.
+
+       Loop twee van hulle, kry een mens twee tokens en die oggendboodskap
+       kom twee keer. Die app laai die LEWENDE webwerf, dus is dit dieselfde
+       bundel wat in al drie gevalle loop — `isInheems` is die skakelaar. */
+    const result = isInheems
+      ? await tekenInInheems()
+      : isSamsungBrowser
+        ? await subscribeSamsung()
+        : await subscribeToNotifications()
     return !!(result && result.ok)
   }
 
@@ -442,7 +514,19 @@ export default function App() {
     merkGevra()
     let gelukt = false
     try { gelukt = await probeerKennisgewings() } catch { gelukt = false }
-    if (gelukt) { setWysStappe(false); setToestemmingAf(false); return }
+    if (gelukt) {
+      setWysStappe(false)
+      setToestemmingAf(false)
+      if (isInheems) inheemsePermRef.current = 'granted'
+      return
+    }
+    /* Misluk dit, hou die inheemse staat by. Android wys sy venster nie 'n
+       tweede keer nie, en 'n knoppie wat niks doen nie is erger as stilte. */
+    if (isInheems) {
+      const staat = await inheemseToestemming()
+      inheemsePermRef.current =
+        staat === 'granted' ? 'granted' : staat === 'denied' ? 'denied' : 'default'
+    }
     if (isInApp) setWysStappe(true)
     else         setToestemmingAf(Notification.permission === 'denied')
   }

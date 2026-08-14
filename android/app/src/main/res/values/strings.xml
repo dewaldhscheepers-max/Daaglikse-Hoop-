@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Daaglikse Hoop</string>
+    <string name="title_activity_main">Daaglikse Hoop</string>
+    <string name="package_name">com.dewaldscheepers.daaglikshoop</string>
+    <string name="custom_url_scheme">com.dewaldscheepers.daaglikshoop</string>
+</resources>

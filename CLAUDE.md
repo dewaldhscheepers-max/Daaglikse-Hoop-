@@ -229,6 +229,35 @@ uit `src/` invoer.
 
 ---
 
+## Die Android-app is nie die webwerf nie
+
+Op Google Play staan 'n **regte app**, gebou met Capacitor, in `android/`.
+Dit was 'n TWA — 'n houer wat die webwerf in die foon se verstek-blaaier
+oopmaak — en op 'n Samsung beteken dit Samsung Internet besit alles wat saak
+maak: die kennisgewing is syne om oor te handig (hy doen dit nie), en die
+kleure is syne om om te keer (hy doen dit wel).
+
+Drie dinge om te weet voor jy hieraan raak:
+
+* **Die app laai die LEWENDE webwerf.** Dieselfde bundel loop in Chrome, in
+  Samsung Internet en in die app. `isInheems` in
+  `src/data/inheemseKennisgewings.js` is die skakelaar wat keer dat push
+  **twee keer** registreer en een mens die oggendboodskap dubbel kry.
+* **`Notification.permission` lieg binne die app.** Dit is die WEBVIEW se
+  toestemming; die een wat tel is `POST_NOTIFICATIONS`, wat aan die app
+  behoort. 'n WebView wat nooit gevra is nie gee dikwels `denied`. `App.jsx`
+  lees die inheemse staat in `inheemsePermRef` en gebruik dít — vir die vraag
+  én vir die drie tellers op `tellers/toestemming`.
+* **Die web en die PWA verander niks.** iPhone, bestaande PWA-installasies en
+  gewone webbesoekers loop presies soos altyd. Die bediener het niks nodig
+  gehad nie: die inheemse token gaan na dieselfde `fcm_tokens`-versameling.
+
+Die `.aab` kan **nie hier gebou word nie** — `dl.google.com` word deur die
+uitgangsbeleid geblokkeer, en dit is waar die Android-SDK én die hele
+Google-Maven sit. Dit word in Android Studio gebou.
+
+Volledig in `docs/android-app.md`. Lees dit voor jy aan `android/` raak.
+
 ## Kennisgewings
 
 Ses duisend fone hang hieraan. Dit is die ding wat die app laat groei, en dit

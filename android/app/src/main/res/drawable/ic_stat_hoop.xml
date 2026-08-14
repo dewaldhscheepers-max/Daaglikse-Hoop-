@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Die ikoon in die statusbalk wanneer die oggendboodskap kom.
+
+     Android teken hierdie ding as 'n SILHOEET: net die alfa tel, die kleur
+     word weggegooi en met default_notification_color vervang. Daarom is dit
+     wit-op-deursigtig en niks anders nie. Sit hier 'n foto of 'n vol logo,
+     en die mens sien 'n grys blok.
+
+     Dit is 'n son wat oor 'n horison opkom — dieselfde sonsopkoms as die
+     app se gradient. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- die horison -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3,18.4 H21 V20 H3 Z" />
+
+    <!-- die son, net die boonste helfte -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M6.6,16.8 A5.4,5.4 0 0 1 17.4,16.8 Z" />
+
+    <!-- strale: bo, linksbo, regsbo, en die twee kante -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11.25,2.6 h1.5 v3.2 h-1.5 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4.67,7.13 L5.73,6.07 L7.83,8.17 L6.77,9.23 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M19.33,7.13 L18.27,6.07 L16.17,8.17 L17.23,9.23 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M1.6,15.9 h3.2 v1.5 h-3.2 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M19.2,15.9 h3.2 v1.5 h-3.2 Z" />
+</vector>

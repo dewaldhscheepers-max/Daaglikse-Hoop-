@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Daaglikse Hoop is 'n LIGTE app. Daar is een palet en daar was nooit 'n
+     donker weergawe nie.
+
+     Capacitor se voorafskrif gebruik `Theme.AppCompat.DayNight` vir die
+     hoofvenster. DayNight beteken: volg die foon. Sit die foon (of Samsung
+     se kragbespaarder) donker modus aan, word die venster agter die WebView
+     swart — en dit is presies die swart wat Dewald gesien het.
+
+     Alles hieronder is Light, met forceDarkAllowed uitdruklik af. Saam met
+     setAlgorithmicDarkeningAllowed(false) in MainActivity is dit die venster
+     EN die bladsy albei vasgenael. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@color/hoopRoom</item>
+        <item name="android:windowBackground">@color/hoopRoom</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

@@ -1,0 +1,19 @@
+{
+  "appId": "com.dewaldscheepers.daaglikshoop",
+  "appName": "Daaglikse Hoop",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#FAF8F5"
+  },
+  "server": {
+    "url": "https://www.dewaldscheepers.com",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

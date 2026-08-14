@@ -209,6 +209,32 @@
     <p class="byline">Deur Dewald Scheepers</p>
     <p class="subtitle">Stemnotas, gebed, e-boeke en daaglikse bemoediging — alles op een plek.</p>
 
+    <!-- ── Android: Google Play, en niks anders nie ──
+
+         Dit is die belangrikste blok op hierdie bladsy.
+
+         Voorheen het elke Android-mens hier 'n les gekry: maak dit in Chrome
+         oop, tik die drie kolletjies, kies "Voeg by tuisskerm", tik
+         "Installeer". Vier stappe, in 'n spyskaart wat in elke blaaier
+         anders lyk en in party glad nie bestaan nie. Die meeste mense het
+         eenvoudig weggeloop, en wie deurgedruk het, het op Samsung Internet
+         beland waar die kennisgewings nie werk nie.
+
+         Nou is dit een knoppie. Google Play maak oop, hy tik Installeer,
+         klaar. Presies soos enige ander app.
+
+         Die webweergawe gaan NERENS heen nie — sien "Gaan voort" hieronder.
+         Wie dit reeds op sy tuisskerm het, hoef niks te doen nie. -->
+    <div id="state-play" style="display:none">
+      <p class="chrome-notice">Kry die app op jou foon — met kennisgewings wat werk.</p>
+      <a class="btn-chrome" id="btn-play"
+         href="https://play.google.com/store/apps/details?id=com.dewaldscheepers.daaglikshoop">
+        📲 Installeer van Google Play
+      </a>
+      <p class="chooser-hint">Google Play maak oop. Tik <strong>Installeer</strong>.</p>
+      <a class="btn-continue" href="/">Nie nou nie — gaan voort op die web</a>
+    </div>
+
     <!-- Default: always visible, JS hides it for Chrome/iOS/desktop -->
     <div id="state-samsung">
       <p class="chrome-notice">Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.</p>
@@ -250,11 +276,28 @@
     </div>
 
     <script>
+      /* ── Is die Play-app openbaar? ──
+
+         Draai dit op `true` die dag wanneer die Daaglikse Hoop-app in Google
+         Play op PRODUKSIE staan en vir enigiemand sigbaar is.
+
+         Moenie dit vroeer aanskakel nie. Solank die app net in geslote toetse
+         is, wys die Play-skakel vir enigiemand wat nie 'n toetser is nie
+         "item not found" — en dan het ons vir elke Android-mens 'n knoppie
+         gegee wat op 'n foutbladsy uitkom. Dit is erger as die ou les met die
+         drie kolletjies.
+
+         Een reel om dit aan te sit, een reel om dit af te sit. */
+      var PLAY_LEWE = false
+
       var deferredPrompt = null
       window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault()
         deferredPrompt = e
-        showState('install')
+        /* Is Google Play die pad, bly dit die pad. Die blaaier se eie
+           installeervenster sit 'n TWEEDE ikoon op die tuisskerm langs die
+           Play-app se een, en dan het een mens twee Daaglikse Hope. */
+        if (!(PLAY_LEWE && /Android/i.test(navigator.userAgent))) showState('install')
       })
 
       ;(function () {
@@ -264,7 +307,13 @@
         var isIOS     = /iPhone|iPad|iPod/i.test(ua)
 
         var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
-        if (isIOS) {
+
+        /* Android kry Google Play, en dit maak nie saak watter blaaier hy
+           gebruik nie. Dit is die hele punt: Chrome, Samsung Internet,
+           Facebook se ingeboude blaaier — almal dieselfde een knoppie. */
+        if (isAndroid && PLAY_LEWE) {
+          showState('play')
+        } else if (isIOS) {
           showState('ios')
         } else if (isMobile && !isChrome) {
           // Mobile non-Chrome (Samsung, Edge, in-app, spoofed UA) — show open-in-Chrome prompt
@@ -279,9 +328,26 @@
       })()
 
       function showState(name) {
-        ;['samsung','install','open','ios'].forEach(function (s) {
+        ;['play','samsung','install','open','ios'].forEach(function (s) {
           document.getElementById('state-' + s).style.display = s === name ? 'block' : 'none'
         })
+        /* "Maak dit in Chrome oop" is 'n les uit die ou wereld. Kom die app
+           uit Google Play, is daar niks om oop te maak nie.
+
+           Die uitstel is nie oorversigtigheid nie: hierdie skrip staan HOER
+           op in die bladsy as die slotreel, dus bestaan #closing nog nie
+           wanneer showState die eerste keer loop. */
+        if (name === 'play') {
+          var stelSlot = function () {
+            var slot = document.getElementById('closing')
+            if (slot) slot.textContent = '"Een tik, en dit is op jou foon."'
+          }
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', stelSlot)
+          } else {
+            stelSlot()
+          }
+        }
       }
 
       document.getElementById('btn-install').addEventListener('click', function () {
@@ -304,7 +370,7 @@
       <div class="feature"><span class="feature-icon">🔔</span><span><strong>06:30 kennisgewings</strong> — jou oggendboodskap op jou foon</span></div>
     </div>
 
-    <p class="closing">"Vir die beste ervaring, maak dit in Chrome oop."</p>
+    <p class="closing" id="closing">"Vir die beste ervaring, maak dit in Chrome oop."</p>
   </div>
 </body>
 </html>

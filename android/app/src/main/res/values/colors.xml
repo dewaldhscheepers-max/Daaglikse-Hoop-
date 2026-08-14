@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dieselfde palet as src/index.css. Verander dit daar, verander dit hier.
+
+     Capacitor se styles.xml verwys na hierdie drie name maar skep die leer
+     nie — sonder dit val die bou om by aapt met "resource color/colorPrimary
+     not found". -->
+<resources>
+    <color name="colorPrimary">#7C6FAF</color>       <!-- --purple -->
+    <color name="colorPrimaryDark">#5C4E8E</color>   <!-- --purple-dark -->
+    <color name="colorAccent">#D4956A</color>        <!-- --gold -->
+
+    <!-- Die room agter die WebView. Dit wys vir 'n oomblik voor die bladsy
+         verf, en dit is die kleur wat die mens sien as hy die app van die
+         onlangse-appe-lys af oopmaak. Dit MOET ligroom wees, anders flits
+         daar swart. -->
+    <color name="hoopRoom">#FAF8F5</color>
+</resources>
