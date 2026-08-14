@@ -53,11 +53,36 @@ function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
 }
 
 /* ── Main screen ── */
+/* Die laaste totale wat ons WEL geken het. Een keer gelees, buite die
+   komponent, sodat dit nie by elke render weer uit localStorage kom nie. */
+const gekasteTotale = (() => {
+  try {
+    const d = JSON.parse(localStorage.getItem('eboekTotale') || 'null')
+    if (d && typeof d.b === 'number' && typeof d.w === 'number') return d
+  } catch {}
+  return { b: null, w: null }
+})()
+
 export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled }) {
   const [bookOverrides,       setBookOverrides]       = useState({})
-  const [rgCount,             setRgCount]             = useState(CAMPAIGN.goal)
-  const [liveCount,           setLiveCount]           = useState(0)
-  const [liveValue,           setLiveValue]           = useState(0)
+  /* ── Die twee groot getalle bo-aan ──
+
+     Hulle het voor 'n mens se oe gespring: eers 7 681, en sowat tien
+     sekondes later 8 545. Die rede is dat hulle uit TWEE bronne kom —
+     `rgCount` uit /api/campaign-count en `liveCount` uit Firestore — en
+     albei het 'n plekhouer gehad wat soos 'n antwoord gelyk het:
+     CAMPAIGN.goal en 0.
+
+     'n Getal oor hoeveel boeke weggegee is en wat dit werd is, wat voor
+     iemand se oe met 900 verander, lyk soos 'n leuen. Dit is die laaste
+     plek waar 'n mens 'n raaiskoot moet wys.
+
+     Nou: die laaste GOEIE totale word in localStorage gehou en dadelik
+     gewys, en 'n vars bladlaai wys 'n rustige — totdat albei bronne in is.
+     Niks spring meer nie. */
+  const [rgCount,             setRgCount]             = useState(null)
+  const [liveCount,           setLiveCount]           = useState(null)
+  const [liveValue,           setLiveValue]           = useState(null)
   const [activeBook,          setActiveBook]          = useState(null)
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
@@ -104,12 +129,15 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     return () => { lewendig = false }
   }, [])
 
-  // Load rgCount from campaign-count API
+  /* Kom die API nie deur nie, val ons terug op die ou plekhouer. Sonder
+     hierdie terugval bly `rgCount` vir altyd null en die twee getalle wys
+     vir altyd 'n strepie — 'n dooie eindpunt sou dus die hele banier
+     doodmaak. */
   function fetchRgCount() {
     fetch('/api/campaign-count')
       .then(r => r.json())
-      .then(d => { if (d.total) setRgCount(d.total) })
-      .catch(() => {})
+      .then(d => setRgCount(d && d.total ? d.total : CAMPAIGN.goal))
+      .catch(() => setRgCount(CAMPAIGN.goal))
   }
 
   useEffect(() => {
@@ -118,13 +146,13 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
   // Load liveCount + liveValue from stats/ebooks_given
   useEffect(() => {
+    /* Bestaan die dokument nie, is die antwoord NUL en nie "ons weet nie" —
+       anders hang die banier vir altyd op 'n strepie. Dieselfde by 'n fout. */
     const unsub = onSnapshot(doc(db, 'stats', 'ebooks_given'), snap => {
-      if (snap.exists()) {
-        const data = snap.data()
-        setLiveCount(data.count ?? 0)
-        setLiveValue(data.value ?? 0)
-      }
-    })
+      const data = snap.exists() ? snap.data() : {}
+      setLiveCount(data.count ?? 0)
+      setLiveValue(data.value ?? 0)
+    }, () => { setLiveCount(0); setLiveValue(0) })
     return unsub
   }, [])
 
@@ -181,8 +209,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     })
     .filter(Boolean)
 
-  const totalBooks = rgCount + 3000 + liveCount
-  const totalValue = rgCount * 110 + 150000 + liveValue
+  /* Albei bronne moet in wees voordat ons 'n getal wys. */
+  const getalleGereed = rgCount !== null && liveCount !== null && liveValue !== null
+  const totalBooks = getalleGereed ? rgCount + 3000 + liveCount        : null
+  const totalValue = getalleGereed ? rgCount * 110 + 150000 + liveValue : null
+
+  /* Hou die laaste goeie paar, sodat 'n mens wat terugkom dadelik iets sien
+     in plaas van 'n strepie wat dan 'n getal word. */
+  useEffect(() => {
+    if (!getalleGereed) return
+    try { localStorage.setItem('eboekTotale', JSON.stringify({ b: totalBooks, w: totalValue })) } catch {}
+  }, [getalleGereed, totalBooks, totalValue])
+
+  const wysBoeke = totalBooks !== null ? totalBooks : gekasteTotale.b
+  const wysWaarde = totalValue !== null ? totalValue : gekasteTotale.w
 
   return (
     <div className="meer">
@@ -193,11 +233,11 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
         <p className="meer-header-sub">Hoop behoort nie net beskikbaar te wees vir mense wat kan betaal nie.</p>
         <div className="meer-stats-row">
           <div className="meer-stat-box">
-            <span className="meer-stat-num">{fmtNum(totalBooks)}+</span>
+            <span className="meer-stat-num">{wysBoeke === null ? '—' : `${fmtNum(wysBoeke)}+`}</span>
             <span className="meer-stat-lbl">e-boeke afgelaai</span>
           </div>
           <div className="meer-stat-box">
-            <span className="meer-stat-num">R{Math.floor(totalValue).toLocaleString('af-ZA')}+</span>
+            <span className="meer-stat-num">{wysWaarde === null ? '—' : `R${Math.floor(wysWaarde).toLocaleString('af-ZA')}+`}</span>
             <span className="meer-stat-lbl">se e-boeke gratis weggegee</span>
           </div>
         </div>

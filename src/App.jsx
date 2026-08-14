@@ -821,6 +821,107 @@ export default function App() {
     if (screenRef.current) screenRef.current.scrollTop = 0
   }
 
+  /* ────────────────────────────────────────────────────────────
+     Die Android terug-knoppie
+
+     In die Play-app (die TWA) IS die stelsel se terug-knoppie die blaaier
+     se terug. Daar was geen geskiedenis-hantering nie, dus het die eerste
+     druk 'n mens reguit UIT die app uit gegooi — ook al was hy diep binne
+     'n leesplan of 'n speletjie. Dit laat die app stukkend voel op die
+     enigste knoppie wat elke Android-mens outomaties druk.
+
+     Hoe dit nou werk: elke keer wat 'n laag OOPGAAN, sit ons 'n inskrywing
+     in die geskiedenis. Die terug-knoppie eet dan daardie inskrywing en ons
+     maak die boonste laag toe. Is niks meer oop nie en staan ons op
+     Luister, is daar geen inskrywing oor nie en die stelsel doen sy gewone
+     ding — die app gaan toe. Dit is presies wat 'n mens verwag.
+
+     Twee reels wat maklik is om te mis:
+
+     · Maak die mens iets toe met die app se EIE knoppie, moet die
+       inskrywing ook weg, anders is die volgende terug-druk 'n dooie een.
+       Daarom `history.go(-n)` — en `negeerPop`, sodat daardie terugspring
+       nie weer 'n laag toemaak nie.
+     · Kom die toemaak UIT 'n terug-druk, het die blaaier reeds teruggegaan
+       en mag ons nie weer nie. Daarvoor is `uitPop`.
+     ──────────────────────────────────────────────────────────── */
+
+  /* Onderste eerste, boonste laaste. Is meer as een oop, maak ons die
+     laaste een toe — die modale sit bo-op die skerms. */
+  const oorlegLae = [
+    { oop: showAdmin,               toe: () => setShowAdmin(false) },
+    { oop: showBybel,               toe: () => setShowBybel(false) },
+    { oop: showArk,                 toe: () => setShowArk(false) },
+    { oop: showVrugtefees,          toe: () => setShowVrugtefees(false) },
+    { oop: showVredepad,            toe: () => setShowVredepad(false) },
+    { oop: showHuise,               toe: () => setShowHuise(false) },
+    { oop: showJourney,             toe: () => setShowJourney(false) },
+    { oop: showDingeVerander,       toe: () => setShowDingeVerander(false) },
+    { oop: showSeerNaVryheid,       toe: () => setShowSeerNaVryheid(false) },
+    { oop: showLeuensDuiwel,        toe: () => setShowLeuensDuiwel(false) },
+    { oop: showBybelMaklik,         toe: () => setShowBybelMaklik(false) },
+    { oop: showWanneerAngs,         toe: () => setShowWanneerAngs(false) },
+    { oop: showRustelosGedagtes,    toe: () => setShowRustelosGedagtes(false) },
+    { oop: showAsAllesWegval,       toe: () => setShowAsAllesWegval(false) },
+    { oop: showAngsDetox,           toe: () => setShowAngsDetox(false) },
+    { oop: showWatIsMyne,           toe: () => setShowWatIsMyne(false) },
+    { oop: showDinkNuut,            toe: () => setShowDinkNuut(false) },
+    { oop: showDeursoekBreekStuur,  toe: () => setShowDeursoekBreekStuur(false) },
+    { oop: showToksies,             toe: () => setShowToksies(false) },
+    { oop: wysSteun,                toe: () => { setWysSteun(false); try { sessionStorage.removeItem('steun_versoek') } catch {} } },
+    { oop: showNooimy,              toe: () => setNooimy(false) },
+    { oop: showLeesplanNotice,      toe: () => setShowLeesplanNotice(false) },
+    { oop: showInstallHelp,         toe: () => setShowInstallHelp(false) },
+    { oop: showInstallPopup,        toe: () => setShowInstallPopup(false) },
+    { oop: showHoopVennoot,         toe: () => setShowHoopVennoot(false) },
+    { oop: showDonation,            toe: () => setDonation(false) },
+  ]
+  const boonsteLaag = [...oorlegLae].reverse().find(l => l.oop) || null
+
+  /* Hoeveel lae die terug-knoppie kan afpel: die oortjie (as ons nie op
+     Luister is nie) plus 'n oop oorlegblad. */
+  const oopLae = (tab !== 'luister' ? 1 : 0) + (boonsteLaag ? 1 : 0)
+
+  const diepteRef  = useRef(0)
+  const negeerPop  = useRef(0)
+  const uitPop     = useRef(false)
+  const boonsteRef = useRef(null)
+  const tabRef     = useRef(tab)
+  useEffect(() => { boonsteRef.current = boonsteLaag })
+  useEffect(() => { tabRef.current = tab }, [tab])
+
+  useEffect(() => {
+    const vorige = diepteRef.current
+    if (oopLae === vorige) return
+    diepteRef.current = oopLae
+
+    if (oopLae > vorige) {
+      for (let i = vorige; i < oopLae; i++) {
+        try { window.history.pushState({ dh: i + 1 }, '') } catch {}
+      }
+      return
+    }
+    /* Dit het toegegaan. Kom dit uit 'n terug-druk, het die blaaier reeds
+       teruggegaan; anders moet ons die inskrywing self gaan haal. */
+    if (uitPop.current) { uitPop.current = false; return }
+    const aantal = vorige - oopLae
+    negeerPop.current += aantal
+    try { window.history.go(-aantal) } catch {}
+  }, [oopLae])
+
+  useEffect(() => {
+    function opTerug() {
+      if (negeerPop.current > 0) { negeerPop.current--; return }
+      const laag = boonsteRef.current
+      if (laag) { uitPop.current = true; laag.toe(); return }
+      if (tabRef.current !== 'luister') { uitPop.current = true; setTab('luister'); return }
+      /* Niks oop en ons is op Luister — daar is geen inskrywing meer nie en
+         die stelsel maak die app toe. Presies wat 'n mens verwag. */
+    }
+    window.addEventListener('popstate', opTerug)
+    return () => window.removeEventListener('popstate', opTerug)
+  }, [])
+
   // ── Samsung Internet → open in Chrome banner ──
   const [samsungChromeDismissed, setSamsungChromeDismissed] = useState(
     () => !!localStorage.getItem('samsungChromeDismissed')
