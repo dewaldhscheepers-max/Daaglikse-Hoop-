@@ -14,6 +14,9 @@ import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
 import { kiesPad } from './data/installeerPad'
+import { wysKnoppie } from './data/kennisgewingStaat'
+import { leesKennisgewingStaat, huidigeToken } from './data/kennisgewingLees'
+import KennisgewingKnoppie from './components/KennisgewingKnoppie'
 import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
 import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
@@ -427,6 +430,63 @@ export default function App() {
     setNotifBanner(true)
     return true
   }
+
+  /* ── "Kennisgewings af" — die merkie regs bo op Luister ──
+
+     Daar is mense wat die app op hulle foon het en al maande niks kry nie.
+     Hulle weet dit nie; hulle dink die app is stil. Ons het geen kanaal na
+     daardie foon nie — die enigste oomblik waarop ons iets kan doen, is
+     wanneer hulle die app oopmaak.
+
+     Daarom is dit nie 'n uitklap nie. 'n Uitklap kom een keer en gaan weg.
+     Dit is 'n merkie wat ELKE KEER daar is totdat dit reg is.
+
+     `null` beteken "ons weet nog nie" — dan wys ons niks, want 'n merkie wat
+     'n halwe sekonde flikker en verdwyn, lyk soos 'n fout. */
+  const [kgStaat, setKgStaat] = useState(null)
+
+  async function herlaaiKgStaat() {
+    try { setKgStaat(await leesKennisgewingStaat()) } catch { setKgStaat(null) }
+  }
+
+  useEffect(() => {
+    let leef = true
+    leesKennisgewingStaat()
+      .then(s => { if (leef) setKgStaat(s) })
+      .catch(() => {})
+    /* Kom die mens terug van sy foon se instellings af, is die antwoord dalk
+       nou anders. Dit is die pad wat 'n mens loop nadat hy "Wys my hoe"
+       gedruk het. */
+    const opWys = () => { if (document.visibilityState === 'visible') herlaaiKgStaat() }
+    document.addEventListener('visibilitychange', opWys)
+    return () => { leef = false; document.removeEventListener('visibilitychange', opWys) }
+  }, [])
+
+  /* Wat die merkie se knoppie doen. Nooit "vra" vir iemand wat geblokkeer
+     het nie — sien kennisgewingStaat.js. */
+  async function kgDoen(watter) {
+    if (watter === 'vra' || watter === 'herstel') {
+      const gelukt = await probeerKennisgewings()
+      await herlaaiKgStaat()
+      return gelukt
+        ? { ok: true,  boodskap: 'Klaar! Jy kry môreoggend jou eerste boodskap.' }
+        : { ok: false, boodskap: 'Dit het nie gewerk nie. Kom ons kyk wat jou foon sê.' }
+    }
+    return { ok: false, boodskap: 'Iets het verkeerd geloop. Probeer asseblief weer.' }
+  }
+
+  /* "Wys my hoe" — die stappe. Vir wie geblokkeer het is dit die ENIGSTE pad
+     terug; vir 'n iPhone wat dit nog nie geinstalleer het nie, is die
+     volgende stap die tuisskerm. */
+  function kgStappe(watter) {
+    if (watter === 'installeer') setShowInstallPopup(true)
+    else if (isInApp)            setWysStappe(true)
+    else                         setToestemmingAf(true)
+  }
+
+  const kennisgewingMerkie = kgStaat && wysKnoppie(kgStaat)
+    ? <KennisgewingKnoppie staat={kgStaat} opDoen={kgDoen} opStappe={kgStappe} />
+    : null
 
   /* Druk iemand die oggendkennisgewing, maak Android die app oop. Bring hom
      na Luister toe — dit is waar die boodskap sit. Dieselfde bestemming as
@@ -1177,7 +1237,7 @@ export default function App() {
                  is 'n muur. */
               if (vraKennisgewingsDalk()) return
               if (shouldShowSharePopup()) setActivePopup({ type: 'share' })
-            }} onNavigate={handleNav} />
+            }} onNavigate={handleNav} kennisgewingMerkie={kennisgewingMerkie} />
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}

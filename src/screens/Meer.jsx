@@ -12,6 +12,8 @@ import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
 import { boekeWatWys } from '../data/kinderBoekeWys'
+import { ToetsKnoppie } from '../components/KennisgewingKnoppie'
+import { huidigeToken } from '../data/kennisgewingLees'
 
 const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 
@@ -64,6 +66,29 @@ const gekasteTotale = (() => {
 })()
 
 export default function Meer({ targetBookId, onScrolled, installPrompt, isInstalled }) {
+  /* ── "Stuur vir my 'n toetsboodskap" ──
+
+     Die enigste eerlike bewys dat hierdie foon ons kan hoor. Daar is geen
+     "is hierdie token lewendig"-navraag by Google nie; 'n mens leer dit eers
+     wanneer 'n stuur UNREGISTERED teruggee. Die bediener stuur dus EEN egte
+     boodskap en se wat gebeur het. Sien api/toets-kennisgewing.js. */
+  async function toetsKennisgewing() {
+    const token = huidigeToken()
+    if (!token) {
+      return { ok: false, boodskap: 'Hierdie foon is nie ingeteken nie. Tik op "Kennisgewings af" bo-aan Luister.' }
+    }
+    const r = await fetch('/api/toets-kennisgewing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    const j = await r.json().catch(() => ({}))
+    return {
+      ok: !!j.ok,
+      boodskap: j.boodskap || 'Iets het verkeerd geloop. Probeer asseblief weer.',
+    }
+  }
+
   const [bookOverrides,       setBookOverrides]       = useState({})
   /* ── Die twee groot getalle bo-aan ──
 
@@ -301,6 +326,25 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           <button className="lp-promo-btn" onClick={e => { e.stopPropagation(); setShowLeesplanne(true) }}>
             SIEN PLANNE →
           </button>
+        </div>
+
+        {/* ── "Kry ek kennisgewings?" ──
+
+            Vir die mense vir wie ALLES reg lyk en wat steeds niks kry nie.
+            Hulle sien geen merkie op Luister nie, want toestemming is daar
+            en die intekening is daar — maar hulle token is by FCM dood en
+            net die bediener weet dit.
+
+            'n Groen merkie op 'n skerm bewys niks. Een egte boodskap wel. */}
+        <div className="meer-section">
+          <div className="section-header">
+            <h3 className="section-title">🔔 Kennisgewings</h3>
+          </div>
+          <p className="kg-toets-lyf">
+            Kry jy nie elke oggend jou boodskap nie? Stuur vir jouself een nou,
+            dan weet ons of hierdie foon ons kan hoor.
+          </p>
+          <ToetsKnoppie opToets={toetsKennisgewing} />
         </div>
 
         {/* All books */}

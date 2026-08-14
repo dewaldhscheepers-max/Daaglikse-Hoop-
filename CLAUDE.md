@@ -32,6 +32,8 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
+node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
+node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse
 node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 toetse
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
@@ -349,6 +351,48 @@ terugdraai nie:
 
 `api/_kennisgewings.toets.mjs` sit 'n vals Google agter die funksie en toets al
 hierdie dinge met 6000 tokens. Loop dit voor jy aan kennisgewings raak.
+
+### "Kennisgewings af" — die merkie regs bo op Luister
+
+Daar is mense wat die app op hulle foon het en al maande niks kry nie. Hulle
+weet dit nie — hulle dink die app is stil. Ons het **geen kanaal** na daardie
+foon nie; die enigste oomblik waarop ons iets kan doen, is wanneer hulle die
+app oopmaak.
+
+Daarom is dit nie 'n uitklap nie. 'n Uitklap kom een keer en gaan weg. Dit is
+'n klein merkie wat ELKE KEER daar is totdat dit reg is, en dan verdwyn dit.
+
+**`Notification.permission === 'granted'` is NIE genoeg nie.** Dewald en sy
+vrou het albei "Toelaat" gedruk, die stelsel het "Managed by Daaglikse Hoop"
+gewys, FCM het die boodskap aanvaar — en niks het verskyn nie. Toestemming se
+net dat 'n mens ja gese het.
+
+`kennisgewingStaat()` in `src/data/kennisgewingStaat.js` is suiwer en gee ses
+state. Die onsuiwer helfte — wat die blaaier en die foon vertel — staan in
+`kennisgewingLees.js`.
+
+* **`herstel`** is die duurste geval: toestemming is daar, die intekening is
+  weg. Dit gebeur by 'n herinstallasie. Sonder hierdie staat lyk daardie foon
+  gesond en bly hy vir altyd stil.
+* **`geblokkeer` vra NOOIT weer nie.** Die stelsel gee dadelik `denied`
+  sonder om iets te wys, en dan het ons 'n knoppie wat niks doen. Die stappe
+  is die enigste pad terug. Daar is 'n toets wat dit oor elke kombinasie
+  afdwing.
+* **`installeer-eers`** is die iPhone: Apple gee web push NET aan 'n webapp
+  wat op die TUISSKERM staan. In Safari self kom die vraag glad nie op nie.
+
+**Die toetsboodskap is die enigste eerlike bewys.** Daar is geen "is hierdie
+token lewendig"-navraag by Google nie — 'n mens leer dit eers wanneer 'n
+stuur `UNREGISTERED` teruggee. `POST /api/toets-kennisgewing` stuur EEN egte
+boodskap met presies dieselfde vorm as die oggend s'n, en vee die dokument
+uit as die token dood is. Dit staan in `Meer` omdat die mense wat dit die
+nodigste het, geen merkie sien nie: by hulle is alles reg en die token is by
+FCM dood.
+
+Die eindpunt dra geen geheim nie — dit word deur die app self geroep. Die hek
+is dat die token reeds in `fcm_tokens` moet staan, en die woorde staan vas in
+die kode. 'n 429 of 'n 503 mag NOOIT 'n token uitvee nie; dit se niks oor die
+foon nie.
 
 ### Wie gevra word, en hoe
 

@@ -217,7 +217,7 @@ function SocialLinks() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate }) {
+export default function Luister({ onPlayingChange, installBanner, onAdminAccess, onNoteFinished, onNavigate, kennisgewingMerkie }) {
   const { notes: cached } = readCache()
 
   const [notes, setNotes]           = useState(cached)
@@ -832,6 +832,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       <audio ref={audioRef} style={{ display: 'none' }} />
 
       <div className="luister-hero">
+        {/* Die "Kennisgewings af"-merkie. Dit kom van App.jsx af as 'n klaar
+            element sodat hierdie skerm niks van toestemmings of tokens hoef
+            te weet nie — en sodat die navigasie hier onaangeraak bly. */}
+        {kennisgewingMerkie}
         {titleBlock}
 
         <div className="hero-controls">

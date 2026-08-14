@@ -909,3 +909,13 @@
 }
 
 .meer-privaatheid a:active { color: var(--purple-dark, #5C4E8E); }
+
+
+/* Die reel bo die toetsknoppie. Stil — dit is 'n gereedskapstuk vir wie
+   twyfel, nie 'n oproep tot aksie nie. */
+.kg-toets-lyf {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 2px 0 4px;
+}

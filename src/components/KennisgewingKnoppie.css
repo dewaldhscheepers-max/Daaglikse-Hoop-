@@ -1,0 +1,91 @@
+/* Die merkie regs bo op Luister se hero.
+
+   Dit sit OOR die foto, dus moet dit sy eie ondergrond dra — 'n deurskynende
+   donker pil met wit teks lees op elke foto, en 'n wit pil sou op 'n ligte
+   sonsopkoms verdwyn.
+
+   Geen `transform` op :active nie. Sien CLAUDE.md se "Android, Chrome, en
+   gekleurde strepe": 'n transform op :active maak en breek 'n saamgestelde
+   laag by elke druk, en op een spesifieke Android-SVE wys daardie nuwe laag
+   ongeinisialiseerde geheue as strepe oor die skerm. Verander net kleur. */
+.kg-merkie {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  z-index: 3;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  background: rgba(20, 12, 34, 0.62);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 7px 12px 7px 10px;
+
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kg-merkie:active { background: rgba(20, 12, 34, 0.82); }
+
+.kg-merkie-klok { font-size: 13px; }
+
+/* Op 'n baie smal foon vat die woorde te veel van die kop af. Die klok
+   alleen dra die betekenis — dit is 'n bekende ikoon en dit is nog steeds
+   groot genoeg om te druk. */
+@media (max-width: 359px) {
+  .kg-merkie-teks { display: none; }
+  .kg-merkie { padding: 8px 10px; }
+}
+
+/* Die antwoord ná 'n toetsboodskap of 'n herstel. Dit moet OPVAL — die hele
+   punt is dat 'n mens weet of dit gewerk het. */
+.kg-uitslag {
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 2px 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.kg-uitslag-goed {
+  background: #EAF6EC;
+  color: #1F5B2C;
+}
+
+.kg-uitslag-sleg {
+  background: #FBEDE9;
+  color: #8A3A22;
+}
+
+/* Die toetsknoppie by die instellings. Stil — dit is nie 'n oproep tot aksie
+   nie, dit is 'n gereedskapstuk vir wie twyfel. */
+.kg-toets {
+  margin-top: 10px;
+}
+
+.kg-toets-knop {
+  width: 100%;
+  background: none;
+  border: 1px solid #E2DAF0;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple-dark);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kg-toets-knop:active { background: #F4F0FA; }
+.kg-toets-knop:disabled { color: var(--text-muted); }
