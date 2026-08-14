@@ -925,7 +925,20 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         ) : today.wallpaperUrl ? (
           <div className="wp-card">
             <div className="wp-card-label">📱 Vandag se wallpaper</div>
-            <img src={today.wallpaperUrl} className="wp-card-img" alt="Wallpaper" />
+            {/* Deur ONS eie domein, nie regstreeks van Firebase af nie.
+
+                Op 'n Samsung het hierdie prent glad nie gelaai nie — 'n
+                gebreekte prentjie met die woord "Wallpaper" langs dit.
+                firebasestorage.googleapis.com is 'n vreemde domein en
+                Samsung Internet strem dit.
+
+                /api/wallpaper haal dit bediener-kant en gee dit terug van
+                ons eie domein af, met 'n dag se kas op die rand. Dieselfde
+                pad wat die deelknoppie reeds gebruik — sien prentPad() en
+                api/wallpaper.js. Dit is ook vinniger: een domein minder om
+                op te soek en 'n verbinding minder om op te stel. */}
+            <img src={prentPad(today.wallpaperUrl)} className="wp-card-img"
+                 alt="Wallpaper" loading="lazy" decoding="async" />
             <button className="wp-deel-knop" onClick={deelWallpaper} disabled={wpBesig}>
               {wpBesig ? 'Een oomblik…' : 'Deel hierdie prent'}
             </button>
