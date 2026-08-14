@@ -100,6 +100,17 @@
 
 .popup-btn-primary:active { opacity: 0.85; }
 
+/* Op 'n Samsung is die hoofknoppie 'n SKAKEL (die intent na Chrome toe), nie
+   'n <button> nie. 'n Skakel erf die blaaier se onderstreep en sy blou, en
+   dan lyk die knoppie stukkend. */
+a.popup-btn-primary {
+  display: block;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+}
+
 .popup-btn-secondary {
   background: none;
   border: none;

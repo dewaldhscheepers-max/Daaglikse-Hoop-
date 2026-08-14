@@ -22,29 +22,52 @@ export function DonationPopup({ onDonate, onClose }) {
   )
 }
 
-export function InstallPopup({ onInstall, onLater, onHelp }) {
+/* `chromeUrl` is die Samsung-geval, en dit verander die hele uitklap.
+ *
+ * Samsung Internet gee ons nooit `beforeinstallprompt` nie. Die groot
+ * knoppie het dus op 'n hulpvenster uitgekom met "tik die drie kolletjies,
+ * kies Voeg by tuisskerm" — die presiese les wat niemand volg nie, in 'n
+ * spyskaart wat in elke blaaier anders lyk.
+ *
+ * En selfs as hy dit reggekry het, sou die app op SAMSUNG se enjin loop, en
+ * dit is juis waar die oggendkennisgewing stilweg verdwyn.
+ *
+ * Daar is dus net een sinvolle knoppie op 'n Samsung: gaan na Chrome. Daar
+ * kom die egte installeervenster met een tik, en die kennisgewings werk.
+ * Een tik meer, maar dit werk — sien docs/android-app.md. */
+export function InstallPopup({ onInstall, onLater, onHelp, chromeUrl }) {
   return (
     <div className="popup-backdrop" onClick={onLater}>
       <div className="popup-card" onClick={e => e.stopPropagation()}>
         <button className="popup-x" onClick={onLater}>✕</button>
         <div className="popup-icon">🏡</div>
-        <h3 className="popup-title">Wil jy Daaglikse Hoop soos 'n gewone app oopmaak?</h3>
+        <h3 className="popup-title">Sit Daaglikse Hoop op jou foon</h3>
         <p className="popup-body">
-          Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.
+          {chromeUrl
+            ? 'Maak dit een keer in Chrome oop, tik Installeer, en dit staan op jou tuisskerm — met ’n boodskap elke oggend.'
+            : 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.'}
         </p>
         {/* Die getal staan HIER, op die oomblik van die besluit. 'n Mens wat
             twyfel of dit die moeite werd is, kry die antwoord van ander mense
             eerder as van 'n knoppie. */}
         <InstallTelling klas="popup-telling" />
-        <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
+        {chromeUrl ? (
+          <a className="popup-btn-primary" href={chromeUrl}>Maak oop in Chrome</a>
+        ) : (
+          <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
+        )}
         <button className="popup-btn-secondary" onClick={onLater}>Later</button>
-        <button
-          className="popup-btn-secondary"
-          onClick={onHelp}
-          style={{ fontSize: 13, marginTop: -4 }}
-        >
-          Wys my hoe →
-        </button>
+        {/* Geen "wys my hoe" op 'n Samsung nie. Dit is die drie-kolletjies-les
+            en dit is presies wat ons hier weggevat het. */}
+        {!chromeUrl && (
+          <button
+            className="popup-btn-secondary"
+            onClick={onHelp}
+            style={{ fontSize: 13, marginTop: -4 }}
+          >
+            Wys my hoe →
+          </button>
+        )}
       </div>
     </div>
   )

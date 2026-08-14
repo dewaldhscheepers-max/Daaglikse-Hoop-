@@ -1059,7 +1059,16 @@ export default function App() {
   const [samsungChromeDismissed, setSamsungChromeDismissed] = useState(
     () => !!localStorage.getItem('samsungChromeDismissed')
   )
-  const chromeIntentUrl = `intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;end`
+  /* Na /go toe, NIE na die bladsy waarop hy nou staan nie.
+
+     Dit was dieselfde fout as in public/go.html: die skakel het Chrome op
+     die APP oopgemaak, waar daar geen installeerknoppie is nie, en die mens
+     se enigste pad was daarna die drie kolletjies in Chrome se spyskaart.
+
+     /go is die installeerblad. Chrome vuur daar `beforeinstallprompt` en die
+     groot knoppie wys — een tik en dit is klaar. */
+  const installIntentUrl = `intent://${window.location.host}/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(`https://${window.location.host}/go`)};end`
+  const chromeIntentUrl = installIntentUrl
 
   // ── Facebook in-app browser → open externally banner ──
   const [fbBannerDismissed, setFbBannerDismissed] = useState(
@@ -1221,6 +1230,9 @@ export default function App() {
           onInstall={handleInstallCta}
           onLater={dismissInstallPopup}
           onHelp={() => { setShowInstallPopup(false); setShowInstallHelp(true) }}
+          /* Net op Samsung Internet, en net BUITE die app. Binne die app is
+             daar niks om te installeer nie en Chrome is die verkeerde raad. */
+          chromeUrl={isSamsungBrowser && !isInApp ? installIntentUrl : null}
         />
       )}
 
