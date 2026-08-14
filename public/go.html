@@ -238,8 +238,20 @@
     <!-- Default: always visible, JS hides it for Chrome/iOS/desktop -->
     <div id="state-samsung">
       <p class="chrome-notice">Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.</p>
+      <!-- Na /go toe, NIE na / nie.
+
+           Hier was die fout wat die hele "installeer" so moeilik gemaak het.
+           Die skakel het na die app se wortel gewys, dus het Chrome oopgemaak
+           en die mens IN DIE APP laat land — met geen installeerknoppie in
+           sig nie. Van daar af was sy enigste pad die drie kolletjies in
+           Chrome se spyskaart, wat presies is wat niemand kan vind nie.
+
+           Nou land hy weer op HIERDIE bladsy, maar in Chrome. Chrome vuur
+           `beforeinstallprompt`, ons wys die groot knoppie, hy tik een keer
+           en dit is klaar. Twee tikke van Samsung Internet af, sonder 'n
+           enkele spyskaart. -->
       <a class="btn-chrome"
-         href="intent://dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com;end">
+         href="intent://dewaldscheepers.com/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com%2Fgo;end">
         Maak oop in Chrome
       </a>
       <p class="chooser-hint">As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.</p>
