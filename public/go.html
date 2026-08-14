@@ -446,7 +446,13 @@
     <div class="features">
       <div class="feature"><span class="feature-icon">🎧</span><span><strong>Luister</strong> — daaglikse stemnotas van hoop</span></div>
       <div class="feature"><span class="feature-icon">🙏</span><span><strong>Bid Saam</strong> — deel jou gebedsversoek anoniem</span></div>
-      <div class="feature"><span class="feature-icon">📚</span><span><strong>E-boeke</strong> — gratis en betaalde hulpbronne</span></div>
+      <!-- ELKE e-boek is gratis, en dit is lankal so. Hier het "gratis en
+           betaalde hulpbronne" gestaan lank nadat die laastes gratis gemaak
+           is. Die `price`-veld in src/data/books.js bly bestaan, maar dit is
+           nie 'n prys nie — dit tel hoeveel rand se boeke weggegee is (sien
+           Meer.jsx se "se e-boeke gratis weggegee"). Moenie dit weer as 'n
+           prys lees nie. -->
+      <div class="feature"><span class="feature-icon">📚</span><span><strong>E-boeke</strong> — almal gratis</span></div>
       <div class="feature"><span class="feature-icon">🔔</span><span><strong>06:30 kennisgewings</strong> — jou oggendboodskap op jou foon</span></div>
     </div>
 
