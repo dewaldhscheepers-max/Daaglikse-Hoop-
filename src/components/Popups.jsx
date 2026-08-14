@@ -89,6 +89,45 @@ export function KennisgewingPopup({ onJa, onLater }) {
   )
 }
 
+/* ── "Nog een stap" ──
+
+   Op Android 13 en later moet die APP self toestemming he om kennisgewings
+   te wys, en die app se venster kry dit nie aangeskakel nie. Dit is 'n oop
+   fout in die TWA-gereedskap (PWABuilder #4817, android-browser-helper
+   #563): 'n mens druk "Toelaat", die stelsel gee niks, en die webvraag word
+   dadelik geweier — sonder om iets te wys.
+
+   Dewald en sy vrou het albei "Ja" gedruk en albei niks gekry nie. Toe sy
+   dit HANDMATIG in Android se instellings aangeskakel het, het dit
+   onmiddellik gewerk. Die weg is dus daar; die app moet net vertel waar.
+
+   Sonder hierdie skerm druk 'n mens "Ja, stuur dit vir my", daar gebeur
+   niks sigbaars, en hy dink die app is stukkend. Dit is die presiese
+   oomblik waar hy dit wil he — nie 'n stil reel iewers onder nie. */
+export function KennisgewingStappe({ opProbeerWeer, onLater }) {
+  return (
+    <div className="popup-backdrop" onClick={onLater}>
+      <div className="popup-card" onClick={e => e.stopPropagation()}>
+        <button className="popup-x" onClick={onLater}>✕</button>
+        <div className="popup-icon">🔔</div>
+        <h3 className="popup-title">Nog een stap op jou foon</h3>
+        <p className="popup-body">
+          Android moet dit eers vir Daaglikse Hoop toelaat. Dit vat 'n halwe minuut:
+        </p>
+        <ol className="popup-stappe">
+          <li>Hou jou vinger op die Daaglikse Hoop-ikoon op jou tuisskerm</li>
+          <li>Tik die <b>ⓘ</b> (Programinligting)</li>
+          <li>Kies <b>Kennisgewings</b></li>
+          <li>Sit <b>Laat kennisgewings toe</b> aan</li>
+          <li>Kom terug hierheen</li>
+        </ol>
+        <button className="popup-btn-primary" onClick={opProbeerWeer}>Ek het dit aangesit</button>
+        <button className="popup-btn-secondary" onClick={onLater}>Later</button>
+      </div>
+    </div>
+  )
+}
+
 const SHARE_MSG = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://dewaldscheepers.com/go'
 const WA_GROUP_URL = `https://wa.me/?text=${encodeURIComponent(SHARE_MSG)}`
 

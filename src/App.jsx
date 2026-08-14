@@ -8,7 +8,7 @@ import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
-import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup } from './components/Popups'
+import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
@@ -410,25 +410,48 @@ export default function App() {
     localStorage.setItem('vraKennisgewingLaas', String(Date.now()))
   }
 
+  /* ── Wanneer die vraag misluk ──
+
+     BINNE die app is 'n mislukking amper altyd dieselfde ding, en dit is
+     NIE dat die mens nee gesê het nie. Op Android 13+ moet die app self
+     toestemming he om kennisgewings te wys, en die app se venster kry dit
+     nie aangeskakel nie — 'n oop fout in die TWA-gereedskap. Die stelsel
+     wys niks, en die webvraag word dadelik geweier.
+
+     Dewald en sy vrou het albei "Ja" gedruk en albei niks gekry nie. Toe sy
+     dit handmatig in Android se instellings aangeskakel het, het dit
+     dadelik gewerk. Die weg is dus daar; die app moet net vertel waar.
+
+     Daarom: in die app wys ons die stappe DADELIK, as 'n uitklap, op die
+     oomblik waar die mens dit wil he. In 'n blaaier bly dit soos dit was —
+     die stil reel onderaan, want daar het 'n mens werklik "Block" gedruk en
+     'n uitklap sou niks help nie. */
+  const [wysStappe, setWysStappe] = useState(false)
+
+  async function probeerKennisgewings() {
+    /* Samsung Internet doen nie Firebase se getToken nie, maar wel die
+       gewone pushManager. Sien `subscribeSamsung`. */
+    const result = isSamsungBrowser
+      ? await subscribeSamsung()
+      : await subscribeToNotifications()
+    return !!(result && result.ok)
+  }
+
   async function handleNotifYes() {
     setNotifBanner(false)
     merkGevra()
-    try {
-      /* Samsung Internet doen nie Firebase se getToken nie, maar wel die
-         gewone pushManager. Sien `subscribeSamsung`. */
-      const result = isSamsungBrowser
-        ? await subscribeSamsung()
-        : await subscribeToNotifications()
+    let gelukt = false
+    try { gelukt = await probeerKennisgewings() } catch { gelukt = false }
+    if (gelukt) { setWysStappe(false); setToestemmingAf(false); return }
+    if (isInApp) setWysStappe(true)
+    else         setToestemmingAf(Notification.permission === 'denied')
+  }
 
-      if (!result.ok && result.reason === 'permission_denied') {
-        /* Hy het nou net geblokkeer. Die blaaier gaan ons nooit weer laat
-           vra nie, dus wys ons van hier af die stil pad terug in plaas van
-           'n boodskap wat verdwyn. */
-        setToestemmingAf(true)
-      }
-    } catch (e) {
-      setToestemmingAf(Notification.permission === 'denied')
-    }
+  /* "Ek het dit aangesit" — probeer weer sonder om die mens weer te vra. */
+  async function stappeKlaar() {
+    let gelukt = false
+    try { gelukt = await probeerKennisgewings() } catch { gelukt = false }
+    if (gelukt) { setWysStappe(false); setToestemmingAf(false) }
   }
 
   /* Is kennisgewings geblokkeer, wys 'n stil reël met die stappe om dit self
@@ -1232,6 +1255,13 @@ export default function App() {
       {/* 'n Regte uitklap, nie 'n balkie onderaan nie. Dit vra nie meer
           dikwels nie — sien KennisgewingPopup se kop en
           src/data/kennisgewingVra.js. */}
+      {wysStappe && (
+        <KennisgewingStappe
+          opProbeerWeer={stappeKlaar}
+          onLater={() => setWysStappe(false)}
+        />
+      )}
+
       {showNotifBanner && (
         <KennisgewingPopup
           onJa={handleNotifYes}
