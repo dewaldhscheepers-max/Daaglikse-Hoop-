@@ -41,6 +41,50 @@ html, body, #root {
   color-scheme: light only;
 }
 
+/* ── Samsung se donker modus ──
+
+   Daaglikse Hoop is 'n LIGTE app. Dit is een ontwerp, met een palet, en
+   daar is nooit 'n donker weergawe gebou nie.
+
+   `color-scheme: light only` hierbo is die standaard-manier om vir 'n
+   blaaier te sê "moenie my omkeer nie", en Chrome respekteer dit — Dewald
+   se twee fone langs mekaar wys dit: Chrome is wit en reg, Samsung is swart
+   en lelik. Samsung Internet ignoreer daardie reel eenvoudig en draai elke
+   kleur om met sy eie algoritme. Die gevolg is 'n app wat lyk of dit
+   stukkend is, en dit gebeur vanself sodra kragbespaarder aangaan.
+
+   Hierdie blok is die enigste uitweg wat van die webkant af bestaan: 'n
+   blaaier hou op om 'n bladsy self donker te maak sodra die bladsy sy EIE
+   donker-styl het. Ons gee dus vir hom een — en dit is presies dieselfde
+   as die ligte een.
+
+   Dit is nie mooi nie. Dit is 'n handtekening wat sê "ek hanteer donker
+   modus self", en dan los die blaaier ons uit.
+
+   Verander die kleure hierbo ooit, moet hulle HIER ook verander. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lavender:      #C4B0E8;
+    --lavender-soft: #EDE8F8;
+    --lavender-mid:  #9B8EC4;
+    --purple:        #7C6FAF;
+    --purple-dark:   #5C4E8E;
+    --peach:         #F2C4A0;
+    --gold:          #D4956A;
+    --cream:         #FAF8F5;
+    --cream-dark:    #F0EBE3;
+    --white:         #FFFFFF;
+    --text:          #2D2040;
+    --text-muted:    #8A7E9A;
+    --shadow:        rgba(92, 78, 142, 0.12);
+  }
+
+  html, body, #root {
+    background: #FAF8F5;
+    color: #2D2040;
+  }
+}
+
 body {
   font-family: var(--font-body);
   background: var(--cream);
