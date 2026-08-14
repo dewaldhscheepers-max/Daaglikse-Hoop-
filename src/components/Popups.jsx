@@ -50,6 +50,45 @@ export function InstallPopup({ onInstall, onLater, onHelp }) {
   )
 }
 
+/* ── "Kry elke oggend 'n boodskap" ──
+
+   Dit was 'n dun balkie onderaan die skerm met 13px-teks en 'n ✕. Dit het
+   soos 'n advertensie gelyk en 'n mens het dit weggevee sonder om te lees.
+   Nou is dit dieselfde uitklap as die installasie-vraag — die vorm wat die
+   app reeds gebruik wanneer hy iets belangriks vra.
+
+   ── Wat NIE verander het nie, en hoekom ──
+
+   HOE DIKWELS dit vra, bly presies dieselfde: net ná 'n nota klaar
+   gespeel het, hoogstens drie keer in 'n leeftyd, minstens sewe dae
+   uitmekaar. Sien src/data/kennisgewingVra.js en CLAUDE.md.
+
+   Daardie reels is duur geleer. Hier het 'n balkie gestaan wat ná ELKE
+   oopmaak gewys het sonder enige geheue, en dit het teen homself gewerk:
+   iemand druk dit weg, dit kom môre weer, en op 'n dag druk hy die
+   BLAAIER se "Block" om daarvan ontslae te raak. Daardie besluit is
+   PERMANENT — `requestPermission()` gee van toe af dadelik `denied`
+   sonder om iets te wys, en die app kan hom nooit weer bereik nie.
+
+   Groter mag dus nie meer beteken nie. */
+export function KennisgewingPopup({ onJa, onLater }) {
+  return (
+    <div className="popup-backdrop" onClick={onLater}>
+      <div className="popup-card" onClick={e => e.stopPropagation()}>
+        <button className="popup-x" onClick={onLater}>✕</button>
+        <div className="popup-icon">🌅</div>
+        <h3 className="popup-title">Wil jy elke oggend 'n boodskap kry?</h3>
+        <p className="popup-body">
+          Ons stuur een keer per dag, in die oggend, 'n kort woord van hoop —
+          niks anders nie. Jy kan dit enige tyd afskakel.
+        </p>
+        <button className="popup-btn-primary" onClick={onJa}>Ja, stuur dit vir my</button>
+        <button className="popup-btn-secondary" onClick={onLater}>Nie nou nie</button>
+      </div>
+    </div>
+  )
+}
+
 const SHARE_MSG = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://dewaldscheepers.com/go'
 const WA_GROUP_URL = `https://wa.me/?text=${encodeURIComponent(SHARE_MSG)}`
 

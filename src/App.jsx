@@ -8,7 +8,7 @@ import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
-import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
+import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
@@ -375,6 +375,32 @@ export default function App() {
     setNotifBanner(true)
     return true
   }
+
+  /* ── In die GEÏNSTALLEERDE app vra ons by die oopmaak ──
+
+     Die vraag het net gekom NADAT 'n nota klaar gespeel het. In 'n blaaier
+     is dit reg: iemand wat toevallig op 'n webblad beland, moet nie 'n
+     toestemmingsvraag in sy gesig kry voordat hy weet wat die plek is nie.
+
+     Maar in die app wat 'n mens SELF van Google Play af geïnstalleer het,
+     is dit verkeerd. Hy het reeds gekies. Hy maak dit oop, kyk rond, maak
+     dit toe — en word nooit gevra nie. En kennisgewings is die hele rede
+     waarom hierdie app werk: dit is die ding wat mense elke oggend
+     terugbring.
+
+     Dus: in die app vra ons by die oopmaak, EEN keer, met dieselfde
+     `magVra`-reels as altyd — hoogstens drie keer in 'n leeftyd, minstens
+     sewe dae uitmekaar, en nooit vir iemand wat reeds ja of nee gesê het
+     nie. Groter en vroeër beteken nie MEER nie; sien
+     src/data/kennisgewingVra.js vir waarom dit so moet bly.
+
+     Die kort wag is sodat die app eers kan gaan staan. 'n Vraag wat oor 'n
+     halwe skerm oopklap terwyl dit nog laai, voel soos 'n fout. */
+  useEffect(() => {
+    if (!isInApp) return
+    const t = setTimeout(() => { vraKennisgewingsDalk() }, 2500)
+    return () => clearTimeout(t)
+  }, [])
 
   /* Weggedruk of geantwoord — albei tel as 'n keer. Iemand wat drie keer
      weggedruk het, het geantwoord, en ons vra nie 'n vierde keer nie. */
@@ -1203,15 +1229,14 @@ export default function App() {
         </div>
       )}
 
+      {/* 'n Regte uitklap, nie 'n balkie onderaan nie. Dit vra nie meer
+          dikwels nie — sien KennisgewingPopup se kop en
+          src/data/kennisgewingVra.js. */}
       {showNotifBanner && (
-        <div className="notif-banner">
-          <div className="notif-banner-text">
-            <strong>🌅 Oggend Kennisgewings</strong>
-            Kry elke oggend 'n nuwe oordenking op jou skerm.
-          </div>
-          <button className="notif-banner-yes" onClick={handleNotifYes}>Ja, graag</button>
-          <button className="notif-banner-no" onClick={() => { setNotifBanner(false); merkGevra() }}>✕</button>
-        </div>
+        <KennisgewingPopup
+          onJa={handleNotifYes}
+          onLater={() => { setNotifBanner(false); merkGevra() }}
+        />
       )}
 
       {paymentResult?.status === 'success' && (
