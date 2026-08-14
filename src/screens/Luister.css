@@ -659,16 +659,35 @@
 .play-btn-small:active { transform: scale(0.9); }
 
 /* ─── Mini player ─── */
+/* ── Die speelbalkie ──
+
+   Hy sit reg bo die onderste nav, en die BYBEL-knoppie steek 46px bo daardie
+   nav uit — presies hier. Die nota se titel het dus agter die Bybel-knoppie
+   verdwyn en 'n mens kon nie sien waarna hy luister nie.
+
+   Die balk word NIE regs geskuif nie — dit sou skeef lyk. Sy WOORDE begin
+   net verder in.
+
+   Waar kom 68px vandaan: die Bybel-knoppie staan op 10% van die nav se
+   breedte, min 24px, en is 48px wyd. Sy regterkant binne hierdie balkie is
+   dus 0,10 x skermbreedte + 12 op 'n gewone foon, en presies 60 op 'n skerm
+   wyer as 480px waar albei hul maksimum haal. 68 gee oral 'n bietjie lug.
+
+   En die sentrering is nou met marges, nie met 'n transform nie: 'n
+   permanente transform op 'n position:fixed element maak dit vir altyd 'n
+   eie saamgestelde laag. Sien CLAUDE.md se afdeling oor gekleurde strepe —
+   die onderste nav is presies hierom verander. */
 .mini-player {
   position: fixed;
   bottom: calc(var(--nav-height) + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: calc(100% - 24px);
   max-width: 456px;
   background: var(--purple-dark);
   border-radius: 16px 16px 0 0;
-  padding: 10px 14px 6px;
+  padding: 10px 14px 6px 68px;
   display: flex;
   align-items: center;
   gap: 10px;
