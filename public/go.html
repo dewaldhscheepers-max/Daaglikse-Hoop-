@@ -276,6 +276,30 @@
       <a class="btn-chrome" href="/">Maak die app oop</a>
     </div>
 
+    <!-- ── iPhone, maar NIE Safari nie ──
+
+         Op 'n iPhone kan net Safari iets op die tuisskerm sit. Chrome,
+         Firefox en Edge op 'n iPhone is Safari se enjin in 'n ander jas,
+         sonder daardie een vermoe — en Facebook en Instagram se ingeboude
+         blaaiers kan glad niks nie.
+
+         Hierdie mense het die Deel-stappe gekry en dit het nie gewerk nie,
+         want die "Voeg by tuisskerm"-item is eenvoudig nie daar nie. Hulle
+         het gelees, probeer, niks gekry, en weggeloop.
+
+         Daar is geen skakel wat 'n iPhone na Safari kan dwing nie — iOS het
+         niks soos Android se intent nie. Die adres is al wat ons kan gee. -->
+    <div id="state-safari" style="display:none">
+      <p class="chrome-notice">Om Daaglikse Hoop op jou tuisskerm te sit, moet jy dit in <strong>Safari</strong> oopmaak.</p>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><span>Maak <strong>Safari</strong> oop op jou iPhone</span></div>
+        <div class="step"><span class="step-num">2</span><span>Gaan na <strong>dewaldscheepers.com/go</strong></span></div>
+        <div class="step"><span class="step-num">3</span><span>Tik <strong>⬆ Deel</strong> en dan <strong>"Voeg by tuisskerm"</strong></span></div>
+      </div>
+      <button class="btn-chrome" id="btn-kopieer">📋 Kopieer die adres</button>
+      <a class="btn-continue" href="/">Gaan voort sonder installasie</a>
+    </div>
+
     <!-- iOS state -->
     <div id="state-ios" style="display:none">
       <p class="chrome-notice">Om die app te installeer op iPhone:</p>
@@ -302,45 +326,89 @@
          Een reel om dit aan te sit, een reel om dit af te sit. */
       var PLAY_LEWE = false
 
+      /* Woordelikse kopie van src/data/installeerPad.js. Hierdie bladsy moet
+         werk sonder die bundel, dus kan dit nie invoer nie.
+         src/data/installeerPad.toets.mjs sny die blok tussen die twee
+         merkers uit, voer dit uit, en eis dieselfde antwoord as die module
+         oor elke blaaier — verander die een, verander die ander.
+         Moenie die merkers wegvat nie. */
+      /* KIESPAD-BEGIN */
+      var IN_APP = /FBAN|FBAV|FBIOS|FB_IAB|FB4A|Instagram|TikTok|Twitter|Line\/|MicroMessenger|Snapchat|Pinterest|LinkedInApp/i
+      var IOS_NIE_SAFARI = /CriOS|FxiOS|EdgiOS|OPT\/|YaBrowser/i
+
+      function kiesPad(o) {
+        o = o || {}
+        var ua = o.ua || ''
+        if (o.geinstalleer) return 'geinstalleer'
+        var isIOS     = /iPhone|iPad|iPod/i.test(ua)
+        var isAndroid = /Android/i.test(ua)
+        var isMobiel  = isIOS || isAndroid || /Mobi/i.test(ua)
+        if (isIOS) return (IN_APP.test(ua) || IOS_NIE_SAFARI.test(ua)) ? 'safari' : 'ios'
+        if (!isMobiel) return o.kanPrompt ? 'prompt' : 'rekenaar'
+        if (IN_APP.test(ua)) return 'chrome'
+        if (/SamsungBrowser/i.test(ua)) return 'chrome'
+        if (/Firefox|FxiOS/i.test(ua)) return 'chrome'
+        if (o.kanPrompt) return 'prompt'
+        return 'stappe'
+      }
+      /* KIESPAD-EINDE */
+
+      /* Van 'n pad na 'n blok op hierdie bladsy. */
+      var BLOK = {
+        prompt: 'install',   /* die egte een-tik-venster */
+        chrome: 'samsung',   /* "maak oop in Chrome" */
+        safari: 'safari',    /* iPhone, maar nie Safari nie */
+        ios:    'ios',       /* iPhone met Safari: die Deel-stappe */
+        stappe: 'open',      /* Chrome sonder venster: die spyskaart */
+      }
+
       var deferredPrompt = null
       window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault()
         deferredPrompt = e
-        /* Is Google Play die pad, bly dit die pad. Die blaaier se eie
-           installeervenster sit 'n TWEEDE ikoon op die tuisskerm langs die
-           Play-app se een, en dan het een mens twee Daaglikse Hope. */
-        if (!(PLAY_LEWE && /Android/i.test(navigator.userAgent))) showState('install')
+        /* Vra kiesPad OPNUUT, nou dat ons weet die venster bestaan.
+           Op 'n Samsung bly die antwoord Chrome — sy venster werk wel, maar
+           dan loop die app op sy enjin en die kennisgewings verdwyn. En is
+           Google Play die pad, bly dit die pad: die blaaier se venster sou 'n
+           TWEEDE ikoon langs die Play-app s'n sit. */
+        if (PLAY_LEWE && /Android/i.test(navigator.userAgent)) return
+        var pad = kiesPad({ ua: navigator.userAgent, kanPrompt: true })
+        if (pad === 'prompt') showState('install')
       })
 
       ;(function () {
-        var ua        = navigator.userAgent
-        var isAndroid = /Android/i.test(ua)
-        var isChrome  = /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR/.test(ua)
-        var isIOS     = /iPhone|iPad|iPod/i.test(ua)
+        var ua = navigator.userAgent
 
-        var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua)
+        /* Android kry Google Play sodra dit openbaar is, en dit maak nie saak
+           watter blaaier hy gebruik nie. */
+        if (/Android/i.test(ua) && PLAY_LEWE) return showState('play')
 
-        /* Android kry Google Play, en dit maak nie saak watter blaaier hy
-           gebruik nie. Dit is die hele punt: Chrome, Samsung Internet,
-           Facebook se ingeboude blaaier — almal dieselfde een knoppie. */
-        if (isAndroid && PLAY_LEWE) {
-          showState('play')
-        } else if (isIOS) {
-          showState('ios')
-        } else if (isMobile && !isChrome) {
-          // Mobile non-Chrome (Samsung, Edge, in-app, spoofed UA) — show open-in-Chrome prompt
-          showState('samsung')
-        } else if (!isMobile) {
-          // Desktop — go straight to the app
-          window.location.replace('/')
-        } else {
-          // Mobile Chrome — show open button (don't auto-redirect, some browsers spoof Chrome UA)
-          showState('open')
-        }
+        var pad = kiesPad({ ua: ua, kanPrompt: false })
+        if (pad === 'rekenaar') return window.location.replace('/')
+        showState(BLOK[pad] || 'open')
       })()
 
+      /* Die adres na die knipbord toe, want 'n mens kan nie 'n iPhone na
+         Safari dwing nie en niemand tik 'n URL oor nie. */
+      var knopKopieer = document.getElementById('btn-kopieer')
+      if (knopKopieer) {
+        knopKopieer.addEventListener('click', function () {
+          var adres = 'https://www.dewaldscheepers.com/go'
+          function gelukt() { knopKopieer.textContent = '✓ Gekopieer — plak dit in Safari' }
+          try {
+            navigator.clipboard.writeText(adres).then(gelukt, misluk)
+          } catch (e) { misluk() }
+          function misluk() {
+            /* Ou iOS-weergawes en party ingeboude blaaiers het geen
+               knipbord-API nie. Dan wys ons die adres eerder as om niks te
+               doen nie — 'n knoppie wat niks doen nie is erger as stilte. */
+            knopKopieer.textContent = adres
+          }
+        })
+      }
+
       function showState(name) {
-        ;['play','samsung','install','open','ios'].forEach(function (s) {
+        ;['play','samsung','install','open','ios','safari'].forEach(function (s) {
           document.getElementById('state-' + s).style.display = s === name ? 'block' : 'none'
         })
         /* "Maak dit in Chrome oop" is 'n les uit die ou wereld. Kom die app

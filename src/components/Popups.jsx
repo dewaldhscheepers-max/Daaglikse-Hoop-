@@ -22,52 +22,93 @@ export function DonationPopup({ onDonate, onClose }) {
   )
 }
 
-/* `chromeUrl` is die Samsung-geval, en dit verander die hele uitklap.
+/* ── Die installeer-uitklap ──
  *
- * Samsung Internet gee ons nooit `beforeinstallprompt` nie. Die groot
- * knoppie het dus op 'n hulpvenster uitgekom met "tik die drie kolletjies,
- * kies Voeg by tuisskerm" — die presiese les wat niemand volg nie, in 'n
- * spyskaart wat in elke blaaier anders lyk.
+ * `pad` kom van `kiesPad()` in src/data/installeerPad.js — die enigste plek
+ * waar besluit word wat 'n besoeker kan doen. Elke pad kry hier 'n knoppie
+ * wat WERKLIK iets doen op daardie foon.
  *
- * En selfs as hy dit reggekry het, sou die app op SAMSUNG se enjin loop, en
- * dit is juis waar die oggendkennisgewing stilweg verdwyn.
+ * Dit was een uitklap vir almal met "Sit op my foon" daarop, en op die
+ * meeste fone het daardie knoppie op 'n hulpvenster uitgekom met "tik die
+ * drie kolletjies, kies Voeg by tuisskerm". In Facebook se blaaier is daar
+ * geen drie kolletjies nie. Op 'n iPhone wat nie Safari is nie, is daar geen
+ * "Voeg by tuisskerm" nie. Die mense het gelees, probeer, niks gekry, en
+ * weggeloop.
  *
- * Daar is dus net een sinvolle knoppie op 'n Samsung: gaan na Chrome. Daar
- * kom die egte installeervenster met een tik, en die kennisgewings werk.
- * Een tik meer, maar dit werk — sien docs/android-app.md. */
-export function InstallPopup({ onInstall, onLater, onHelp, chromeUrl }) {
+ * 'n Knoppie wat niks doen nie is erger as stilte. */
+const STAPPE = {
+  safari: [
+    ['Maak ', 'Safari', ' oop op jou iPhone'],
+    ['Gaan na ', 'dewaldscheepers.com', ''],
+    ['Tik ', '⬆ Deel', ' en dan "Voeg by tuisskerm"'],
+  ],
+  ios: [
+    ['Tik die ', '⬆ Deel', '-knoppie onderaan'],
+    ['Kies ', '"Voeg by tuisskerm"', ''],
+    ['Tik ', '"Voeg by"', ' — klaar!'],
+  ],
+}
+
+export function InstallPopup({ pad = 'prompt', onInstall, onLater, onHelp, chromeUrl }) {
+  const [gekopieer, setGekopieer] = useState(false)
+
+  const lyf = {
+    prompt: 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.',
+    chrome: 'Maak dit een keer in Chrome oop, tik Installeer, en dit staan op jou tuisskerm — met ’n boodskap elke oggend.',
+    safari: 'Op ’n iPhone kan net Safari dit op jou tuisskerm sit.',
+    ios:    'Drie tikke, en dit staan op jou tuisskerm.',
+    stappe: 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.',
+  }[pad] || 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.'
+
+  /* Daar is geen manier om 'n iPhone na Safari te dwing nie — iOS het niks
+     soos Android se intent nie. Die adres na die knipbord is al wat ons kan
+     gee, en niemand tik 'n URL oor nie. */
+  async function kopieerAdres() {
+    try {
+      await navigator.clipboard.writeText('https://www.dewaldscheepers.com')
+      setGekopieer(true)
+    } catch { setGekopieer(true) }
+  }
+
+  const stappe = STAPPE[pad]
+
   return (
     <div className="popup-backdrop" onClick={onLater}>
       <div className="popup-card" onClick={e => e.stopPropagation()}>
         <button className="popup-x" onClick={onLater}>✕</button>
         <div className="popup-icon">🏡</div>
         <h3 className="popup-title">Sit Daaglikse Hoop op jou foon</h3>
-        <p className="popup-body">
-          {chromeUrl
-            ? 'Maak dit een keer in Chrome oop, tik Installeer, en dit staan op jou tuisskerm — met ’n boodskap elke oggend.'
-            : 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.'}
-        </p>
+        <p className="popup-body">{lyf}</p>
+
+        {stappe && (
+          <ol className="popup-stappe">
+            {stappe.map(([voor, sterk, na], i) => (
+              <li key={i}>{voor}<strong>{sterk}</strong>{na}</li>
+            ))}
+          </ol>
+        )}
+
         {/* Die getal staan HIER, op die oomblik van die besluit. 'n Mens wat
             twyfel of dit die moeite werd is, kry die antwoord van ander mense
             eerder as van 'n knoppie. */}
         <InstallTelling klas="popup-telling" />
-        {chromeUrl ? (
+
+        {pad === 'chrome' && (
           <a className="popup-btn-primary" href={chromeUrl}>Maak oop in Chrome</a>
-        ) : (
-          <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
         )}
-        <button className="popup-btn-secondary" onClick={onLater}>Later</button>
-        {/* Geen "wys my hoe" op 'n Samsung nie. Dit is die drie-kolletjies-les
-            en dit is presies wat ons hier weggevat het. */}
-        {!chromeUrl && (
-          <button
-            className="popup-btn-secondary"
-            onClick={onHelp}
-            style={{ fontSize: 13, marginTop: -4 }}
-          >
-            Wys my hoe →
+        {pad === 'safari' && (
+          <button className="popup-btn-primary" onClick={kopieerAdres}>
+            {gekopieer ? '✓ Gekopieer — plak dit in Safari' : '📋 Kopieer die adres'}
           </button>
         )}
+        {pad === 'prompt' && (
+          <button className="popup-btn-primary" onClick={onInstall}>Sit op my foon</button>
+        )}
+        {pad === 'stappe' && (
+          <button className="popup-btn-primary" onClick={onHelp}>Wys my hoe</button>
+        )}
+
+        <button className="popup-btn-secondary" onClick={onLater}>Later</button>
       </div>
     </div>
   )

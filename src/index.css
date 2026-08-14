@@ -383,4 +383,5 @@ body {
   color: #5A5165;
 }
 .popup-stappe li { margin-bottom: 6px; }
-.popup-stappe b { color: #2D2040; }
+.popup-stappe b,
+.popup-stappe strong { color: #2D2040; }

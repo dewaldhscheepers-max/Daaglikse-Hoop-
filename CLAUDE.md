@@ -32,6 +32,7 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
+node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 toetse
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
@@ -228,6 +229,41 @@ verwerp. Daar is toetse wat dit vashou; moenie hulle omseil nie.
 uit `src/` invoer.
 
 ---
+
+## Wie kan die app op sy foon sit, en hoe
+
+Die hele webwerf bestaan om op 'n foon te beland. Elke besoeker moet 'n pad
+he wat WERK op sy foon — en 'n knoppie wat niks doen nie is erger as stilte.
+
+Die besluit staan op **een plek**: `kiesPad()` in `src/data/installeerPad.js`.
+Dit is suiwer (user-agent in, 'n string uit) en gee een van sewe paaie:
+`geinstalleer`, `prompt`, `chrome`, `safari`, `ios`, `stappe`, `rekenaar`.
+
+Die duur lesse wat daarin vassit:
+
+* **Samsung Internet word Chrome toe gestuur, ook al KAN dit installeer.**
+  Dit vuur wel `beforeinstallprompt`, maar dan loop die app op Samsung se
+  enjin en dit is presies waar die oggendkennisgewing verdwyn. Een tik meer,
+  maar dit werk.
+* **Op 'n iPhone kan net Safari dit doen.** Chrome, Firefox en Edge op 'n
+  iPhone is Safari se enjin sonder daardie een vermoe. Hulle het die
+  Deel-stappe gekry en die "Voeg by tuisskerm"-item was eenvoudig nie daar
+  nie. Nou kry hulle die adres na die knipbord toe — 'n mens kan 'n iPhone
+  nie na Safari dwing nie, iOS het niks soos Android se intent nie.
+* **Facebook, Instagram, TikTok se ingeboude blaaiers kan glad niks.** Daar
+  IS geen drie kolletjies nie. Chrome toe.
+* **Elke skakel Chrome toe gaan na `/go`, nooit na `/` nie.** Dit was die
+  fout wat installasie maande lank stukkend gehou het: Chrome het oopgemaak
+  op die APP, waar daar geen installeerknoppie is nie, en die mens se enigste
+  pad was daarna die spyskaart.
+
+`public/go.html` kan nie invoer nie (dit moet sonder die bundel werk) en dra
+'n kopie tussen `KIESPAD-BEGIN` en `KIESPAD-EINDE`.
+`installeerPad.toets.mjs` voer ALBEI uit en eis dieselfde antwoord oor elke
+blaaier. Moenie die merkers wegvat nie.
+
+`oudit.mjs` in die scratchpad loop elke blaaier teen `/` en `/go` en val om
+as enigiemand niks kry nie.
 
 ## Die Android-app is nie die webwerf nie
 

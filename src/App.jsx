@@ -13,6 +13,7 @@ import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
+import { kiesPad } from './data/installeerPad'
 import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
 import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
@@ -1070,6 +1071,15 @@ export default function App() {
   const installIntentUrl = `intent://${window.location.host}/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(`https://${window.location.host}/go`)};end`
   const chromeIntentUrl = installIntentUrl
 
+  /* Wat KAN hierdie besoeker werklik doen? Een besluit, een plek — dieselfde
+     funksie wat /go gebruik. Sien src/data/installeerPad.js.
+
+     Binne die Play-app is daar niks om te installeer nie; dit staan reeds op
+     sy foon. */
+  const installeerPad = isInApp
+    ? 'geinstalleer'
+    : kiesPad({ ua: navigator.userAgent, kanPrompt: !!installPrompt, geinstalleer: isInstalled })
+
   // ── Facebook in-app browser → open externally banner ──
   const [fbBannerDismissed, setFbBannerDismissed] = useState(
     () => !!localStorage.getItem('fbBannerDismissed')
@@ -1135,14 +1145,18 @@ export default function App() {
             weet of ander mense dit gedoen het. */}
         <InstallTelling klas="install-persist-telling" />
       </div>
+      {/* Die balk het twee knoppies gehad, en op die meeste fone was albei
+          dood: "Sit op my foon" het net gewys as die blaaier ons sy venster
+          gegee het, en "Hoe om te installeer" het die drie-kolletjies-les
+          oopgemaak — ook in Facebook se blaaier, waar daar geen kolletjies
+          is nie.
+
+          Nou is daar EEN knoppie, en dit maak die uitklap oop. Die uitklap
+          weet watter pad hierdie foon het (sien kiesPad) en wys 'n knoppie
+          wat werklik iets doen. */}
       <div className="install-persist-actions">
-        {installPrompt && (
-          <button className="install-persist-btn" onClick={handleInstallCta}>
-            Sit op my foon
-          </button>
-        )}
-        <button className="install-persist-help" onClick={() => setShowInstallHelp(true)}>
-          {installPrompt ? 'Wys my hoe' : 'Hoe om te installeer'}
+        <button className="install-persist-btn" onClick={() => setShowInstallPopup(true)}>
+          {installeerPad === 'prompt' ? 'Sit op my foon' : 'Wys my hoe'}
         </button>
       </div>
     </div>
@@ -1227,12 +1241,11 @@ export default function App() {
 
       {showInstallPopup && !activePopup && (
         <InstallPopup
+          pad={installeerPad}
           onInstall={handleInstallCta}
           onLater={dismissInstallPopup}
           onHelp={() => { setShowInstallPopup(false); setShowInstallHelp(true) }}
-          /* Net op Samsung Internet, en net BUITE die app. Binne die app is
-             daar niks om te installeer nie en Chrome is die verkeerde raad. */
-          chromeUrl={isSamsungBrowser && !isInApp ? installIntentUrl : null}
+          chromeUrl={installIntentUrl}
         />
       )}
 
