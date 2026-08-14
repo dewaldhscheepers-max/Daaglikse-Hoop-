@@ -18,6 +18,37 @@ const FCM_VAPID_KEY = 'BBG0lF3YGD7BRhdveAO3ufCkT4ze1EaAbncl2r2nfUZwQ-p77uijz3UMt
 export const isSamsungBrowser  = /SamsungBrowser/i.test(navigator.userAgent)
 export const isFacebookBrowser = /FBAN|FBAV|FBIOS|FB_IAB/.test(navigator.userAgent)
 
+/* ── Loop ons BINNE die geïnstalleerde app? ──
+
+   Dit is die app van Google Play (die TWA) of 'n PWA wat op die tuisskerm
+   gesit is — nie 'n blaaieroortjie nie.
+
+   Waarom dit bestaan: die Play-app word gehuisves deur die foon se
+   verstekblaaier. Op 'n Samsung is dit Samsung Internet, en dan bevat die
+   user agent "SamsungBrowser" — binne-in ons eie app. Elke balk wat sê
+   "maak dit in Chrome oop" het dus in die geïnstalleerde app verskyn en
+   die mens by 'n leë Chrome-oortjie laat beland, ná hy die app pas van
+   Play af geïnstalleer het.
+
+   Twee seine, want een is nie genoeg nie:
+     · `android-app://` as verwyser — die TWA se eie handtekening, en die
+       betroubaarste een. Dit is net op die eerste laai daar;
+     · standalone-vertoonmodus — die res van die tyd, en ook vir 'n PWA op
+       die tuisskerm en vir iOS.
+
+   Dit word EEN keer gelees en dan vasgehou: die vertoonmodus kan verander
+   as 'n mens die blad in 'n oortjie oopmaak, maar die verwyser is dan al
+   lankal weg. */
+export const isInApp = (() => {
+  try {
+    if (typeof document !== 'undefined' &&
+        String(document.referrer || '').startsWith('android-app://')) return true
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true
+    if (window.navigator && window.navigator.standalone === true) return true
+  } catch {}
+  return false
+})()
+
 const app        = initializeApp(firebaseConfig)
 export const db  = getFirestore(app)
 export const storage = getStorage(app)

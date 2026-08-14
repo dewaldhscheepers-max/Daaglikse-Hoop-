@@ -11,7 +11,7 @@ import BottomNav from './components/BottomNav'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
-import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, db } from './firebase'
+import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { magVra, wysPadTerug, telVerandering } from './data/kennisgewingVra'
 import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
@@ -832,7 +832,9 @@ export default function App() {
     () => !!localStorage.getItem('fbBannerDismissed')
   )
   const isiOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
-  const fbBanner = isFacebookBrowser && !fbBannerDismissed ? (
+  /* Ook hier `!isInApp` — dieselfde klas fout. 'n Balk wat se die app werk
+     nie, hoort nooit BINNE die app nie. */
+  const fbBanner = isFacebookBrowser && !isInApp && !fbBannerDismissed ? (
     <div className="fb-browser-banner">
       <div className="fb-browser-text">
         <strong>Daaglikse Hoop werk nie in Facebook se browser nie.</strong>
@@ -853,7 +855,18 @@ export default function App() {
     </div>
   ) : null
 
-  const samsungOpenInChromeBanner = isSamsungBrowser && !samsungChromeDismissed ? (
+  /* `!isInApp` is die belangrike deel.
+
+     Die Play-app word deur die foon se verstekblaaier gehuisves. Op 'n
+     Samsung is dit Samsung Internet, dus was `isSamsungBrowser` WAAR
+     binne-in ons eie app — en die eerste ding wat 'n mens ná 'n
+     Play-installasie gesien het, was 'n balk wat hom uit die app uit
+     stuur. Druk hy dit, kry hy 'n "Open with"-keuse en dan 'n leë
+     Chrome-oortjie.
+
+     Buite die app bly die balk soos hy was: Samsung Internet se web-push
+     is onbetroubaar en Chrome is daar die regte raad. */
+  const samsungOpenInChromeBanner = isSamsungBrowser && !isInApp && !samsungChromeDismissed ? (
     <div className="samsung-chrome-banner">
       <div className="samsung-chrome-text">
         <strong>Kry kennisgewings elke oggend</strong>
