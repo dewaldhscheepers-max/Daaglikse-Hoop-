@@ -458,13 +458,79 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
   }, [activeNote, playing])
 
-  // ── Audio element ──
+  /* ── Die klank ──
+   *
+   * Hier was 'n fout wat gelyk het soos 'n stadige net: 'n mens druk speel,
+   * niks gebeur nie, en hy moet uit die skerm uit en weer in voor dit werk.
+   *
+   * Die oorsaak was hierdie twee reels langs mekaar:
+   *
+   *     audio.src = activeNote.audioUrl
+   *     audio.play().catch(() => {})
+   *
+   * Om `src` te stel begin 'n laai wat 'n RUKKIE vat. `play()` dadelik
+   * daarna gee 'n belofte wat die blaaier verwerp met 'n AbortError — "die
+   * play()-versoek is deur 'n nuwe laai onderbreek". Daardie `catch` het dit
+   * doodgemaak sonder om iets te doen.
+   *
+   * Die gevolg: `playing` bly WAAR terwyl niks speel nie. Die knoppie wys 'n
+   * pouse-ikoon, die balkie staan stil, en die app en die werklikheid stem
+   * nie meer ooreen nie. Druk die mens weer, sit hy dit AF; druk hy 'n derde
+   * keer, is die leer intussen gelaai en dan werk dit. Presies "ek moet in
+   * en uit gaan".
+   *
+   * Dit tref die NUUTSTE nota die ergste, want daardie leer is nog in
+   * niemand se kas nie.
+   *
+   * Nou: verwerp die belofte, wag ons vir `canplay` en probeer EEN keer
+   * weer. Se die blaaier dit mag glad nie speel nie (NotAllowedError), stel
+   * ons `playing` terug op vals sodat die knoppie die waarheid wys. */
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
-    if (audio.src !== activeNote.audioUrl) { audio.src = activeNote.audioUrl; setElapsed(0) }
-    if (playing) audio.play().catch(() => {})
-    else audio.pause()
+
+    if (audio.src !== activeNote.audioUrl) {
+      audio.src = activeNote.audioUrl
+      /* Sonder `load()` hou die element soms aan die vorige leer se buffer
+         vas en dan speel die VERKEERDE nota se laaste sekondes. */
+      audio.load()
+      setElapsed(0)
+    }
+
+    if (!playing) { audio.pause(); return }
+
+    let dood = false
+    let wagLuisteraar = null
+
+    function gee_op() {
+      if (dood) return
+      setPlaying(false)
+      onPlayingChange?.(false)
+    }
+
+    audio.play().catch(fout => {
+      if (dood) return
+
+      /* Die blaaier weier. Dit gebeur wanneer daar nie 'n mens se tik agter
+         hierdie oproep sit nie. Daar is niks om te probeer nie — wys net die
+         speel-ikoon weer, sodat 'n tik dit kan regmaak. */
+      if (fout && fout.name === 'NotAllowedError') return gee_op()
+
+      /* Alles anders is 'n wedloop met die laai. Wag tot daar genoeg is om
+         mee te begin, en probeer een keer weer. */
+      wagLuisteraar = () => {
+        audio.removeEventListener('canplay', wagLuisteraar)
+        wagLuisteraar = null
+        if (dood) return
+        audio.play().catch(gee_op)
+      }
+      audio.addEventListener('canplay', wagLuisteraar)
+    })
+
+    return () => {
+      dood = true
+      if (wagLuisteraar) audio.removeEventListener('canplay', wagLuisteraar)
+    }
   }, [activeNote?.id, playing])
 
   useEffect(() => {
