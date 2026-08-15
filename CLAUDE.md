@@ -32,6 +32,7 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 63 toetse
+node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
 node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
 node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse

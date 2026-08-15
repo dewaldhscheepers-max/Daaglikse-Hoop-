@@ -1,0 +1,187 @@
+/* VOLG JESUS se admin. Geen `transform` op :active nerens nie — sien
+   CLAUDE.md se "Android, Chrome, en gekleurde strepe". Verander net kleur. */
+
+.vj { padding: 4px 2px 40px; font-family: var(--font-body); }
+
+.vj-kop h3 { font-size: 20px; font-weight: 800; color: var(--text); }
+.vj-sub {
+  font-size: 13px; color: var(--text-muted); line-height: 1.55; margin: 4px 0 14px;
+}
+
+/* ── Die rooster van 52 ── */
+.vj-beweging { margin-bottom: 18px; }
+.vj-beweging-kop {
+  font-size: 12px; font-weight: 800; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--purple-dark); margin-bottom: 8px;
+}
+.vj-beweging-kop span { color: var(--text-muted); font-weight: 600; }
+
+.vj-rooster { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+
+.vj-blok {
+  display: flex; flex-direction: column; gap: 3px;
+  text-align: left; padding: 10px; min-height: 62px;
+  border-radius: 12px; border: 1px solid #E6DFF2; background: #fff;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-body);
+}
+.vj-blok:active { background: #F4F0FA; }
+.vj-blok-n { font-size: 11px; font-weight: 800; color: var(--text-muted); }
+.vj-blok-t {
+  font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.3;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.vj-blok.leeg    { border-style: dashed; background: #FBFAFD; }
+.vj-blok.leeg .vj-blok-t { color: var(--text-muted); }
+.vj-blok.geskryf { border-color: var(--purple); }
+.vj-blok.lewe    { border-color: #2E8B57; background: #F2FAF5; }
+
+/* ── Die balk ── */
+.vj-balk {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.vj-balk-knoppe { display: flex; gap: 8px; }
+.vj-balk-nota { font-size: 12px; color: var(--text-muted); }
+
+.vj-terug {
+  background: none; border: none; padding: 6px 0;
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--purple-dark); cursor: pointer;
+}
+
+.vj-titel { font-size: 19px; font-weight: 800; color: var(--text); }
+
+.vj-knop, .vj-knop-2 {
+  border-radius: 11px; padding: 10px 16px; cursor: pointer;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+.vj-knop   { background: var(--purple-dark); color: #fff; border: none; }
+.vj-knop:active { background: #4a3d78; }
+.vj-knop:disabled { background: #B6ADCE; }
+.vj-knop-2 { background: #fff; color: var(--purple-dark); border: 1px solid #D9CFEC; }
+.vj-knop-2:active { background: #F4F0FA; }
+
+.vj-laai {
+  width: 100%; margin: 10px 0 16px; padding: 12px;
+  border: 1px dashed var(--purple); border-radius: 12px; background: #FBF9FE;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 600;
+  color: var(--purple-dark); cursor: pointer;
+}
+.vj-laai:active { background: #F1EBFA; }
+
+.vj-boodskap { font-size: 13.5px; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; }
+.vj-boodskap.goed { background: #EAF6EC; color: #1F5B2C; }
+.vj-boodskap.sleg { background: #FBEDE9; color: #8A3A22; }
+
+/* ── Velde ── */
+.vj-afdeling {
+  font-size: 12px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--purple-dark); margin: 22px 0 6px;
+  padding-top: 14px; border-top: 1px solid #EDE8F8;
+}
+
+.vj-veld { margin-bottom: 12px; }
+.vj-veld label {
+  display: block; font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+}
+.vj-veld input, .vj-veld textarea {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid #E2DAF0; border-radius: 10px; padding: 10px 12px;
+  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  background: #fff; line-height: 1.5; resize: vertical;
+}
+.vj-veld input:focus, .vj-veld textarea:focus { outline: 2px solid #D9CFEC; outline-offset: -1px; }
+
+.vj-ok   { display: block; font-size: 11.5px; color: #2E8B57;  margin-top: 4px; }
+.vj-fout { display: block; font-size: 11.5px; color: #B4472A; margin-top: 4px; }
+
+.vj-radio { display: flex; gap: 6px; flex-wrap: wrap; }
+.vj-radio button {
+  border: 1px solid #E2DAF0; background: #fff; border-radius: 999px;
+  padding: 7px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vj-radio button.aan { background: var(--purple-dark); border-color: var(--purple-dark); color: #fff; }
+
+.vj-kontrole {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 0; font-size: 13px; line-height: 1.5; color: var(--text);
+  border-bottom: 1px solid #F2EEF9;
+}
+.vj-kontrole input { margin-top: 2px; width: 18px; height: 18px; flex-shrink: 0; }
+.vj-kontrole strong { text-transform: uppercase; font-size: 11px; letter-spacing: .4px; }
+
+.vj-status { margin: 18px 0; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; }
+.vj-status.goed { background: #EAF6EC; color: #1F5B2C; }
+.vj-status.sleg { background: #FFF6E8; color: #7A5210; }
+.vj-status ul { margin: 6px 0 0 18px; }
+.vj-status li { margin-bottom: 3px; }
+
+.vj-onder { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── Die voorskou ── */
+.vjv { background: var(--cream); border-radius: 16px; padding: 4px 0 18px; }
+
+.vjv-open {
+  background: var(--purple-dark); color: #fff;
+  border-radius: 16px; padding: 26px 20px; text-align: center; margin-bottom: 14px;
+}
+.vjv-week { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; opacity: .8; }
+.vjv-open h2 { font-family: var(--font-serif); font-size: 28px; margin: 8px 0 12px; }
+.vjv-open-teks { font-size: 14px; line-height: 1.7; opacity: .92; white-space: pre-line; text-align: left; }
+.vjv-knop {
+  margin-top: 18px; width: 100%; background: #fff; color: var(--purple-dark);
+  border: none; border-radius: 12px; padding: 14px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 800;
+}
+
+.vjv-stap {
+  background: #fff; border-radius: 14px; padding: 16px 16px 18px; margin-bottom: 10px;
+}
+.vjv-dag { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--gold); }
+.vjv-stap-t {
+  font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  color: var(--purple-dark); margin: 2px 0 10px;
+}
+.vjv-stap p { font-size: 14.5px; line-height: 1.65; color: var(--text); }
+
+.vjv-skrif { font-family: var(--font-serif); font-size: 19px; color: var(--purple-dark); margin-bottom: 6px; }
+.vjv-klein { font-size: 13px; color: var(--text-muted); }
+.vjv-kern  { font-family: var(--font-serif); font-size: 19px; line-height: 1.5; color: var(--text); }
+.vjv-gebed { font-style: italic; color: #5A5165; }
+
+.vjv-knop-2 {
+  margin-top: 12px; width: 100%; background: #F4F0FA; color: var(--purple-dark);
+  border: none; border-radius: 11px; padding: 12px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+}
+
+.vjv-kassie {
+  margin-top: 10px; border: 1px solid #E2DAF0; border-radius: 10px;
+  padding: 14px; color: var(--text-muted); font-size: 13.5px; background: #FBFAFD;
+}
+.vjv-slot { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+.vjv-duim { width: 100%; border-radius: 12px; display: block; }
+.vjv-geenvideo {
+  border: 1px dashed #D9CFEC; border-radius: 12px; padding: 34px;
+  text-align: center; color: var(--text-muted); font-size: 13.5px;
+}
+
+.vjv-vrae { margin: 0 0 0 18px; }
+.vjv-vrae li { font-size: 14.5px; line-height: 1.6; color: var(--text); margin-bottom: 8px; }
+
+.vjv-fas {
+  background: #FFF9EE; border: 1px solid #F0E2C8; border-radius: 14px;
+  padding: 14px 16px; margin-top: 12px;
+}
+.vjv-fas h4 {
+  font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+  color: #8A6A22; margin-bottom: 8px;
+}
+.vjv-fas p { font-size: 13.5px; line-height: 1.6; color: #5A4A2A; margin-bottom: 6px; }
+.vjv-waarsku {
+  background: #FBEDE9; color: #8A3A22; border-radius: 9px; padding: 10px 12px; margin-top: 8px;
+}
