@@ -15,6 +15,8 @@
 export const WEKE_1_TOT_5 = {
   1: {
     weeknommer: 1,
+    moreTeaser:
+      'Môre: ’n vreemde titel wat Johannes vir Jesus gee — die Lam van God.',
     titel: 'Wie is Jesus?',
     doel: 'Voordat iemand leer wat Jesus vra, moet hy eers begin sien Wie Jesus is.',
     openingskerm:
@@ -63,6 +65,8 @@ export const WEKE_1_TOT_5 = {
 
   2: {
     weeknommer: 2,
+    moreTeaser:
+      'Môre lees ons wat Jesus in Nasaret oor Sy eie sending gesê het.',
     titel: 'Die Koninkryk het naby gekom',
     doel: 'Om te verstaan wat Jesus kom verkondig het, en waarom Sy boodskap altyd ’n reaksie vra: bekeer jou en glo.',
     openingskerm:
@@ -107,6 +111,8 @@ export const WEKE_1_TOT_5 = {
 
   3: {
     weeknommer: 3,
+    moreTeaser:
+      'Môre: waarom God die eerste tree na mense toe gegee het.',
     titel: 'Jy het nuwe lewe nodig',
     doel: 'Om te verstaan dat Jesus ons nie net roep om beter mense te probeer word nie. Ons het nuwe lewe van God nodig.',
     openingskerm:
@@ -154,6 +160,8 @@ export const WEKE_1_TOT_5 = {
 
   4: {
     weeknommer: 4,
+    moreTeaser:
+      'Môre hoor ons Jesus se uitnodiging aan mense wat moeg en oorlaai is.',
     titel: 'Kom. Leer. Volg.',
     doel: 'Om te verstaan dat dissipelskap nie bloot beteken om Jesus se lering te bestudeer nie. Jesus roep mense na Homself toe.',
     openingskerm:
@@ -199,6 +207,8 @@ export const WEKE_1_TOT_5 = {
 
   5: {
     weeknommer: 5,
+    moreTeaser:
+      'Môre: waarom God Sy Seun gegee het — en waar dit begin.',
     titel: 'Waarom Jesus gekom het',
     doel: 'Om te verstaan dat Jesus gekom het om te dien, Sy lewe te gee en deur Sy dood en opstanding die goeie nuus van God se redding oop te maak.',
     openingskerm:

@@ -226,3 +226,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 .vj-blok-oog:active { background: #EDE8F8; opacity: 1; }
+
+/* Die voorskou wys die EGTE gebruikerskomponent. Die room daaragter is die
+   app se eie agtergrond, sodat dit lyk soos 'n foon en nie soos 'n vorm nie. */
+.vj-skerm {
+  background: var(--cream);
+  border-radius: 18px;
+  padding: 14px;
+}

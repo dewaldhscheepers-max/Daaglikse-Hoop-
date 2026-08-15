@@ -27,6 +27,7 @@ import {
   publiseerFoute, geldigeVideoId, ontleedVerwysing,
 } from '../data/volgJesus'
 import { WEKE_1_TOT_5 } from '../data/volgJesusWeke'
+import VolgJesusWeek from './VolgJesusWeek'
 import './VolgJesusAdmin.css'
 
 const LEEG = (n) => ({
@@ -36,6 +37,7 @@ const LEEG = (n) => ({
   videoId: '',
   kernwaarheid: '', privaatRefleksie: '', gehoorsaamheidStap: '', gebed: '',
   dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
+  moreTeaser: '',
   groepVraag1: '', groepVraag2: '', groepVraag3: '',
   fasiliteerderHoofpunt: '', fasiliteerderGrens: '', fasiliteerderWaarskuwing: '',
   pastoraleRisiko: 'laag',
@@ -51,6 +53,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   const [boodskap, setBoodskap] = useState(null)
   const [voorskou, setVoorskou] = useState(false)
   const [opBesig, setOpBesig]   = useState(false)
+  const [rol, setRol]           = useState('solo')
 
   const kop = useCallback(() => ({ 'Content-Type': 'application/json', 'x-sorg-geheim': geheim }), [geheim])
 
@@ -207,9 +210,18 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <div className="vj">
         <div className="vj-balk">
           <button className="vj-terug" onClick={() => setVoorskou(false)}>← Terug na redigeer</button>
-          <span className="vj-balk-nota">Dit is hoe die gebruiker dit sal sien</span>
+          <div className="vj-radio">
+            {[['solo', 'Alleen'], ['groep', 'In n groep'], ['fasiliteerder', 'Fasiliteerder']].map(([s, w]) => (
+              <button key={s} className={rol === s ? 'aan' : ''} onClick={() => setRol(s)}>{w}</button>
+            ))}
+          </div>
         </div>
-        <WeekVoorskou week={week} />
+        {/* Die EGTE komponent, nie 'n namaaksel nie. 'n Voorskou wat sy eie
+            weergawe van die skerm teken, is 'n voorskou wat lieg — dit sou
+            reg kon lyk terwyl die ding wat mense sien, stukkend is. */}
+        <div className="vj-skerm" key={rol}>
+          <VolgJesusWeek week={week} rol={rol} />
+        </div>
       </div>
     )
   }
@@ -270,6 +282,10 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <Veld l="Dag 3 — vraag"  v={week.dag3Prompt} op={v => stel('dag3Prompt', v)} lank />
       <Veld l="Dag 4 — hartsvraag" v={week.dag4Vraag} op={v => stel('dag4Vraag', v)} lank />
       <Veld l="Dag 5 — leef dit"   v={week.dag5Prompt} op={v => stel('dag5Prompt', v)} lank />
+      {/* Die haak na môre. Geen streak, geen "moenie jou rekord verloor
+          nie" — net 'n rede om nuuskierig te wees. */}
+      <Veld l="Môre-haak (wat wag môre?)" v={week.moreTeaser}
+            op={v => stel('moreTeaser', v)} lank />
 
       <h4 className="vj-afdeling">Die groep</h4>
       <Veld l="Groepvraag 1" v={week.groepVraag1} op={v => stel('groepVraag1', v)} lank />
@@ -337,87 +353,6 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           {besig ? 'Besig…' : 'Stoor'}
         </button>
       </div>
-    </div>
-  )
-}
-
-/* ── Die voorskou: presies wat 'n gebruiker sal sien ───────────────────── */
-function WeekVoorskou({ week }) {
-  return (
-    <div className="vjv">
-      <div className="vjv-open">
-        <div className="vjv-week">WEEK {week.weeknommer} VAN 52</div>
-        <h2>{week.titel}</h2>
-        <p className="vjv-open-teks">{week.openingskerm}</p>
-        <button className="vjv-knop">BEGIN WEEK {week.weeknommer}</button>
-      </div>
-
-      <VStap n="DAG 1" t="LEES">
-        <p className="vjv-skrif">{week.primereSkrif}</p>
-        <p className="vjv-klein">Lees die gedeelte stadig.</p>
-        <button className="vjv-knop-2">EK HET GELEES</button>
-      </VStap>
-
-      <VStap n="" t="VERSTAAN">
-        {geldigeVideoId(week.videoId)
-          ? <img className="vjv-duim" alt="Video"
-                 src={`https://i.ytimg.com/vi/${week.videoId}/hqdefault.jpg`} />
-          : <div className="vjv-geenvideo">Nog geen video nie</div>}
-      </VStap>
-
-      <VStap n="" t="HOU DIT VAS">
-        <p className="vjv-kern">{week.kernwaarheid}</p>
-      </VStap>
-
-      <VStap n="" t="WEES EERLIK">
-        <p>{week.privaatRefleksie}</p>
-        <div className="vjv-kassie">Skryf vir jouself…</div>
-        <p className="vjv-slot">🔒 Net jy kan hierdie lees.</p>
-      </VStap>
-
-      <VStap n="" t="GEHOORSAAM">
-        <p>{week.gehoorsaamheidStap}</p>
-        <button className="vjv-knop-2">EK WEET WAT MY VOLGENDE STAP IS</button>
-      </VStap>
-
-      <VStap n="" t="BID">
-        <p className="vjv-gebed">{week.gebed}</p>
-      </VStap>
-
-      {week.dag2Prompt && <VStap n="DAG 2" t="KYK WEER">
-        {week.dag2Skrif && <p className="vjv-skrif">{week.dag2Skrif}</p>}
-        <p>{week.dag2Prompt}</p>
-      </VStap>}
-      {week.dag3Prompt && <VStap n="DAG 3" t="DOEN"><p>{week.dag3Prompt}</p></VStap>}
-      {week.dag4Vraag  && <VStap n="DAG 4" t="HART"><p>{week.dag4Vraag}</p></VStap>}
-      {week.dag5Prompt && <VStap n="DAG 5" t="LEEF DIT"><p>{week.dag5Prompt}</p></VStap>}
-
-      <VStap n="GROEP" t="PRAAT SAAM">
-        <ol className="vjv-vrae">
-          <li>{week.groepVraag1}</li>
-          <li>{week.groepVraag2}</li>
-          <li>{week.groepVraag3}</li>
-        </ol>
-      </VStap>
-
-      <div className="vjv-fas">
-        <h4>Net die fasiliteerder sien hierdie</h4>
-        <p><strong>Hoofpunt:</strong> {week.fasiliteerderHoofpunt}</p>
-        <p><strong>Moenie aflei nie:</strong> {week.fasiliteerderGrens}</p>
-        {week.pastoraleRisiko === 'hoog' && week.fasiliteerderWaarskuwing && (
-          <p className="vjv-waarsku">⚠ {week.fasiliteerderWaarskuwing}</p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function VStap({ n, t, children }) {
-  return (
-    <div className="vjv-stap">
-      {n && <div className="vjv-dag">{n}</div>}
-      <div className="vjv-stap-t">{t}</div>
-      {children}
     </div>
   )
 }
