@@ -194,6 +194,15 @@ service cloud.firestore {
     // (api/tel-toestemming.js, api/tel-sorg.js), wat hierdie reels omseil.
     // Sonder hierdie blok geld dieselfde weiering by verstek; dit staan hier
     // sodat niemand later dink daar is 'n gaping nie.
+    /* VOLG JESUS. Albei versamelings loop NET deur die Vercel-funksies met die
+       diensrekening — die kliënt mag nooit direk daaraan raak nie.
+
+       volgJesusVersoeke dra mense se name en kontakbesonderhede. 'n Kliënt wat
+       dit kon lees, sou 'n lys kry van almal wat gevra het om oor doop te
+       praat. */
+    match /volgJesusWeke/{id}    { allow read: if false; allow write: if false; }
+    match /volgJesusVersoeke/{id} { allow read: if false; allow write: if false; }
+
     match /tellers/{id} {
       allow read:  if false;
       allow write: if false;

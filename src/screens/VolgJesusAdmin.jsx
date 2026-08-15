@@ -54,6 +54,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   const [voorskou, setVoorskou] = useState(false)
   const [opBesig, setOpBesig]   = useState(false)
   const [rol, setRol]           = useState('solo')
+  const [versoeke, setVersoeke] = useState([])
 
   const kop = useCallback(() => ({ 'Content-Type': 'application/json', 'x-sorg-geheim': geheim }), [geheim])
 
@@ -65,7 +66,24 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     } catch { setLys([]) }
   }, [geheim])
 
-  useEffect(() => { laaiLys() }, [laaiLys])
+  const laaiVersoeke = useCallback(async () => {
+    try {
+      const r = await fetch('/api/volg-jesus-versoek', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json()
+      setVersoeke(Array.isArray(j.versoeke) ? j.versoeke : [])
+    } catch { setVersoeke([]) }
+  }, [geheim])
+
+  async function merkHanteer(id) {
+    try {
+      await fetch('/api/volg-jesus-versoek', {
+        method: 'PATCH', headers: kop(), body: JSON.stringify({ id, hanteer: true }),
+      })
+      laaiVersoeke()
+    } catch {}
+  }
+
+  useEffect(() => { laaiLys(); laaiVersoeke() }, [laaiLys, laaiVersoeke])
 
   async function maakOop(n) {
     setBesig(true); setBoodskap(null); setVoorskou(false)
@@ -169,6 +187,25 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         </div>
         {boodskap && (
           <p className={`vj-boodskap ${boodskap.goed ? 'goed' : 'sleg'}`}>{boodskap.teks}</p>
+        )}
+
+        {/* Mense wat gevra het dat iemand hulle kontak. Dit staan BO, want
+            'n doopversoek wat drie weke lank onder 52 blokkies lê, is 'n mens
+            wat gevra het en niks gehoor het nie. */}
+        {versoeke.some(v => !v.hanteer) && (
+          <div className="vj-versoeke">
+            <div className="vj-versoeke-kop">MENSE WAT WAG OM GEHOOR TE WORD</div>
+            {versoeke.filter(v => !v.hanteer).map(v => (
+              <div key={v.id} className="vj-versoek">
+                <div className="vj-versoek-teks">
+                  <strong>{v.opskrif}</strong>
+                  <span>{v.naam} · {v.kontak}</span>
+                  <span className="vj-versoek-tyd">{(v.geskep || '').slice(0, 10)}</span>
+                </div>
+                <button onClick={() => merkHanteer(v.id)}>Gedoen</button>
+              </div>
+            ))}
+          </div>
         )}
         {BEWEGINGS.map(b => (
           <div key={b.nommer} className="vj-beweging">

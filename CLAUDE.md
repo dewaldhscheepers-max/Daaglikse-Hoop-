@@ -34,6 +34,7 @@ node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toet
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 63 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/volgJesusMylpale.toets.mjs      # die mylpale + wat die kerk mag sien, 42 toetse
+node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde oorleef, 53 toetse
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
 node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
 node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse

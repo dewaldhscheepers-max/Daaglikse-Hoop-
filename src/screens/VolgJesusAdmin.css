@@ -234,3 +234,30 @@
   border-radius: 18px;
   padding: 14px;
 }
+
+/* ── Mense wat wag om gehoor te word ──
+   Dit staan BO die rooster. 'n Doopversoek wat drie weke lank onder 52
+   blokkies lê, is 'n mens wat gevra het en niks gehoor het nie. */
+.vj-versoeke {
+  background: #FFF9EE; border: 1px solid #F0E2C8; border-radius: 14px;
+  padding: 14px; margin-bottom: 16px;
+}
+.vj-versoeke-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px;
+  color: #8A6A22; margin-bottom: 10px;
+}
+.vj-versoek {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border-radius: 11px; padding: 11px 12px; margin-bottom: 7px;
+}
+.vj-versoek-teks { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vj-versoek-teks strong { font-size: 13.5px; color: var(--text); }
+.vj-versoek-teks span { font-size: 13px; color: #5A5165; word-break: break-word; }
+.vj-versoek-tyd { font-size: 11.5px; color: var(--text-muted); }
+.vj-versoek button {
+  flex-shrink: 0; background: #EAF6EC; color: #1F5B2C; border: none;
+  border-radius: 9px; padding: 9px 13px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vj-versoek button:active { background: #D6EEDC; }

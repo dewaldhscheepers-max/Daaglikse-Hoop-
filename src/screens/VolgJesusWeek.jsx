@@ -345,6 +345,7 @@ function Dag3({ week, antwoord, setAntwoord }) {
  * En die kerk sien NIKS totdat die mens self die tweede knoppie druk. Die
  * eerste keuse is syne alleen. */
 function Mylpaal({ week, staat, opKies }) {
+  const [vorm, setVorm] = useState(false)
   const m = mylpaalVir(week.weeknommer)
   if (!m) return null
 
@@ -373,17 +374,72 @@ function Mylpaal({ week, staat, opKies }) {
       {magVra && (
         staat.toestemming
           ? <p className="vw-myl-gestuur">
-              ✓ Jou gemeente sal met jou kontak maak. Hulle sien net dat jy gevra het — niks van wat jy geskryf het nie.
+              ✓ Jou gemeente sal met jou kontak maak. Hulle sien net jou naam en hoe om jou te bereik —
+              niks van wat jy geskryf het nie.
             </p>
-          : <button className="vw-myl-kontak"
-                    onClick={() => opKies({ ...staat, toestemming: true })}>
-              {m.kontakVraag}
-            </button>
+          : (vorm
+              ? <KontakVorm mylpaal={m} waarde={gekies}
+                            opKlaar={() => opKies({ ...staat, toestemming: true })}
+                            opKanselleer={() => setVorm(false)} />
+              : <button className="vw-myl-kontak" onClick={() => setVorm(true)}>
+                  {m.kontakVraag}
+                </button>)
       )}
 
       {gekies && (
         <p className="vw-myl-oop">Jy kan hierdie enige tyd verander.</p>
       )}
+    </div>
+  )
+}
+
+/* ── "Kontak my" ──
+ *
+ * Hier is die eerlike spanning: ons het deurgaans gese die kerk sien niks
+ * persoonliks nie, maar 'n mens kan nie "kontak my" he sonder iets om mee te
+ * kontak nie.
+ *
+ * Die antwoord is nie om die reel te breek nie — dit is om dit presies te
+ * stel. Twee velde, self ingetik, op hierdie oomblik, vir hierdie doel. Die
+ * refleksies en die hartsantwoorde gaan NOOIT hierheen nie; hulle verlaat
+ * nooit die toestel nie. Dit staan op die skerm sodat 'n mens dit kan sien
+ * voor hy tik. */
+function KontakVorm({ mylpaal, waarde, opKlaar, opKanselleer }) {
+  const [naam, setNaam]     = useState('')
+  const [kontak, setKontak] = useState('')
+  const [besig, setBesig]   = useState(false)
+  const [fout, setFout]     = useState(null)
+
+  async function stuur() {
+    setBesig(true); setFout(null)
+    try {
+      const r = await fetch('/api/volg-jesus-versoek', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mylpaal: mylpaal.sleutel, waarde, naam, kontak }),
+      })
+      const j = await r.json()
+      if (j.ok) opKlaar()
+      else setFout(j.fout || 'Kon nie stuur nie')
+    } catch { setFout('Kon nie stuur nie') }
+    finally { setBesig(false) }
+  }
+
+  return (
+    <div className="vw-vorm">
+      <p className="vw-vorm-lyf">
+        Ons stuur net jou naam en hoe om jou te bereik. Niks wat jy in hierdie app geskryf het,
+        gaan saam nie.
+      </p>
+      <input value={naam} onChange={e => setNaam(e.target.value)}
+             placeholder="Jou naam" autoComplete="name" />
+      <input value={kontak} onChange={e => setKontak(e.target.value)}
+             placeholder="E-pos of selnommer" autoComplete="tel" inputMode="text" />
+      {fout && <p className="vw-vorm-fout">{fout}</p>}
+      <button className="vw-myl-kontak" onClick={stuur} disabled={besig || !naam || !kontak}>
+        {besig ? 'Besig…' : 'Stuur'}
+      </button>
+      <button className="vw-stil" onClick={opKanselleer}>Nie nou nie</button>
     </div>
   )
 }
