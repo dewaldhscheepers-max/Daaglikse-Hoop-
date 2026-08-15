@@ -185,3 +185,44 @@
 .vjv-waarsku {
   background: #FBEDE9; color: #8A3A22; border-radius: 9px; padding: 10px 12px; margin-top: 8px;
 }
+
+/* ── Die groot oplaai-knoppie ── */
+.vj-groot {
+  width: 100%; margin: 6px 0 6px;
+  background: var(--purple-dark); color: #fff; border: none;
+  border-radius: 13px; padding: 15px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 800;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vj-groot:active   { background: #4a3d78; }
+.vj-groot:disabled { background: #B6ADCE; }
+
+.vj-fyn { font-size: 12px; margin-top: 0; }
+
+/* ── "Sien wat die gebruiker sien" ──
+   Dit is die knoppie wat Dewald die meeste gaan druk, dus lyk dit soos 'n
+   knoppie en nie soos 'n voetnoot nie. */
+.vj-knop-oog {
+  background: var(--gold); color: #3A2A12; border: none;
+  border-radius: 11px; padding: 10px 16px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 800;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vj-knop-oog:active { background: #C2854F; }
+
+/* Die blok word 'n houer met twee knoppies: die naam, en die oog. */
+.vj-blok { position: relative; padding: 0; }
+.vj-blok-hoof {
+  display: flex; flex-direction: column; gap: 3px; width: 100%;
+  text-align: left; padding: 10px 30px 10px 10px; min-height: 62px;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-body); -webkit-tap-highlight-color: transparent;
+}
+.vj-blok-oog {
+  position: absolute; top: 4px; right: 4px;
+  width: 26px; height: 26px; line-height: 1;
+  border: none; background: none; border-radius: 8px;
+  font-size: 14px; cursor: pointer; opacity: .55;
+  -webkit-tap-highlight-color: transparent;
+}
+.vj-blok-oog:active { background: #EDE8F8; opacity: 1; }

@@ -50,6 +50,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   const [besig, setBesig]     = useState(false)
   const [boodskap, setBoodskap] = useState(null)
   const [voorskou, setVoorskou] = useState(false)
+  const [opBesig, setOpBesig]   = useState(false)
 
   const kop = useCallback(() => ({ 'Content-Type': 'application/json', 'x-sorg-geheim': geheim }), [geheim])
 
@@ -87,6 +88,50 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     finally { setBesig(false) }
   }
 
+  /* ── Laai Week 1 tot 5 op, in een slag ──
+   *
+   * Dewald het hierdie vyf weke geskryf. Om hulle een vir een oop te maak,
+   * te laai en te stoor is tien klikke vir werk wat reeds gedoen is.
+   *
+   * Dit skryf na die LEWENDE Firestore, en dit is hoekom dit 'n knoppie is
+   * en nie iets wat ek self gedoen het nie: CLAUDE.md se dat 'n mens nie aan
+   * die lewende projek raak sonder om te vra nie. Hierdie is Dewald wat vra,
+   * met sy eie geheim.
+   *
+   * Dit oorskryf NIE 'n week wat reeds inhoud het nie — dit sou 'n aand se
+   * redigering kon uitvee. */
+  async function laaiAlmalOp() {
+    if (opBesig) return
+    setOpBesig(true); setBoodskap(null)
+    const gedoen = [], oorgeslaan = [], misluk = []
+    for (const n of Object.keys(WEKE_1_TOT_5).map(Number).sort((a, b) => a - b)) {
+      try {
+        const bestaan = await fetch(`/api/volg-jesus-week?week=${n}`, {
+          headers: { 'x-sorg-geheim': geheim },
+        }).then(r => r.json()).catch(() => ({}))
+
+        /* 'n Week met 'n titel is werk wat iemand gedoen het. Los dit. */
+        if (bestaan.week && String(bestaan.week.titel || '').trim()) {
+          oorgeslaan.push(n); continue
+        }
+
+        const r = await fetch('/api/volg-jesus-week', {
+          method: 'PUT', headers: kop(),
+          body: JSON.stringify({ week: { ...LEEG(n), ...WEKE_1_TOT_5[n] } }),
+        })
+        const j = await r.json()
+        if (j.ok) gedoen.push(n); else misluk.push(n)
+      } catch { misluk.push(n) }
+    }
+    await laaiLys()
+    setOpBesig(false)
+    const dele = []
+    if (gedoen.length)     dele.push(`Week ${gedoen.join(', ')} opgelaai`)
+    if (oorgeslaan.length) dele.push(`Week ${oorgeslaan.join(', ')} het reeds inhoud — oorgeslaan`)
+    if (misluk.length)     dele.push(`Week ${misluk.join(', ')} het misluk`)
+    setBoodskap({ goed: !misluk.length, teks: dele.join('. ') + '.' })
+  }
+
   /* Laai Dewald se geskrewe Week 1–5 in die vorm. Dit STOOR nie — hy kyk
      eers, verander wat hy wil, en druk dan self Stoor. */
   function laaiGeskrewe(n) {
@@ -111,7 +156,17 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           <p className="vj-sub">
             52 weke. Niks hiervan is in die app nie — dit word hier gebou en hier getoets.
           </p>
+          <button className="vj-groot" onClick={laaiAlmalOp} disabled={opBesig}>
+            {opBesig ? 'Besig om op te laai…' : '⬆  Laai Week 1 tot 5 op'}
+          </button>
+          <p className="vj-sub vj-fyn">
+            Skryf die vyf weke wat reeds geskryf is na die databasis. 'n Week wat
+            al inhoud het, word oorgeslaan. Daarna hoef jy net die video's by te sit.
+          </p>
         </div>
+        {boodskap && (
+          <p className={`vj-boodskap ${boodskap.goed ? 'goed' : 'sleg'}`}>{boodskap.teks}</p>
+        )}
         {BEWEGINGS.map(b => (
           <div key={b.nommer} className="vj-beweging">
             <div className="vj-beweging-kop">
@@ -122,10 +177,21 @@ export default function VolgJesusAdmin({ geheim = '' }) {
                 const ry = lys.find(x => x.weeknommer === n)
                 const klas = ry ? (ry.gepubliseer ? 'lewe' : 'geskryf') : 'leeg'
                 return (
-                  <button key={n} className={`vj-blok ${klas}`} onClick={() => maakOop(n)}>
-                    <span className="vj-blok-n">{n}</span>
-                    <span className="vj-blok-t">{ry ? ry.titel : '—'}</span>
-                  </button>
+                  <div key={n} className={`vj-blok ${klas}`}>
+                    <button className="vj-blok-hoof" onClick={() => maakOop(n)}>
+                      <span className="vj-blok-n">{n}</span>
+                      <span className="vj-blok-t">{ry ? ry.titel : '—'}</span>
+                    </button>
+                    {/* Reguit na die voorskou, sonder om eers deur die vorm te
+                        gaan. Dewald: "ek soek knoppie waar ek kan kliek en
+                        presies kan sien wat die gebruikers gaan sien." */}
+                    {ry && (
+                      <button className="vj-blok-oog" title="Sien wat die gebruiker sien"
+                              onClick={async () => { await maakOop(n); setVoorskou(true) }}>
+                        👁
+                      </button>
+                    )}
+                  </div>
                 )
               })}
             </div>
@@ -155,7 +221,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <div className="vj-balk">
         <button className="vj-terug" onClick={() => { setWeek(null); setBoodskap(null) }}>← Al 52 weke</button>
         <div className="vj-balk-knoppe">
-          <button className="vj-knop-2" onClick={() => setVoorskou(true)}>👁 Voorskou</button>
+          <button className="vj-knop-oog" onClick={() => setVoorskou(true)}>
+            👁 Sien wat die gebruiker sien
+          </button>
           <button className="vj-knop" onClick={stoor} disabled={besig}>
             {besig ? 'Besig…' : 'Stoor'}
           </button>
@@ -262,7 +330,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       </div>
 
       <div className="vj-onder">
-        <button className="vj-knop-2" onClick={() => setVoorskou(true)}>👁 Voorskou</button>
+        <button className="vj-knop-oog" onClick={() => setVoorskou(true)}>
+          👁 Sien wat die gebruiker sien
+        </button>
         <button className="vj-knop" onClick={stoor} disabled={besig}>
           {besig ? 'Besig…' : 'Stoor'}
         </button>
