@@ -1,0 +1,120 @@
+/* Die VOLG JESUS-kaart.
+
+   Geen `transform` en geen `opacity` op `:active` nie — sien CLAUDE.md se
+   "Android, Chrome, en gekleurde strepe". Verander net kleur. */
+
+.vjk {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: none;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-body);
+  text-align: left;
+
+  /* ONDEURSIGTIG. Die kleur is uit die kunswerk se donker linkerkant geneem,
+     sodat 'n teel wat nog nie geverf is nie soos die prent lyk en nie soos 'n
+     gat nie. Dit is die hele rede waarom dit 'n agtergrond is en nie 'n
+     <img> nie. */
+  background-color: #2A1F14;
+  background-image: url('/beelde/volg-jesus.webp');
+  background-size: cover;
+  /* 62% regs: die man en die kruis bly sigbaar wanneer 'n smal foon die prent
+     sny, en die donker linkerkant bly onder die woorde. */
+  background-position: 62% center;
+  background-repeat: no-repeat;
+
+  /* 16:9 sodat die kaart nie op 'n groot skerm 'n muur word nie. */
+  aspect-ratio: 16 / 9;
+  max-height: 260px;
+}
+
+.vjk:active { background-color: #1C140C; }
+
+/* Die sluier. 'n Mens mag nooit op die PRENT staatmaak vir leesbare teks
+   nie — laai die prent nie, of kom daar eendag 'n ander een, moet die woorde
+   steeds staan. */
+.vjk-sluier {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(12, 8, 4, 0.86) 0%,
+    rgba(12, 8, 4, 0.72) 34%,
+    rgba(12, 8, 4, 0.22) 62%,
+    rgba(12, 8, 4, 0.05) 100%);
+}
+
+.vjk-binne {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 20px 18px;
+  height: 100%;
+  justify-content: center;
+}
+
+.vjk-titel {
+  font-family: var(--font-body);
+  font-size: clamp(26px, 8.4vw, 40px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.5px;
+  color: #FFFDF8;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+
+.vjk-streep {
+  width: 54px;
+  height: 2px;
+  background: var(--gold);
+  margin: 2px 0 4px;
+}
+
+.vjk-sub {
+  font-size: clamp(12px, 3.4vw, 14.5px);
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #F0D9A8;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Die week se titel, net wanneer iemand reeds begin het. */
+.vjk-week {
+  font-family: var(--font-serif);
+  font-size: clamp(15px, 4.2vw, 19px);
+  line-height: 1.25;
+  color: #FFFDF8;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+  max-width: 62%;
+}
+
+.vjk-knop {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(180deg, #F5DCA6 0%, #DCB472 100%);
+  color: #33230D;
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-size: clamp(13px, 3.6vw, 15px);
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.vjk:active .vjk-knop { background: linear-gradient(180deg, #E6CB94 0%, #C9A263 100%); }
+
+/* Op 'n baie smal foon (320px) word die kaart hoër as 16:9 sodat die woorde
+   nie in mekaar druk nie. */
+@media (max-width: 359px) {
+  .vjk { aspect-ratio: 4 / 3; }
+  .vjk-week { max-width: 100%; }
+}
