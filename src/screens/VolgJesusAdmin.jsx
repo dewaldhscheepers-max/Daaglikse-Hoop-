@@ -26,7 +26,7 @@ import {
   BEWEGINGS, bewegingVir, KONTROLES, RISIKO_VLAKKE,
   publiseerFoute, geldigeVideoId, ontleedVerwysing,
 } from '../data/volgJesus'
-import { WEKE_1_TOT_5 } from '../data/volgJesusWeke'
+import { WEKE } from '../data/volgJesusWeke'
 import VolgJesusWeek from './VolgJesusWeek'
 import './VolgJesusAdmin.css'
 
@@ -107,7 +107,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     if (opBesig) return
     setOpBesig(true); setBoodskap(null)
     const gedoen = [], oorgeslaan = [], misluk = []
-    for (const n of Object.keys(WEKE_1_TOT_5).map(Number).sort((a, b) => a - b)) {
+    for (const n of Object.keys(WEKE).map(Number).sort((a, b) => a - b)) {
       try {
         const bestaan = await fetch(`/api/volg-jesus-week?week=${n}`, {
           headers: { 'x-sorg-geheim': geheim },
@@ -120,7 +120,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
 
         const r = await fetch('/api/volg-jesus-week', {
           method: 'PUT', headers: kop(),
-          body: JSON.stringify({ week: { ...LEEG(n), ...WEKE_1_TOT_5[n] } }),
+          body: JSON.stringify({ week: { ...LEEG(n), ...WEKE[n] } }),
         })
         const j = await r.json()
         if (j.ok) gedoen.push(n); else misluk.push(n)
@@ -138,7 +138,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   /* Laai Dewald se geskrewe Week 1–5 in die vorm. Dit STOOR nie — hy kyk
      eers, verander wat hy wil, en druk dan self Stoor. */
   function laaiGeskrewe(n) {
-    const bron = WEKE_1_TOT_5[n]
+    const bron = WEKE[n]
     if (!bron) return
     setWeek(w => ({ ...LEEG(n), ...bron, ...(w && w.opgedateer ? { gepubliseer: w.gepubliseer } : {}) }))
     setBoodskap({ goed: true, teks: `Week ${n} se geskrewe teks is gelaai. Nog nie gestoor nie.` })
@@ -160,10 +160,10 @@ export default function VolgJesusAdmin({ geheim = '' }) {
             52 weke. Niks hiervan is in die app nie — dit word hier gebou en hier getoets.
           </p>
           <button className="vj-groot" onClick={laaiAlmalOp} disabled={opBesig}>
-            {opBesig ? 'Besig om op te laai…' : '⬆  Laai Week 1 tot 5 op'}
+            {opBesig ? 'Besig om op te laai…' : `⬆  Laai Week 1 tot ${Object.keys(WEKE).length} op`}
           </button>
           <p className="vj-sub vj-fyn">
-            Skryf die vyf weke wat reeds geskryf is na die databasis. 'n Week wat
+            Skryf al die weke wat reeds geskryf is na die databasis. 'n Week wat
             al inhoud het, word oorgeslaan. Daarna hoef jy net die video's by te sit.
           </p>
         </div>
@@ -249,7 +249,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         <p className={`vj-boodskap ${boodskap.goed ? 'goed' : 'sleg'}`}>{boodskap.teks}</p>
       )}
 
-      {WEKE_1_TOT_5[week.weeknommer] && (
+      {WEKE[week.weeknommer] && (
         <button className="vj-laai" onClick={() => laaiGeskrewe(week.weeknommer)}>
           ↓ Laai die geskrewe teks vir Week {week.weeknommer}
         </button>

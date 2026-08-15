@@ -173,6 +173,15 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                    'Markus 8:31', 'Markus 9:30–32', 'Markus 10:32–34',
                    'Matteus 20:28', 'Johannes 10:11–18', 'Johannes 12:23–33',
                    'Lukas 22:14–20',
+      /* Week 6 */ 'Lukas 9:23–27', 'Lukas 14:25–35', 'Lukas 9:23',
+                   'Lukas 14:28–33', 'Lukas 14:25–27', 'Lukas 9:23–25',
+                   'Matteus 10:37–39', 'Matteus 16:24–27', 'Markus 8:34–38',
+                   'Johannes 12:24–26', 'Markus 10:28–31', 'Johannes 21:19–22',
+      /* Week 7 */ 'Matteus 3:13–17', 'Johannes 3:22–26', 'Johannes 4:1–2',
+                   'Lukas 3:21–22',
+      /* Week 8 */ 'Matteus 7:24–27', 'Johannes 8:31–36', 'Johannes 13:12–17',
+                   'Lukas 6:46–49', 'Matteus 21:28–32', 'Johannes 14:15',
+                   'Johannes 15:9–10',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
@@ -181,7 +190,7 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       const foute = keurVerwysing(v, leesBoek)
       if (foute.length) stukkend.push(`${v} → ${foute.join('; ')}`)
     }
-    is(`al ${VERWYSINGS.length} verwysings uit Week 1-5 bestaan werklik`, stukkend, [])
+    is(`al ${VERWYSINGS.length} verwysings uit Week 1-8 bestaan werklik`, stukkend, [])
 
     /* En die keurder moet werklik VANG — anders is die groen hierbo waardeloos. */
     is('n hoofstuk wat nie bestaan nie word gevang',

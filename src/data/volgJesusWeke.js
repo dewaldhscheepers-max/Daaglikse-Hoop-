@@ -1,4 +1,4 @@
-/* Week 1 tot 5, soos Dewald hulle geskryf het.
+/* Week 1 tot 8, soos Dewald hulle geskryf het.
  *
  * Dit is nie die lewende data nie — die lewende data staan in Firestore en
  * word deur die admin geredigeer. Hierdie is die BRON: die teks wat Dewald
@@ -12,7 +12,7 @@
  * volgJesus.toets.mjs. Die keuses bly Dewald s'n om na te gaan.
  */
 
-export const WEKE_1_TOT_5 = {
+export const WEKE = {
   1: {
     weeknommer: 1,
     moreTeaser:
@@ -251,6 +251,165 @@ export const WEKE_1_TOT_5 = {
       'Moenie ’n prentjie skep asof die Vader mense wou vernietig en Jesus Hom moes oortuig nie. ' +
       'Moenie die opstanding tot ’n metafoor verskraal ("jy kan ook weer opstaan") nie. ' +
       'En moenie die kruis gebruik om skuld te manipuleer nie.',
+    pastoraleRisiko: 'medium',
+  },
+  6: {
+    weeknommer: 6,
+    moreTeaser:
+      'Môre kyk ons na twee woorde wat maklik is om te lees en swaar is om te leef: elke dag.',
+    titel: 'Die koste van volg',
+    doel: 'Om te verstaan dat Jesus nie net ’n plek in ons bestaande lewe vra nie. Hy roep ons om Hom eerste te stel, onsself te verloën, ons kruis op te neem en Hom te volg — ook wanneer dit iets kos.',
+    openingskerm:
+      'Oor die afgelope vyf weke het ons begin ontdek Wie Jesus is.\n\n' +
+      'Nou kom ons by ’n keerpunt. Jesus roep ons nie net om sekere dinge oor Hom te glo nie. Hy sê: Volg My.\n\n' +
+      'En Jesus is eerlik oor wat dit beteken. Om Hom te volg gaan soms bots met wat jy self wil hê. Dit kan jou gemak raak. ' +
+      'Jou planne. Jou prioriteite. Jou reputasie.\n\n' +
+      'Jesus probeer niemand met ’n maklike verkooppraatjie oortuig nie. Hy sê vooraf dat dissipelskap ’n koste het.',
+    primereSkrif: 'Lukas 9:23–27',
+    ondersteunendeSkrif: 'Lukas 14:25–35',
+    videoId: '',
+    kernwaarheid:
+      'Jesus vra nie net vir ’n plek in my lewe nie. Hy roep my om my hele lewe agter Hom aan te rig.',
+    privaatRefleksie:
+      'Waar in jou lewe is jy die bangste dat dit jou iets kan kos om Jesus te volg? Moenie probeer om indrukwekkend te antwoord nie.',
+    gehoorsaamheidStap:
+      'Moenie ’n dramatiese offer probeer uitdink net om te bewys dat jy ernstig is nie. Vra eerder: waar weet ek reeds wat Jesus se weg is, ' +
+      'maar probeer ek steeds my eie wil eerste stel? Kies één area. Bid daaroor. Gee dan die volgende getroue tree.',
+    gebed:
+      'Jesus, U het Uself gegee. Ek wil U nie net volg wanneer dit maklik is of wanneer U weg by my planne pas nie. ' +
+      'Wys my waar ek steeds myself eerste stel. Gee my die moed om U te vertrou, myself te verloën en my lewe elke dag agter U aan te rig. ' +
+      'Bewaar my daarvan om U woorde verkeerd te verstaan of te gebruik om ongesonde beheer en skade te aanvaar. Amen.',
+    dag2Skrif: 'Lukas 9:23',
+    dag2Prompt:
+      'Let op die woorde "elke dag". Waar lyk die daaglikse volg van Jesus tans baie gewoon, maar tog moeilik, in jou lewe?',
+    dag3Prompt:
+      'Lees Lukas 14:28–33. Wat sou vir jou die moeilikste wees om aan Jesus se leiding oor te gee? Nie "wat moet ek nou weggee" nie — maar: waar is my greep die styfste?',
+    dag4Vraag:
+      'Lees Lukas 14:25–27. Wie se goedkeuring beïnvloed jou soms sterker as Jesus se woorde?',
+    dag5Prompt:
+      'Lees weer Lukas 9:23–25. Vertrou jy Jesus genoeg om te glo dat Sy weg beter is as ’n lewe waarin jy altyd self die beheer probeer behou?',
+    groepVraag1:
+      'Wat is die verskil tussen selfverloëning en die ongesonde idee dat jy niks werd is of geen grense mag hê nie?',
+    groepVraag2:
+      'Waar bots Jesus se weg die maklikste met ons begeerte om self beheer te hou?',
+    groepVraag3:
+      'Waarom dink julle gebruik Jesus die woorde "elke dag" wanneer Hy oor die kruis praat?',
+    fasiliteerderHoofpunt:
+      'Dit is die eerste groot besluitweek. Moenie dit manipuleer nie. Die doel is nie ’n emosionele oomblik waarin almal dieselfde antwoord gee nie — ' +
+      'dit is om Jesus se eie oproep duidelik te laat staan sodat die mens eerlik daarop kan reageer.',
+    fasiliteerderGrens:
+      'Selfverloëning beteken NIE selfhaat, geen grense, geen rus, of dat jy manipulasie moet aanvaar nie. ' +
+      'Moenie elke vorm van lyding "jou kruis" noem nie — iemand se siekte, mishandeling of depressie word nie afgemaak met "dra dit" nie. ' +
+      'En Lukas 14 se sterk taal oor familie is NIE ’n bevel tot vyandigheid nie; dit beklemtoon Jesus se voorrang. ' +
+      'Moenie geestelike heldhaftigheid aanmoedig nie — gehoorsaamheid lyk dikwels eenvoudig: die waarheid praat, vergifnis begin, hulp vra.',
+    fasiliteerderWaarskuwing:
+      'Hierdie is presies die soort teks wat deur manipulerende mense misbruik word. Kruisdra beteken NIE dat iemand in mishandeling moet bly nie. ' +
+      'Jesus se oproep gee geen huweliksmaat, pastor, fasiliteerder of familielid die reg om iemand te beheer, te verneder of in gevaar te hou nie. ' +
+      'Sê nooit namens iemand "Jesus sê jy moet jou werk los" of "Jesus sê jy moet in daardie verhouding bly" nie. ' +
+      'Openbaar iemand gevaar: stop die gewone toepassing en volg die veilige pastorale proses.',
+    pastoraleRisiko: 'hoog',
+    mylpaal: 'Mylpaal 1 — Ek kies om Jesus te volg',
+  },
+
+  7: {
+    weeknommer: 7,
+    moreTeaser:
+      'Môre kyk ons van naderby na die oomblik waar Johannes vir Jesus wou keer — en hoekom Jesus daarop aangedring het.',
+    titel: 'Doop',
+    doel: 'Om te verstaan waarom doop deel is van Jesus se opdrag om dissipels te maak, wat ons duidelik uit die Evangelies daaroor kan sê, en wat jou volgende getroue tree rondom doop is.',
+    openingskerm:
+      'Verlede week het ons by ’n belangrike vraag gekom: wil ek Jesus werklik volg?\n\n' +
+      'Nou begin ’n nuwe beweging. Nie net "wat glo ek?" nie, maar: hoe begin ek Jesus gehoorsaam?\n\n' +
+      'Jesus is self gedoop. Mense is tydens Sy bediening deur Sy dissipels gedoop. En ná Sy opstanding stuur Hy Sy dissipels om dissipels te maak, ' +
+      'hulle te doop en hulle te leer om Hom te gehoorsaam.\n\n' +
+      'Ons gaan nie elke kerklike debat oor doop probeer oplos nie. Ons begin by Jesus se woorde.',
+    primereSkrif: 'Matteus 3:13–17',
+    ondersteunendeSkrif: 'Matteus 28:18–20; Johannes 3:22–26; Johannes 4:1–2',
+    videoId: '',
+    kernwaarheid:
+      'Jesus plaas doop binne ’n lewe van dissipelskap — ’n lewe waarin ek Hom volg en leer om Hom te gehoorsaam.',
+    privaatRefleksie:
+      'Wanneer jy aan doop dink, wat gebeur eerste binne-in jou? Dankbaarheid, uitstel, onsekerheid, vrees vir wat familie sal sê, of ’n moeilike ervaring?',
+    gehoorsaamheidStap:
+      'Wat is jou eerlike volgende tree rondom doop? Ek is reeds gedoop · Ek wil gedoop word · Ek het vrae en wil met iemand praat · Ek is nog nie gereed nie. ' +
+      'Geen antwoord sluit jou uit nie. Maar moenie die vraag wegskuif net omdat dit ongemaklik is nie.',
+    gebed:
+      'Jesus, dankie dat U self in gehoorsaamheid die pad geloop het wat voor U gelê het. Ek wil nie net U woorde hoor nie; ek wil leer om U te gehoorsaam. ' +
+      'Gee my wysheid en ’n oop hart wanneer ek oor doop dink. As hierdie stap nog voor my lê, gee my die moed om dit eerlik te ondersoek. Amen.',
+    dag2Skrif: 'Matteus 3:13–17',
+    dag2Prompt:
+      'Johannes probeer Jesus aanvanklik keer, maar Jesus dring daarop aan. Wat leer Jesus se bereidheid om hierdie pad te loop jou oor gehoorsaamheid?',
+    dag3Prompt:
+      'Lees Johannes 3:22–26 en Johannes 4:1–2. Waarom dink jy neem geloof in Jesus ook sigbare vorm aan in die lewe van ’n dissipel?',
+    dag4Vraag:
+      'Lees Matteus 28:18–20. Het jy doop dalk ooit as die eindpunt gesien, eerder as deel van die begin van ’n lewe van dissipelskap?',
+    dag5Prompt:
+      'Jesus se opdrag stop nie by "doop hulle" nie. Hy sê ook: leer hulle om alles te gehoorsaam. Waar moet dit vandag in jou gewone lewe sigbaar word dat Jesus jou Here is?',
+    groepVraag1:
+      'Waarom dink julle plaas Jesus doop binne die groter opdrag om dissipels te maak?',
+    groepVraag2:
+      'Wat kan gebeur as doop net ’n eenmalige godsdienstige gebeurtenis word, maar daar geen lewe van navolging is nie?',
+    groepVraag3:
+      'Hoe kan ons Jesus se woorde oor doop ernstig neem sonder om mense te druk of elke kerklike verskil in een gesprek te probeer oplos?',
+    fasiliteerderHoofpunt:
+      'Jesus plaas doop binne die maak van dissipels. Die doel is nie om die groep in ’n debat oor elke denominasionele verskil te trek nie — ' +
+      'kyk na die teks, neem Jesus ernstig, en gee ’n verantwoordelike volgende tree.',
+    fasiliteerderGrens:
+      'Moenie sê Jesus is gedoop omdat Hy Hom van sonde moes bekeer nie — Sy doop is uniek binne Sy identiteit en sending. ' +
+      'Johannes 4:2 maak uitdruklik duidelik dat Jesus nie self gedoop het nie; Sy dissipels het. ' +
+      'Moenie doop ’n reddingstoets in die app maak nie: geen keuseveld verklaar iemand se verhouding met God nie. ' +
+      'En moenie mense druk met "as jy Jesus regtig liefhet, moet jy hierdie Sondag gedoop word" nie.',
+    pastoraleRisiko: 'medium',
+    mylpaal: 'Mylpaal 2 — Doop',
+  },
+
+  8: {
+    weeknommer: 8,
+    moreTeaser:
+      'Môre: Jesus praat met mense wat reeds in Hom glo — en Hy stop nie daar nie.',
+    titel: 'Hoor én doen',
+    doel: 'Om te verstaan dat dissipelskap nie eindig wanneer ek Jesus se woorde hoor, verstaan of daarmee saamstem nie. Jesus roep my om Sy woorde deel van my werklike lewe te maak.',
+    openingskerm:
+      'Jy kan baie van Jesus weet. Jy kan Sy woorde lees. Jy kan preke luister. Jy kan selfs saamstem met wat Hy sê.\n\n' +
+      'Maar Jesus vra ’n dieper vraag: wat doen jy met wat jy gehoor het?\n\n' +
+      'Aan die einde van die Bergrede vertel Jesus van twee mense. Albei hoor Sy woorde. Albei bou. Albei beleef ’n storm. ' +
+      'Maar daar is een groot verskil: die een hoor Jesus se woorde en doen wat Hy sê.',
+    primereSkrif: 'Matteus 7:24–27',
+    ondersteunendeSkrif: 'Johannes 8:31–36; Johannes 13:12–17',
+    videoId: '',
+    kernwaarheid:
+      'Dissipelskap is nie net om Jesus se woorde te hoor nie. Ek leer om te doen wat Hy sê.',
+    privaatRefleksie:
+      'Is daar iets waarvan jy reeds weet wat Jesus se weg is, maar wat jy aanhou uitstel? Moenie tien dinge probeer identifiseer nie. Een is genoeg.',
+    gehoorsaamheidStap:
+      'Vra: wat het Jesus reeds vir my duidelik gemaak? En dan: wat is die kleinste konkrete tree wat ek vandag kan gee om daarop te reageer? ' +
+      'Maak dit spesifiek. Nie "ek moet ’n beter Christen wees" nie, maar "ek gaan vandag daardie oproep maak".',
+    gebed:
+      'Jesus, ek wil nie net iemand wees wat U woorde hoor en daarmee saamstem nie. Wys my waar ek reeds weet wat U weg is, maar dit aanhou uitstel. ' +
+      'Gee my die nederigheid en moed om te doen wat U sê. Bewaar my daarvan om gehoorsaamheid te gebruik om U liefde te probeer verdien. Amen.',
+    dag2Skrif: 'Johannes 8:31–36',
+    dag2Prompt:
+      'Jesus praat met mense wat in Hom begin glo het — en Hy stop nie by "julle glo" nie. Hoe lyk dit prakties om by Jesus se woorde te bly wanneer dit wat Hy sê jou korrigeer?',
+    dag3Prompt:
+      'Lees Johannes 13:12–17. Is daar iets van Jesus se manier van dien wat jy bewonder, maar selde self doen? Gee een klein tree.',
+    dag4Vraag:
+      'Is daar iets waarvan jy reeds lank weet wat jy moet doen, maar waarvoor jy steeds wag vir ’n makliker oomblik? Waarom stel jy dit uit — vrees, trots, gemak, mense se opinies, die koste?',
+    dag5Prompt:
+      'Lees weer Matteus 7:24–27. Watter één lering van Jesus wil jy doelbewus begin inbou in hoe jy leef? Hou dit eenvoudig. Hou dit konkreet.',
+    groepVraag1:
+      'Wat is die verskil tussen om met Jesus saam te stem en om Hom te gehoorsaam?',
+    groepVraag2:
+      'Waarom moet ons versigtig wees om hierdie verhaal te gebruik asof gehoorsaamheid beteken dat niks slegs met jou sal gebeur nie?',
+    groepVraag3:
+      'Wat help ons om Jesus se woorde uit ’n Bybelstudie tot in ons gewone lewe te neem?',
+    fasiliteerderHoofpunt:
+      'Jesus onderskei tussen iemand wat Sy woorde net hoor en iemand wat dit hoor én doen. Die doel is om die afstand tussen hoor en doen kleiner te maak — ' +
+      'nie om nog twintig nuwe beginsels by te voeg nie.',
+    fasiliteerderGrens:
+      'Moenie sê dat wie Jesus gehoorsaam, geen storms sal hê nie — albei huise beleef die storm. ' +
+      'Moenie iemand wat swaarkry laat dink dit gebeur omdat hy nie gehoorsaam genoeg was nie. ' +
+      'Moenie gehoorsaamheid in prestasie-geloof verander nie: dit betaal nie vir genade nie, dit vloei uit vertroue. ' +
+      'En moenie "hoor én doen" gebruik om mense in gevaarlike of manipulerende situasies te druk nie — onderskei tussen gehoorsaamheid aan JESUS en blinde gehoorsaamheid aan ’n mens.',
     pastoraleRisiko: 'medium',
   },
 }
