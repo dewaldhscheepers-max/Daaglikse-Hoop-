@@ -1,4 +1,4 @@
-/* Week 1 tot 8, soos Dewald hulle geskryf het.
+/* Week 1 tot 12, soos Dewald hulle geskryf het.
  *
  * Dit is nie die lewende data nie — die lewende data staan in Firestore en
  * word deur die admin geredigeer. Hierdie is die BRON: die teks wat Dewald
@@ -8,7 +8,8 @@
  * Die videoId's is leeg. Hulle word in die admin geplak sodra die video op
  * YouTube is — presies soos Sorg s'n.
  *
- * Al 36 Skrifverwysings hierin is teen die GAB in public/gab/ gekeur; sien
+ * Elke Skrifverwysing hierin — en elke kruisverwysing van die weke se
+ * teologiese bronkaarte — is teen die GAB in public/gab/ gekeur; sien
  * volgJesus.toets.mjs. Die keuses bly Dewald s'n om na te gaan.
  */
 
@@ -410,6 +411,299 @@ export const WEKE = {
       'Moenie iemand wat swaarkry laat dink dit gebeur omdat hy nie gehoorsaam genoeg was nie. ' +
       'Moenie gehoorsaamheid in prestasie-geloof verander nie: dit betaal nie vir genade nie, dit vloei uit vertroue. ' +
       'En moenie "hoor én doen" gebruik om mense in gevaarlike of manipulerende situasies te druk nie — onderskei tussen gehoorsaamheid aan JESUS en blinde gehoorsaamheid aan ’n mens.',
+    pastoraleRisiko: 'medium',
+  },
+
+  9: {
+    weeknommer: 9,
+    moreTeaser:
+      'Môre: die woordjie wat deur Jesus se hele antwoord loop — hele.',
+    titel: 'Lief God. Lief mense.',
+    doel: 'Om te verstaan dat Jesus ’n lewe van gehoorsaamheid terugbring na twee groot liefdes: om God met jou hele wese lief te hê en jou naaste soos jouself.',
+    openingskerm:
+      'Jesus leer ons baie dinge. Bid. Vergewe. Dien. Gee. Praat die waarheid.\n\n' +
+      'Maar eendag vra iemand vir Jesus: watter gebod is die belangrikste?\n\n' +
+      'Jesus se antwoord bring alles terug na twee groot liefdes. Wees lief vir God. En: wees lief vir jou naaste.\n\n' +
+      'Nie net met woorde nie. Nie net wanneer dit maklik is nie. Nie net wanneer iemand jou liefde teruggee nie.\n\n' +
+      'Jesus wys dat ’n lewe saam met God uiteindelik sigbaar begin word in wie ek liefhet — en hoe ek liefhet.',
+    primereSkrif: 'Matteus 22:34–40',
+    ondersteunendeSkrif: 'Markus 12:28–34',
+    videoId: '',
+    kernwaarheid:
+      'Jesus roep my om God met my hele lewe lief te hê en my liefde vir Hom sigbaar te laat word in hoe ek mense behandel.',
+    privaatRefleksie:
+      'Waar is daar tans die grootste gaping tussen die liefde waarvan jy praat en die liefde wat jy uitleef? ' +
+      'Dink aan jou tyd, jou woorde, jou prioriteite, jou verhoudings en die manier waarop jy mense behandel. ' +
+      'Nie om jouself te veroordeel nie. Om eerlik te kyk.',
+    gehoorsaamheidStap:
+      'Kies vandag een persoon en vra: hoe kan ek op ’n eenvoudige, konkrete manier liefde teenoor hierdie persoon wys? ' +
+      'Dalk luister sonder om dadelik raad te gee, help met iets prakties, gee jou volle aandag, praat sagter, ' +
+      'hou op om die persoon agter sy of haar rug af te breek, of doen iets goed sonder om erkenning daarvoor te verwag. ' +
+      'Nie iets indrukwekkends nie. Maak liefde sigbaar.\n\n' +
+      'En as jy met daardie persoon sukkel: liefde beteken nie dat jy moet voorgee daar is geen seer, konflik of onreg nie, ' +
+      'en jy hoef nie onveilige kontak te maak net om hierdie week se stap af te merk nie. ' +
+      'Vra eerder hoe liefde én waarheid in hierdie situasie lyk — om nie terug seer te maak nie, om vir die persoon te bid, ' +
+      'om ’n gesonde grens te stel, om verantwoordelike hulp te kry, of om op te hou om haat in jou hart te voed.',
+    gebed:
+      'Vader, ek wil U nie net met my woorde liefhê nie. Leer my om U lief te hê met my hele hart en met my hele lewe. ' +
+      'Wys my waar my liefde vir U sigbaar moet word in hoe ek mense behandel. Maak my oë oop vir die mense naby my wat ek maklik miskyk. ' +
+      'Gee my liefde wat opreg, prakties en vol waarheid is. Leer my om U eerste lief te hê en vanuit daardie liefde ander lief te hê. Amen.',
+    dag2Skrif: 'Markus 12:28–30',
+    dag2Prompt:
+      'Jesus praat van jou hele hart, jou hele siel, jou hele verstand en al jou krag. Die gedagte wat deur alles loop, is: hele. ' +
+      'Watter deel van jou lewe hou jy die maklikste apart van jou liefde vir God — jou geld, jou werk, jou toekoms, jou gedagtes, ' +
+      'jou vermaak, jou verhoudings, jou ambisie of jou tyd? En hoe sou liefde vir God ook dáár sigbaar word?',
+    dag3Prompt:
+      'Lees Markus 12:31. "Wees lief vir jou naaste soos jouself" klink eenvoudig totdat jou naaste ’n naam en ’n gesig kry. ' +
+      'Wie is naby jou, maar maklik om mis te kyk? Dalk iemand in jou eie huis, dalk iemand by die werk, ' +
+      'dalk iemand wat altyd daar is en daarom amper onsigbaar geword het. Gee daardie persoon vandag doelbewus jou aandag.',
+    dag4Vraag:
+      'Lees Markus 12:32–34. Godsdienstige aktiwiteit kan nie ’n liefdelose lewe wegsteek nie. ' +
+      'Is daar iemand wat die "Christelike" kant van jou lewe sien, maar nie altyd liefde ervaar in die manier waarop jy hom of haar behandel nie?',
+    dag5Prompt:
+      'Dink terug aan die persoon wat jy hierdie week gekies het. Het jou liefde verder gegaan as net ’n goeie bedoeling? ' +
+      'Het dit tyd gevra? Geduld? Aandag? Nederigheid? Liefde hoef nie groot of dramaties te wees nie, ' +
+      'maar liefde wat nooit enigiets doen nie, bly maklik net ’n goeie bedoeling. ' +
+      'Doen vandag nog één eenvoudige daad van liefde sonder om iets terug te verwag.',
+    groepVraag1: 'Wat beteken dit prakties om God met jou hele lewe lief te hê?',
+    groepVraag2:
+      'Waarom is die manier waarop ons mense behandel so belangrik wanneer ons sê dat ons God liefhet?',
+    groepVraag3:
+      'Hoe kan liefde lyk wanneer daar konflik, seer of die behoefte aan ’n gesonde grens is?',
+    fasiliteerderHoofpunt:
+      'Jesus bring die lewe van gehoorsaamheid terug na liefde vir God en liefde vir die naaste. ' +
+      'Hou dit eenvoudig en moenie liefde in ’n vae, sentimentele woord verander nie — Jesus praat van liefde wat die hele lewe raak.',
+    fasiliteerderGrens:
+      'Moenie hart, siel, verstand en krag in vier kunsmatig afsonderlike dele van ’n mens probeer verdeel nie; Jesus se klem is dat God die hele mens vra. ' +
+      'Moenie uit "soos jouself" ’n leer bou wat sê ’n mens moet eers homself volledig liefhê voordat hy iemand anders kan liefhê nie — die fokus bly jou naaste. ' +
+      'Moenie liefde teen waarheid afspeel nie: om iemand lief te hê beteken nie dat jy met alles saamstem, dat jy alle grense verwyder, ' +
+      'dat gebreekte vertroue onmiddellik herstel moet word, of dat iemand in mishandeling of gevaar moet bly nie. ' +
+      'Die grootste risiko is dat "wees lief vir jou naaste" gehoor word as "gee weer toegang aan iemand wat jou skade aandoen" — dit is nie dieselfde nie. ' +
+      'En moenie in die groep vra wie iemand sukkel om lief te hê nie; moenie mense teenoor mekaar blootstel nie.',
+    pastoraleRisiko: 'medium',
+  },
+
+  10: {
+    weeknommer: 10,
+    moreTeaser:
+      'Môre: Jesus vra Sy dissipels waaroor hulle onderweg geredeneer het — en hulle bly stil.',
+    titel: 'Word klein',
+    doel: 'Om te verstaan dat Jesus ons idee van grootheid omkeer. In Sy Koninkryk gaan dit nie oor status, aansien of die behoefte om eerste te wees nie, maar oor nederigheid, diens, ontvanklikheid en die bereidheid om mense raak te sien wat maklik misgekyk word.',
+    openingskerm:
+      'Jesus se dissipels het Hom gevolg. Hulle het Sy wonderwerke gesien, Sy lering gehoor en saam met Hom gereis.\n\n' +
+      'En tog het daar ’n vraag tussen hulle begin groei: wie van ons is die grootste?\n\n' +
+      'Dit is ’n baie menslike vraag. Wie is die belangrikste? Wie word raakgesien? Wie staan voor? Wie het die meeste invloed?\n\n' +
+      'Jesus antwoord op ’n onverwagte manier. Hy roep ’n kind nader, plaas die kind tussen hulle, ' +
+      'en begin hulle leer dat grootheid in Sy Koninkryk heeltemal anders lyk.\n\n' +
+      'Hierdie week vra ons: waar probeer ek nog belangrik wees, wanneer Jesus my leer om nederig te volg, te ontvang en te dien?',
+    primereSkrif: 'Matteus 18:1–5',
+    ondersteunendeSkrif: 'Markus 9:33–37; Lukas 18:15–17',
+    videoId: '',
+    kernwaarheid:
+      'Ek hoef nie myself groter te maak nie. Jesus leer my om nederig te volg, te ontvang en te dien.',
+    privaatRefleksie:
+      'Waar verlang jy tans die meeste daarna om raakgesien, erken of belangrik geag te word? ' +
+      'Dalk by die werk, by die huis, in jou huwelik, in jou familie, in jou kerk, in jou bediening, in jou vriendekring of op sosiale media. ' +
+      'Daar is niks vreemd daaraan om waardering te verlang nie. Maar vra eerlik: wat gebeur binne-in my wanneer iemand anders die erkenning kry wat ek graag wou hê?',
+    gehoorsaamheidStap:
+      'Moenie hierdie week iets doen net sodat mense kan sien hoe nederig jy is nie — dit mis die hele punt. ' +
+      'Kies eerder een eenvoudige daad van diens wat nie om jou draai nie. Dalk laat jy iemand anders eerste praat, ' +
+      'help jy met iets waarvoor niemand jou gaan bedank nie, eer jy iemand anders se goeie werk, erken jy dat jy verkeerd was, ' +
+      'luister jy sonder om jou eie storie groter te maak, of gee jy krediet waar dit hoort. En as niemand dit raaksien nie? Dis reg.\n\n' +
+      'Sukkel jy hiermee, vra: wat is ek bang ek verloor as ek nie hierdie keer eerste, reg of raakgesien is nie? ' +
+      'Moenie voorgee jy gee nie om as jy wel omgee nie. Nederigheid begin nie by voorgee nie. Dit begin by waarheid.',
+    gebed:
+      'Jesus, U ken my hart. U weet hoe maklik ek myself met ander vergelyk en hoe diep ek soms daarna verlang om raakgesien en erken te word. ' +
+      'Wys my waar trots, status of die behoefte om myself te bewys my begin beheer. Leer my om nederig te volg, te ontvang en te dien. ' +
+      'Maak my oë oop vir mense wat maklik misgekyk word. Help my om getrou te wees, selfs wanneer niemand my daarvoor raaksien nie. ' +
+      'Ek hoef nie die grootste te wees nie. Ek wil U volg. Amen.',
+    dag2Skrif: 'Markus 9:33–37',
+    dag2Prompt:
+      'Jesus vra Sy dissipels waaroor hulle onderweg geredeneer het. Hulle bly stil — hulle weet presies waarom. ' +
+      'Waar vergelyk jy jouself die maklikste met ander mense? Sukses, voorkoms, geld, gawes, kinders, bediening, werk, invloed, geestelike groei? ' +
+      'Vergelyking vra voortdurend "waar staan ek teenoor hulle?" Jesus beweeg die vraag in ’n ander rigting: "wie kan ek dien?"',
+    dag3Prompt:
+      'Lees Markus 9:35. Jesus sê dat iemand wat eerste wil wees, laaste van almal en almal se dienaar moet wees. ' +
+      'Hy vernietig nie verantwoordelikheid of leierskap nie; Hy verander ons idee van grootheid. ' +
+      'Waar kan jy vandag iemand dien sonder om iets terug te verwag? Nie vir applous nie. Nie vir ’n foto nie. Net dien.',
+    dag4Vraag:
+      'Lees Markus 9:36–37. Die dissipels dink oor wie groot is; Jesus bring iemand na die middel wat maklik as minder belangrik beskou kon word. ' +
+      'Wie is naby jou wat jy maklik miskyk omdat daardie persoon niks vir jou status, gemak of voordeel kan gee nie? ' +
+      'Sien daardie mens vandag. Nie as ’n projek nie. As ’n mens.',
+    dag5Prompt:
+      'Lees Lukas 18:15–17. Die dissipels probeer die kinders keer, maar Jesus roep hulle nader en sê dat die Koninkryk van God ontvang moet word soos ’n kind dit ontvang. ' +
+      'Die punt is nie om kinderagtig te wees nie — die klem is: ontvang. Trots wil verdien, beheer en bewys; nederigheid kan met oop hande ontvang. ' +
+      'Waar probeer jy tans iets by God verdien of beheer wat jy eerder in vertroue moet ontvang?',
+    groepVraag1: 'Wat is die verskil tussen nederigheid en om sleg oor jouself te dink?',
+    groepVraag2:
+      'Hoe kan die behoefte om raakgesien te word selfs in kerk, geloof of bediening insluip?',
+    groepVraag3:
+      'Wie is die mense wat ons samelewing maklik miskyk — en hoe verander Jesus se lering die manier waarop ons hulle behoort te sien?',
+    fasiliteerderHoofpunt:
+      'Hierdie week gaan nie oor "dink minder van jou waarde" nie. Dit gaan oor "hou op om jou lewe rondom jou eie belangrikheid te bou". ' +
+      'Jesus konfronteer die dissipels se soeke na status en wys hulle ’n ander pad: nederigheid, diens, ontvanklikheid, ' +
+      'en aandag aan mense wat maklik misgekyk word.',
+    fasiliteerderGrens:
+      'Moenie leer dat Jesus sê volwassenes moet kinderagtig, naïef of onkrities word nie — laat elke teks se eie klem staan. ' +
+      'Moenie nederigheid in selfveragting verander nie: dit vra nie dat iemand homself moet afbreek nie. ' +
+      'Moenie leer dat niemand mag lei nie; Jesus verbind grootheid aan diens, Hy skaf nie verantwoordelikheid af nie. ' +
+      'En pas op vir misbruik van "word klein": niemand mag vir iemand anders sê "jy moet kleiner word, daarom moet jy stilbly oor wat met jou gebeur" nie. ' +
+      'Hierdie week kan sensitief wees vir mense wat verneder is, uit beheersende kerkomgewings kom, of deur geestelike taal gemanipuleer is — ' +
+      'Jesus roep ons weg van selfverheffing, nie weg van menswaardigheid nie. Moenie in die groep vra wie die trotsste is nie.',
+    pastoraleRisiko: 'medium',
+  },
+
+  11: {
+    weeknommer: 11,
+    moreTeaser:
+      'Môre: die vrou vra oor die regte plek — en Jesus neem die gesprek verder as ’n berg of ’n stad.',
+    titel: 'Ware aanbidding',
+    doel: 'Om te verstaan dat aanbidding nie net oor ’n plek, lied of godsdienstige oomblik gaan nie. Jesus leer ons om die Vader in gees en waarheid te aanbid en om aan God alleen die hoogste lojaliteit van ons lewe te gee.',
+    openingskerm:
+      'Waar aanbid ’n mens reg? In watter kerk? Op watter plek? Op watter manier?\n\n' +
+      '’n Samaritaanse vrou bring ’n soortgelyke vraag na Jesus. Haar mense aanbid op een berg; die Jode sê Jerusalem is die plek.\n\n' +
+      'Maar Jesus neem die gesprek dieper. Die vraag word nie meer net "waar aanbid jy?" nie. ' +
+      'Dit word: wie aanbid jy — en is jou aanbidding werklik?\n\n' +
+      'Jesus sê: die Vader soek mense wat Hom in gees en waarheid aanbid.\n\n' +
+      'Hierdie week vra ons: kry God net ’n plek in my geloofslewe — of kry Hy die hoogste plek in my lewe?',
+    primereSkrif: 'Johannes 4:19–26',
+    ondersteunendeSkrif: 'Matteus 4:8–10',
+    videoId: '',
+    kernwaarheid:
+      'Ware aanbidding gaan nie net oor wat ek sing of waar ek aanbid nie. Dit gaan oor God wat die hoogste plek in my lewe kry.',
+    privaatRefleksie:
+      'Wat kry tans die maklikste ’n plek in jou lewe wat net aan God behoort? ' +
+      'Dalk mense se goedkeuring, geld, beheer, ’n verhouding, sukses, status, veiligheid, gemak of jou eie planne. ' +
+      'Nie elke ding wat vir jou belangrik is, is daarom ’n afgod nie. ' +
+      'Vra eerder: sou ek God doelbewus ongehoorsaam wees om hierdie ding te kry, te behou of te beheer?',
+    gehoorsaamheidStap:
+      'Kies één area waarin jy besef dat iets anders maklik die finale sê begin kry. Moenie ’n dramatiese offer probeer uitdink nie. ' +
+      'Vra: wat sou dit vandag prakties beteken om God eerste te stel in hierdie area? ' +
+      'Dalk weier jy om ’n kompromie te maak, gee jy ’n besluit aan God oor, hou jy op om mense se goedkeuring te jaag, ' +
+      'is jy eerlik oor geld, spreek jy ’n gewoonte aan wat jou van God af wegtrek, of word jy stil en vertrou jy God ' +
+      'voordat jy weer alles probeer beheer.\n\n' +
+      'Sukkel jy om dit oor te gee, vra: wat is ek bang sal gebeur as God werklik die finale sê hier kry? ' +
+      'Moenie voorgee dat die vrees nie bestaan nie. Ware aanbidding beteken nie dat jy nooit bang is nie — ' +
+      'dit beteken dat jy selfs met jou vrees kan sê: "U bly God."',
+    gebed:
+      'Vader, U alleen is God en U alleen is waardig om aanbid te word. Wys my waar ander dinge in my lewe begin om ’n plek in te neem wat aan U behoort. ' +
+      'Ek wil U nie net met liedere en woorde aanbid nie. Ek wil U ken soos U werklik is en my lewe op U rig. ' +
+      'Gee my die moed om U bo mense se goedkeuring, geld, beheer, gemak en my eie planne te kies. ' +
+      'Leer my om U te aanbid en U alleen te dien. Amen.',
+    dag2Skrif: 'Johannes 4:19–24',
+    dag2Prompt:
+      'Die vrou vra oor plek; Jesus neem haar na die Vader en na ware aanbidding. Hy maak nie waarheid onbelangrik nie, ' +
+      'maar Hy wys dat aanbidding nie net aan ’n geografiese plek vasgemaak kan word nie. ' +
+      'Het jy aanbidding dalk te sterk aan ’n kerkdiens of ’n spesifieke oomblik gekoppel? Wat van Maandag, by die werk, by die huis, ' +
+      'wanneer niemand kyk nie? Neem vandag een gewone oomblik en rig bewustelik jou aandag op God — nie omdat die plek besonders is nie, ' +
+      'maar omdat God waardig is.',
+    dag3Prompt:
+      'Lees Johannes 4:23–24. Jesus sê die Vader soek ware aanbidders wat Hom in gees en waarheid aanbid. ' +
+      'Moenie dit verklein tot "sterk emosie plus die regte feite" nie, maar moet dit ook nie so vaag maak dat dit enigiets kan beteken nie. ' +
+      'Is daar ’n gaping tussen wat jy oor God sê en hoe jy werklik teenoor Hom leef? Geen veroordeling nie. Net eerlikheid.',
+    dag4Vraag:
+      'Lees Matteus 4:8–10. Jesus word koninkryke, mag en heerlikheid aangebied, maar die prys is aanbidding. ' +
+      'Hy neem nie die kortpad nie: "Aanbid die Here jou God en dien Hom alleen." ' +
+      'Waar is jy die meeste in die versoeking om jou waardes te buig om iets te kry wat jy baie graag wil hê? ' +
+      'En wat mag jy nooit prysgee net om iets anders te kry nie?',
+    dag5Prompt:
+      'Aanbidding kan in sang gebeur, maar dit kan nie net by sang bly nie. Die groter vraag is: wat gebeur wanneer die lied klaar is? ' +
+      'Wanneer jy huis toe gaan, wanneer iemand jou kwaad maak, wanneer geld min raak, wanneer ’n moeilike besluit voor jou lê, ' +
+      'wanneer niemand jou geloof sien nie. Waar kan jou lewe vandag wys "God is eerste", sonder dat jy een woord sing? ' +
+      'Dalk deur eerlikheid, vertroue, gehoorsaamheid, dankbaarheid, diens, ’n kompromie te weier, of iets aan God oor te gee. Kies een.',
+    groepVraag1:
+      'Hoe verskil ’n lewe van aanbidding van ’n idee van aanbidding wat net rondom musiek draai?',
+    groepVraag2:
+      'Watter goeie dinge kan maklik begin om te veel van ons vertroue, identiteit of lojaliteit te dra?',
+    groepVraag3:
+      'Hoe kan ons onderskei tussen iets wat bloot belangrik vir ons is en iets wat begin om die finale sê in ons lewe te kry?',
+    fasiliteerderHoofpunt:
+      'Die hoofpunt is nie bloot "aanbidding is meer as musiek" nie — dit is waar, maar dit gaan nie ver genoeg nie. ' +
+      'Die dieper punt is dat ware aanbidding op God gerig is, in waarheid staan, en aan Hom die lojaliteit gee wat net aan Hom behoort.',
+    fasiliteerderGrens:
+      'Moenie "in gees en waarheid" verander in "enige aanbidding is reg solank dit uit jou hart kom" nie — Jesus maak waarheid nie relatief nie. ' +
+      'Moenie die frase eenvoudig verdeel as "geestelik beteken emosie, waarheid beteken kennis" nie; dit is te simplisties. ' +
+      'Moenie so sterk oor die Vader praat dat Jesus uit Sy eie gesprek verdwyn nie — Hy sê vir haar: "Dit is Ek, Ek wat met jou praat." ' +
+      'By Matteus 4 bly die eerste waarheid dat Jesus weier om iemand anders as God te aanbid en te dien; moenie dit dadelik reduseer tot "sukses kan jou afgod wees" nie. ' +
+      'En moenie mense se werk, familie, stokperdjies of ander goeie dinge sommer as "afgode" etiketteer nie. ' +
+      'Die grootste risiko hierdie week is onnodige skuld: die vraag is nie "het ek enigiets behalwe God lief" nie, ' +
+      'maar "watter plek het God tussen alles wat ek liefhet". Moenie in die groep vra "wat is jou afgod" nie.',
+    pastoraleRisiko: 'medium',
+  },
+
+  12: {
+    weeknommer: 12,
+    moreTeaser:
+      'Môre: twee mense bid in die tempel — en Jesus wys waarop elkeen vertrou.',
+    titel: 'Godsdiens kan jou ook mislei',
+    doel: 'Om te verstaan dat godsdienstige kennis, geloofspraktyke en ’n goeie uiterlike nie vanself beteken dat my hart naby Jesus is nie. Jesus roep ons weg van selfregverdiging, geestelike trots en skynheiligheid — terug na nederigheid, genade en Homself.',
+    openingskerm:
+      'Daar is ’n gevaar waarvan Jesus baie ernstig praat. Nie net die gevaar om God heeltemal te ignoreer nie.\n\n' +
+      'Maar ook die gevaar om te bid, die Skrif te ken, kerk toe te gaan, die regte geloofstaal te gebruik, ' +
+      'ander mense se verkeerde dinge raak te sien — en stadig te begin glo: "Ek is reg met God omdat ek godsdienstig lyk."\n\n' +
+      'Van Jesus se skerpste woorde was juis gerig aan mense wat baie van God geweet het.\n\n' +
+      'Daarom vra ons hierdie week ’n ongemaklike vraag: bring my geloof my nader aan Jesus — of het ek net geleer hoe om godsdienstig te lyk?',
+    primereSkrif: 'Lukas 18:9–14',
+    ondersteunendeSkrif: 'Matteus 23:1–12, 23–28; Johannes 5:39–40',
+    videoId: '',
+    kernwaarheid:
+      'Geloof is nie ’n manier om myself bo ander te plaas nie. Ek het Jesus en Sy genade steeds nodig.',
+    privaatRefleksie:
+      'Teenoor watter soort mens dink jy die maklikste: "Ek is darem nie soos hulle nie"? Jy hoef nie ’n naam te skryf nie — dink aan die soort persoon. ' +
+      'Dalk iemand wat met ’n ander sonde as jy worstel, wat minder van die Bybel weet, wat uit ’n ander kerktradisie kom, ' +
+      'wat sy of haar lewe deurmekaar gemaak het, of wat vrae vra wat vir jou vanselfsprekend voel. ' +
+      'Vra daarna: het waarheid in my hart begin verander in meerderwaardigheid?',
+    gehoorsaamheidStap:
+      'Let hierdie week op wanneer jy jouself geestelik met iemand anders vergelyk. Wanneer die gedagte kom "ek is darem nie soos hulle nie" — stop. ' +
+      'Jy hoef nie verkeerd reg te noem nie, maar jy hoef ook nie jou waarde uit iemand anders se mislukking te haal nie. ' +
+      'Bid eerder: "God, wees my genadig. Hou my nederig. Help my om hierdie mens met waarheid én genade te sien." ' +
+      'En waar dit gepas is: luister, bid, dien, behandel die persoon met waardigheid, of hou eenvoudig op om hom of haar in jou gedagtes af te breek.\n\n' +
+      'Sukkel jy hiermee, vra: wat kry ek daaruit wanneer ek myself met hierdie persoon vergelyk? ' +
+      'Nederigheid beteken nie "ek is slegter as almal" nie. Dit beteken: "ek hoef nie beter as iemand anders te wees om na God toe te kom nie."',
+    gebed:
+      'Jesus, bewaar my van ’n geloof wat net aan die buitekant reg lyk. Wys my waar ek myself met ander vergelyk, op mense neersien ' +
+      'of my geloofspraktyke gebruik om beter oor myself te voel. Ek het U genade nodig. Maak my eerlik oor my eie hart. ' +
+      'Laat U Woord my nie net meer kennis gee nie, maar my nader aan U bring en my verander. ' +
+      'Leer my om waarheid ernstig op te neem sonder trots, en om met geregtigheid, barmhartigheid en trou te leef. Amen.',
+    dag2Skrif: 'Lukas 18:9–14',
+    dag2Prompt:
+      'Twee mense bid. Die een kan baie goeie dinge oor sy lewe noem; die tollenaar vra net om genade. ' +
+      'Die probleem is nie dat die eerste een vas, gee of sonde wil vermy nie — die probleem is dat hy op homself vertrou en op iemand anders neersien. ' +
+      'Het ’n goeie geestelike gewoonte in jou lewe al ’n manier geword om jouself met ander te vergelyk? ' +
+      'Die antwoord is nie "hou dan op om hierdie goeie dinge te doen" nie, maar "moenie daarop vertrou om jouself voor God te regverdig nie".',
+    dag3Prompt:
+      'Lees Matteus 23:23–28. Jesus praat oor mense wat baie aandag aan die buitekant gee, maar binne-in die belangriker dinge mis: ' +
+      'geregtigheid, barmhartigheid en trou. Is daar ’n area waarin jou geloof aan die buitekant sterker lyk as wat dit tans binne-in jou is? ' +
+      'Jy hoef nie voor Jesus voor te gee nie. Hy kan met waarheid werk.',
+    dag4Vraag:
+      'Lees Matteus 23:5–12. Jesus praat oor mense wat godsdienstige dinge doen om deur ander raakgesien te word — oor eer, status, titels ' +
+      'en die behoefte om belangrik te wees. Hoe belangrik is dit vir jou dat ander mense jou as ’n goeie of geestelike persoon sien? ' +
+      'Wat gebeur binne jou wanneer niemand jou diens raaksien nie, wanneer iemand jou korrigeer, of wanneer iemand anders erkenning kry? ' +
+      'Dien ek Jesus — of bou ek ook ’n beeld van myself?',
+    dag5Prompt:
+      'Lees Johannes 5:39–40. Jesus sê nie dat die Skrifte onbelangrik is nie — inteendeel: hulle getuig van Hom. ' +
+      'Maar hulle wil nie na Hom toe kom om lewe te hê nie. Bring die manier waarop jy die Bybel lees jou nader aan Jesus, ' +
+      'of gee dit jou hoofsaaklik meer inligting? Vra terwyl jy lees: wat wys hierdie gedeelte vir my van Jesus? ' +
+      'Wat ontbloot dit in my eie hart? Wat moet ek glo, ontvang of gehoorsaam?',
+    groepVraag1:
+      'Wat is die verskil tussen om waarheid ernstig op te neem en om geestelik meerderwaardig te word?',
+    groepVraag2:
+      'Waarom is dit soms makliker om iemand anders se fout raak te sien as om ons eie hart eerlik te ondersoek?',
+    groepVraag3:
+      'Hoe kan Bybellees, gebed en ander geloofspraktyke ons nader aan Jesus bring sonder dat dit ’n geestelike prestasieprojek word?',
+    fasiliteerderHoofpunt:
+      'Hierdie week sê nie "godsdiens is sleg" nie — dit sou die tekste verkeerd vereenvoudig. Jesus self ken en gebruik die Skrifte, ' +
+      'gaan na die sinagoge, vier die feeste, bid en leer. Die probleem ontstaan wanneer geloofspraktyke gebruik word vir selfregverdiging, ' +
+      'status, skynheiligheid en meerderwaardigheid — terwyl Jesus en die hart van God gemis word.',
+    fasiliteerderGrens:
+      'Moenie "Fariseër" as ’n skelwoord gebruik nie. Die Fariseërs was ’n werklike Joodse beweging binne Jesus se historiese wêreld, en Jesus self was Joods. ' +
+      'Hierdie tekste mag nooit gebruik word om Jode, Judaïsme of enige etniese groep te verkleineer of verdag te maak nie. ' +
+      'Moenie uit Lukas 18 leer dat vas, gee of om sonde ernstig op te neem verkeerd is nie — die probleem is selfregverdiging en veragting van ander. ' +
+      'Moenie Matteus 23 se skerp taal so versag dat dit niks meer sê nie, maar moet dit ook nie gebruik as toestemming om mense wreed te etiketteer nie: ' +
+      'die eerste toepassing is "laat Jesus hierdie dinge in MY ondersoek". ' +
+      'Hierdie week kan diep raak aan mense wat deur ’n kerk veroordeel, geestelik gemanipuleer of onder harde wettisisme grootgemaak is — ' +
+      'moenie hulle pyn afmaak nie, en moenie die materiaal gebruik om alle kerke, leiers of geloofspraktyke as korrup af te skryf nie. ' +
+      'Moenie in die groep vra wie die Fariseër in julle kerk is nie, en moenie mense bespreek wat nie daar is nie.',
     pastoraleRisiko: 'medium',
   },
 }

@@ -1,7 +1,7 @@
 /* VOLG JESUS — die week se hekke, en die Skrifverwysings teen die EGTE Bybel.
  *
  * Die tweede helfte van hierdie leer is die waardevolste deel: dit neem elke
- * Skrifverwysing uit Week 1 tot 5 en toets dit teen die 31 102 verse wat
+ * Skrifverwysing uit Week 1 tot 12 en toets dit teen die 31 102 verse wat
  * reeds in public/gab/ staan. Bestaan die boek? Die hoofstuk? Die verse?
  *
  * Dit vervang NIE Dewald se nagaan nie — die reel bly dat hy elke vers teen
@@ -158,7 +158,7 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
   if (mat) {
     is('Matteus het 28 hoofstukke', mat.hoofstukke.length, 28)
 
-    /* Elke verwysing uit Week 1 tot 5 wat Dewald geskryf het. */
+    /* Elke verwysing wat Dewald in Week 1 tot 12 geskryf het. */
     const VERWYSINGS = [
       /* Week 1 */ 'Johannes 1:1–18', 'Matteus 1:18–25', 'Markus 1:1–11',
                    'Johannes 1:29–34', 'Markus 1:9–11', 'Johannes 1:35–39',
@@ -182,6 +182,20 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 8 */ 'Matteus 7:24–27', 'Johannes 8:31–36', 'Johannes 13:12–17',
                    'Lukas 6:46–49', 'Matteus 21:28–32', 'Johannes 14:15',
                    'Johannes 15:9–10',
+      /* Week 9 */ 'Matteus 22:34–40', 'Markus 12:28–34', 'Markus 12:28–30',
+                   'Markus 12:31', 'Markus 12:32–34', 'Lukas 10:25–37',
+                   'Johannes 13:34–35', 'Matteus 5:43–48', 'Johannes 15:9–17',
+      /* Week 10 */ 'Matteus 18:1–5', 'Markus 9:33–37', 'Lukas 18:15–17',
+                    'Markus 9:35', 'Markus 9:36–37', 'Matteus 20:20–28',
+                    'Lukas 9:46–48', 'Lukas 14:7–11', 'Lukas 22:24–27',
+                    'Johannes 13:1–17',
+      /* Week 11 */ 'Johannes 4:19–26', 'Matteus 4:8–10', 'Johannes 4:19–24',
+                    'Johannes 4:23–24', 'Matteus 6:24', 'Matteus 15:7–9',
+                    'Johannes 5:19–23', 'Johannes 12:1–8',
+      /* Week 12 */ 'Lukas 18:9–14', 'Matteus 23:1–12, 23–28',
+                    'Johannes 5:39–40', 'Matteus 23:23–28', 'Matteus 23:5–12',
+                    'Matteus 6:1–18', 'Matteus 7:1–5', 'Matteus 9:10–13',
+                    'Matteus 15:1–20', 'Lukas 11:37–54', 'Johannes 9:39–41',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
@@ -190,7 +204,7 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       const foute = keurVerwysing(v, leesBoek)
       if (foute.length) stukkend.push(`${v} → ${foute.join('; ')}`)
     }
-    is(`al ${VERWYSINGS.length} verwysings uit Week 1-8 bestaan werklik`, stukkend, [])
+    is(`al ${VERWYSINGS.length} verwysings uit Week 1-12 bestaan werklik`, stukkend, [])
 
     /* En die keurder moet werklik VANG — anders is die groen hierbo waardeloos. */
     is('n hoofstuk wat nie bestaan nie word gevang',

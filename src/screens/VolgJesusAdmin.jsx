@@ -153,7 +153,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     setBoodskap({ goed: !misluk.length, teks: dele.join('. ') + '.' })
   }
 
-  /* Laai Dewald se geskrewe Week 1–5 in die vorm. Dit STOOR nie — hy kyk
+  /* Laai Dewald se geskrewe week in die vorm. Dit STOOR nie — hy kyk
      eers, verander wat hy wil, en druk dan self Stoor. */
   function laaiGeskrewe(n) {
     const bron = WEKE[n]
