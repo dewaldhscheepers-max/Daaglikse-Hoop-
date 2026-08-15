@@ -25,6 +25,7 @@
  */
 import { useState } from 'react'
 import { geldigeVideoId } from '../data/volgJesus'
+import { mylpaalVir, biedKontak, antwoordVir } from '../data/volgJesusMylpale'
 import './VolgJesusWeek.css'
 
 /* Wat elke dag se kop se. Punt 3 §55. */
@@ -36,10 +37,11 @@ const DAE = [
   { n: 5, merk: 'DAG 5', titel: 'Leef dit' },
 ]
 
-export default function VolgJesusWeek({ week, rol = 'solo', opSluit }) {
+export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }) {
   const [blad, setBlad] = useState('oop')   /* 'oop' | 'dag' | 'klaar' | 'groep' | 'fas' */
   const [dag, setDag]   = useState(1)
   const [antwoord, setAntwoord] = useState(null)
+  const [mylStaat, setMylStaat] = useState(null)   /* { waarde, toestemming } */
 
   if (!week) return null
 
@@ -72,6 +74,15 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit }) {
             <p>{week.openingskerm}</p>
           </details>
         )}
+
+        {/* Die mylpaal staan op die openingskerm, nie in 'n uitklap nie.
+            Punt 1 §12: dit is nie 'n venster wat een keer kom en weggaan nie.
+            Mense groei en kry hulle vrae beantwoord; wanneer iemand later
+            gereed is, moet hy kan terugkom en die volgende tree gee. */}
+        <Mylpaal week={week} staat={mylStaat} opKies={s => {
+          setMylStaat(s)
+          if (opMylpaal) opMylpaal(s)
+        }} />
 
         <div className="vw-dae">
           {DAE.map(d => (
@@ -320,6 +331,60 @@ function Dag3({ week, antwoord, setAntwoord }) {
       </div>
       {antwoord && <div className="vw-antwoord">{WOORDE[antwoord]}</div>}
     </>
+  )
+}
+
+/* ── Die mylpaal ──
+ *
+ * Week 6 vra of jy Jesus wil volg. Week 7 vra waar jy met doop staan.
+ *
+ * Dit sluit NIKS toe nie. Kies iemand "ek is nog nie gereed nie", gaan die
+ * week net so voort — die app ken nie sy gewete, sy omstandighede of sy
+ * plaaslike kerk nie. Sien blokkeerVolgendeWeek() in volgJesusMylpale.js.
+ *
+ * En die kerk sien NIKS totdat die mens self die tweede knoppie druk. Die
+ * eerste keuse is syne alleen. */
+function Mylpaal({ week, staat, opKies }) {
+  const m = mylpaalVir(week.weeknommer)
+  if (!m) return null
+
+  const gekies = staat && staat.waarde
+  const magVra = biedKontak(m, gekies)
+
+  return (
+    <div className="vw-myl">
+      <div className="vw-myl-kop">JOU VOLGENDE STAP</div>
+      <h3>{m.titel}</h3>
+      <p className="vw-myl-lyf">{m.lyf}</p>
+
+      <div className="vw-myl-keuses">
+        {m.keuses.map(k => (
+          <button key={k.waarde}
+                  className={gekies === k.waarde ? 'aan' : ''}
+                  onClick={() => opKies({ waarde: k.waarde, toestemming: false })}>
+            {k.woorde}
+          </button>
+        ))}
+      </div>
+
+      {gekies && <p className="vw-myl-antwoord">{antwoordVir(m, gekies)}</p>}
+
+      {/* Die tweede knoppie. Die kerk hoor NIKS voor dit gedruk is. */}
+      {magVra && (
+        staat.toestemming
+          ? <p className="vw-myl-gestuur">
+              ✓ Jou gemeente sal met jou kontak maak. Hulle sien net dat jy gevra het — niks van wat jy geskryf het nie.
+            </p>
+          : <button className="vw-myl-kontak"
+                    onClick={() => opKies({ ...staat, toestemming: true })}>
+              {m.kontakVraag}
+            </button>
+      )}
+
+      {gekies && (
+        <p className="vw-myl-oop">Jy kan hierdie enige tyd verander.</p>
+      )}
+    </div>
   )
 }
 

@@ -220,3 +220,51 @@
 }
 .vw-waarsku strong { display: block; font-size: 14px; color: #8A3A22; margin-bottom: 6px; }
 .vw-waarsku p { font-size: 14px; line-height: 1.6; color: #7A4030; }
+
+/* ── Die mylpaal ──
+   Dit staan op die openingskerm en dit verdwyn nie. Geen "achievement"-taal,
+   geen persentasie, geen trofee — dit is 'n oop vraag van gehoorsaamheid. */
+.vw-myl {
+  background: #fff; border: 1px solid #EAE2F7; border-radius: 16px;
+  padding: 18px; margin-top: 14px;
+}
+.vw-myl-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px;
+  color: var(--gold); margin-bottom: 6px;
+}
+.vw-myl h3 {
+  font-family: var(--font-serif); font-size: 21px; line-height: 1.25;
+  color: var(--text); margin-bottom: 8px;
+}
+.vw-myl-lyf { font-size: 14px; line-height: 1.65; color: var(--text-muted); margin-bottom: 14px; }
+
+.vw-myl-keuses { display: flex; flex-direction: column; gap: 7px; }
+.vw-myl-keuses button {
+  width: 100%; text-align: left; background: #FBFAFD;
+  border: 1px solid #E2DAF0; border-radius: 12px; padding: 13px 14px;
+  font-family: var(--font-body); font-size: 14.5px; font-weight: 600; color: var(--text);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vw-myl-keuses button.aan {
+  border-color: var(--purple-dark); background: #F4F0FA; color: var(--purple-dark);
+}
+
+.vw-myl-antwoord {
+  margin-top: 12px; background: #F4F0FA; border-radius: 12px; padding: 14px;
+  font-size: 14.5px; line-height: 1.65; color: var(--text);
+}
+
+.vw-myl-kontak {
+  width: 100%; margin-top: 10px; background: var(--purple-dark); color: #fff;
+  border: none; border-radius: 12px; padding: 14px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700; line-height: 1.4;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vw-myl-kontak:active { background: #4a3d78; }
+
+.vw-myl-gestuur {
+  margin-top: 10px; background: #EAF6EC; color: #1F5B2C;
+  border-radius: 12px; padding: 13px; font-size: 13.5px; line-height: 1.6;
+}
+
+.vw-myl-oop { margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
