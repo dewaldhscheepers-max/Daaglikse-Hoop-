@@ -100,6 +100,9 @@ export const OPSIONELE_VELDE = [
      kernwaarheid nie: die kernwaarheid dra die WEEK, hierdie een dra die DAG
      en is bedoel om skerp te wees. */
   'eenSin',
+  /* Die week se wallpaper: dieselfde sin, op 'n prent vir 'n sluitskerm.
+     Dit is die enigste deel van die program wat buite die app gesien word. */
+  'wallpaper',
   'dag2Skrif', 'dag2Prompt',
   'dag3Prompt',
   'dag4Vraag',

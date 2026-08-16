@@ -39,7 +39,7 @@ const LEEG = (n) => ({
   dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
   moreTeaser: '',
   groepVraag1: '', groepVraag2: '', groepVraag3: '', groepVraag4: '',
-  eenSin: '',
+  eenSin: '', wallpaper: '',
   fasiliteerderHoofpunt: '', fasiliteerderGrens: '', fasiliteerderWaarskuwing: '',
   pastoraleRisiko: 'laag',
   kontroles: { teks: false, konteks: false, jesus: false, toepassing: false, grens: false },
@@ -56,6 +56,8 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   const [opBesig, setOpBesig]   = useState(false)
   const [rol, setRol]           = useState('solo')
   const [versoeke, setVersoeke] = useState([])
+  /* Die bevestiging vir 'Begin oor'. Dit val na tien sekondes vanself terug. */
+  const [seker, setSeker]       = useState(false)
 
   const kop = useCallback(() => ({ 'Content-Type': 'application/json', 'x-sorg-geheim': geheim }), [geheim])
 
@@ -154,6 +156,58 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     setBoodskap({ goed: !misluk.length, teks: dele.join('. ') + '.' })
   }
 
+  /* ── Begin oor ──
+   *
+   * Dewald skryf die program oor, en die ou weke uit volgJesusWeke.js haal
+   * help niks: hierdie skerm lees uit FIRESTORE, en daar staan hulle nog.
+   * Dit is presies waarom sy rooster nog "Doop", "Word klein" en "Ware
+   * aanbidding" gewys het nadat die kode al skoon was.
+   *
+   * Hierdie knoppie vee die hele versameling uit en skryf dan die geskrewe
+   * weke terug. Dit VERNIETIG data, en daarom:
+   *
+   *   · dit vra twee keer — die eerste druk verander net die knoppie;
+   *   · die tweede druk wag tien sekondes voor dit weer wapen, sodat 'n dubbel-
+   *     tik op 'n foon nie per ongeluk 'n aand se werk uitvee nie;
+   *   · dit gebruik ?alles=ja, wat opsetlik omslagtig is.
+   *
+   * Anders as `laaiAlmalOp` slaan dit NIKS oor nie — dit is die punt. */
+  async function beginOor() {
+    if (opBesig) return
+    if (!seker) {
+      setSeker(true)
+      setBoodskap({ goed: false, teks: 'Druk weer om te bevestig. Dit vee ALLES uit wat tans in die databasis staan.' })
+      setTimeout(() => setSeker(false), 10000)
+      return
+    }
+    setSeker(false); setOpBesig(true); setBoodskap(null)
+    try {
+      const r = await fetch('/api/volg-jesus-week?alles=ja', {
+        method: 'DELETE', headers: { 'x-sorg-geheim': geheim },
+      })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.fout || 'Kon nie uitvee nie')
+
+      const gedoen = [], misluk = []
+      for (const n of Object.keys(WEKE).map(Number).sort((a, b) => a - b)) {
+        try {
+          const p = await fetch('/api/volg-jesus-week', {
+            method: 'PUT', headers: kop(),
+            body: JSON.stringify({ week: { ...LEEG(n), ...WEKE[n] } }),
+          })
+          if ((await p.json()).ok) gedoen.push(n); else misluk.push(n)
+        } catch { misluk.push(n) }
+      }
+      await laaiLys()
+      const dele = [`${(j.uitgevee || []).length} weke uitgevee`]
+      if (gedoen.length) dele.push(`Week ${gedoen.join(', ')} weer opgelaai`)
+      if (misluk.length) dele.push(`Week ${misluk.join(', ')} het misluk`)
+      setBoodskap({ goed: !misluk.length && !(j.misluk || []).length, teks: dele.join('. ') + '.' })
+    } catch (e) {
+      setBoodskap({ goed: false, teks: e.message || 'Kon nie begin oor nie' })
+    } finally { setOpBesig(false) }
+  }
+
   /* Laai Dewald se geskrewe week in die vorm. Dit STOOR nie — hy kyk
      eers, verander wat hy wil, en druk dan self Stoor. */
   function laaiGeskrewe(n) {
@@ -188,6 +242,22 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           <p className="vj-sub vj-fyn">
             Skryf al die weke wat reeds geskryf is na die databasis. 'n Week wat
             al inhoud het, word oorgeslaan. Daarna hoef jy net die video's by te sit.
+          </p>
+
+          {/* Die enigste knoppie in hierdie hele admin wat data vernietig.
+              Daarom lyk dit anders, staan dit apart, en vra dit twee keer. */}
+          <button className={`vj-gevaarlik${seker ? ' vj-gewapen' : ''}`}
+                  onClick={beginOor} disabled={opBesig}>
+            {opBesig
+              ? 'Besig…'
+              : seker
+                ? '⚠  Druk weer — vee ALLES uit'
+                : '🗑  Begin oor: vee alles uit en laai oor'}
+          </button>
+          <p className="vj-sub vj-fyn">
+            Vee elke week uit die databasis en skryf dan net die geskrewe weke
+            terug. Gebruik dit wanneer die program oorgeskryf word. Dit kan nie
+            teruggedraai word nie.
           </p>
         </div>
         {boodskap && (
@@ -315,6 +385,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
 
       <Veld l="Kernwaarheid (een sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
       <Veld l="Die een sin wat vandag moet bly (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />
+      <Veld l="Wallpaper (pad na die prent)" v={week.wallpaper} op={v => stel('wallpaper', v.trim())} />
       <Veld l="Privaat refleksie"      v={week.privaatRefleksie} op={v => stel('privaatRefleksie', v)} lank />
       <Veld l="Gehoorsaamheidstap"     v={week.gehoorsaamheidStap} op={v => stel('gehoorsaamheidStap', v)} lank />
       <Veld l="Gebed"                  v={week.gebed} op={v => stel('gebed', v)} lank />

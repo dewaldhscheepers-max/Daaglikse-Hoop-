@@ -3,6 +3,8 @@
  *   GET  /api/volg-jesus-week            → die lys van al 52 se rugstring
  *   GET  /api/volg-jesus-week?week=1     → een volledige week
  *   PUT  /api/volg-jesus-week            → stoor een week
+ *   DELETE /api/volg-jesus-week?week=7   → vee een week uit
+ *   DELETE /api/volg-jesus-week?alles=ja → vee ALLES uit
  *
  * ── Wie mag ──
  *
@@ -15,7 +17,7 @@
  * is presies hoe 'n halwe program per ongeluk lewendig gaan.
  */
 const crypto = require('crypto')
-const { magAdminDing } = require('./_geheim.js')
+const { magAdminDing, wieMag } = require('./_geheim.js')
 const { dokNaam, naFirestore, uitFirestore, lysInskrywing } = require('./_volgJesusBerging.js')
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
@@ -54,6 +56,21 @@ const basis = () =>
 
 module.exports = async function handler(req, res) {
   if (!magAdminDing(req)) return res.status(401).json({ fout: 'Ongemagtig' })
+
+  /* 'n MENS mag uitvee. 'n Cron nie.
+   *
+   * magAdminDing() laat albei deur, want dit vra net "is daar 'n geldige
+   * geheim". Dit is reg vir lees en stoor. Dit is VERKEERD vir DELETE: hierdie
+   * is die enigste eindpunt in die kodebasis wat data VERNIETIG, en Vercel
+   * stuur CRON_SECRET self by elke geskeduleerde lopie. Wys 'n cron-pad ooit
+   * per ongeluk hierheen, is die hele program in een oggend weg.
+   *
+   * wieMag() gee terug WIE ingekom het; hier tel net 'admin'. Dit staan BO die
+   * teken-haal sodat 'n cron omgedraai word voor ons enigiets met Firestore
+   * doen. */
+  if (req.method === 'DELETE' && wieMag(req) !== 'admin') {
+    return res.status(403).json({ fout: 'Net n mens met die admin-geheim mag uitvee' })
+  }
 
   let token
   try { token = await getAccessToken() }
@@ -98,6 +115,61 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  /* ── Vee uit ─────────────────────────────────────────────────────────
+   *
+   *   DELETE /api/volg-jesus-week?week=7      → een week
+   *   DELETE /api/volg-jesus-week?alles=ja    → ALLES
+   *
+   * Hoekom dit bestaan: Dewald skryf die program oor. Om die ou weke uit die
+   * KODE te haal help niks — die admin lees uit Firestore, en daar staan
+   * hulle nog. Sonder hierdie eindpunt sou 'n mens 24 weke se velde met die
+   * hand moes leegmaak.
+   *
+   * Dit is die enigste plek in hierdie kodebasis wat data VERNIETIG, en
+   * daarom is `?alles=ja` opsetlik omslagtig: dit is nie 'n verstek nie, dit
+   * moet uitgespel word. Die admin vra ook twee keer voor dit hier kom. */
+  if (req.method === 'DELETE') {
+    const q = req.query || {}
+    const alles = String(q.alles || '') === 'ja'
+
+    if (!alles) {
+      const naam = dokNaam(q.week)
+      if (!naam) return res.status(400).json({ fout: 'Weeknommer moet 1 tot 52 wees' })
+      try {
+        const r = await fetch(`${basis()}/${naam}`, { method: 'DELETE', headers: kop })
+        /* 404 beteken dit was reeds weg. Dit is die uitkoms wat gevra is. */
+        if (!r.ok && r.status !== 404) return res.status(500).json({ fout: 'Firestore ' + r.status })
+        return res.status(200).json({ ok: true, uitgevee: [Number(q.week)] })
+      } catch (e) {
+        console.error('[volg-jesus vee]', e && e.message)
+        return res.status(500).json({ fout: 'Kon nie uitvee nie' })
+      }
+    }
+
+    try {
+      const r = await fetch(`${basis()}?pageSize=100`, { headers: kop })
+      if (!r.ok) return res.status(500).json({ fout: 'Firestore ' + r.status })
+      const j = await r.json()
+      const name = d => String((d && d.name) || '')
+      const dokke = (j.documents || []).map(name).filter(Boolean)
+
+      const uitgevee = [], misluk = []
+      for (const volleNaam of dokke) {
+        const kort = volleNaam.split('/').pop()
+        const n = Number(String(kort).replace(/^week-/, ''))
+        try {
+          const d = await fetch(`${basis()}/${kort}`, { method: 'DELETE', headers: kop })
+          if (d.ok || d.status === 404) uitgevee.push(n); else misluk.push(n)
+        } catch { misluk.push(n) }
+      }
+      uitgevee.sort((a, b) => a - b); misluk.sort((a, b) => a - b)
+      return res.status(200).json({ ok: !misluk.length, uitgevee, misluk })
+    } catch (e) {
+      console.error('[volg-jesus vee alles]', e && e.message)
+      return res.status(500).json({ fout: 'Kon nie uitvee nie' })
+    }
+  }
+
   /* ── Stoor ───────────────────────────────────────────────────────── */
   if (req.method === 'PUT' || req.method === 'POST') {
     const lyf = typeof req.body === 'string' ? veiligJson(req.body) : (req.body || {})
@@ -129,8 +201,8 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  res.setHeader('Allow', 'GET, PUT')
-  return res.status(405).json({ fout: 'net GET of PUT' })
+  res.setHeader('Allow', 'GET, PUT, DELETE')
+  return res.status(405).json({ fout: 'net GET, PUT of DELETE' })
 }
 
 function veiligJson(s) { try { return JSON.parse(s) } catch { return {} } }

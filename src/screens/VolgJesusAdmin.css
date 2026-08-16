@@ -261,3 +261,22 @@
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 .vj-versoek button:active { background: #D6EEDC; }
+
+/* ── Begin oor ──
+   Die enigste knoppie wat data vernietig. Dit moet nie soos die res lyk nie:
+   dit staan apart, dit is rooi sodra dit gewapen is, en 'n mens moet twee
+   keer druk. Geen transform of opacity op :active nie — sien CLAUDE.md. */
+.vj-gevaarlik {
+  display: block; width: 100%;
+  margin-top: 18px; padding: 13px 14px;
+  border: 1px solid #E2C8C8; border-radius: 12px;
+  background: #FDF4F4; color: #8C3A3A;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
+.vj-gevaarlik:active { background: #F6E6E6; }
+.vj-gevaarlik:disabled { color: #B08A8A; cursor: default; }
+.vj-gewapen {
+  background: #8C2B2B; border-color: #8C2B2B; color: #fff;
+}
+.vj-gewapen:active { background: #741F1F; }

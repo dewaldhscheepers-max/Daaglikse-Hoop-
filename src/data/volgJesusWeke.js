@@ -50,6 +50,7 @@ export const WEKE = {
       'Dissipelskap begin nie by wat ek vir Jesus doen nie. Dit begin by Wie Jesus is.',
     eenSin:
       'Die grootste vraag is nie net wat jy oor Jesus glo nie. Die vraag is: as Hy werklik Here is — gaan jy Hom volg?',
+    wallpaper: '/beelde/vj-w1-wallpaper.webp',
     privaatRefleksie:
       'Wie is Jesus vir jou op hierdie stadium? Nie die antwoord wat jy dink ’n Christen behoort te gee nie — jou eerlike antwoord.\n\n' +
       'Dalk: "Ek glo Hy is die Seun van God." "Ek weet baie van Hom, maar ek ken Hom nie goed nie." ' +

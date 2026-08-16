@@ -67,5 +67,52 @@ for (const [naam, pad, geweier] of [
   }
 }
 
+
+/* ── Die enigste eindpunt wat DATA VERNIETIG ──
+ *
+ * DELETE /api/volg-jesus-week?alles=ja vee die hele VOLG JESUS-versameling
+ * uit. As daardie slot ooit oopgaan, kan enigiemand op die internet Dewald se
+ * hele program uitvee. Hierdie toets loop dus die egte handler, met 'n vals
+ * `res`, en eis 'n 401 sonder die geheim.
+ *
+ * Dit raak NOOIT die netwerk nie: die geheim faal voor enige fetch.
+ */
+{
+  console.log('\n── volg-jesus-week: DELETE ──')
+  const handler = vereis('./volg-jesus-week.js')
+  const h = typeof handler === 'function' ? handler : handler.default
+
+  const vee = (kop, query) => ({ method: 'DELETE', headers: kop, query: query || {}, body: {} })
+
+  for (const [naam, kop] of [
+    ['sonder enige kopstuk',      {}],
+    ['met n lee geheim',          { 'x-sorg-geheim': '' }],
+    ['met die verkeerde geheim',  { 'x-sorg-geheim': 'nee-dis-nie-dit-nie' }],
+    ['met n kort geheim',         { 'x-sorg-geheim': 'kort' }],
+    /* Die ou hardgekodeerde string wat vyf keer in hierdie projek gelek het. */
+    ['met die ou gelekte string', { 'x-sorg-geheim': 'DaaglikseHoop2025Cron' }],
+    /* 'n Cron mag stuur, maar 'n cron mag NIE die program uitvee nie. */
+  ]) {
+    const r = valsRes()
+    await h(vee(kop, { alles: 'ja' }), r)
+    is(`vee alles ${naam} → 401`, r.kode, 401)
+  }
+
+  /* 'n Cron dra 'n GELDIGE geheim, dus kom dit by magAdminDing verby. Maar
+     Vercel stuur CRON_SECRET by elke geskeduleerde lopie, en 'n cron-pad wat
+     ooit hierheen wys sou die hele program uitvee. Net 'n mens mag. */
+  {
+    const r = valsRes()
+    await h(vee({ authorization: `Bearer ${process.env.CRON_SECRET}` }, { alles: 'ja' }), r)
+    is('n CRON mag NIE uitvee nie → 403', r.kode, 403)
+  }
+
+  /* En dieselfde vir een enkele week. */
+  {
+    const r = valsRes()
+    await h(vee({}, { week: '1' }), r)
+    is('vee een week sonder die geheim → 401', r.kode, 401)
+  }
+}
+
 console.log(`\n${reg} reg, ${val} vals\n`)
-process.exit(val ? 1 : 0)

@@ -250,7 +250,84 @@ function Dag1({ week }) {
           <p>{week.eenSin}</p>
         </div>
       )}
+
+      <WallpaperKaart week={week} />
     </>
+  )
+}
+
+/* ── Die week se wallpaper ──
+ *
+ * Dieselfde sin as `eenSin`, maar op 'n prent wat 'n mens op sy sluitskerm
+ * sit. Dit is die enigste deel van VOLG JESUS wat BUITE die app gesien word:
+ * die adres is in die prent ingebrand, en dus is elke deelnemer se foon 'n
+ * week lank 'n stil advertensie vir /go.
+ *
+ * Die adres MOET op die prent wees en nie net in die byskrif nie. Sodra daar
+ * 'n leer by `navigator.share()` is, gooi WhatsApp die teks weg — elke ander
+ * app hou dit. Sien dieselfde les in Luister.jsx.
+ *
+ * En let op hoe die voorskou geteken word: 'n CSS-`background-image` op 'n
+ * ONDEURSIGTIGE houer, nooit 'n volskerm `<img>` nie. 'n Volskerm-prent is die
+ * grootste tekstuur in die app en Chrome gee dit maklik sy eie laag; dit is
+ * presies wat die gekleurde strepe in Vrugtefees teruggebring het.
+ * Sien CLAUDE.md. */
+function WallpaperKaart({ week }) {
+  const [besig, setBesig] = useState(false)
+  const [nota, setNota]   = useState(null)
+  const bron = week.wallpaper
+  if (!bron) return null
+
+  async function deel() {
+    if (besig) return
+    setBesig(true); setNota(null)
+    try {
+      const r = await fetch(bron)
+      const b = r.ok ? await r.blob() : null
+      if (!b || !/^image\//.test(b.type) || b.size < 1024) {
+        setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')
+        setBesig(false); return
+      }
+      const leer = new File([b], 'volg-jesus-week-1.webp', { type: b.type })
+
+      /* canShare({ files }) is die enigste betroubare toets: navigator.share
+         bestaan op baie blaaiers wat NIE leers kan deel nie. */
+      if (navigator.canShare && navigator.canShare({ files: [leer] })) {
+        try {
+          await navigator.share({ files: [leer] })
+          setNota('Gestuur. Sit dit op jou sluitskerm of jou status.')
+          setBesig(false); return
+        } catch (e) {
+          if (e && e.name === 'AbortError') { setBesig(false); return }
+        }
+      }
+
+      /* Geen leerdeel nie (meestal 'n rekenaar): laai dit af. */
+      const url = URL.createObjectURL(b)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'volg-jesus-week-1.webp'
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+      setNota('Afgelaai.')
+    } catch {
+      setNota('Hou lank op die prent vas om dit te stoor.')
+    }
+    setBesig(false)
+  }
+
+  return (
+    <div className="vw-wp">
+      <div className="vw-wp-kop">📱 SIT DIT OP JOU SKERM</div>
+      <div className="vw-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
+      <button className="vw-wp-knop" onClick={deel} disabled={besig}>
+        {besig ? 'Besig…' : 'Stoor of deel'}
+      </button>
+      <p className="vw-wp-fyn">
+        Sit dit as jou sluitskerm sodat die vraag die hele week by jou bly — of
+        stuur dit vir iemand.
+      </p>
+      {nota && <p className="vw-wp-nota">{nota}</p>}
+    </div>
   )
 }
 
