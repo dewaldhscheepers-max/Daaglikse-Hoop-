@@ -158,6 +158,27 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     setBoodskap({ goed: !misluk.length, teks: dele.join('. ') + '.' })
   }
 
+  /* ── Wys wanneer die databasis agter die geskrewe teks is ──
+   *
+   * Dit het Dewald nou DRIE keer tyd gekos. Hy kyk na die voorskou, sien ou
+   * inhoud, en dink die kode is verkeerd — terwyl die kode reeds reg is en
+   * Firestore net nog die vorige weergawe dra.
+   *
+   * Die rede is struktureel: hierdie skerm lees uit die DATABASIS, maar die
+   * teks word in volgJesusWeke.js geskryf en met 'n knoppie oorgedra. Tussen
+   * daardie twee kan 'n gaping wees, en niks het dit gewys nie.
+   *
+   * Nou wys dit. Ons vergelyk elke veld wat die BRON het teen wat gelaai is,
+   * en tel hoeveel verskil. Velde wat net in die admin bestaan (videoId, die
+   * kontroles, hersieningStatus, gepubliseer) word nie vergelyk nie — hulle
+   * hoort nie in die bron nie. */
+  function verskilVanBron(w) {
+    const bron = w && WEKE[w.weeknommer]
+    if (!bron) return []
+    return Object.keys(bron).filter(veld =>
+      String(w[veld] ?? '').trim() !== String(bron[veld] ?? '').trim())
+  }
+
   /* ── Begin oor ──
    *
    * Dewald skryf die program oor, en die ou weke uit volgJesusWeke.js haal
@@ -363,11 +384,30 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         <p className={`vj-boodskap ${boodskap.goed ? 'goed' : 'sleg'}`}>{boodskap.teks}</p>
       )}
 
-      {WEKE[week.weeknommer] && (
-        <button className="vj-laai" onClick={() => laaiGeskrewe(week.weeknommer)}>
-          ↓ Laai die geskrewe teks vir Week {week.weeknommer}
-        </button>
-      )}
+      {WEKE[week.weeknommer] && (() => {
+        const anders = verskilVanBron(week)
+        return (
+          <>
+            {anders.length > 0 && (
+              <div className="vj-verouderd">
+                <strong>Die geskrewe teks het verander</strong>
+                <p>
+                  {anders.length === 1
+                    ? 'Een veld hier verskil van wat in die kode staan'
+                    : `${anders.length} velde hier verskil van wat in die kode staan`}
+                  {' '}({anders.slice(0, 6).join(', ')}{anders.length > 6 ? '…' : ''}).
+                  {' '}Wat jy hier en in die voorskou sien, is die ou weergawe uit die databasis.
+                  Laai die nuwe teks en druk Stoor.
+                </p>
+              </div>
+            )}
+            <button className={`vj-laai${anders.length ? ' vj-laai-nodig' : ''}`}
+                    onClick={() => laaiGeskrewe(week.weeknommer)}>
+              ↓ Laai die geskrewe teks vir Week {week.weeknommer}
+            </button>
+          </>
+        )
+      })()}
 
       <Veld l="Titel"        v={week.titel}        op={v => stel('titel', v)} />
       <Veld l="Doel van die week" v={week.doel}    op={v => stel('doel', v)} lank />

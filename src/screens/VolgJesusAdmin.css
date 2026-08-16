@@ -280,3 +280,27 @@
   background: #8C2B2B; border-color: #8C2B2B; color: #fff;
 }
 .vj-gewapen:active { background: #741F1F; }
+
+/* ── Die databasis is agter die geskrewe teks ──
+   Dit het Dewald drie keer tyd gekos: hy kyk na die voorskou, sien ou inhoud,
+   en dink die kode is stukkend. Nou sê die skerm dit self. */
+.vj-verouderd {
+  background: #FFF8E8;
+  border: 1px solid #EBD9AE;
+  border-left: 4px solid #C9A227;
+  border-radius: 0 12px 12px 0;
+  padding: 14px 16px;
+  margin: 16px 0 10px;
+}
+.vj-verouderd strong {
+  display: block; font-size: 14px; color: #6B5410; margin-bottom: 6px;
+}
+.vj-verouderd p { font-size: 13px; line-height: 1.6; color: #6B5410; }
+
+.vj-laai-nodig {
+  background: #C9A227;
+  border-color: #C9A227;
+  color: #2A2107;
+  font-weight: 800;
+}
+.vj-laai-nodig:active { background: #B08E1E; }
