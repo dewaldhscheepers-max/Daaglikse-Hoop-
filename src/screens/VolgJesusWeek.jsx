@@ -71,7 +71,20 @@ export default function VolgJesusWeek({
     setBlad('klaar'); boToe()
     if (opDagKlaar) { try { opDagKlaar(dag) } catch {} }
   }
-  function boToe() { try { window.scrollTo({ top: 0 }) } catch {} }
+  /* Bo toe.
+   *
+   * `window.scrollTo` alleen het NIKS gedoen nie, en dit was 'n regte fout:
+   * hierdie skerm skuif binne `.vjl-blad` (overflow-y: auto), nie in die
+   * venster nie. Dewald: "as ek op dag een kliek moet ek heeltemal weer op
+   * scroll." Skuif dus die HOUER, en die venster ook vir die admin se
+   * voorskou, waar daar geen houer is nie. */
+  function boToe() {
+    try { window.scrollTo({ top: 0 }) } catch {}
+    try {
+      const houer = document.querySelector('.vjl-blad')
+      if (houer) houer.scrollTop = 0
+    } catch {}
+  }
 
   /* ── Die opening ────────────────────────────────────────────────────
    *
@@ -121,8 +134,11 @@ export default function VolgJesusWeek({
 
         <div className="vw-dae">
           {DAE.map(d => (
+            /* "DAG 1", nie 'n kaal syfer nie. 'n Nommer in 'n sirkel lyk soos
+               'n lysnommer; die program werk in DAE en die skerm moet dieselfde
+               taal praat as die mens wat môre terugkom. */
             <button key={d.n} className="vw-dag-ry" onClick={() => beginDag(d.n)}>
-              <span className="vw-dag-n">{d.n}</span>
+              <span className="vw-dag-merk">DAG {d.n}</span>
               <span className="vw-dag-t">{dagTitel(week, d.n)}</span>
               <span className="vw-dag-pyl">›</span>
             </button>
