@@ -359,3 +359,37 @@
 @media (max-width: 379px) {
   .vj-teller-n { font-size: 22px; }
 }
+
+/* ── Publiseer ──
+   Die knoppie wat 'n week vir duisende mense sigbaar maak. Dit lyk anders as
+   Stoor omdat dit iets anders doen. */
+.vj-publiseer {
+  margin: 16px 0 4px;
+  border: 1px solid #E2DBF3; border-radius: 14px;
+  background: #F3F0FA; padding: 16px;
+}
+.vj-publiseer.aan { background: #EEF8F0; border-color: #CBE7D2; }
+.vj-publiseer-kop {
+  font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+  color: #5C4E8E; margin-bottom: 8px;
+}
+.vj-publiseer.aan .vj-publiseer-kop { color: #2E7D4F; }
+.vj-publiseer p { margin: 0 0 12px; font-size: 13px; line-height: 1.6; color: #4A4560; }
+
+.vj-op, .vj-af {
+  width: 100%; border: none; border-radius: 12px; padding: 15px;
+  font-family: var(--font-body); font-size: 14.5px; font-weight: 900;
+  letter-spacing: .4px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vj-op { background: #2E7D4F; color: #fff; }
+.vj-op:active { background: #256540; }
+.vj-op:disabled { background: #CFCADD; color: #7B7590; cursor: default; }
+.vj-af { background: none; border: 1px solid #C9B7B7; color: #8A3A3A; }
+.vj-af:active { background: #F7EDED; }
+
+.vj-lewe-merk {
+  display: inline-block; margin-left: 8px; vertical-align: middle;
+  background: #2E7D4F; color: #fff;
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  border-radius: 999px; padding: 4px 9px;
+}

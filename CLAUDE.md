@@ -326,8 +326,23 @@ swak lyn elke mislukte versoek weer). Dieselfde mens op twee fone tel twee
 keer; 'n herinstallasie tel weer. Die getal is eerder 'n bietjie te laag as te
 hoog, en dit is die regte kant om op te fouteer.
 
+### Die Publiseer-knoppie
+
+Die openbare eindpunt filter op `gepubliseer === true` — en 'n dag lank was
+daar **niks in die admin wat daardie veld kon aanskakel nie**. Alles anders
+het gewerk, die hele lewende pad was in 'n blaaier deurgeloop, en die kaart
+het steeds nie gewys nie. Die toetse het die pad NÁ die hek gemeet en nooit
+gevra of 'n mens by die hek kan uitkom nie.
+
+Die knoppie staan nou direk onder die vyf kontroles (`stelPublikasie` in
+`VolgJesusAdmin.jsx`) en is gesper totdat `magPubliseer` groen is. Afhaal het
+geen hek nie: is 'n week verkeerd, moet dit dadelik af kan kom.
+`kykPubliseer.mjs` druk dit en kyk of `gepubliseer: true` werklik by die
+bediener aankom.
+
 Blaaiertoetse in die scratchpad: `kykVjLewe.mjs` (die hele lewende pad, met
-die boodskap wat skuif wanneer week 2 publiseer) en `kykTellers.mjs`.
+die boodskap wat skuif wanneer week 2 publiseer), `kykPubliseer.mjs` en
+`kykTellers.mjs`.
 
 ---
 

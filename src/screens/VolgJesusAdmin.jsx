@@ -24,7 +24,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   BEWEGINGS, bewegingVir, KONTROLES, RISIKO_VLAKKE,
-  publiseerFoute, geldigeVideoId, ontleedVerwysing,
+  publiseerFoute, magPubliseer, geldigeVideoId, ontleedVerwysing,
 } from '../data/volgJesus'
 import { WEKE } from '../data/volgJesusWeke'
 import { keurVideoInset } from '../data/youtubeId'
@@ -162,6 +162,46 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       if (j.ok) { setBoodskap({ goed: true, teks: 'Gestoor.' }); laaiLys() }
       else setBoodskap({ goed: false, teks: j.fout || 'Kon nie stoor nie' })
     } catch { setBoodskap({ goed: false, teks: 'Kon nie stoor nie' }) }
+    finally { setBesig(false) }
+  }
+
+  /* ── Publiseer ──
+   *
+   * Hierdie knoppie het ONTBREEK, en dit was die duurste soort fout: alles
+   * anders het gewerk. Die openbare eindpunt filter op `gepubliseer === true`,
+   * die kaart op Luister hang aan daardie lys, en die hele pad is getoets —
+   * maar niks in hierdie admin kon daardie veld ooit aanskakel nie. Dewald:
+   * "die verandering is op admin maar nie op luister nou skerm nie."
+   *
+   * Dit is 'n APARTE knoppie en nie 'n merkie langs Stoor nie, want dit doen
+   * iets anders as stoor: dit maak 'n week vir duisende mense sigbaar. 'n
+   * Mens moet kan stoor sonder om te publiseer, en dit is presies hoe hy
+   * elke dag 'n week bou.
+   *
+   * Die hek is `magPubliseer` — dieselfde vyf kontroles wat op die skerm
+   * staan. Afhaal het geen hek nie: is 'n week verkeerd, moet dit dadelik af
+   * kan kom. */
+  async function stelPublikasie(aan) {
+    if (!week) return
+    if (aan && !magPubliseer(week)) return
+    setBesig(true); setBoodskap(null)
+    try {
+      const skoon = { ...week, videoId: keurVideoInset(week.videoId).id, gepubliseer: aan }
+      const r = await fetch('/api/volg-jesus-week', {
+        method: 'PUT', headers: kop(), body: JSON.stringify({ week: skoon }),
+      })
+      const j = await r.json()
+      if (j.ok) {
+        setWeek(w => ({ ...w, gepubliseer: aan }))
+        setBoodskap({
+          goed: true,
+          teks: aan
+            ? `Week ${week.weeknommer} is LEWENDIG. Die kaart op Luister wys hom nou.`
+            : `Week ${week.weeknommer} is afgehaal en is nie meer in die app nie.`,
+        })
+        laaiLys()
+      } else setBoodskap({ goed: false, teks: j.fout || 'Kon nie publiseer nie' })
+    } catch { setBoodskap({ goed: false, teks: 'Kon nie publiseer nie' }) }
     finally { setBesig(false) }
   }
 
@@ -432,7 +472,10 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         </div>
       </div>
 
-      <h3 className="vj-titel">Week {week.weeknommer} — {week.titel || 'sonder titel'}</h3>
+      <h3 className="vj-titel">
+        Week {week.weeknommer} — {week.titel || 'sonder titel'}
+        {week.gepubliseer && <span className="vj-lewe-merk">LEWENDIG</span>}
+      </h3>
       {bew && <p className="vj-sub">Beweging {bew.nommer}: {bew.naam}</p>}
 
       {boodskap && (
@@ -557,6 +600,37 @@ export default function VolgJesusAdmin({ geheim = '' }) {
               <strong>Nog nie gereed nie — {foute.length} ding{foute.length === 1 ? '' : 'e'}:</strong>
               <ul>{foute.map((f, i) => <li key={i}>{f}</li>)}</ul>
             </>}
+      </div>
+
+      {/* Die knoppie wat die week vir die wêreld aanskakel. Dit staan DIREK
+          onder die vyf kontroles, want dit is die ding waarvoor daardie
+          kontroles bestaan. */}
+      <div className={`vj-publiseer${week.gepubliseer ? ' aan' : ''}`}>
+        {week.gepubliseer ? (
+          <>
+            <div className="vj-publiseer-kop">✓ HIERDIE WEEK IS LEWENDIG</div>
+            <p>
+              Die kaart op Luister wys Week {week.weeknommer} en mense kan hom doen.
+              Stoor jy nou iets, is dit dadelik by hulle.
+            </p>
+            <button className="vj-af" onClick={() => stelPublikasie(false)} disabled={besig}>
+              {besig ? 'Besig…' : 'Haal dit uit die app uit'}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="vj-publiseer-kop">HIERDIE WEEK IS NOG NIE IN DIE APP NIE</div>
+            <p>
+              {foute.length
+                ? 'Maak eers al vyf die kontroles hierbo groen en keur die hersiening goed.'
+                : 'Druk hier en Week ' + week.weeknommer + ' is dadelik lewendig vir almal.'}
+            </p>
+            <button className="vj-op" onClick={() => stelPublikasie(true)}
+                    disabled={besig || foute.length > 0}>
+              {besig ? 'Besig…' : `⬆  Publiseer Week ${week.weeknommer}`}
+            </button>
+          </>
+        )}
       </div>
 
       <div className="vj-onder">
