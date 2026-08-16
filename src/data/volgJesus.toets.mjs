@@ -1,7 +1,7 @@
 /* VOLG JESUS — die week se hekke, en die Skrifverwysings teen die EGTE Bybel.
  *
  * Die tweede helfte van hierdie leer is die waardevolste deel: dit neem elke
- * Skrifverwysing uit Week 1 tot 12 en toets dit teen die 31 102 verse wat
+ * Skrifverwysing uit Week 1 tot 24 en toets dit teen die 31 102 verse wat
  * reeds in public/gab/ staan. Bestaan die boek? Die hoofstuk? Die verse?
  *
  * Dit vervang NIE Dewald se nagaan nie — die reel bly dat hy elke vers teen
@@ -11,8 +11,9 @@ import { readFileSync, existsSync } from 'node:fs'
 import {
   ETIKETTE, BEWEGINGS, bewegingVir, KONTROLES,
   publiseerFoute, magPubliseer, geldigeVideoId,
-  ontleedVerwysing, keurVerwysing, BOEKKODES,
+  ontleedVerwysing, keurVerwysing, BOEKKODES, VERPLIGTE_VELDE,
 } from './volgJesus.js'
+import { WEKE } from './volgJesusWeke.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -158,7 +159,7 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
   if (mat) {
     is('Matteus het 28 hoofstukke', mat.hoofstukke.length, 28)
 
-    /* Elke verwysing wat Dewald in Week 1 tot 12 geskryf het. */
+    /* Elke verwysing wat Dewald in Week 1 tot 24 geskryf het. */
     const VERWYSINGS = [
       /* Week 1 */ 'Johannes 1:1–18', 'Matteus 1:18–25', 'Markus 1:1–11',
                    'Johannes 1:29–34', 'Markus 1:9–11', 'Johannes 1:35–39',
@@ -196,6 +197,45 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                     'Johannes 5:39–40', 'Matteus 23:23–28', 'Matteus 23:5–12',
                     'Matteus 6:1–18', 'Matteus 7:1–5', 'Matteus 9:10–13',
                     'Matteus 15:1–20', 'Lukas 11:37–54', 'Johannes 9:39–41',
+      /* Week 13 */ 'Matteus 6:5–8', 'Markus 1:35', 'Lukas 5:15–16',
+                    'Matteus 6:5–6', 'Matteus 6:7–8', 'Matteus 14:23',
+                    'Markus 6:46', 'Lukas 6:12', 'Lukas 11:1–13',
+                    'Matteus 26:36–44',
+      /* Week 14 */ 'Matteus 6:9–13', 'Lukas 11:1–4', 'Matteus 6:9–10',
+                    'Matteus 6:11', 'Matteus 6:12', 'Lukas 11:4', 'Matteus 6:13',
+                    'Matteus 6:14–15', 'Lukas 11:5–13', 'Johannes 17',
+      /* Week 15 */ 'Lukas 11:5–10', 'Lukas 11:11–13', 'Matteus 7:9–11',
+                    'Matteus 6:5–13', 'Matteus 15:21–28', 'Markus 10:46–52',
+                    'Lukas 22:39–46', 'Johannes 14:13–14', 'Johannes 15:7',
+                    'Johannes 16:23–27',
+      /* Week 16 */ 'Markus 1:35–39', 'Lukas 6:12–16', 'Markus 1:32–34',
+                    'Matteus 14:13', 'Markus 6:30–32, 45–46', 'Lukas 4:42–44',
+                    'Lukas 9:18', 'Lukas 9:28–29',
+      /* Week 17 */ 'Matteus 6:16–18', 'Matteus 9:14–17', 'Markus 2:18–22',
+                    'Lukas 5:33–39', 'Matteus 4:1–4', 'Lukas 4:1–4',
+      /* Week 18 */ 'Matteus 6:1–4', 'Matteus 5:14–16', 'Matteus 6:2–3',
+                    'Matteus 6:4', 'Matteus 6:19–24', 'Lukas 6:30–35',
+                    'Lukas 12:32–34', 'Lukas 14:12–14', 'Markus 12:41–44',
+                    'Lukas 18:18–30', 'Lukas 19:1–10',
+      /* Week 19 */ 'Matteus 5:1–12', 'Lukas 6:20–26', 'Matteus 5:3–5',
+                    'Matteus 5:6–7', 'Matteus 5:8', 'Matteus 5:9–12',
+                    'Matteus 20:25–28', 'Matteus 23:11–12', 'Lukas 14:7–14',
+      /* Week 20 */ 'Matteus 5:13–16', 'Matteus 5:13', 'Matteus 5:14–15',
+                    'Matteus 5:16', 'Matteus 6:1', 'Markus 9:50',
+                    'Lukas 14:34–35', 'Johannes 8:12', 'Johannes 15:8',
+      /* Week 21 */ 'Matteus 5:21–26', 'Matteus 5:21–22', 'Matteus 5:22',
+                    'Matteus 5:23–24', 'Matteus 5:25–26', 'Matteus 5:38–48',
+                    'Matteus 18:15–20', 'Matteus 18:21–35', 'Markus 3:1–5',
+                    'Markus 11:25', 'Lukas 6:27–36', 'Lukas 17:3–4',
+      /* Week 22 */ 'Matteus 5:27–32', 'Matteus 19:1–12', 'Markus 10:2–12',
+                    'Matteus 5:27–28', 'Matteus 5:29–30', 'Matteus 5:31–32',
+                    'Matteus 19:3–9', 'Matteus 19:10–12',
+      /* Week 23 */ 'Matteus 5:33–37', 'Matteus 23:16–22', 'Matteus 5:33–36',
+                    'Matteus 5:37', 'Matteus 12:33–37', 'Johannes 8:31–32',
+                    'Johannes 18:37',
+      /* Week 24 */ 'Matteus 5:38–42', 'Lukas 6:27–31', 'Matteus 5:38–39',
+                    'Matteus 5:40–41', 'Matteus 5:42', 'Lukas 6:32–36',
+                    'Lukas 22:49–51', 'Johannes 18:19–23',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
@@ -204,7 +244,7 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       const foute = keurVerwysing(v, leesBoek)
       if (foute.length) stukkend.push(`${v} → ${foute.join('; ')}`)
     }
-    is(`al ${VERWYSINGS.length} verwysings uit Week 1-12 bestaan werklik`, stukkend, [])
+    is(`al ${VERWYSINGS.length} verwysings uit Week 1-24 bestaan werklik`, stukkend, [])
 
     /* En die keurder moet werklik VANG — anders is die groen hierbo waardeloos. */
     is('n hoofstuk wat nie bestaan nie word gevang',
@@ -213,6 +253,55 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
        keurVerwysing('Markus 1:9999', leesBoek).length > 0, true)
     is('en n reeks wat agteruit loop',
        keurVerwysing('Johannes 3:16-2', leesBoek).length > 0, true)
+  }
+}
+
+/* ── En nou die WEKE wat Dewald werklik geskryf het ──
+ *
+ * publiseerFoute() kan nie hierop loop nie: die videoId, die vyf kontroles en
+ * die teologiese hersiening word in die admin gestel, nie hier nie. Maar alles
+ * ANDERS moet reeds klaar wees, anders laai die bulkknoppie 'n halwe week op.
+ *
+ * Die belangrikste reel hier is die laaste een. 'n Hoe-risiko week sonder 'n
+ * fasiliteerderwaarskuwing mag nie publiseer nie — en week 21, 22 en 24 raak
+ * mishandeling. Val die waarskuwing ooit uit, moet hierdie toets rooi word
+ * lank voordat 'n fasiliteerder in 'n sitkamer daarsonder sit.
+ */
+console.log('\n── Die geskrewe weke self ──\n')
+{
+  const nommers = Object.keys(WEKE).map(Number).sort((a, b) => a - b)
+  is('hulle loop 1 tot 24 sonder n gat',
+     nommers, Array.from({ length: nommers.length }, (_, i) => i + 1))
+
+  const SONDER_VIDEO = VERPLIGTE_VELDE.filter(v => v !== 'videoId')
+  const leeg = [], verkeerdeNommer = [], sonderWaarskuwing = [], metVideo = []
+  for (const n of nommers) {
+    const w = WEKE[n]
+    if (w.weeknommer !== n) verkeerdeNommer.push(n)
+    for (const veld of SONDER_VIDEO) {
+      if (String(w[veld] ?? '').trim() === '') leeg.push(`week ${n}: ${veld}`)
+    }
+    /* Die videoId's word in die admin geplak; hier moet hulle leeg wees. */
+    if (String(w.videoId ?? '') !== '') metVideo.push(n)
+    if (w.pastoraleRisiko === 'hoog' &&
+        String(w.fasiliteerderWaarskuwing || '').trim() === '') sonderWaarskuwing.push(n)
+  }
+  is('elke week se sleutel en weeknommer stem ooreen', verkeerdeNommer, [])
+  is('geen verpligte veld is leeg nie', leeg, [])
+  is('elke videoId is nog leeg', metVideo, [])
+  is('ELKE hoe-risiko week dra n fasiliteerderwaarskuwing', sonderWaarskuwing, [])
+
+  /* En die hek moet werklik VANG — anders is die groen hierbo waardeloos. */
+  is('n hoe-risiko week sonder waarskuwing sou gevang word',
+     ['laag', 'medium', 'hoog'].map(r =>
+       publiseerFoute({ ...heelWeek(), pastoraleRisiko: r }).length > 0),
+     [false, false, true])
+
+  /* Die weke wat mishandeling kan oopmaak, moet dit BY NAAM noem — 'n vae
+     waarskuwing help niemand wat dit in 'n sitkamer moet lei nie. */
+  for (const n of [21, 22, 24]) {
+    is(`week ${n} se waarskuwing noem mishandeling`,
+       /mishandel/i.test(WEKE[n].fasiliteerderWaarskuwing || ''), true)
   }
 }
 
