@@ -119,6 +119,24 @@
 }
 .vw-doen p { font-size: 15.5px; line-height: 1.7; color: #4A3A1A; }
 
+/* ── Die een sin wat vandag moet bly ──
+   Die laaste ding op Dag 1. Donker en stil, sodat dit nie soos nog 'n kaart
+   lyk nie maar soos 'n sin wat 'n mens saamvat. */
+.vw-eensin {
+  background: #2A1F14;
+  border-radius: 16px;
+  padding: 20px 18px 22px;
+  margin-bottom: 10px;
+}
+.vw-eensin-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px;
+  color: #C9A227; margin-bottom: 10px;
+}
+.vw-eensin p {
+  font-family: var(--font-serif);
+  font-size: 20px; line-height: 1.5; color: #F6EFE4;
+}
+
 /* ── Die video ── */
 .vw-video { margin-bottom: 10px; border-radius: 16px; overflow: hidden; background: #241B12; }
 .vw-video-duim {

@@ -91,6 +91,15 @@ export const VERPLIGTE_VELDE = [
    hulle te WYS, nie om hulle te EIS nie. */
 export const OPSIONELE_VELDE = [
   'ondersteunendeSkrif',
+  /* 'n Vierde groepvraag. Party weke het drie, party vier — die vierde is
+     die een wat gewoonlik die diepste sny, en dit mag nie wegval bloot omdat
+     die vorm net drie plekke gehad het nie. */
+  'groepVraag4',
+  /* "Die een sin wat vandag moet bly." Dit staan aan die einde van Dag 1 en
+     is die sin wat 'n mens die dag saamdra. Nie dieselfde as die
+     kernwaarheid nie: die kernwaarheid dra die WEEK, hierdie een dra die DAG
+     en is bedoel om skerp te wees. */
+  'eenSin',
   'dag2Skrif', 'dag2Prompt',
   'dag3Prompt',
   'dag4Vraag',

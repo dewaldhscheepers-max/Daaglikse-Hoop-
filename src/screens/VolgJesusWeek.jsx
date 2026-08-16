@@ -144,7 +144,7 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
           <div className="vw-kop">ONS GROEP</div>
           <p className="vw-skrif">{week.primereSkrif}</p>
           <ol className="vw-vrae">
-            {[week.groepVraag1, week.groepVraag2, week.groepVraag3]
+            {[week.groepVraag1, week.groepVraag2, week.groepVraag3, week.groepVraag4]
               .filter(Boolean).map((v, i) => <li key={i}>{v}</li>)}
           </ol>
         </div>
@@ -239,6 +239,15 @@ function Dag1({ week }) {
         <div className="vw-kaart">
           <div className="vw-kop">BID</div>
           <p className="vw-gebed">{week.gebed}</p>
+        </div>
+      )}
+
+      {/* Die laaste hou van Dag 1. Dit staan heel onder omdat dit die sin is
+          waarmee 'n mens die skerm verlaat en die dag ingaan. */}
+      {week.eenSin && (
+        <div className="vw-eensin">
+          <div className="vw-eensin-kop">DIE EEN SIN WAT VANDAG MOET BLY</div>
+          <p>{week.eenSin}</p>
         </div>
       )}
     </>

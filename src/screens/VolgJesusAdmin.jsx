@@ -38,7 +38,8 @@ const LEEG = (n) => ({
   kernwaarheid: '', privaatRefleksie: '', gehoorsaamheidStap: '', gebed: '',
   dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
   moreTeaser: '',
-  groepVraag1: '', groepVraag2: '', groepVraag3: '',
+  groepVraag1: '', groepVraag2: '', groepVraag3: '', groepVraag4: '',
+  eenSin: '',
   fasiliteerderHoofpunt: '', fasiliteerderGrens: '', fasiliteerderWaarskuwing: '',
   pastoraleRisiko: 'laag',
   kontroles: { teks: false, konteks: false, jesus: false, toepassing: false, grens: false },
@@ -178,7 +179,11 @@ export default function VolgJesusAdmin({ geheim = '' }) {
             52 weke. Niks hiervan is in die app nie — dit word hier gebou en hier getoets.
           </p>
           <button className="vj-groot" onClick={laaiAlmalOp} disabled={opBesig}>
-            {opBesig ? 'Besig om op te laai…' : `⬆  Laai Week 1 tot ${Object.keys(WEKE).length} op`}
+            {opBesig
+              ? 'Besig om op te laai…'
+              : Object.keys(WEKE).length === 1
+                ? '⬆  Laai Week 1 op'
+                : `⬆  Laai Week 1 tot ${Object.keys(WEKE).length} op`}
           </button>
           <p className="vj-sub vj-fyn">
             Skryf al die weke wat reeds geskryf is na die databasis. 'n Week wat
@@ -309,6 +314,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       </div>
 
       <Veld l="Kernwaarheid (een sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
+      <Veld l="Die een sin wat vandag moet bly (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />
       <Veld l="Privaat refleksie"      v={week.privaatRefleksie} op={v => stel('privaatRefleksie', v)} lank />
       <Veld l="Gehoorsaamheidstap"     v={week.gehoorsaamheidStap} op={v => stel('gehoorsaamheidStap', v)} lank />
       <Veld l="Gebed"                  v={week.gebed} op={v => stel('gebed', v)} lank />
@@ -328,6 +334,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <Veld l="Groepvraag 1" v={week.groepVraag1} op={v => stel('groepVraag1', v)} lank />
       <Veld l="Groepvraag 2" v={week.groepVraag2} op={v => stel('groepVraag2', v)} lank />
       <Veld l="Groepvraag 3" v={week.groepVraag3} op={v => stel('groepVraag3', v)} lank />
+      <Veld l="Groepvraag 4 (opsioneel)" v={week.groepVraag4} op={v => stel('groepVraag4', v)} lank />
 
       <h4 className="vj-afdeling">Die fasiliteerder</h4>
       <Veld l="Hoofpunt" v={week.fasiliteerderHoofpunt} op={v => stel('fasiliteerderHoofpunt', v)} lank />
