@@ -7,17 +7,17 @@
  *
  * ── Week 1 tot 24 is op 16 Augustus 2026 UITGEHAAL ──
  *
- * Dewald skryf die hele program oor. Die ou weke was nie verkeerd nie, maar
- * die stem was nog nie reg nie: te veel verduideliking, te min dringendheid,
- * en die oproep om Jesus te VOLG het te sag geword. Hy begin weer by Week 1.
- *
- * Hulle is nie hier begrawe nie — hulle staan in die geskiedenis by commit
- * d2321d0. Wil 'n mens ooit 'n ou week se formulering terugsien:
+ * Dewald skryf die hele program oor. Hulle is nie hier begrawe nie — hulle
+ * staan in die geskiedenis by commit d2321d0:
  *
  *     git show d2321d0:src/data/volgJesusWeke.js
  *
  * MOENIE hulle terugplak sonder dat Dewald vra nie. Die punt van die oorskryf
  * is juis dat die ou weergawes weg is.
+ *
+ * Week 1 self is al 'n paar keer oorgeskryf. Hierdie is die weergawe waarin
+ * die troon-vraag die punt word: nie hoeveel plek Jesus in jou lewe het nie,
+ * maar wie op die troon sit.
  *
  * Die videoId's is leeg. Hulle word in die admin geplak sodra die video op
  * YouTube is — presies soos Sorg s'n.
@@ -30,116 +30,117 @@ export const WEKE = {
   1: {
     weeknommer: 1,
     moreTeaser:
-      'Môre: Johannes begin nie by Betlehem nie — hy begin vóór Betlehem.',
+      'Môre: Johannes begin nie by die krip nie — hy begin "in die begin".',
     titel: 'Wie is Jesus?',
-    doel: 'Om nie by ’n vae of selfgemaakte idee van Jesus te begin nie, maar by Wie die Evangelies Hom openbaar. Jesus is die ewige Woord wat mens geword het, die Seun van God, Immanuel en die Een wat gekom het om van sonde te verlos. Voordat ons vra hoe om Jesus te volg, moet ons eers sien Wie dit is wat ons roep.',
+    doel: 'Om nie met ’n vae of selfgemaakte idee van Jesus te begin nie, maar met Wie die Evangelies Hom openbaar. Jesus is die ewige Woord wat mens geword het, Immanuel, die Seun van God en die Redder wat gekom het om van sonde te verlos. Voordat ons vra hoe om Jesus te volg, moet ons eers sien Wie dit is wat ons roep.',
+    weekKern:
+      'Dissipelskap begin nie by wat ek vir Jesus doen nie. Dit begin by Wie Jesus is.',
     openingskerm:
       'Jy kan die Naam Jesus jou hele lewe lank ken... en Hom steeds nooit werklik ken nie.\n\n' +
-      'Jy kan in die kerk grootword. Jy kan Bybelverse ken. Jy kan bid wanneer jy bang is. ' +
-      'Jy kan selfs sê: "Ek glo in Jesus."\n\n' +
-      'Maar hierdie hele reis staan of val by een vraag: Wie is Jesus?\n\n' +
+      'Jy kan in die kerk grootword. Jy kan Bybelverse ken. Jy kan bid. Jy kan selfs sê: "Ek glo in Jesus."\n\n' +
+      'Maar voordat jy leer hoe om Hom te volg, moet jy eers een vraag antwoord: Wie is Jesus?\n\n' +
       'Want as Jesus net ’n goeie leermeester is, kan jy Sy raad vat of los. ' +
-      'As Hy net ’n inspirerende mens is, kan jy Hom bewonder en steeds jou eie pad loop.\n\n' +
-      'Maar as Jesus werklik is Wie die Bybel sê Hy is... kan jy Hom nie net bewonder nie. ' +
-      'Jy moet besluit wat jy met Hom gaan doen.\n\n' +
-      'Hierdie week begin ons dus nie by "wat moet ek doen?" nie. Ons begin by: "Wie is Hy?"',
+      'Maar as Hy werklik is Wie die Evangelies sê Hy is... kan jy Hom nie net bewonder nie.\n\n' +
+      'Hierdie reis begin dus nie by "wat kan Jesus vir my doen?" nie. Dit begin by: "Wie is Hy?"',
     primereSkrif: 'Johannes 1:1–18',
-    ondersteunendeSkrif: 'Matteus 1:18–25; Markus 1:1–11; Jakobus 2:19',
+    ondersteunendeSkrif: 'Matteus 1:18–25; Markus 1:9–11; Jakobus 2:19',
     videoId: '',
+    /* HOU DIT VAS op Dag 1 — en die sin op die wallpaper. */
     kernwaarheid:
-      'Dissipelskap begin nie by wat ek vir Jesus doen nie. Dit begin by Wie Jesus is.',
+      'As Jesus werklik Here is — gaan jy Hom volg?',
+    /* DIE LAASTE HOU. Dit sluit die boodskap af. */
     eenSin:
-      'Die grootste vraag is nie net wat jy oor Jesus glo nie. Die vraag is: as Hy werklik Here is — gaan jy Hom volg?',
+      'Die grootste vraag is nie hoeveel plek Jesus in jou lewe het nie. Die vraag is: wie sit op die troon?',
     wallpaper: '/beelde/vj-w1-wallpaper.webp',
     privaatRefleksie:
-      'Wie is Jesus vir jou op hierdie stadium? Nie die antwoord wat jy dink ’n Christen behoort te gee nie — jou eerlike antwoord.\n\n' +
-      'Dalk: "Ek glo Hy is die Seun van God." "Ek weet baie van Hom, maar ek ken Hom nie goed nie." ' +
-      '"Ek is nog onseker." "Ek het Hom hoofsaaklik gesoek wanneer ek iets nodig het." ' +
-      '"Ek glo Hy is my Redder, maar ek sukkel om Hom as Here te volg."\n\n' +
+      'Moenie die antwoord gee wat jy dink ’n Christen behoort te gee nie. Vra eerlik: wie is Jesus vir my?\n\n' +
+      'Dalk: "Ek glo Hy is die Seun van God." "Ek weet baie van Hom, maar ek wil Hom beter leer ken." ' +
+      '"Ek hardloop hoofsaaklik na Hom wanneer ek iets nodig het." ' +
+      '"Ek wil hê Hy moet my help, maar ek hou steeds graag self beheer." ' +
+      '"Ek is nog onseker oor Wie Hy is." ' +
+      '"Ek glo Hy is my Redder en ek wil leer om Hom as Here te volg."\n\n' +
       'Jy hoef niks voor te gee nie. Begin eerlik.',
     gehoorsaamheidStap:
-      'KYK WEER NA JESUS\n\n' +
-      'Vandag is jou volgende tree eenvoudig. Lees Johannes 1:1–18 weer.\n\n' +
-      'Nie om ’n blokkie af te merk nie. Nie om ’n preek te soek nie. Nie om iets vir iemand anders te kry nie. ' +
+      'KYK NA JESUS\n\n' +
+      'Jou eerste gehoorsaamheidstap is eenvoudig: lees Johannes 1:1–18 weer.\n\n' +
+      'Nie om ’n blokkie af te merk nie. Nie om iets vir iemand anders te kry nie. Nie om vinnig klaar te wees nie. ' +
       'Lees dit om Jesus te sien.\n\n' +
-      'Elke keer wanneer die gedeelte iets oor Hom sê, stop en vra: "wat leer ek hier oor Jesus?" ' +
-      'Skryf een waarheid neer. Net een. En dra dit vandag saam met jou.',
+      'Elke keer wanneer Johannes iets oor Hom sê, stop. Vra: "wat leer ek hier oor Jesus?"\n\n' +
+      'Skryf een waarheid neer. Dra dit hierdie week saam met jou.',
     gebed:
-      'Here Jesus, maak my oë oop. Ek wil U nie net by naam ken nie — ek wil U werklik ken.\n\n' +
-      'U is die ewige Seun van God. Die Woord wat mens geword het. Immanuel — God met ons. ' +
-      'Die Een wat gekom het om van sonde te verlos. My Redder. My Here.\n\n' +
-      'Vergewe my waar ek U net gesoek het vir wat U vir my kan doen, terwyl ek steeds my lewe vir myself wou hou.\n\n' +
-      'Ek wil nie net weet dat U bestaan nie. Ek wil U ken. Ek wil U vertrou. Ek wil U gehoorsaam. En ek wil U volg. Amen.',
+      'Here Jesus, maak my oë oop. Ek wil U nie net by naam ken nie. Ek wil U werklik ken.\n\n' +
+      'U is die ewige Seun van God. Die Woord wat mens geword het. Immanuel — God met ons. My Redder. My Here.\n\n' +
+      'Vergewe my waar ek U net gesoek het vir wat U vir my kan doen, terwyl ek steeds self in beheer wou bly.\n\n' +
+      'Wys my Wie U werklik is. Verander wat in my moet verander.\n\n' +
+      'Ek wil U ken. Ek wil U vertrou. Ek wil U gehoorsaam. Ek wil U volg. In Jesus se Naam. Amen.',
     dag1Titel: 'Wie is Jesus?',
     dag2Titel: 'Voor Betlehem was Hy reeds daar',
-    dag3Titel: 'Die Woord het mens geword',
-    dag4Titel: 'Immanuel: God met ons',
+    dag3Titel: 'God het nader gekom',
+    dag4Titel: 'Hy het gekom om te verlos',
     dag5Titel: 'My geliefde Seun',
     dag2Skrif: 'Johannes 1:1–5',
     dag2Prompt:
-      'Johannes begin: "In die begin..." Nog voordat hy iets van Jesus se aardse lewe vertel, neem hy jou terug — ' +
-      'voor Betlehem, voor die krip, voor Sy bediening. Die Woord was reeds daar. ' +
-      'En Johannes sê: die Woord was God. Alles het deur Hom ontstaan.\n\n' +
-      'Het jy Jesus hoofsaaklik gesien as Iemand Wie se verhaal by Betlehem begin — of sien jy Hom as die Een wat reeds "in die begin" daar was?\n\n' +
-      'Dit verander die manier waarop ons na Jesus luister. Hy is nie net een stem tussen baie ander stemme nie. ' +
-      'Lees Johannes 1:1–5 weer en hou hierdie waarheid vas: Jesus se verhaal begin nie by Betlehem nie.',
+      'Johannes begin: "In die begin..." Nie "by die krip" nie. Nie "toe Maria geboorte gee" nie. In die begin.\n\n' +
+      'Die Woord was reeds daar. Die Woord was by God. Die Woord was God. Alles het deur Hom tot stand gekom.\n\n' +
+      'Jesus is nie net een wyse stem tussen baie ander nie. Hy is nie net nog iemand met goeie raad oor die lewe nie.\n\n' +
+      'Die vraag: as Jesus werklik is Wie Johannes sê Hy is, met hoeveel gewig behoort ek dan na Sy woorde te luister?\n\n' +
+      'Lees Johannes 1:1–5 nog een keer en hou hierdie waarheid vas: die krip was nie Jesus se begin nie.',
     dag3Prompt:
-      'Lees Johannes 1:14–18. Johannes sê: "Die Woord het mens geword en onder ons kom woon." Dink oor die gewig daarvan. ' +
-      'Die Een deur Wie alles ontstaan het, het mens geword. Hy het nie van ver af gebly nie. ' +
-      'Hy het tussen mense geleef. Hy het moeg geword. Hy het gehuil. Hy het mense aangeraak. Hy het saam met mense geëet. ' +
-      'Hy het verwerping beleef. Hy het uiteindelik gely en gesterf.\n\n' +
-      'Wat wys dit vir jou van God dat die Woord mens geword en onder ons kom woon het?\n\n' +
-      'Johannes beskryf Jesus as vol genade en waarheid. Nie genade sonder waarheid nie. Nie waarheid sonder genade nie. ' +
-      'Vra: "leer ek Jesus ken soos Hy Homself openbaar — of verkies ek ’n weergawe van Hom wat altyd by my voorkeure pas?"',
+      'Lees Johannes 1:14–18. Johannes sê: "Die Woord het mens geword en onder ons kom woon."\n\n' +
+      'Die Een deur Wie alles ontstaan het, het mens geword. Hy het nie op ’n afstand gebly nie. ' +
+      'Hy het tussen mense geleef. Hy het honger geken. Moegheid geken. Trane geken. Verwerping geken. Pyn geken.\n\n' +
+      'God het nader gekom.\n\n' +
+      'Johannes sê Jesus is vol genade en waarheid. Nie genade wat sonde eenvoudig goedpraat nie. ' +
+      'Nie waarheid sonder genade nie. Genade én waarheid.\n\n' +
+      'Het jy dalk vir jouself ’n weergawe van Jesus gevorm wat altyd saamstem met wat jy reeds wil hê? ' +
+      'Onthou: ’n Jesus wat jy self kan vorm, kan jou nooit vorm nie.\n\n' +
+      'Bid: "Jesus, wys my waar my beeld van U nie pas by wat U Woord openbaar nie."',
     dag4Vraag:
-      'Lees Matteus 1:18–25. Die engel sê vir Josef dat Maria se Seun Jesus genoem moet word omdat Hy Sy volk van hulle sondes sal verlos. ' +
-      'Matteus verbind hierdie geboorte ook met Immanuel — God met ons. ' +
-      'Twee groot waarhede staan langs mekaar: God met ons. En: Hy kom om te verlos.\n\n' +
-      'Waarvoor soek jy Jesus die meeste? Is dit hoofsaaklik vir hulp, beskerming, genesing, antwoorde, vrede, voorsiening of ’n uitweg?\n\n' +
-      'Dit is nie verkeerd om met jou nood na Jesus toe te kom nie. Maar Jesus is groter as wat jy hoop Hy vir jou sal doen. ' +
-      'Vra vandag: "wil ek Jesus self ken — of wil ek hoofsaaklik hê Hy moet my lewe regmaak?"',
+      'Lees Matteus 1:18–25. Die engel sê dat Hy Jesus genoem moet word. Waarom? Omdat Hy Sy volk van hulle sondes sal verlos. ' +
+      'Matteus noem Hom ook Immanuel — God met ons.\n\n' +
+      'Jesus het nie gekom bloot om jou dag ’n bietjie beter te maak nie. Hy het nie gekom net om jou te help om jou eie doelwitte te bereik nie. ' +
+      'Hy het gekom omdat ons verlossing nodig het.\n\n' +
+      'Wees eerlik: waarvoor soek jy Jesus gewoonlik eerste? Vir vrede? Voorsiening? Genesing? Beskerming? ’n Antwoord? ’n Uitweg?\n\n' +
+      'Dit is nie verkeerd om jou nood na Jesus toe te bring nie. Maar daar is ’n groter vraag: ' +
+      'wil ek Jesus hê — of hoofsaaklik wat ek hoop Hy vir my kan doen?',
     dag5Prompt:
-      'Lees Markus 1:9–11. Jesus kom na Johannes en word gedoop. Markus beskryf Jesus in die water, ' +
-      'die Gees wat op Hom neerdaal, en die stem uit die hemel. En die Vader sê: "Jy is my geliefde Seun."\n\n' +
-      'Voordat Jesus se openbare bediening ontvou, laat Markus jou hoor Wie Hy is.\n\n' +
-      'Waarom maak Jesus se identiteit saak voordat ons begin vra wat Hy van ons verwag? ' +
-      'Omdat die Christelike geloof nie eerste begin by "wat kan Jesus vir my doen?" nie. Dit begin by: "Wie is Jesus?"\n\n' +
-      'Bid eenvoudig: "Jesus, ek wil U leer ken soos U werklik is."',
+      'Lees Markus 1:9–11. Jesus staan in die water. Die Gees daal op Hom neer. ' +
+      'Die Vader se stem kom uit die hemel: "Jy is my geliefde Seun."\n\n' +
+      'Voordat Markus begin wys wat Jesus alles doen, wys hy vir ons Wie Jesus is.\n\n' +
+      'En dit is die orde van hierdie hele program. Ons gaan praat oor gehoorsaamheid, gebed, geld, verhoudings, ' +
+      'vergifnis, reinheid, diens en sending. Maar dit alles maak net sin wanneer ons weet Wie ons volg.\n\n' +
+      'Die vraag: as Jesus werklik die Seun van God is, kan ek Hom dan net volg wanneer Sy woorde vir my gemaklik is?\n\n' +
+      'Bid eenvoudig: "Jesus, ek wil U nie net bewonder nie. Ek wil U volg."',
     groepVraag1:
-      'Wat het hierdie tekste oor Jesus gesê wat jy maklik vergeet of miskyk?',
+      'Wat het hierdie week jou beeld van Jesus uitgedaag of verdiep?',
     groepVraag2:
-      'Waarom maak dit saak Wie Jesus is voordat ons begin praat oor wat Hy van ons vra?',
+      'Waarom maak dit saak Wie Jesus is voordat ons vra wat Hy van ons verwag?',
     groepVraag3:
-      'Wat is die gevaar daarvan om vir onsself ’n weergawe van Jesus te maak wat altyd met ons saamstem?',
+      'Hoe vorm ons soms vir onsself ’n Jesus wat altyd met ons saamstem?',
     groepVraag4:
-      'Wat sou dit beteken om vir die volgende 52 weke die Evangelies toe te laat om ons beeld van Jesus te vorm?',
+      'Wat sou dit beteken om vir die volgende 52 weke Jesus toe te laat om óns te vorm, eerder as dat ons Hom volgens ons voorkeure vorm?',
     fasiliteerderHoofpunt:
-      'Week 1 moet nie in ’n algemene inleiding tot Christenskap verander nie. Die fokus is smaller en sterker: WIE IS JESUS? ' +
-      'Voordat deelnemers leer oor gebed, geld, vergifnis, verhoudings, sending of gehoorsaamheid, ' +
-      'moet die program hulle eers na Jesus self bring.\n\n' +
-      'Hou Jesus, nie die deelnemer, in die middelpunt. Die versoeking is om te vinnig te vra "wat beteken dit vir my?". ' +
-      'Week 1 vra eers: "wat sê die teks oor Hom?" Die orde is openbaring → reaksie. ' +
-      'Ons begin nie by ons eie voorkeurbeeld van Jesus en laat tekste dan daarby pas nie — ons laat die Evangelies ons beeld van Jesus vorm.',
+      'Moenie Week 1 verander in ’n algemene les oor "hoe om ’n goeie Christen te wees" nie. ' +
+      'Die week moet by een vraag bly: WIE IS JESUS?\n\n' +
+      'Die orde is Jesus → reaksie. Ons begin nie by ons behoeftes en maak Jesus daarna ’n hulpmiddel om ons bestaande lewe ' +
+      'beter te laat werk nie. Ons begin by Hom.',
     fasiliteerderGrens:
-      'Moenie Johannes se taal versag nie. Hy sê "die Woord was God" en "die Woord het mens geword" — ' +
-      'moenie Week 1 reduseer tot "Jesus was ’n besonder goeie mens" nie; dit is minder as wat Johannes sê. ' +
-      'Die uitdrukking "God die Seun" staan nie woordeliks in Johannes 1 nie; gebruik dit verantwoordelik en hou die Bybelteks self voor. ' +
-      'Moenie die Seun en die Vader verwar nie: Johannes sê tegelyk dat die Woord BY God was én God was, ' +
-      'en Markus 1 onderskei duidelik tussen Jesus in die water, die Gees wat neerdaal en die Vader wat spreek. ' +
-      'Moenie Week 1 in ’n volledige tegniese les oor die Drie-eenheid verander nie, maar moet ook nie die onderskeid uitvee nie. ' +
-      'Vermy taal soos "hier word Jesus die Seun van God" — die doop skep nie Sy Seunskap nie, dit openbaar Wie Hy is. ' +
-      'By Matteus 1: hou die teks se eie fokus op sonde en verlossing; Jesus kom nie bloot om mense meer suksesvol, ' +
-      'gemaklik of gemotiveerd te maak nie. Moenie "Immanuel" reduseer tot "God is by jou wanneer jy ’n moeilike dag het" nie. ' +
-      'Jakobus 2:19 is ’n ONDERSTEUNENDE teks: moenie sê "die demone het dieselfde geloof as ’n Christen" nie — ' +
-      'die veilige toepassing is dat blote erkenning van ware dinge oor God nie dieselfde is as die lewe van ’n dissipel nie. ' +
-      'Moenie "glo" en "volg" as vyande teenoor mekaar stel nie: ons red onsself nie deur meer dissipline, ' +
-      'Bybellees of goeie werke nie — maar dieselfde Jesus wat red, roep mense om Hom te volg. ' +
-      'Moenie "Redder en Here" in ’n formule verander waarmee mense moet bewys dat Jesus "genoeg Here" van elke terrein is ' +
-      'voordat genade vir hulle beskikbaar is nie. ' +
-      'Moenie Week 1 in ’n skuldveldtog verander nie — die doel is nie dat iemand ná Dag 1 paniekerig dink "miskien is ek glad nie gered nie" ' +
-      'omdat hy nog groei, sukkel of vrae het nie. Geen manipulerende onsekerheid en geen gedwonge emosionele besluit nie. ' +
-      'Moenie deelnemers dwing om voor die groep te verklaar "ek is gered" of "ek is nie gered nie" nie — ' +
-      'mense kan gelowig, soekend, onseker, nuut of jare in die kerk wees.',
+      'Johannes 1 moet sy volle gewig dra: "die Woord was God" en "die Woord het mens geword". ' +
+      'Moenie dit afwater tot "Jesus was ’n besondere geestelike mens" nie — dit sê minder as wat Johannes sê. ' +
+      'Die krip was nie Jesus se begin nie: die menswording beteken nie dat Hy toe eers begin bestaan het nie. ' +
+      'Moenie die Vader en die Seun verwar nie — Johannes sê die Woord was BY God én was God, en in Markus 1 sien ons Jesus, die Gees en die Vader se stem. ' +
+      'Moenie Week 1 in ’n tegniese les oor die Drie-eenheid verander nie, maar moet ook nie die onderskeid uitvee nie. ' +
+      'Markus 1 sê nie Jesus word by Sy doop vir die eerste keer die Seun nie — die toneel OPENBAAR Sy identiteit. ' +
+      'By Matteus 1: moenie Jesus se sending reduseer tot meer sukses, meer geluk, meer selfvertroue of ’n makliker lewe nie. ' +
+      'Die reël "agter sonde sien ons die neiging: God, ek wil my eie pad loop" is ’n teologiese opsomming en toepassing, ' +
+      'nie ’n definisie wat Johannes 1 of Matteus 1 woordeliks gee nie — hou daardie onderskeid duidelik. ' +
+      'Jakobus 2:19 is ONDERSTEUNEND: die punt is dat blote korrekte kennis oor God nie dieselfde is as ’n lewe van geloof en dissipelskap nie. ' +
+      'Moenie geloof en gehoorsaamheid teen mekaar opstel asof geloof nie red nie maar goeie dissipelskap wel. ' +
+      'Ons red onsself nie — maar die Jesus wat red, roep ook "Volg My". ' +
+      'Moenie sê "jy word gered omdat jou lewe genoeg verander het" nie, maar moet ook nie uit vrees vir werke die oproep tot verandering verwyder nie. ' +
+      'En moenie manipuleer nie: die boodskap mag dringend wees, maar moenie mense doelbewus onseker maak oor hulle verlossing, ' +
+      '’n emosionele besluit afdwing, twyfel gelykstel aan verwerping, of mense onder groepsdruk plaas nie. ' +
+      'Moenie in die groep vra wie eintlik nie gered is nie.',
     pastoraleRisiko: 'medium',
   },
 }

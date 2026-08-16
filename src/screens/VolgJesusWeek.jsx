@@ -198,6 +198,12 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
             <p>{week.doel}</p>
           </div>
         )}
+        {week.weekKern && (
+          <div className="vw-kaart vw-kern-kaart">
+            <div className="vw-kop">HIERDIE WEEK SE KERNWAARHEID</div>
+            <p className="vw-kern">{week.weekKern}</p>
+          </div>
+        )}
         <div className="vw-kaart">
           <div className="vw-kop">DIE HOOFPUNT</div>
           <p>{week.fasiliteerderHoofpunt}</p>
@@ -225,6 +231,10 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
       {dag === 3 && <Eenvoudig kop="KYK DIEPER" teks={week.dag3Prompt} />}
       {dag === 4 && <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag} />}
       {dag === 5 && <Eenvoudig kop="LEEF DIT" teks={week.dag5Prompt} />}
+      {/* Die week se wallpaper staan in Dewald se dokument NA Dag 5, tussen
+          die laaste dag en die weekoorsig. Dit is 'n WEEK-ding, nie 'n dag
+          s'n nie. */}
+      {dag === 5 && <WallpaperKaart week={week} />}
 
       <button className="vw-hoofknop vw-onder" onClick={klaarMetDag}>
         KLAAR MET DAG {dag}
@@ -240,10 +250,27 @@ function Dag1({ week, antwoord, setAntwoord }) {
       <div className="vw-kaart">
         <div className="vw-kop">LEES</div>
         <p className="vw-skrif">{week.primereSkrif}</p>
-        <p className="vw-fyn">Lees die gedeelte stadig. Jy hoef nie vandag alles te verstaan nie.</p>
+        <p className="vw-fyn">
+          Lees die gedeelte stadig. Moenie vandag jaag om by die toepassing uit te kom nie.
+        </p>
       </div>
 
       <VideoKaart week={week} />
+
+      {week.gebed && (
+        <div className="vw-kaart">
+          <div className="vw-kop">BID</div>
+          <p className="vw-gebed">{week.gebed}</p>
+        </div>
+      )}
+
+      {/* DIE LAASTE HOU. Dit sluit die boodskap af — die sin wat land. */}
+      {week.eenSin && (
+        <div className="vw-eensin">
+          <div className="vw-eensin-kop">DIE LAASTE HOU</div>
+          <p>{week.eenSin}</p>
+        </div>
+      )}
 
       {week.kernwaarheid && (
         <div className="vw-kaart vw-kern-kaart">
@@ -263,24 +290,6 @@ function Dag1({ week, antwoord, setAntwoord }) {
           <Intjek antwoord={antwoord} setAntwoord={setAntwoord} />
         </div>
       )}
-
-      {week.gebed && (
-        <div className="vw-kaart">
-          <div className="vw-kop">BID</div>
-          <p className="vw-gebed">{week.gebed}</p>
-        </div>
-      )}
-
-      {/* Die laaste hou van Dag 1. Dit staan heel onder omdat dit die sin is
-          waarmee 'n mens die skerm verlaat en die dag ingaan. */}
-      {week.eenSin && (
-        <div className="vw-eensin">
-          <div className="vw-eensin-kop">DIE EEN SIN WAT VANDAG MOET BLY</div>
-          <p>{week.eenSin}</p>
-        </div>
-      )}
-
-      <WallpaperKaart week={week} />
     </>
   )
 }
@@ -346,14 +355,14 @@ function WallpaperKaart({ week }) {
 
   return (
     <div className="vw-wp">
-      <div className="vw-wp-kop">📱 SIT DIT OP JOU SKERM</div>
+      <div className="vw-wp-kop">HOU HIERDIE WAARHEID VOOR JOU</div>
       <div className="vw-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
       <button className="vw-wp-knop" onClick={deel} disabled={besig}>
         {besig ? 'Besig…' : 'Stoor of deel'}
       </button>
       <p className="vw-wp-fyn">
-        Sit dit as jou sluitskerm sodat die vraag die hele week by jou bly — of
-        stuur dit vir iemand.
+        Stoor dit en stel dit as jou agtergrond, sodat die vraag die hele week
+        voor jou bly — of deel dit met iemand.
       </p>
       {nota && <p className="vw-wp-nota">{nota}</p>}
     </div>

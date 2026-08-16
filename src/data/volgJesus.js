@@ -100,6 +100,10 @@ export const OPSIONELE_VELDE = [
      kernwaarheid nie: die kernwaarheid dra die WEEK, hierdie een dra die DAG
      en is bedoel om skerp te wees. */
   'eenSin',
+  /* "Hierdie week se kernwaarheid" uit Dewald se metadata-blok. Dit is nie
+     dieselfde as `kernwaarheid` nie: dit staan by die Beweging en die
+     kerntekste, en dit is fasiliteerder-taal. */
+  'weekKern',
   /* Die week se wallpaper: dieselfde sin, op 'n prent vir 'n sluitskerm.
      Dit is die enigste deel van die program wat buite die app gesien word. */
   'wallpaper',

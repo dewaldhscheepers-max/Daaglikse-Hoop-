@@ -40,7 +40,7 @@ const LEEG = (n) => ({
   dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
   moreTeaser: '',
   groepVraag1: '', groepVraag2: '', groepVraag3: '', groepVraag4: '',
-  eenSin: '', wallpaper: '',
+  eenSin: '', weekKern: '', wallpaper: '',
   fasiliteerderHoofpunt: '', fasiliteerderGrens: '', fasiliteerderWaarskuwing: '',
   pastoraleRisiko: 'laag',
   kontroles: { teks: false, konteks: false, jesus: false, toepassing: false, grens: false },
@@ -384,8 +384,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         )}
       </div>
 
-      <Veld l="Kernwaarheid (een sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
-      <Veld l="Die een sin wat vandag moet bly (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />
+      <Veld l="Hou dit vas (Dag 1, en die wallpaper se sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
+      <Veld l="Die laaste hou (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />
+      <Veld l="Hierdie week se kernwaarheid (fasiliteerder)" v={week.weekKern} op={v => stel('weekKern', v)} lank />
       <Veld l="Wallpaper (pad na die prent)" v={week.wallpaper} op={v => stel('wallpaper', v.trim())} />
       <Veld l="Privaat refleksie"      v={week.privaatRefleksie} op={v => stel('privaatRefleksie', v)} lank />
       <Veld l="Gehoorsaamheidstap"     v={week.gehoorsaamheidStap} op={v => stel('gehoorsaamheidStap', v)} lank />

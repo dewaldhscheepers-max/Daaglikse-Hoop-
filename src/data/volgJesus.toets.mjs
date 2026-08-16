@@ -161,9 +161,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
 
     /* Elke verwysing wat Dewald geskryf het. */
     const VERWYSINGS = [
-      /* Week 1 */ 'Johannes 1:1–18', 'Matteus 1:18–25', 'Markus 1:1–11',
+      /* Week 1 */ 'Johannes 1:1–18', 'Matteus 1:18–25', 'Markus 1:9–11',
                    'Jakobus 2:19', 'Johannes 1:1–5', 'Johannes 1:14–18',
-                   'Markus 1:9–11', 'Johannes 8:58', 'Johannes 10:30–38',
+                   'Johannes 8:58', 'Johannes 10:30–38',
                    'Johannes 14:6–11', 'Johannes 17:1–5', 'Johannes 20:28–31',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
