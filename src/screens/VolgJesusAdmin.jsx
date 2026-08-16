@@ -36,6 +36,7 @@ const LEEG = (n) => ({
   primereSkrif: '', ondersteunendeSkrif: '',
   videoId: '',
   kernwaarheid: '', privaatRefleksie: '', gehoorsaamheidStap: '', gebed: '',
+  dag1Titel: '', dag2Titel: '', dag3Titel: '', dag4Titel: '', dag5Titel: '',
   dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
   moreTeaser: '',
   groepVraag1: '', groepVraag2: '', groepVraag3: '', groepVraag4: '',
@@ -389,6 +390,12 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <Veld l="Privaat refleksie"      v={week.privaatRefleksie} op={v => stel('privaatRefleksie', v)} lank />
       <Veld l="Gehoorsaamheidstap"     v={week.gehoorsaamheidStap} op={v => stel('gehoorsaamheidStap', v)} lank />
       <Veld l="Gebed"                  v={week.gebed} op={v => stel('gebed', v)} lank />
+
+      <h4 className="vj-afdeling">Elke dag se opskrif</h4>
+      {[1, 2, 3, 4, 5].map(n => (
+        <Veld key={n} l={`Dag ${n} — opskrif`} v={week[`dag${n}Titel`]}
+              op={v => stel(`dag${n}Titel`, v)} />
+      ))}
 
       <h4 className="vj-afdeling">Dag 2 tot 5</h4>
       <SkrifVeld l="Dag 2 — Skrif" v={week.dag2Skrif} op={v => stel('dag2Skrif', v)} />

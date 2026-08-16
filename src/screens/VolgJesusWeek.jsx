@@ -29,14 +29,24 @@ import { geldigeVideoId } from '../data/volgJesus'
 import { mylpaalVir, biedKontak, antwoordVir } from '../data/volgJesusMylpale'
 import './VolgJesusWeek.css'
 
-/* Wat elke dag se kop se. Punt 3 §55. */
+/* Die terugval-name vir die vyf dae.
+ *
+ * Hulle is GENERIES, en dit was 'n probleem: Dag 3 het "Gehoorsaam" geheet
+ * terwyl Week 1 se Dag 3 oor die menswording gaan. Dewald skryf 'n regte
+ * opskrif vir elke dag ("VOOR BETLEHEM WAS HY REEDS DAAR"), en as daardie
+ * opskrif daar is, wen dit. Hierdie lys is net wat oorbly wanneer 'n week nog
+ * nie sy eie name het nie. */
 const DAE = [
   { n: 1, merk: 'DAG 1', titel: 'Ontmoet Jesus' },
   { n: 2, merk: 'DAG 2', titel: 'Kyk weer' },
-  { n: 3, merk: 'DAG 3', titel: 'Gehoorsaam' },
+  { n: 3, merk: 'DAG 3', titel: 'Kyk dieper' },
   { n: 4, merk: 'DAG 4', titel: 'Hart' },
   { n: 5, merk: 'DAG 5', titel: 'Leef dit' },
 ]
+
+/* Die week se eie opskrif vir 'n dag, met die generiese naam as terugval. */
+const dagTitel = (week, n) =>
+  String((week && week[`dag${n}Titel`]) || '').trim() || DAE[n - 1].titel
 
 export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }) {
   const [blad, setBlad] = useState('oop')   /* 'oop' | 'dag' | 'klaar' | 'groep' | 'fas' */
@@ -99,7 +109,7 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
           {DAE.map(d => (
             <button key={d.n} className="vw-dag-ry" onClick={() => beginDag(d.n)}>
               <span className="vw-dag-n">{d.n}</span>
-              <span className="vw-dag-t">{d.titel}</span>
+              <span className="vw-dag-t">{dagTitel(week, d.n)}</span>
               <span className="vw-dag-pyl">›</span>
             </button>
           ))}
@@ -208,10 +218,11 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
         <button className="vw-terug" onClick={() => setBlad('oop')}>‹ Week {week.weeknommer}</button>
         <span className="vw-balk-dag">{dagInfo.merk}</span>
       </div>
+      <h2 className="vw-dag-titel">{dagTitel(week, dag)}</h2>
 
-      {dag === 1 && <Dag1 week={week} />}
+      {dag === 1 && <Dag1 week={week} antwoord={antwoord} setAntwoord={setAntwoord} />}
       {dag === 2 && <Eenvoudig kop="KYK WEER" skrif={week.dag2Skrif} teks={week.dag2Prompt} />}
-      {dag === 3 && <Dag3 week={week} antwoord={antwoord} setAntwoord={setAntwoord} />}
+      {dag === 3 && <Eenvoudig kop="KYK DIEPER" teks={week.dag3Prompt} />}
       {dag === 4 && <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag} />}
       {dag === 5 && <Eenvoudig kop="LEEF DIT" teks={week.dag5Prompt} />}
 
@@ -223,7 +234,7 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
 }
 
 /* ── Dag 1: die volle ritme ──────────────────────────────────────────── */
-function Dag1({ week }) {
+function Dag1({ week, antwoord, setAntwoord }) {
   return (
     <>
       <div className="vw-kaart">
@@ -249,6 +260,7 @@ function Dag1({ week }) {
         <div className="vw-doen">
           <div className="vw-doen-kop">GEHOORSAAM</div>
           <p>{week.gehoorsaamheidStap}</p>
+          <Intjek antwoord={antwoord} setAntwoord={setAntwoord} />
         </div>
       )}
 
@@ -410,25 +422,32 @@ function Privaat({ kop, teks }) {
 
 /* Dag 3 vra terug oor die week se stap. Geen straf by "nog nie" — sien
    Punt 3 §18. */
-function Dag3({ week, antwoord, setAntwoord }) {
+/* ── Die intjek by die gehoorsaamheidstap ──
+ *
+ * Dit het op DAG 3 gestaan, saam met 'n herhaling van die hele
+ * gehoorsaamheidstap. Dewald het dit raakgesien: "by dag 1 en dag 3 wys jy
+ * dieselfde: KYK WEER NA JESUS. moet dit so wees?"
+ *
+ * Nee. Dit was 'n aanname uit 'n vroeer struktuur waar Dag 3 generies
+ * "Gehoorsaam" geheet het en die dag was waarop 'n mens gaan intjek. Dewald se
+ * weke werk nie so nie: die stap staan een keer, op Dag 1, en Dag 3 het sy eie
+ * inhoud. Sy dokument sit die knoppies ook op Dag 1 — "[ EK HET DIT GEDOEN ]"
+ * staan direk onder GEHOORSAAM.
+ *
+ * Die intjek is dus nie weggegooi nie; dit is by die stap gesit waarop dit
+ * slaan. */
+function Intjek({ antwoord, setAntwoord }) {
   const WOORDE = {
-    gedoen:  'Neem ’n oomblik en dank God dat jy kon reageer op wat Jesus jou geleer het.',
-    sukkel:  'Gehoorsaamheid beteken nie elke stap voel maklik nie. Gaan weer terug na Jesus se woorde en vra Hom vir wysheid en moed.',
-    nogNie:  'Jy hoef nie voor te gee nie. Die vraag bly oop: wat is jou volgende getroue stap?',
+    gedoen: 'Neem ’n oomblik en dank God dat jy kon reageer op wat Jesus jou geleer het.',
+    sukkel: 'Gehoorsaamheid beteken nie elke stap voel maklik nie. Gaan weer terug na Jesus se woorde en vra Hom vir wysheid en moed.',
+    nogNie: 'Jy hoef nie voor te gee nie. Die vraag bly oop: wat is jou volgende getroue stap?',
   }
   return (
     <>
-      <div className="vw-doen">
-        <div className="vw-doen-kop">JOU STAP HIERDIE WEEK</div>
-        <p>{week.gehoorsaamheidStap}</p>
-      </div>
-      {week.dag3Prompt && (
-        <div className="vw-kaart"><p>{week.dag3Prompt}</p></div>
-      )}
       <div className="vw-keuses">
-        {[['gedoen', 'Ek het ’n stap gegee'],
+        {[['gedoen', 'Ek het dit gedoen'],
           ['sukkel', 'Ek wil, maar ek sukkel'],
-          ['nogNie', 'Ek het nog nie']].map(([s, w]) => (
+          ['nogNie', 'Ek wil dit nog doen']].map(([s, w]) => (
           <button key={s} className={antwoord === s ? 'aan' : ''} onClick={() => setAntwoord(s)}>{w}</button>
         ))}
       </div>

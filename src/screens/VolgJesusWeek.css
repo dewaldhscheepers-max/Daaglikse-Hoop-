@@ -83,6 +83,14 @@
 }
 .vw-kaart p { font-size: 15px; line-height: 1.7; color: var(--text); }
 
+/* Dewald skryf met paragrawe. Sonder `pre-line` loop hulle inmekaar en lees
+   'n dag soos een lang blok: "KYK WEER NA JESUS Vandag is jou volgende tree".
+   Dit geld vir ELKE lang veld op hierdie skerm. */
+.vw-kaart p,
+.vw-doen p,
+.vw-gebed,
+.vw-antwoord { white-space: pre-line; }
+
 .vw-skrif {
   font-family: var(--font-serif); font-size: 21px;
   color: var(--purple-dark); margin-bottom: 8px;
@@ -337,3 +345,12 @@
 .vw-wp-knop:disabled { color: #A08E6E; }
 .vw-wp-fyn  { margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: #7A7286; }
 .vw-wp-nota { margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: #4C3A78; }
+
+/* Die dag se eie opskrif. Dit staan onder die balk sodat 'n mens weet waar hy
+   is sonder om na die dagelys terug te gaan. */
+.vw-dag-titel {
+  font-family: var(--font-serif);
+  font-size: 24px; line-height: 1.2;
+  color: var(--purple-dark);
+  margin: 2px 2px 14px;
+}

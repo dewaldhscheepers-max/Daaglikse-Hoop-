@@ -70,6 +70,11 @@ export const WEKE = {
       'Die Een wat gekom het om van sonde te verlos. My Redder. My Here.\n\n' +
       'Vergewe my waar ek U net gesoek het vir wat U vir my kan doen, terwyl ek steeds my lewe vir myself wou hou.\n\n' +
       'Ek wil nie net weet dat U bestaan nie. Ek wil U ken. Ek wil U vertrou. Ek wil U gehoorsaam. En ek wil U volg. Amen.',
+    dag1Titel: 'Wie is Jesus?',
+    dag2Titel: 'Voor Betlehem was Hy reeds daar',
+    dag3Titel: 'Die Woord het mens geword',
+    dag4Titel: 'Immanuel: God met ons',
+    dag5Titel: 'My geliefde Seun',
     dag2Skrif: 'Johannes 1:1–5',
     dag2Prompt:
       'Johannes begin: "In die begin..." Nog voordat hy iets van Jesus se aardse lewe vertel, neem hy jou terug — ' +

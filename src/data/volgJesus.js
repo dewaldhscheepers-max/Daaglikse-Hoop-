@@ -103,6 +103,9 @@ export const OPSIONELE_VELDE = [
   /* Die week se wallpaper: dieselfde sin, op 'n prent vir 'n sluitskerm.
      Dit is die enigste deel van die program wat buite die app gesien word. */
   'wallpaper',
+  /* Die week se eie opskrif vir elke dag. Sonder hulle val die skerm terug
+     op generiese name, en dan heet 'n dag oor die menswording "Gehoorsaam". */
+  'dag1Titel', 'dag2Titel', 'dag3Titel', 'dag4Titel', 'dag5Titel',
   'dag2Skrif', 'dag2Prompt',
   'dag3Prompt',
   'dag4Vraag',
