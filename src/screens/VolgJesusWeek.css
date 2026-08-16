@@ -106,10 +106,24 @@
   font-family: var(--font-serif); font-size: 20px; line-height: 1.5; color: var(--text);
 }
 
+/* 'n REGTE textarea. Dit was 'n <div> wat soos 'n invoerveld gelyk het, en
+   toe kon niemand daarin tik nie.
+
+   `font-size: 16px` is nie 'n smaaksaak nie: onder 16px zoem iOS Safari die
+   hele blad in sodra 'n mens 'n veld raak, en dan sit die skerm skeef.
+   `resize: vertical` sodat 'n lang antwoord nie in 'n klein hokkie hoef te
+   pas nie, maar niemand die blad sywaarts kan trek nie. */
 .vw-kassie {
+  display: block; width: 100%; box-sizing: border-box;
   margin-top: 12px; border: 1px solid #E2DAF0; border-radius: 11px;
-  padding: 15px; color: var(--text-muted); font-size: 14px; background: #FBFAFD;
+  padding: 14px; color: var(--text); font-size: 16px; line-height: 1.65;
+  background: #FBFAFD;
+  font-family: var(--font-body);
+  resize: vertical; min-height: 110px;
+  -webkit-appearance: none;
 }
+.vw-kassie::placeholder { color: var(--text-muted); }
+.vw-kassie:focus { outline: none; border-color: #B9A8DC; background: #fff; }
 .vw-slot { font-size: 12.5px; color: var(--text-muted); margin-top: 7px; }
 
 /* ── GEHOORSAAM ──

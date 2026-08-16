@@ -286,7 +286,8 @@ export default function VolgJesusWeek({
       {dag === 4 && (
         <>
           <Lees skrif={week.dag4Skrif} />
-          <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag} />
+          <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag}
+                   sleutel={`w${week.weeknommer}d4`} />
         </>
       )}
       {dag === 5 && (
@@ -338,7 +339,10 @@ function Dag1({ week, antwoord, setAntwoord }) {
         </div>
       )}
 
-      {week.privaatRefleksie && <Privaat kop="WEES EERLIK" teks={week.privaatRefleksie} />}
+      {week.privaatRefleksie && (
+        <Privaat kop="WEES EERLIK" teks={week.privaatRefleksie}
+                 sleutel={`w${week.weeknommer}d1`} />
+      )}
 
       {/* Die belangrikste kaart in die week. Dit LYK anders omdat dit die
           oomblik is waar 'n mens van lees na doen beweeg. */}
@@ -477,13 +481,47 @@ function Eenvoudig({ kop, skrif, teks }) {
   )
 }
 
-function Privaat({ kop, teks }) {
+/* ── Die private kassie ──
+ *
+ * Dit WAS 'n <div> met die woorde "Skryf vir jouself…" in. Dit het soos 'n
+ * invoerveld gelyk en was dit nie: 'n mens tik daarop en niks gebeur nie.
+ * Dewald: "die text bokse waarin die verbruiker moet skryf in dag 1 en 4 werk
+ * nie."
+ *
+ * Nou is dit 'n regte <textarea>, en wat daarin geskryf word, bly op die
+ * TOESTEL. Dit is nie 'n gerief nie — dit is die belofte wat die hele skerm
+ * dra: "🔒 Net jy kan hierdie lees." Hierdie antwoorde gaan nooit oor die
+ * netwerk nie, hulle raak nooit die tellers nie, en hulle staan in geen
+ * bediener nie. Die enigste plek waar hulle bestaan, is localStorage op die
+ * foon van die mens wat hulle geskryf het.
+ *
+ * Dit word by ELKE tikslag gestoor. 'n Mens skryf iets eerliks, die foon
+ * skakel af, en dan is dit weg — dan skryf hy dit nooit weer nie. */
+function Privaat({ kop, teks, sleutel }) {
+  const berg = sleutel ? `vj_privaat_${sleutel}` : ''
+  const [waarde, setWaarde] = useState(() => {
+    if (!berg) return ''
+    try { return localStorage.getItem(berg) || '' } catch { return '' }
+  })
+
+  function verander(v) {
+    setWaarde(v)
+    if (!berg) return
+    try { localStorage.setItem(berg, v) } catch {}
+  }
+
   return (
     <div className="vw-kaart">
       <div className="vw-kop">{kop}</div>
       <p>{teks}</p>
-      <div className="vw-kassie">Skryf vir jouself…</div>
-      <p className="vw-slot">🔒 Net jy kan hierdie lees.</p>
+      <textarea
+        className="vw-kassie"
+        value={waarde}
+        onChange={e => verander(e.target.value)}
+        placeholder="Skryf vir jouself…"
+        rows={4}
+      />
+      <p className="vw-slot">🔒 Net jy kan hierdie lees. Dit bly op hierdie foon.</p>
     </div>
   )
 }
