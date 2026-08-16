@@ -116,6 +116,7 @@ export default function App() {
   const [showToksies,            setShowToksies]            = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showBybel, setShowBybel]                 = useState(false)
+  const [bybelBeginBy, setBybelBeginBy]           = useState(null)
   const [showArk, setShowArk]                     = useState(false)
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
@@ -938,8 +939,15 @@ export default function App() {
   }, [])
 
   // ── Bybel ──
+  // Die gebeurtenis mag 'n gedeelte saambring: VOLG JESUS stuur mense hierheen
+  // om die week se Skrif te gaan lees, en dan moet die Bybel by daardie
+  // hoofstuk oopmaak en nie by die boekelys nie.
   useEffect(() => {
-    function onOpen() { setShowBybel(true) }
+    function onOpen(e) {
+      const d = (e && e.detail) || null
+      setBybelBeginBy(d && d.boek && d.hoofstuk ? d : null)
+      setShowBybel(true)
+    }
     window.addEventListener('open-bybel', onOpen)
     return () => window.removeEventListener('open-bybel', onOpen)
   }, [])
@@ -1380,7 +1388,7 @@ export default function App() {
       )}
 
       {showBybel && (
-        <Bybel onClose={() => setShowBybel(false)} />
+        <Bybel onClose={() => { setShowBybel(false); setBybelBeginBy(null) }} beginBy={bybelBeginBy} />
       )}
 
       {showHuise && (

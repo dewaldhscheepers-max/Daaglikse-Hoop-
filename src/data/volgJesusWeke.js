@@ -79,6 +79,9 @@ export const WEKE = {
     dag4Titel: 'Hy het gekom om te verlos',
     dag5Titel: 'My geliefde Seun',
     dag2Skrif: 'Johannes 1:1–5',
+    dag3Skrif: 'Johannes 1:14–18',
+    dag4Skrif: 'Matteus 1:18–25',
+    dag5Skrif: 'Markus 1:9–11',
     dag2Prompt:
       'Johannes begin: "In die begin..." Nie "by die krip" nie. Nie "toe Maria geboorte gee" nie. In die begin.\n\n' +
       'Die Woord was reeds daar. Die Woord was by God. Die Woord was God. Alles het deur Hom tot stand gekom.\n\n' +
@@ -86,7 +89,7 @@ export const WEKE = {
       'Die vraag: as Jesus werklik is Wie Johannes sê Hy is, met hoeveel gewig behoort ek dan na Sy woorde te luister?\n\n' +
       'Lees Johannes 1:1–5 nog een keer en hou hierdie waarheid vas: die krip was nie Jesus se begin nie.',
     dag3Prompt:
-      'Lees Johannes 1:14–18. Johannes sê: "Die Woord het mens geword en onder ons kom woon."\n\n' +
+      'Johannes sê: "Die Woord het mens geword en onder ons kom woon."\n\n' +
       'Die Een deur Wie alles ontstaan het, het mens geword. Hy het nie op ’n afstand gebly nie. ' +
       'Hy het tussen mense geleef. Hy het honger geken. Moegheid geken. Trane geken. Verwerping geken. Pyn geken.\n\n' +
       'God het nader gekom.\n\n' +
@@ -96,7 +99,7 @@ export const WEKE = {
       'Onthou: ’n Jesus wat jy self kan vorm, kan jou nooit vorm nie.\n\n' +
       'Bid: "Jesus, wys my waar my beeld van U nie pas by wat U Woord openbaar nie."',
     dag4Vraag:
-      'Lees Matteus 1:18–25. Die engel sê dat Hy Jesus genoem moet word. Waarom? Omdat Hy Sy volk van hulle sondes sal verlos. ' +
+      'Die engel sê dat Hy Jesus genoem moet word. Waarom? Omdat Hy Sy volk van hulle sondes sal verlos. ' +
       'Matteus noem Hom ook Immanuel — God met ons.\n\n' +
       'Jesus het nie gekom bloot om jou dag ’n bietjie beter te maak nie. Hy het nie gekom net om jou te help om jou eie doelwitte te bereik nie. ' +
       'Hy het gekom omdat ons verlossing nodig het.\n\n' +
@@ -104,7 +107,7 @@ export const WEKE = {
       'Dit is nie verkeerd om jou nood na Jesus toe te bring nie. Maar daar is ’n groter vraag: ' +
       'wil ek Jesus hê — of hoofsaaklik wat ek hoop Hy vir my kan doen?',
     dag5Prompt:
-      'Lees Markus 1:9–11. Jesus staan in die water. Die Gees daal op Hom neer. ' +
+      'Jesus staan in die water. Die Gees daal op Hom neer. ' +
       'Die Vader se stem kom uit die hemel: "Jy is my geliefde Seun."\n\n' +
       'Voordat Markus begin wys wat Jesus alles doen, wys hy vir ons Wie Jesus is.\n\n' +
       'En dit is die orde van hierdie hele program. Ons gaan praat oor gehoorsaamheid, gebed, geld, verhoudings, ' +

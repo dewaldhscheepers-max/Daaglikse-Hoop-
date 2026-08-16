@@ -175,7 +175,7 @@ function Steun() {
   )
 }
 
-export default function Bybel({ onClose }) {
+export default function Bybel({ onClose, beginBy = null }) {
   const [view, setView]             = useState('boeke')
   const [weergawes, setWeergawes]   = useState([])
   const [weergaweId, setWeergaweId] = useState(() => lees('byb_weergawe', null))
@@ -348,6 +348,25 @@ export default function Bybel({ onClose }) {
   useEffect(() => {
     if (view === 'lees' && inhoud && teksRef.current) omhulVerse(teksRef.current)
   }, [view, inhoud])
+
+  /* ── Maak direk by 'n gedeelte oop ──
+   *
+   * VOLG JESUS stuur mense hierheen om die week se Skrif te gaan lees. As die
+   * Bybel by die boekelys oopmaak, moet 'n mens Johannes soek, dan hoofstuk 1
+   * soek, en teen daardie tyd het die helfte opgegee. Die punt van daardie
+   * knoppie is juis dat hulle die teks LEES.
+   *
+   * Dit gebruik `springNa`, dieselfde pad as die soekresultate en "gaan
+   * voort" — geen nuwe laai-logika nie. Dit wag vir 'n weergawe, want
+   * `laaiTeks` het een nodig, en dit loop net EEN keer. */
+  const begonRef = useRef(false)
+  useEffect(() => {
+    if (begonRef.current || !beginBy || !weergaweId) return
+    const { boek: b, hoofstuk: h, vers } = beginBy
+    if (!b || !h) return
+    begonRef.current = true
+    springNa(b, h, vers || null)
+  }, [beginBy, weergaweId])   // eslint-disable-line react-hooks/exhaustive-deps
 
   function tikVers(e) {
     const el = e.target.closest && e.target.closest('.byb-vers')

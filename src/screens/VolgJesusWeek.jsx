@@ -25,7 +25,7 @@
  *   · 'n solo-mens sien NOOIT die groep- of fasiliteerdermateriaal nie.
  */
 import { useState } from 'react'
-import { geldigeVideoId } from '../data/volgJesus'
+import { geldigeVideoId, ontleedVerwysing } from '../data/volgJesus'
 import { mylpaalVir, biedKontak, antwoordVir } from '../data/volgJesusMylpale'
 import './VolgJesusWeek.css'
 
@@ -227,10 +227,30 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
       <h2 className="vw-dag-titel">{dagTitel(week, dag)}</h2>
 
       {dag === 1 && <Dag1 week={week} antwoord={antwoord} setAntwoord={setAntwoord} />}
-      {dag === 2 && <Eenvoudig kop="KYK WEER" skrif={week.dag2Skrif} teks={week.dag2Prompt} />}
-      {dag === 3 && <Eenvoudig kop="KYK DIEPER" teks={week.dag3Prompt} />}
-      {dag === 4 && <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag} />}
-      {dag === 5 && <Eenvoudig kop="LEEF DIT" teks={week.dag5Prompt} />}
+      {dag === 2 && (
+        <>
+          <Lees skrif={week.dag2Skrif} />
+          <Eenvoudig kop="KYK WEER" teks={week.dag2Prompt} />
+        </>
+      )}
+      {dag === 3 && (
+        <>
+          <Lees skrif={week.dag3Skrif} />
+          <Eenvoudig kop="KYK DIEPER" teks={week.dag3Prompt} />
+        </>
+      )}
+      {dag === 4 && (
+        <>
+          <Lees skrif={week.dag4Skrif} />
+          <Privaat kop="WAT GEBEUR BINNE JOU?" teks={week.dag4Vraag} />
+        </>
+      )}
+      {dag === 5 && (
+        <>
+          <Lees skrif={week.dag5Skrif} />
+          <Eenvoudig kop="LEEF DIT" teks={week.dag5Prompt} />
+        </>
+      )}
       {/* Die week se wallpaper staan in Dewald se dokument NA Dag 5, tussen
           die laaste dag en die weekoorsig. Dit is 'n WEEK-ding, nie 'n dag
           s'n nie. */}
@@ -247,13 +267,8 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
 function Dag1({ week, antwoord, setAntwoord }) {
   return (
     <>
-      <div className="vw-kaart">
-        <div className="vw-kop">LEES</div>
-        <p className="vw-skrif">{week.primereSkrif}</p>
-        <p className="vw-fyn">
-          Lees die gedeelte stadig. Moenie vandag jaag om by die toepassing uit te kom nie.
-        </p>
-      </div>
+      <Lees skrif={week.primereSkrif}
+            fyn="Lees die gedeelte stadig. Moenie vandag jaag om by die toepassing uit te kom nie." />
 
       <VideoKaart week={week} />
 
@@ -431,6 +446,65 @@ function Privaat({ kop, teks }) {
 
 /* Dag 3 vra terug oor die week se stap. Geen straf by "nog nie" — sien
    Punt 3 §18. */
+/* ── LEES ──
+ *
+ * Die belangrikste kaart van die dag, en dit het te klein gelyk.
+ *
+ * Dewald: "maak die text grote so groot soos die bybel sin wat in die app is.
+ * en maak seker hulle lees dit. se vir hulle dis belangrik om die Skrif te
+ * gaan lees wat ek gee. hul kan dit op die app se bybel lees of in hulle eie
+ * bybel."
+ *
+ * Die verwysing staan nou op 22px Georgia — presies `.byb-teks` in Bybel.css,
+ * die grootte waarop 'n mens die Bybel self in hierdie app lees.
+ *
+ * En daar is 'n knoppie. 'n Oproep om die Skrif te gaan lees, met die Bybel
+ * drie skerms weg, is 'n oproep wat die meeste mense nie gaan volg nie. Die
+ * knoppie stuur die gedeelte saam, sodat die Bybel by DAARDIE hoofstuk
+ * oopmaak en nie by die boekelys nie. Sien `beginBy` in Bybel.jsx.
+ *
+ * Kan ons die verwysing nie ontleed nie (of loop ons in die admin se
+ * voorskou, waar App.jsx nie luister nie), dan bly die woorde staan en verdwyn
+ * net die knoppie. Niemand kry 'n knoppie wat niks doen nie. */
+function Lees({ skrif, fyn }) {
+  const [gestuur, setGestuur] = useState(false)
+  if (!skrif) return null
+
+  const spanne = ontleedVerwysing(skrif)
+  const eerste = spanne && spanne[0]
+
+  function maakBybelOop() {
+    if (!eerste) return
+    try {
+      window.dispatchEvent(new CustomEvent('open-bybel', {
+        detail: { boek: eerste.boek, hoofstuk: eerste.hoofstuk, vers: eerste.van || null },
+      }))
+      setGestuur(true)
+    } catch {}
+  }
+
+  return (
+    <div className="vw-kaart vw-lees">
+      <div className="vw-kop">LEES</div>
+      <p className="vw-skrif">{skrif}</p>
+      <p className="vw-lees-eis">
+        Moenie hierdie deel oorslaan nie. Die res van vandag bou op hierdie
+        gedeelte — gaan lees dit eers.
+      </p>
+      {eerste && (
+        <button className="vw-lees-knop" onClick={maakBybelOop}>
+          📖  Lees dit in die app se Bybel
+        </button>
+      )}
+      <p className="vw-fyn">
+        {eerste ? 'Of lees dit in jou eie Bybel. ' : ''}
+        {fyn}
+      </p>
+      {gestuur && <p className="vw-lees-nota">Die Bybel maak by {skrif} oop.</p>}
+    </div>
+  )
+}
+
 /* ── Die intjek by die gehoorsaamheidstap ──
  *
  * Dit het op DAG 3 gestaan, saam met 'n herhaling van die hele

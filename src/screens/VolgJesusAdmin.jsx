@@ -37,7 +37,8 @@ const LEEG = (n) => ({
   videoId: '',
   kernwaarheid: '', privaatRefleksie: '', gehoorsaamheidStap: '', gebed: '',
   dag1Titel: '', dag2Titel: '', dag3Titel: '', dag4Titel: '', dag5Titel: '',
-  dag2Skrif: '', dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
+  dag2Skrif: '', dag3Skrif: '', dag4Skrif: '', dag5Skrif: '',
+  dag2Prompt: '', dag3Prompt: '', dag4Vraag: '', dag5Prompt: '',
   moreTeaser: '',
   groepVraag1: '', groepVraag2: '', groepVraag3: '', groepVraag4: '',
   eenSin: '', weekKern: '', wallpaper: '',
@@ -401,7 +402,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <h4 className="vj-afdeling">Dag 2 tot 5</h4>
       <SkrifVeld l="Dag 2 — Skrif" v={week.dag2Skrif} op={v => stel('dag2Skrif', v)} />
       <Veld l="Dag 2 — vraag"  v={week.dag2Prompt} op={v => stel('dag2Prompt', v)} lank />
+      <SkrifVeld l="Dag 3 — Skrif" v={week.dag3Skrif} op={v => stel('dag3Skrif', v)} />
       <Veld l="Dag 3 — vraag"  v={week.dag3Prompt} op={v => stel('dag3Prompt', v)} lank />
+      <SkrifVeld l="Dag 4 — Skrif" v={week.dag4Skrif} op={v => stel('dag4Skrif', v)} />
       <Veld l="Dag 4 — hartsvraag" v={week.dag4Vraag} op={v => stel('dag4Vraag', v)} lank />
       <Veld l="Dag 5 — leef dit"   v={week.dag5Prompt} op={v => stel('dag5Prompt', v)} lank />
       {/* Die haak na môre. Geen streak, geen "moenie jou rekord verloor

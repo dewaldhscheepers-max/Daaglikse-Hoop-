@@ -354,3 +354,36 @@
   color: var(--purple-dark);
   margin: 2px 2px 14px;
 }
+
+/* ── LEES ──
+   Die verwysing staan op dieselfde grootte as die Bybel se eie leesteks
+   (.byb-teks in Bybel.css: 22px Georgia). Dit is die kaart wat 'n mens moet
+   sien, en dit was te klein. */
+.vw-lees { border: 1px solid #E6DFF5; }
+.vw-lees .vw-skrif {
+  font-family: Georgia, 'Noto Serif', 'Droid Serif', 'Times New Roman', serif;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: 0.002em;
+  color: var(--purple-dark);
+  margin-bottom: 12px;
+}
+.vw-lees-eis {
+  font-size: 15px; line-height: 1.65; font-weight: 600;
+  color: #4A3A1A;
+  background: #FFF6E6;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.vw-lees-knop {
+  display: block; width: 100%;
+  padding: 14px; margin-bottom: 10px;
+  border: none; border-radius: 12px;
+  background: var(--purple-dark); color: #fff;
+  font-family: inherit; font-size: 15px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vw-lees-knop:active { background: #362B57; }
+.vw-lees-nota { margin-top: 8px; font-size: 12.5px; color: var(--purple-dark); }

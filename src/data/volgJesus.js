@@ -110,7 +110,11 @@ export const OPSIONELE_VELDE = [
   /* Die week se eie opskrif vir elke dag. Sonder hulle val die skerm terug
      op generiese name, en dan heet 'n dag oor die menswording "Gehoorsaam". */
   'dag1Titel', 'dag2Titel', 'dag3Titel', 'dag4Titel', 'dag5Titel',
-  'dag2Skrif', 'dag2Prompt',
+  /* Elke dag gee Skrif, nie net Dag 1 en 2 nie. Sonder hierdie velde is die
+     verwysing net 'n sin binne-in die prompt, en dan is daar niks om groot te
+     wys en niks om die Bybel mee oop te maak nie. */
+  'dag2Skrif', 'dag3Skrif', 'dag4Skrif', 'dag5Skrif',
+  'dag2Prompt',
   'dag3Prompt',
   'dag4Vraag',
   'dag5Prompt',
