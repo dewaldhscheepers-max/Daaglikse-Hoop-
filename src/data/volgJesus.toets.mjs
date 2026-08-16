@@ -204,21 +204,27 @@ console.log('\n── Die geskrewe weke self ──\n')
      nommers, Array.from({ length: nommers.length }, (_, i) => i + 1))
 
   const SONDER_VIDEO = VERPLIGTE_VELDE.filter(v => v !== 'videoId')
-  const leeg = [], verkeerdeNommer = [], sonderWaarskuwing = [], metVideo = []
+  const leeg = [], verkeerdeNommer = [], sonderWaarskuwing = [], slegteVideo = []
   for (const n of nommers) {
     const w = WEKE[n]
     if (w.weeknommer !== n) verkeerdeNommer.push(n)
     for (const veld of SONDER_VIDEO) {
       if (String(w[veld] ?? '').trim() === '') leeg.push(`week ${n}: ${veld}`)
     }
-    /* Die videoId's word in die admin geplak; hier moet hulle leeg wees. */
-    if (String(w.videoId ?? '') !== '') metVideo.push(n)
+    /* 'n Week hoef nog nie 'n video te he nie. Maar as sy een het, moet dit
+       die KAAL ID wees en nie 'n URL nie. Dit was eers "elke videoId is nog
+       leeg", en dit was 'n oomblik en nie 'n reel nie: die dag toe Week 1 sy
+       video gekry het, het die toets rooi geword sonder dat iets stukkend was.
+       Die werklike gevaar is 'n hele skakel wat as 'n "ID" gestoor word — die
+       speler wys dan 'n lee blok en niks kla nie. */
+    const v = String(w.videoId ?? '')
+    if (v !== '' && !geldigeVideoId(v)) slegteVideo.push(`week ${n}: ${v}`)
     if (w.pastoraleRisiko === 'hoog' &&
         String(w.fasiliteerderWaarskuwing || '').trim() === '') sonderWaarskuwing.push(n)
   }
   is('elke week se sleutel en weeknommer stem ooreen', verkeerdeNommer, [])
   is('geen verpligte veld is leeg nie', leeg, [])
-  is('elke videoId is nog leeg', metVideo, [])
+  is('geen videoId is n skakel of rommel nie', slegteVideo, [])
   is('ELKE hoe-risiko week dra n fasiliteerderwaarskuwing', sonderWaarskuwing, [])
 
   /* En die hek moet werklik VANG — anders is die groen hierbo waardeloos. */

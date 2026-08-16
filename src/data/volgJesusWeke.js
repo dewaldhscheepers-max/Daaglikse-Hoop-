@@ -44,7 +44,7 @@ export const WEKE = {
       'Hierdie reis begin dus nie by "wat kan Jesus vir my doen?" nie. Dit begin by: "Wie is Hy?"',
     primereSkrif: 'Johannes 1:1–18',
     ondersteunendeSkrif: 'Matteus 1:18–25; Markus 1:9–11; Jakobus 2:19',
-    videoId: '',
+    videoId: 'jACGS5QkLkQ',
     /* HOU DIT VAS op Dag 1 — en die sin op die wallpaper. */
     kernwaarheid:
       'As Jesus werklik Here is — gaan jy Hom volg?',

@@ -5,6 +5,7 @@ import VolgJesusAdmin from './VolgJesusAdmin'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { videoIdUit } from '../data/youtubeId'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
@@ -39,19 +40,6 @@ function leesOortjie() {
     const o = localStorage.getItem(OORTJIE_SLEUTEL)
     return OORTJIES.includes(o) ? o : 'notes'
   } catch { return 'notes' }
-}
-
-function extractYoutubeId(input) {
-  const s = (input || '').trim()
-  const shorts = s.match(/shorts\/([a-zA-Z0-9_-]+)/)
-  if (shorts) return shorts[1]
-  const watch = s.match(/[?&]v=([a-zA-Z0-9_-]+)/)
-  if (watch) return watch[1]
-  const youtu = s.match(/youtu\.be\/([a-zA-Z0-9_-]+)/)
-  if (youtu) return youtu[1]
-  const embed = s.match(/embed\/([a-zA-Z0-9_-]+)/)
-  if (embed) return embed[1]
-  return s
 }
 
 export default function Admin({ onClose }) {
@@ -140,7 +128,7 @@ export default function Admin({ onClose }) {
 
   async function handleSvSave() {
     setSvSaving(true)
-    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: extractYoutubeId(svVideoId), title: svTitle.trim(), subtitle: svSubtitle.trim() })
+    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: videoIdUit(svVideoId), title: svTitle.trim(), subtitle: svSubtitle.trim() })
     setSvSaving(false)
     setSvSaved(true)
     setTimeout(() => setSvSaved(false), 2500)

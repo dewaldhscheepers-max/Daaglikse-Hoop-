@@ -304,3 +304,13 @@
   font-weight: 800;
 }
 .vj-laai-nodig:active { background: #B08E1E; }
+
+/* Die video-veld se terugvoer: wys wat werklik gestoor gaan word. */
+.vj-hint { display: block; margin-top: 6px; font-size: 12.5px; color: #8A82A0; }
+.vj-goed { display: block; margin-top: 6px; font-size: 12.5px; color: #2E7D4F; }
+.vj-goed strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Die video-veld se terugvoer: wys wat werklik gestoor gaan word. */
+.vj-hint { display: block; margin-top: 6px; font-size: 12.5px; color: #8A82A0; }
+.vj-goed { display: block; margin-top: 6px; font-size: 12.5px; color: #2E7D4F; }
+.vj-goed strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }

@@ -27,8 +27,45 @@ import {
   publiseerFoute, geldigeVideoId, ontleedVerwysing,
 } from '../data/volgJesus'
 import { WEKE } from '../data/volgJesusWeke'
+import { keurVideoInset } from '../data/youtubeId'
 import VolgJesusWeek from './VolgJesusWeek'
 import './VolgJesusAdmin.css'
+
+/* ── Die video ──
+ *
+ * Dewald: "maak seker ek kan in admin by die series die hele link insit en nie
+ * net die ID nie."
+ *
+ * Hy plak wat sy foon hom gee, en dit is nooit die rou ID nie:
+ *
+ *     https://youtu.be/jACGS5QkLkQ?si=DjVIhhIlhHKS4Hg6
+ *
+ * Die veld hou die skakel soos hy dit geplak het en wys onder wat werklik
+ * gestoor gaan word. Kry ons niks bruikbaars nie, se dit dit — in plaas
+ * daarvan om die hele URL as 'n "video-ID" te stoor en die lee speler weke
+ * later te ontdek. */
+function VideoVeld({ waarde, op }) {
+  const k = keurVideoInset(waarde)
+  return (
+    <div className="vj-veld">
+      <label>Video — plak die hele YouTube-skakel</label>
+      <input value={waarde} onChange={e => op(e.target.value)}
+             placeholder="https://youtu.be/jACGS5QkLkQ?si=..." />
+      {k.leeg && <span className="vj-hint">Nog geen video nie.</span>}
+      {!k.leeg && k.geldig && (
+        <span className="vj-goed">
+          ✓ Video-ID: <strong>{k.id}</strong>{k.wasSkakel ? ' — uit die skakel gehaal' : ''}
+        </span>
+      )}
+      {!k.leeg && !k.geldig && (
+        <span className="vj-fout">
+          Ek kry nie 'n YouTube-video hierin nie. Plak die hele skakel, bv.
+          https://youtu.be/jACGS5QkLkQ
+        </span>
+      )}
+    </div>
+  )
+}
 
 const LEEG = (n) => ({
   weeknommer: n,
@@ -104,8 +141,11 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     if (!week) return
     setBesig(true); setBoodskap(null)
     try {
+      /* Die skakel word HIER in 'n ID verander, nie by elke tikslag nie — 'n
+         halwe URL tydens die tik moet nie 'n fout laat flits nie. */
+      const skoon = { ...week, videoId: keurVideoInset(week.videoId).id }
       const r = await fetch('/api/volg-jesus-week', {
-        method: 'PUT', headers: kop(), body: JSON.stringify({ week }),
+        method: 'PUT', headers: kop(), body: JSON.stringify({ week: skoon }),
       })
       const j = await r.json()
       if (j.ok) { setBoodskap({ goed: true, teks: 'Gestoor.' }); laaiLys() }
@@ -416,14 +456,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <SkrifVeld l="Primêre Skrif"       v={week.primereSkrif}        op={v => stel('primereSkrif', v)} />
       <SkrifVeld l="Ondersteunende Skrif" v={week.ondersteunendeSkrif} op={v => stel('ondersteunendeSkrif', v)} />
 
-      <div className="vj-veld">
-        <label>YouTube-video-ID</label>
-        <input value={week.videoId || ''} onChange={e => stel('videoId', e.target.value.trim())}
-               placeholder="dQw4w9WgXcQ" />
-        {week.videoId && !geldigeVideoId(week.videoId) && (
-          <span className="vj-fout">Dit lyk nie soos 'n video-ID nie — net die 11 karakters, nie die hele skakel nie.</span>
-        )}
-      </div>
+      <VideoVeld waarde={week.videoId || ''} op={v => stel('videoId', v)} />
 
       <Veld l="Hou dit vas (Dag 1, en die wallpaper se sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
       <Veld l="Die laaste hou (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />

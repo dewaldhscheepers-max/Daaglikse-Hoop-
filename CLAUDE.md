@@ -31,7 +31,7 @@ node src/data/sorgSaai.toets.mjs              # die eerste reaksies en opmerking
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
-node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 63 toetse
+node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/volgJesusMylpale.toets.mjs      # die mylpale + wat die kerk mag sien, 42 toetse
 node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde oorleef, 53 toetse
@@ -44,11 +44,12 @@ node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde,
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
 node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 38 toetse
-node api/_adminSlot.toets.mjs                 # die admin-geheim op drie eindpunte, 13 toetse
+node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uitvee, 20 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 49 toetse
+node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
