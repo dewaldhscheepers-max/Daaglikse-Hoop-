@@ -15,6 +15,17 @@
 }
 .vw-open-doel { font-size: 15px; line-height: 1.65; opacity: .93; margin-bottom: 22px; }
 
+/* Die openingskerm self. Dit staan nou VOOR die knoppie en is nie meer
+   weggevou nie — sien die kommentaar in VolgJesusWeek.jsx. `pre-line` sodat
+   Dewald se paragraafbreuke land soos hy hulle geskryf het. */
+.vw-open-teks {
+  font-size: 15.5px; line-height: 1.75;
+  white-space: pre-line;
+  text-align: left;
+  opacity: .95;
+  margin-bottom: 24px;
+}
+
 .vw-hoofknop {
   width: 100%; background: var(--gold); color: #33230D; border: none;
   border-radius: 14px; padding: 16px;
@@ -28,20 +39,6 @@
   width: 100%; margin-top: 10px; background: none; border: none;
   font-family: var(--font-body); font-size: 13.5px; color: var(--text-muted);
   padding: 10px; cursor: pointer;
-}
-
-/* Die lang inleiding, weggevou. */
-.vw-meer { margin: 14px 2px 0; }
-.vw-meer summary {
-  font-size: 13.5px; font-weight: 700; color: var(--purple-dark);
-  cursor: pointer; padding: 8px 0; list-style: none;
-}
-.vw-meer summary::-webkit-details-marker { display: none; }
-.vw-meer summary::before { content: '＋  '; }
-.vw-meer[open] summary::before { content: '－  '; }
-.vw-meer p {
-  font-size: 14.5px; line-height: 1.7; color: var(--text);
-  white-space: pre-line; padding: 4px 0 10px;
 }
 
 /* ── Die dae-lys op die opening ── */

@@ -13,8 +13,9 @@
  *
  * Daarom:
  *
- *   · die opening is KORT — wie is ek, wat leer ek, wat druk ek. Die lang
- *     inleiding kom NA die klik, nie voor nie;
+ *   · die OPENING word gelees, nie weggesteek nie. Dit was 'n uitklap en dit
+ *     was verkeerd: dit is die sterkste skryfwerk in die week en die ding wat
+ *     iemand laat besluit om te begin. Titel → opening → BEGIN;
  *   · elke dag het 'n herkenbare EINDE, nie 'n vloei in die volgende dag nie;
  *   · elke einde dra 'n haak na môre. Geen streak, geen "jy verloor jou
  *     rekord" — net 'n rede om nuuskierig te wees;
@@ -51,9 +52,27 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
   function klaarMetDag() { setBlad('klaar'); boToe() }
   function boToe() { try { window.scrollTo({ top: 0 }) } catch {} }
 
-  /* ── Die opening: kort ──────────────────────────────────────────────
-     Op 'n foon moet iemand binne twee sekondes weet waar hy is, wat hy gaan
-     leer, en wat hy druk. Die lang inleiding wag agter die knoppie. */
+  /* ── Die opening ────────────────────────────────────────────────────
+   *
+   * Die openingskerm was agter 'n uitklap — "＋ Waaroor gaan hierdie week?"
+   * Dit was my keuse, om die eerste skerm kort te hou, en dit was verkeerd.
+   *
+   * Dewald: "waaroor gaan hierdie week is weggesteek. dit moet deel van die
+   * program wees."
+   *
+   * Hy is reg, en sy eie dokument sê dit ook: die opening staan VOOR die
+   * BEGIN-knoppie, nie agter 'n plusteken nie. Dit is die sterkste skryfwerk
+   * in die week en dit is die ding wat iemand laat besluit om te begin. 'n
+   * Uitklap beteken die meeste mense lees dit nooit.
+   *
+   * Die volgorde is nou soos hy dit geskryf het:
+   *
+   *     WEEK 1 VAN 52  →  Wie is Jesus?  →  die opening  →  [ BEGIN WEEK 1 ]
+   *
+   * `doel` staan nie meer hier nie. In sy dokument is dit metadata — dit staan
+   * bo saam met die Beweging en die kerntekste, met die woorde "Doel van die
+   * week". Dit is die fasiliteerder se taal, en dit wys nou op die
+   * fasiliteerderblad. */
   if (blad === 'oop') {
     return (
       <div className="vw">
@@ -61,19 +80,11 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
         <div className="vw-open">
           <div className="vw-open-merk">WEEK {week.weeknommer} VAN 52</div>
           <h1 className="vw-open-titel">{week.titel}</h1>
-          {week.doel && <p className="vw-open-doel">{week.doel}</p>}
+          {week.openingskerm && <p className="vw-open-teks">{week.openingskerm}</p>}
           <button className="vw-hoofknop" onClick={() => beginDag(1)}>
             BEGIN WEEK {week.weeknommer}
           </button>
         </div>
-
-        {/* Die lang inleiding, NA die knoppie. Wie dit wil lees, lees dit. */}
-        {week.openingskerm && (
-          <details className="vw-meer">
-            <summary>Waaroor gaan hierdie week?</summary>
-            <p>{week.openingskerm}</p>
-          </details>
-        )}
 
         {/* Die mylpaal staan op die openingskerm, nie in 'n uitklap nie.
             Punt 1 §12: dit is nie 'n venster wat een keer kom en weggaan nie.
@@ -169,6 +180,12 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
           <div className="vw-waarsku">
             <strong>⚠ Wees versigtig met hierdie gesprek</strong>
             <p>{week.fasiliteerderWaarskuwing}</p>
+          </div>
+        )}
+        {week.doel && (
+          <div className="vw-kaart">
+            <div className="vw-kop">DOEL VAN DIE WEEK</div>
+            <p>{week.doel}</p>
           </div>
         )}
         <div className="vw-kaart">
