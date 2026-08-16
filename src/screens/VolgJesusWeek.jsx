@@ -48,7 +48,15 @@ const DAE = [
 const dagTitel = (week, n) =>
   String((week && week[`dag${n}Titel`]) || '').trim() || DAE[n - 1].titel
 
-export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }) {
+export default function VolgJesusWeek({
+  week, rol = 'solo', opSluit, opMylpaal,
+  /* Die drie hake vir die lewende app. Hulle is almal opsioneel: die admin se
+     voorskou gee nie een van hulle nie, en dan tel niks en skuif niks.
+     · opBegin      — die BEGIN-knoppie op die opening
+     · opDagKlaar   — 'n dag is klaar (1..5)
+     · binnekort    — { kop, lyf } uit volgJesusOpenbaar.js, vir ná Dag 5 */
+  opBegin, opDagKlaar, binnekort = null,
+}) {
   const [blad, setBlad] = useState('oop')   /* 'oop' | 'dag' | 'klaar' | 'groep' | 'fas' */
   const [dag, setDag]   = useState(1)
   const [antwoord, setAntwoord] = useState(null)
@@ -59,7 +67,10 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
   const wysOortjies = rol === 'groep' || rol === 'fasiliteerder'
 
   function beginDag(n) { setDag(n); setBlad('dag'); setAntwoord(null); boToe() }
-  function klaarMetDag() { setBlad('klaar'); boToe() }
+  function klaarMetDag() {
+    setBlad('klaar'); boToe()
+    if (opDagKlaar) { try { opDagKlaar(dag) } catch {} }
+  }
   function boToe() { try { window.scrollTo({ top: 0 }) } catch {} }
 
   /* ── Die opening ────────────────────────────────────────────────────
@@ -91,7 +102,10 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
           <div className="vw-open-merk">WEEK {week.weeknommer} VAN 52</div>
           <h1 className="vw-open-titel">{week.titel}</h1>
           {week.openingskerm && <p className="vw-open-teks">{week.openingskerm}</p>}
-          <button className="vw-hoofknop" onClick={() => beginDag(1)}>
+          <button className="vw-hoofknop" onClick={() => {
+            if (opBegin) { try { opBegin() } catch {} }
+            beginDag(1)
+          }}>
             BEGIN WEEK {week.weeknommer}
           </button>
         </div>
@@ -136,9 +150,23 @@ export default function VolgJesusWeek({ week, rol = 'solo', opSluit, opMylpaal }
               <p>{week.moreTeaser || volgende.titel}</p>
             </div>
           ) : (
+            /* ── Die einde van die week ──
+             *
+             * "Volgende week gaan ons verder" was 'n leuen op die dag toe daar
+             * nog nie 'n volgende week was nie. Dewald laai een week per dag,
+             * en die program is lewendig terwyl dit groei.
+             *
+             * Die woorde word dus nie hier getik nie. Hulle kom uit
+             * `binnekort()` in volgJesusOpenbaar.js, wat sy nommer AFLEI uit
+             * wat gepubliseer is. Skakel hy Week 2 aan, sê hierdie blokkie
+             * vanself "Week 3 kom binnekort" — daar is niks om te onthou om
+             * by te werk nie.
+             *
+             * Sonder daardie inligting (die admin se voorskou) bly die ou
+             * sin staan; daar is niemand om te mislei nie. */
             <div className="vw-more">
-              <span className="vw-more-kop">HIERDIE WEEK IS KLAAR</span>
-              <p>Volgende week gaan ons verder.</p>
+              <span className="vw-more-kop">{binnekort ? binnekort.kop : 'HIERDIE WEEK IS KLAAR'}</span>
+              <p>{binnekort ? binnekort.lyf : 'Volgende week gaan ons verder.'}</p>
             </div>
           )}
 

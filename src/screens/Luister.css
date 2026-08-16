@@ -976,3 +976,9 @@
 @media (max-width: 359px) {
   .sorg-deur { font-size: 13px; padding: 12px 10px; }
 }
+
+/* ── Die VOLG JESUS-kaart, direk onder die speler ──
+   Dieselfde marges as .sorg-deur daaronder, sodat die drie blokke onder die
+   speler op een lyn staan. Die kaart self bring sy eie hoogte en kleur —
+   sien VolgJesusKnoppie.css. */
+.vj-kaart-plek { margin: 16px 16px 0; }

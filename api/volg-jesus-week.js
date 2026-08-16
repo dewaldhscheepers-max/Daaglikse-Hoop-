@@ -12,9 +12,20 @@
  * slot as die res van die admin; die vergelyking staan een keer, in
  * _geheim.js, deur timingSafeEqual.
  *
- * Daar is DOELBEWUS geen openbare leeseindpunt nie. Die program is nie in die
- * app tot Week 52 klaar is, en 'n eindpunt wat "net die gepubliseerdes" wys,
- * is presies hoe 'n halwe program per ongeluk lewendig gaan.
+ * ── Die openbare pad staan ELDERS ──
+ *
+ * Hier het gestaan: "Daar is DOELBEWUS geen openbare leeseindpunt nie ... 'n
+ * eindpunt wat 'net die gepubliseerdes' wys, is presies hoe 'n halwe program
+ * per ongeluk lewendig gaan."
+ *
+ * Die program loop nou lewendig terwyl dit groei — Dewald laai een week per
+ * dag — en die publiek lees deur `volg-jesus-openbaar.mjs`. Die vrees bly
+ * geldig en is 'n toets geword: daardie leer stuur net weke waar
+ * `gepubliseer === true` (die APARTE Firestore-veld, nie iets in die JSON
+ * nie) en bou sy antwoord uit 'n WITLYS, sodat niks van hierdie eindpunt se
+ * fasiliteerder- of hersieningsmateriaal daar kan uitkom nie.
+ *
+ * HIERDIE leer bly heeltemal toe. Wat hier deurkom, is die volle week.
  */
 const crypto = require('crypto')
 const { magAdminDing, wieMag } = require('./_geheim.js')

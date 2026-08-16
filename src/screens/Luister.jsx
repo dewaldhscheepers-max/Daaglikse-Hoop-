@@ -5,6 +5,7 @@ import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
+import VolgJesusKaart from '../components/VolgJesusKaart'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -1180,6 +1181,19 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── VOLG JESUS ──
+
+          Direk onder die speler, want dit is wat Dewald gevra het en dit is
+          reg: die stemboodskap bly die app, en die program is die volgende
+          tree vir wie meer wil hê as vandag se boodskap.
+
+          Die kaart WYS NIE as daar niks gepubliseer is nie. Sien
+          VolgJesusKaart.jsx — die hele besluit staan daar sodat hierdie skerm
+          se navigasie onaangeraak bly. */}
+      <div className="vj-kaart-plek">
+        <VolgJesusKaart />
       </div>
 
       {/* ── Die deur na Pastorale Sorg ──

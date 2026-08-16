@@ -1,0 +1,126 @@
+/* Die VOLG JESUS-oorlegskerm.
+ *
+ * Geen `transform` en geen `opacity` op `:active` nie, en geen
+ * `transform: translateX(-50%)` om iets te sentreer nie — albei maak 'n eie
+ * saamgestelde laag en albei staan in CLAUDE.md se lys van wat die gekleurde
+ * strepe teruggebring het.
+ *
+ * `100svh`, nie `100dvh` nie: `dvh` verander saam met Chrome se adresbalk en
+ * hervorm die hele blad by elke raam van daardie animasie. */
+
+.vjl {
+  position: fixed;
+  inset: 0;
+  /* ONDER die Bybel (250). Die LEES-kaart stuur 'n mens na die app se Bybel
+     toe, en 'n Bybel wat agter hierdie skerm oopmaak, is 'n knoppie wat niks
+     doen. 240 laat hierdie skerm bo die gewone blad staan en die Bybel bo
+     hom. */
+  z-index: 240;
+  background: var(--bg, #FAF7F2);
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  font-family: var(--font-body);
+}
+
+.vjl-balk {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #2A2350;
+  color: #fff;
+}
+
+.vjl-toe {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: none; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff; font-size: 16px; line-height: 1;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vjl-toe:active { background: rgba(255, 255, 255, 0.28); }
+
+.vjl-balk-naam {
+  flex: 1;
+  font-size: 13px; font-weight: 900; letter-spacing: 1.6px;
+}
+
+.vjl-kies {
+  flex-shrink: 0;
+  border: none; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  padding: 8px 10px;
+}
+/* Die lys self word deur die stelsel geteken en erf nie die wit hierbo nie. */
+.vjl-kies option { color: #1a1a1a; background: #fff; }
+
+.vjl-blad {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 14px 40px;
+}
+
+.vjl-stil {
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-muted, #6b6b6b);
+}
+
+/* ── Verby die laaste week ──
+ *
+ * Dit is nie 'n foutskerm nie en dit moet nie soos een lyk nie. Iemand wat
+ * hier kom, het alles gedoen wat bestaan. */
+.vjl-wag {
+  background: linear-gradient(165deg, #5C4E8E 0%, #443A6E 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 34px 22px 26px;
+  text-align: center;
+}
+.vjl-wag-merk {
+  width: 52px; height: 52px; margin: 0 auto 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.vjl-wag h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 7vw, 30px);
+  margin: 0 0 10px;
+}
+.vjl-wag-lyf { font-size: 15px; line-height: 1.7; opacity: .92; margin: 0 0 20px; }
+
+.vjl-binnekort {
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: left;
+}
+.vjl-binnekort-kop {
+  display: block;
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--gold, #E0B872);
+  margin-bottom: 8px;
+}
+.vjl-binnekort p { margin: 0; font-size: 14.5px; line-height: 1.7; opacity: .93; }
+
+.vjl-terugknop {
+  width: 100%;
+  margin-top: 18px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 13px;
+  padding: 13px;
+  color: #fff;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vjl-terugknop:active { background: rgba(255, 255, 255, 0.14); }

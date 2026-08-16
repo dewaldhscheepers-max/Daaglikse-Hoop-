@@ -43,6 +43,7 @@ import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
+import VolgJesusLewe from './screens/VolgJesusLewe'
 import BidVirMy from './components/BidVirMy'
 import { idUitPad } from './data/gebedDeel'
 import './App.css'
@@ -119,6 +120,7 @@ export default function App() {
   const [bybelBeginBy, setBybelBeginBy]           = useState(null)
   const [showArk, setShowArk]                     = useState(false)
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
+  const [showVolgJesus, setShowVolgJesus]         = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
   /* Die id van 'n gedeelde gebedsversoek — /bid/<id>. Dit staan HIER by die
      res van die toestand en nie langs sy eie effek nie: die
@@ -938,6 +940,14 @@ export default function App() {
     return () => window.removeEventListener('open-vrugtefees', onOpen)
   }, [])
 
+  // ── VOLG JESUS ──
+  // Die kaart op Luister staan direk onder die speler en stuur hierheen.
+  useEffect(() => {
+    function onOpen() { setShowVolgJesus(true) }
+    window.addEventListener('open-volg-jesus', onOpen)
+    return () => window.removeEventListener('open-volg-jesus', onOpen)
+  }, [])
+
   // ── Bybel ──
   // Die gebeurtenis mag 'n gedeelte saambring: VOLG JESUS stuur mense hierheen
   // om die week se Skrif te gaan lees, en dan moet die Bybel by daardie
@@ -1052,6 +1062,7 @@ export default function App() {
      laaste een toe — die modale sit bo-op die skerms. */
   const oorlegLae = [
     { oop: showAdmin,               toe: () => setShowAdmin(false) },
+    { oop: showVolgJesus,           toe: () => setShowVolgJesus(false) },
     { oop: showBybel,               toe: () => setShowBybel(false) },
     { oop: showArk,                 toe: () => setShowArk(false) },
     { oop: showVrugtefees,          toe: () => setShowVrugtefees(false) },
@@ -1381,6 +1392,10 @@ export default function App() {
 
       {showVrugtefees && (
         <Vrugtefees onClose={() => setShowVrugtefees(false)} />
+      )}
+
+      {showVolgJesus && (
+        <VolgJesusLewe onClose={() => setShowVolgJesus(false)} />
       )}
 
       {showArk && (

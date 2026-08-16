@@ -97,6 +97,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
   const [versoeke, setVersoeke] = useState([])
   /* Die bevestiging vir 'Begin oor'. Dit val na tien sekondes vanself terug. */
   const [seker, setSeker]       = useState(false)
+  /* Die tellers. Vier heelgetalle plus een ry per week — geen naam en geen
+     toestel-id, sien api/_volgJesusTelVelde.js. */
+  const [tellers, setTellers]   = useState(null)
 
   const kop = useCallback(() => ({ 'Content-Type': 'application/json', 'x-sorg-geheim': geheim }), [geheim])
 
@@ -106,6 +109,14 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       const j = await r.json()
       setLys(Array.isArray(j.weke) ? j.weke : [])
     } catch { setLys([]) }
+  }, [geheim])
+
+  const laaiTellers = useCallback(async () => {
+    try {
+      const r = await fetch('/api/volg-jesus-telling', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json()
+      setTellers(j && j.tellers ? j.tellers : {})
+    } catch { setTellers({}) }
   }, [geheim])
 
   const laaiVersoeke = useCallback(async () => {
@@ -125,7 +136,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
     } catch {}
   }
 
-  useEffect(() => { laaiLys(); laaiVersoeke() }, [laaiLys, laaiVersoeke])
+  useEffect(() => { laaiLys(); laaiVersoeke(); laaiTellers() }, [laaiLys, laaiVersoeke, laaiTellers])
 
   async function maakOop(n) {
     setBesig(true); setBoodskap(null); setVoorskou(false)
@@ -293,7 +304,9 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         <div className="vj-kop">
           <h3>VOLG JESUS</h3>
           <p className="vj-sub">
-            52 weke. Niks hiervan is in die app nie — dit word hier gebou en hier getoets.
+            52 weke. 'n Week wat GEPUBLISEER is, is lewendig in die app — die
+            kaart op Luister wys hom en mense kan hom doen. Al die res word
+            hier gebou en hier getoets en gaan nêrens heen nie.
           </p>
           <button className="vj-groot" onClick={laaiAlmalOp} disabled={opBesig}>
             {opBesig
@@ -345,6 +358,8 @@ export default function VolgJesusAdmin({ geheim = '' }) {
             ))}
           </div>
         )}
+        <Tellers tellers={tellers} lys={lys} />
+
         {BEWEGINGS.map(b => (
           <div key={b.nommer} className="vj-beweging">
             <div className="vj-beweging-kop">
@@ -552,6 +567,78 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           {besig ? 'Besig…' : 'Stoor'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/* ── Hoeveel mense loop die program ──
+ *
+ * Dewald: "en as iemand die program doen moet dit in admin tel hoeveel mense
+ * begin het en so."
+ *
+ * Vier getalle bo, en dan een ry per week wat lewendig is.
+ *
+ * ── Wat elke getal WERKLIK beteken ──
+ *
+ * Dit staan op die skerm, want 'n getal sonder sy definisie is 'n getal wat
+ * later verkeerd aangehaal word. Hierdie projek het daardie fout al gemaak
+ * met die installasie-teller minus die tokens — 'n aftreksom wat soos 'n feit
+ * gelyk het en 'n raaiskoot was.
+ *
+ * Elke TOESTEL tel homself een keer per ding. Dieselfde mens op twee fone tel
+ * dus twee keer, en 'n herinstallasie tel weer. Die getal is 'n bietjie te
+ * laag eerder as te hoog, en dit is die regte kant om op te fouteer.
+ *
+ * Daar is geen naam, geen e-pos en geen toestel-id agter hierdie getalle nie.
+ * Wat mense in die program tik, verlaat nooit hulle foon nie. */
+function Tellers({ tellers, lys }) {
+  if (!tellers) return null
+  const n = v => Number(tellers[v] || 0)
+  const lewe = (lys || []).filter(w => w.gepubliseer).map(w => w.weeknommer).sort((a, b) => a - b)
+
+  const GROOT = [
+    ['Het die kaart oopgemaak', n('oop'),      'Op Luister gedruk en die program oopgemaak.'],
+    ['Het BEGIN gedruk',        n('begin'),    'Werklik met \u2019n week begin.'],
+    ['Dae voltooi',             n('dagKlaar'), 'Elke keer wat iemand \u2018Klaar met dag\u2019 gedruk het.'],
+    ['Weke voltooi',            n('weekKlaar'),'Al vyf dae van \u2019n week klaar.'],
+  ]
+
+  return (
+    <div className="vj-tellers">
+      <div className="vj-tellers-kop">HOEVEEL MENSE LOOP DIE PROGRAM</div>
+      <div className="vj-tellers-ry">
+        {GROOT.map(([w, v, fyn]) => (
+          <div key={w} className="vj-teller">
+            <span className="vj-teller-n">{v.toLocaleString('af-ZA').replace(/,/g, '\u00a0')}</span>
+            <span className="vj-teller-w">{w}</span>
+            <span className="vj-teller-f">{fyn}</span>
+          </div>
+        ))}
+      </div>
+
+      {lewe.length > 0 && (
+        <table className="vj-teller-tabel">
+          <thead>
+            <tr><th>Week</th><th>Begin</th><th>Dag 1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Klaar</th></tr>
+          </thead>
+          <tbody>
+            {lewe.map(w => (
+              <tr key={w}>
+                <td>{w}</td>
+                <td>{n(`w${w}begin`)}</td>
+                {[1, 2, 3, 4, 5].map(d => <td key={d}>{n(`w${w}dag${d}`)}</td>)}
+                <td>{n(`w${w}klaar`)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <p className="vj-sub vj-fyn">
+        Een toestel tel een keer per ding. Twee fone is twee; ’n
+        herinstallasie tel weer. Geen naam, geen e-pos, geen toestel-id —
+        net getalle.
+      </p>
     </div>
   )
 }

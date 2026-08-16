@@ -314,3 +314,48 @@
 .vj-hint { display: block; margin-top: 6px; font-size: 12.5px; color: #8A82A0; }
 .vj-goed { display: block; margin-top: 6px; font-size: 12.5px; color: #2E7D4F; }
 .vj-goed strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ── Die tellers ──
+   Vier getalle bo, dan een ry per lewende week. Die tabel skuif horisontaal
+   binne haar eie houer; die blad self mag nooit sywaarts skuif nie. */
+.vj-tellers {
+  background: #F3F0FA; border: 1px solid #E2DBF3; border-radius: 14px;
+  padding: 14px; margin-bottom: 16px;
+}
+.vj-tellers-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px;
+  color: #5C4E8E; margin-bottom: 12px;
+}
+.vj-tellers-ry {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.vj-teller {
+  background: #fff; border-radius: 11px; padding: 12px 12px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.vj-teller-n {
+  font-size: 26px; font-weight: 900; line-height: 1.05; color: #2A2350;
+  font-variant-numeric: tabular-nums;
+}
+.vj-teller-w { font-size: 12.5px; font-weight: 700; color: #3A3350; }
+.vj-teller-f { font-size: 11px; line-height: 1.45; color: #77728A; }
+
+.vj-teller-tabel {
+  width: 100%; margin-top: 12px; border-collapse: collapse;
+  background: #fff; border-radius: 11px; overflow: hidden;
+  font-size: 12.5px; font-variant-numeric: tabular-nums;
+}
+.vj-teller-tabel th {
+  background: #EAE5F7; color: #5C4E8E;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .4px;
+  padding: 8px 4px; text-align: center;
+}
+.vj-teller-tabel td {
+  padding: 8px 4px; text-align: center; color: #3A3350;
+  border-top: 1px solid #F0EDF8;
+}
+.vj-teller-tabel td:first-child, .vj-teller-tabel th:first-child { font-weight: 800; }
+
+@media (max-width: 379px) {
+  .vj-teller-n { font-size: 22px; }
+}

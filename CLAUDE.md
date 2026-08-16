@@ -32,6 +32,10 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
+node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
+node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
+node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
+node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/volgJesusMylpale.toets.mjs      # die mylpale + wat die kerk mag sien, 42 toetse
 node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde oorleef, 53 toetse
@@ -261,6 +265,69 @@ Twee dinge maak hierdie Bybel anders as die res: **309 310 kruisverwysings**
 nooit laai nie.
 
 Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
+
+---
+
+## VOLG JESUS is lewendig terwyl dit groei
+
+Die program was admin-alleen, en `api/volg-jesus-week.js` se opskrif het gesê
+waarom: *"'n eindpunt wat 'net die gepubliseerdes' wys, is presies hoe 'n
+halwe program per ongeluk lewendig gaan."*
+
+Dewald laai nou **een week per dag** en die program moet intussen lewe. Die
+vrees bly geldig; die antwoord het verander.
+
+**Die publiek lees deur `api/volg-jesus-openbaar.mjs`**, wat geen geheim dra
+nie. Twee hekke, albei in `src/data/volgJesusOpenbaar.js`:
+
+* `gepubliseer === true`, en daardie veld staan **apart** in Firestore — dit
+  kom nie uit die week se JSON nie, dus kan 'n week wat nog geskryf word dit
+  nie per ongeluk aanskakel nie. `'true'`, `1` en `'ja'` tel nie;
+* 'n **witlys**, nie 'n swartlys nie. Die week wat uit Firestore kom, word
+  nooit deurgestuur nie — daar word 'n nuwe voorwerp gebou. Voeg iemand more
+  'n veld by, kom dit eers uit wanneer dit hier bygesit word. Die
+  fasiliteerdermateriaal, die groepvrae en die hersieningsnotas gaan dus nie
+  oor die draad nie, en dit is nie "die skerm wys dit nie" nie — dit is die
+  netwerk-oortjie.
+
+**Die "Week N+1 kom binnekort"-boodskap word nooit getik nie.** `binnekort()`
+lei sy nommer af uit wat gepubliseer is. Publiseer hy Week 2, skuif die sin
+homself agter Week 2 en praat van Week 3. Daar is niks om te onthou om by te
+werk nie, en dus niks wat kan agterbly nie.
+
+**Die program loop AANEENLOPEND vanaf week 1.** Word week 9 per ongeluk voor
+week 2 gepubliseer, spring die app nie daarheen nie — sien `tot()`. 'n Mens
+wat by week 2 vasval sonder om te weet hoekom, is erger as 'n week wat 'n dag
+later wys.
+
+**Die kaart op Luister wys nie as niks gepubliseer is nie.** 'n Knoppie wat
+op 'n leë skerm uitkom, is erger as geen knoppie — en hierdie blad is waar die
+oggendkennisgewing elke dag duisende mense laat land. Die hele besluit staan
+in `src/components/VolgJesusKaart.jsx` sodat `Luister.jsx` een reël bykry en
+sy navigasie onaangeraak bly.
+
+`VolgJesusLewe.css` sit op `z-index: 240`, **onder** die Bybel se 250. Die
+LEES-kaart stuur 'n mens na die app se Bybel, en 'n Bybel wat agter hierdie
+skerm oopmaak, is 'n knoppie wat niks doen nie.
+
+### Die tellers
+
+Vier heelgetalle plus een veld per week op `tellers/volgJesus`. Geen naam,
+geen e-pos, geen toestel-id, geen tydstempel per mens.
+
+Die POST is **oop** (dieselfde as `tel-toestemming`), en daarom stuur die
+kliënt **nooit 'n veldnaam** nie — hy stuur 'n gebeurtenis en 'n weeknommer,
+en `api/_volgJesusTelVelde.js` maak die name. Wie 'n `fieldPath` mag kies, mag
+enige veld op daardie dokument skryf. Die GET is toe.
+
+Elke **toestel** tel homself een keer per ding (`src/data/volgJesusTel.js`,
+'n merkie in localStorage wat geskryf word **voor** ons stuur — anders tel 'n
+swak lyn elke mislukte versoek weer). Dieselfde mens op twee fone tel twee
+keer; 'n herinstallasie tel weer. Die getal is eerder 'n bietjie te laag as te
+hoog, en dit is die regte kant om op te fouteer.
+
+Blaaiertoetse in die scratchpad: `kykVjLewe.mjs` (die hele lewende pad, met
+die boodskap wat skuif wanneer week 2 publiseer) en `kykTellers.mjs`.
 
 ---
 
