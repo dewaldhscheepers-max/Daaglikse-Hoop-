@@ -154,6 +154,28 @@
 
 .hero-time:last-child { text-align: right; }
 
+/* Die reel wat verskyn wanneer die speler opgegee het. Dit moet gesien word,
+   maar dit mag nie soos 'n ramp lyk nie — dit is 'n knoppie wat dit regmaak.
+   Geen transform en geen opacity op :active nie; sien CLAUDE.md oor die
+   gekleurde strepe. */
+.hero-klankfout {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.22);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.35;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.hero-klankfout:active { background: rgba(0,0,0,0.38); }
+
 .hero-bar {
   flex: 1;
   height: 3px;

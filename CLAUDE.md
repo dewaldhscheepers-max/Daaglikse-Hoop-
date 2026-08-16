@@ -48,6 +48,7 @@ node api/_adminSlot.toets.mjs                 # die admin-geheim op drie eindpun
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
+node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 49 toetse
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -154,6 +155,60 @@ Slaag dit nie, wag dit ses uur en wys intussen woorde en 'n knoppie — nooit
 Toets dit met `kykWitSkerm.mjs` in die scratchpad: dit gee die bundel 'n 404
 en eis dat die app homself regmaak, dat dit nie in 'n lus beland nie, en dat
 'n **gesonde** app nooit geraak word nie.
+
+---
+
+## Die stemboodskap-speler
+
+Dit is die app. Alles anders is by. Twee reels geld hier bo alles:
+
+**Moenie klank in die diensketter kas nie.** Dit was 'n `CacheFirst` op alles
+by `firebasestorage.googleapis.com`, en dit het die speler stukkend gemaak op
+'n manier wat maande lank onsigbaar gebly het. 'n `<audio>` vra nooit 'n leer
+in een stuk nie — dit stuur 'n `Range`-kop en vra grepe. 'n Kas antwoord op
+die URL en weet niks van Ranges nie, en dan kry die speler die verkeerde
+liggaam met die verkeerde status. Erger: `CacheFirst` met 30 dae beteken die
+stukkende inskrywing kom **more weer**. Die klag was presies dit — *"die
+stemboodskap speel nou al vir 3 dae nie deur tot die einde nie."*
+
+Die besluit staan op een plek en is suiwer: `magKas()` in
+`src/data/kasBesluit.js`. Prente uit Storage word gekas; klank nooit. Drie
+hekke hou klank uit, want een is te min: `request.destination`, die vouer
+(`audio/`, wat elke oplaai in hierdie app gebruik), en die uitbreiding.
+Moenie daardie voorwaarde in `sw.js` inlyn herskryf nie.
+
+Verander jy iets aan wat gekas word, **verhoog `SPOEL` in `src/sw.js`**. Dit
+is die enigste hefboom wat 'n foon bereik wat ons nie kan raak nie; sonder dit
+bly 'n stukkende kas vir altyd op daardie toestel staan.
+
+**'n Speler wat lieg is erger as een wat stukkend is.** Hier was net
+`timeupdate`, `ended` en `loadedmetadata` — geen `error`. Gaan die pyplyn
+dood, bly `playing` waar, wys die knoppie 'n pouse-ikoon, vries die balkie, en
+niks probeer ooit weer nie. Die enigste pad uit was om die skerm te verlaat en
+terug te kom. Vandaar "ek moet in en uit gaan".
+
+`Luister.jsx` moet dus altyd:
+
+* op `error` dadelik herstel, by dieselfde sekonde;
+* op `stalled`/`waiting` 'n waghond loop — maar **nie** herlaai as die buffer
+  nog groei nie, anders straf ons iemand op 'n swak lyn;
+* 'n `ended` wat te vroeg kom teen die nota se `lengthSeconds` toets, en
+  PRESIES een keer weer probeer (verkeerde data mag nooit 'n lus word);
+* nooit herstel terwyl die mens gepouseer het nie — sien `speelRef`;
+* ná vier mislukte pogings ophou en dit vir die mens **se**;
+* `duration` keur met `Number.isFinite` voor dit erens beland. NaN en Infinity
+  het albei in `lengthSeconds` beland en die balkie vir altyd stukkend gemaak.
+
+Met `preload="auto"` kan die leer misluk **voor** die mens ooit tik. Dan sit
+daar 'n `MediaError`, `play()` doen niks, en `canplay` vuur nooit. Laai eers
+weer as `audio.error` gestel is — anders is die eerste tik 'n dooie tik.
+
+Twee toetse in die scratchpad: `kykKlank.mjs` (begin dit met EEN tik) en
+`kykKlankHard.mjs` (die verbinding val, die stroom hang, dit is werklik
+stukkend, die leer is afgekap, spring verby die einde, en die knoppie mag
+nooit lieg nie). Loop albei voor jy aan die speler raak. Meet die APP, nie die
+bediener nie: Chromium hergebruik sy eie buffer by `load()`, ook met
+`Cache-Control: no-store`, dus is 'n bedienerteller 'n vals maatstaf.
 
 ---
 

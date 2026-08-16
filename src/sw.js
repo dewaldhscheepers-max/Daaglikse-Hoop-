@@ -3,6 +3,8 @@ import { cacheNames } from 'workbox-core'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { magKas } from './data/kasBesluit.js'
 
 
 /* Verhoog hierdie getal om elke geinstalleerde app te dwing om sy
@@ -22,7 +24,11 @@ import { ExpirationPlugin } from 'workbox-expiration'
    tydens install, en om hom in activate weg te gooi laat die app met niks —
    dan werk aflyn nie meer nie. cleanupOutdatedCaches() vat die ou weergawes;
    hierdie een vat net die looptyd-kasse. */
-const SPOEL = 3
+/* 4: die ou `audio-cache` moet van ELKE foon af weg. Solank een stukkende
+      klank-inskrywing daar staan, bly die stemboodskap stukkend — CacheFirst
+      gee dieselfde liggaam elke dag weer terug. Hierdie is die enigste
+      hefboom wat 'n foon bereik wat ons nie kan raak nie. */
+const SPOEL = 4
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
@@ -58,11 +64,29 @@ self.addEventListener('activate', event => {
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
 
+/* Firebase Storage.
+ *
+ * LET WEL: hier was 'n CacheFirst op ALLES by hierdie gasheer, en die kas se
+ * naam was `audio-cache`. Dit was die fout wat die stemboodskap laat stop het
+ * voor die einde — dae aanmekaar, want CacheFirst gee dieselfde stukkende
+ * liggaam weer en weer terug.
+ *
+ * 'n <audio> vra stukke met 'n Range-kop; 'n kas antwoord op die URL en weet
+ * niks van Ranges nie. Sien src/data/kasBesluit.js vir die volle verhaal.
+ *
+ * Klank gaan nou reguit na die netwerk. Prente word steeds gekas — hulle vra
+ * nooit Ranges nie en hulle kos data. `magKas()` is suiwer en het 'n toets;
+ * moenie hierdie voorwaarde hier inlyn herskryf nie. */
 registerRoute(
-  /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
+  ({ url, request }) => magKas(url.href, request.destination),
   new CacheFirst({
-    cacheName: 'audio-cache',
-    plugins: [new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 })]
+    cacheName: 'storage-prente',
+    plugins: [
+      /* Net 'n volledige 200 mag in die kas. Sonder hierdie hek kan 'n 206 of
+         'n ondeursigtige antwoord land, en dan is die kas self die fout. */
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+    ],
   })
 )
 

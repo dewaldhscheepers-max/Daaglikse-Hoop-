@@ -58,7 +58,10 @@ function noteColor(id, stored) {
 }
 
 function fmtTime(sec) {
-  if (!sec) return '0:00'
+  /* Infinity en NaN het albei hier ingekom toe `duration` ongekeurd in
+     `lengthSeconds` beland het. `Math.floor(Infinity/60)` gee "Infinity:NaN"
+     op die skerm. */
+  if (!Number.isFinite(sec) || sec <= 0) return '0:00'
   const m = Math.floor(sec / 60)
   const s = String(Math.floor(sec % 60)).padStart(2, '0')
   return `${m}:${s}`
@@ -246,9 +249,26 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [nlEmail,    setNlEmail]    = useState('')
   const [nlState,    setNlState]    = useState(() => localStorage.getItem('nl_subscribed') ? 'done' : 'idle')
   const [featuredVideo, setFeaturedVideo] = useState(null)
+  /* Waar is die klank stukkend? Dit is die enigste manier waarop 'n mens ooit
+     hiervan hoor. Sonder dit vries die balkie en die knoppie lieg. */
+  const [klankFout, setKlankFout]     = useState(false)
 
   const timerRef      = useRef(null)
   const audioRef      = useRef(null)
+  /* Watter nota se leer staan tans in die element. Ons hou dit SELF by in
+     plaas van om `audio.src` te vergelyk: `audio.src` gee die blaaier se
+     opgeloste URL terug, en die dag wanneer daardie string op een karakter na
+     verskil, herlaai elke pouse die leer van voor af. */
+  const gelaaiRef     = useRef(null)
+  /* Hoeveel keer ons hierdie nota al uit 'n dooie speler teruggebring het. */
+  const herstelRef    = useRef(0)
+  /* Die afgekap-kontrole mag PRESIES een keer probeer. Sien onEnded. */
+  const afgekapRef    = useRef(0)
+  /* Wil die MENS tans hê dit moet speel? Die herstel-effek hang nie van
+     `playing` af nie (dit sou elke pouse sy luisteraars herbou), en sonder
+     hierdie verwysing sou 'n herstel iets wat die mens pas gepouseer het weer
+     aan die speel sit. */
+  const speelRef      = useRef(false)
   const playedRef     = useRef(false)
   const tapCountRef   = useRef(0)
   const tapTimerRef   = useRef(null)
@@ -257,6 +277,11 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   /* Wat ons NOU het. `fetchNotes` het 'n leë afhanklikheidslys en sou
      andersins vir altyd na die eerste render se notas kyk. */
   const notasRef      = useRef(cached)
+
+  /* Hou dit tydens die render by, nie in 'n effek nie: 'n effek loop NA die
+     render, en die `error`-luisteraar kan tussenin vuur en dan die verkeerde
+     antwoord kry. */
+  speelRef.current = playing
 
   const today      = notes[0] || null
   const recent     = notes.slice(1)
@@ -455,8 +480,35 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     navigator.mediaSession.setActionHandler('pause',        () => { setPlaying(false); onPlayingChange?.(false) })
     navigator.mediaSession.setActionHandler('seekbackward', () => skip(-15))
     navigator.mediaSession.setActionHandler('seekforward',  () => skip(15))
+    /* Die skuifbalkie op die sluitskerm. Sonder hierdie hanteerder is dit
+       daar, lyk dit werkend, en doen dit niks. */
+    try {
+      navigator.mediaSession.setActionHandler('seekto', e => {
+        const audio = audioRef.current
+        if (!audio || !Number.isFinite(e?.seekTime)) return
+        try { audio.currentTime = e.seekTime; setElapsed(e.seekTime) } catch {}
+        stelPosisie()
+      })
+    } catch { /* ouer blaaiers ken nie 'seekto' nie en gooi */ }
     navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
+    stelPosisie()
   }, [activeNote, playing])
+
+  /* Chrome ekstrapoleer die sluitskerm se balkie self uit hierdie drie getalle
+     — ons hoef dit dus nie by elke `timeupdate` te stel nie, net wanneer die
+     posisie SPRING. Dit gooi as die getalle nie sin maak nie; vandaar die
+     wagte en die try. */
+  function stelPosisie() {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return
+    const audio = audioRef.current
+    if (!audio) return
+    const d = audio.duration
+    const p = audio.currentTime
+    if (!Number.isFinite(d) || d <= 0 || !Number.isFinite(p) || p < 0 || p > d) return
+    try {
+      navigator.mediaSession.setPositionState({ duration: d, position: p, playbackRate: audio.playbackRate || 1 })
+    } catch {}
+  }
 
   /* ── Die klank ──
    *
@@ -489,7 +541,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
 
-    if (audio.src !== activeNote.audioUrl) {
+    /* Laai net wanneer die NOTA verander. Ons vergelyk teen ons eie
+       verwysing, nooit teen `audio.src` nie — sien gelaaiRef hierbo. */
+    if (gelaaiRef.current !== activeNote.id) {
+      gelaaiRef.current = activeNote.id
+      herstelRef.current = 0
+      afgekapRef.current = 0
+      setKlankFout(false)
       audio.src = activeNote.audioUrl
       /* Sonder `load()` hou die element soms aan die vorige leer se buffer
          vas en dan speel die VERKEERDE nota se laaste sekondes. */
@@ -508,6 +566,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       onPlayingChange?.(false)
     }
 
+    /* Die element kan REEDS stukkend wees voor die mens ooit getik het: met
+       `preload="auto"` begin die haal sodra die bron gestel is, en val die
+       net op daardie oomblik, dan sit hier 'n MediaError en 'n readyState van
+       0. `play()` daarop doen niks en `canplay` gaan nooit vuur nie — die
+       knoppie sou vir altyd 'n pouse wys. Laai eers weer. */
+    if (audio.error && herstelRef.current < 4) {
+      herstelRef.current += 1
+      audio.load()
+    }
+
     audio.play().catch(fout => {
       if (dood) return
 
@@ -515,6 +583,14 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
          hierdie oproep sit nie. Daar is niks om te probeer nie — wys net die
          speel-ikoon weer, sodat 'n tik dit kan regmaak. */
       if (fout && fout.name === 'NotAllowedError') return gee_op()
+
+      /* Die bron is stukkend eerder as stadig. Wag vir `canplay` is dan 'n
+         wag wat nooit eindig nie; laai weer, en dan neem die `error`-ketting
+         in die volgende effek oor as dit weer misluk. */
+      if (audio.error && herstelRef.current < 4) {
+        herstelRef.current += 1
+        audio.load()
+      }
 
       /* Alles anders is 'n wedloop met die laai. Wag tot daar genoeg is om
          mee te begin, en probeer een keer weer. */
@@ -533,11 +609,112 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }, [activeNote?.id, playing])
 
+  /* ── Wanneer die klank in die middel doodgaan ──
+   *
+   * Dit is die fout wat as "die stemboodskap speel nie deur tot die einde
+   * nie" gerapporteer is, drie dae aanmekaar.
+   *
+   * Hier was NET `timeupdate`, `ended` en `loadedmetadata`. Daar was geen
+   * `error` nie. Gaan die media-pyplyn dood — 'n netwerk wat val, 'n
+   * afgekapte liggaam uit die kas, 'n dekodeerfout — dan vuur die blaaier
+   * `error` op die element, die klank stop, en die app hoor NIKS. `playing`
+   * bly waar. Die pouse-ikoon bly staan. Die balkie vries. Niks probeer ooit
+   * weer nie. Die enigste pad uit is om die skerm te verlaat en terug te kom,
+   * wat presies is wat mense gedoen het.
+   *
+   * Nou:
+   *   · `error`  — bring dit dadelik terug, by dieselfde sekonde.
+   *   · `stalled`/`waiting` — 'n waghond. Buffer normaalweg gerus; maar het
+   *     die tyd na 10 sekondes nie geskuif nie, is dit dood en nie stadig nie.
+   *   · `ended` wat TE VROEG kom — as ons die egte lengte ken en die leer is
+   *     meer as 5 sekondes korter, is dit afgekap. Presies EEN keer probeer,
+   *     want 'n verkeerde `lengthSeconds` in die data mag nooit 'n lus word.
+   *
+   * En as al vier pogings misluk, sê ons dit vir die mens. 'n Speler wat lieg
+   * is erger as 'n speler wat stukkend is. */
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !activeNote?.audioUrl) return
-    function onTimeUpdate()     { setElapsed(audio.currentTime) }
-    function onEnded() {
+
+    let dood = false
+    let waghond = null
+    let tydByWaghond = -1
+    let gebufferByWaghond = -1
+    /* Presies EEN hangende herstel-luisteraar. Sonder hierdie verwysing bly
+       elke mislukte poging s'n aangeheg, en dan vuur die eerste geslaagde
+       laai hulle ALMAL — vier soeke en vier play()'s op mekaar. */
+    let terug = null
+
+    const losWaghond = () => { clearTimeout(waghond); waghond = null }
+    const losTerug = () => {
+      if (terug) { audio.removeEventListener('loadeddata', terug); terug = null }
+    }
+
+    /* Hoeveel is reeds afgelaai. Groei dit, is die net stadig en nie dood nie. */
+    function gebuffer() {
+      try {
+        const b = audio.buffered
+        return b && b.length ? b.end(b.length - 1) : 0
+      } catch { return 0 }
+    }
+
+    function herstel() {
+      if (dood) return
+      losWaghond()
+      /* Die mens het gepouseer. Dan is 'n dooie stroom nie 'n probleem nie, en
+         ons mag dit BESLIS nie weer aan die speel sit nie. */
+      if (!speelRef.current) return
+      if (herstelRef.current >= 4) {
+        setPlaying(false); onPlayingChange?.(false); setKlankFout(true)
+        return
+      }
+      herstelRef.current += 1
+
+      const waar = Number.isFinite(audio.currentTime) ? audio.currentTime : 0
+      losTerug()
+      terug = () => {
+        losTerug()
+        if (dood || !speelRef.current) return
+        try {
+          /* Net soek as die blaaier sê hy KAN daarheen soek. 'n Bron sonder
+             Range-ondersteuning gooi hier, en dan is 'n herbegin by 0 steeds
+             beter as 'n dooie speler. */
+          const s = audio.seekable
+          if (waar > 0 && s && s.length && waar <= s.end(s.length - 1)) audio.currentTime = waar
+        } catch {}
+        audio.play().then(stelPosisie).catch(() => {})
+      }
+      audio.addEventListener('loadeddata', terug)
+      audio.load()
+    }
+
+    function beginWaghond() {
+      if (dood || waghond) return
+      tydByWaghond = audio.currentTime
+      gebufferByWaghond = gebuffer()
+      waghond = setTimeout(() => {
+        waghond = null
+        if (dood || audio.paused || !speelRef.current) return
+        /* Het die tyd geskuif, was dit net gewone buffering. */
+        if (audio.currentTime > tydByWaghond + 0.25) return
+        /* En het die BUFFER gegroei, is die net net stadig. Om nou te herlaai
+           sou die stukkie wat wel afgelaai is weggooi en dit erger maak. Wag
+           weer. Iemand op 'n swak lyn moet nooit deur ons gestraf word nie. */
+        if (gebuffer() > gebufferByWaghond + 0.25) return beginWaghond()
+        herstel()
+      }, 10000)
+    }
+
+    function onTimeUpdate() {
+      setElapsed(audio.currentTime)
+      losWaghond()
+    }
+    function onSpeel()   { losWaghond(); setKlankFout(false); stelPosisie() }
+    function onWag()     { beginWaghond() }
+    function onFout()    { herstel() }
+    function onSoekKlaar() { stelPosisie() }
+
+    function klaar() {
       setPlaying(false); onPlayingChange?.(false); setElapsed(0)
       const n = parseInt(localStorage.getItem('completedListens') || '0')
       localStorage.setItem('completedListens', String(n + 1))
@@ -548,20 +725,56 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         onNoteFinished?.()
       }
     }
+
+    function onEnded() {
+      losWaghond()
+      /* Die egte lengte kom uit die nota se dokument, nie uit die leer nie.
+         Is die leer merkbaar korter, het ons 'n afgekapte liggaam gekry. */
+      const eg = Number(activeNote.lengthSeconds)
+      const d  = audio.duration
+      if (afgekapRef.current === 0 &&
+          Number.isFinite(eg) && eg > 0 &&
+          Number.isFinite(d)  && d > 0 && d < eg - 5) {
+        afgekapRef.current = 1
+        return herstel()
+      }
+      klaar()
+    }
+
     function onLoadedMetadata() {
-      if (!activeNote.lengthSeconds) {
-        setNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(audio.duration) } : n))
+      stelPosisie()
+      /* `duration` kan NaN wees (die metadata is nog nie daar nie) of
+         Infinity (die antwoord het geen bruikbare lengte nie — presies wat 'n
+         stukkende kas gee). Albei het vroeer in `notes` beland, en dan is
+         `elapsed / lengthSeconds` NaN en die balkie is stukkend vir altyd. */
+      const d = audio.duration
+      if (!activeNote.lengthSeconds && Number.isFinite(d) && d > 0 && d < 24 * 60 * 60) {
+        setNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, lengthSeconds: Math.round(d) } : n))
       }
     }
+
     audio.addEventListener('timeupdate', onTimeUpdate)
     audio.addEventListener('ended', onEnded)
     audio.addEventListener('loadedmetadata', onLoadedMetadata)
+    audio.addEventListener('error', onFout)
+    audio.addEventListener('stalled', onWag)
+    audio.addEventListener('waiting', onWag)
+    audio.addEventListener('playing', onSpeel)
+    audio.addEventListener('seeked', onSoekKlaar)
     return () => {
+      dood = true
+      losWaghond()
+      losTerug()
       audio.removeEventListener('timeupdate', onTimeUpdate)
       audio.removeEventListener('ended', onEnded)
       audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+      audio.removeEventListener('error', onFout)
+      audio.removeEventListener('stalled', onWag)
+      audio.removeEventListener('waiting', onWag)
+      audio.removeEventListener('playing', onSpeel)
+      audio.removeEventListener('seeked', onSoekKlaar)
     }
-  }, [activeNote?.id])
+  }, [activeNote?.id, activeNote?.lengthSeconds])
 
   // ── Fallback timer (no audio URL) ──
   useEffect(() => {
@@ -618,10 +831,34 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
+  /* Hier was net `Math.max(0, ...)`. Dit klem die onderkant en niks anders.
+     Spring 'n mens verby die einde, vuur `ended` en tel ons 'n luister wat
+     nooit gebeur het nie; en is `duration` NaN — wat dit is voor die metadata
+     daar is — dan gooi die toekenning en die knoppie doen niks. */
   function skip(seconds) {
     const audio = audioRef.current
-    if (audio && activeNote?.audioUrl) audio.currentTime = Math.max(0, audio.currentTime + seconds)
-    else setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
+    if (!audio || !activeNote?.audioUrl) {
+      setElapsed(e => Math.max(0, Math.min(e + seconds, activeNote?.lengthSeconds || 0)))
+      return
+    }
+    const nou = Number.isFinite(audio.currentTime) ? audio.currentTime : 0
+    const d   = audio.duration
+    let doel  = nou + seconds
+    if (!Number.isFinite(doel)) return
+    if (doel < 0) doel = 0
+    /* Bly 'n halwe sekonde van die einde af weg. */
+    if (Number.isFinite(d) && d > 0) doel = Math.min(doel, Math.max(0, d - 0.5))
+    try { audio.currentTime = doel; setElapsed(doel) } catch { /* nie soekbaar nie */ }
+  }
+
+  /* Die enigste knoppie wat verskyn wanneer die speler opgegee het. */
+  function probeerWeer() {
+    const audio = audioRef.current
+    setKlankFout(false)
+    herstelRef.current = 0
+    afgekapRef.current = 0
+    if (audio) { try { audio.load() } catch {} }
+    setPlaying(true); onPlayingChange?.(true)
   }
 
   async function handleLike(noteId) {
@@ -895,7 +1132,10 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   return (
     <div className="luister">
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      {/* `preload="auto"` sodat die blaaier begin haal sodra die bron gestel
+          is, en nie eers by die eerste tik nie. Dit is die verskil tussen 'n
+          speler wat dadelik begin en een wat 'n sekonde of twee stil bly. */}
+      <audio ref={audioRef} preload="auto" style={{ display: 'none' }} />
 
       <div className="luister-hero">
         {/* Die "Kennisgewings af"-merkie. Dit kom van App.jsx af as 'n klaar
@@ -923,6 +1163,13 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             </div>
             <span className="hero-time">{today.lengthSeconds ? fmtTime(today.lengthSeconds) : '--:--'}</span>
           </div>
+          {/* 'n Speler wat stilweg doodgaan is hoe hierdie fout maande lank
+              onsigbaar gebly het. Kry ons dit nie reg nie, sê ons dit. */}
+          {klankFout && activeId === today.id && (
+            <button className="hero-klankfout" onClick={probeerWeer}>
+              Die boodskap wou nie klaar speel nie. Tik om weer te probeer.
+            </button>
+          )}
           <div className="hero-actions">
             <button className={`hero-like-btn ${liked.includes(today.id) ? 'liked' : ''}`} onClick={() => handleLike(today.id)}>
               <HeartIcon filled={liked.includes(today.id)} size={18} />
