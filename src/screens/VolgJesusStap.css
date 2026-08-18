@@ -231,16 +231,34 @@
 /* ── Die wallpaper ──
    'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n volskerm <img> nie —
    sien CLAUDE.md se "Android, Chrome, en gekleurde strepe". */
+/* ── Die wallpaper ──
+ *
+ * Dewald: "die wallpapers se pers border maak die images toe."
+ *
+ * Twee dinge het die prent opgevreet:
+ *
+ *   · `background-size: cover` SNY. Saam met `max-height` was die blok korter
+ *     as 9:16, en cover het die bo- en onderkant afgeknip — presies waar die
+ *     kunswerk se woorde staan. Dit is nou `contain`: die hele prent wys,
+ *     altyd, wat ook al sy verhouding is.
+ *   · die pers raam was 20px dik rondom. Nou is dit 'n dun lyn, en die prent
+ *     kry die blad.
+ *
+ * Die houer bly ONDEURSIGTIG en die prent bly 'n CSS-agtergrond — nooit 'n
+ * volskerm <img> nie. Sien CLAUDE.md se "Android, Chrome, en gekleurde
+ * strepe". */
 .vs-wp {
   background: linear-gradient(165deg, #2E2757 0%, #443A6E 100%);
-  color: #fff; border-radius: 18px; padding: 20px 18px;
+  color: #fff; border-radius: 18px; padding: 14px 10px 12px;
 }
-.vs-wp .vs-kop { color: var(--gold, #E0B872); }
+.vs-wp .vs-kop { color: var(--gold, #E0B872); padding: 0 4px; }
 .vs-wp-prent {
-  width: 100%; aspect-ratio: 9 / 16; max-height: 52vh;
-  background-color: #2A1F14;
-  background-size: cover; background-position: center; background-repeat: no-repeat;
-  border-radius: 13px;
+  width: 100%; aspect-ratio: 9 / 16; max-height: 68vh;
+  /* Deursigtig: is die prent nie presies 9:16 nie, wys die kaart se eie pers
+     as 'n rand in plaas van 'n vreemde bruin blok. */
+  background-color: transparent;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+  border-radius: 12px;
 }
 .vs-wp-fyn { font-size: 12.5px; line-height: 1.6; opacity: .88; margin-top: 10px; }
 .vs-wp-nota { font-size: 12.5px; color: var(--gold, #E0B872); margin-top: 8px; }
