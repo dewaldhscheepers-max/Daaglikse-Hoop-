@@ -128,18 +128,25 @@ const DAG1 = [
     velde: [{ id: 'ontdek', prompt: 'Die ding wat ek die graagste oor Jesus wil ontdek, is…' }],
     knop: 'STOOR EN GAAN AAN',
   },
-  {
-    soort: 'lees',
-    kop: 'VANDAG',
-    skrif: 'Johannes 1:1–18',
-    lyf: 'Vra: “Wat wys hierdie gedeelte vir my oor Jesus?”\n\nMoenie probeer om alles te verstaan nie. Soek net een ding.',
-    knop: 'EK HET GELEES',
-  },
-  {
-    soort: 'vraag',
-    velde: [{ id: 'raakgesien1', prompt: 'Vandag het ek raakgesien dat Jesus…' }],
-    knop: 'STOOR MY ANTWOORD',
-  },
+  /* ── Johannes 1 staan NIE meer op Dag 1 nie ──
+   *
+   * Dewald: "Some of the stuff that is in day one is also in day two. Like the
+   * text about John that they have to read again in day two. I would say that
+   * in day two they have to read John, not in day one. Day one is already very
+   * long."
+   *
+   * Hy is reg. Dag 1 het Matteus 16 gelees, na die hele stemboodskap geluister,
+   * twee private antwoorde gevra EN dan nog Johannes 1:1–18 by gesit — terwyl
+   * Dag 2 se hele doel is om Johannes 1 oop te maak. Dieselfde gedeelte twee
+   * dae na mekaar laat die tweede dag soos herhaling voel, en 'n eerste dag wat
+   * te lank is, is 'n eerste dag wat mense nie klaarmaak nie.
+   *
+   * Dag 1 = Matteus 16, die stemboodskap, en die eerlike antwoord.
+   * Dag 2 = Johannes 1.
+   *
+   * (Dag 4 lees Johannes 1:14–18. Dit is nie 'n herhaling nie maar 'n
+   * INZOEM op "vol genade en waarheid", en dit staan so in sy dokument.)
+   */
   {
     /* Dag 1 se wallpaper. Dit sluit die dag af waarop die stemboodskap land,
        en die sin op die prent is die stemboodskap se eie punt. Is daar nog
@@ -437,7 +444,7 @@ export const WEEK1_DAE = [
   { n: 1, titel: 'Wie sê jý is Jesus?',
     klaarKop: 'JY HET BEGIN KYK.',
     klaarLyf: 'Jy hoef nie vandag alles te verstaan nie. Jy het net begin doen wat elke dissipel moet aanhou doen: weer na Jesus kyk.',
-    more: 'Op Dag 2 gaan ons Johannes 1 weer oopmaak — maar hierdie keer gaan ons vir ’n paar minute ophou vra wat Jesus vir ons kan doen, en net kyk na Wie Hy is.',
+    more: 'Op Dag 2 maak ons Johannes 1 oop — en ons gaan vir ’n paar minute ophou vra wat Jesus vir ons kan doen, en net kyk na Wie Hy is.',
     stappe: DAG1 },
   { n: 2, titel: 'Kyk weer na Jesus',
     klaarKop: 'VANDAG HET JY NIE NET NA JESUS SE HAND GEKYK NIE. JY HET WEER NA HOM GEKYK.',

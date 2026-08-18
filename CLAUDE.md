@@ -32,6 +32,7 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
+node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 36 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
@@ -353,6 +354,15 @@ wat iemand geskryf het nie.
 **Die belangrikste oomblik is die terugblik.** Op Dag 5 wys die app die mens
 sy WERKLIKE Dag 1-woorde terug. Is daar niks gestoor nie, word daardie skerm
 heeltemal oorgeslaan — nooit `undefined`, nooit 'n leë aanhaling.
+
+**Niks mag oor twee dae herhaal nie.** Johannes 1:1–18 het op Dag 1 EN Dag 2
+gestaan; Dewald het dit op sy foon gevang. Dit is 'n fout wat 'n mens NIE in
+'n blaaier sien nie — jy moet twee dae langs mekaar hou, en teen die tyd dat
+jy by Dag 2 kom, het jy Dag 1 vergeet. `volgJesusWeek1.toets.mjs` hou albei
+gelyk vas: geen Skrifgedeelte twee keer, geen twee vrae met dieselfde id (dan
+skryf die een die ander se antwoord dood), geen stap sonder 'n knoppie, en
+Dag 1 mag nie langer wees as die ander dae nie — dit dra reeds die hele
+stemboodskap.
 
 `kykWeek1.mjs` in die scratchpad loop die hele week deur soos 'n mens.
 
