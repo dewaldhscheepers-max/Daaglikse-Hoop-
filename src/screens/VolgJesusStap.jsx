@@ -54,6 +54,8 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
   const [dag, setDag]   = useState(1)
   const [antwoorde, setAntwoorde] = useState(() => alleAntwoorde(w))
   const [hervat, setHervat] = useState(0)
+  /* Die week se dae is 'n tweede skerm, nie 'n taaklys op die eerste een nie. */
+  const [wysWeek, setWysWeek] = useState(false)
   const bladRef = useRef(null)
 
   useEffect(() => {
@@ -90,9 +92,18 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
   }
 
   const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
+  const vandag = hervat >= 1 ? hervat : 1
+  const vandagInfo = WEEK1_DAE.find(d => d.n === vandag) || WEEK1_DAE[0]
 
-  /* ── Die openingsblad ───────────────────────────────────────────────
-     Kort. Titel, 'n paar reëls, die privaatheidsreël, en BEGIN. */
+  /* ── Die openingsblad: VANDAG EERSTE ────────────────────────────────
+   *
+   * Dewald se §9: "Moenie die gebruiker onmiddellik 'n lys van vyf take wys
+   * nie ... Die hele week mag beskikbaar wees, maar moet nie soos 'n taaklys
+   * in die gebruiker se gesig wees nie."
+   *
+   * Die vyf dae het altyd oop gelê onder die knoppie. Dit is 'n taaklys, en 'n
+   * taaklys is die eerste ding wat 'n program soos huiswerk laat voel. Nou
+   * staan VANDAG bo, en die week is 'n tweede, stiller knoppie. */
   if (blad === 'oop') {
     return (
       <div className="vs">
@@ -103,24 +114,37 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
           <p className="vs-privaat">
             🔒 Alles wat jy persoonlik hier skryf, bly privaat.
           </p>
+          {/* VANDAG. Een ding, een knoppie. */}
+          <div className="vs-vandag">
+            <span className="vs-vandag-merk">VANDAG · DAG {vandag}</span>
+            <span className="vs-vandag-titel">{vandagInfo.titel}</span>
+            <span className="vs-vandag-fyn">Dag {vandag} van 5</span>
+          </div>
+
           <button className="vs-hoofknop" onClick={() => {
             if (opBegin) { try { opBegin() } catch {} }
-            beginDag(hervat || 1)
+            beginDag(vandag)
           }}>
-            {hervat > 1 ? `GAAN VOORT MET DAG ${hervat}` : `BEGIN WEEK ${w}`}
+            {hervat > 1 ? 'GAAN VOORT' : `BEGIN WEEK ${w}`}
           </button>
           {hervat > 1 && <p className="vs-hervat">Welkom terug. Gaan voort waar jy opgehou het.</p>}
         </div>
 
-        <div className="vs-dae">
-          {WEEK1_DAE.map(d => (
-            <button key={d.n} className="vs-dag-ry" onClick={() => beginDag(d.n)}>
-              <span className="vs-dag-merk">DAG {d.n}</span>
-              <span className="vs-dag-t">{d.titel}</span>
-              <span className="vs-dag-pyl">›</span>
-            </button>
-          ))}
-        </div>
+        <button className="vs-week-knop" onClick={() => setWysWeek(v => !v)}>
+          {wysWeek ? 'Steek hierdie week weg' : 'Sien hierdie week'}
+        </button>
+
+        {wysWeek && (
+          <div className="vs-dae">
+            {WEEK1_DAE.map(d => (
+              <button key={d.n} className="vs-dag-ry" onClick={() => beginDag(d.n)}>
+                <span className="vs-dag-merk">DAG {d.n}</span>
+                <span className="vs-dag-t">{d.titel}</span>
+                <span className="vs-dag-pyl">›</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -177,10 +201,10 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
           </div>
         )}
 
-        {/* ALBEI wallpapers. Dewald: "hou al 2 wallpapers." */}
-        <Wallpaper bron={week.wallpaperDag1} week={w} />
-        <Wallpaper bron={week.wallpaper} week={w} />
-
+        {/* Die wallpapers staan op die DAE waar hulle hoort — Dag 1 s'n op
+            Dag 1, die week s'n aan die einde van Dag 5. Hulle word hier NIE
+            herhaal nie: 'n mens het albei pas gesien, en herhaling is presies
+            wat hierdie skerm lig moet hou. */}
         <div className="vs-hou">
           <div className="vs-hou-kop">DEEL DIT MET IEMAND</div>
           <p>{WEEK1_DEELSIN}</p>

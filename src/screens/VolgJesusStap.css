@@ -271,3 +271,26 @@
   font-family: var(--font-serif); font-size: 20px; line-height: 1.3;
   color: var(--text); margin: 0 0 10px;
 }
+
+/* ── VANDAG eerste ──
+   Dewald se §9: die week mag beskikbaar wees, maar mag nie soos 'n taaklys in
+   die gebruiker se gesig wees nie. */
+.vs-vandag {
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(0, 0, 0, .22); border-radius: 14px;
+  padding: 16px; margin-bottom: 4px; text-align: left;
+}
+.vs-vandag-merk {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--gold, #E0B872);
+}
+.vs-vandag-titel { font-family: var(--font-serif); font-size: 19px; line-height: 1.3; }
+.vs-vandag-fyn { font-size: 12px; opacity: .75; }
+
+.vs-week-knop {
+  width: 100%; margin-top: 12px;
+  background: none; border: none;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 700;
+  color: var(--purple-dark); padding: 12px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}

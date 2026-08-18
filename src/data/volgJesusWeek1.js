@@ -108,7 +108,7 @@ const DAG3 = [
     kop: 'KIES EEN.',
     lyf: 'Waar is dit vandag vir jou die moeilikste om Jesus te vertrou of te volg?',
     opsies: [
-      { waarde: 'bang',    woorde: 'Ek is bang' },
+      { waarde: 'vrees',   woorde: 'Vrees' },
       { waarde: 'geld',    woorde: 'Geld' },
       { waarde: 'seer',    woorde: 'Iemand het my seergemaak' },
       { waarde: 'besluit', woorde: 'Ek moet ’n besluit neem' },
@@ -127,9 +127,10 @@ const DAG3 = [
 const DAG4 = [
   {
     soort: 'teks',
-    lyf: 'Ons hou maklik van Jesus wat troos. Jesus wat help. Jesus wat vergewe.\n\n' +
-         'Maar dieselfde Jesus lei. Hy korrigeer. Hy sê soms dinge wat teen my eie begeertes ingaan.\n\n' +
-         'En daarom moet elke dissipel soms vra: volg ek Jesus soos Hy werklik is — of net die weergawe van Jesus wat vir my gemaklik is?',
+    /* Hoogstens 100–150 woorde. Dit is die hele devotional vir Dag 4. */
+    lyf: 'Ons hou maklik van Jesus wat troos, help en vergewe.\n\n' +
+         'Maar dieselfde Jesus lei. Hy korrigeer. Hy roep ons om te verander.\n\n' +
+         'Daarom moet elke dissipel soms vra: volg ek Jesus soos Hy werklik is… of net die weergawe van Jesus wat vir my gemaklik is?',
   },
   { soort: 'groot', lyf: '’n Jesus wat jy self kan vorm,\nkan jou nooit vorm nie.' },
   {
@@ -151,11 +152,7 @@ const DAG5 = [
      eie woorde terug. Is daar niks gestoor nie, verdwyn hierdie blok — nooit
      `undefined`, nooit 'n leë aanhaling. */
   { soort: 'terugblik', bronId: 'getref', kop: 'OP DAG 1 HET JY GESKRYF:' },
-  {
-    soort: 'teks',
-    lyf: 'Vier dae later het jy weer na Jesus gekyk. Jy het Sy woorde gelees. Jy het eerlik na jou eie lewe gekyk.\n\nNou kom dieselfde vraag terug.',
-  },
-  { soort: 'vraag', id: 'glo5', kop: 'WIE SÊ JÝ IS JESUS?', prompt: 'Skryf dit in jou eie woorde…' },
+  { soort: 'vraag', id: 'glo5', kop: 'WIE SÊ JÝ VANDAG IS JESUS?', prompt: 'Skryf dit in jou eie woorde…' },
   { soort: 'vraag', id: 'area5', kop: 'WAT IS EEN AREA WAARIN JY HOM NOU MEER WIL VOLG?', prompt: 'Een area…' },
   {
     soort: 'gebed',
@@ -164,6 +161,12 @@ const DAG5 = [
          'Waar ek U te klein gemaak het, korrigeer my. Waar ek self die laaste sê wil hê, leer my om U te vertrou.\n\n' +
          'Ek wil U ken. Ek wil U volg. Amen.',
   },
+  /* Die WEEK se wallpaper, aan die einde van Dag 5.
+     Dit het net op die weekklaar-skerm gestaan — die blad ná die knoppie —
+     en dus het 'n mens dit op Dag 5 self nooit gesien nie. Elke wallpaper
+     staan nou op die DAG waar hy hoort: Dag 1 s'n op Dag 1, die week s'n op
+     Dag 5. Nie een word herhaal nie. */
+  { soort: 'wallpaper', bronVeld: 'wallpaper', kop: 'HOU DIT VOOR JOU' },
 ]
 
 export const WEEK1_DAE = [
@@ -300,8 +303,6 @@ Daarom het Jesus gekom.
 
 Hy het nie net vir jou gesterf nie. Hy het in jou plek gesterf.
 
-Jou skuld. Sy kruis. Jou straf. Sy liggaam.
-
 Jou hoop rus nie op hoe goed jy dit regkry om vir God te leef nie. Jou hoop rus op wat Jesus vir jou gedoen het.
 
 Maar Hy het nie in die graf gebly nie. Jesus het opgestaan. Die graf is leeg. Jesus leef.
@@ -338,7 +339,7 @@ Lees vandag Johannes 1:1–18. Lees dit stadig.
 
 En vra nie eerste “Wat beteken dit vir my?” nie. Vra: “Wat wys hierdie vir my oor Jesus?”
 
-En daarna vra jy die moeiliker vraag: “As Jesus werklik Here is… waar leef ek nog asof ék die laaste sê het?”
+En daarna: “As Jesus werklik Here is… waar leef ek nog asof ék die laaste sê het?”
 
 En as hierdie werklik jou gebed is, bid saam met my:
 
