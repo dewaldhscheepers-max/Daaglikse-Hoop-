@@ -313,6 +313,18 @@ function Blok({ blok: b, week, w, antwoorde, stel }) {
     )
   }
 
+  /* Die dag se wallpaper, in die blad self. */
+  if (b.soort === 'wallpaper') {
+    const bron = week[b.bronVeld || 'wallpaper']
+    if (!bron) return null
+    return (
+      <div className="vs-wp">
+        <div className="vs-kop">WEEK {w} · {b.kop}</div>
+        <Wallpaper bron={bron} week={w} kaal />
+      </div>
+    )
+  }
+
   if (b.soort === 'terugblik') {
     const teks = String(antwoorde[b.bronId] || '').trim()
     if (!teks) return null      /* nooit undefined, nooit 'n leë aanhaling */
@@ -381,7 +393,7 @@ function Lees({ merk, skrif, lyf }) {
 /* Die wallpaper. 'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n
    volskerm <img> nie — sien CLAUDE.md se "Android, Chrome, en gekleurde
    strepe". Geen prent, geen blok. */
-function Wallpaper({ bron, week }) {
+function Wallpaper({ bron, week, kaal }) {
   const [besig, setBesig] = useState(false)
   const [nota, setNota]   = useState(null)
   if (!bron) return null
@@ -413,15 +425,19 @@ function Wallpaper({ bron, week }) {
     setBesig(false)
   }
 
-  return (
-    <div className="vs-wp">
-      <div className="vs-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
+  /* Die adres word AANGEHAAL. 'n Firebase-aflaai-URL dra `?alt=media&token=...`
+     en 'n ongehaalde `url(...)` in CSS is 'n slegte plek vir sulke karakters —
+     dit is presies hoe 'n prent stil verdwyn sonder dat enigiets kla. */
+  const binne = (
+    <>
+      <div className="vs-wp-prent" style={{ backgroundImage: `url("${bron}")` }} />
       <button className="vs-deel" onClick={deel} disabled={besig}>
-        {besig ? 'Besig…' : 'Stel as agtergrond of deel'}
+        {besig ? 'Besig...' : 'Stel as agtergrond of deel'}
       </button>
       {nota && <p className="vs-wp-nota">{nota}</p>}
-    </div>
+    </>
   )
+  return kaal ? binne : <div className="vs-wp">{binne}</div>
 }
 
 /* Deel woorde (en 'n skakel). Val `navigator.share` weg — soos op 'n rekenaar

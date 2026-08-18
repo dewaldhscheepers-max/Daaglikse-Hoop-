@@ -54,7 +54,7 @@ export default function PrentOplaai({ week, sleutel, kop, hulp, waarde, op }) {
           <div className="so-daar-kop">✓ Die prent is opgelaai</div>
           {/* 'n Klein voorskou as agtergrond, nie 'n <img> nie — sien
               CLAUDE.md se "Android, Chrome, en gekleurde strepe". */}
-          <div className="so-prent" style={{ backgroundImage: `url(${waarde})` }} />
+          <div className="so-prent" style={{ backgroundImage: `url("${waarde}")` }} />
           <button className="so-vee" onClick={() => op('')}>Haal dit af</button>
         </div>
       )}

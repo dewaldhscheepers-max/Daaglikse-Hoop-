@@ -419,7 +419,7 @@ function WallpaperKaart({ week }) {
   return (
     <div className="vw-wp">
       <div className="vw-wp-kop">HOU HIERDIE WAARHEID VOOR JOU</div>
-      <div className="vw-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
+      <div className="vw-wp-prent" style={{ backgroundImage: `url("${bron}")` }} />
       <button className="vw-wp-knop" onClick={deel} disabled={besig}>
         {besig ? 'Besig…' : 'Stoor of deel'}
       </button>

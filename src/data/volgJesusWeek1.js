@@ -80,6 +80,14 @@ const DAG1 = [
     prompt: 'Skryf een ding neer…',
     deelStem: true,
   },
+  /* Die dag se wallpaper. Dit sluit Dag 1 af — die dag waarop die
+     stemboodskap land — en die sin op die prent IS die boodskap se punt.
+
+     Dit het in die herbou verlore geraak: die wallpapers het net op die
+     weekklaar-skerm oorgebly, en dan sien 'n mens die prent wat hy pas
+     opgelaai het eers ná Dag 5. Is daar nog geen prent nie, verdwyn hierdie
+     blok stil. */
+  { soort: 'wallpaper', bronVeld: 'wallpaperDag1', kop: 'HOU DIT VOOR JOU' },
 ]
 
 const DAG2 = [
