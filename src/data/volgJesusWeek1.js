@@ -140,6 +140,15 @@ const DAG1 = [
     velde: [{ id: 'raakgesien1', prompt: 'Vandag het ek raakgesien dat Jesus…' }],
     knop: 'STOOR MY ANTWOORD',
   },
+  {
+    /* Dag 1 se wallpaper. Dit sluit die dag af waarop die stemboodskap land,
+       en die sin op die prent is die stemboodskap se eie punt. Is daar nog
+       geen prent opgelaai nie, word hierdie stap heeltemal uitgelaat. */
+    soort: 'wallpaper',
+    bronVeld: 'wallpaperDag1',
+    kop: 'HOU DIT VOOR JOU',
+    knop: 'GAAN AAN',
+  },
 ]
 
 const DAG2 = [
@@ -409,8 +418,8 @@ const DAG5 = [
   },
   {
     soort: 'wallpaper',
+    bronVeld: 'wallpaper',
     kop: 'HOU DIT VAS',
-    sin: 'WIE SÊ JÝ IS JESUS?',
     knop: 'GAAN AAN',
   },
   {

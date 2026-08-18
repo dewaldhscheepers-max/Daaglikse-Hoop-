@@ -31,6 +31,7 @@ import { keurVideoInset } from '../data/youtubeId'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import StemOplaai from '../components/StemOplaai'
+import PrentOplaai from '../components/PrentOplaai'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -86,6 +87,7 @@ const LEEG = (n) => ({
   kontroles: { teks: false, konteks: false, jesus: false, toepassing: false, grens: false },
   hersieningStatus: 'wag',
   stemboodskapUrl: '',
+  wallpaperDag1: '',
   gepubliseer: false,
 })
 
@@ -541,6 +543,20 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <p className="vj-sub vj-fyn">
         Onthou om daarna <strong>Stoor</strong> te druk.
       </p>
+
+      {/* TWEE wallpapers. Die een sluit Dag 1 af, die ander sluit die week af.
+          Albei bly staan — die een vervang nie die ander nie. */}
+      <PrentOplaai week={week.weeknommer} sleutel="dag1"
+                   kop="WALLPAPER — EINDE VAN DAG 1"
+                   hulp="Dit wys nadat die stemboodskap gehoor is, aan die einde van Dag 1. Laat dit leeg en die skerm slaan dit stil oor."
+                   waarde={week.wallpaperDag1}
+                   op={v => stel('wallpaperDag1', v)} />
+
+      <PrentOplaai week={week.weeknommer} sleutel="week"
+                   kop="WALLPAPER — EINDE VAN DIE WEEK"
+                   hulp="Dit wys op Dag 5, waar die week afsluit."
+                   waarde={week.wallpaper}
+                   op={v => stel('wallpaper', v)} />
 
       <Veld l="Hou dit vas (Dag 1, en die wallpaper se sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
       <Veld l="Die laaste hou (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />

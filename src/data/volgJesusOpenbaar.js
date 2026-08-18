@@ -53,6 +53,7 @@ export const OPENBARE_VELDE = [
   'privaatRefleksie',
   'gehoorsaamheidStap',
   'wallpaper',
+  'wallpaperDag1',
   'dag1Titel', 'dag2Titel', 'dag3Titel', 'dag4Titel', 'dag5Titel',
   'dag2Skrif', 'dag3Skrif', 'dag4Skrif', 'dag5Skrif',
   'dag2Prompt', 'dag3Prompt', 'dag4Vraag', 'dag5Prompt',

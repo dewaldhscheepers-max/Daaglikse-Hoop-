@@ -106,6 +106,10 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
      bestaan maar homself dadelik verbyspring, laat die vorderingspitte lieg. */
   const stappe = stappeVirDag(dag, antwoorde)
     .filter(st => !st.netAs || antwoorde[st.netAs.id] === st.netAs.waarde)
+    /* 'n Wallpaper-stap sonder 'n prent bestaan glad nie. Dit is beter as om
+       hom te wys en dadelik te laat verbyspring — 'n stap wat homself oorslaan
+       laat die vorderingspitte lieg oor hoe ver 'n mens is. */
+    .filter(st => st.soort !== 'wallpaper' || !!week[st.bronVeld || 'wallpaper'])
   const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
 
   function volgende() {
@@ -455,15 +459,16 @@ function Stap({ stap: s, week, w, antwoorde, stel, volgende }) {
    * Let op hoe die voorskou geteken word: 'n CSS-`background-image` op 'n
    * ONDEURSIGTIGE houer, nooit 'n volskerm <img> nie — sien CLAUDE.md. */
   if (s.soort === 'wallpaper') {
-    if (!week.wallpaper) { return <Slaan volgende={volgende} /> }
+    const bron = week[s.bronVeld || 'wallpaper']
+    if (!bron) { return <Slaan volgende={volgende} /> }
     return (
       <>
         <div className="vs-wp">
-          <div className="vs-kop">{s.kop}</div>
-          <div className="vs-wp-prent" style={{ backgroundImage: `url(${week.wallpaper})` }} />
+          <div className="vs-kop">WEEK {w} · {s.kop}</div>
+          <div className="vs-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
           <DeelKnop
-            bron={week.wallpaper}
-            naam={`volg-jesus-week-${w}.webp`}
+            bron={bron}
+            naam={`volg-jesus-week-${w}.jpg`}
             woorde="Stoor dit as jou agtergrond, sodat die vraag die hele week voor jou bly — of deel dit met iemand."
             knop="Stoor of deel"
           />

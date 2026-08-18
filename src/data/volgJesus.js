@@ -93,6 +93,8 @@ export const OPSIONELE_VELDE = [
   /* Die week se stemboodskap. Dit VERVANG die video: Dewald neem dit self op
      en laai dit op, en die app speel dit. Sien Stemboodskap.jsx. */
   'stemboodskapUrl',
+  /* Twee wallpapers per week: een sluit Dag 1 af, een sluit die week af. */
+  'wallpaperDag1',
   'ondersteunendeSkrif',
   /* 'n Vierde groepvraag. Party weke het drie, party vier — die vierde is
      die een wat gewoonlik die diepste sny, en dit mag nie wegval bloot omdat
