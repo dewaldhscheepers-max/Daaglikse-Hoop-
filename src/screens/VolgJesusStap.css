@@ -244,3 +244,30 @@
 }
 .vs-wp-fyn { font-size: 12.5px; line-height: 1.6; opacity: .88; margin-top: 10px; }
 .vs-wp-nota { font-size: 12.5px; color: var(--gold, #E0B872); margin-top: 8px; }
+
+/* ── Een blad per dag ── */
+.vs-dag-titel {
+  font-family: var(--font-serif); font-size: clamp(21px, 6vw, 27px);
+  line-height: 1.25; color: var(--text); margin: 0 0 16px;
+}
+.vs-blokke { display: flex; flex-direction: column; gap: 14px; }
+
+.vs-kassie {
+  display: block; width: 100%; box-sizing: border-box; margin-top: 12px;
+  border: 1px solid #E2DAF0; border-radius: 11px; padding: 14px;
+  /* 16px, want onder 16px zoem iOS Safari die blad in sodra 'n veld geraak
+     word. */
+  font-size: 16px; line-height: 1.65; color: var(--text);
+  background: #FBFAFD; font-family: var(--font-body);
+  resize: vertical; min-height: 96px; -webkit-appearance: none;
+}
+.vs-kassie::placeholder { color: var(--text-muted); }
+.vs-kassie:focus { outline: none; border-color: #B9A8DC; background: #fff; }
+
+.vs-opvolg { margin-top: 18px; padding-top: 16px; border-top: 1px solid #EFEAF9; }
+.vs-lees-nota-lyf { margin-top: 12px; font-size: 15px; }
+
+.vs-volgende h3 {
+  font-family: var(--font-serif); font-size: 20px; line-height: 1.3;
+  color: var(--text); margin: 0 0 10px;
+}

@@ -51,15 +51,13 @@ export const WEKE = {
       'Nie om alles oor Jesus binne een week te verstaan nie, en nie om iemand skuldig genoeg te laat voel om groot beloftes te maak nie. Hierdie week het een doel: kyk weer na Jesus. Lees wat die Evangelies oor Hom sê, kyk eerlik na die beeld wat jy van Hom gevorm het, kyk na wat jou gewone lewe wys oor Wie werklik die laaste sê het — en begin self antwoord.',
     weekKern:
       'Jy kan Jesus se Naam ken, kerk toe gaan en Bybelverse ken — en steeds nog moet ontdek Wie Hy werklik is.',
+    /* KORT. Dewald: "Moenie die huidige lang openingsblad gebruik nie ...
+       Geen verdere intro." */
     openingskerm:
-      'Miskien volg jy Jesus al vir jare.\n\n' +
-      'Miskien begin jy nou eers vrae vra.\n\n' +
-      'Miskien glo jy, maar besef jy daar is nog soveel van Hom wat jy nie ken nie.\n\n' +
-      'Of miskien weet jy nog nie of jy glo nie.\n\n' +
-      'Jy hoef nie voor te gee nie. Jy is welkom hier.\n\n' +
-      'Ons begin nie hierdie reis by "wat moet ek alles verander?" nie. Ons begin by JESUS.\n\n' +
-      'Hierdie week gaan jy self uit die Evangelies lees, na die week se stemboodskap luister, eerlik kyk na Wie Jesus werklik is, vra waar jy Hom dalk kleiner gemaak het, raaksien wat jou gewone lewe oor jou geloof wys — en uiteindelik jou eie antwoord gee.\n\n' +
-      'Nie iemand anders s\u2019n nie. Joune.',
+      'Jy hoef nie hierdie week alles uit te werk nie.\n\n' +
+      'Ons begin net by Jesus.\n\n' +
+      'Lees wat die Evangelies oor Hom s\u00ea. Luister. Wees eerlik.\n\n' +
+      'En kyk waar hierdie vraag jou raak: Wie s\u00ea j\u00fd is Jesus?',
     primereSkrif: 'Matteus 16:13\u201317',
     ondersteunendeSkrif: 'Johannes 1:1\u201318',
     /* Geen video. Die hoofboodskap is die stemboodskap. */
@@ -68,7 +66,7 @@ export const WEKE = {
     kernwaarheid:
       'Jy kan Jesus se Naam ken, kerk toe gaan en Bybelverse ken \u2014 en steeds nog moet ontdek Wie Hy werklik is.',
     eenSin:
-      'Iemand anders kan jou van Jesus vertel. Niemand anders kan Hom namens jou volg nie.',
+      'Jy kan nie die kruis vir jou skuld vat en die troon vir jouself hou nie.',
     privaatRefleksie:
       'As ek heeltemal eerlik is, dink ek meestal aan Jesus as\u2026',
     gehoorsaamheidStap:

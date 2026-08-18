@@ -99,3 +99,4 @@
   max-height: 60vh; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+.stem-duur { font-size: 12px; opacity: .75; margin: -12px 0 16px; }

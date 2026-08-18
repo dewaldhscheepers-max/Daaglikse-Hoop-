@@ -40,7 +40,7 @@ const fmt = s => {
   return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 }
 
-export default function Stemboodskap({ bron, titel, sleutel, transkripsie }) {
+export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkripsie }) {
   const audioRef = useRef(null)
   const [speel, setSpeel]   = useState(false)
   const [nou, setNou]       = useState(0)
@@ -142,6 +142,7 @@ export default function Stemboodskap({ bron, titel, sleutel, transkripsie }) {
 
       <div className="stem-kop">DIE WEEK SE STEMBOODSKAP</div>
       {titel && <div className="stem-titel">{titel}</div>}
+      {duurTeks && <div className="stem-duur">{duurTeks}</div>}
 
       <div className="stem-kontroles">
         <button className="stem-spring" onClick={() => spring(-15)} aria-label="15 sekondes terug">

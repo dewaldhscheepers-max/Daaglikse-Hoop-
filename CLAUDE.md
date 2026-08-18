@@ -327,44 +327,51 @@ swak lyn elke mislukte versoek weer). Dieselfde mens op twee fone tel twee
 keer; 'n herinstallasie tel weer. Die getal is eerder 'n bietjie te laag as te
 hoog, en dit is die regte kant om op te fouteer.
 
-### Week 1 is 'n PAD, nie plat velde nie
+### Week 1 is EEN BLAD PER DAG, nie plat velde nie
 
-Op 18 Augustus 2026 het Dewald Week 1 heeltemal oorgeskryf, en die nuwe vorm
-pas nie in die ou model nie. Die ander weke is 'n handjievol plat velde
-(`dag2Prompt`, `dag4Vraag`) wat 'n vaste uitleg vul. Week 1 is 'n LYS STAPPE
-in `src/data/volgJesusWeek1.js`, en `VolgJesusStap.jsx` wys hulle een op 'n
-slag met een knoppie elk.
+Op 18 Augustus 2026 het Dewald Week 1 twee keer oorgeskryf. Die tweede keer was
+'n reguit oordeel oor my werk: *"Die probleem met die huidige implementasie is
+dat VOLG JESUS soos 'n kursus begin voel: lees → klik → lees → klik → luister →
+klik → skryf → klik. VOLG JESUS MAG NOOIT SOOS HUISWERK VOEL NIE."*
 
-`VolgJesusLewe.jsx` kies: week 1 → die stapskerm, alles anders → die ou
-`VolgJesusWeek.jsx`. Die admin, die publiseer-hek en die openbare eindpunt
-loop steeds deur die plat rekord; net wat die GEBRUIKER sien, het verander.
+Hy was reg. Ek het "een stap op 'n slag" gelees as BAIE KLEIN SKERMS en agt
+skermpies per dag gebou. Wat hy bedoel het, was MIN INHOUD:
+
+    MAAK OOP → SIEN EEN DING → DOEN EEN DING → ANTWOORD EEN DING → KLAAR.
+
+'n Dag is nou **een blad** met 'n paar blokke en **een knoppie** onderaan
+(`blokkeVirDag` in `src/data/volgJesusWeek1.js`, geteken deur
+`VolgJesusStap.jsx`). Die perke staan in `volgJesusWeek1.toets.mjs` omdat hulle
+die soort ding is wat terugsluip sodra iemand "net nog een kaart" byvoeg:
+hoogstens vyf blokke per dag, hoogstens twee private antwoorde per dag, geen
+teksblok van meer as drie paragrawe nie, en geen Skrifgedeelte twee dae na
+mekaar nie.
+
+Dewald se eie toets voor enige nuwe teks: **"Sal die gebruiker iets verloor as
+ons hierdie verwyder?"** Is die antwoord nee — verwyder dit.
+
+`VolgJesusLewe.jsx` kies: week 1 → die bladskerm, alles anders → die ou
+`VolgJesusWeek.jsx`. Die admin, die publiseer-hek en die openbare eindpunt loop
+steeds deur die plat rekord; net wat die GEBRUIKER sien, het verander.
 
 **Daar is geen video vir Week 1 nie.** Die hoofboodskap is 'n STEMBOODSKAP wat
 in die app speel (`Stemboodskap.jsx`), met die transkripsie **by verstek
-toegevou**. Die adres kom uit die admin se `stemboodskapUrl`; is dit leeg, sê
-die skerm dit eerlik in plaas van 'n dooie speler te wys. Die speler onthou
-waar 'n mens opgehou het — 'n boodskap wat drie keer van voor af begin, word
-nooit klaar geluister nie.
+toegevou**. Dit word in die admin OPGELAAI (`StemOplaai.jsx`), nie as 'n adres
+geplak nie — 'n adres bestaan nie voordat die lêer êrens is nie, en 'n veld vir
+'n ding wat niemand kan maak, is geen veld nie. Dieselfde geld vir die **twee
+wallpapers** per week (`PrentOplaai.jsx`): een sluit Dag 1 af, een sluit die
+week af, en albei bly.
 
-**Elke antwoord bly op die foon.** `vj_a_w<week>_<id>` in localStorage, en
-niks meer nie. Geen groep, geen fasiliteerder, geen kerk-admin kan daaraan kom
-— daar is niks om aan te kom nie. Die tellers tel dat 'n dag klaar is; nooit
-wat iemand geskryf het nie.
+**Elke antwoord bly op die foon.** `vj_a_w<week>_<id>` in localStorage, en dit
+stoor vanself terwyl 'n mens tik — geen STOOR-knoppie, want dit is nog 'n klik
+en 'n mens wat vergeet druk, verloor sy woorde.
 
-**Die belangrikste oomblik is die terugblik.** Op Dag 5 wys die app die mens
-sy WERKLIKE Dag 1-woorde terug. Is daar niks gestoor nie, word daardie skerm
-heeltemal oorgeslaan — nooit `undefined`, nooit 'n leë aanhaling.
+**Die belangrikste oomblik is die terugblik.** Op Dag 5 wys die app die mens sy
+WERKLIKE Dag 1-woorde terug. Is daar niks gestoor nie, verdwyn daardie blok —
+nooit `undefined`, nooit 'n leë aanhaling.
 
-**Niks mag oor twee dae herhaal nie.** Johannes 1:1–18 het op Dag 1 EN Dag 2
-gestaan; Dewald het dit op sy foon gevang. Dit is 'n fout wat 'n mens NIE in
-'n blaaier sien nie — jy moet twee dae langs mekaar hou, en teen die tyd dat
-jy by Dag 2 kom, het jy Dag 1 vergeet. `volgJesusWeek1.toets.mjs` hou albei
-gelyk vas: geen Skrifgedeelte twee keer, geen twee vrae met dieselfde id (dan
-skryf die een die ander se antwoord dood), geen stap sonder 'n knoppie, en
-Dag 1 mag nie langer wees as die ander dae nie — dit dra reeds die hele
-stemboodskap.
-
-`kykWeek1.mjs` in die scratchpad loop die hele week deur soos 'n mens.
+`kykWeek1.mjs` in die scratchpad loop die hele week deur en tel die KLIKKE:
+elke dag moet met een druk klaar wees.
 
 ### Die Publiseer-knoppie
 

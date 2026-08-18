@@ -1,60 +1,46 @@
-/* ── VOLG JESUS · een stap op 'n slag ──
+/* ── VOLG JESUS · een blad per dag ──
  *
- * Dewald: "Moenie ’n hele dag as een lang dokument op een skerm wys nie. Elke
- * dag moet soos ’n rustige, persoonlike reis voel: Lees → Luister/Dink →
- * Reageer → Bid → Voltooi. Gebruik een duidelike primêre aksie per skerm."
+ * Dewald: "Die gebruiker moet nooit hierdie patroon ervaar nie: lees, klik,
+ * lees, klik, skryf, klik, nog 'n kaart, klik. Die ideale gevoel is:
+ * OPEN → SIEN EEN DING → DOEN EEN DING → ANTWOORD EEN DING → KLAAR."
  *
- * Die ou skerm het 'n hele dag in een blad gegooi en 'n mens moes daardeur
- * skuif. Hierdie een wys EEN ding, met EEN knoppie, en dan die volgende.
+ * Die vorige weergawe van hierdie skerm was 'n ketting van agt skermpies met
+ * agt knoppies. Dit was my verkeerde lees van "een stap op 'n slag": ek het
+ * dit as baie klein skerms gebou in plaas van as MIN INHOUD. Die gevolg het
+ * soos huiswerk gevoel.
+ *
+ * Nou is 'n dag EEN BLAD met 'n paar blokke en EEN knoppie onderaan.
  *
  * ── Wat hierdie skerm NIE doen nie ──
  *
- * Geen punte. Geen ranglys. Geen XP. Geen streak. Geen skuldtaal. Die enigste
- * vordering wat gewys word, is "DAG 2 VAN 5" en "stap 3 van 8" — 'n mens moet
- * kan sien hoe ver hy is sonder om iets te verloor.
+ * Geen punte, geen ranglys, geen XP, geen streak, geen skuldtaal. Geen
+ * "voltooiingsblad" met 'n opstel nie. Die enigste vordering is "DAG 2 VAN 5".
  *
  * ── Alles wat hier geskryf word, bly op die foon ──
  *
- * Elke antwoord gaan na localStorage en NERENS anders nie. Geen groep, geen
- * fasiliteerder, geen kerk-admin kan daaraan kom, want daar is niks om aan te
- * kom nie: dit verlaat nooit die toestel nie. Dit staan ook op die skerm,
- * want 'n mens moet dit KAN SIEN voor hy iets eerliks tik.
- *
- * ── Die belangrikste oomblik ──
- *
- * Op Dag 5 wys die app die mens sy EIE Dag 1-antwoord terug. Nie "onthou wat
- * jy gedink het?" nie — die werklike woorde. Is daar niks gestoor nie, word
- * daardie kaart heeltemal oorgeslaan; nooit `undefined`, nooit 'n leë blok.
+ * Elke antwoord gaan na localStorage en NERENS anders nie, en dit stoor
+ * vanself terwyl 'n mens tik. Geen groep, geen fasiliteerder, geen kerk-admin
+ * kan daaraan kom — daar is niks om aan te kom nie.
  */
 import { useEffect, useRef, useState } from 'react'
 import { ontleedVerwysing } from '../data/volgJesus'
 import {
-  WEEK1_DAE, WEEK1_REIS, WEEK1_TRANSKRIPSIE, BEGINPUNT, DAG5_INLEI, stappeVirDag,
+  WEEK1_DAE, WEEK1_REIS, WEEK1_TRANSKRIPSIE, WEEK1_OPENING, WEEK1_DEELSIN,
+  WEEK1_VOLGENDE, blokkeVirDag,
 } from '../data/volgJesusWeek1'
 import Stemboodskap from '../components/Stemboodskap'
 import '../components/Stemboodskap.css'
 import './VolgJesusStap.css'
 
-/* Waar 'n antwoord staan. Per week, sodat Week 2 se "dink" nie Week 1 s'n
-   oorskryf nie. */
 const antwoordSleutel = (w, id) => `vj_a_w${w}_${id}`
 const plekSleutel = w => `vj_plek_w${w}`
 
-function lees(w, id) {
-  try { return localStorage.getItem(antwoordSleutel(w, id)) || '' } catch { return '' }
-}
-function skryf(w, id, waarde) {
-  try { localStorage.setItem(antwoordSleutel(w, id), waarde) } catch {}
-}
-
-/* Alles wat hierdie mens al geskryf het. Dit dryf die takke (Dag 3 se area)
-   en die terugblik (Dag 5). */
 function alleAntwoorde(w) {
   const uit = {}
   try {
+    const voor = `vj_a_w${w}_`
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i)
-      const voor = `vj_a_w${w}_`
       if (k && k.startsWith(voor)) uit[k.slice(voor.length)] = localStorage.getItem(k)
     }
   } catch {}
@@ -64,28 +50,18 @@ function alleAntwoorde(w) {
 export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binnekort }) {
   const w = Number(week && week.weeknommer) || 1
 
-  /* 'oop' | 'begin' | 'dag' | 'klaar' | 'weekklaar' */
-  const [blad, setBlad] = useState('oop')
+  const [blad, setBlad] = useState('oop')      /* 'oop' | 'dag' | 'klaar' | 'weekklaar' */
   const [dag, setDag]   = useState(1)
-  const [stap, setStap] = useState(0)
   const [antwoorde, setAntwoorde] = useState(() => alleAntwoorde(w))
+  const [hervat, setHervat] = useState(0)
   const bladRef = useRef(null)
 
-  /* Hervat waar hy opgehou het. Dewald: "gebruiker moet altyd presies kan
-     hervat waar hy/sy opgehou het." */
-  const [hervat, setHervat] = useState(null)
   useEffect(() => {
     try {
-      const rou = localStorage.getItem(plekSleutel(w))
-      if (!rou) return
-      const p = JSON.parse(rou)
-      if (p && p.dag >= 1 && p.dag <= 5) setHervat(p)
+      const n = Number(localStorage.getItem(plekSleutel(w)))
+      if (Number.isInteger(n) && n >= 1 && n <= 5) setHervat(n)
     } catch {}
   }, [w])
-
-  function stoorPlek(d, s) {
-    try { localStorage.setItem(plekSleutel(w), JSON.stringify({ dag: d, stap: s })) } catch {}
-  }
 
   function boToe() {
     try { window.scrollTo({ top: 0 }) } catch {}
@@ -96,67 +72,44 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
     } catch {}
   }
 
-  function stelAntwoord(id, waarde) {
-    skryf(w, id, waarde)
+  function stel(id, waarde) {
+    try { localStorage.setItem(antwoordSleutel(w, id), waarde) } catch {}
     setAntwoorde(a => ({ ...a, [id]: waarde }))
   }
 
-  /* Stappe wat net vir SOMMIGE mense bestaan (die "as jy nog nie seker is
-     nie"-kaart) word heeltemal uitgelaat, nie oorgeslaan nie. 'n Stap wat
-     bestaan maar homself dadelik verbyspring, laat die vorderingspitte lieg. */
-  const stappe = stappeVirDag(dag, antwoorde)
-    .filter(st => !st.netAs || antwoorde[st.netAs.id] === st.netAs.waarde)
-    /* 'n Wallpaper-stap sonder 'n prent bestaan glad nie. Dit is beter as om
-       hom te wys en dadelik te laat verbyspring — 'n stap wat homself oorslaan
-       laat die vorderingspitte lieg oor hoe ver 'n mens is. */
-    .filter(st => st.soort !== 'wallpaper' || !!week[st.bronVeld || 'wallpaper'])
+  function beginDag(n) {
+    setDag(n); setBlad('dag')
+    try { localStorage.setItem(plekSleutel(w), String(n)) } catch {}
+    boToe()
+  }
+
+  function klaarMetDag(n) {
+    setBlad(n === 5 ? 'weekklaar' : 'klaar')
+    boToe()
+    if (opDagKlaar) { try { opDagKlaar(n) } catch {} }
+  }
+
   const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
 
-  function volgende() {
-    const s = stap + 1
-    if (s >= stappe.length) {
-      setBlad('klaar'); boToe()
-      if (opDagKlaar) { try { opDagKlaar(dag) } catch {} }
-      stoorPlek(dag, 0)
-      return
-    }
-    setStap(s); stoorPlek(dag, s); boToe()
-  }
-
-  function beginDag(n, by = 0) {
-    setDag(n); setStap(by); setBlad('dag'); stoorPlek(n, by); boToe()
-  }
-
-  /* ── Die openingskerm ─────────────────────────────────────────────── */
+  /* ── Die openingsblad ───────────────────────────────────────────────
+     Kort. Titel, 'n paar reëls, die privaatheidsreël, en BEGIN. */
   if (blad === 'oop') {
     return (
       <div className="vs">
         <div className="vs-open">
           <div className="vs-merk">WEEK {w} VAN 52</div>
           <h1 className="vs-open-titel">{week.titel}</h1>
-          {week.openingskerm && <p className="vs-open-teks">{week.openingskerm}</p>}
+          <p className="vs-open-teks">{week.openingskerm || WEEK1_OPENING}</p>
           <p className="vs-privaat">
-            🔒 Alles wat jy hier skryf, is privaat. Dit bly op hierdie foon —
-            niemand anders sien dit nie.
+            🔒 Alles wat jy persoonlik hier skryf, bly privaat.
           </p>
-
-          {/* Hervat. Dit staan BO die begin-knoppie, want iemand wat terugkom,
-              soek dit eerste. */}
-          {hervat && hervat.dag >= 1 ? (
-            <>
-              <button className="vs-hoofknop" onClick={() => beginDag(hervat.dag, hervat.stap || 0)}>
-                GAAN VOORT MET DAG {hervat.dag}
-              </button>
-              <p className="vs-hervat">Welkom terug. Gaan voort waar jy opgehou het.</p>
-            </>
-          ) : (
-            <button className="vs-hoofknop" onClick={() => {
-              if (opBegin) { try { opBegin() } catch {} }
-              setBlad('begin'); boToe()
-            }}>
-              BEGIN WEEK {w}
-            </button>
-          )}
+          <button className="vs-hoofknop" onClick={() => {
+            if (opBegin) { try { opBegin() } catch {} }
+            beginDag(hervat || 1)
+          }}>
+            {hervat > 1 ? `GAAN VOORT MET DAG ${hervat}` : `BEGIN WEEK ${w}`}
+          </button>
+          {hervat > 1 && <p className="vs-hervat">Welkom terug. Gaan voort waar jy opgehou het.</p>}
         </div>
 
         <div className="vs-dae">
@@ -172,430 +125,230 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
     )
   }
 
-  /* ── Waar begin jy vandag ─────────────────────────────────────────── */
-  if (blad === 'begin') {
-    const gekies = antwoorde[BEGINPUNT.id]
-    const keuse = BEGINPUNT.keuses.find(k => k.waarde === gekies)
-    return (
-      <div className="vs" ref={bladRef}>
-        <div className="vs-kaart">
-          <div className="vs-kop">{BEGINPUNT.kop}</div>
-          <p className="vs-lyf">{BEGINPUNT.lyf}</p>
-          <div className="vs-keuses">
-            {BEGINPUNT.keuses.map(k => (
-              <button key={k.waarde} className={gekies === k.waarde ? 'aan' : ''}
-                      onClick={() => stelAntwoord(BEGINPUNT.id, k.waarde)}>
-                {k.woorde}
-              </button>
-            ))}
-          </div>
-          {keuse && <p className="vs-antwoord">{keuse.antwoord}</p>}
-        </div>
-        <button className="vs-hoofknop" disabled={!gekies}
-                onClick={() => beginDag(1)}>
-          {BEGINPUNT.knop}
-        </button>
-      </div>
-    )
-  }
-
-  /* ── Dag klaar ────────────────────────────────────────────────────── */
+  /* ── Dag klaar ──────────────────────────────────────────────────────
+     'n Klein bevestiging. Geen viering, geen opstel. */
   if (blad === 'klaar') {
-    const laaste = dag === 5
     return (
       <div className="vs" ref={bladRef}>
         <div className="vs-klaar">
           <div className="vs-klaar-merk">✓</div>
-          <div className="vs-merk">DAG {dag} VAN 5 VOLTOOI</div>
           <h2>{dagInfo.klaarKop}</h2>
           {dagInfo.klaarLyf && <p className="vs-klaar-lyf">{dagInfo.klaarLyf}</p>}
-
-          {dagInfo.more && (
-            <div className="vs-more">
-              <span className="vs-more-kop">MÔRE</span>
-              <p>{dagInfo.more}</p>
-            </div>
-          )}
-
-          {laaste && binnekort && (
-            <div className="vs-more">
-              <span className="vs-more-kop">{binnekort.kop}</span>
-              <p>{binnekort.lyf}</p>
-            </div>
-          )}
-
-          <button className="vs-hoofknop" onClick={() => {
-            if (laaste) { setBlad('oop'); boToe(); if (opSluit) opSluit() }
-            else { setBlad('oop'); boToe() }
-          }}>
-            {laaste ? 'VOLTOOI WEEK 1' : `VOLTOOI DAG ${dag}`}
+          <button className="vs-hoofknop" onClick={() => { setBlad('oop'); boToe() }}>
+            TERUG NA VOLG JESUS
           </button>
-          {!laaste && (
-            <button className="vs-stil" onClick={() => beginDag(dag + 1)}>
-              Ek wil nou al met Dag {dag + 1} aangaan
-            </button>
-          )}
+          <button className="vs-stil" onClick={() => beginDag(Math.min(5, dag + 1))}>
+            Ek wil nou al met Dag {Math.min(5, dag + 1)} aangaan
+          </button>
         </div>
       </div>
     )
   }
 
-  /* ── 'n Stap ──────────────────────────────────────────────────────── */
-  const s = stappe[Math.min(stap, stappe.length - 1)]
+  /* ── Die week is klaar ──────────────────────────────────────────────
+     Sy woorde terug, albei wallpapers, die deelbare kaart, en 'n rede om
+     volgende week terug te kom. */
+  if (blad === 'weekklaar') {
+    const rye = WEEK1_REIS
+      .map(r => ({ kop: r.kop, teks: String(antwoorde[r.id] || '').trim() }))
+      .filter(r => r.teks)
+
+    return (
+      <div className="vs" ref={bladRef}>
+        <div className="vs-klaar">
+          <div className="vs-klaar-merk">✓</div>
+          <h2>JY HET BEGIN KYK.</h2>
+          <p className="vs-klaar-lyf">
+            Nie alles hoef vandag opgelos te wees nie. Maar jy het begin doen wat
+            ’n dissipel nooit moet ophou doen nie: weer na Jesus kyk.
+          </p>
+        </div>
+
+        {rye.length > 0 && (
+          <div className="vs-kaart">
+            <div className="vs-kop">JOU WEEK</div>
+            {rye.map((r, i) => (
+              <div key={i} className="vs-reis-ry">
+                <span>{r.kop}</span>
+                <blockquote>{r.teks}</blockquote>
+              </div>
+            ))}
+            <p className="vs-fyn">🔒 Hierdie bly privaat.</p>
+          </div>
+        )}
+
+        {/* ALBEI wallpapers. Dewald: "hou al 2 wallpapers." */}
+        <Wallpaper bron={week.wallpaperDag1} week={w} />
+        <Wallpaper bron={week.wallpaper} week={w} />
+
+        <div className="vs-hou">
+          <div className="vs-hou-kop">DEEL DIT MET IEMAND</div>
+          <p>{WEEK1_DEELSIN}</p>
+          <button className="vs-deel" onClick={() => deelWoorde(WEEK1_DEELSIN)}>
+            📤  Deel met iemand
+          </button>
+        </div>
+
+        <div className="vs-kaart vs-volgende">
+          <div className="vs-kop">WEEK {WEEK1_VOLGENDE.nommer}</div>
+          <h3>{WEEK1_VOLGENDE.titel}</h3>
+          <p className="vs-lyf">{WEEK1_VOLGENDE.lyf}</p>
+          {binnekort && <p className="vs-fyn">{binnekort.lyf}</p>}
+        </div>
+
+        <button className="vs-hoofknop" onClick={() => { setBlad('oop'); boToe(); if (opSluit) opSluit() }}>
+          KLAAR
+        </button>
+      </div>
+    )
+  }
+
+  /* ── 'n Dag: EEN blad ───────────────────────────────────────────────── */
+  const blokke = blokkeVirDag(dag)
   return (
     <div className="vs" ref={bladRef}>
       <div className="vs-balk">
-        <button className="vs-terug" onClick={() => { setBlad('oop'); boToe() }}>
-          ‹ Week {w}
-        </button>
+        <button className="vs-terug" onClick={() => { setBlad('oop'); boToe() }}>‹ Week {w}</button>
         <span className="vs-balk-dag">DAG {dag} VAN 5</span>
       </div>
+      <h2 className="vs-dag-titel">{dagInfo.titel}</h2>
 
-      {/* Rustige vordering. Geen punte, net waar 'n mens in die dag is. */}
-      <div className="vs-vorder">
-        {stappe.map((_, i) => (
-          <span key={i} className={`vs-pit${i <= stap ? ' aan' : ''}`} />
+      <div className="vs-blokke">
+        {blokke.map((b, i) => (
+          <Blok key={i} blok={b} week={week} w={w} antwoorde={antwoorde} stel={stel} />
         ))}
       </div>
 
-      <Stap stap={s} week={week} w={w} antwoorde={antwoorde}
-            stel={stelAntwoord} volgende={volgende} />
+      <button className="vs-hoofknop" onClick={() => klaarMetDag(dag)}>
+        {dagInfo.knop}
+      </button>
     </div>
   )
 }
 
-/* ── Een stap ───────────────────────────────────────────────────────── */
-function Stap({ stap: s, week, w, antwoorde, stel, volgende }) {
-  if (!s) return null
+/* ── Een blok ───────────────────────────────────────────────────────── */
+function Blok({ blok: b, week, w, antwoorde, stel }) {
+  if (b.soort === 'lees') return <Lees merk={b.merk} skrif={b.skrif} lyf={b.lyf} />
 
-  if (s.soort === 'lees') {
+  if (b.soort === 'stem') {
     return (
-      <>
-        <Lees kop={s.kop} skrif={s.skrif} lyf={s.lyf} />
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
+      <Stemboodskap
+        bron={week.stemboodskapUrl}
+        titel={b.titel}
+        duurTeks={b.duur}
+        sleutel={`w${w}`}
+        transkripsie={w === 1 ? WEEK1_TRANSKRIPSIE : week.transkripsie}
+      />
     )
   }
 
-  if (s.soort === 'stem') {
+  if (b.soort === 'teks') {
     return (
-      <>
-        <Stemboodskap
-          bron={week.stemboodskapUrl}
-          titel={s.titel}
-          sleutel={`w${w}`}
-          transkripsie={w === 1 ? WEEK1_TRANSKRIPSIE : week.transkripsie}
-        />
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
+      <div className="vs-kaart">
+        {b.kop && <div className="vs-kop">{b.kop}</div>}
+        <p className="vs-lyf">{b.lyf}</p>
+      </div>
     )
   }
 
-  if (s.soort === 'teks') {
-    const inlei = s.inleiVan ? DAG5_INLEI[antwoorde[s.inleiVan]] : null
+  if (b.soort === 'groot') {
     return (
-      <>
-        <div className="vs-kaart">
-          {s.kop && <div className="vs-kop">{s.kop}</div>}
-          {inlei && <p className="vs-inlei">{inlei}</p>}
-          <p className="vs-lyf">{s.lyf}</p>
-          {s.fyn && <p className="vs-fyn">🔒 {s.fyn}</p>}
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
+      <div className="vs-hou">
+        <p>{b.lyf}</p>
+      </div>
     )
   }
 
-  if (s.soort === 'hou') {
+  if (b.soort === 'gebed') {
     return (
-      <>
-        <div className="vs-hou">
-          <div className="vs-hou-kop">HOU DIT VAS</div>
-          <p>{s.lyf}</p>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
+      <div className="vs-bid">
+        {b.kop && <div className="vs-kop">{b.kop}</div>}
+        <p>{b.lyf}</p>
+      </div>
     )
   }
 
-  if (s.soort === 'bid') {
+  if (b.soort === 'vraag') {
     return (
-      <>
-        <div className="vs-bid">
-          {s.kop && <div className="vs-kop">{s.kop}</div>}
-          <p>{s.gebed}</p>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
-    )
-  }
-
-  if (s.soort === 'vraag') {
-    const klaar = s.magOorslaan || s.velde.every(v => String(antwoorde[v.id] || '').trim())
-    return (
-      <>
-        <div className="vs-kaart">
-          {s.kop && <div className="vs-kop">{s.kop}</div>}
-          {s.lyf && <p className="vs-lyf">{s.lyf}</p>}
-          {s.velde.map(v => (
-            <div key={v.id} className="vs-veld">
-              <label>{v.prompt}</label>
-              <textarea
-                value={antwoorde[v.id] || ''}
-                onChange={e => stel(v.id, e.target.value)}
-                placeholder="Skryf vir jouself…"
-                rows={4}
-              />
-            </div>
-          ))}
-          <p className="vs-fyn">🔒 Net jy kan hierdie lees. Dit bly op hierdie foon.</p>
-        </div>
-        {/* Die stemboodskap kan aangestuur word. Dit staan HIER en nie by die
-            speler nie: 'n mens deel iets nadat dit hom getref het, nie voor
-            hy dit gehoor het nie. */}
-        {s.deelStem && week.stemboodskapUrl && (
+      <div className="vs-kaart">
+        {b.kop && <div className="vs-kop">{b.kop}</div>}
+        <Kassie id={b.id} prompt={b.prompt} waarde={antwoorde[b.id] || ''} stel={stel} />
+        {/* Een deel-geleentheid per dag, nie vyf nie. */}
+        {b.deelStem && week.stemboodskapUrl && (
           <button className="vs-deel-stem"
                   onClick={() => deelWoorde(
-                    `Luister na hierdie: "${week.titel}" — VOLG JESUS, Week ${w}.`,
+                    `Luister na hierdie: “${week.titel}” — VOLG JESUS, Week ${w}.`,
                     week.stemboodskapUrl)}>
             📤  Deel die stemboodskap
           </button>
         )}
-        <button className="vs-hoofknop" onClick={volgende} disabled={!klaar}>{s.knop}</button>
-        {!klaar && <p className="vs-wag">Skryf iets — al is dit net een sin.</p>}
-      </>
+      </div>
     )
   }
 
-  if (s.soort === 'keuse') {
-    const gekies = antwoorde[s.id]
-    const k = s.keuses.find(x => x.waarde === gekies)
+  /* 'n Keuse wat EEN opvolgvraag op DIESELFDE blad oopmaak. Nie 'n nuwe skerm
+     nie — dit is presies die klik-ketting wat weg moes gaan. */
+  if (b.soort === 'kies') {
+    const gekies = antwoorde[b.id]
     return (
-      <>
-        <div className="vs-kaart">
-          {s.kop && <div className="vs-kop">{s.kop}</div>}
-          {s.lyf && <p className="vs-lyf">{s.lyf}</p>}
-          <div className="vs-keuses">
-            {s.keuses.map(x => (
-              <button key={x.waarde} className={gekies === x.waarde ? 'aan' : ''}
-                      onClick={() => stel(s.id, x.waarde)}>
-                {x.woorde}
-              </button>
-            ))}
+      <div className="vs-kaart">
+        {b.kop && <div className="vs-kop">{b.kop}</div>}
+        {b.lyf && <p className="vs-lyf">{b.lyf}</p>}
+        <div className="vs-keuses">
+          {b.opsies.map(o => (
+            <button key={o.waarde} className={gekies === o.waarde ? 'aan' : ''}
+                    onClick={() => stel(b.id, o.waarde)}>
+              {o.woorde}
+            </button>
+          ))}
+        </div>
+        {gekies && b.vraag && (
+          <div className="vs-opvolg">
+            <div className="vs-kop">{b.vraag.kop}</div>
+            <Kassie id={b.vraag.id} prompt={b.vraag.prompt || 'Skryf dit hier neer…'}
+                    waarde={antwoorde[b.vraag.id] || ''} stel={stel} />
           </div>
-          {k && k.antwoord && <p className="vs-antwoord">{k.antwoord}</p>}
-        </div>
-        <button className="vs-hoofknop" onClick={volgende} disabled={!gekies}>{s.knop}</button>
-      </>
+        )}
+      </div>
     )
   }
 
-  if (s.soort === 'spieel') {
-    const gekies = antwoorde[s.id]
+  if (b.soort === 'terugblik') {
+    const teks = String(antwoorde[b.bronId] || '').trim()
+    if (!teks) return null      /* nooit undefined, nooit 'n leë aanhaling */
     return (
-      <>
-        <div className="vs-kaart">
-          <div className="vs-kop">{s.kop}</div>
-          <p className="vs-lyf">{s.lyf}</p>
-          <div className="vs-keuses">
-            {s.areas.map(a => (
-              <button key={a.waarde} className={gekies === a.waarde ? 'aan' : ''}
-                      onClick={() => stel(s.id, a.waarde)}>
-                {a.woorde}
-              </button>
-            ))}
-          </div>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende} disabled={!gekies}>GAAN AAN</button>
-      </>
-    )
-  }
-
-  /* ── Die terugblik ──
-   *
-   * Die belangrikste oomblik in die week: die app wys 'n mens sy EIE woorde
-   * terug. Is daar niks gestoor nie, slaan ons hierdie skerm heeltemal oor —
-   * 'n leë aanhalingsteken is erger as geen kaart. */
-  if (s.soort === 'terugblik') {
-    const teks = String(antwoorde[s.bronId] || '').trim()
-    if (!teks) { volgende(); return null }
-    return (
-      <>
-        <div className="vs-terugblik">
-          <div className="vs-kop">{s.kop}</div>
-          <div className="vs-terugblik-kop">{s.bronKop}</div>
-          <blockquote>{teks}</blockquote>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
-    )
-  }
-
-  /* ── Nog 'n area op Dag 3 ──
-   *
-   * Dewald: "Dit is nooit nodig om nog 'n area te kies om Dag 3 te voltooi
-   * nie." Die primêre knoppie gaan dus AAN; die tweede een is die sagte een.
-   * Kies hy weer, begin die spieël van voor af met 'n skoon keuse. */
-  if (s.soort === 'nogArea') {
-    return (
-      <>
-        <div className="vs-kaart">
-          <p className="vs-lyf">{s.lyf}</p>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-        <button className="vs-stil" onClick={() => stel('area', '')}>
-          Ek wil nog ’n area ondersoek
-        </button>
-      </>
-    )
-  }
-
-  /* ── Die wallpaper ──
-   *
-   * Dit is die enigste deel van die week wat BUITE die app gesien word: die
-   * adres is in die prent ingebrand, en dus is elke deelnemer se sluitskerm 'n
-   * week lank 'n stil uitnodiging.
-   *
-   * Let op hoe die voorskou geteken word: 'n CSS-`background-image` op 'n
-   * ONDEURSIGTIGE houer, nooit 'n volskerm <img> nie — sien CLAUDE.md. */
-  if (s.soort === 'wallpaper') {
-    const bron = week[s.bronVeld || 'wallpaper']
-    if (!bron) { return <Slaan volgende={volgende} /> }
-    return (
-      <>
-        <div className="vs-wp">
-          <div className="vs-kop">WEEK {w} · {s.kop}</div>
-          <div className="vs-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
-          <DeelKnop
-            bron={bron}
-            naam={`volg-jesus-week-${w}.jpg`}
-            woorde="Stoor dit as jou agtergrond, sodat die vraag die hele week voor jou bly — of deel dit met iemand."
-            knop="Stoor of deel"
-          />
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
-    )
-  }
-
-  /* ── Die deelbare kaart ──
-   *
-   * Die een sin, om aan te stuur. Dit dra die adres saam, want die punt is dat
-   * die mens wat dit kry, self hier kan uitkom. */
-  if (s.soort === 'deelkaart') {
-    return (
-      <>
-        <div className="vs-hou">
-          <div className="vs-hou-kop">{s.kop}</div>
-          <p>{s.sin}</p>
-          <button className="vs-deel" onClick={() => deelWoorde(s.sin)}>
-            📤  Deel dit
-          </button>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
-    )
-  }
-
-  if (s.soort === 'reis') {
-    const rye = WEEK1_REIS
-      .map(r => ({ kop: r.kop, teks: String(antwoorde[r.id] || '').trim() }))
-      .filter(r => r.teks)
-    return (
-      <>
-        <div className="vs-kaart">
-          <div className="vs-kop">{s.kop}</div>
-          {rye.length === 0
-            ? <p className="vs-lyf">Jy het hierdie week deurgeloop. Wat jy geskryf het, bly hier vir jou.</p>
-            : rye.map((r, i) => (
-                <div key={i} className="vs-reis-ry">
-                  <span>{r.kop}</span>
-                  <blockquote>{r.teks}</blockquote>
-                </div>
-              ))}
-          <p className="vs-fyn">
-            🔒 Hierdie antwoorde is net vir jou. Jy kan later terugkom en weer sien
-            waar jou reis begin het.
-          </p>
-        </div>
-        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
-      </>
+      <div className="vs-terugblik">
+        <div className="vs-terugblik-kop">{b.kop}</div>
+        <blockquote>{teks}</blockquote>
+      </div>
     )
   }
 
   return null
 }
 
-/* 'n Stap wat niks het om te wys nie, gaan dadelik verby. Dit gebeur net vir
-   'n week sonder wallpaper. */
-function Slaan({ volgende }) {
-  useEffect(() => { volgende() }, [])
-  return null
-}
-
-/* Deel woorde (en 'n skakel) met wie ook al. Val `navigator.share` weg — soos
-   op 'n rekenaar — beland dit op die knipbord. */
-async function deelWoorde(teks, skakel) {
-  const boodskap = skakel ? `${teks}\n\n${skakel}` : `${teks}\n\nhttps://dewaldscheepers.com/go`
-  try {
-    if (navigator.share) { await navigator.share({ text: boodskap }); return }
-  } catch { return }
-  try { await navigator.clipboard.writeText(boodskap) } catch {}
-}
-
-/* Die wallpaper stoor of deel. Dieselfde les as Luister.jsx: sodra daar 'n
-   LEER by navigator.share() is, gooi WhatsApp die byskrif weg — elke ander app
-   hou dit. Daarom is die adres in die PRENT ingebrand en nie net in die teks
-   nie. */
-function DeelKnop({ bron, naam, woorde, knop }) {
-  const [besig, setBesig] = useState(false)
-  const [nota, setNota]   = useState(null)
-
-  async function deel() {
-    if (besig) return
-    setBesig(true); setNota(null)
-    try {
-      const r = await fetch(bron)
-      const b = r.ok ? await r.blob() : null
-      if (!b || !/^image\//.test(b.type) || b.size < 1024) {
-        setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')
-        setBesig(false); return
-      }
-      const leer = new File([b], naam, { type: b.type })
-      if (navigator.canShare && navigator.canShare({ files: [leer] })) {
-        try {
-          await navigator.share({ files: [leer] })
-          setNota('Gestuur. Sit dit op jou sluitskerm of jou status.')
-          setBesig(false); return
-        } catch (e) { if (e && e.name === 'AbortError') { setBesig(false); return } }
-      }
-      const url = URL.createObjectURL(b)
-      const a = document.createElement('a')
-      a.href = url; a.download = naam
-      document.body.appendChild(a); a.click(); a.remove()
-      setTimeout(() => URL.revokeObjectURL(url), 4000)
-      setNota('Afgelaai.')
-    } catch {
-      setNota('Hou lank op die prent vas om dit te stoor.')
-    }
-    setBesig(false)
-  }
-
+/* 'n Private kassie wat vanself stoor terwyl 'n mens tik. Geen "STOOR"-knoppie
+   nie: 'n knoppie is nog 'n klik, en 'n mens wat vergeet druk verloor sy
+   woorde. */
+function Kassie({ id, prompt, waarde, stel }) {
   return (
     <>
-      <button className="vs-deel" onClick={deel} disabled={besig}>
-        {besig ? 'Besig…' : knop}
-      </button>
-      <p className="vs-wp-fyn">{woorde}</p>
-      {nota && <p className="vs-wp-nota">{nota}</p>}
+      <textarea
+        className="vs-kassie"
+        value={waarde}
+        onChange={e => stel(id, e.target.value)}
+        placeholder={prompt}
+        rows={4}
+      />
+      <p className="vs-fyn">🔒 Net jy kan hierdie lees. Dit bly op hierdie foon.</p>
     </>
   )
 }
 
-/* Die LEES-kaart, met die knoppie na die app se eie Bybel. Dieselfde patroon
-   as die vorige skerm: kan die verwysing nie ontleed word nie, verdwyn net
-   die knoppie — niemand kry 'n knoppie wat niks doen nie. */
-function Lees({ kop, skrif, lyf }) {
+/* Die LEES-blok. 'n Klein reël en 'n knoppie — geen "EK HET GELEES" wat die
+   pad blokkeer nie. Kan die verwysing nie ontleed word nie, verdwyn net die
+   knoppie; niemand kry 'n knoppie wat niks doen nie. */
+function Lees({ merk, skrif, lyf }) {
   const [gestuur, setGestuur] = useState(false)
   const spanne = ontleedVerwysing(skrif)
   const eerste = spanne && spanne[0]
@@ -612,20 +365,73 @@ function Lees({ kop, skrif, lyf }) {
 
   return (
     <div className="vs-kaart vs-lees">
-      <div className="vs-kop">{kop || 'LEES'}</div>
+      {merk && <div className="vs-kop">{merk}</div>}
       <p className="vs-skrif">{skrif}</p>
-      <p className="vs-lees-eis">
-        Moenie hierdie deel oorslaan nie. Die res van vandag bou op hierdie
-        gedeelte — gaan lees dit eers.
-      </p>
       {eerste && (
         <button className="vs-lees-knop" onClick={maakOop}>
-          📖  Lees dit in die app se Bybel
+          📖  Maak in Bybel oop
         </button>
       )}
-      {eerste && <p className="vs-fyn-grys">Of lees dit in jou eie Bybel.</p>}
-      {lyf && <p className="vs-lyf">{lyf}</p>}
+      {lyf && <p className="vs-lyf vs-lees-nota-lyf">{lyf}</p>}
       {gestuur && <p className="vs-lees-nota">Die Bybel maak by {skrif} oop.</p>}
     </div>
   )
+}
+
+/* Die wallpaper. 'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n
+   volskerm <img> nie — sien CLAUDE.md se "Android, Chrome, en gekleurde
+   strepe". Geen prent, geen blok. */
+function Wallpaper({ bron, week }) {
+  const [besig, setBesig] = useState(false)
+  const [nota, setNota]   = useState(null)
+  if (!bron) return null
+
+  async function deel() {
+    if (besig) return
+    setBesig(true); setNota(null)
+    try {
+      const r = await fetch(bron)
+      const b = r.ok ? await r.blob() : null
+      if (!b || !/^image\//.test(b.type) || b.size < 1024) {
+        setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')
+        setBesig(false); return
+      }
+      const leer = new File([b], `volg-jesus-week-${week}.jpg`, { type: b.type })
+      if (navigator.canShare && navigator.canShare({ files: [leer] })) {
+        try {
+          await navigator.share({ files: [leer] })
+          setNota('Gestuur.'); setBesig(false); return
+        } catch (e) { if (e && e.name === 'AbortError') { setBesig(false); return } }
+      }
+      const url = URL.createObjectURL(b)
+      const a = document.createElement('a')
+      a.href = url; a.download = `volg-jesus-week-${week}.jpg`
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+      setNota('Afgelaai.')
+    } catch { setNota('Hou lank op die prent vas om dit te stoor.') }
+    setBesig(false)
+  }
+
+  return (
+    <div className="vs-wp">
+      <div className="vs-wp-prent" style={{ backgroundImage: `url(${bron})` }} />
+      <button className="vs-deel" onClick={deel} disabled={besig}>
+        {besig ? 'Besig…' : 'Stel as agtergrond of deel'}
+      </button>
+      {nota && <p className="vs-wp-nota">{nota}</p>}
+    </div>
+  )
+}
+
+/* Deel woorde (en 'n skakel). Val `navigator.share` weg — soos op 'n rekenaar
+   — beland dit op die knipbord. */
+async function deelWoorde(teks, skakel) {
+  const boodskap = skakel
+    ? `${teks}\n\n${skakel}`
+    : `${teks}\n\nhttps://dewaldscheepers.com/go`
+  try {
+    if (navigator.share) { await navigator.share({ text: boodskap }); return }
+  } catch { return }
+  try { await navigator.clipboard.writeText(boodskap) } catch {}
 }
