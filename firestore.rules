@@ -208,6 +208,117 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /* ── VOLG JESUS · groepe en groepchat ──────────────────────────────
+     *
+     * Dit is die EERSTE plek in hierdie kodebasis waar 'n reel vra WIE die
+     * leser is. Alles tot dusver was of heeltemal oop (prayers, notes) of
+     * heeltemal toe (sorg_*).
+     *
+     * Die sekuriteit staan HIER, nie in die UI nie. Dewald se ss50: 'n mens
+     * in groep A mag nooit groep B se data kry deur 'n id in 'n URL te
+     * verander nie. Firestore dwing dit af; die skerm kan dit nie.
+     *
+     * Die truuk is dat 'n lid se dokumentnaam SY UID is. Dan is "is jy 'n
+     * lid" een goedkoop `exists()`, en dit kan nie vervals word nie —
+     * `request.auth.uid` kom van Firebase se geverifieerde token, nooit uit
+     * die versoek se liggaam nie.
+     *
+     * Wat 'n KLIENT mag: sy groep lees, 'n boodskap skryf, sy eie boodskap
+     * uitvee, sy eie leesmerk stel. Niks anders nie.
+     *
+     * Wat NET DIE BEDIENER mag (api/vj-groep.mjs met die diensrekening):
+     * die groep self skep en verander, en lidmaatskap. Niemand maak homself
+     * 'n fasiliteerder deur 'n dokument te skryf nie. */
+    match /vjGroepe/{groepId} {
+
+      function myLid() {
+        return get(/databases/$(database)/documents/vjGroepe/$(groepId)/lede/$(request.auth.uid)).data;
+      }
+      function isLid() {
+        return request.auth != null
+          && exists(/databases/$(database)/documents/vjGroepe/$(groepId)/lede/$(request.auth.uid))
+          && myLid().status == 'aktief';
+      }
+      function isFasiliteerder() {
+        return isLid() && myLid().rol == 'fasiliteerder';
+      }
+
+      // Die groep se eie dokument: 'n lid lees dit, niemand skryf dit.
+      allow read:  if isLid();
+      allow write: if false;
+
+      /* Lidmaatskap. 'n Lid sien wie in sy groep is (§16 wys die aantal en die
+         fasiliteerder se naam). Skryf gaan ALTYD deur die bediener — aansluit,
+         verlaat, verwyder, en rol. */
+      match /lede/{uid} {
+        allow read:  if isLid();
+        allow write: if false;
+      }
+
+      /* Die boodskappe.
+       *
+       * `uid` MOET `request.auth.uid` wees. Dit is die reel wat keer dat
+       * iemand namens 'n ander praat — die naam op die skerm kom uit die
+       * boodskap, en sonder hierdie reel kon enigiemand 'n boodskap plaas wat
+       * lyk of die fasiliteerder dit gese het.
+       *
+       * `teks` is PLAIN TEXT en hoogstens 4 000 karakters (§51). Firestore
+       * tel Unicode-karakters, nie grepe nie, dus is die perk dieselfde as die
+       * een in volgJesusGroep.js.
+       *
+       * `geskep` moet die BEDIENER se tyd wees. 'n Kliënt wat sy eie tyd kies,
+       * kan 'n boodskap bo-aan die gesprek vasspeld of hom in die verlede
+       * versteek. */
+      match /boodskappe/{boodskapId} {
+        allow read: if isLid();
+
+        allow create: if isLid()
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.teks is string
+          && request.resource.data.teks.size() > 0
+          && request.resource.data.teks.size() <= 4000
+          && request.resource.data.naam is string
+          && request.resource.data.naam.size() <= 30
+          && request.resource.data.geskep == request.time
+          && request.resource.data.uitgevee == false;
+
+        /* Verander mag NET uitvee wees, en net jou eie — of die fasiliteerder
+           s'n, wat sy eie groep modereer. Die teks self word nooit herskryf
+           nie: 'n gesprek waarin woorde agterna verander, is nie 'n gesprek
+           nie. */
+        allow update: if isLid()
+          && (resource.data.uid == request.auth.uid || isFasiliteerder())
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['uitgevee', 'uitgeveeOp'])
+          && request.resource.data.uitgevee == true;
+
+        // Niks word ooit werklik vernietig nie — dan kan 'n mens nie modereer.
+        allow delete: if false;
+      }
+
+      /* Jou eie leesmerk. Net joune, en dit kan niks anders raak nie. */
+      match /lees/{uid} {
+        allow read, write: if request.auth != null
+          && request.auth.uid == uid
+          && isLid();
+      }
+    }
+
+    /* Waar 'n mens hoort. Hy lees NET sy eie; die bediener skryf dit.
+       Dit is 'n gemak sodat 'n foon sy groep terugkry na 'n herinstallasie —
+       die WAARHEID oor lidmaatskap staan in vjGroepe/{id}/lede/{uid}. */
+    match /vjGebruikers/{uid} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    /* Hoeveel keer iemand 'n groepkode geraai het. Niemand lees dit nie —
+       ook nie die mens self nie, want dan weet hy hoeveel pogings oor is. */
+    match /vjPogings/{uid} {
+      allow read:  if false;
+      allow write: if false;
+    }
+
     // Vredepad Top 5 leaderboard
     match /leaderboard/{userId} {
       allow read: if true;
