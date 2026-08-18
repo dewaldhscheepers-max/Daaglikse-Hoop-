@@ -28,6 +28,13 @@ import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import { kiesWeek, binnekort } from '../data/volgJesusOpenbaar'
 import { tel } from '../data/volgJesusTel'
+import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
+import {
+  GroepOfSolo, KryJouByMense, VoorJyAlleenBegin, SluitAan, BeginGroep,
+  GroepGereed, NooiPastoor, GroepInstellings,
+} from './VolgJesusGroep'
+import { myGroepe } from '../data/volgJesusGroepApi'
+import { myUid } from '../data/volgJesusIdentiteit'
 import './VolgJesusLewe.css'
 
 const MY_WEEK = 'vj_my_week'
@@ -48,6 +55,65 @@ export default function VolgJesusLewe({ onClose }) {
   const [week, setWeek]   = useState(null)     /* die oop week se volle inhoud */
   const [nommer, setNommer] = useState(leesMyWeek)
   const [besig, setBesig] = useState(true)
+
+  /* ── Die groep ──
+   *
+   * `modus` is 'wag' totdat ons weet: 'onbeslis' (nog nooit gekies nie),
+   * 'solo', of 'groep'. Die keuse staan op die TOESTEL sodat 'n solo-mens nooit
+   * op 'n bediener hoef te wag om sy week te sien nie; die groep self kom van
+   * die bediener af, want dit is die waarheid. */
+  const [modus, setModus]   = useState('wag')
+  const [groep, setGroep]   = useState(null)
+  const [myLid, setMyLid]   = useState(null)
+  const [uid, setUid]       = useState('')
+  /* null | 'kies' | 'mense' | 'kode' | 'skep' | 'gereed' | 'pastoor' | 'alleen'
+     | 'instellings' | 'chat' */
+  const [groepBlad, setGroepBlad] = useState(null)
+  const [chatAanset, setChatAanset] = useState('')
+
+  useEffect(() => {
+    let dood = false
+    ;(async () => {
+      const u = await myUid()
+      if (dood) return
+      setUid(u)
+
+      let gekies = ''
+      try { gekies = localStorage.getItem('vj_modus') || '' } catch {}
+
+      /* Wie 'n uid het, vra die bediener waar hy hoort. Dit is hoe 'n groep 'n
+         herinstallasie oorleef — die uid is dieselfde sodra hy weer aanmeld. */
+      if (u) {
+        const r = await myGroepe()
+        if (dood) return
+        const eerste = r.ok && r.groepe && r.groepe[0]
+        if (eerste) {
+          setGroep(eerste)
+          setMyLid({ uid: u, naam: eerste.myNaam, rol: eerste.myRol, status: 'aktief' })
+          setModus('groep')
+          try { localStorage.setItem('vj_modus', 'groep') } catch {}
+          return
+        }
+      }
+      setModus(gekies === 'solo' ? 'solo' : 'onbeslis')
+    })()
+    return () => { dood = true }
+  }, [])
+
+  function kiesSolo() {
+    setModus('solo'); setGroepBlad(null)
+    try { localStorage.setItem('vj_modus', 'solo') } catch {}
+  }
+  function naGroep(g) {
+    setGroep(g)
+    setMyLid({ uid, naam: g.myNaam || '', rol: g.eienaar === uid ? 'fasiliteerder' : 'deelnemer', status: 'aktief' })
+    setModus('groep')
+    try { localStorage.setItem('vj_modus', 'groep') } catch {}
+  }
+
+  /* Die ongeleesde telling loop in die agtergrond, sodat die knoppie sy getal
+     ken sonder dat die chat oop is. */
+  const { boodskappe, laasGelees } = useOngelees(groep && groep.id, uid)
 
   /* Die kaart is oopgemaak. Een keer per toestel. */
   useEffect(() => { tel('oop') }, [])
@@ -115,7 +181,34 @@ export default function VolgJesusLewe({ onClose }) {
 
   /* ── Wat wys ons ─────────────────────────────────────────────────── */
   let binne
-  if (besig && !week) {
+
+  /* Die groep se eie skerms staan BO die week: hulle is 'n pad wat 'n mens
+     een keer loop, en dan is hulle klaar. */
+  const groepSkerm = {
+    kies:    <GroepOfSolo opSaam={() => setGroepBlad('mense')} opSolo={() => setGroepBlad('alleen')} />,
+    mense:   <KryJouByMense opKode={() => setGroepBlad('kode')} opSkep={() => setGroepBlad('skep')}
+                            opPastoor={() => setGroepBlad('pastoor')} opSolo={() => setGroepBlad('alleen')} />,
+    alleen:  <VoorJyAlleenBegin opGroep={() => setGroepBlad('skep')}
+                                opPastoor={() => setGroepBlad('pastoor')} opVoort={kiesSolo} />,
+    kode:    <SluitAan opTerug={() => setGroepBlad('mense')}
+                       opKlaar={g => { naGroep(g); setGroepBlad(null) }} />,
+    skep:    <BeginGroep opTerug={() => setGroepBlad('mense')}
+                         opKlaar={g => { naGroep(g); setGroepBlad('gereed') }} />,
+    gereed:  groep ? <GroepGereed groep={groep} opKlaar={() => setGroepBlad(null)} /> : null,
+    pastoor: <NooiPastoor opTerug={() => setGroepBlad('mense')} />,
+    instellings: groep
+      ? <GroepInstellings groep={groep} myLid={myLid} opTerug={() => setGroepBlad(null)}
+                          opUit={() => { setGroep(null); setMyLid(null); kiesSolo() }} />
+      : null,
+  }[groepBlad]
+
+  if (modus === 'wag') {
+    binne = <div className="vjl-stil">Besig om te laai…</div>
+  } else if (groepBlad && groepSkerm) {
+    binne = groepSkerm
+  } else if (modus === 'onbeslis') {
+    binne = groepSkerm || <GroepOfSolo opSaam={() => setGroepBlad('mense')} opSolo={() => setGroepBlad('alleen')} />
+  } else if (besig && !week) {
     binne = <div className="vjl-stil">Besig om die program te laai…</div>
   } else if (fout) {
     binne = (
@@ -177,7 +270,14 @@ export default function VolgJesusLewe({ onClose }) {
     <div className="vjl">
       <div className="vjl-balk">
         <button className="vjl-toe" onClick={onClose} aria-label="Maak toe">✕</button>
-        <span className="vjl-balk-naam">VOLG JESUS</span>
+        {modus === 'groep' && groep ? (
+          <button className="vjl-balk-groep" onClick={() => setGroepBlad('instellings')}>
+            <span className="vjl-balk-naam">VOLG JESUS</span>
+            <span className="vjl-balk-fyn">{groep.naam}</span>
+          </button>
+        ) : (
+          <span className="vjl-balk-naam">VOLG JESUS</span>
+        )}
         {/* Die weekkieser. Iemand wat by Week 3 is, moet Week 1 weer kan
             oopmaak — die program is 'n pad, nie 'n toets. Dit wys eers
             wanneer daar meer as een week is. */}
@@ -188,7 +288,38 @@ export default function VolgJesusLewe({ onClose }) {
           </select>
         )}
       </div>
-      <div className="vjl-blad">{binne}</div>
+      <div className="vjl-blad">
+        {binne}
+        {/* §39: die knoppie is op ELKE VOLG JESUS-skerm, dit maak niks toe
+            nie, en die ongeleesde telling is helder. */}
+        {modus === 'groep' && groep && myLid && !groepBlad && (
+          <GroepKnoppie
+            groep={groep}
+            boodskappe={boodskappe}
+            laasGeleesId={laasGelees}
+            myUid={uid}
+            opKlik={() => setGroepBlad('chat')}
+          />
+        )}
+      </div>
+
+      {/* ── Die chat lê BO-OP, dit vervang nie ──
+       *
+       * Dit was 'n vroeë-terugkeer, en dan het die weekskerm afgebreek: 'n mens
+       * maak die chat toe en staan weer op die openingsblad, met sy halfgetikte
+       * antwoord weg. §39 verbied presies dit — "huidige dag bly waar dit was;
+       * geskryfde antwoord bly staan; audio-posisie bly staan."
+       *
+       * Die chat is `position: fixed` met sy eie z-index, dus dek dit die skerm
+       * sonder om dit te ontmantel. Die blaaiertoets het hierdie een gevang. */}
+      {groepBlad === 'chat' && groep && myLid && (
+        <VolgJesusChat
+          groep={groep}
+          myLid={myLid}
+          aanset={chatAanset}
+          opSluit={() => { setGroepBlad(null); setChatAanset('') }}
+        />
+      )}
     </div>
   )
 }

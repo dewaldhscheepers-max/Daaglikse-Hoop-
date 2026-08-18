@@ -124,3 +124,15 @@
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 .vjl-terugknop:active { background: rgba(255, 255, 255, 0.14); }
+
+/* Die groep se naam in die balk, met 'n deur na die instellings. */
+.vjl-balk-groep {
+  flex: 1; display: flex; flex-direction: column; align-items: flex-start;
+  background: none; border: none; padding: 0; color: #fff;
+  font-family: var(--font-body); cursor: pointer; min-width: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.vjl-balk-fyn {
+  font-size: 11.5px; font-weight: 600; opacity: .75;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
