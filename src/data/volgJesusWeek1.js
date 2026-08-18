@@ -80,6 +80,16 @@ const DAG1 = [
     prompt: 'Skryf een ding neer…',
     deelStem: true,
   },
+  /* ── Die brug na die groep (§40) ──
+   *
+   * Dit staan NA die stemboodskap en NA die private antwoord, want 'n mens
+   * deel iets nadat dit hom getref het — nie voor hy dit gehoor het nie.
+   *
+   * 'n Solo-mens sien hierdie blok nooit. Dit is die enigste plek in die week
+   * waar 'n groep 'n groot uitnodiging kry; die res van die dae het net die
+   * permanente knoppie, want vyf "praat nou met jou groep"-skerms is
+   * gemeganiseerde gemeenskap (§41). */
+  { soort: 'groepbrug', netGroep: true },
   /* Die dag se wallpaper. Dit sluit Dag 1 af — die dag waarop die
      stemboodskap land — en die sin op die prent IS die boodskap se punt.
 

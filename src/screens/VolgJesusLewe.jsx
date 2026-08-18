@@ -253,6 +253,8 @@ export default function VolgJesusLewe({ onClose }) {
         opBegin={opBegin}
         opDagKlaar={opDagKlaar}
         opSluit={onClose}
+        inGroep={modus === 'groep' && !!groep && !!myLid}
+        opPraatMetGroep={a => { setChatAanset(a || ''); setGroepBlad('chat') }}
       />
     ) : (
       <VolgJesusWeek

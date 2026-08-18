@@ -47,7 +47,12 @@ function alleAntwoorde(w) {
   return uit
 }
 
-export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binnekort }) {
+export default function VolgJesusStap({
+  week, opSluit, opBegin, opDagKlaar, binnekort,
+  /* Die groep, as daar een is. 'n Solo-mens gee niks, en dan bestaan die
+     groepblokke glad nie. */
+  inGroep = false, opPraatMetGroep,
+}) {
   const w = Number(week && week.weeknommer) || 1
 
   const [blad, setBlad] = useState('oop')      /* 'oop' | 'dag' | 'klaar' | 'weekklaar' */
@@ -228,7 +233,11 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
   }
 
   /* ── 'n Dag: EEN blad ───────────────────────────────────────────────── */
-  const blokke = blokkeVirDag(dag)
+  /* Groepblokke bestaan GLAD NIE vir 'n solo-mens nie — hulle word nie
+     versteek nie, hulle is nie daar nie. 'n Vroeer weergawe het hierdie
+     filter op 'n ketting gehad wat nie meer bestaan het, en toe het 'n
+     solo-mens die groepbrug gesien. Die blaaiertoets het dit gevang. */
+  const blokke = blokkeVirDag(dag).filter(b => !b.netGroep || inGroep)
   return (
     <div className="vs" ref={bladRef}>
       <div className="vs-balk">
@@ -239,7 +248,8 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
 
       <div className="vs-blokke">
         {blokke.map((b, i) => (
-          <Blok key={i} blok={b} week={week} w={w} antwoorde={antwoorde} stel={stel} />
+          <Blok key={i} blok={b} week={week} w={w} antwoorde={antwoorde} stel={stel}
+                opPraatMetGroep={opPraatMetGroep} />
         ))}
       </div>
 
@@ -251,7 +261,7 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
 }
 
 /* ── Een blok ───────────────────────────────────────────────────────── */
-function Blok({ blok: b, week, w, antwoorde, stel }) {
+function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
   if (b.soort === 'lees') return <Lees merk={b.merk} skrif={b.skrif} lyf={b.lyf} />
 
   if (b.soort === 'stem') {
@@ -345,6 +355,36 @@ function Blok({ blok: b, week, w, antwoorde, stel }) {
       <div className="vs-wp">
         <div className="vs-kop">WEEK {w} · {b.kop}</div>
         <Wallpaper bron={bron} week={w} kaal />
+      </div>
+    )
+  }
+
+  /* ── Wil jy hieroor praat? ──
+   *
+   * §40. Die vier aansette VUL die kassie in die chat; hulle stuur nie. 'n
+   * Boodskap wat 'n knoppie namens 'n mens stuur, is nie sy woorde nie. */
+  if (b.soort === 'groepbrug') {
+    return (
+      <div className="vs-brug">
+        <div className="vs-kop">WIL JY HIEROOR PRAAT?</div>
+        <p className="vs-lyf">
+          As iets jou getref het, jy ’n vraag het of jy wil hoor wat jou groep
+          dink — jou groep is hier.
+        </p>
+        <button className="vs-brug-hoof" onClick={() => opPraatMetGroep && opPraatMetGroep('')}>
+          💬  PRAAT MET MY GROEP
+        </button>
+        <div className="vs-brug-aansette">
+          {[
+            'Iets het my getref',
+            'Ek het ’n vraag',
+            'Ek sukkel hiermee',
+            'Bid asseblief saam met my',
+          ].map(a => (
+            <button key={a} onClick={() => opPraatMetGroep && opPraatMetGroep(a + ': ')}>{a}</button>
+          ))}
+        </div>
+        <p className="vs-fyn">Jy hoef niks persoonliks te deel wat jy nie wil deel nie.</p>
       </div>
     )
   }

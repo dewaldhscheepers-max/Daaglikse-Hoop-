@@ -113,7 +113,10 @@ export function SluitAan({ beginKode = '', opKlaar, opTerug }) {
 
   async function soek() {
     setBesig(true); setFout('')
-    const r = await kykGroep(kode)
+    /* Stuur die kode SKOON. Die bediener normaliseer ook, maar 'n versoek met
+       'n spasie in werk net omdat iemand anders dit opruim — en dan hang die
+       hele ding aan 'n gewoonte in plaas van 'n reël. */
+    const r = await kykGroep(keurGroepkode(kode))
     setBesig(false)
     if (!r.ok) { setFout(r.fout); return }
     setGroep(r.groep)
@@ -121,7 +124,7 @@ export function SluitAan({ beginKode = '', opKlaar, opTerug }) {
 
   async function aansluit() {
     setBesig(true); setFout('')
-    const r = await sluitAan(kode, naam)
+    const r = await sluitAan(keurGroepkode(kode), naam)
     setBesig(false)
     if (!r.ok) { setFout(r.fout); return }
     opKlaar(r.groep)
