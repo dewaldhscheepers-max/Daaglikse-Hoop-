@@ -72,7 +72,7 @@ const DAG1 = [
        eenvoudig af na die stemboodskap. */
     lyf: 'Let net op hoe Jesus beweeg van “Wat sê die mense?” na: “Maar julle, wie sê julle is Ek?”',
   },
-  { soort: 'stem', titel: 'Wie sê jý is Jesus?', duur: '±4 minute' },
+  { soort: 'stem', titel: 'Wie sê jý is Jesus?', duur: '±5 minute' },
   {
     soort: 'vraag',
     kop: 'WAT HET JOU GETREF?',
@@ -222,74 +222,124 @@ export function blokkeVirDag(n) {
  *
  * By verstek TOEGEVOU. 'n Mens moet die boodskap hoor; die teks is daar vir
  * wie liewer lees of iets wil teruglees. */
-export const WEEK1_TRANSKRIPSIE = `As Jesus vandag niks vir jou regmaak nie — die geld bly min, die antwoord waarvoor jy bid kom nie, die situasie verander nie — sal jy Hom steeds wil hê?
+/* ── Die stemboodskap se transkripsie ──
+ *
+ * By verstek TOEGEVOU. 'n Mens moet die boodskap hoor; die teks is daar vir
+ * wie liewer lees of iets wil teruglees.
+ *
+ * Dewald oor hierdie weergawe: "Hierdie is die een. Ek sou hom nie langer maak
+ * nie ... Jesus moet die enigste groot Naam wees wat die luisteraar onthou."
+ * Daar word dus GEEN ander prediker in genoem nie, en die opname bly onder vyf
+ * minute.
+ *
+ * Die twee sinne wat moet bly brand nadat die klank klaar is:
+ *
+ *     Wil ek Jesus hê — of net wat ek hoop Hy vir my sal doen?
+ *     Jy kan nie die kruis vir jou skuld vat en die troon vir jouself hou nie.
+ *
+ * Die tweede een is ook die week se deelbare kaart (WEEK1_DEELSIN). Hulle moet
+ * dieselfde bly: die sin wat 'n mens hoor, is die sin wat hy kan aanstuur.
+ */
+export const WEEK1_TRANSKRIPSIE = `As Jesus vandag niks vir jou regmaak nie — die geld bly min, die antwoord waarvoor jy bid kom nie, die storm bedaar nie — sal jy Hom steeds wil hê?
 
-Nie net Sy hulp nie. Nie net wat Hy vir jou kan gee nie. Hom.
+Nie net Sy hulp nie. Nie net Sy gawes nie. Hom.
 
-Want dit is moontlik om Jesus te soek… sonder om eintlik Jesus te soek.
+Want dalk is die moeiliker vraag nie “Glo ek in Jesus?” nie. Dalk is dit: “Wil ek Jesus hê vir Wie Hy is… of net vir wat ek hoop Hy vir my sal doen?”
 
-Ek kan Sy vrede wil hê. Sy beskerming. Sy voorsiening. Sy vergifnis. Ek kan wil hê Hy moet my lewe regmaak… maar steeds diep binne sê: “Here, help my met mý plan.”
+Want ons kan maklik vir onsself ’n Jesus vorm wat baie gemaklik by ons lewe inpas.
 
-En dalk is een van die gevaarlikste dinge wat ons kan doen om vir onsself ’n Jesus te vorm wat gemaklik by ons lewe inpas.
+’n Jesus wat my troos… maar my nooit uitdaag nie. Wat my vergewe… maar nooit aan my keuses raak nie. Wat my help wanneer ek in die moeilikheid is… maar nooit Here oor my lewe mag wees nie.
 
-’n Jesus wat my troos… maar my nooit uitdaag nie. Wat my vergewe… maar nooit aan my keuses raak nie. Wat my help… maar nooit Here oor my lewe mag wees nie.
+Dis ’n veilige Jesus.
+
+Maar ’n Jesus wat jy self kan vorm, kan jou nooit vorm nie.
 
 In Matteus 16 vra Jesus vir Sy dissipels: “Wie sê die mense is die Seun van die mens?”
 
 En almal het ’n antwoord. Johannes die Doper. Elia. Jeremia.
 
-Almal het ’n opinie oor Jesus gehad. Net soos vandag.
+Met ander woorde: almal het ’n opinie oor Jesus.
 
-Maar toe maak Jesus dit persoonlik: “Maar julle, wie sê julle is Ek?”
+Toe verander Hy die vraag.
 
-Nie: wat sê jou kerk? Wat glo jou ouers? Wat het jy as kind geleer?
+“Maar julle, wie sê julle is Ek?”
+
+Nie: wat sê jou kerk? Wat glo jou ouers? Wat het jy grootgeword om te glo?
 
 Jý. Wie sê jý is Jesus?
 
 Petrus antwoord: “U is die Christus, die Seun van die lewende God.”
 
-En Johannes 1 vat daardie antwoord nóg verder: “In die begin was die Woord… en die Woord was God.”
+En Johannes 1 maak daardie antwoord nog groter.
 
-Jesus het nie by Betlehem begin nie. Voor die krip. Voor Maria. Voor die aarde. Hy was reeds daar.
+“In die begin was die Woord… en die Woord was God.”
 
-Johannes sê alles het deur Hom ontstaan. En toe: “Die Woord het mens geword en onder ons kom woon.”
+Voor Betlehem. Voor die krip. Voor die aarde. Jesus was reeds daar.
 
-Die Een deur Wie alles ontstaan het… het nader gekom. God het nie op ’n afstand gebly nie.
+Alles het deur Hom ontstaan.
 
-En Jesus het nie gekom omdat jy net ’n bietjie beter raad nodig gehad het nie. Jy het ’n Redder nodig gehad. Ons almal het.
+En toe gebeur die ondenkbare: “Die Woord het mens geword en onder ons kom woon.”
 
-Sonde is nie iets wat ons net met beter gewoontes kon regmaak nie. Ons kon onsself nie red nie.
+God het nader gekom. Die Een deur Wie alles ontstaan het… het ons wêreld binnegestap.
 
-Daarom het Jesus gekom. Hy het gesterf. Hy het opgestaan.
+En Hy het nie gekom omdat jy net beter raad nodig gehad het nie.
 
-En nou kom die vraag baie nader as: “Glo jy Jesus bestaan?”
+Jy het ’n Redder nodig gehad. Ek ook.
 
-Die vraag word: “As Jesus werklik Here is… wie kry die laaste sê in my lewe?”
+Ons sonde was nie iets wat ons met ’n paar beter gewoontes kon regmaak nie. Ons kon onsself nie red nie.
 
-Wanneer jy ’n groot besluit neem… wie kry die laaste sê?
+Daarom het Jesus gekom.
 
-Wanneer iemand jou seermaak… wie bepaal hoe jy reageer?
+Hy het nie net vir jou gesterf nie. Hy het in jou plek gesterf.
 
-Wanneer geld min is… wie bepaal waar jou vertroue lê?
+Jou skuld. Sy kruis. Jou straf. Sy liggaam.
 
-Wanneer Jesus se woorde bots met wat jy eintlik wil hê… wie wen?
+Jou hoop rus nie op hoe goed jy dit regkry om vir God te leef nie. Jou hoop rus op wat Jesus vir jou gedoen het.
 
-Want jy kan sê: “Jesus is Here.” en steeds leef asof jy self op die troon sit.
+Maar Hy het nie in die graf gebly nie. Jesus het opgestaan. Die graf is leeg. Jesus leef.
 
-En hier is ’n sin wat ek wil hê jy vandag moet onthou:
+En as Jesus leef… as Hy werklik die Christus is… as Hy werklik Here is… dan kan Hy nie net nog ’n deel van jou lewe wees nie.
+
+En dis waar hierdie boodskap baie persoonlik raak.
+
+Want jy kan met jou mond sê: “Jesus is Here.”
+
+Maar wie kry die laaste sê?
+
+Wanneer Jesus se woorde bots met wat jy wil hê — wie wen?
+
+Wanneer jy moet besluit hoe jy iemand gaan behandel — wie regeer?
+
+Wanneer niemand kyk nie — wie sit op die troon?
+
+Want as Jesus net Here is wanneer jy met Hom saamstem… dan sit jy nog steeds self op die troon.
+
+En ek dink hierdie is een van die belangrikste sinne wat ek vir jou vandag kan sê:
 
 Jy kan nie die kruis vir jou skuld vat en die troon vir jouself hou nie.
 
 Jesus het nie gesê: “Bewonder My.” Hy het gesê: “Volg My.”
 
-En dis waar hierdie hele reis begin. Nie by probeer om vandag alles in jou lewe reg te maak nie. Nie by voorgee jy het al die antwoorde nie. By Jesus.
+En dít is waar hierdie reis begin.
 
-Lees vandag Johannes 1:1–18. En vra net: “Wat wys hierdie vir my oor Jesus?”
+Nie by probeer om vandag alles reg te kry nie. Nie by maak asof jy al die antwoorde het nie. Nie by nóg ’n godsdienstige lysie nie.
 
-En vra daarna: “As Jesus werklik Here is… waar leef ek nog asof ék die laaste sê het?”
+By Jesus.
 
-En as jy wil, bid: “Jesus, wys my Wie U werklik is. Wys my waar ek U net wil hê vir wat U vir my kan doen. Wys my waar ek nog self op die troon sit. Ek wil U leer ken, U vertrou en U volg. Amen.”
+Lees vandag Johannes 1:1–18. Lees dit stadig.
 
-En dra vandag net hierdie vraag saam: Wie sê jý is Jesus?
+En vra nie eerste “Wat beteken dit vir my?” nie. Vra: “Wat wys hierdie vir my oor Jesus?”
 
-Want jou antwoord word nie net in jou woorde gehoor nie. Dit word uiteindelik in jou lewe gesien.`
+En daarna vra jy die moeiliker vraag: “As Jesus werklik Here is… waar leef ek nog asof ék die laaste sê het?”
+
+En as hierdie werklik jou gebed is, bid saam met my:
+
+“Jesus, ek het U nodig. Ek kan myself nie red nie. Dankie vir die kruis. Dankie dat U opgestaan het. Wys my Wie U werklik is. Wys my waar ek nog self op die troon sit. Ek wil U nie net hê vir wat U vir my kan doen nie. Ek wil U ken, U vertrou en U volg. Amen.”
+
+En vandag wil ek jou met dieselfde vraag los waarmee Jesus Sy dissipels gekonfronteer het:
+
+“Maar jý… wie sê jý is Ek?”
+
+Want uiteindelik antwoord jy daardie vraag nie net met jou mond nie.
+
+Jou lewe wys wie jy glo Jesus is.`

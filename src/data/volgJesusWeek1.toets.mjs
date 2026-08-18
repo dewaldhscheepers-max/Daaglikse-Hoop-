@@ -83,6 +83,25 @@ waar('en dit begin by n werklike lewe, nie by teologie nie',
      /^As Jesus vandag niks vir jou regmaak nie/.test(WEEK1_TRANSKRIPSIE))
 is('geen ontsnapte \\u in die woorde', /\\u[0-9a-f]{4}/i.test(WEEK1_TRANSKRIPSIE), false)
 
+/* Dewald oor hierdie weergawe: "Ek sou hom nie langer maak nie ... Ek sou nie
+   Billy Graham, Joyce Meyer, Josh Howerton of enige ander prediker daarin noem
+   nie. Jesus moet die enigste groot Naam wees wat die luisteraar onthou." */
+is('geen ander prediker word genoem nie',
+   /Graham|Joyce Meyer|Howerton|Furtick|Lentz/i.test(WEEK1_TRANSKRIPSIE), false)
+
+/* "Ek sou die opname onder 5 minute hou." Teen 'n natuurlike ~150 woorde per
+   minuut is dit sowat 750 woorde. 'n Transkripsie wat stilweg groei, is 'n
+   ses-minute teologiese marathon wat niemand klaar luister nie. */
+const woorde = WEEK1_TRANSKRIPSIE.trim().split(/\s+/).length
+waar(`dit bly onder ~5 minute (${woorde} woorde)`, woorde <= 820)
+waar('en dit is nie n stukkie nie', woorde >= 500)
+
+/* Die twee sinne wat moet bly brand nadat die klank klaar is. */
+waar('die eerste kern: wil ek Jesus he, of net wat Hy kan doen',
+     /vir Wie Hy is… of net vir wat ek hoop Hy vir my sal doen/.test(WEEK1_TRANSKRIPSIE))
+waar('en dit eindig by die lewe, nie by n les nie',
+     /Jou lewe wys wie jy glo Jesus is\.$/.test(WEEK1_TRANSKRIPSIE.trim()))
+
 console.log('\n── Geen twee antwoorde deel n id nie ──\n')
 /* Deel twee velde 'n id, skryf die een die ander dood — en dan is die
    terugblik op Dag 5 die verkeerde woorde. */
