@@ -29,6 +29,7 @@ import {
 import { WEKE } from '../data/volgJesusWeke'
 import { keurVideoInset } from '../data/youtubeId'
 import VolgJesusWeek from './VolgJesusWeek'
+import VolgJesusStap from './VolgJesusStap'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -450,8 +451,18 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         {/* Die EGTE komponent, nie 'n namaaksel nie. 'n Voorskou wat sy eie
             weergawe van die skerm teken, is 'n voorskou wat lieg — dit sou
             reg kon lyk terwyl die ding wat mense sien, stukkend is. */}
+        {/* Die voorskou moet die EGTE skerm wys, en dit is nie meer een skerm
+            nie: Week 1 is oorgeskryf as 'n pad van stappe (VolgJesusStap) en
+            die res van die weke gebruik nog die plat uitleg. Wys die admin die
+            verkeerde een, is die voorskou 'n voorskou wat LIEG — dit kan reg
+            lyk terwyl die ding wat mense sien iets anders is.
+
+            Die groep- en fasiliteerderblaaie leef nog net in die ou skerm, dus
+            gaan net die solo-rol na die stapskerm. */}
         <div className="vj-skerm" key={rol}>
-          <VolgJesusWeek week={week} rol={rol} />
+          {week.weeknommer === 1 && rol === 'solo'
+            ? <VolgJesusStap week={week} />
+            : <VolgJesusWeek week={week} rol={rol} />}
         </div>
       </div>
     )
