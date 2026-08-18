@@ -326,6 +326,36 @@ swak lyn elke mislukte versoek weer). Dieselfde mens op twee fone tel twee
 keer; 'n herinstallasie tel weer. Die getal is eerder 'n bietjie te laag as te
 hoog, en dit is die regte kant om op te fouteer.
 
+### Week 1 is 'n PAD, nie plat velde nie
+
+Op 18 Augustus 2026 het Dewald Week 1 heeltemal oorgeskryf, en die nuwe vorm
+pas nie in die ou model nie. Die ander weke is 'n handjievol plat velde
+(`dag2Prompt`, `dag4Vraag`) wat 'n vaste uitleg vul. Week 1 is 'n LYS STAPPE
+in `src/data/volgJesusWeek1.js`, en `VolgJesusStap.jsx` wys hulle een op 'n
+slag met een knoppie elk.
+
+`VolgJesusLewe.jsx` kies: week 1 → die stapskerm, alles anders → die ou
+`VolgJesusWeek.jsx`. Die admin, die publiseer-hek en die openbare eindpunt
+loop steeds deur die plat rekord; net wat die GEBRUIKER sien, het verander.
+
+**Daar is geen video vir Week 1 nie.** Die hoofboodskap is 'n STEMBOODSKAP wat
+in die app speel (`Stemboodskap.jsx`), met die transkripsie **by verstek
+toegevou**. Die adres kom uit die admin se `stemboodskapUrl`; is dit leeg, sê
+die skerm dit eerlik in plaas van 'n dooie speler te wys. Die speler onthou
+waar 'n mens opgehou het — 'n boodskap wat drie keer van voor af begin, word
+nooit klaar geluister nie.
+
+**Elke antwoord bly op die foon.** `vj_a_w<week>_<id>` in localStorage, en
+niks meer nie. Geen groep, geen fasiliteerder, geen kerk-admin kan daaraan kom
+— daar is niks om aan te kom nie. Die tellers tel dat 'n dag klaar is; nooit
+wat iemand geskryf het nie.
+
+**Die belangrikste oomblik is die terugblik.** Op Dag 5 wys die app die mens
+sy WERKLIKE Dag 1-woorde terug. Is daar niks gestoor nie, word daardie skerm
+heeltemal oorgeslaan — nooit `undefined`, nooit 'n leë aanhaling.
+
+`kykWeek1.mjs` in die scratchpad loop die hele week deur soos 'n mens.
+
 ### Die Publiseer-knoppie
 
 Die openbare eindpunt filter op `gepubliseer === true` — en 'n dag lank was

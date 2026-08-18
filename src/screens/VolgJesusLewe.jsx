@@ -25,6 +25,7 @@
  */
 import { useEffect, useState, useCallback } from 'react'
 import VolgJesusWeek from './VolgJesusWeek'
+import VolgJesusStap from './VolgJesusStap'
 import { kiesWeek, binnekort } from '../data/volgJesusOpenbaar'
 import { tel } from '../data/volgJesusTel'
 import './VolgJesusLewe.css'
@@ -148,7 +149,19 @@ export default function VolgJesusLewe({ onClose }) {
   } else if (!week) {
     binne = <div className="vjl-stil">Hierdie week is nie beskikbaar nie.</div>
   } else {
-    binne = (
+    /* Week 1 is heeltemal oorgeskryf: een stap op 'n slag, 'n stemboodskap in
+       plaas van 'n video, en 'n oomblik op Dag 5 waar die app die mens sy eie
+       Dag 1-woorde teruggee. Daardie vorm pas nie in die ou plat uitleg nie,
+       en die ou skerm bly staan vir elke week wat nog so geskryf is. */
+    binne = week.weeknommer === 1 ? (
+      <VolgJesusStap
+        week={week}
+        binnekort={weekBoodskap}
+        opBegin={opBegin}
+        opDagKlaar={opDagKlaar}
+        opSluit={onClose}
+      />
+    ) : (
       <VolgJesusWeek
         week={week}
         rol="solo"

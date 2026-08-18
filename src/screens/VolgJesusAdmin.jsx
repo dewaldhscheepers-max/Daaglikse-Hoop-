@@ -83,6 +83,7 @@ const LEEG = (n) => ({
   pastoraleRisiko: 'laag',
   kontroles: { teks: false, konteks: false, jesus: false, toepassing: false, grens: false },
   hersieningStatus: 'wag',
+  stemboodskapUrl: '',
   gepubliseer: false,
 })
 
@@ -515,6 +516,17 @@ export default function VolgJesusAdmin({ geheim = '' }) {
       <SkrifVeld l="Ondersteunende Skrif" v={week.ondersteunendeSkrif} op={v => stel('ondersteunendeSkrif', v)} />
 
       <VideoVeld waarde={week.videoId || ''} op={v => stel('videoId', v)} />
+
+      {/* Die stemboodskap. Vir Week 1 VERVANG dit die video heeltemal — Dewald
+          neem dit self op en die app speel dit. Plak die volle adres van die
+          klanklêer (dieselfde soort skakel as 'n gewone stemnota). */}
+      <Veld l="Stemboodskap (adres van die klanklêer)"
+            v={week.stemboodskapUrl}
+            op={v => stel('stemboodskapUrl', v)} />
+      <p className="vj-sub vj-fyn">
+        Laat dit leeg en die skerm sê eerlik "Die stemboodskap kom binnekort" in
+        plaas daarvan om 'n dooie speler te wys.
+      </p>
 
       <Veld l="Hou dit vas (Dag 1, en die wallpaper se sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />
       <Veld l="Die laaste hou (Dag 1)" v={week.eenSin} op={v => stel('eenSin', v)} lank />

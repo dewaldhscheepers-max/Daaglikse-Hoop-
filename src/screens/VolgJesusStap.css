@@ -1,0 +1,211 @@
+/* Een stap op 'n slag. Geen `transform` en geen `opacity` op `:active` — sien
+   CLAUDE.md se "Android, Chrome, en gekleurde strepe". Net kleur. */
+
+.vs { padding: 0 0 44px; font-family: var(--font-body); }
+
+/* ── Die opening ── */
+.vs-open {
+  background: linear-gradient(165deg, #5C4E8E 0%, #443A6E 100%);
+  color: #fff; border-radius: 20px; padding: 30px 22px 24px; text-align: center;
+}
+.vs-merk { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; opacity: .8; }
+.vs-open-titel {
+  font-family: var(--font-serif); font-size: clamp(27px, 7.6vw, 35px);
+  line-height: 1.12; margin: 10px 0 14px;
+}
+.vs-open-teks {
+  font-size: 15.5px; line-height: 1.75; white-space: pre-line;
+  text-align: left; opacity: .95; margin-bottom: 18px;
+}
+.vs-privaat {
+  font-size: 12.5px; line-height: 1.6; text-align: left;
+  background: rgba(0,0,0,.2); border-radius: 11px; padding: 12px 13px;
+  margin-bottom: 20px; opacity: .95;
+}
+.vs-hervat { font-size: 13px; opacity: .85; margin-top: 10px; }
+
+.vs-hoofknop {
+  width: 100%; background: var(--gold, #E0B872); color: #33230D; border: none;
+  border-radius: 14px; padding: 17px; margin-top: 18px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 900; letter-spacing: .6px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vs-hoofknop:active { background: #C2854F; }
+.vs-hoofknop:disabled { background: #DED8EC; color: #8A83A3; cursor: default; }
+
+.vs-stil {
+  width: 100%; margin-top: 10px; background: none; border: none;
+  font-family: var(--font-body); font-size: 13.5px; color: var(--text-muted);
+  padding: 10px; cursor: pointer;
+}
+.vs-wag { text-align: center; font-size: 12.5px; color: var(--text-muted); margin-top: 8px; }
+
+/* ── Die dae-lys ── */
+.vs-dae { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.vs-dag-ry {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: #fff; border: 1px solid #EDE8F8; border-radius: 13px;
+  padding: 14px; cursor: pointer; text-align: left;
+  font-family: var(--font-body); -webkit-tap-highlight-color: transparent;
+}
+.vs-dag-ry:active { background: #F7F4FC; }
+.vs-dag-merk {
+  flex-shrink: 0; width: 52px; background: #EDE8F8; color: var(--purple-dark);
+  border-radius: 8px; padding: 5px 0; text-align: center;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .6px;
+}
+.vs-dag-t { flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text); }
+.vs-dag-pyl { color: var(--text-muted); font-size: 18px; }
+
+/* ── Die balk en die vordering ── */
+.vs-balk { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.vs-terug {
+  background: none; border: none; color: var(--purple-dark);
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  padding: 6px 0; cursor: pointer;
+}
+.vs-balk-dag { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; color: var(--text-muted); }
+
+/* Rustige vordering. Geen punte, geen streak — net waar 'n mens in die dag is. */
+.vs-vorder { display: flex; gap: 5px; margin-bottom: 16px; }
+.vs-pit { flex: 1; height: 4px; border-radius: 2px; background: #E6E0F2; }
+.vs-pit.aan { background: var(--gold, #E0B872); }
+
+/* ── Kaarte ── */
+.vs-kaart {
+  background: #fff; border: 1px solid #EDE8F8; border-radius: 16px; padding: 20px 18px;
+}
+.vs-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--purple-dark); margin-bottom: 10px;
+}
+.vs-lyf { font-size: 16px; line-height: 1.8; white-space: pre-line; color: var(--text); margin: 0; }
+.vs-inlei {
+  font-size: 15px; line-height: 1.7; font-style: italic;
+  color: var(--purple-dark); margin: 0 0 14px;
+  border-left: 3px solid #E0D6F4; padding-left: 12px;
+}
+.vs-fyn { font-size: 12.5px; line-height: 1.6; color: var(--text-muted); margin-top: 14px; }
+.vs-fyn-grys { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+
+/* ── LEES ── */
+.vs-skrif {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px; line-height: 1.5; color: var(--text); margin: 0 0 12px;
+}
+.vs-lees-eis {
+  background: #F6F2FD; border-left: 3px solid var(--purple-dark);
+  border-radius: 0 10px 10px 0; padding: 12px 14px;
+  font-size: 14px; line-height: 1.6; font-weight: 600; color: var(--text);
+  margin: 0 0 14px;
+}
+.vs-lees-knop {
+  width: 100%; background: #2E2757; color: #fff; border: none; border-radius: 12px;
+  padding: 14px; font-family: var(--font-body); font-size: 14.5px; font-weight: 800;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vs-lees-knop:active { background: #221C42; }
+.vs-lees-nota { font-size: 12.5px; color: var(--purple-dark); margin-top: 10px; }
+
+/* ── HOU DIT VAS ── */
+.vs-hou {
+  background: linear-gradient(160deg, #2A1F14 0%, #3B2C1B 100%);
+  color: #FFFDF8; border-radius: 16px; padding: 28px 20px; text-align: center;
+}
+.vs-hou-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.6px;
+  color: var(--gold, #E0B872); margin-bottom: 14px;
+}
+.vs-hou p {
+  font-family: var(--font-serif); font-size: clamp(19px, 5.4vw, 23px);
+  line-height: 1.45; white-space: pre-line; margin: 0;
+}
+
+/* ── BID ── */
+.vs-bid {
+  background: #F6F2FD; border: 1px solid #E4DAF6; border-radius: 16px; padding: 22px 18px;
+}
+.vs-bid p {
+  font-family: var(--font-serif); font-size: 17px; line-height: 1.85;
+  white-space: pre-line; color: var(--text); margin: 0;
+}
+
+/* ── Vrae ── */
+.vs-veld { margin-top: 16px; }
+.vs-veld label {
+  display: block; font-size: 14.5px; font-weight: 700; line-height: 1.55;
+  color: var(--text); margin-bottom: 8px;
+}
+.vs-veld textarea {
+  display: block; width: 100%; box-sizing: border-box;
+  border: 1px solid #E2DAF0; border-radius: 11px; padding: 14px;
+  /* 16px, want onder 16px zoem iOS Safari die hele blad in sodra 'n mens 'n
+     veld raak. */
+  font-size: 16px; line-height: 1.65; color: var(--text);
+  background: #FBFAFD; font-family: var(--font-body);
+  resize: vertical; min-height: 110px; -webkit-appearance: none;
+}
+.vs-veld textarea:focus { outline: none; border-color: #B9A8DC; background: #fff; }
+
+/* ── Keuses ── */
+.vs-keuses { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.vs-keuses button {
+  width: 100%; text-align: left;
+  background: #F7F4FC; border: 1px solid #E6E0F2; border-radius: 12px;
+  padding: 14px; font-family: var(--font-body); font-size: 14.5px; font-weight: 600;
+  color: var(--text); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vs-keuses button.aan { background: var(--purple-dark, #5C4E8E); border-color: var(--purple-dark, #5C4E8E); color: #fff; }
+.vs-antwoord {
+  margin-top: 14px; background: #F6F2FD; border-radius: 12px; padding: 14px;
+  font-size: 14.5px; line-height: 1.7; color: var(--text);
+}
+
+/* ── Die terugblik: die mens se eie woorde ── */
+.vs-terugblik {
+  background: linear-gradient(165deg, #5C4E8E 0%, #443A6E 100%);
+  color: #fff; border-radius: 16px; padding: 24px 20px;
+}
+.vs-terugblik .vs-kop { color: var(--gold, #E0B872); }
+.vs-terugblik-kop {
+  font-size: 12.5px; font-weight: 700; letter-spacing: .4px;
+  opacity: .9; margin-bottom: 12px;
+}
+.vs-terugblik blockquote {
+  margin: 0; font-family: var(--font-serif); font-size: 19px; line-height: 1.7;
+  white-space: pre-line;
+  border-left: 3px solid var(--gold, #E0B872); padding-left: 14px;
+}
+
+.vs-reis-ry { margin-top: 16px; }
+.vs-reis-ry span { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+.vs-reis-ry blockquote {
+  margin: 0; font-family: var(--font-serif); font-size: 16.5px; line-height: 1.7;
+  white-space: pre-line; color: var(--text);
+  border-left: 3px solid #E0D6F4; padding-left: 13px;
+}
+
+/* ── Dag klaar ── */
+.vs-klaar {
+  background: #fff; border: 1px solid #EDE8F8; border-radius: 20px;
+  padding: 30px 20px 24px; text-align: center;
+}
+.vs-klaar-merk {
+  width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 50%;
+  background: #E8F5EC; color: #2E7D4F;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.vs-klaar h2 {
+  font-family: var(--font-serif); font-size: clamp(20px, 5.6vw, 25px);
+  line-height: 1.3; margin: 10px 0 10px; color: var(--text);
+}
+.vs-klaar-lyf { font-size: 15px; line-height: 1.75; color: var(--text-muted); margin: 0 0 18px; }
+
+.vs-more {
+  background: #F6F2FD; border-radius: 14px; padding: 16px; text-align: left; margin-top: 14px;
+}
+.vs-more-kop {
+  display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px;
+  color: var(--purple-dark); margin-bottom: 8px;
+}
+.vs-more p { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--text); }

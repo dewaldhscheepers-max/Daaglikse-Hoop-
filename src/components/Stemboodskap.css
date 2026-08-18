@@ -1,0 +1,101 @@
+/* Die stemboodskap-speler. Geen `transform` en geen `opacity` op `:active` —
+   sien CLAUDE.md se "Android, Chrome, en gekleurde strepe". Net kleur. */
+
+.stem {
+  background: linear-gradient(165deg, #2E2757 0%, #443A6E 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 22px 18px 18px;
+  text-align: center;
+}
+
+.stem-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.6px;
+  color: #E0C89A;
+}
+.stem-titel {
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 5.6vw, 25px);
+  line-height: 1.25;
+  margin: 8px 0 18px;
+}
+
+.stem-kontroles {
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+}
+.stem-speel {
+  width: 76px; height: 76px; flex-shrink: 0;
+  border: none; border-radius: 50%;
+  background: var(--gold, #E0B872); color: #33230D;
+  font-size: 26px; line-height: 1;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.stem-speel:active { background: #C9A263; }
+
+.stem-spring {
+  border: 1px solid rgba(255,255,255,.3); background: none; color: #fff;
+  border-radius: 999px; padding: 9px 13px;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.stem-spring:active { background: rgba(255,255,255,.14); }
+
+.stem-nooi {
+  margin-top: 10px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1.8px;
+  color: #E0C89A;
+}
+
+.stem-balk-ry {
+  display: flex; align-items: center; gap: 10px; margin-top: 16px;
+}
+.stem-tyd {
+  font-size: 11.5px; font-variant-numeric: tabular-nums;
+  opacity: .8; flex-shrink: 0; min-width: 38px;
+}
+.stem-balk {
+  flex: 1; height: 5px; border-radius: 3px;
+  background: rgba(255,255,255,.22); overflow: hidden;
+}
+.stem-vul { height: 100%; background: var(--gold, #E0B872); }
+
+.stem-spoed {
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,.28); background: none; color: #fff;
+  border-radius: 999px; padding: 6px 14px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.stem-spoed:active { background: rgba(255,255,255,.14); }
+
+.stem-geen {
+  margin: 14px 0 0; font-size: 14.5px; line-height: 1.6; opacity: .9;
+}
+
+.stem-fout {
+  display: block; width: 100%; margin-top: 14px;
+  border: 1px solid rgba(255,255,255,.35); border-radius: 12px;
+  background: rgba(0,0,0,.2); color: #fff;
+  padding: 12px; font-family: var(--font-body); font-size: 13px; line-height: 1.5;
+  cursor: pointer;
+}
+
+/* ── Die transkripsie ── */
+.stem-teks { margin-top: 16px; }
+.stem-teks-knop {
+  background: none; border: none; color: #E0C89A;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  text-decoration: underline; padding: 8px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.stem-teks-lyf {
+  margin-top: 10px;
+  background: rgba(0,0,0,.24);
+  border-radius: 13px;
+  padding: 16px;
+  text-align: left;
+  font-size: 15px; line-height: 1.8;
+  white-space: pre-line;
+  max-height: 60vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}

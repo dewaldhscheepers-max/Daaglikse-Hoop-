@@ -46,6 +46,7 @@ export const OPENBARE_VELDE = [
   'primereSkrif',
   'ondersteunendeSkrif',
   'videoId',
+  'stemboodskapUrl',
   'kernwaarheid',
   'eenSin',
   'gebed',

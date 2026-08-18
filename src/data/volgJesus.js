@@ -90,6 +90,9 @@ export const VERPLIGTE_VELDE = [
    week se vorm dit nie vra nie. Hulle staan hier sodat die admin weet om
    hulle te WYS, nie om hulle te EIS nie. */
 export const OPSIONELE_VELDE = [
+  /* Die week se stemboodskap. Dit VERVANG die video: Dewald neem dit self op
+     en laai dit op, en die app speel dit. Sien Stemboodskap.jsx. */
+  'stemboodskapUrl',
   'ondersteunendeSkrif',
   /* 'n Vierde groepvraag. Party weke het drie, party vier — die vierde is
      die een wat gewoonlik die diepste sny, en dit mag nie wegval bloot omdat
