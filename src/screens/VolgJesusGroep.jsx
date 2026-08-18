@@ -305,8 +305,126 @@ export function NooiPastoor({ opTerug }) {
   )
 }
 
+/* ── Die groepsessie (§44) ──
+ *
+ * Dit staan APART van die vyf dae en dit blokkeer niks. 30–40 minute, en dit
+ * word NIE met materiaal volgestop om 'n uur te vul nie.
+ */
+export function Groepsessie({ opTerug }) {
+  return (
+    <div className="vg">
+      <div className="vg-kop">
+        <button className="vg-terug" onClick={opTerug}>‹ Terug</button>
+        <div className="vg-merk">GROEPSESSIE · 30–40 MINUTE</div>
+        <h1>Kyk saam na Jesus</h1>
+      </div>
+
+      <div className="vg-kaart">
+        <p className="vg-fyn">
+          Hierdie is nie ’n toets van wie die meeste weet nie. Niemand word
+          gedwing om iets persoonliks te deel nie.
+        </p>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">LEES SAAM</div>
+        <p className="vg-skrifreel">Matteus 16:13–17</p>
+        <p className="vg-skrifreel">Johannes 1:1–18</p>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">PRAAT SAAM</div>
+        <ol className="vg-vrae">
+          <li>Wat het jou hierdie week die meeste van Jesus getref?</li>
+          <li>Waarom dink jy maak Jesus die vraag persoonlik: “Wie sê júlle is Ek?”</li>
+          <li>Waar vorm ons maklik ’n Jesus wat by ons eie voorkeure pas?</li>
+          <li>Wat beteken dit prakties om Jesus nie net as Helper te wil hê nie, maar Hom as Here te volg?</li>
+        </ol>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">STIL OOMBLIK</div>
+        <p>Gee die groep ’n paar minute stilte. Moenie dit te vinnig probeer vul nie.</p>
+      </div>
+
+      <div className="vg-kaart vg-gebed">
+        <div className="vg-kop2">BID SAAM</div>
+        <p>
+          Here Jesus, help ons om U te sien soos U werklik is. Waar ons U kleiner
+          gemaak het, korrigeer ons. Waar ons nog self die laaste sê wil hê, leer
+          ons om U te vertrou. Leer ons om U saam te volg. Amen.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Die fasiliteerder-gids (§45) ──
+ *
+ * "Die fasiliteerder moet nie 'n tweede kursus moet studeer nie. Maksimum
+ * ongeveer 3 minute voorbereiding."
+ *
+ * Dit wys NET vir 'n fasiliteerder. 'n Gewone deelnemer sien dit nooit.
+ */
+export function FasiliteerderGids({ opTerug }) {
+  return (
+    <div className="vg">
+      <div className="vg-kop">
+        <button className="vg-terug" onClick={opTerug}>‹ Terug</button>
+        <div className="vg-merk">FASILITEERDER · ±3 MINUTE OM TE LEES</div>
+        <h1>Jou doel</h1>
+        <p className="vg-groot">Help mense om na Jesus te kyk.</p>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">DIE KERNWAARHEID</div>
+        <p>
+          Die vraag is persoonlik, maar die Evangelies bepaal die inhoud van die
+          antwoord. Ons antwoord op Jesus — ons skep Hom nie.
+        </p>
+        <p>Hou aan vra: <strong>“Wat wys die teks vir ons oor Jesus?”</strong></p>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">MOENIE</div>
+        <ul className="vg-lys">
+          <li>private dinge uit mense probeer trek nie</li>
+          <li>twyfel verneder nie</li>
+          <li>elke antwoord met ’n mini-preek opvolg nie</li>
+          <li>teologiese antwoorde uitdink nie</li>
+          <li>stilte vrees nie</li>
+        </ul>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">AS IEMAND SÊ: “EK WEET NIE OF EK GLO NIE”</div>
+        <p className="vg-aanhaling">
+          Dankie dat jy eerlik is. Hou saam met ons aan om na Jesus te kyk.
+        </p>
+      </div>
+
+      <div className="vg-kaart">
+        <div className="vg-kop2">AS DIE GROEP STIL RAAK</div>
+        <p className="vg-aanhaling">
+          As Johannes 1 al was wat ons oor Jesus gehad het, wat sou ons vandag
+          van Hom weet?
+        </p>
+      </div>
+
+      <div className="vg-kaart vg-veilig">
+        <div className="vg-kop2">VEILIGHEID</div>
+        <p>
+          Beskryf iemand onmiddellike gevaar, mishandeling of selfbesering,
+          hanteer dit NIE as gewone groepsgesprek nie. Gebruik die app se
+          Hulp&nbsp;Nou.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 /* ── Die groep se instellings ───────────────────────────────────────── */
-export function GroepInstellings({ groep, myLid, opTerug, opUit }) {
+export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
   const [nota, setNota]   = useState('')
   const [kode, setKode]   = useState(groep.kode)
   const [besig, setBesig] = useState(false)
@@ -355,6 +473,15 @@ export function GroepInstellings({ groep, myLid, opTerug, opUit }) {
             {besig ? 'Besig…' : 'MELD AAN MET GOOGLE'}
           </button>
         </div>
+      )}
+
+      <button className="vg-tweede" onClick={() => opBlad && opBlad('sessie')}>
+        DIE GROEPSESSIE
+      </button>
+      {myLid && myLid.rol === 'fasiliteerder' && (
+        <button className="vg-tweede" onClick={() => opBlad && opBlad('gids')}>
+          FASILITEERDER-GIDS
+        </button>
       )}
 
       {myLid && myLid.rol === 'fasiliteerder' && groep.eienaar === myLid.uid && (

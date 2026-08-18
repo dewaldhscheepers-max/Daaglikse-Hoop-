@@ -35,6 +35,8 @@ node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers 
 node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 36 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
+node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
+node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
 node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
@@ -372,6 +374,43 @@ nooit `undefined`, nooit 'n leë aanhaling.
 
 `kykWeek1.mjs` in die scratchpad loop die hele week deur en tel die KLIKKE:
 elke dag moet met een druk klaar wees.
+
+### Groepe en die groepchat
+
+Volledig in `docs/volg-jesus-groepe.md`. Lees dit voor jy aan `vjGroepe` raak.
+
+Die drie dinge wat 'n mens nie uit die kode aflei nie:
+
+**Die chat werk NIE soos Sorg nie.** Elke `sorg_*`-versameling is toe en elke
+plasing word deur 'n MENS goedgekeur. Dit werk vir 'n muur; 'n gesprek kan nie
+wag vir goedkeuring nie, en 'n bediener-eindpunt wat gepols word, is ses
+duisend fone maal 'n funksie-aanroep. Die chat gebruik Firestore se
+`onSnapshot` DIREK vanaf die kliënt.
+
+**Die sekuriteit staan dus in `firestore.rules`, nie in die UI nie.** 'n Lid se
+dokumentnaam IS sy uid, dus is "is jy 'n lid" een goedkoop `exists()` wat nie
+vervals kan word nie. 'n Boodskap se `uid` moet `request.auth.uid` wees — dit
+is die reël wat keer dat iemand namens die fasiliteerder praat. Lidmaatskap
+word NOOIT deur 'n kliënt geskryf nie; dit loop deur `api/vj-groep.mjs`, want
+'n kliënt wat groepe op 'n kode kan soek, kan die hele kode-ruimte deurloop.
+
+**Private antwoorde is nie "toe" nie — hulle bestaan nie op 'n bediener nie.**
+Hulle lê in localStorage op die foon. Dit is sterker as wat §43 vra, want daar
+is niks om te beskerm nie.
+
+Twee dinge om te onthou wanneer iets nie werk nie:
+
+* die reëls moet ONTPLOOI wees (`firebase deploy --only firestore:rules`).
+  Sonder dit weier Firestore alles en die chat bly stil;
+* die kliënt se identiteit is 'n ANONIEME Firebase-uid. Dit is geverifieer (die
+  bediener keur die ID-token), maar dit hoort aan die installasie. Wie by 'n
+  groep aansluit, kan sy rekening koppel — `linkWithCredential` hou dieselfde
+  uid — en dit is die enigste manier waarop 'n groep 'n herinstallasie
+  oorleef. Dit is nooit 'n muur nie: misluk dit, werk die groep steeds.
+
+Blaaiertoetse: `kykChat.mjs` (TWEE oortjies met twee uids — die enigste eerlike
+toets vir 'n chat) en `kykGroepBegin.mjs` (die pad wat 'n nuwe mens vandag
+loop).
 
 ### Die Publiseer-knoppie
 

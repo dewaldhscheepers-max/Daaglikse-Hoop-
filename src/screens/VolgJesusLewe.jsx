@@ -31,7 +31,7 @@ import { tel } from '../data/volgJesusTel'
 import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
 import {
   GroepOfSolo, KryJouByMense, VoorJyAlleenBegin, SluitAan, BeginGroep,
-  GroepGereed, NooiPastoor, GroepInstellings,
+  GroepGereed, NooiPastoor, GroepInstellings, Groepsessie, FasiliteerderGids,
 } from './VolgJesusGroep'
 import { myGroepe } from '../data/volgJesusGroepApi'
 import { myUid } from '../data/volgJesusIdentiteit'
@@ -198,7 +198,14 @@ export default function VolgJesusLewe({ onClose }) {
     pastoor: <NooiPastoor opTerug={() => setGroepBlad('mense')} />,
     instellings: groep
       ? <GroepInstellings groep={groep} myLid={myLid} opTerug={() => setGroepBlad(null)}
+                          opBlad={setGroepBlad}
                           opUit={() => { setGroep(null); setMyLid(null); kiesSolo() }} />
+      : null,
+    /* Die groepsessie staan APART van die vyf dae en blokkeer niks (§44). Die
+       gids wys NET vir 'n fasiliteerder. */
+    sessie: <Groepsessie opTerug={() => setGroepBlad('instellings')} />,
+    gids: myLid && myLid.rol === 'fasiliteerder'
+      ? <FasiliteerderGids opTerug={() => setGroepBlad('instellings')} />
       : null,
   }[groepBlad]
 
