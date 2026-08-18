@@ -103,8 +103,13 @@ const DAG1 = [
     kop: 'WAT HET JOU GETREF?',
     lyf: 'Was daar iets wat jy vandag anders raakgesien het? Het jy ’n vraag? Of het iets jou uitgedaag?',
     velde: [{ id: 'getref', prompt: 'Skryf dit hier neer…' }],
-    knop: 'STOOR MY ANTWOORD',
+    knop: 'GAAN AAN MET DAG 1',
+    /* Hierdie een mag leeg bly. Dit is 'n uitnodiging, nie 'n hek nie —
+       iemand wat vandag niks wil skryf nie, moet steeds kan aangaan. */
     magOorslaan: true,
+    /* En hy kan die boodskap vir iemand aanstuur. Dit is die enigste deel van
+       die week wat BUITE die app gaan. */
+    deelStem: true,
   },
   {
     soort: 'hou',
@@ -234,6 +239,11 @@ const DAG3_BASIS = [
 ]
 
 const DAG3_SLOT = [
+  {
+    soort: 'nogArea',
+    lyf: 'Jy kan nog ’n area ondersoek as jy wil. Dit is nooit nodig om Dag 3 te voltooi nie.',
+    knop: 'GAAN AAN',
+  },
   {
     soort: 'vraag',
     kop: 'DIE GROOT VRAAG',
@@ -386,6 +396,28 @@ const DAG5 = [
     kop: 'WEEK 1 SE GEBED',
     gebed: 'Here Jesus,\n\nek wil U nie net ken uit wat ander mense oor U sê nie. Ek wil U self beter leer ken.\n\nDankie vir wat ek hierdie week reeds in U Woord gesien het.\n\nWaar ek U te klein gemaak het, wys my. Waar ek ’n Jesus gevorm het wat net by my eie voorkeure pas, korrigeer my. Waar ek net na U toe kom wanneer ek iets nodig het, leer my om ook by U te bly.\n\nMaak my oë oop wanneer ek die Evangelies lees. Help my om U hart te sien. U genade. U waarheid. U liefde.\n\nEn wanneer U woorde my uitdaag, gee my die nederigheid om te luister.\n\nEk wil U ken. Ek wil U vertrou. En stap vir stap wil ek leer om U te volg.\n\nAmen.',
     knop: 'EK HET GEBID',
+  },
+  {
+    /* Net vir wie aan die begin gesê het hy weet nog nie of hy glo nie. Vir
+       almal anders bestaan hierdie skerm nie — sien `netAs` in
+       VolgJesusStap.jsx. */
+    soort: 'teks',
+    netAs: { id: 'beginpunt', waarde: 'onseker' },
+    kop: 'AS JY NOG NIE SEKER IS NIE',
+    lyf: 'Jy hoef nie ’n antwoord voor te gee om hierdie week te voltooi nie.\n\nJy kan eenvoudig skryf: “Ek weet nog nie. Maar ek wil aanhou kyk.”\n\nDis nie ’n mislukking nie. Dis eerlikheid. En eerlikheid is ’n beter plek om ’n reis te begin as voorgee.',
+    knop: 'DIT IS MY EERLIKE ANTWOORD',
+  },
+  {
+    soort: 'wallpaper',
+    kop: 'HOU DIT VAS',
+    sin: 'WIE SÊ JÝ IS JESUS?',
+    knop: 'GAAN AAN',
+  },
+  {
+    soort: 'deelkaart',
+    kop: 'DEEL DIT MET IEMAND',
+    sin: 'Iemand anders kan jou van Jesus vertel.\nNiemand anders kan Hom namens jou volg nie.',
+    knop: 'GAAN AAN',
   },
   { soort: 'reis', kop: 'JOU WEEK 1-REIS', knop: 'GAAN AAN' },
 ]

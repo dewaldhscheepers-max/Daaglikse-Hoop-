@@ -1,0 +1,42 @@
+/* Die stemboodskap-oplaai in die admin. Geen transform op :active — sien
+   CLAUDE.md se "Android, Chrome, en gekleurde strepe". */
+.so {
+  background: #F3F0FA; border: 1px solid #E2DBF3; border-radius: 14px;
+  padding: 16px; margin: 18px 0;
+}
+.so-kop {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px;
+  color: #5C4E8E; margin-bottom: 12px;
+}
+.so-leeg { margin: 0 0 14px; font-size: 13px; line-height: 1.6; color: #6B6580; }
+
+.so-daar { background: #EEF8F0; border: 1px solid #CBE7D2; border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+.so-daar-kop { font-size: 12px; font-weight: 800; color: #2E7D4F; margin-bottom: 10px; }
+.so-daar audio { width: 100%; display: block; }
+.so-vee {
+  margin-top: 10px; background: none; border: 1px solid #C9B7B7; color: #8A3A3A;
+  border-radius: 10px; padding: 9px 14px;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.so-vee:active { background: #F7EDED; }
+
+.so-knoppe { display: flex; flex-direction: column; gap: 8px; }
+.so-knop {
+  width: 100%; background: #fff; border: 1px solid #D8D0EC; border-radius: 12px;
+  padding: 14px; font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  color: #3A3350; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.so-knop:active { background: #EFEAFA; }
+
+.so-stop {
+  width: 100%; background: #A33; border: none; border-radius: 12px; padding: 15px;
+  color: #fff; font-family: var(--font-body); font-size: 14.5px; font-weight: 800;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.so-stop:active { background: #822; }
+
+.so-besig { font-size: 12.5px; color: #5C4E8E; }
+.so-balk { height: 6px; border-radius: 3px; background: #E0D9F2; overflow: hidden; margin-bottom: 8px; }
+.so-vul { height: 100%; background: #5C4E8E; }
+
+.so-fout { margin-top: 10px; font-size: 12.5px; line-height: 1.55; color: #8A3A3A; }

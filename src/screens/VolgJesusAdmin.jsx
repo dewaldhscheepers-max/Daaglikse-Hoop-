@@ -30,6 +30,7 @@ import { WEKE } from '../data/volgJesusWeke'
 import { keurVideoInset } from '../data/youtubeId'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
+import StemOplaai from '../components/StemOplaai'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -528,15 +529,17 @@ export default function VolgJesusAdmin({ geheim = '' }) {
 
       <VideoVeld waarde={week.videoId || ''} op={v => stel('videoId', v)} />
 
-      {/* Die stemboodskap. Vir Week 1 VERVANG dit die video heeltemal — Dewald
-          neem dit self op en die app speel dit. Plak die volle adres van die
-          klanklêer (dieselfde soort skakel as 'n gewone stemnota). */}
-      <Veld l="Stemboodskap (adres van die klanklêer)"
-            v={week.stemboodskapUrl}
-            op={v => stel('stemboodskapUrl', v)} />
+      {/* Die stemboodskap. Vir Week 1 VERVANG dit die video heeltemal.
+
+          Dit was 'n teksveldjie waarin 'n mens 'n adres moes plak — en daardie
+          adres het nie bestaan nie, want daar was nêrens om die lêer te sit.
+          'n Veld vir 'n ding wat niemand kan maak, is geen veld nie. Nou laai
+          dit op na dieselfde `audio/`-vouer as elke ander stemnota. */}
+      <StemOplaai week={week.weeknommer}
+                  waarde={week.stemboodskapUrl}
+                  op={v => stel('stemboodskapUrl', v)} />
       <p className="vj-sub vj-fyn">
-        Laat dit leeg en die skerm sê eerlik "Die stemboodskap kom binnekort" in
-        plaas daarvan om 'n dooie speler te wys.
+        Onthou om daarna <strong>Stoor</strong> te druk.
       </p>
 
       <Veld l="Hou dit vas (Dag 1, en die wallpaper se sin)" v={week.kernwaarheid} op={v => stel('kernwaarheid', v)} lank />

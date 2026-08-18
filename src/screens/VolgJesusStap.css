@@ -209,3 +209,38 @@
   color: var(--purple-dark); margin-bottom: 8px;
 }
 .vs-more p { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--text); }
+
+/* ── Deel ── */
+.vs-deel {
+  width: 100%; margin-top: 14px;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.34);
+  border-radius: 12px; padding: 13px; color: #fff;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vs-deel:active { background: rgba(255,255,255,.26); }
+
+.vs-deel-stem {
+  width: 100%; margin-top: 12px;
+  background: #fff; border: 1px solid #D8D0EC; border-radius: 12px; padding: 13px;
+  color: #3A3350; font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vs-deel-stem:active { background: #EFEAFA; }
+
+/* ── Die wallpaper ──
+   'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n volskerm <img> nie —
+   sien CLAUDE.md se "Android, Chrome, en gekleurde strepe". */
+.vs-wp {
+  background: linear-gradient(165deg, #2E2757 0%, #443A6E 100%);
+  color: #fff; border-radius: 18px; padding: 20px 18px;
+}
+.vs-wp .vs-kop { color: var(--gold, #E0B872); }
+.vs-wp-prent {
+  width: 100%; aspect-ratio: 9 / 16; max-height: 52vh;
+  background-color: #2A1F14;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  border-radius: 13px;
+}
+.vs-wp-fyn { font-size: 12.5px; line-height: 1.6; opacity: .88; margin-top: 10px; }
+.vs-wp-nota { font-size: 12.5px; color: var(--gold, #E0B872); margin-top: 8px; }

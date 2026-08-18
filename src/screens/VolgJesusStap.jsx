@@ -101,7 +101,11 @@ export default function VolgJesusStap({ week, opSluit, opBegin, opDagKlaar, binn
     setAntwoorde(a => ({ ...a, [id]: waarde }))
   }
 
+  /* Stappe wat net vir SOMMIGE mense bestaan (die "as jy nog nie seker is
+     nie"-kaart) word heeltemal uitgelaat, nie oorgeslaan nie. 'n Stap wat
+     bestaan maar homself dadelik verbyspring, laat die vorderingspitte lieg. */
   const stappe = stappeVirDag(dag, antwoorde)
+    .filter(st => !st.netAs || antwoorde[st.netAs.id] === st.netAs.waarde)
   const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
 
   function volgende() {
@@ -342,6 +346,17 @@ function Stap({ stap: s, week, w, antwoorde, stel, volgende }) {
           ))}
           <p className="vs-fyn">🔒 Net jy kan hierdie lees. Dit bly op hierdie foon.</p>
         </div>
+        {/* Die stemboodskap kan aangestuur word. Dit staan HIER en nie by die
+            speler nie: 'n mens deel iets nadat dit hom getref het, nie voor
+            hy dit gehoor het nie. */}
+        {s.deelStem && week.stemboodskapUrl && (
+          <button className="vs-deel-stem"
+                  onClick={() => deelWoorde(
+                    `Luister na hierdie: "${week.titel}" — VOLG JESUS, Week ${w}.`,
+                    week.stemboodskapUrl)}>
+            📤  Deel die stemboodskap
+          </button>
+        )}
         <button className="vs-hoofknop" onClick={volgende} disabled={!klaar}>{s.knop}</button>
         {!klaar && <p className="vs-wag">Skryf iets — al is dit net een sin.</p>}
       </>
@@ -412,6 +427,71 @@ function Stap({ stap: s, week, w, antwoorde, stel, volgende }) {
     )
   }
 
+  /* ── Nog 'n area op Dag 3 ──
+   *
+   * Dewald: "Dit is nooit nodig om nog 'n area te kies om Dag 3 te voltooi
+   * nie." Die primêre knoppie gaan dus AAN; die tweede een is die sagte een.
+   * Kies hy weer, begin die spieël van voor af met 'n skoon keuse. */
+  if (s.soort === 'nogArea') {
+    return (
+      <>
+        <div className="vs-kaart">
+          <p className="vs-lyf">{s.lyf}</p>
+        </div>
+        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
+        <button className="vs-stil" onClick={() => stel('area', '')}>
+          Ek wil nog ’n area ondersoek
+        </button>
+      </>
+    )
+  }
+
+  /* ── Die wallpaper ──
+   *
+   * Dit is die enigste deel van die week wat BUITE die app gesien word: die
+   * adres is in die prent ingebrand, en dus is elke deelnemer se sluitskerm 'n
+   * week lank 'n stil uitnodiging.
+   *
+   * Let op hoe die voorskou geteken word: 'n CSS-`background-image` op 'n
+   * ONDEURSIGTIGE houer, nooit 'n volskerm <img> nie — sien CLAUDE.md. */
+  if (s.soort === 'wallpaper') {
+    if (!week.wallpaper) { return <Slaan volgende={volgende} /> }
+    return (
+      <>
+        <div className="vs-wp">
+          <div className="vs-kop">{s.kop}</div>
+          <div className="vs-wp-prent" style={{ backgroundImage: `url(${week.wallpaper})` }} />
+          <DeelKnop
+            bron={week.wallpaper}
+            naam={`volg-jesus-week-${w}.webp`}
+            woorde="Stoor dit as jou agtergrond, sodat die vraag die hele week voor jou bly — of deel dit met iemand."
+            knop="Stoor of deel"
+          />
+        </div>
+        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
+      </>
+    )
+  }
+
+  /* ── Die deelbare kaart ──
+   *
+   * Die een sin, om aan te stuur. Dit dra die adres saam, want die punt is dat
+   * die mens wat dit kry, self hier kan uitkom. */
+  if (s.soort === 'deelkaart') {
+    return (
+      <>
+        <div className="vs-hou">
+          <div className="vs-hou-kop">{s.kop}</div>
+          <p>{s.sin}</p>
+          <button className="vs-deel" onClick={() => deelWoorde(s.sin)}>
+            📤  Deel dit
+          </button>
+        </div>
+        <button className="vs-hoofknop" onClick={volgende}>{s.knop}</button>
+      </>
+    )
+  }
+
   if (s.soort === 'reis') {
     const rye = WEEK1_REIS
       .map(r => ({ kop: r.kop, teks: String(antwoorde[r.id] || '').trim() }))
@@ -439,6 +519,72 @@ function Stap({ stap: s, week, w, antwoorde, stel, volgende }) {
   }
 
   return null
+}
+
+/* 'n Stap wat niks het om te wys nie, gaan dadelik verby. Dit gebeur net vir
+   'n week sonder wallpaper. */
+function Slaan({ volgende }) {
+  useEffect(() => { volgende() }, [])
+  return null
+}
+
+/* Deel woorde (en 'n skakel) met wie ook al. Val `navigator.share` weg — soos
+   op 'n rekenaar — beland dit op die knipbord. */
+async function deelWoorde(teks, skakel) {
+  const boodskap = skakel ? `${teks}\n\n${skakel}` : `${teks}\n\nhttps://dewaldscheepers.com/go`
+  try {
+    if (navigator.share) { await navigator.share({ text: boodskap }); return }
+  } catch { return }
+  try { await navigator.clipboard.writeText(boodskap) } catch {}
+}
+
+/* Die wallpaper stoor of deel. Dieselfde les as Luister.jsx: sodra daar 'n
+   LEER by navigator.share() is, gooi WhatsApp die byskrif weg — elke ander app
+   hou dit. Daarom is die adres in die PRENT ingebrand en nie net in die teks
+   nie. */
+function DeelKnop({ bron, naam, woorde, knop }) {
+  const [besig, setBesig] = useState(false)
+  const [nota, setNota]   = useState(null)
+
+  async function deel() {
+    if (besig) return
+    setBesig(true); setNota(null)
+    try {
+      const r = await fetch(bron)
+      const b = r.ok ? await r.blob() : null
+      if (!b || !/^image\//.test(b.type) || b.size < 1024) {
+        setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')
+        setBesig(false); return
+      }
+      const leer = new File([b], naam, { type: b.type })
+      if (navigator.canShare && navigator.canShare({ files: [leer] })) {
+        try {
+          await navigator.share({ files: [leer] })
+          setNota('Gestuur. Sit dit op jou sluitskerm of jou status.')
+          setBesig(false); return
+        } catch (e) { if (e && e.name === 'AbortError') { setBesig(false); return } }
+      }
+      const url = URL.createObjectURL(b)
+      const a = document.createElement('a')
+      a.href = url; a.download = naam
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+      setNota('Afgelaai.')
+    } catch {
+      setNota('Hou lank op die prent vas om dit te stoor.')
+    }
+    setBesig(false)
+  }
+
+  return (
+    <>
+      <button className="vs-deel" onClick={deel} disabled={besig}>
+        {besig ? 'Besig…' : knop}
+      </button>
+      <p className="vs-wp-fyn">{woorde}</p>
+      {nota && <p className="vs-wp-nota">{nota}</p>}
+    </>
+  )
 }
 
 /* Die LEES-kaart, met die knoppie na die app se eie Bybel. Dieselfde patroon
