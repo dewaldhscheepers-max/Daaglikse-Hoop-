@@ -17,7 +17,7 @@ import {
   keurVertoonnaam, keurGroepnaam, keurGemeente,
   keurBoodskap, MAKS_BOODSKAP,
   isFasiliteerder, isEienaar, magLees, magStuur, magNooi,
-  magUitvee, magVasspeld, magVerlaat,
+  magUitvee, magVasspeld, magChatVerwyder, inChat, magVerlaat,
   ongeleesTel, ongeleesWoorde, uitnodiging, nooiNudge,
 } from './volgJesusGroep.js'
 
@@ -191,6 +191,39 @@ waar('alleen', /saam met jou begin/.test(nooiNudge(1)))
 waar('twee', /reeds twee/.test(nooiNudge(2)))
 is('drie of meer: stil', nooiNudge(3), '')
 is('en dit tel nie soos n wedstryd nie', nooiNudge(40), '')
+
+console.log('\n── Uit die GROEPCHAT, maar nie uit die groep nie ──\n')
+{
+  const groep = { id: 'g1', eienaar: 'u-dewald' }
+  const fasil = { uid: 'u-dewald', rol: 'fasiliteerder', status: 'aktief' }
+  const tweedeFasil = { uid: 'u-tweede', rol: 'fasiliteerder', status: 'aktief' }
+  const lid = { uid: 'u-maria', rol: 'deelnemer', status: 'aktief' }
+  const bMaria = { id: 'b1', uid: 'u-maria', teks: 'nonsens' }
+  const bDewald = { id: 'b2', uid: 'u-dewald', teks: 'my eie' }
+
+  is('n fasiliteerder mag', magChatVerwyder(fasil, bMaria, groep), true)
+  is('n deelnemer nie', magChatVerwyder(lid, bMaria, groep), false)
+  is('nie op sy EIE boodskap nie', magChatVerwyder(fasil, bDewald, groep), false)
+  /* Sou 'n tweede fasiliteerder die eienaar kon stilmaak, kon hy die groep
+     oorneem. */
+  is('en nooit op die EIENAAR nie', magChatVerwyder(tweedeFasil, bDewald, groep), false)
+  is('n tweede fasiliteerder mag wel n gewone lid', magChatVerwyder(tweedeFasil, bMaria, groep), true)
+
+  is('geen boodskap', magChatVerwyder(fasil, null, groep), false)
+  is('n boodskap sonder uid', magChatVerwyder(fasil, { id: 'x' }, groep), false)
+  is('geen lid', magChatVerwyder(null, bMaria, groep), false)
+  is('sonder n groep werk dit steeds', magChatVerwyder(fasil, bMaria, null), true)
+
+  console.log('\n── Wie in die chat is ──\n')
+  is('n gewone lid is binne', inChat(lid), true)
+  is('wie voor hierdie dag aangesluit het ook', inChat({ status: 'aktief' }), true)
+  is('wie uitgehaal is, is buite', inChat({ ...lid, chatAf: true }), false)
+  is('en false beteken binne', inChat({ ...lid, chatAf: false }), true)
+  /* Die veld mag nooit 'n string wees nie, maar as dit een word, moet dit NIE
+     stilweg as "uit" tel nie — dan is 'n datafout 'n mens wat stilgemaak is. */
+  is('n string tel nie as uit nie', inChat({ ...lid, chatAf: 'true' }), true)
+  is('wie nie meer n lid is nie, is buite', inChat({ ...lid, status: 'verwyder' }), false)
+}
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

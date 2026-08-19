@@ -149,6 +149,38 @@ export function magUitvee(lid, boodskap) {
 /* Vasspeld en modereer is die fasiliteerder s'n. */
 export function magVasspeld(lid) { return isFasiliteerder(lid) }
 
+/* ── Iemand uit die GROEPCHAT haal ──
+ *
+ * Dewald: "if someone makes nonsense on the group chat the fasiliteerder must
+ * be able to remove that person from the group's chat. They should still do the
+ * program and go on like normal."
+ *
+ * Dit is nie dieselfde as uit die groep gooi nie. Die mens bly 'n lid, hou sy
+ * week, sy antwoorde en sy plek — net die gesprek gaan toe.
+ *
+ * Drie dinge mag nie:
+ *   · net 'n fasiliteerder mag dit doen;
+ *   · nie op jou eie boodskap nie — daarvoor is daar "Verwyder";
+ *   · nie op die EIENAAR nie. Sou 'n tweede fasiliteerder die eienaar kon
+ *     stilmaak, kon hy die groep oorneem.
+ *
+ * Die skerm gebruik hierdie reel om die knoppie te wys. Wat dit WERKLIK keer,
+ * is api/vj-groep.mjs en die reels in firestore.rules — 'n knoppie wat 'n mens
+ * wegsteek, is nie 'n slot nie. */
+export function magChatVerwyder(myLid, boodskap, groep) {
+  if (!isFasiliteerder(myLid) || !boodskap || !boodskap.uid) return false
+  if (boodskap.uid === myLid.uid) return false
+  if (groep && groep.eienaar && boodskap.uid === groep.eienaar) return false
+  return true
+}
+
+/* Of HIERDIE mens in die chat mag wees. Ontbreek die veld — soos by elke lid
+   wat voor hierdie dag aangesluit het — is die antwoord ja. */
+export function inChat(lid) {
+  if (!isAktief(lid)) return false
+  return lid.chatAf !== true
+}
+
 /* Die eienaar mag nie eenvoudig loop nie — 'n groep sonder eienaar is 'n groep
    wat niemand kan regmaak nie. §46. */
 export function magVerlaat(groep, uid, aantalLede) {

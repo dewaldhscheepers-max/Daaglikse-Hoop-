@@ -266,6 +266,51 @@ is('een groep', myne.groepe.length, 1)
 is('en die rol is reg', myne.groepe[0].myRol, 'fasiliteerder')
 is('iemand sonder groepe kry n lee lys', (await roep('vreemdeling', { doen: 'myne' })).groepe, [])
 
+console.log('\n── Uit die GROEPCHAT, maar nie uit die groep nie ──\n')
+/* 'n Eie groep, want Maria het GID intussen verlaat. */
+const g4 = (await roep('dewald', { doen: 'skep', naam: 'Vierde Groep', gemeente: '', vertoonnaam: 'Dewald' })).groep
+await roep('nadia', { doen: 'sluitaan', kode: g4.kode, vertoonnaam: 'Nadia' })
+{
+  /* Dewald: "if someone makes nonsense on the group chat the fasiliteerder must
+     be able to remove that person from the group's chat. They should still do
+     the program and go on like normal." */
+  const r = await roep('dewald', { doen: 'chat', groepId: g4.id, uid: 'nadia', aan: false })
+  is('die fasiliteerder mag', r.status, 200)
+  const lid = () => winkel.get(`vjGroepe/${g4.id}/lede/nadia`)
+  is('die merkie staan op haar lid-dokument', lid().chatAf, true)
+  is('maar sy is NOG n lid', lid().status, 'aktief')
+  is('en haar rol is onaangeraak', lid().rol, 'deelnemer')
+
+  /* Sy sien dit self, sodat die app nie stilweg stukkend lyk nie. */
+  const hare = await roep('nadia', { doen: 'myne' })
+  const haarGroep = hare.groepe.find(g => g.id === g4.id)
+  is('sy sien dat sy uit die chat is', haarGroep.myChatAf, true)
+  is('maar die groep staan nog daar', !!haarGroep, true)
+
+  const syne = await roep('dewald', { doen: 'myne' })
+  is('die fasiliteerder is nie geraak nie',
+     syne.groepe.find(g => g.id === g4.id).myChatAf, false)
+
+  /* En dit draai terug. */
+  is('dit draai terug',
+     (await roep('dewald', { doen: 'chat', groepId: g4.id, uid: 'nadia', aan: true })).status, 200)
+  is('en die merkie is af', lid().chatAf, false)
+}
+
+console.log('\n── Wie dit NIE mag doen nie ──\n')
+is('n deelnemer nie',
+   (await roep('nadia', { doen: 'chat', groepId: g4.id, uid: 'dewald', aan: false })).status, 403)
+is('n vreemdeling nie',
+   (await roep('niemand', { doen: 'chat', groepId: g4.id, uid: 'nadia', aan: false })).status, 403)
+/* Sou 'n tweede fasiliteerder die eienaar kon stilmaak, kon hy die groep
+   oorneem. */
+is('en NOOIT die eienaar nie',
+   (await roep('dewald', { doen: 'chat', groepId: g4.id, uid: 'dewald', aan: false })).status, 409)
+is('n onbekende groep',
+   (await roep('dewald', { doen: 'chat', groepId: 'niks', uid: 'nadia', aan: false })).status, 404)
+is('iemand wat nie n lid is nie',
+   (await roep('dewald', { doen: 'chat', groepId: g4.id, uid: 'wie-ook-al', aan: false })).status, 404)
+
 console.log('\n── n Onbekende versoek ──\n')
 is('word geweier', (await roep('dewald', { doen: 'iets-anders' })).status, 400)
 is('n leë liggaam ook', (await roep('dewald', null)).status, 400)

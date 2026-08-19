@@ -263,6 +263,26 @@ service cloud.firestore {
         return isLid() && myLid().rol == 'fasiliteerder';
       }
 
+      /* ── Uit die GROEPCHAT, maar nie uit die groep nie ──
+       *
+       * Dewald: "if someone makes nonsense on the group chat the fasiliteerder
+       * must be able to remove that person from the group's chat. They should
+       * still do the program and go on like normal."
+       *
+       * Dit is 'n aparte ding van lidmaatskap. `status` bly 'aktief' — die mens
+       * loop die program klaar, hou sy week, sy antwoorde en sy plek. Net die
+       * gesprek gaan toe.
+       *
+       * Dit staan HIER en nie in die skerm nie. 'n Skerm wat 'n gesprek
+       * wegsteek, is 'n gesprek wat enigiemand met die SDK steeds kan lees. Die
+       * enigste plek waar 'n chat werklik toegaan, is die reel.
+       *
+       * `chatAf != true` en nie `chatAf == false` nie: die veld bestaan nie op
+       * ou lede nie, en 'n ontbrekende veld moet BINNE beteken. */
+      function magChat() {
+        return isLid() && myLid().chatAf != true;
+      }
+
       // Die groep se eie dokument: 'n lid lees dit, niemand skryf dit.
       allow read:  if isLid();
       allow write: if false;
@@ -290,9 +310,9 @@ service cloud.firestore {
        * kan 'n boodskap bo-aan die gesprek vasspeld of hom in die verlede
        * versteek. */
       match /boodskappe/{boodskapId} {
-        allow read: if isLid();
+        allow read: if magChat();
 
-        allow create: if isLid()
+        allow create: if magChat()
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.teks is string
           && request.resource.data.teks.size() > 0
@@ -307,9 +327,11 @@ service cloud.firestore {
            gesprek nie. */
         allow update: if isLid()
           && (
-            /* Uitvee: jou eie, of die fasiliteerder wat modereer. */
+            /* Uitvee: jou eie, of die fasiliteerder wat modereer.
+               Wie uit die chat is, mag niks meer verander nie — ook nie sy eie
+               ou boodskappe nie. Die fasiliteerder bly wel by sy werk. */
             (
-              (resource.data.uid == request.auth.uid || isFasiliteerder())
+              ((resource.data.uid == request.auth.uid && magChat()) || isFasiliteerder())
               && request.resource.data.diff(resource.data).affectedKeys()
                    .hasOnly(['uitgevee', 'uitgeveeOp'])
               && request.resource.data.uitgevee == true
@@ -333,11 +355,11 @@ service cloud.firestore {
            Dan kan niemand namens iemand anders reageer nie, en niemand kan twee
            keer tel nie — die struktuur maak dit onmoontlik, nie 'n telling nie. */
         match /reaksies/{uid} {
-          allow read: if isLid();
-          allow create, update: if isLid()
+          allow read: if magChat();
+          allow create, update: if magChat()
             && request.auth.uid == uid
             && request.resource.data.soort in ['hart', 'bid'];
-          allow delete: if isLid() && request.auth.uid == uid;
+          allow delete: if magChat() && request.auth.uid == uid;
         }
       }
 
@@ -346,7 +368,7 @@ service cloud.firestore {
          fasiliteerder nie. Dit gaan na Dewald deur die admin, want 'n rapport
          wat die groep kan lees, is 'n rapport wat niemand gaan indien nie. */
       match /rapporte/{id} {
-        allow create: if isLid() && request.resource.data.deur == request.auth.uid;
+        allow create: if magChat() && request.resource.data.deur == request.auth.uid;
         allow read, update, delete: if false;
       }
 

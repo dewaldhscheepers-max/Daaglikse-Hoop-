@@ -135,3 +135,33 @@ Elke stap is op sy eie bruikbaar en word getoets voordat die volgende begin.
 geen privaat boodskappe tussen twee mense, geen foto's, video's of stemnotas in
 die chat, geen oproepe, geen openbare profiele of groepe, geen aanlyn-status,
 geen ranglys.
+
+
+## Uit die groepchat, maar nie uit die groep nie
+
+Dewald: *"if someone makes nonsense on the group chat the fasiliteerder must be
+able to remove that person from the group's chat. They should still do the
+program and go on like normal."*
+
+Dit is 'n APARTE ding van lidmaatskap. `status` bly `'aktief'` — die mens loop
+die program klaar, hou sy week, sy antwoorde en sy plek. Net `chatAf: true` kom
+by op sy lid-dokument.
+
+**Die reels doen die werk, nie die skerm nie.** `magChat()` in `firestore.rules`
+is `isLid() && myLid().chatAf != true`, en dit sit op lees, skryf, reaksies en
+rapporte. 'n Skerm wat 'n gesprek wegsteek, is 'n gesprek wat enigiemand met die
+SDK steeds kan lees.
+
+`chatAf != true` en nie `== false` nie: die veld bestaan nie op lede wat voor
+hierdie dag aangesluit het nie, en 'n ontbrekende veld moet BINNE beteken.
+
+Twee dinge mag nooit: die **eienaar** kan nie stilgemaak word nie (dan kan
+niemand die groep meer modereer nie), en 'n mens kan dit nie op homself doen nie.
+
+Die mens SIEN dat dit gebeur het — `myChatAf` kom saam met `myne`, en die skerm
+se dit met 'n stil reel waar die chat-knoppie sou gestaan het. 'n Knoppie wat
+stilweg verdwyn, laat 'n mens dink die app is stukkend, en 'n gesprek waarin hy
+praat terwyl niemand hom hoor nie, is erger as om dit te weet.
+
+Die pad TERUG staan in die groep se instellings, en dit is die helfte wat 'n
+mens vergeet om te bou.

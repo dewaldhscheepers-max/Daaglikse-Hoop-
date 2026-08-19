@@ -28,8 +28,9 @@ import {
   reageer, luisterReaksies, speldVas, rapporteer, REAKSIES,
 } from '../data/volgJesusChat'
 import {
-  keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, ongeleesTel,
+  keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, magChatVerwyder, ongeleesTel,
 } from '../data/volgJesusGroep'
+import { stelChat } from '../data/volgJesusGroepApi'
 import './VolgJesusChat.css'
 
 /* Die vier vinnige aansette ná die stemboodskap (§40). Hulle vul die kassie —
@@ -126,6 +127,10 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
      want 'n rapport per ongeluk is 'n mens wat 'n ander mens aankla. */
   const [rapporteerB, setRapporteerB] = useState(null)
   const [rapportKlaar, setRapportKlaar] = useState(false)
+  /* Wie uit die groepchat gehaal word. Dit is 'n aparte tree, want dit maak 'n
+     mens se gesprek toe — en dit is nie dieselfde as 'n boodskap uitvee nie. */
+  const [chatUit, setChatUit] = useState(null)
+  const [chatNota, setChatNota] = useState('')
   /* Die wenk by die eerste boodskap. Een keer per toestel, en dan nooit weer. */
   const [wysWenk, setWysWenk] = useState(() => {
     try { return !localStorage.getItem('vj_chat_wenk_gesien') } catch { return true }
@@ -245,6 +250,15 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
   function beginAntwoord(b) {
     setAntwoordOp({ id: b.id, naam: b.naam || 'Iemand', teks: b.teks || '' })
     setOopBoodskap(null)
+  }
+
+  async function doenChatUit(b) {
+    setChatUit(null)
+    const r = await stelChat(groepId, b.uid, false)
+    setChatNota(r && r.ok
+      ? `${b.naam || 'Die persoon'} is uit die groepchat. Hy kan die program klaarmaak.`
+      : (r && r.fout) || 'Kon nie nou nie. Probeer weer.')
+    setTimeout(() => setChatNota(''), 5000)
   }
 
   async function stuurRapport(rede) {
@@ -411,6 +425,14 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
                       onClick={() => { setRapporteerB(b); setOopBoodskap(null) }}
                     >Rapporteer</button>
                   )}
+                  {/* Uit die GROEPCHAT — nie uit die groep nie. Die mens loop
+                      die program klaar; net die gesprek gaan toe. */}
+                  {magChatVerwyder(myLid, b, groep) && (
+                    <button
+                      className="vc-doen-knop weg"
+                      onClick={() => { setChatUit(b); setOopBoodskap(null) }}
+                    >Verwyder van groepchat</button>
+                  )}
                 </div>
               )}
             </div>
@@ -420,6 +442,7 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
       </div>
 
       {fout && <div className="vc-fout">{fout}</div>}
+      {chatNota && <div className="vc-dankie">{chatNota}</div>}
       {rapportKlaar && (
         <div className="vc-dankie">
           Dankie. Ons kyk daarna. Die groep sien nie hierdie rapport nie.
@@ -465,6 +488,28 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
       {/* Rapporteer. 'n Aparte tree, want 'n rapport per ongeluk is een mens
           wat 'n ander aankla. Die rede is OPSIONEEL — 'n verpligte veld is
           hoe 'n mens ophou rapporteer. */}
+      {chatUit && (
+        <div className="vc-blad" role="dialog" aria-label="Verwyder van groepchat">
+          <div className="vc-blad-binne">
+            <h3>Verwyder {chatUit.naam || 'hierdie persoon'} van die groepchat?</h3>
+            <p className="vc-blad-fyn">
+              Hy bly in die groep en kan die program klaarmaak — sy week, sy
+              antwoorde en sy plek bly net soos hulle is. Net die gesprek gaan
+              toe: hy sien niks nuuts nie en kan niks meer stuur nie.
+            </p>
+            <p className="vc-blad-fyn">
+              Jy kan dit later terugdraai onder die groep se instellings.
+            </p>
+            <div className="vc-blad-knoppe">
+              <button className="vc-blad-los" onClick={() => setChatUit(null)}>Los maar</button>
+              <button className="vc-blad-stuur" onClick={() => doenChatUit(chatUit)}>
+                Verwyder van groepchat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {rapporteerB && (
         <RapporteerBlad
           boodskap={rapporteerB}

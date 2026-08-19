@@ -34,6 +34,9 @@ export const sluitAan    = (kode, vertoonnaam) => vra('sluitaan', { kode, vertoo
 export const verlaatGroep = groepId => vra('verlaat', { groepId })
 export const verwyderLid = (groepId, uid) => vra('verwyder', { groepId, uid })
 export const stelRol     = (groepId, uid, rol) => vra('rol', { groepId, uid, rol })
+/* Uit die groepchat, maar NIE uit die groep nie. Die mens loop die program
+   klaar; net die gesprek gaan toe. */
+export const stelChat    = (groepId, uid, aan) => vra('chat', { groepId, uid, aan })
 export const roteerKode  = groepId => vra('kode', { groepId })
 export const sluitKodeAf = groepId => vra('kode', { groepId, aan: false })
 export const myGroepe    = () => vra('myne')

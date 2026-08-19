@@ -10,12 +10,13 @@
  * Niemand se persoonlike vordering of private antwoorde word ooit geraak nie.
  * Hulle lê in localStorage op die foon; 'n groep is iets wat BYKOM.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
-  skepGroep, kykGroep, sluitAan, verlaatGroep, roteerKode,
+  skepGroep, kykGroep, sluitAan, verlaatGroep, roteerKode, stelChat,
 } from '../data/volgJesusGroepApi'
 import { koppelGoogle, isGekoppel, KOPPEL_REDE } from '../data/volgJesusIdentiteit'
 import { keurGroepkode, uitnodiging, nooiNudge } from '../data/volgJesusGroep'
+import { haalLede } from '../data/volgJesusChat'
 import './VolgJesusGroep.css'
 
 const deel = async teks => {
@@ -440,6 +441,53 @@ export function FasiliteerderGids({ opTerug }) {
   )
 }
 
+/* ── Wie uit die groepchat is ────────────────────────────────────────
+ *
+ * Die fasiliteerder haal iemand uit die gesprek by die boodskap self. Hier is
+ * die pad TERUG, en dit is die helfte wat 'n mens vergeet om te bou: 'n knoppie
+ * wat 'n mens per ongeluk druk, moet 'n weg terug hê.
+ *
+ * Die lede kom direk uit Firestore — 'n lid mag sy eie groep se lede lees. */
+function UitDieChat({ groep }) {
+  const [uit, setUit]   = useState(null)   /* null = nog nie gekyk nie */
+  const [besig, setBesig] = useState('')
+
+  useEffect(() => {
+    let dood = false
+    if (!groep || !groep.id) return
+    haalLede(groep.id)
+      .then(l => { if (!dood) setUit(l.filter(x => x.chatAf === true)) })
+      .catch(() => { if (!dood) setUit([]) })
+    return () => { dood = true }
+  }, [groep && groep.id])
+
+  async function terug(lid) {
+    setBesig(lid.uid)
+    const r = await stelChat(groep.id, lid.uid, true)
+    setBesig('')
+    if (r && r.ok) setUit(v => v.filter(x => x.uid !== lid.uid))
+  }
+
+  if (!uit || !uit.length) return null
+
+  return (
+    <div className="vg-kaart vg-uitchat">
+      <div className="vg-kop2">UIT DIE GROEPCHAT</div>
+      <p className="vg-fyn">
+        Hulle doen die program soos altyd — net die gesprek is toe.
+      </p>
+      {uit.map(l => (
+        <div key={l.uid} className="vg-uitchat-ry">
+          <span>{l.naam || 'Iemand'}</span>
+          <button disabled={besig === l.uid} onClick={() => terug(l)}>
+            {besig === l.uid ? 'Besig…' : 'Sit terug'}
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ── Die groep se instellings ───────────────────────────────────────── */
 export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
   const [nota, setNota]   = useState('')
@@ -491,6 +539,12 @@ export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
           </button>
         </div>
       )}
+
+      {/* Wie uit die groepchat is. Dit wys NET as daar iemand is — 'n leë blok
+          met 'n opskrif is 'n blok wat 'n mens leer om te ignoreer.
+          Die bevestiging in die chat belowe hierdie pad terug; sonder dit is
+          'n mens wat per ongeluk gedruk het, vas. */}
+      {myLid && myLid.rol === 'fasiliteerder' && <UitDieChat groep={groep} />}
 
       <button className="vg-tweede" onClick={() => opBlad && opBlad('sessie')}>
         DIE GROEPSESSIE

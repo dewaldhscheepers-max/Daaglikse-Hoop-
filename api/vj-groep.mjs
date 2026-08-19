@@ -3,6 +3,7 @@
  *   POST { doen: 'skep',     naam, gemeente, vertoonnaam }
  *   POST { doen: 'kyk',      kode }                       → 'n voorskou
  *   POST { doen: 'sluitaan', kode, vertoonnaam }
+ *   POST { doen: 'chat', groepId, uid, aan }   → uit/terug in die groepchat
  *   POST { doen: 'verlaat',  groepId }
  *   POST { doen: 'verwyder', groepId, uid }
  *   POST { doen: 'rol',      groepId, uid, rol }
@@ -402,6 +403,46 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true })
       }
 
+      /* ── Uit die groepchat, maar nie uit die groep nie ───────────
+       *
+       * Dewald: "if someone makes nonsense on the group chat the fasiliteerder
+       * must be able to remove that person from the group's chat. They should
+       * still do the program and go on like normal."
+       *
+       * Daarom raak dit NIE aan `status` nie. Die mens bly 'n lid, hou sy week,
+       * sy antwoorde en sy plek in die program. Net `chatAf` verander, en die
+       * reels in firestore.rules doen die res.
+       *
+       * Twee dinge mag nie: die EIENAAR kan nie stilgemaak word nie (dan kan
+       * niemand die groep meer modereer nie), en 'n mens kan dit nie op homself
+       * doen nie — daarvoor is daar "Verlaat die groep". */
+      case 'chat': {
+        const groepId = String(lyf.groepId || '')
+        const wie = String(lyf.uid || '')
+        const af = lyf.aan === false || lyf.af === true
+
+        const groep = await fs.lees(`vjGroepe/${groepId}`)
+        if (!groep) return res.status(404).json({ fout: 'Ons kry nie daardie groep nie.' })
+        const ek = await fs.lees(`vjGroepe/${groepId}/lede/${uid}`)
+        if (!ek || ek.status !== 'aktief' || ek.rol !== 'fasiliteerder') {
+          return res.status(403).json({ fout: 'Net n fasiliteerder kan dit doen.' })
+        }
+        if (wie === groep.eienaar) {
+          return res.status(409).json({ fout: 'Die eienaar kan nie uit die chat gehaal word nie.' })
+        }
+        if (wie === uid) return res.status(409).json({ fout: 'Jy kan dit nie op jouself doen nie.' })
+
+        const lid = await fs.lees(`vjGroepe/${groepId}/lede/${wie}`)
+        if (!lid || lid.status !== 'aktief') {
+          return res.status(404).json({ fout: 'Daardie mens is nie in hierdie groep nie.' })
+        }
+
+        await fs.stel(`vjGroepe/${groepId}/lede/${wie}`, af
+          ? { chatAf: true, chatAfOp: nouISO, chatAfDeur: uid }
+          : { chatAf: false })
+        return res.status(200).json({ ok: true, chatAf: af })
+      }
+
       /* ── Die kode roteer of afsluit ──────────────────────────────── */
       case 'kode': {
         const groepId = String(lyf.groepId || '')
@@ -445,6 +486,10 @@ export default async function handler(req, res) {
           uit.push({
             ...groepUit(groep, lede.length, fasil ? fasil.naam : ''),
             myRol: lid.rol, myNaam: lid.naam,
+            /* Of hierdie mens uit die GROEPCHAT is. Sy lidmaatskap bly heel —
+               net die gesprek is toe. Die skerm gebruik dit om die
+               chat-knoppie te versteek; die REELS is wat dit werklik toemaak. */
+            myChatAf: lid.chatAf === true,
           })
         }
         return res.status(200).json({ ok: true, groepe: uit, aktief: (my && my.aktief) || (uit[0] && uit[0].id) || null })

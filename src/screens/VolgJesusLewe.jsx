@@ -97,7 +97,11 @@ export default function VolgJesusLewe({ onClose: opToe }) {
         const eerste = r.ok && r.groepe && r.groepe[0]
         if (eerste) {
           setGroep(eerste)
-          setMyLid({ uid: u, naam: eerste.myNaam, rol: eerste.myRol, status: 'aktief' })
+          setMyLid({
+            uid: u, naam: eerste.myNaam, rol: eerste.myRol, status: 'aktief',
+            /* Uit die groepchat, maar nie uit die groep nie. */
+            chatAf: eerste.myChatAf === true,
+          })
           setModus('groep')
           try { localStorage.setItem('vj_modus', 'groep') } catch {}
           return
@@ -134,6 +138,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
       naam: g.myNaam || '',
       rol: g.myRol || (g.eienaar === uid ? 'fasiliteerder' : 'deelnemer'),
       status: 'aktief',
+      chatAf: g.myChatAf === true,
     })
     setModus('groep')
     tel('doen')
@@ -159,8 +164,12 @@ export default function VolgJesusLewe({ onClose: opToe }) {
   }
 
   /* Die ongeleesde telling loop in die agtergrond, sodat die knoppie sy getal
-     ken sonder dat die chat oop is. */
-  const { boodskappe, laasGelees } = useOngelees(groep && groep.id, uid)
+     ken sonder dat die chat oop is.
+     Wie uit die chat is, luister glad nie — die reels sou hom in elk geval
+     weier, en 'n luisteraar wat elke keer 'n toestemmingsfout kry, is 'n oop
+     verbinding wat niks doen nie. */
+  const magChat = !!myLid && myLid.chatAf !== true
+  const { boodskappe, laasGelees } = useOngelees(magChat ? (groep && groep.id) : null, uid)
 
   /* Die kaart is oopgemaak. Een keer per toestel. */
   useEffect(() => { tel('oop') }, [])
@@ -396,7 +405,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
         {binne}
         {/* §39: die knoppie is op ELKE VOLG JESUS-skerm, dit maak niks toe
             nie, en die ongeleesde telling is helder. */}
-        {modus === 'groep' && groep && myLid && !groepBlad && (
+        {modus === 'groep' && groep && myLid && !groepBlad && !myLid.chatAf && (
           <GroepKnoppie
             groep={groep}
             boodskappe={boodskappe}
@@ -404,6 +413,21 @@ export default function VolgJesusLewe({ onClose: opToe }) {
             myUid={uid}
             opKlik={() => setGroepBlad('chat')}
           />
+        )}
+
+        {/* ── Uit die groepchat ──
+         *
+         * Die fasiliteerder het hierdie mens uit die GESPREK gehaal, nie uit
+         * die groep nie. Hy loop die program klaar, hou sy week, sy antwoorde
+         * en sy plek.
+         *
+         * Ons se dit vir hom. 'n Knoppie wat stilweg verdwyn, laat 'n mens
+         * dink die app is stukkend — en 'n gesprek waarin hy praat terwyl
+         * niemand hom hoor nie, is erger as om dit te weet. */}
+        {modus === 'groep' && groep && myLid && !groepBlad && myLid.chatAf && (
+          <div className="vjl-chat-af">
+            Jy is uit die groepchat. Jy kan die program klaarmaak soos altyd.
+          </div>
         )}
       </div>
 
@@ -416,7 +440,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
        *
        * Die chat is `position: fixed` met sy eie z-index, dus dek dit die skerm
        * sonder om dit te ontmantel. Die blaaiertoets het hierdie een gevang. */}
-      {groepBlad === 'chat' && groep && myLid && (
+      {groepBlad === 'chat' && groep && myLid && !myLid.chatAf && (
         <VolgJesusChat
           groep={groep}
           myLid={myLid}
