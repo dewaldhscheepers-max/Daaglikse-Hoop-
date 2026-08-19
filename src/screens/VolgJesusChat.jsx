@@ -126,6 +126,10 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
      want 'n rapport per ongeluk is 'n mens wat 'n ander mens aankla. */
   const [rapporteerB, setRapporteerB] = useState(null)
   const [rapportKlaar, setRapportKlaar] = useState(false)
+  /* Die wenk by die eerste boodskap. Een keer per toestel, en dan nooit weer. */
+  const [wysWenk, setWysWenk] = useState(() => {
+    try { return !localStorage.getItem('vj_chat_wenk_gesien') } catch { return true }
+  })
 
   const onderRef = useRef(null)
   const lysRef   = useRef(null)
@@ -232,6 +236,10 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
     const my = telReaksies(reaksies[b.id], myUid)[soort]
     /* Dieselfde teken weer beteken "haal dit af". */
     reageer(groepId, b.id, myUid, my && my.myne ? null : soort)
+    /* En die knoppie-ry gaan toe. Dewald: "as ek reaksie soos hartjie druk moet
+       daardie popup thing weer weggaan." Hy is reg — 'n mens het klaar gese wat
+       hy wou se, en 'n ry knoppies wat bly staan, maak die gesprek toe. */
+    setOopBoodskap(null)
   }
 
   function beginAntwoord(b) {
@@ -303,6 +311,14 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
           </div>
         )}
 
+        {/* Die eerste keer dat daar iets in die gesprek is, se ons wat 'n mens
+            hier kan doen. Sonder dit is die knoppies onvindbaar: niks op die
+            skerm wys dat 'n boodskap getik kan word nie. Dit verdwyn sodra hy
+            een keer 'n boodskap oopgemaak het, en kom nooit weer nie. */}
+        {alles.length > 0 && wysWenk && (
+          <div className="vc-wenk">Tik op 'n boodskap om te reageer of te antwoord.</div>
+        )}
+
         {alles.map((b, i) => {
           const myne = b.uid === myUid
           const vorige = alles[i - 1]
@@ -318,7 +334,13 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
               {!myne && nuweSpreker && <div className="vc-naam">{b.naam || 'Iemand'}</div>}
               <div
                 className={`vc-bel${b.hangend ? ' hangend' : ''}${b.misluk ? ' misluk' : ''}${b.vasgespeld ? ' vasgespeld' : ''}`}
-                onClick={() => setOopBoodskap(o => (o === b.id ? null : b.id))}
+                onClick={() => {
+                  setOopBoodskap(o => (o === b.id ? null : b.id))
+                  if (wysWenk) {
+                    setWysWenk(false)
+                    try { localStorage.setItem('vj_chat_wenk_gesien', '1') } catch {}
+                  }
+                }}
               >
                 {/* Waarop hierdie boodskap antwoord. Die aanhaling is 'n
                     afskrif — die oorspronklike kan intussen uitgevee wees, en

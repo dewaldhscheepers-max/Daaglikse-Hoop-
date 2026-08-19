@@ -269,9 +269,23 @@ export default async function handler(req, res) {
 
         await onthouLidmaatskap(fs, uid, groepId, nouISO)
 
+        /* `myNaam` en `myRol` MOET saamkom.
+         *
+         * Sonder hulle stel die skerm `myLid.naam` op '' — en die eerste
+         * boodskap wat hierdie mens stuur, dra geen naam nie en wys as
+         * "Iemand". Dewald: "hoekom staan Nadia se naam nie daar nie. ek wil
+         * weet wie iemand is."
+         *
+         * Dit is die bediener se werk, nie die skerm s'n: die kliënt weet wel
+         * watter naam hy pas getik het, maar 'n naam wat net in 'n skerm se
+         * geheue lewe, is weg by die volgende oopmaak. */
         return res.status(200).json({
           ok: true,
-          groep: groepUit({ id: groepId, naam: naam.waarde, gemeente: gemeente.waarde, kode, eienaar: uid }, 1, vnaam.waarde),
+          groep: {
+            ...groepUit({ id: groepId, naam: naam.waarde, gemeente: gemeente.waarde, kode, eienaar: uid }, 1, vnaam.waarde),
+            myNaam: vnaam.waarde,
+            myRol: 'fasiliteerder',
+          },
         })
       }
 
@@ -323,9 +337,15 @@ export default async function handler(req, res) {
 
         const lede = await ledeVan(fs, groep.id)
         const fasil = lede.find(l => l.rol === 'fasiliteerder')
+        /* Sien die nota by 'skep': sonder `myNaam` wys hierdie mens se eerste
+           boodskap as "Iemand". */
         return res.status(200).json({
           ok: true,
-          groep: groepUit(groep, lede.length, fasil ? fasil.naam : ''),
+          groep: {
+            ...groepUit(groep, lede.length, fasil ? fasil.naam : ''),
+            myNaam: vnaam.waarde,
+            myRol: (bestaande && bestaande.rol) || 'deelnemer',
+          },
         })
       }
 

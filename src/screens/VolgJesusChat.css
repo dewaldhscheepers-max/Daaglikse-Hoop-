@@ -68,6 +68,15 @@
   display: flex; flex-direction: column; gap: 2px;
 }
 
+/* Die wenk by die heel eerste boodskap. Niks op die skerm wys andersins dat 'n
+   boodskap getik kan word nie, en dan is die hartjie en die antwoord
+   onvindbaar. Dit verdwyn sodra 'n mens een boodskap oopgemaak het. */
+.vc-wenk {
+  align-self: center; margin: 2px 0 8px;
+  background: #EFEBFA; border-radius: 999px; padding: 6px 14px;
+  font-size: 12px; color: var(--purple-dark); text-align: center;
+}
+
 .vc-leeg { margin: auto; text-align: center; padding: 30px 20px; }
 .vc-leeg p { margin: 0; font-size: 15px; color: var(--text-muted); }
 .vc-leeg-fyn { margin-top: 6px !important; font-size: 13.5px !important; }

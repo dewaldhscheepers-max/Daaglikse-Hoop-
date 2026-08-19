@@ -186,6 +186,19 @@ is('dit werk', aan.status, 200)
 is('sy is n DEELNEMER, nie n fasiliteerder nie', winkel.get(`vjGroepe/${GID}/lede/maria`).rol, 'deelnemer')
 is('en nou is daar twee lede', aan.groep.aantalLede, 2)
 
+/* ── Die naam MOET saamkom ──
+ *
+ * Sonder `myNaam` stel die skerm `myLid.naam` op '' — en dan dra hierdie mens
+ * se eerste boodskap in die chat geen naam nie en wys as "Iemand". Dewald:
+ * "hoekom staan Nadia se naam nie daar nie. ek wil weet wie iemand is."
+ *
+ * Dit kan nie agterna reggemaak word nie: die reels laat 'n boodskap se naam
+ * nooit herskryf word nie. Dit moet dus REG wees die eerste keer. */
+is('sluitaan gee haar naam terug', aan.groep.myNaam, 'Maria')
+is('en haar rol', aan.groep.myRol, 'deelnemer')
+is('skep gee die stigter se naam terug', skep.groep.myNaam, 'Dewald')
+is('en hy is die fasiliteerder', skep.groep.myRol, 'fasiliteerder')
+
 console.log('\n── Die uid kom uit die TOKEN, nooit uit die liggaam nie ──\n')
 /* Dewald se §15. Iemand stuur 'n ander se uid saam en hoop dit tel. */
 await roep('indringer', { doen: 'sluitaan', kode: KODE, vertoonnaam: 'Indringer', uid: 'dewald', user_id: 'dewald' })

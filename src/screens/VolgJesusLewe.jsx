@@ -125,9 +125,32 @@ export default function VolgJesusLewe({ onClose: opToe }) {
   }
   function naGroep(g) {
     setGroep(g)
-    setMyLid({ uid, naam: g.myNaam || '', rol: g.eienaar === uid ? 'fasiliteerder' : 'deelnemer', status: 'aktief' })
+    setMyLid({
+      uid,
+      naam: g.myNaam || '',
+      rol: g.myRol || (g.eienaar === uid ? 'fasiliteerder' : 'deelnemer'),
+      status: 'aktief',
+    })
     setModus('groep')
     try { localStorage.setItem('vj_modus', 'groep') } catch {}
+
+    /* 'n Vangnet vir 'n naam wat nie saamgekom het nie.
+     *
+     * Die bediener stuur `myNaam` nou saam met 'skep' en 'sluitaan', maar 'n
+     * foon kan 'n ou bundel loop. Sonder 'n naam wys hierdie mens se eerste
+     * boodskap as "Iemand", en dit kan nie agterna reggemaak word nie — die
+     * reels laat 'n boodskap se teks en naam nooit herskryf word nie.
+     *
+     * Dus: kry ons nie 'n naam nie, gaan vra ons hom voordat die mens kan
+     * begin tik. */
+    if (!g.myNaam) {
+      myGroepe().then(r => {
+        const myne = r && r.ok && r.groepe && r.groepe.find(x => x.id === g.id)
+        if (myne && myne.myNaam) {
+          setMyLid(l => (l ? { ...l, naam: myne.myNaam, rol: myne.myRol || l.rol } : l))
+        }
+      }).catch(() => {})
+    }
   }
 
   /* Die ongeleesde telling loop in die agtergrond, sodat die knoppie sy getal
