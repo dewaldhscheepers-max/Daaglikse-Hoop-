@@ -32,6 +32,11 @@ import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import StemOplaai from '../components/StemOplaai'
 import PrentOplaai from '../components/PrentOplaai'
+import { beginOor } from '../data/volgJesusTerugstel'
+import { myGroepe, verwyderLid, verlaatGroep } from '../data/volgJesusGroepApi'
+/* Die lede kom DIREK uit Firestore. 'n Lid mag sy eie groep se lede lees — dit
+   is die reel wat die chat se name laat werk. */
+import { haalLede } from '../data/volgJesusChat'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -405,6 +410,8 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         )}
         <Tellers tellers={tellers} lys={lys} />
 
+        <BeginOor />
+
         {BEWEGINGS.map(b => (
           <div key={b.nommer} className="vj-beweging">
             <div className="vj-beweging-kop">
@@ -704,6 +711,89 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           {besig ? 'Besig…' : 'Stoor'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/* ── Begin heeltemal oor op HIERDIE foon ──
+ *
+ * Dewald: "ek wil dit nou heeltemal oor toets ... reset dit dat ons dit kan
+ * toets PRESIES hoe ander mense dit sien."
+ *
+ * Dit was tot nou onmoontlik. Die EIENAAR van 'n groep mag nie sommer loop nie
+ * (§46) — 'n groep sonder eienaar is 'n groep wat niemand kan regmaak nie — en
+ * daar was geen skerm om 'n ander lid mee te verwyder nie. Die "Verlaat die
+ * groep"-knoppie het dus net geweier, en niks kon aanbeweeg nie.
+ *
+ * Dit staan in die ADMIN en nie in die app nie. 'n Knoppie wat alles uitvee,
+ * hoort nie op 'n skerm waar ses duisend mense hom per ongeluk kan druk nie.
+ *
+ * Twee tikke, want dit vee 'n mens se antwoorde uit en dit is onomkeerbaar. */
+function BeginOor() {
+  const [vra, setVra]       = useState(false)
+  const [besig, setBesig]   = useState(false)
+  const [stap, setStap]     = useState('')
+  const [klaar, setKlaar]   = useState(null)
+
+  async function doen() {
+    setBesig(true); setKlaar(null)
+    const v = await beginOor({
+      stap: setStap,
+      api: { myne: myGroepe, lede: haalLede, verwyder: verwyderLid, verlaat: verlaatGroep },
+    })
+    setStap('')
+    setBesig(false)
+    setKlaar(v)
+  }
+
+  return (
+    <div className="vj-oor">
+      <div className="vj-oor-kop">TOETS DIT SOOS 'N VREEMDE MENS</div>
+      <p>
+        Dit haal jou uit elke VOLG JESUS-groep uit, verwyder die ander lede uit
+        die groepe wat JY lei, en vee alles wat hierdie foon oor die program
+        onthou — jou week, jou merkies en jou geskrewe antwoorde.
+      </p>
+      <p className="vj-oor-fyn">
+        Dit raak net VOLG JESUS. Jou stemboodskappe, Sorg en die speletjies bly
+        soos hulle is.
+      </p>
+
+      {klaar ? (
+        <div className="vj-oor-klaar">
+          <strong>Klaar.</strong>
+          <span>
+            {klaar.groepe} groep{klaar.groepe === 1 ? '' : 'e'} verlaat ·{' '}
+            {klaar.lede} lid{klaar.lede === 1 ? '' : 'de'} verwyder ·{' '}
+            {klaar.sleutels} merkie{klaar.sleutels === 1 ? '' : 's'} uitgevee
+          </span>
+          {klaar.foute.length > 0 && (
+            <ul className="vj-oor-foute">
+              {klaar.foute.map((f, i) => <li key={i}>{f}</li>)}
+            </ul>
+          )}
+          <button className="vj-knop" onClick={() => window.location.reload()}>
+            Herlaai die app
+          </button>
+        </div>
+      ) : vra ? (
+        <div className="vj-oor-vra">
+          <strong>Is jy seker?</strong>
+          <span>Dit kan nie teruggedraai word nie.</span>
+          <div className="vj-oor-knoppe">
+            <button className="vj-knop-los" onClick={() => setVra(false)} disabled={besig}>
+              Nee, los dit
+            </button>
+            <button className="vj-oor-doen" onClick={doen} disabled={besig}>
+              {besig ? (stap || 'Besig…') : 'Ja, begin heeltemal oor'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="vj-oor-begin" onClick={() => setVra(true)}>
+          ↺  Begin VOLG JESUS heeltemal oor
+        </button>
+      )}
     </div>
   )
 }

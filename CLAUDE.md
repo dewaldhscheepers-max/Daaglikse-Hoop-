@@ -38,6 +38,8 @@ node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
 node src/data/volgJesusNooi.toets.mjs         # die uitnodigingskakel, 56 toetse
 node src/data/prentPad.toets.mjs              # waar 'n prent gehaal word om te deel, 11 toetse
+node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 toetse
+node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
 node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
