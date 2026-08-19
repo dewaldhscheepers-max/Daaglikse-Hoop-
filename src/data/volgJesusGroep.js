@@ -188,7 +188,22 @@ export function ongeleesWoorde(n) {
 /* ── Die uitnodiging ──
  *
  * §21. Die kode staan in die teks EN in die skakel: 'n mens plak dit soms in 'n
- * plek waar skakels nie werk nie, en dan moet die kode steeds oorleef. */
+ * plek waar skakels nie werk nie, en dan moet die kode steeds oorleef.
+ *
+ * ── Waarom daar TWEE paaie in staan ──
+ *
+ * Dewald het die eerste uitnodiging gestuur en dadelik gevra: "wat van die
+ * mense wat reeds die app op hulle fone het ... nou maak dit die blaaier oop."
+ *
+ * Hy is reg, en dit is nie iets wat 'n mens met kode kan oplos nie. 'n Skakel
+ * in WhatsApp gaan na die blaaier. Android kan 'n geïnstalleerde app die
+ * skakel laat vang, maar dit hang af van die foon, van hoe die app geïnstalleer
+ * is, en van 'n instelling wat die meeste mense nooit sien nie. Ons kan dit nie
+ * belowe nie.
+ *
+ * Wat WEL altyd werk, is die kode. Dus staan albei hier: die skakel vir wie die
+ * app nog nie het nie, en die kode vir wie hom wel het. Niemand kom by 'n
+ * doodloopstraat uit nie. */
 export function uitnodiging(groep, basis = 'https://dewaldscheepers.com') {
   const naam = String((groep && groep.naam) || '').trim() || 'ons groep'
   const kode = String((groep && groep.kode) || '').trim()
@@ -201,7 +216,9 @@ export function uitnodiging(groep, basis = 'https://dewaldscheepers.com') {
     '',
     'Ons stap saam om Jesus beter te leer ken en Hom in ons werklike lewe te volg.',
     '',
-    `Sluit hier aan: ${skakel}`,
+    `Het jy Daaglikse Hoop reeds op jou foon? Maak dit oop, druk VOLG JESUS, kies "Sluit aan by 'n groep" en tik ${kode}.`,
+    '',
+    `Het jy dit nog nie? Sluit hier aan: ${skakel}`,
   ].join('\n')
 }
 

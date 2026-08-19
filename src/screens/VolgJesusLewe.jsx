@@ -27,6 +27,7 @@ import { useEffect, useState, useCallback } from 'react'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import { kiesWeek, binnekort } from '../data/volgJesusOpenbaar'
+import { leesNooi, veeNooi } from '../data/volgJesusNooi'
 import { tel } from '../data/volgJesusTel'
 import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
 import {
@@ -49,7 +50,11 @@ function skryfMyWeek(n) {
   try { localStorage.setItem(MY_WEEK, String(n)) } catch {}
 }
 
-export default function VolgJesusLewe({ onClose }) {
+export default function VolgJesusLewe({ onClose: opToe }) {
+  /* Maak 'n mens VOLG JESUS toe, is die uitnodiging klaar — anders spring hy by
+     die volgende herlaai weer op 'n aansluitskerm uit. */
+  const onClose = useCallback(() => { veeNooi(); if (opToe) opToe() }, [opToe])
+
   const [lys, setLys]     = useState(null)     /* { klaar, weke: [...] } */
   const [fout, setFout]   = useState(false)
   const [week, setWeek]   = useState(null)     /* die oop week se volle inhoud */
@@ -69,6 +74,9 @@ export default function VolgJesusLewe({ onClose }) {
   /* null | 'kies' | 'mense' | 'kode' | 'skep' | 'gereed' | 'pastoor' | 'alleen'
      | 'instellings' | 'chat' */
   const [groepBlad, setGroepBlad] = useState(null)
+  /* Die kode uit 'n uitnodigingskakel. Dit vul die aansluitskerm in sodat 'n
+     mens hom nie hoef oor te tik nie — die skakel se hele punt. */
+  const [nooiKode, setNooiKode] = useState('')
   const [chatAanset, setChatAanset] = useState('')
 
   useEffect(() => {
@@ -96,6 +104,17 @@ export default function VolgJesusLewe({ onClose }) {
         }
       }
       setModus(gekies === 'solo' ? 'solo' : 'onbeslis')
+
+      /* 'n Uitnodiging uit 'n skakel. Dit kom NA die groep-navraag hierbo, en
+         dit is met opset: wie reeds in 'n groep is, word nie na 'n
+         aansluitskerm gestuur nie — daardie `return` hierbo vang hom eerste.
+         Iemand wat 'n tweede uitnodiging kry terwyl hy klaar hoort, moet by
+         sy mense uitkom, nie by 'n vorm nie. */
+      const genooi = leesNooi()
+      if (genooi) {
+        setNooiKode(genooi)
+        setGroepBlad('kode')
+      }
     })()
     return () => { dood = true }
   }, [])
@@ -190,8 +209,13 @@ export default function VolgJesusLewe({ onClose }) {
                             opPastoor={() => setGroepBlad('pastoor')} opSolo={() => setGroepBlad('alleen')} />,
     alleen:  <VoorJyAlleenBegin opGroep={() => setGroepBlad('skep')}
                                 opPastoor={() => setGroepBlad('pastoor')} opVoort={kiesSolo} />,
-    kode:    <SluitAan opTerug={() => setGroepBlad('mense')}
-                       opKlaar={g => { naGroep(g); setGroepBlad(null) }} />,
+    /* `veeNooi` loop wanneer die mens die skerm VERLAAT, nie wanneer hy hom
+       sien nie. Vee ons dit by die eerste teken, dan is die uitnodiging weg
+       sodra die diensketter die blad een keer herlaai — presies die fout wat
+       die steunblad gehad het, en 'n mens uit WhatsApp is juis die geval waar
+       daardie herlaai gebeur. */
+    kode:    <SluitAan beginKode={nooiKode} opTerug={() => { veeNooi(); setGroepBlad('mense') }}
+                       opKlaar={g => { veeNooi(); naGroep(g); setGroepBlad(null) }} />,
     skep:    <BeginGroep opTerug={() => setGroepBlad('mense')}
                          opKlaar={g => { naGroep(g); setGroepBlad('gereed') }} />,
     gereed:  groep ? <GroepGereed groep={groep} opKlaar={() => setGroepBlad(null)} /> : null,

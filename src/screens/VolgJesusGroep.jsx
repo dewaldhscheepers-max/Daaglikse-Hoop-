@@ -264,7 +264,24 @@ export function GroepGereed({ groep, opKlaar }) {
         KOPIEER KODE
       </button>
       {nota && <p className="vg-nota">{nota}</p>}
-      <button className="vg-stil" onClick={opKlaar}>Ek sal later mense nooi</button>
+
+      {/* Die pad vorentoe.
+       *
+       * Hier het "Ek sal later mense nooi" gestaan, en dit was die ENIGSTE
+       * uitgang. Dewald het mense genooi en toe voor 'n skerm gesit met net
+       * een deur wat sê hy het nog nie gedoen wat hy pas gedoen het nie:
+       * "ek het mense genooi ... wat nou .... geen verdere instruksies."
+       *
+       * 'n Skerm moet altyd sê wat die volgende ding is. Hierdie sin geld of
+       * hy genooi het of nie — die groep bly staan, en die kode werk môre nog
+       * net so goed. */}
+      <button className="vg-stil" onClick={opKlaar}>
+        Gaan voort na die week →
+      </button>
+      <p className="vg-fyn vg-fyn-onder">
+        Jou groep bly staan. Wie ook al later met <strong>{groep.kode}</strong>
+        {' '}aansluit, kom by julle uit — jy hoef nie hier te wag nie.
+      </p>
     </div>
   )
 }

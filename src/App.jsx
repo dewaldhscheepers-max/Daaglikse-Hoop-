@@ -44,6 +44,7 @@ import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
 import VolgJesusLewe from './screens/VolgJesusLewe'
+import { kodeUitAdres, stoorNooi, leesNooi } from './data/volgJesusNooi'
 import BidVirMy from './components/BidVirMy'
 import { idUitPad } from './data/gebedDeel'
 import './App.css'
@@ -946,6 +947,30 @@ export default function App() {
     function onOpen() { setShowVolgJesus(true) }
     window.addEventListener('open-volg-jesus', onOpen)
     return () => window.removeEventListener('open-volg-jesus', onOpen)
+  }, [])
+
+  /* ── 'n Uitnodiging na 'n groep ──
+   *
+   *   /go/volg-jesus/join?kode=DA4055
+   *
+   * Dewald het die eerste uitnodiging op WhatsApp gestuur, en toe lees NIKS
+   * daardie kode nie: 'n mens het geklik en op die gewone tuisblad geland.
+   * Die kode is gemaak, die skakel is gebou, die groep het bestaan — en die
+   * een ding wat moes gebeur, het nêrens gestaan nie.
+   *
+   * Die kode gaan in sessionStorage voor ons die adresbalk skoonmaak. Presies
+   * die les van die steunblad hierbo: die diensketter herlaai die blad by 'n
+   * eerste besoek wanneer daar 'n nuwe weergawe is, en 'n bedoeling wat net in
+   * React se toestand lê, oorleef dit nie. */
+  useEffect(() => {
+    try {
+      const kode = kodeUitAdres(window.location.pathname, window.location.search)
+      if (kode) {
+        stoorNooi(kode)
+        window.history.replaceState({}, '', '/')
+      }
+      if (leesNooi()) setShowVolgJesus(true)
+    } catch {}
   }, [])
 
   // ── Bybel ──
