@@ -301,7 +301,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             Dit staan NET BO die kinderboeke, want dit is die ander ding wat 'n
             mens hier gratis kry. Wys niks as daar niks gepubliseer is nie —
             die hele besluit staan in VolgJesusKaart.jsx. */}
-        <div className="vj-kaart-plek">
+        <div className="vj-kaart-meer">
           <VolgJesusKaart />
         </div>
 

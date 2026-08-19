@@ -919,3 +919,11 @@
   color: var(--text-muted);
   margin: 2px 0 4px;
 }
+
+/* ── Die VOLG JESUS-kaart op die e-boekblad ──
+   `.meer-body` gee die kant-spasie (padding: 20px 16px) en elke kaart dra sy eie
+   `margin-bottom: 16px`. Die kaart het aanvanklik Luister se `.vj-kaart-plek`
+   gebruik, wat NOG 16px aan elke kant bygesit het — hy was smaller as die res —
+   en niks onder nie, dus het hy teen die kinderboeke gedruk. Dewald: "die spasie
+   hier is ook nie reg nie ... lyk nie soos ander nie." */
+.vj-kaart-meer { margin: 0 0 16px; }

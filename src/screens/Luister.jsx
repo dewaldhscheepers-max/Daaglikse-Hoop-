@@ -1191,25 +1191,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
       </div>
 
 
-      {nlState !== 'done' && <div className="luister-newsletter">
-        <div className="nl-text">
-          <span className="nl-desc">Ontvang elke week 'n e-pos vol hoop.</span>
-        </div>
-          <form className="nl-form" onSubmit={handleNewsletterSignup}>
-            <input
-              className="nl-input"
-              type="email"
-              placeholder="jou e-posadres"
-              value={nlEmail}
-              onChange={e => setNlEmail(e.target.value)}
-              disabled={nlState === 'loading'}
-            />
-            <button className="nl-btn" type="submit" disabled={nlState === 'loading'}>
-              {nlState === 'loading' ? '...' : 'INSKRYF'}
-            </button>
-          </form>
-        {nlState === 'error' && <div className="nl-error">Probeer weer.</div>}
-      </div>}
 
       <div className="luister-body">
 
@@ -1364,6 +1345,40 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         )}
 
         <DonationCard />
+        {/* ── Die e-pos ──
+         *
+         * Dit het DIREK onder VOLG JESUS gestaan, rand-tot-rand, en Dewald het
+         * dit reg gelees: "die epos is te teen aan die program ... ek weet nie
+         * of die epos op die regte plek is nie."
+         *
+         * Drie dinge was verkeerd. Die pers band het aan die program se kaart
+         * geraak en dus gelyk of 'n mens vir die PROGRAM inteken. Twee versoeke
+         * rug teen rug maak albei swakker. En die e-pos is die swakste kanaal —
+         * die oggendkennisgewing doen sy werk klaar — met die tweede sterkste
+         * plek op die blad.
+         *
+         * Dit staan nou hier onder, by die ander "bly in kontak"-dinge, en dit
+         * lyk soos die res van die blad in plaas van 'n advertensie. */}
+        {nlState !== 'done' && (
+          <div className="luister-newsletter">
+            <span className="nl-desc">Ontvang elke week ’n e-pos vol hoop.</span>
+            <form className="nl-form" onSubmit={handleNewsletterSignup}>
+              <input
+                className="nl-input"
+                type="email"
+                placeholder="jou e-posadres"
+                value={nlEmail}
+                onChange={e => setNlEmail(e.target.value)}
+                disabled={nlState === 'loading'}
+              />
+              <button className="nl-btn" type="submit" disabled={nlState === 'loading'}>
+                {nlState === 'loading' ? '…' : 'INSKRYF'}
+              </button>
+            </form>
+            {nlState === 'error' && <div className="nl-error">Probeer weer.</div>}
+          </div>
+        )}
+
         <SocialLinks />
 
       </div>

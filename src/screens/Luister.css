@@ -771,12 +771,19 @@
 
 
 /* ── Newsletter signup ── */
+/* ── Die e-pos ──
+   Dit was 'n pers band wat rand-tot-rand oor die blad gesny het, en dit was die
+   enigste ding op die skerm wat so gelyk het — daarom het dit soos 'n
+   advertensie gelees. Nou is dit 'n kaart soos die res. */
 .luister-newsletter {
-  background: #5C4E8E;
-  padding: 10px 16px 12px;
+  background: #F3F0FA;
+  border: 1px solid #E2DBF3;
+  border-radius: 16px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .nl-text {
@@ -791,9 +798,10 @@
 }
 
 .nl-desc {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--purple-dark, #2E2757);
 }
 
 .nl-form {
@@ -803,33 +811,38 @@
 
 .nl-input {
   flex: 1;
-  padding: 8px 10px;
-  border-radius: 7px;
-  border: 1px solid rgba(255,255,255,0.2);
-  font-size: 13px;
-  background: rgba(255,255,255,0.12);
-  color: #fff;
+  padding: 12px 13px;
+  border-radius: 11px;
+  border: 1px solid #DCD3F0;
+  /* 16px, want onder 16px zoem iOS Safari die hele blad in sodra 'n mens die
+     veld raak. */
+  font-size: 16px;
+  background: #fff;
+  color: var(--text, #2A2438);
   outline: none;
   -webkit-appearance: none;
   min-width: 0;
 }
 
-.nl-input::placeholder { color: rgba(255,255,255,0.45); }
-.nl-input:focus { border-color: rgba(255,255,255,0.5); }
+.nl-input::placeholder { color: #9A93AE; }
+.nl-input:focus { border-color: #B9A8DC; }
 
 .nl-btn {
-  background: #fff;
-  color: #5C4E8E;
+  background: #2E2757;
+  color: #fff;
   border: none;
-  border-radius: 7px;
-  padding: 8px 12px;
-  font-size: 11px;
+  border-radius: 11px;
+  padding: 12px 15px;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
+.nl-btn:active { background: #1C1740; }
+.nl-btn:disabled { background: #CFC7E4; }
 
 .nl-thanks {
   font-size: 12px;
@@ -981,4 +994,7 @@
    Dieselfde marges as .sorg-deur daaronder, sodat die drie blokke onder die
    speler op een lyn staan. Die kaart self bring sy eie hoogte en kleur —
    sien VolgJesusKnoppie.css. */
-.vj-kaart-plek { margin: 16px 16px 0; }
+/* Die VOLG JESUS-kaart op Luister. Onder is daar LUG: dit was die enigste
+   versoek op die blad wat aan die volgende blok geraak het, en twee versoeke
+   wat mekaar aanraak, lyk soos een. */
+.vj-kaart-plek { margin: 16px 16px 20px; }
