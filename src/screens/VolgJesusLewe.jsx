@@ -119,8 +119,12 @@ export default function VolgJesusLewe({ onClose: opToe }) {
     return () => { dood = true }
   }, [])
 
+  /* Die mens het GEKIES: alleen of saam. Dit is die oomblik waarop hy die
+     program begin doen, en dit is die enigste getal wat "hoeveel mense" beteken
+     — `begin` tel weke, nie mense nie. Een keer per toestel, ooit. */
   function kiesSolo() {
     setModus('solo'); setGroepBlad(null)
+    tel('doen')
     try { localStorage.setItem('vj_modus', 'solo') } catch {}
   }
   function naGroep(g) {
@@ -132,6 +136,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
       status: 'aktief',
     })
     setModus('groep')
+    tel('doen')
     try { localStorage.setItem('vj_modus', 'groep') } catch {}
 
     /* 'n Vangnet vir 'n naam wat nie saamgekom het nie.

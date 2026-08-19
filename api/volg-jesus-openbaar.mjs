@@ -1,6 +1,6 @@
 /* ── VOLG JESUS, soos die publiek dit sien ──
  *
- *   GET /api/volg-jesus-openbaar          → { klaar, binnekort, weke: [...] }
+ *   GET /api/volg-jesus-openbaar          → { klaar, binnekort, weke: [...], doen }
  *   GET /api/volg-jesus-openbaar?week=1   → { week: {...} }  of  { week: null }
  *
  * Geen geheim. Dit is die eindpunt wat 'n gewone foon roep.
@@ -72,12 +72,39 @@ async function kryToken() {
 const basis = () =>
   `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${VERSAMELING}`
 
+/* ── Hoeveel mense die program DOEN ──
+ *
+ * Een heelgetal, en niks anders van daardie dokument nie. Dewald wil dit op die
+ * e-boekblad by die gratis-weggegee-som tel: elke mens wat VOLG JESUS doen, is
+ * R280 se materiaal wat hy nie betaal het nie.
+ *
+ * Dit is `doen`, nie `begin` nie. `begin` tel WEEK-beginne — dieselfde mens tel
+ * weer wanneer hy Week 2 oopmaak — en 'n mens-telling wat stadig opblaas, is
+ * presies die soort getal wat later soos 'n feit aangehaal word terwyl dit dit
+ * nie is nie. Sien api/_volgJesusTelVelde.js.
+ *
+ * Val dit om, is die antwoord 0 en nie 'n fout nie. Die e-boekblad se getalle
+ * mag nooit op 'n teller wag nie. */
+async function kryDoen(kop) {
+  try {
+    const r = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tellers/volgJesus`,
+      { headers: kop },
+    )
+    if (!r.ok) return 0
+    const j = await r.json()
+    const w = ((j.fields || {}).doen || {}).integerValue
+    const n = Number(w)
+    return Number.isInteger(n) && n >= 0 ? n : 0
+  } catch { return 0 }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET')
     return res.status(405).json({ fout: 'net GET' })
   }
-  res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=600')
+  res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, stale-while-revalidate=600')
 
   let token
   try { token = await kryToken() }
@@ -127,9 +154,10 @@ export default async function handler(req, res) {
       .map(w => ({ weeknommer: Number(w.weeknommer), titel: String(w.titel || '') }))
       .sort((a, b) => a.weeknommer - b.weeknommer)
 
-    return res.status(200).json({ klaar, binnekort: binnekort(nommers), weke })
+    const doen = await kryDoen(kop)
+    return res.status(200).json({ klaar, binnekort: binnekort(nommers), weke, doen })
   } catch (e) {
     console.error('[vj openbaar lys]', e && e.message)
-    return res.status(200).json({ klaar: 0, binnekort: null, weke: [] })
+    return res.status(200).json({ klaar: 0, binnekort: null, weke: [], doen: 0 })
   }
 }

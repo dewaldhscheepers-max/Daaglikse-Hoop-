@@ -30,6 +30,8 @@ export function sleutelVir(ding, week, dag) {
   const okWeek = Number.isInteger(w) && w >= 1 && w <= 52
 
   if (ding === 'oop') return `${VOOR}oop`
+  /* Een keer per TOESTEL, ooit. Nie per week nie — dit is 'n mens-telling. */
+  if (ding === 'doen') return `${VOOR}doen`
   if (ding === 'begin') return okWeek ? `${VOOR}begin_${w}` : ''
   if (ding === 'weekKlaar') return okWeek ? `${VOOR}klaar_${w}` : ''
   if (ding === 'dag') {
@@ -73,7 +75,7 @@ export function tel(ding, week, dag) {
 
   try {
     const lyf = { ding }
-    if (ding !== 'oop') lyf.week = Number(week)
+    if (ding !== 'oop' && ding !== 'doen') lyf.week = Number(week)
     if (ding === 'dag') lyf.dag = Number(dag)
     fetch('/api/volg-jesus-telling', {
       method: 'POST',

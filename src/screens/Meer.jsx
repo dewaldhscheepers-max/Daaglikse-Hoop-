@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { db } from '../firebase'
+import VolgJesusKaart from '../components/VolgJesusKaart'
+import { eboekTotale } from '../data/eboekTotale'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
@@ -108,6 +110,9 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   const [rgCount,             setRgCount]             = useState(null)
   const [liveCount,           setLiveCount]           = useState(null)
   const [liveValue,           setLiveValue]           = useState(null)
+  /* Hoeveel mense VOLG JESUS doen. 0 tot ons weet — dit mag die twee getalle
+     nooit ophou nie. */
+  const [vjDoen,              setVjDoen]              = useState(0)
   const [activeBook,          setActiveBook]          = useState(null)
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
@@ -167,6 +172,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
   useEffect(() => {
     fetchRgCount()
+  }, [])
+
+  /* Hoeveel mense VOLG JESUS doen. Elkeen is R280 se materiaal wat hy nie
+     betaal het nie, en dit tel by dieselfde twee getalle.
+
+     Val dit om, bly dit 0 — die blad se getalle mag nooit op hierdie een wag
+     nie. Sien eboekTotale.js. */
+  useEffect(() => {
+    let dood = false
+    fetch('/api/volg-jesus-openbaar')
+      .then(r => r.json())
+      .then(j => { if (!dood) setVjDoen(Number(j && j.doen) || 0) })
+      .catch(() => { if (!dood) setVjDoen(0) })
+    return () => { dood = true }
   }, [])
 
   // Load liveCount + liveValue from stats/ebooks_given
@@ -234,10 +253,12 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     })
     .filter(Boolean)
 
-  /* Albei bronne moet in wees voordat ons 'n getal wys. */
-  const getalleGereed = rgCount !== null && liveCount !== null && liveValue !== null
-  const totalBooks = getalleGereed ? rgCount + 3000 + liveCount        : null
-  const totalValue = getalleGereed ? rgCount * 110 + 150000 + liveValue : null
+  /* Die som staan in src/data/eboekTotale.js sodat dit getoets kan word. Dit is
+     die getal wat ons aan die wêreld wys, en dit het al een keer 'n fout gehad
+     wat soos 'n feit gelyk het. */
+  const { boeke: totalBooks, waarde: totalValue } =
+    eboekTotale({ rgCount, liveCount, liveValue, vjDoen })
+  const getalleGereed = totalBooks !== null
 
   /* Hou die laaste goeie paar, sodat 'n mens wat terugkom dadelik iets sien
      in plaas van 'n strepie wat dan 'n getal word. */
@@ -270,6 +291,19 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
       <div className="meer-body">
         <DonationCard />
+
+        {/* ── VOLG JESUS ──
+            Dieselfde kaart as op Luister, en dit gaan na dieselfde plek.
+            Dewald: "Volg Jesus moet op die luister nou bladsy wees en op die
+            eboek bladsy. Maak nie saak waar hulle kliek dit gaan na dieselfde
+            page."
+
+            Dit staan NET BO die kinderboeke, want dit is die ander ding wat 'n
+            mens hier gratis kry. Wys niks as daar niks gepubliseer is nie —
+            die hele besluit staan in VolgJesusKaart.jsx. */}
+        <div className="vj-kaart-plek">
+          <VolgJesusKaart />
+        </div>
 
         {/* ── Kinder promo card ── */}
         <div

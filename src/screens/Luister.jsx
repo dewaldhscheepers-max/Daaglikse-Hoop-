@@ -1054,12 +1054,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     setWpBesig(false)
   }
 
-  /* Na Pastorale Sorg. Dieselfde navigasie-gebeurtenis wat BidNou en
-     SorgVorm reeds gebruik. */
-  function naSorg() {
-    window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'sorg' }))
-  }
-
   async function handleListenShare() {
     setListenShareNote(null)
     const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
@@ -1196,26 +1190,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         <VolgJesusKaart />
       </div>
 
-      {/* ── Die deur na Pastorale Sorg ──
-
-          Sorg het presies EEN deur gehad: die oortjie onderaan. Niks het
-          daarheen gewys nie. Die oggendkennisgewing gaan na duisende fone
-          en land HIER, op Luister — die hele gehoor kom elke oggend by die
-          voordeur in en niks het gesê Sorg bestaan nie.
-
-          Dit staan onder die speler omdat 'n mens dit eers ná die boodskap
-          moet sien, nie in plaas daarvan nie.
-
-          EEN reel, en dit moet soos 'n KNOPPIE lyk. Dit was 'n kaart met 'n
-          opskrif en twee reels daaronder, en dit het soos nog 'n blok teks
-          gelyk — 'n mens lees dit en druk dit nie.
-
-          Dit gaan na die Sorg-BLAD, nie na die vorm nie. Iemand wat hier
-          druk, is nuuskierig; hy het nog nie besluit om sy swaarste ding te
-          tik nie. 'n Vorm wat oor sy skerm oopklap, is te vinnig. */}
-      <button className="sorg-deur" onClick={naSorg}>
-        Dra jy iets swaars? Vertel my daarvan →
-      </button>
 
       {nlState !== 'done' && <div className="luister-newsletter">
         <div className="nl-text">

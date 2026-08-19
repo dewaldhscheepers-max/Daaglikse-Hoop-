@@ -33,11 +33,11 @@
 
 /* Die vier dinge wat 'n mens in die program doen. Meer as dit is 'n
    dopgehou-app, nie 'n dissipelskapprogram nie. */
-const GEBEURE = ['oop', 'begin', 'dag', 'weekKlaar']
+const GEBEURE = ['oop', 'doen', 'begin', 'dag', 'weekKlaar']
 
 /* Die totale langs die per-week getalle. Die admin lees die groot prentjie
    hieruit sonder om 52 velde op te tel. */
-const TOTAAL = { oop: 'oop', begin: 'begin', dag: 'dagKlaar', weekKlaar: 'weekKlaar' }
+const TOTAAL = { oop: 'oop', doen: 'doen', begin: 'begin', dag: 'dagKlaar', weekKlaar: 'weekKlaar' }
 
 function heelIn(waarde, van, tot) {
   const n = Number(waarde)
@@ -54,8 +54,18 @@ function velde(lyf) {
   const uit = [TOTAAL[ding]]
 
   /* `oop` is die kaart op Luister. Dit hoort by geen week nie — dit is die
-     mens wat kyk wat dit is. */
-  if (ding === 'oop') return uit
+     mens wat kyk wat dit is.
+
+     `doen` is die mens wat GEKIES het: alleen of saam. Dit is die enigste
+     getal wat "hoeveel mense doen die program" beteken, en dit hoort ook by
+     geen week nie.
+
+     Let op hoe dit van `begin` verskil. `begin` tel WEEK-BEGINNE: dieselfde
+     mens tel weer wanneer hy Week 2 oopmaak, want sy toestel-merkie dra die
+     weeknommer. Vir 'n mens-telling sou dit stadig opblaas, en dit is presies
+     die soort getal wat later soos 'n feit aangehaal word terwyl dit dit nie
+     is nie. */
+  if (ding === 'oop' || ding === 'doen') return uit
 
   const w = heelIn(lyf.week, 1, 52)
   if (w === null) return []
