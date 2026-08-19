@@ -21,6 +21,7 @@
 import { useEffect, useState } from 'react'
 import VolgJesusKnoppie from './VolgJesusKnoppie'
 import { kiesWeek } from '../data/volgJesusOpenbaar'
+import { kaartWeek } from '../data/volgJesusBegin'
 
 export default function VolgJesusKaart() {
   const [weke, setWeke] = useState(null)
@@ -37,24 +38,35 @@ export default function VolgJesusKaart() {
   if (!weke || !weke.length) return null
 
   let myne = 1
+  let modus = ''
+  let klaarDae = []
   try {
     const n = Number(localStorage.getItem('vj_my_week'))
     if (Number.isInteger(n) && n >= 1) myne = n
+    modus = localStorage.getItem('vj_modus') || ''
   } catch {}
 
   const nommers = weke.map(w => w.weeknommer)
   const keuse = kiesWeek(myne, nommers)
 
-  /* Wie reeds begin het, sien sy eie week en "GAAN VOORT". Wie verby die
-     laaste lewende week is, sien ook sy laaste week — nie 'n leë kaart nie;
-     die skerm daarbinne verduidelik dat die volgende een kom. */
+  /* Wie verby die laaste lewende week is, sien ook sy laaste week — nie 'n leë
+     kaart nie; die skerm daarbinne verduidelik dat die volgende een kom. */
   const wys = keuse.nommer || keuse.klaar
   const inligting = weke.find(w => w.weeknommer === wys)
-  const begin = myne <= 1
+
+  try { klaarDae = JSON.parse(localStorage.getItem(`vj_klaar_w${wys}`) || '[]') } catch {}
+
+  /* "BEGIN HIER" of "GAAN VOORT". Dit het aan `vj_my_week` gehang, en daardie
+     getal skuif eers wanneer 'n mens 'n hele WEEK klaarmaak — iemand op Dag 3
+     het dus steeds "BEGIN HIER" gesien. Sien volgJesusBegin.js. */
+  const week = kaartWeek({
+    modus, klaarDae,
+    nommer: wys, titel: (inligting && inligting.titel) || '',
+  })
 
   return (
     <VolgJesusKnoppie
-      week={begin ? null : { nommer: wys, titel: (inligting && inligting.titel) || '' }}
+      week={week}
       opKlik={() => window.dispatchEvent(new CustomEvent('open-volg-jesus'))}
     />
   )
