@@ -65,16 +65,14 @@ export const KONTROLES = [
 
 /* ── Die week se velde ──
  *
- * Uit Punt 3 §45, minus `audio_only`: Dewald het besluit daar is net video.
- * YouTube laat 'n mens self 144p kies, wat minder data gebruik as die app se
- * stemnotas — die laedata-geval bly dus gedek. */
+ * Uit Punt 3 §45. `videoId` staan NIE meer hier nie — sien HOOFBOODSKAP_VELDE
+ * hieronder. */
 export const VERPLIGTE_VELDE = [
   'weeknommer',
   'titel',
   'doel',
   'openingskerm',
   'primereSkrif',
-  'videoId',
   'kernwaarheid',
   'privaatRefleksie',
   'gehoorsaamheidStap',
@@ -132,6 +130,19 @@ export const OPSIONELE_VELDE = [
   'hoofgevaar',
 ]
 
+/* ── Die week se hoofboodskap ──
+ *
+ * Die enjin hang aan die verduideliking: 'n week sonder hoofboodskap is 'n
+ * week met net vrae. Maar dit hoef nie 'n VIDEO te wees nie.
+ *
+ * Week 1 se hoofboodskap is 'n STEMBOODSKAP wat Dewald self opneem en in die
+ * admin oplaai, en dit speel binne die app. Die hek het steeds `videoId`
+ * geeis, en toe kon die week nie publiseer nie al was alles anders reg —
+ * 'n hek wat vra vir 'n ding wat hierdie week doelbewus nie het nie.
+ *
+ * Een van die twee is genoeg. Albei is ook goed. */
+export const HOOFBOODSKAP_VELDE = ['videoId', 'stemboodskapUrl']
+
 export const RISIKO_VLAKKE = ['laag', 'medium', 'hoog']
 
 /* ── Mag hierdie week publiseer? ──
@@ -154,7 +165,15 @@ export function publiseerFoute(week = {}) {
     foute.push('Weeknommer moet 1 tot 52 wees')
   }
 
-  /* Geen video, geen week. Die hele enjin hang aan die verduideliking. */
+  /* Geen hoofboodskap, geen week. Die hele enjin hang aan die verduideliking —
+     maar dit mag 'n video OF 'n stemboodskap wees. */
+  const hetHoofboodskap = HOOFBOODSKAP_VELDE.some(
+    v => week[v] !== undefined && week[v] !== null && String(week[v]).trim() !== '',
+  )
+  if (!hetHoofboodskap) {
+    foute.push('Ontbreek: die week se hoofboodskap — laai ’n stemboodskap op, of gee ’n video-ID')
+  }
+
   if (week.videoId && !geldigeVideoId(week.videoId)) {
     foute.push('Die YouTube-ID lyk nie reg nie')
   }

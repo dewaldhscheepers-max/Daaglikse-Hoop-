@@ -99,6 +99,36 @@ for (const veld of ['titel', 'primereSkrif', 'videoId', 'kernwaarheid', 'gehoors
 }
 is('n veld met net spasies tel as leeg', magPubliseer(heelWeek({ titel: '   ' })), false)
 
+/* ── Die hoofboodskap mag 'n STEMBOODSKAP wees ──
+ *
+ * Week 1 het doelbewus geen video nie — die hoofboodskap is 'n stemboodskap
+ * wat in die app speel. Die hek het steeds `videoId` geeis, en toe kon die
+ * week nie publiseer nie al was alles anders reg. Dit is presies die soort
+ * fout wat 'n mens eers op die dag sien: die toetse het die pad NA die hek
+ * gemeet en nooit gevra of 'n mens by die hek kan uitkom nie. */
+console.log('\n── Die hoofboodskap: video OF stemboodskap ──\n')
+{
+  const stemWeek = heelWeek({ videoId: '', stemboodskapUrl: 'https://x/audio/w1.mp3' })
+  is('n week met NET n stemboodskap mag publiseer', magPubliseer(stemWeek), true)
+  is('en die fout praat nie van n video nie',
+     publiseerFoute(stemWeek).some(f => /video/i.test(f)), false)
+
+  is('n week met NET n video mag ook',
+     magPubliseer(heelWeek({ stemboodskapUrl: '' })), true)
+  is('albei is ook goed',
+     magPubliseer(heelWeek({ stemboodskapUrl: 'https://x/audio/w1.mp3' })), true)
+
+  const geenEen = heelWeek({ videoId: '', stemboodskapUrl: '' })
+  is('maar sonder albei mag dit nie', magPubliseer(geenEen), false)
+  is('en dit se WAT kort',
+     publiseerFoute(geenEen).some(f => /hoofboodskap/.test(f)), true)
+
+  is('n stemboodskap red nie n stukkende video-ID nie',
+     magPubliseer(heelWeek({ videoId: 'nie-n-id!', stemboodskapUrl: 'https://x/a.mp3' })), false)
+  is('net spasies in die stemboodskap tel nie',
+     magPubliseer(heelWeek({ videoId: '', stemboodskapUrl: '   ' })), false)
+}
+
 console.log('\n── Die weeknommer ──\n')
 for (const n of [0, 53, -1, 1.5, 'een', null]) {
   is(`${JSON.stringify(n)} is nie n geldige weeknommer nie`,
