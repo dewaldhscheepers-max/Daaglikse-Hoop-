@@ -27,6 +27,7 @@
 import { useState } from 'react'
 import { geldigeVideoId, ontleedVerwysing } from '../data/volgJesus'
 import { mylpaalVir, biedKontak, antwoordVir } from '../data/volgJesusMylpale'
+import { prentPad } from '../data/prentPad'
 import './VolgJesusWeek.css'
 
 /* Die terugval-name vir die vyf dae.
@@ -383,7 +384,9 @@ function WallpaperKaart({ week }) {
     if (besig) return
     setBesig(true); setNota(null)
     try {
-      const r = await fetch(bron)
+      /* DEUR /api/wallpaper — 'n `fetch` reguit na firebasestorage word deur
+         CORS geblokkeer, en dan deel die knoppie niks. Sien prentPad.js. */
+      const r = await fetch(prentPad(bron))
       const b = r.ok ? await r.blob() : null
       if (!b || !/^image\//.test(b.type) || b.size < 1024) {
         setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')

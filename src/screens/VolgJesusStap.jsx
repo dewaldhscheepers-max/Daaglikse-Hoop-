@@ -31,6 +31,7 @@ import {
 import Stemboodskap from '../components/Stemboodskap'
 import '../components/Stemboodskap.css'
 import { weekSkakel } from '../data/volgJesusNooi'
+import { prentPad } from '../data/prentPad'
 import './VolgJesusStap.css'
 
 const antwoordSleutel = (w, id) => `vj_a_w${w}_${id}`
@@ -522,7 +523,15 @@ function Wallpaper({ bron, week, kaal }) {
     if (besig) return
     setBesig(true); setNota(null)
     try {
-      const r = await fetch(bron)
+      /* DEUR /api/wallpaper, nooit direk nie.
+       *
+       * Die prent WYS uit firebasestorage.googleapis.com, maar 'n `fetch`
+       * daarheen word deur CORS geblokkeer — en 'n mens moet die grepe he om 'n
+       * LEER te deel. Dewald: "hierdie wallpaper wil nie deel nie." Die prent
+       * was al die tyd sigbaar; dit is die HAAL wat misluk het.
+       *
+       * Sien src/data/prentPad.js en api/wallpaper.js. */
+      const r = await fetch(prentPad(bron))
       const b = r.ok ? await r.blob() : null
       if (!b || !/^image\//.test(b.type) || b.size < 1024) {
         setNota('Die prent wou nie laai nie. Hou lank op die prent vas om dit te stoor.')
