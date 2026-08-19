@@ -25,8 +25,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   luister, stuur, veeUit, merkGelees, luisterLeesmerk, nuweKliëntId,
+  reageer, luisterReaksies, speldVas, rapporteer, REAKSIES,
 } from '../data/volgJesusChat'
-import { keurBoodskap, MAKS_BOODSKAP, magUitvee, ongeleesTel } from '../data/volgJesusGroep'
+import {
+  keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, ongeleesTel,
+} from '../data/volgJesusGroep'
 import './VolgJesusChat.css'
 
 /* Die vier vinnige aansette ná die stemboodskap (§40). Hulle vul die kassie —
@@ -41,6 +44,63 @@ export const AANSETTE = [
 const tydWoorde = d => {
   if (!(d instanceof Date) || Number.isNaN(d.getTime())) return ''
   return d.toLocaleTimeString('af-ZA', { hour: '2-digit', minute: '2-digit' })
+}
+
+/* ── Hoeveel boodskappe se reaksies ons lewendig volg ──
+ *
+ * Elke boodskap se reaksies is 'n eie subversameling, en dus 'n eie
+ * luisteraar. Twee honderd luisteraars op een foon is twee honderd oop
+ * strome — dit is presies hoe 'n chat 'n battery opeet.
+ *
+ * Reaksies leef in die HEDE: 'n mens druk 'n hartjie op wat pas gesê is.
+ * Ons volg dus die laaste vyftig, en dit is 'n grens wat 'n mens in die
+ * praktyk nooit raakloop nie. */
+export const REAKSIE_VENSTER = 50
+
+/* Een haak vir al die reaksies, sodat die skerm nie 'n luisteraar per
+   boodskap-komponent hoef te bestuur nie. Gee 'n voorwerp terug:
+   { boodskapId: [{ uid, soort }] }. */
+function useReaksies(groepId, ids) {
+  const [kaart, setKaart] = useState({})
+  const afRef = useRef(new Map())
+  const sleutel = ids.join(',')
+
+  useEffect(() => {
+    if (!groepId) return
+    const wil = new Set(sleutel ? sleutel.split(',') : [])
+    /* Wat nie meer op die lys is nie, se luisteraar gaan af. */
+    for (const [id, af] of afRef.current) {
+      if (!wil.has(id)) { af(); afRef.current.delete(id) }
+    }
+    for (const id of wil) {
+      if (afRef.current.has(id)) continue
+      afRef.current.set(id, luisterReaksies(groepId, id, lys => {
+        setKaart(k => ({ ...k, [id]: lys }))
+      }))
+    }
+  }, [groepId, sleutel])
+
+  /* Die skerm gaan toe: alles af. */
+  useEffect(() => () => {
+    for (const af of afRef.current.values()) af()
+    afRef.current.clear()
+  }, [])
+
+  return kaart
+}
+
+/* Tel per soort, en onthou wat EK gedruk het — die knoppie moet wys dat dit
+   myne is, anders druk 'n mens dit twee keer. */
+export function telReaksies(lys, myUid) {
+  const uit = {}
+  for (const r of REAKSIES) uit[r.soort] = { n: 0, myne: false }
+  if (!Array.isArray(lys)) return uit
+  for (const r of lys) {
+    if (!uit[r.soort]) continue
+    uit[r.soort].n += 1
+    if (r.uid === myUid) uit[r.soort].myne = true
+  }
+  return uit
 }
 
 export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
@@ -59,6 +119,13 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
      visuele geraas — 'n fasiliteerder mag almal s'n modereer, en dan staan dit
      onder die hele gesprek. Nou kom dit op 'n tik. */
   const [oopBoodskap, setOopBoodskap] = useState(null)
+  /* Waarop 'n mens besig is om te antwoord. Die aanhaling staan bo die
+     skryfkassie sodat hy kan sien waarop hy praat. */
+  const [antwoordOp, setAntwoordOp] = useState(null)
+  /* Watter boodskap gerapporteer word. Die bevestiging is 'n aparte tree,
+     want 'n rapport per ongeluk is 'n mens wat 'n ander mens aankla. */
+  const [rapporteerB, setRapporteerB] = useState(null)
+  const [rapportKlaar, setRapportKlaar] = useState(false)
 
   const onderRef = useRef(null)
   const lysRef   = useRef(null)
@@ -111,14 +178,25 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
     if (!gekeur.ok) { if (gekeur.fout) setFout(gekeur.fout); return }
 
     const id = nuweKliëntId()
-    const nou = { id, uid: myUid, naam: myLid.naam, teks: gekeur.waarde, geskep: new Date(), hangend: true }
+    /* Die aanhaling word HIER gemaak en saam met die hangende boodskap gehou.
+       Sou ons hom uit `antwoordOp` lees wanneer die bediener antwoord, is hy
+       reeds skoongevee en dan verloor 'n mislukte boodskap sy antwoord. */
+    const verwys = antwoordOp
+      ? { id: antwoordOp.id, naam: antwoordOp.naam || '', teks: String(antwoordOp.teks || '').slice(0, 120) }
+      : null
+    const nou = {
+      id, uid: myUid, naam: myLid.naam, teks: gekeur.waarde,
+      antwoordOp: verwys, geskep: new Date(), hangend: true,
+    }
     setHangend(h => [...h, nou])
     setTeks('')
     setFout('')
+    setAntwoordOp(null)
     setBesig(true)
 
     const r = await stuur(groepId, {
       uid: myUid, naam: myLid.naam, teks: gekeur.waarde, kliëntId: id,
+      antwoordOp: verwys,
     })
     setBesig(false)
     if (!r.ok) {
@@ -126,12 +204,13 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
       /* Dit bly staan, met 'n knoppie. Die teks is nie weg nie. */
       setHangend(h => h.map(x => x.id === id ? { ...x, misluk: true } : x))
     }
-  }, [groepId, myUid, myLid])
+  }, [groepId, myUid, myLid, antwoordOp])
 
   async function probeerWeer(item) {
     setHangend(h => h.map(x => x.id === item.id ? { ...x, misluk: false } : x))
     const r = await stuur(groepId, {
       uid: myUid, naam: myLid.naam, teks: item.teks, kliëntId: item.id,
+      antwoordOp: item.antwoordOp || null,
     })
     if (!r.ok) setHangend(h => h.map(x => x.id === item.id ? { ...x, misluk: true } : x))
   }
@@ -139,6 +218,38 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
   const alles = [...boodskappe, ...hangend]
   const telling = keurBoodskap(teks).telling || 0
   const naByPerk = telling > MAKS_BOODSKAP - 300
+
+  /* Die vasgespelde boodskap staan bo die gesprek. Is daar meer as een — twee
+     fasiliteerders, of een wat vergeet het — wys ons die LAASTE. 'n Ry banier-
+     tjies bo-aan maak die gesprek toe. */
+  const vasgespeld = boodskappe.filter(b => b.vasgespeld && !b.uitgevee).slice(-1)[0] || null
+
+  /* Net die laaste klompie se reaksies word gevolg. Sien REAKSIE_VENSTER. */
+  const reaksieIds = boodskappe.filter(b => !b.uitgevee).slice(-REAKSIE_VENSTER).map(b => b.id)
+  const reaksies = useReaksies(groepId, reaksieIds)
+
+  function doenReageer(b, soort) {
+    const my = telReaksies(reaksies[b.id], myUid)[soort]
+    /* Dieselfde teken weer beteken "haal dit af". */
+    reageer(groepId, b.id, myUid, my && my.myne ? null : soort)
+  }
+
+  function beginAntwoord(b) {
+    setAntwoordOp({ id: b.id, naam: b.naam || 'Iemand', teks: b.teks || '' })
+    setOopBoodskap(null)
+  }
+
+  async function stuurRapport(rede) {
+    const b = rapporteerB
+    setRapporteerB(null)
+    if (!b) return
+    await rapporteer(groepId, b, myUid, rede)
+    /* Ons sê altyd dankie, ook as die skryf misluk het. 'n Mens wat pas iets
+       gerapporteer het, moet nie 'n foutboodskap kry nie — dan lyk dit of hy
+       weer moet, en dan kla hy 'n mens twee keer aan. */
+    setRapportKlaar(true)
+    setTimeout(() => setRapportKlaar(false), 3200)
+  }
 
   return (
     <div className="vc">
@@ -164,6 +275,24 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
         </div>
       )}
 
+      {/* Wat vasgespeld is, staan bo die gesprek en skuif nie weg nie (§38). */}
+      {vasgespeld && (
+        <div className="vc-vasgespeld">
+          <span className="vc-speld-ikoon" aria-hidden="true">📌</span>
+          <div className="vc-speld-teks">
+            <span className="vc-speld-naam">{vasgespeld.naam || 'Iemand'}</span>
+            <p>{vasgespeld.teks}</p>
+          </div>
+          {magVasspeld(myLid) && (
+            <button
+              className="vc-speld-af"
+              onClick={() => speldVas(groepId, vasgespeld.id, false)}
+              aria-label="Haal af"
+            >×</button>
+          )}
+        </div>
+      )}
+
       <div className="vc-lys" ref={lysRef}>
         {alles.length === 0 && !fout && (
           <div className="vc-leeg">
@@ -181,25 +310,86 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
           if (b.uitgevee) {
             return <div key={b.id} className="vc-uitgevee">Hierdie boodskap is verwyder.</div>
           }
+          const tel = telReaksies(reaksies[b.id], myUid)
+          const enigeReaksie = REAKSIES.some(r => tel[r.soort].n > 0)
+          const oop = !b.hangend && oopBoodskap === b.id
           return (
             <div key={b.id} className={`vc-ry${myne ? ' myne' : ''}`}>
               {!myne && nuweSpreker && <div className="vc-naam">{b.naam || 'Iemand'}</div>}
               <div
-                className={`vc-bel${b.hangend ? ' hangend' : ''}${b.misluk ? ' misluk' : ''}`}
+                className={`vc-bel${b.hangend ? ' hangend' : ''}${b.misluk ? ' misluk' : ''}${b.vasgespeld ? ' vasgespeld' : ''}`}
                 onClick={() => setOopBoodskap(o => (o === b.id ? null : b.id))}
               >
+                {/* Waarop hierdie boodskap antwoord. Die aanhaling is 'n
+                    afskrif — die oorspronklike kan intussen uitgevee wees, en
+                    dan moet die gesprek steeds leesbaar bly. */}
+                {b.antwoordOp && (
+                  <div className="vc-aanhaal">
+                    <span className="vc-aanhaal-naam">{b.antwoordOp.naam || 'Iemand'}</span>
+                    <span className="vc-aanhaal-teks">{b.antwoordOp.teks}</span>
+                  </div>
+                )}
                 <p>{b.teks}</p>
                 <span className="vc-tyd">
+                  {b.vasgespeld && <span className="vc-tyd-speld" aria-label="Vasgespeld">📌 </span>}
                   {b.misluk ? 'Nie gestuur nie' : b.hangend ? 'Stuur…' : tydWoorde(b.geskep)}
                 </span>
               </div>
+
+              {/* Die reaksies wat REEDS daar is. Hulle wys altyd — 'n mens
+                  moet nie eers op 'n boodskap tik om te sien iemand het
+                  saamgebid nie. */}
+              {enigeReaksie && (
+                <div className="vc-reaksies">
+                  {REAKSIES.filter(r => tel[r.soort].n > 0).map(r => (
+                    <button
+                      key={r.soort}
+                      className={`vc-reaksie${tel[r.soort].myne ? ' myne' : ''}`}
+                      onClick={() => doenReageer(b, r.soort)}
+                      aria-label={r.soort === 'hart' ? 'Hartjie' : 'Bid saam'}
+                    >
+                      <span>{r.teken}</span><span className="vc-reaksie-n">{tel[r.soort].n}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {b.misluk && (
                 <button className="vc-weer" onClick={() => probeerWeer(b)}>Probeer weer</button>
               )}
-              {!b.hangend && oopBoodskap === b.id && magUitvee(myLid, b) && (
-                <button className="vc-vee" onClick={() => { veeUit(groepId, b.id); setOopBoodskap(null) }}>
-                  Verwyder hierdie boodskap
-                </button>
+
+              {/* Die knoppies kom op 'n tik. 'n Ry knoppies onder ELKE
+                  boodskap is visuele geraas, en 'n fasiliteerder sien hulle
+                  onder die hele gesprek. */}
+              {oop && (
+                <div className="vc-doen">
+                  {REAKSIES.map(r => (
+                    <button
+                      key={r.soort}
+                      className={`vc-doen-knop${tel[r.soort].myne ? ' aan' : ''}`}
+                      onClick={() => doenReageer(b, r.soort)}
+                    >{r.teken}</button>
+                  ))}
+                  <button className="vc-doen-knop" onClick={() => beginAntwoord(b)}>Antwoord</button>
+                  {magVasspeld(myLid) && (
+                    <button
+                      className="vc-doen-knop"
+                      onClick={() => { speldVas(groepId, b.id, !b.vasgespeld); setOopBoodskap(null) }}
+                    >{b.vasgespeld ? 'Haal af' : 'Speld vas'}</button>
+                  )}
+                  {magUitvee(myLid, b) && (
+                    <button
+                      className="vc-doen-knop weg"
+                      onClick={() => { veeUit(groepId, b.id); setOopBoodskap(null) }}
+                    >Verwyder</button>
+                  )}
+                  {!myne && (
+                    <button
+                      className="vc-doen-knop weg"
+                      onClick={() => { setRapporteerB(b); setOopBoodskap(null) }}
+                    >Rapporteer</button>
+                  )}
+                </div>
               )}
             </div>
           )
@@ -208,6 +398,23 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
       </div>
 
       {fout && <div className="vc-fout">{fout}</div>}
+      {rapportKlaar && (
+        <div className="vc-dankie">
+          Dankie. Ons kyk daarna. Die groep sien nie hierdie rapport nie.
+        </div>
+      )}
+
+      {/* Waarop ek besig is om te antwoord. Dit staan BO die kassie sodat 'n
+          mens sien waarop hy praat voordat hy tik. */}
+      {antwoordOp && (
+        <div className="vc-antwoord-op">
+          <div className="vc-antwoord-teks">
+            <span className="vc-antwoord-naam">Antwoord vir {antwoordOp.naam}</span>
+            <span className="vc-antwoord-fyn">{antwoordOp.teks}</span>
+          </div>
+          <button className="vc-antwoord-af" onClick={() => setAntwoordOp(null)} aria-label="Los">×</button>
+        </div>
+      )}
 
       <div className="vc-skryf">
         <textarea
@@ -232,6 +439,47 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
       {naByPerk && (
         <div className="vc-telling">{telling} / {MAKS_BOODSKAP}</div>
       )}
+
+      {/* Rapporteer. 'n Aparte tree, want 'n rapport per ongeluk is een mens
+          wat 'n ander aankla. Die rede is OPSIONEEL — 'n verpligte veld is
+          hoe 'n mens ophou rapporteer. */}
+      {rapporteerB && (
+        <RapporteerBlad
+          boodskap={rapporteerB}
+          opKanselleer={() => setRapporteerB(null)}
+          opStuur={stuurRapport}
+        />
+      )}
+    </div>
+  )
+}
+
+function RapporteerBlad({ boodskap, opKanselleer, opStuur }) {
+  const [rede, setRede] = useState('')
+  const [besig, setBesig] = useState(false)
+  return (
+    <div className="vc-blad" role="dialog" aria-label="Rapporteer hierdie boodskap">
+      <div className="vc-blad-binne">
+        <h3>Rapporteer hierdie boodskap</h3>
+        <p className="vc-blad-fyn">
+          Dit gaan net na ons toe. Die groep en die persoon self sien dit nie.
+        </p>
+        <div className="vc-blad-aanhaal">{String(boodskap.teks || '').slice(0, 200)}</div>
+        <textarea
+          value={rede}
+          onChange={e => setRede(e.target.value.slice(0, 200))}
+          placeholder="Wil jy vertel wat fout is? (opsioneel)"
+          rows={3}
+        />
+        <div className="vc-blad-knoppe">
+          <button className="vc-blad-los" onClick={opKanselleer} disabled={besig}>Los maar</button>
+          <button
+            className="vc-blad-stuur"
+            disabled={besig}
+            onClick={() => { setBesig(true); opStuur(rede) }}
+          >{besig ? 'Besig…' : 'Rapporteer'}</button>
+        </div>
+      </div>
     </div>
   )
 }

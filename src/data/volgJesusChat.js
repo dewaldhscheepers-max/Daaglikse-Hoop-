@@ -20,8 +20,8 @@
  * dieselfde naam. Twee pogings, een boodskap.
  */
 import {
-  collection, doc, setDoc, updateDoc, onSnapshot,
-  query, orderBy, limit, serverTimestamp, getDocs,
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
+  query, orderBy, limit, serverTimestamp, getDocs, addDoc,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { keurBoodskap } from './volgJesusGroep'
@@ -56,6 +56,7 @@ export function luister(groepId, opNuut, opFout) {
           naam: data.naam || '',
           teks: data.teks || '',
           uitgevee: data.uitgevee === true,
+          vasgespeld: data.vasgespeld === true,
           antwoordOp: data.antwoordOp || null,
           /* 'n Boodskap wat pas gestuur is, het nog nie die bediener se tyd
              nie. Dan is dit NOU — anders spring hy na die bokant van die lys
@@ -127,6 +128,84 @@ export async function veeUit(groepId, boodskapId) {
     return { ok: true }
   } catch {
     return { ok: false, fout: 'Kon nie uitvee nie.' }
+  }
+}
+
+/* ── Reaksies ──
+ *
+ * §38 laat net twee toe: ❤️ en 🙏. Nie ses nie — 'n ry emoji is 'n sosiale
+ * meganisme, en hierdie is 'n gesprek tussen mense wat saam bid.
+ *
+ * Elke mens kry EEN dokument per boodskap, en die dokument se NAAM is sy uid.
+ * Dan kan niemand twee keer tel nie en niemand kan namens iemand anders
+ * reageer nie — die struktuur maak dit onmoontlik, nie 'n telling nie.
+ */
+export const REAKSIES = [
+  { soort: 'hart', teken: '❤️' },
+  { soort: 'bid',  teken: '🙏' },
+]
+
+export async function reageer(groepId, boodskapId, uid, soort) {
+  const pad = doc(db, 'vjGroepe', groepId, 'boodskappe', boodskapId, 'reaksies', uid)
+  try {
+    /* Dieselfde reaksie weer beteken "haal dit af". */
+    if (!soort) { await deleteDoc(pad); return { ok: true } }
+    await setDoc(pad, { soort, geskep: serverTimestamp() })
+    return { ok: true }
+  } catch {
+    return { ok: false }
+  }
+}
+
+/* Al die reaksies vir 'n groep se boodskappe. Dit loop as EEN luisteraar per
+   boodskap sou te veel wees; ons luister eerder op elke boodskap wat op die
+   skerm is. */
+export function luisterReaksies(groepId, boodskapId, op) {
+  if (!groepId || !boodskapId) return () => {}
+  return onSnapshot(
+    collection(db, 'vjGroepe', groepId, 'boodskappe', boodskapId, 'reaksies'),
+    kiek => {
+      const uit = []
+      kiek.forEach(d => uit.push({ uid: d.id, ...(d.data() || {}) }))
+      op(uit)
+    },
+    () => op([]),
+  )
+}
+
+/* ── Vasspeld ──
+ *
+ * Net 'n fasiliteerder, en die reels dwing dit af. 'n Vasgespelde boodskap
+ * staan bo die gesprek — §38 gebruik dit vir die week se kaart. */
+export async function speldVas(groepId, boodskapId, aan) {
+  try {
+    await updateDoc(doc(db, 'vjGroepe', groepId, 'boodskappe', boodskapId), {
+      vasgespeld: !!aan,
+    })
+    return { ok: true }
+  } catch {
+    return { ok: false, fout: 'Kon nie vasspeld nie.' }
+  }
+}
+
+/* ── Rapporteer ──
+ *
+ * Dit gaan NIE na die groep nie. Niemand lees dit terug nie — ook nie die
+ * fasiliteerder nie — want 'n rapport wat die groep kan sien, is 'n rapport
+ * wat niemand gaan indien nie. */
+export async function rapporteer(groepId, boodskap, deur, rede) {
+  try {
+    await addDoc(collection(db, 'vjGroepe', groepId, 'rapporte'), {
+      boodskapId: boodskap.id,
+      boodskapUid: boodskap.uid,
+      boodskapTeks: String(boodskap.teks || '').slice(0, 500),
+      deur,
+      rede: String(rede || '').slice(0, 200),
+      geskep: serverTimestamp(),
+    })
+    return { ok: true }
+  } catch {
+    return { ok: false, fout: 'Kon nie rapporteer nie.' }
   }
 }
 

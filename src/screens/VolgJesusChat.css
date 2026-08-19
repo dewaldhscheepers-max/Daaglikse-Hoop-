@@ -38,6 +38,30 @@
   font-weight: 800; letter-spacing: .5px; cursor: pointer;
 }
 
+/* Wat vasgespeld is. Dit staan bo die gesprek en skuif nie saam nie. */
+.vc-vasgespeld {
+  flex-shrink: 0; display: flex; align-items: flex-start; gap: 9px;
+  padding: 10px 12px; background: #FFF9EE; border-bottom: 1px solid #F0E2C8;
+}
+.vc-speld-ikoon { font-size: 13px; line-height: 1.5; flex-shrink: 0; }
+.vc-speld-teks { flex: 1; min-width: 0; }
+.vc-speld-naam {
+  display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .4px;
+  color: #8A6A22; text-transform: uppercase;
+}
+.vc-speld-teks p {
+  margin: 2px 0 0; font-size: 13px; line-height: 1.5; color: #5C4A18;
+  /* Een reël. 'n Vasgespelde paragraaf maak die gesprek toe. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vc-speld-af {
+  flex-shrink: 0; width: 26px; height: 26px; border: none; border-radius: 8px;
+  background: rgba(0,0,0,.06); color: #8A6A22; font-size: 16px; line-height: 1;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vc-speld-af:active { background: rgba(0,0,0,.14); }
+
 .vc-lys {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
   padding: 14px 12px 6px;
@@ -77,6 +101,59 @@
 .vc-bel.hangend p { color: #7B7590; }
 .vc-bel.misluk { border-color: #E0B4B4; background: #FDF6F6; }
 
+.vc-bel.vasgespeld { border-color: #E8CF9A; background: #FFFCF5; }
+.vc-ry.myne .vc-bel.vasgespeld { background: #F6EFDD; border-color: #E8CF9A; }
+.vc-tyd-speld { font-size: 9.5px; }
+
+/* Die aanhaling BINNE 'n boodskap: waarop hy antwoord. */
+.vc-aanhaal {
+  display: block; margin: 0 0 7px; padding: 6px 9px;
+  border-left: 3px solid #B9A8DC; border-radius: 6px;
+  background: rgba(42,35,80,.05);
+}
+.vc-aanhaal-naam {
+  display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .3px;
+  color: var(--purple-dark);
+}
+.vc-aanhaal-teks {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 2px; font-size: 12.5px; line-height: 1.45; color: #6A6480;
+  word-break: break-word;
+}
+
+/* Die reaksies wat reeds daar is. Twee soorte, nie ses nie (§38). */
+.vc-reaksies { display: flex; gap: 6px; margin: 4px 2px 0; }
+.vc-ry.myne .vc-reaksies { justify-content: flex-end; }
+.vc-reaksie {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid #EDE8F8; border-radius: 999px; background: #fff;
+  padding: 3px 9px; font-family: var(--font-body); font-size: 12px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vc-reaksie.myne { background: #EDE8F8; border-color: #C9B9E8; }
+.vc-reaksie:active { background: #E4DCF6; }
+.vc-reaksie-n {
+  font-size: 11px; font-weight: 800; color: var(--purple-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Die knoppies wat op 'n tik oopgaan. */
+.vc-doen {
+  display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 2px 0;
+}
+.vc-ry.myne .vc-doen { justify-content: flex-end; }
+.vc-doen-knop {
+  border: 1px solid #E2DAF0; border-radius: 999px; background: #fff;
+  padding: 6px 12px; font-family: var(--font-body); font-size: 12px;
+  font-weight: 700; color: var(--purple-dark);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vc-doen-knop:active { background: #EDE8F8; }
+.vc-doen-knop.aan { background: #EDE8F8; border-color: #C9B9E8; }
+.vc-doen-knop.weg { color: #8A3A3A; border-color: #E8D2D2; }
+.vc-doen-knop.weg:active { background: #FBEEEE; }
+
 .vc-weer, .vc-vee {
   background: none; border: none; padding: 4px 10px;
   font-family: var(--font-body); font-size: 11.5px; font-weight: 700;
@@ -94,6 +171,79 @@
   flex-shrink: 0; background: #FDF6F6; border-top: 1px solid #E0B4B4;
   padding: 10px 14px; font-size: 13px; line-height: 1.5; color: #8A3A3A;
 }
+
+.vc-dankie {
+  flex-shrink: 0; background: #F2F8F2; border-top: 1px solid #CADFC8;
+  padding: 10px 14px; font-size: 13px; line-height: 1.5; color: #35592F;
+}
+
+/* Waarop ek antwoord. Dit sit bo die kassie. */
+.vc-antwoord-op {
+  flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: #F6F3FC; border-top: 1px solid #EDE8F8;
+}
+.vc-antwoord-teks {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  border-left: 3px solid #B9A8DC; padding-left: 9px;
+}
+.vc-antwoord-naam {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .3px;
+  color: var(--purple-dark);
+}
+.vc-antwoord-fyn {
+  font-size: 12.5px; color: #6A6480; margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vc-antwoord-af {
+  flex-shrink: 0; width: 28px; height: 28px; border: none; border-radius: 8px;
+  background: rgba(42,35,80,.08); color: var(--purple-dark);
+  font-size: 17px; line-height: 1; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vc-antwoord-af:active { background: rgba(42,35,80,.18); }
+
+/* Die rapport-blad. */
+.vc-blad {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(20,16,40,.55);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.vc-blad-binne {
+  width: 100%; max-width: 520px; box-sizing: border-box;
+  background: var(--bg, #FAF7F2); border-radius: 18px 18px 0 0;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+}
+.vc-blad-binne h3 {
+  margin: 0 0 6px; font-family: var(--font-heading, var(--font-body));
+  font-size: 17px; color: var(--text);
+}
+.vc-blad-fyn { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+.vc-blad-aanhaal {
+  border-left: 3px solid #E0B4B4; background: #fff; border-radius: 8px;
+  padding: 9px 11px; margin-bottom: 12px;
+  font-size: 13.5px; line-height: 1.5; color: #55506A;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 110px; overflow: hidden;
+}
+.vc-blad-binne textarea {
+  width: 100%; box-sizing: border-box; resize: none;
+  border: 1px solid #E2DAF0; border-radius: 12px; padding: 11px 13px;
+  font-size: 16px; line-height: 1.45; font-family: var(--font-body);
+  color: var(--text); background: #fff; -webkit-appearance: none;
+}
+.vc-blad-binne textarea:focus { outline: none; border-color: #B9A8DC; }
+.vc-blad-knoppe { display: flex; gap: 10px; margin-top: 14px; }
+.vc-blad-los, .vc-blad-stuur {
+  flex: 1; border: none; border-radius: 12px; padding: 13px 10px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 800;
+  letter-spacing: .5px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vc-blad-los { background: #E8E2F2; color: var(--purple-dark); }
+.vc-blad-los:active { background: #DAD1EC; }
+.vc-blad-stuur { background: #8A3A3A; color: #fff; }
+.vc-blad-stuur:active { background: #6E2C2C; }
+.vc-blad-stuur:disabled, .vc-blad-los:disabled { opacity: 1; background: #D8D0EC; color: #fff; }
 
 /* Die skryfkassie. Dit sit onder en die lys skuif bo hom — die klawerbord
    mag nooit die laaste boodskap toemaak nie. */

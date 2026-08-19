@@ -282,18 +282,52 @@ service cloud.firestore {
           && request.resource.data.geskep == request.time
           && request.resource.data.uitgevee == false;
 
-        /* Verander mag NET uitvee wees, en net jou eie — of die fasiliteerder
-           s'n, wat sy eie groep modereer. Die teks self word nooit herskryf
-           nie: 'n gesprek waarin woorde agterna verander, is nie 'n gesprek
-           nie. */
+        /* Verander mag NET uitvee of vasspeld wees. Die teks self word nooit
+           herskryf nie: 'n gesprek waarin woorde agterna verander, is nie 'n
+           gesprek nie. */
         allow update: if isLid()
-          && (resource.data.uid == request.auth.uid || isFasiliteerder())
-          && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['uitgevee', 'uitgeveeOp'])
-          && request.resource.data.uitgevee == true;
+          && (
+            /* Uitvee: jou eie, of die fasiliteerder wat modereer. */
+            (
+              (resource.data.uid == request.auth.uid || isFasiliteerder())
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['uitgevee', 'uitgeveeOp'])
+              && request.resource.data.uitgevee == true
+            )
+            ||
+            /* Vasspeld: NET die fasiliteerder. 'n Vasgespelde boodskap staan bo
+               die hele gesprek, en 'n deelnemer wat dit kan doen, kan die groep
+               se aandag kaap. */
+            (
+              isFasiliteerder()
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['vasgespeld'])
+            )
+          );
 
         // Niks word ooit werklik vernietig nie — dan kan 'n mens nie modereer.
         allow delete: if false;
+
+        /* ── Reaksies ──
+           Een dokument per mens per boodskap, en die dokumentNAAM is sy uid.
+           Dan kan niemand namens iemand anders reageer nie, en niemand kan twee
+           keer tel nie — die struktuur maak dit onmoontlik, nie 'n telling nie. */
+        match /reaksies/{uid} {
+          allow read: if isLid();
+          allow create, update: if isLid()
+            && request.auth.uid == uid
+            && request.resource.data.soort in ['hart', 'bid'];
+          allow delete: if isLid() && request.auth.uid == uid;
+        }
+      }
+
+      /* ── Rapporte ──
+         'n Lid rapporteer; NIEMAND lees dit terug nie, ook nie die
+         fasiliteerder nie. Dit gaan na Dewald deur die admin, want 'n rapport
+         wat die groep kan lees, is 'n rapport wat niemand gaan indien nie. */
+      match /rapporte/{id} {
+        allow create: if isLid() && request.resource.data.deur == request.auth.uid;
+        allow read, update, delete: if false;
       }
 
       /* Jou eie leesmerk. Net joune, en dit kan niks anders raak nie. */
