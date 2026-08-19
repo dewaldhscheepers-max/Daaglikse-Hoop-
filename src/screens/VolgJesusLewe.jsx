@@ -252,12 +252,37 @@ export default function VolgJesusLewe({ onClose: opToe }) {
        kaart op Luister ook nie — maar 'n leë skerm is nie 'n antwoord nie. */
     binne = <div className="vjl-stil">Die program kom binnekort.</div>
   } else if (keuse.wag) {
+    /* ── "Jy is op datum" ──
+     *
+     * Hierdie skerm wys wanneer die toestel se `vj_my_week` VERBY die laaste
+     * gepubliseerde week staan. Dit is reg vir iemand wat die week klaargemaak
+     * het — en 'n muur vir iemand vir wie dit per ongeluk gebeur het.
+     *
+     * Dewald se vrou het dit gesien sonder om Week 1 gedoen te hê: "dit sê op
+     * my vrou ook dat alles op datum is en week een klaar. nee man."
+     *
+     * Twee dinge het dit 'n muur gemaak:
+     *
+     *   1. die sin het GESE sy het alles gedoen. Die app weet dit nie — dit
+     *      weet net wat op die toestel staan. Nou se dit wat dit werklik weet;
+     *   2. "Gaan terug na Week N" het net die skerm verander. By die volgende
+     *      oopmaak was sy weer hier, want die merkie op die toestel het bly
+     *      staan. 'n Pad terug wat nie hou nie, is geen pad nie.
+     */
+    const terug = () => {
+      setNommer(keuse.klaar)
+      skryfMyWeek(keuse.klaar)
+      /* Ook die plek BINNE daardie week. Iemand wat hier druk, se die rekord is
+         verkeerd — dan help dit hom nie om by "VANDAG · DAG 5" uit te kom nie.
+         Sy geskrewe antwoorde bly staan; net die plek gaan terug. */
+      try { localStorage.removeItem(`vj_plek_w${keuse.klaar}`) } catch {}
+    }
     binne = (
       <div className="vjl-wag">
         <div className="vjl-wag-merk">✓</div>
         <h2>Jy is op datum</h2>
         <p className="vjl-wag-lyf">
-          Jy het alles gedoen wat tot dusver hier is.
+          Volgens hierdie foon het jy Week {keuse.klaar} klaargemaak.
         </p>
         {boodskap && (
           <div className="vjl-binnekort">
@@ -265,9 +290,13 @@ export default function VolgJesusLewe({ onClose: opToe }) {
             <p>{boodskap.lyf}</p>
           </div>
         )}
-        <button className="vjl-terugknop" onClick={() => setNommer(keuse.klaar)}>
+        <button className="vjl-terugknop" onClick={terug}>
           Gaan terug na Week {keuse.klaar}
         </button>
+        <p className="vjl-wag-fyn">
+          Klop dit nie? Druk hierbo — dan staan jy weer by Week {keuse.klaar} en
+          kan jy hom van Dag 1 af doen.
+        </p>
       </div>
     )
   } else if (!week) {

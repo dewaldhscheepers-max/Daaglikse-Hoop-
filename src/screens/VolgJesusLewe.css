@@ -97,6 +97,8 @@
   margin: 0 0 10px;
 }
 .vjl-wag-lyf { font-size: 15px; line-height: 1.7; opacity: .92; margin: 0 0 20px; }
+/* Die uitweg vir iemand vir wie hierdie skerm eenvoudig verkeerd is. */
+.vjl-wag-fyn { font-size: 13px; line-height: 1.6; opacity: .72; margin: 12px 0 0; }
 
 .vjl-binnekort {
   background: rgba(0, 0, 0, 0.22);
