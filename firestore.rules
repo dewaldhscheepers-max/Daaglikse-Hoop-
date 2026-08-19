@@ -1,4 +1,30 @@
 rules_version = '2';
+
+/* ── Die reels wat WERKLIK ontplooi is ──
+ *
+ * Op 19 Augustus 2026 is die lewende reels uit die Firebase-konsole gehaal en
+ * teen hierdie leer vergeleke. Hulle het gedryf, en op drie plekke sou 'n
+ * blinde ontplooiing van hierdie leer iets verander het:
+ *
+ *   prayers        — lewendig staan `allow update: if true`; hier het
+ *                    `allow update, delete: if false` gestaan. Ontplooi, sou
+ *                    die gebedsmuur se tellers stilweg opgehou werk het.
+ *   counters       — lewendig is dit heeltemal toe; hier het `read: if true`
+ *                    gestaan.
+ *   preek_versoeke — bestaan lewendig en het glad NIE in hierdie leer gestaan
+ *                    nie. Niks in die kodebasis skryf meer daarheen nie, maar
+ *                    'n reel wat lewendig is, word nie op 'n vermoede
+ *                    weggegooi nie.
+ *
+ * Hierdie leer is nou die lewende weergawe plus die VOLG JESUS-groepe. Verander
+ * jy iets hier, ontplooi dit — en ontplooi jy iets in die konsole, sit dit hier
+ * terug. 'n Leer wat lyk soos die waarheid en dit nie is nie, is erger as geen
+ * leer nie.
+ *
+ * Die blokke wat net `if false` se, verander niks: Firestore weier klaar waar
+ * geen reel pas nie. Hulle staan hier sodat die bedoeling swart op wit is en
+ * niemand hulle later per ongeluk oopmaak nie.
+ */
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -28,15 +54,16 @@ service cloud.firestore {
 
     // Likes — anyone can read and increment, nobody can delete
     match /likes/{id} {
-      allow read:   if true;
-      allow write:  if true;
+      allow read:  if true;
+      allow write: if true;
     }
 
-    // Prayer wall — anyone can read and create, nobody can edit/delete
+    // Prayer wall — anyone can read, create and increment; nobody deletes
     match /prayers/{id} {
       allow read:   if true;
       allow create: if true;
-      allow update, delete: if false;
+      allow update: if true;
+      allow delete: if false;
     }
 
     // Testimonies — anyone can read and create, update only for amenCount/likeCount
@@ -47,9 +74,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Counters — clients can read (for live display), only server writes
+    // Preekversoeke — 'n mens skryf, niemand lees terug nie
+    match /preek_versoeke/{id} {
+      allow write: if true;
+      allow read:  if false;
+    }
+
+    // Counters — server only, both ways
     match /counters/{id} {
-      allow read:  if true;
+      allow read:  if false;
       allow write: if false;
     }
 
@@ -94,11 +127,6 @@ service cloud.firestore {
     // enigste pad in en uit is /api/ark-ranglys, wat met die diensrekening
     // werk, die speler se ID-token verifieer en die lopie op
     // geloofwaardigheid toets voordat 'n punt tel.
-    //
-    // Firestore weier by verstek waar geen reel pas nie, dus is hierdie blok
-    // nie wat die versameling toemaak nie — dit is klaar toe. Dit staan hier
-    // sodat die bedoeling swart op wit is en niemand dit later per ongeluk
-    // oopmaak nie.
     match /arkRanglys/{userId} {
       allow read:  if false;
       allow write: if false;
@@ -112,10 +140,6 @@ service cloud.firestore {
     // verifieer en — anders as die Ark — die hele lopie OORSPEEL met
     // dieselfde enjin voordat 'n punt tel. Die klient stuur nie eens sy
     // puntetelling nie; die bediener bereken dit self.
-    //
-    // Firestore weier klaar waar geen reel pas nie. Hierdie blokke staan
-    // hier sodat die bedoeling swart op wit is en niemand dit later per
-    // ongeluk oopmaak nie.
     match /vfOesmeesters/{userId} {
       allow read:  if false;
       allow write: if false;
@@ -140,10 +164,8 @@ service cloud.firestore {
     // hier aan nie — nie lees nie en nie skryf nie. Die enigste pad in en uit
     // is /api/sorg-*, met die diensrekening en die admin-geheim.
     //
-    // Firestore weier klaar waar geen reel pas nie. Hierdie blokke staan hier
-    // sodat die bedoeling swart op wit is en niemand dit later per ongeluk
-    // oopmaak nie. As iemand ooit 'allow read: if true' hier bo-op sit, lees
-    // die hele internet 'n vrou se beskrywing van haar mishandeling.
+    // As iemand ooit 'allow read: if true' hier bo-op sit, lees die hele
+    // internet 'n vrou se beskrywing van haar mishandeling.
     match /sorg_inkomend/{id} {
       allow read:  if false;
       allow write: if false;
@@ -188,21 +210,19 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Blote getalle: tellers/toestemming en tellers/sorg. Geen naam, geen
-    // toestel-id, niks wat na 'n mens teruglei nie — maar 'n kliënt raak
-    // steeds nie daaraan nie. Hulle word deur die diensrekening geskryf
-    // (api/tel-toestemming.js, api/tel-sorg.js), wat hierdie reels omseil.
-    // Sonder hierdie blok geld dieselfde weiering by verstek; dit staan hier
-    // sodat niemand later dink daar is 'n gaping nie.
     /* VOLG JESUS. Albei versamelings loop NET deur die Vercel-funksies met die
        diensrekening — die kliënt mag nooit direk daaraan raak nie.
 
        volgJesusVersoeke dra mense se name en kontakbesonderhede. 'n Kliënt wat
        dit kon lees, sou 'n lys kry van almal wat gevra het om oor doop te
        praat. */
-    match /volgJesusWeke/{id}    { allow read: if false; allow write: if false; }
+    match /volgJesusWeke/{id}     { allow read: if false; allow write: if false; }
     match /volgJesusVersoeke/{id} { allow read: if false; allow write: if false; }
 
+    // Blote getalle: tellers/toestemming, tellers/sorg, tellers/volgJesus.
+    // Geen naam, geen toestel-id, niks wat na 'n mens teruglei nie — maar 'n
+    // kliënt raak steeds nie daaraan nie. Hulle word deur die diensrekening
+    // geskryf, wat hierdie reels omseil.
     match /tellers/{id} {
       allow read:  if false;
       allow write: if false;
@@ -211,7 +231,7 @@ service cloud.firestore {
     /* ── VOLG JESUS · groepe en groepchat ──────────────────────────────
      *
      * Dit is die EERSTE plek in hierdie kodebasis waar 'n reel vra WIE die
-     * leser is. Alles tot dusver was of heeltemal oop (prayers, notes) of
+     * leser is. Alles hierbo was of heeltemal oop (prayers, notes) of
      * heeltemal toe (sorg_*).
      *
      * Die sekuriteit staan HIER, nie in die UI nie. Dewald se ss50: 'n mens
