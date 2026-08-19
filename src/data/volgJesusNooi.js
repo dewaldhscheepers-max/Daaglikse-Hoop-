@@ -75,8 +75,72 @@ export function kodeUitAdres(pad = '', soek = '') {
   return ROU_KODE.test(skoon) ? skoon : ''
 }
 
+/* ── Deel die week ──────────────────────────────────────────────────────
+ *
+ * Die "Deel die stemboodskap"-knoppie het die KLANKLÊER se adres gestuur —
+ * die rou Firebase-Storage-URL met sy teken in. Dewald het dit vir sy vrou
+ * gestuur en gevra: "wanneer ek die stemboodskap share ... dit moet op die app
+ * oopmaak?"
+ *
+ * Hy is reg, en dit was op drie maniere verkeerd:
+ *
+ *   1. dit maak 'n kaal klanklêer in 'n blaaier oop. Geen program, geen week,
+ *      geen pad na die res toe;
+ *   2. dit gee die Storage-teken vir enigiemand wat die boodskap aanstuur;
+ *   3. dit is 'n lang, lelike adres wat soos gemors lyk in 'n gesprek.
+ *
+ * Nou deel ons 'n skakel na die APP by daardie week. Wie dit oopmaak, land in
+ * VOLG JESUS en die stemboodskap speel daar, saam met alles rondom hom. */
+export function weekSkakel(w, basis = 'https://dewaldscheepers.com') {
+  const n = Number(w)
+  if (!Number.isInteger(n) || n < 1 || n > 52) return `${basis}/go/volg-jesus`
+  return `${basis}/go/volg-jesus?week=${n}`
+}
+
+const WEEK_PAAIE = ['/go/volg-jesus', '/volg-jesus', '/go/vj', '/vj']
+
+/* Gee die weeknommer, of 0. Die pad alleen (sonder ?week=) tel ook — dan maak
+   ons die program net oop by die mens se eie week. */
+export function weekUitAdres(pad = '', soek = '') {
+  let skoonPad = ''
+  try { skoonPad = String(pad || '').toLowerCase().replace(/\/+$/, '') } catch { return 0 }
+  if (!WEEK_PAAIE.includes(skoonPad)) return 0
+
+  let vraag
+  try { vraag = new URLSearchParams(String(soek || '')) } catch { return 0 }
+  const n = Number(vraag.get('week'))
+  /* -1 beteken "maak oop, maar by die mens se eie week". 0 beteken "hierdie is
+     nie 'n VOLG JESUS-skakel nie", en die twee mag nooit deurmekaar raak nie. */
+  if (!Number.isInteger(n) || n < 1 || n > 52) return -1
+  return n
+}
+
 /* ── Die bedoeling, oor 'n herlaai heen ── */
 export const NOOI_SLEUTEL = 'vj_nooi_kode'
+export const WEEK_SLEUTEL = 'vj_nooi_week'
+
+export function stoorWeek(n, berging) {
+  const s = berging || (typeof sessionStorage !== 'undefined' ? sessionStorage : null)
+  if (!s || !n) return false
+  try { s.setItem(WEEK_SLEUTEL, String(n)); return true } catch { return false }
+}
+
+/* Gee 0 (niks gevra nie), -1 (maak oop by die eie week) of 1..52. */
+export function leesWeek(berging) {
+  const s = berging || (typeof sessionStorage !== 'undefined' ? sessionStorage : null)
+  if (!s) return 0
+  try {
+    const n = Number(s.getItem(WEEK_SLEUTEL))
+    if (n === -1) return -1
+    return Number.isInteger(n) && n >= 1 && n <= 52 ? n : 0
+  } catch { return 0 }
+}
+
+export function veeWeek(berging) {
+  const s = berging || (typeof sessionStorage !== 'undefined' ? sessionStorage : null)
+  if (!s) return
+  try { s.removeItem(WEEK_SLEUTEL) } catch {}
+}
 
 export function stoorNooi(kode, berging) {
   const s = berging || (typeof sessionStorage !== 'undefined' ? sessionStorage : null)

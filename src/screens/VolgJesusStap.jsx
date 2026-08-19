@@ -30,6 +30,7 @@ import {
 } from '../data/volgJesusWeek1'
 import Stemboodskap from '../components/Stemboodskap'
 import '../components/Stemboodskap.css'
+import { weekSkakel } from '../data/volgJesusNooi'
 import './VolgJesusStap.css'
 
 const antwoordSleutel = (w, id) => `vj_a_w${w}_${id}`
@@ -324,11 +325,15 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
         {b.kop && <div className="vs-kop">{b.kop}</div>}
         <Kassie id={b.id} prompt={b.prompt} waarde={antwoorde[b.id] || ''} stel={stel} />
         {/* Een deel-geleentheid per dag, nie vyf nie. */}
+        {/* Ons deel die APP se skakel, NOOIT die klanklêer se adres nie.
+            Daardie adres maak 'n kaal lêer in 'n blaaier oop, gee die
+            Storage-teken vir enigiemand wat die boodskap aanstuur, en lyk soos
+            gemors in 'n gesprek. Sien weekSkakel() in volgJesusNooi.js. */}
         {b.deelStem && week.stemboodskapUrl && (
           <button className="vs-deel-stem"
                   onClick={() => deelWoorde(
                     `Luister na hierdie: “${week.titel}” — VOLG JESUS, Week ${w}.`,
-                    week.stemboodskapUrl)}>
+                    weekSkakel(w))}>
             📤  Deel die stemboodskap
           </button>
         )}

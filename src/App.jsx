@@ -44,7 +44,10 @@ import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
 import VolgJesusLewe from './screens/VolgJesusLewe'
-import { kodeUitAdres, stoorNooi, leesNooi } from './data/volgJesusNooi'
+import {
+  kodeUitAdres, stoorNooi, leesNooi,
+  weekUitAdres, stoorWeek, leesWeek,
+} from './data/volgJesusNooi'
 import BidVirMy from './components/BidVirMy'
 import { idUitPad } from './data/gebedDeel'
 import './App.css'
@@ -969,7 +972,14 @@ export default function App() {
         stoorNooi(kode)
         window.history.replaceState({}, '', '/')
       }
-      if (leesNooi()) setShowVolgJesus(true)
+      /* En 'n gedeelde week: /go/volg-jesus?week=1. Dit is wat die
+         "Deel die stemboodskap"-knoppie stuur. */
+      const w = weekUitAdres(window.location.pathname, window.location.search)
+      if (w) {
+        stoorWeek(w)
+        window.history.replaceState({}, '', '/')
+      }
+      if (leesNooi() || leesWeek()) setShowVolgJesus(true)
     } catch {}
   }, [])
 

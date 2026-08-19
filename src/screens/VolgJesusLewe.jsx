@@ -27,7 +27,7 @@ import { useEffect, useState, useCallback } from 'react'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import { kiesWeek, binnekort } from '../data/volgJesusOpenbaar'
-import { leesNooi, veeNooi } from '../data/volgJesusNooi'
+import { leesNooi, veeNooi, leesWeek, veeWeek } from '../data/volgJesusNooi'
 import { tel } from '../data/volgJesusTel'
 import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
 import {
@@ -159,6 +159,17 @@ export default function VolgJesusLewe({ onClose: opToe }) {
 
   /* Die kaart is oopgemaak. Een keer per toestel. */
   useEffect(() => { tel('oop') }, [])
+
+  /* 'n Gedeelde week: /go/volg-jesus?week=1.
+   *
+   * Dit WYS die week; dit skuif nie die mens se eie plek nie. Iemand wat by
+   * Week 3 is en 'n skakel na Week 1 kry, moet Week 1 kan sien sonder om sy
+   * eie vordering te verloor — en `vj_my_week` bly dus onaangeraak. */
+  useEffect(() => {
+    const w = leesWeek()
+    veeWeek()
+    if (w > 0) setNommer(w)
+  }, [])
 
   useEffect(() => {
     let dood = false

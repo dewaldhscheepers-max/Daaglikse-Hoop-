@@ -9,6 +9,7 @@
  */
 import {
   kodeUitAdres, stoorNooi, leesNooi, veeNooi, NOOI_SLEUTEL,
+  weekSkakel, weekUitAdres, stoorWeek, leesWeek, veeWeek,
 } from './volgJesusNooi.js'
 
 let reg = 0, val = 0
@@ -107,6 +108,49 @@ console.log('\n── Sonder n winkel val niks om nie ──\n')
   is('lees gee niks', leesNooi(stukkend), '')
   veeNooi(stukkend)
   is('en vee gooi nie', true, true)
+}
+
+console.log('\n── Deel die week, nie die klanklêer nie ──\n')
+{
+  /* Die knoppie het die rou Firebase-Storage-URL gestuur: 'n kaal klanklêer,
+     die Storage-teken vir enigiemand wat dit aanstuur, en 'n adres wat soos
+     gemors lyk in 'n gesprek. */
+  is('die skakel wys na die APP',
+     weekSkakel(1), 'https://dewaldscheepers.com/go/volg-jesus?week=1')
+  is('week 12', weekSkakel(12), 'https://dewaldscheepers.com/go/volg-jesus?week=12')
+  is('n onmoontlike week val terug op die program self',
+     weekSkakel(99), 'https://dewaldscheepers.com/go/volg-jesus')
+  is('en rommel ook', weekSkakel('nee'), 'https://dewaldscheepers.com/go/volg-jesus')
+  is('daar is NIKS van firebasestorage in nie',
+     /firebasestorage|token=/.test(weekSkakel(1)), false)
+
+  is('en die app lees hom terug', weekUitAdres('/go/volg-jesus', '?week=1'), 1)
+  is('sonder n week: maak oop by die mens se eie week',
+     weekUitAdres('/go/volg-jesus', ''), -1)
+  is('n onmoontlike week tel as "net oopmaak"',
+     weekUitAdres('/go/volg-jesus', '?week=99'), -1)
+  for (const p of ['/volg-jesus', '/go/vj', '/vj']) {
+    is(`${p} werk ook`, weekUitAdres(p, '?week=2'), 2)
+  }
+  is('die tuisblad is NIE n VOLG JESUS-skakel nie', weekUitAdres('/', '?week=1'), 0)
+  is('en die steunblad ook nie', weekUitAdres('/go/steun', ''), 0)
+  is('n aansluitskakel is nie n weekskakel nie',
+     weekUitAdres('/go/volg-jesus/join', '?kode=DA4055'), 0)
+  is('en n weekskakel is nie n aansluitskakel nie',
+     kodeUitAdres('/go/volg-jesus', '?week=1'), '')
+
+  const winkel = {}
+  const berging = {
+    getItem: k => (k in winkel ? winkel[k] : null),
+    setItem: (k, w) => { winkel[k] = String(w) },
+    removeItem: k => { delete winkel[k] },
+  }
+  stoorWeek(3, berging)
+  is('dit oorleef n herlaai', leesWeek(berging), 3)
+  veeWeek(berging)
+  is('en dan is dit weg', leesWeek(berging), 0)
+  stoorWeek(-1, berging)
+  is('"net oopmaak" oorleef ook', leesWeek(berging), -1)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)
