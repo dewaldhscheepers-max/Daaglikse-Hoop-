@@ -477,7 +477,7 @@ export default function VolgJesusAdmin({ geheim = '' }) {
               nie gebou nie. Solank hulle nie bestaan nie, is dit eerliker om
               dit te SÊ as om 'n leë skerm te wys. */}
           {week.weeknommer === 1
-            ? <VolgJesusStap week={week} />
+            ? <VolgJesusStap week={week} voorskou />
             : <VolgJesusWeek week={week} rol={rol} />}
         </div>
         {week.weeknommer === 1 && rol !== 'solo' && (

@@ -52,23 +52,39 @@ export default function VolgJesusStap({
   /* Die groep, as daar een is. 'n Solo-mens gee niks, en dan bestaan die
      groepblokke glad nie. */
   inGroep = false, opPraatMetGroep,
+  /* Die admin se "Sien wat die gebruiker sien". Dit lees en skryf niks. */
+  voorskou = false,
 }) {
   const w = Number(week && week.weeknommer) || 1
 
+  /* ── Die voorskou mag NIE aan die mens se plek raak nie ──
+   *
+   * Die admin se "Sien wat die gebruiker sien" gebruik hierdie einste
+   * komponent, en dit was reg — dit is die enigste eerlike voorskou. Maar dit
+   * het na DIESELFDE localStorage geskryf. Dewald het die vyf dae in die admin
+   * deurgeloop om te kyk of hulle werk, en toe se sy eie app vir hom "VANDAG ·
+   * DAG 5 · Gaan voort waar jy opgehou het" terwyl hy nog nooit 'n dag gedoen
+   * het nie.
+   *
+   * 'n Voorskou lees nie en skryf nie. Hy begin elke keer waar 'n vreemde mens
+   * sou begin, en dit is boonop 'n beter voorskou. */
+  const lewend = !voorskou
+
   const [blad, setBlad] = useState('oop')      /* 'oop' | 'dag' | 'klaar' | 'weekklaar' */
   const [dag, setDag]   = useState(1)
-  const [antwoorde, setAntwoorde] = useState(() => alleAntwoorde(w))
+  const [antwoorde, setAntwoorde] = useState(() => (voorskou ? {} : alleAntwoorde(w)))
   const [hervat, setHervat] = useState(0)
   /* Die week se dae is 'n tweede skerm, nie 'n taaklys op die eerste een nie. */
   const [wysWeek, setWysWeek] = useState(false)
   const bladRef = useRef(null)
 
   useEffect(() => {
+    if (!lewend) { setHervat(0); return }
     try {
       const n = Number(localStorage.getItem(plekSleutel(w)))
       if (Number.isInteger(n) && n >= 1 && n <= 5) setHervat(n)
     } catch {}
-  }, [w])
+  }, [w, lewend])
 
   function boToe() {
     try { window.scrollTo({ top: 0 }) } catch {}
@@ -80,13 +96,13 @@ export default function VolgJesusStap({
   }
 
   function stel(id, waarde) {
-    try { localStorage.setItem(antwoordSleutel(w, id), waarde) } catch {}
+    if (lewend) { try { localStorage.setItem(antwoordSleutel(w, id), waarde) } catch {} }
     setAntwoorde(a => ({ ...a, [id]: waarde }))
   }
 
   function beginDag(n) {
     setDag(n); setBlad('dag')
-    try { localStorage.setItem(plekSleutel(w), String(n)) } catch {}
+    if (lewend) { try { localStorage.setItem(plekSleutel(w), String(n)) } catch {} }
     boToe()
   }
 
