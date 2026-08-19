@@ -36,6 +36,27 @@ import './VolgJesusStap.css'
 const antwoordSleutel = (w, id) => `vj_a_w${w}_${id}`
 const plekSleutel = w => `vj_plek_w${w}`
 
+/* ── Watter dae is KLAAR ──
+ *
+ * Die skerm het net onthou watter dag laas OOPGEMAAK is, en dus het dit ná Dag
+ * 1 steeds "BEGIN WEEK 1" gese. Dewald: "dit se heeltyd begin by week een al
+ * het ek dag een klaar gemaak."
+ *
+ * Klaar is iets anders as oopgemaak, en dit is die ding wat 'n mens wil sien.
+ *
+ * Dit le op die FOON en nerens anders nie. Dewald: "onthou as ek dag een klaar
+ * gemaak het moet dit nie vir al die groep lede so wys nie." Daar is niks om
+ * uit te lek nie — hierdie getal gaan nooit oor 'n draad nie. */
+const klaarSleutel = w => `vj_klaar_w${w}`
+
+function leesKlaar(w) {
+  try {
+    const rou = JSON.parse(localStorage.getItem(klaarSleutel(w)) || '[]')
+    if (!Array.isArray(rou)) return []
+    return rou.filter(n => Number.isInteger(n) && n >= 1 && n <= 5)
+  } catch { return [] }
+}
+
 function alleAntwoorde(w) {
   const uit = {}
   try {
@@ -74,17 +95,14 @@ export default function VolgJesusStap({
   const [blad, setBlad] = useState('oop')      /* 'oop' | 'dag' | 'klaar' | 'weekklaar' */
   const [dag, setDag]   = useState(1)
   const [antwoorde, setAntwoorde] = useState(() => (voorskou ? {} : alleAntwoorde(w)))
-  const [hervat, setHervat] = useState(0)
-  /* Die week se dae is 'n tweede skerm, nie 'n taaklys op die eerste een nie. */
-  const [wysWeek, setWysWeek] = useState(false)
+  const [klaarDae, setKlaarDae] = useState(() => (voorskou ? [] : leesKlaar(w)))
   const bladRef = useRef(null)
 
+  /* Wat op hierdie foon reeds klaar is. Dit is die enigste ding wat die
+     openingsblad nou onthou — "watter dag is laas oopgemaak" het niks beteken
+     en het die skerm laat lieg. */
   useEffect(() => {
-    if (!lewend) { setHervat(0); return }
-    try {
-      const n = Number(localStorage.getItem(plekSleutel(w)))
-      if (Number.isInteger(n) && n >= 1 && n <= 5) setHervat(n)
-    } catch {}
+    setKlaarDae(lewend ? leesKlaar(w) : [])
   }, [w, lewend])
 
   function boToe() {
@@ -110,22 +128,41 @@ export default function VolgJesusStap({
   function klaarMetDag(n) {
     setBlad(n === 5 ? 'weekklaar' : 'klaar')
     boToe()
+    setKlaarDae(oud => {
+      if (oud.includes(n)) return oud
+      const nuwe = [...oud, n].sort((a, b) => a - b)
+      if (lewend) {
+        try { localStorage.setItem(klaarSleutel(w), JSON.stringify(nuwe)) } catch {}
+      }
+      return nuwe
+    })
     if (opDagKlaar) { try { opDagKlaar(n) } catch {} }
   }
 
   const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
-  const vandag = hervat >= 1 ? hervat : 1
-  const vandagInfo = WEEK1_DAE.find(d => d.n === vandag) || WEEK1_DAE[0]
+  const isKlaar = n => klaarDae.includes(n)
+  const hoeveelKlaar = klaarDae.length
 
-  /* ── Die openingsblad: VANDAG EERSTE ────────────────────────────────
+  /* ── Die openingsblad: DIE VYF DAE ──────────────────────────────────
    *
-   * Dewald se §9: "Moenie die gebruiker onmiddellik 'n lys van vyf take wys
-   * nie ... Die hele week mag beskikbaar wees, maar moet nie soos 'n taaklys
-   * in die gebruiker se gesig wees nie."
+   * Hier het 'n VANDAG-kaart gestaan met een knoppie, en die vyf dae was
+   * agter 'n tweede knoppie weggesteek. Dit het uit §9 gekom: moenie 'n mens
+   * met 'n lys take begroet nie.
    *
-   * Die vyf dae het altyd oop gelê onder die knoppie. Dit is 'n taaklys, en 'n
-   * taaklys is die eerste ding wat 'n program soos huiswerk laat voel. Nou
-   * staan VANDAG bo, en die week is 'n tweede, stiller knoppie. */
+   * Dit het in die praktyk stukkend gegaan, want die kaart het geraai watter
+   * dag "vandag" is uit die laas OOPGEMAAKTE dag — en 'n dag wat 'n mens
+   * klaargemaak het, was steeds die dag wat oopgemaak is. Dewald: "dit se
+   * heeltyd begin by week een al het ek dag een klaar gemaak. hoekom vat jy
+   * nie eerder daai knoppie weg en wys al die dae."
+   *
+   * Sy antwoord is beter as 'n slimmer raaiskoot. Die vyf dae staan nou oop,
+   * en wat KLAAR is, dra 'n groen merkie. 'n Mens sien in een oogopslag waar
+   * hy is — en dit is nie 'n taaklys nie, want die app het nog nooit gese wat
+   * jy vandag MOET doen nie. Dit wys net wat jy reeds gedoen het.
+   *
+   * Die merkie le op HIERDIE FOON. Dewald: "onthou as ek dag een klaar gemaak
+   * het moet dit nie vir al die groep lede so wys nie." Dit gaan nooit oor 'n
+   * draad nie — daar is niks om te lek nie. */
   if (blad === 'oop') {
     return (
       <div className="vs">
@@ -136,37 +173,35 @@ export default function VolgJesusStap({
           <p className="vs-privaat">
             🔒 Alles wat jy persoonlik hier skryf, bly privaat.
           </p>
-          {/* VANDAG. Een ding, een knoppie. */}
-          <div className="vs-vandag">
-            <span className="vs-vandag-merk">VANDAG · DAG {vandag}</span>
-            <span className="vs-vandag-titel">{vandagInfo.titel}</span>
-            <span className="vs-vandag-fyn">Dag {vandag} van 5</span>
-          </div>
-
-          <button className="vs-hoofknop" onClick={() => {
-            if (opBegin) { try { opBegin() } catch {} }
-            beginDag(vandag)
-          }}>
-            {hervat > 1 ? 'GAAN VOORT' : `BEGIN WEEK ${w}`}
-          </button>
-          {hervat > 1 && <p className="vs-hervat">Welkom terug. Gaan voort waar jy opgehou het.</p>}
         </div>
 
-        <button className="vs-week-knop" onClick={() => setWysWeek(v => !v)}>
-          {wysWeek ? 'Steek hierdie week weg' : 'Sien hierdie week'}
-        </button>
+        {hoeveelKlaar > 0 && (
+          <div className="vs-vordering">
+            {hoeveelKlaar === 5
+              ? 'Jy het al vyf die dae van hierdie week gedoen.'
+              : `${hoeveelKlaar} van 5 dae gedoen`}
+          </div>
+        )}
 
-        {wysWeek && (
-          <div className="vs-dae">
-            {WEEK1_DAE.map(d => (
-              <button key={d.n} className="vs-dag-ry" onClick={() => beginDag(d.n)}>
-                <span className="vs-dag-merk">DAG {d.n}</span>
+        <div className="vs-dae">
+          {WEEK1_DAE.map(d => {
+            const klaar = isKlaar(d.n)
+            return (
+              <button
+                key={d.n}
+                className={`vs-dag-ry${klaar ? ' klaar' : ''}`}
+                onClick={() => {
+                  if (opBegin) { try { opBegin() } catch {} }
+                  beginDag(d.n)
+                }}
+              >
+                <span className="vs-dag-merk">{klaar ? '✓' : `DAG ${d.n}`}</span>
                 <span className="vs-dag-t">{d.titel}</span>
                 <span className="vs-dag-pyl">›</span>
               </button>
-            ))}
-          </div>
-        )}
+            )
+          })}
+        </div>
       </div>
     )
   }

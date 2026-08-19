@@ -22,7 +22,6 @@
   background: rgba(0,0,0,.2); border-radius: 11px; padding: 12px 13px;
   margin-bottom: 20px; opacity: .95;
 }
-.vs-hervat { font-size: 13px; opacity: .85; margin-top: 10px; }
 
 .vs-hoofknop {
   width: 100%; background: var(--gold, #E0B872); color: #33230D; border: none;
@@ -56,6 +55,34 @@
 }
 .vs-dag-t { flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text); }
 .vs-dag-pyl { color: var(--text-muted); font-size: 18px; }
+
+/* ── 'n Dag wat KLAAR is ──
+ *
+ * Ligte groen, met 'n merkie in plaas van die dagnommer. Dit is die enigste
+ * plek in die program waar iets "afgevink" word, en dit bly rustig: geen punte,
+ * geen streak, geen viering. Net 'n mens wat sien waar hy is.
+ *
+ * Die groen is donker genoeg om teen wit te lees (kontras ~5:1) — 'n bleek
+ * pastelgroen op wit is 'n merkie wat niemand raaksien nie. */
+.vs-dag-ry.klaar {
+  background: #F0F8F0;
+  border-color: #BFDCBF;
+}
+.vs-dag-ry.klaar:active { background: #E4F1E4; }
+.vs-dag-ry.klaar .vs-dag-merk {
+  background: #2F7A3E; color: #fff;
+  /* Die merkie self is 'n teken, nie 'n woord — dus groter en nie gespasieer. */
+  font-size: 15px; letter-spacing: 0; line-height: 1.1;
+}
+.vs-dag-ry.klaar .vs-dag-t { color: #2C4A2F; }
+
+/* Hoeveel dae klaar is. Een reël, en dit verdwyn heeltemal voordat 'n mens sy
+   eerste dag gedoen het — anders begroet die program iemand met 'n nul. */
+.vs-vordering {
+  margin: 2px 0 12px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: .3px;
+  color: #2F7A3E; text-align: center;
+}
 
 /* ── Die balk en die vordering ── */
 .vs-balk { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -293,33 +320,7 @@
 /* ── VANDAG eerste ──
    Dewald se §9: die week mag beskikbaar wees, maar mag nie soos 'n taaklys in
    die gebruiker se gesig wees nie. */
-.vs-vandag {
-  display: flex; flex-direction: column; gap: 4px;
-  background: rgba(0, 0, 0, .22); border-radius: 14px;
-  padding: 16px; margin-bottom: 4px; text-align: left;
-}
-.vs-vandag-merk {
-  font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px;
-  color: var(--gold, #E0B872);
-}
-.vs-vandag-titel { font-family: var(--font-serif); font-size: 19px; line-height: 1.3; }
-.vs-vandag-fyn { font-size: 12px; opacity: .75; }
 
-/* Die tweede deur op die openingsblad: die vyf dae.
- *
- * Dit was 'n dun skakeltjie onderaan en Dewald kon dit skaars sien. Dit is
- * nie 'n voetnoot nie — dit is die enigste pad na 'n ANDER dag as die een
- * waar die app dink jy is, en dus die enigste pad terug wanneer die app
- * verkeerd raai. Dit lyk nou soos 'n knoppie. */
-.vs-week-knop {
-  width: 100%; margin-top: 14px; box-sizing: border-box;
-  background: #fff; border: 1.5px solid #DCD3F0; border-radius: 14px;
-  font-family: var(--font-body); font-size: 16px; font-weight: 800;
-  letter-spacing: .3px;
-  color: var(--purple-dark); padding: 17px 14px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.vs-week-knop:active { background: #F3F0FA; }
 
 /* ── Die brug na die groep, na die stemboodskap (§40) ── */
 .vs-brug {

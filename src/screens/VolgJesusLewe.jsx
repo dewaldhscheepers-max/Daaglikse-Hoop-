@@ -306,10 +306,13 @@ export default function VolgJesusLewe({ onClose: opToe }) {
     const terug = () => {
       setNommer(keuse.klaar)
       skryfMyWeek(keuse.klaar)
-      /* Ook die plek BINNE daardie week. Iemand wat hier druk, se die rekord is
-         verkeerd — dan help dit hom nie om by "VANDAG · DAG 5" uit te kom nie.
-         Sy geskrewe antwoorde bly staan; net die plek gaan terug. */
-      try { localStorage.removeItem(`vj_plek_w${keuse.klaar}`) } catch {}
+      /* Ook die merkies BINNE daardie week. Iemand wat hier druk, se die rekord
+         is verkeerd — dan help dit hom nie om vyf groen regmerkies te sien nie.
+         Sy geskrewe antwoorde bly staan; net die merkies gaan weg. */
+      try {
+        localStorage.removeItem(`vj_plek_w${keuse.klaar}`)
+        localStorage.removeItem(`vj_klaar_w${keuse.klaar}`)
+      } catch {}
     }
     binne = (
       <div className="vjl-wag">
