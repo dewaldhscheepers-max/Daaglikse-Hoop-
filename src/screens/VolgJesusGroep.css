@@ -147,3 +147,14 @@
 }
 .vg-uitchat-ry button:active { background: #DED3F2; }
 .vg-uitchat-ry button:disabled { background: #E8E2F2; color: #9A93AE; }
+
+/* HOE die groepsessie werk. Dit staan EERSTE en dit lees swaarder as die res —
+   'n groep hoef nie fisies te vergader nie, en dit is die ding wat 'n mens
+   eerste moet weet. */
+.vg-sessie-hoe p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.65;
+  font-weight: 600;
+  color: var(--text);
+}

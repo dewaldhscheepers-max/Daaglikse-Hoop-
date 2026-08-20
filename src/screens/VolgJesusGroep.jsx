@@ -336,6 +336,16 @@ export function Groepsessie({ opTerug }) {
         <h1>Kyk saam na Jesus</h1>
       </div>
 
+      {/* HOE dit werk, voordat 'n mens hoor wat dit is.
+       *
+       * Dewald het hierdie sin gevra. Dit is die belangrikste een op die skerm:
+       * 'n groep hoef nie fisies te vergader nie. Sonder dit lees "GROEPSESSIE ·
+       * 30–40 MINUTE" soos 'n afspraak wat 'n mens moet reël, en dit is presies
+       * waar 'n klein groep sterf. */}
+      <div className="vg-kaart vg-sessie-hoe">
+        <p>Kom een keer per week bymekaar — of gesels deur die groepchat.</p>
+      </div>
+
       <div className="vg-kaart">
         <p className="vg-fyn">
           Hierdie is nie ’n toets van wie die meeste weet nie. Niemand word
