@@ -21,7 +21,7 @@
  * Dewald se besluit, en YouTube laat 'n mens self 144p kies, wat minder data
  * gebruik as die app se eie stemnotas.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   BEWEGINGS, bewegingVir, KONTROLES, RISIKO_VLAKKE,
   publiseerFoute, magPubliseer, geldigeVideoId, ontleedVerwysing,
@@ -33,6 +33,9 @@ import VolgJesusStap from './VolgJesusStap'
 import StemOplaai from '../components/StemOplaai'
 import PrentOplaai from '../components/PrentOplaai'
 import { beginOor } from '../data/volgJesusTerugstel'
+import { haalAgtergrond, stelAgtergrond } from '../data/vjChatAgtergrond'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { storage } from '../firebase'
 import { myGroepe, verwyderLid, verlaatGroep } from '../data/volgJesusGroepApi'
 /* Die lede kom DIREK uit Firestore. 'n Lid mag sy eie groep se lede lees — dit
    is die reel wat die chat se name laat werk. */
@@ -410,6 +413,8 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         )}
         <Tellers tellers={tellers} lys={lys} />
 
+        <ChatAgtergrond />
+
         <BeginOor />
 
         {BEWEGINGS.map(b => (
@@ -711,6 +716,83 @@ export default function VolgJesusAdmin({ geheim = '' }) {
           {besig ? 'Besig…' : 'Stoor'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/* ── Die groepchat se agtergrond ──
+ *
+ * Dewald het 'n liggeel patroon gestuur — kruisies, duiwe, blare,
+ * versverwysings — en gevra of dit agter die boodskappe kan staan.
+ *
+ * Dit is 'n OPLAAIER en nie 'n teksveld nie, om dieselfde rede as die
+ * stemboodskap en die wallpapers: 'n adres bestaan nie voordat die leer erens
+ * is nie. Dit is die derde keer dat hierdie les tel.
+ *
+ * Die adres gaan na `config/vjChatAgtergrond` — klient-leesbaar, admin-skryfbaar
+ * — en die chat kas dit op die foon sodat die patroon nie elke keer inskuif
+ * nadat die gesprek al staan nie. */
+function ChatAgtergrond() {
+  const leerRef = useRef(null)
+  const [url, setUrl]     = useState('')
+  const [besig, setBesig] = useState(false)
+  const [pers, setPers]   = useState(0)
+  const [nota, setNota]   = useState('')
+
+  useEffect(() => { haalAgtergrond(setUrl) }, [])
+
+  async function stuurOp(leer) {
+    if (!leer) return
+    setBesig(true); setPers(0); setNota('')
+    try {
+      const uit = (leer.name.split('.').pop() || 'jpg').toLowerCase()
+      const plek = ref(storage, `covers/vj-chat-agtergrond-${Date.now()}.${uit}`)
+      const nuwe = await new Promise((klaar, val) => {
+        const taak = uploadBytesResumable(plek, leer)
+        taak.on('state_changed',
+          st => setPers(Math.round(st.bytesTransferred / st.totalBytes * 100)),
+          val,
+          async () => klaar(await getDownloadURL(taak.snapshot.ref)))
+      })
+      const gestoor = await stelAgtergrond(nuwe)
+      if (!gestoor) { setNota('Daardie adres kon nie gebruik word nie.'); return }
+      setUrl(gestoor)
+      setNota('Gestoor. Die groepchat wys dit nou.')
+    } catch (e) {
+      setNota('Die oplaai het misluk: ' + (e && e.message))
+    } finally { setBesig(false) }
+  }
+
+  async function haalAf() {
+    setBesig(true); setNota('')
+    try { await stelAgtergrond(''); setUrl(''); setNota('Die agtergrond is af.') }
+    catch { setNota('Kon nie nou nie.') }
+    finally { setBesig(false) }
+  }
+
+  return (
+    <div className="vj-agtergrond">
+      <div className="vj-agtergrond-kop">DIE GROEPCHAT SE AGTERGROND</div>
+      <p>
+        Die patroon wat agter die boodskappe staan. Kies iets baie lig — die
+        teks moet daaroor lees. Dit teel oor die hele gesprek.
+      </p>
+
+      {url && (
+        <div className="vj-agtergrond-prent" style={{ backgroundImage: `url("${url}")` }} />
+      )}
+
+      <input ref={leerRef} type="file" accept="image/*" hidden
+             onChange={e => stuurOp(e.target.files && e.target.files[0])} />
+      <div className="vj-agtergrond-knoppe">
+        <button className="vj-knop" disabled={besig} onClick={() => leerRef.current.click()}>
+          {besig ? `Besig… ${pers}%` : (url ? 'Kies n ander prent' : 'Laai n prent op')}
+        </button>
+        {url && (
+          <button className="vj-knop-los" disabled={besig} onClick={haalAf}>Haal dit af</button>
+        )}
+      </div>
+      {nota && <p className="vj-agtergrond-nota">{nota}</p>}
     </div>
   )
 }

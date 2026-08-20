@@ -32,6 +32,7 @@ import {
   ongeleesTel, wysNaam,
 } from '../data/volgJesusGroep'
 import { stelChat } from '../data/volgJesusGroepApi'
+import { haalAgtergrond, leesKas } from '../data/vjChatAgtergrond'
 import './VolgJesusChat.css'
 
 /* Die vier vinnige aansette ná die stemboodskap (§40). Hulle vul die kassie —
@@ -137,8 +138,14 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
     try { return !localStorage.getItem('vj_chat_wenk_gesien') } catch { return true }
   })
 
+  /* Die agtergrond agter die boodskappe. Die gekasde adres is DADELIK daar,
+     sodat die patroon nie inskuif nadat die gesprek al staan nie. */
+  const [agtergrond, setAgtergrond] = useState(leesKas)
+
   const onderRef = useRef(null)
   const lysRef   = useRef(null)
+
+  useEffect(() => { haalAgtergrond(setAgtergrond) }, [])
 
   /* Die privaatheidsreël wys EEN keer per toestel (§42). */
   useEffect(() => {
@@ -326,7 +333,15 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
         </div>
       )}
 
-      <div className="vc-lys" ref={lysRef}>
+      {/* 'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n <img> nie — sien
+          CLAUDE.md se "Android, Chrome, en gekleurde strepe". Die adres word
+          AANGEHAAL: 'n Firebase-aflaai-URL dra `?alt=media&token=...` en 'n
+          ongehaalde url() in CSS is presies hoe 'n prent stil verdwyn. */}
+      <div
+        className={`vc-lys${agtergrond ? ' met-prent' : ''}`}
+        ref={lysRef}
+        style={agtergrond ? { backgroundImage: `url("${agtergrond}")` } : undefined}
+      >
         {alles.length === 0 && !fout && (
           <div className="vc-leeg">
             <p>Nog niks hier nie.</p>

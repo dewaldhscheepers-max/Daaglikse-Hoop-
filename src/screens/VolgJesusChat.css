@@ -321,3 +321,34 @@
 .vc-menu span {
   display: block; width: 16px; height: 2px; border-radius: 2px; background: #fff;
 }
+
+/* ── Die agtergrond agter die boodskappe ──
+ *
+ * Dewald se patroon: kruisies, duiwe, blare, versverwysings. Dit is 'n
+ * CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n <img> nie — sien CLAUDE.md
+ * se "Android, Chrome, en gekleurde strepe".
+ *
+ * `repeat` met 'n vaste breedte: die patroon teel eerder as om te rek. 'n
+ * Gerekte patroon lyk op 'n lang gesprek soos 'n fout.
+ *
+ * Die kleur BLY onder die prent staan. Laai die prent nie, of is die lyn stadig,
+ * dan wys 'n ongeverfde teel die agtergrondkleur in plaas van rou geheue. */
+.vc-lys.met-prent {
+  background-color: #FBF6EA;
+  background-repeat: repeat;
+  background-size: 320px auto;
+  background-position: top center;
+  /* Die patroon skuif SAAM met die gesprek. `fixed` sou dit 'n eie laag maak. */
+  background-attachment: scroll;
+}
+
+/* Die borrels word ONDEURSIGTIG. Half-deursigtige teks oor 'n kruisie of 'n
+   woord is teks wat 'n mens twee keer moet lees. */
+.vc-lys.met-prent .vc-bel { background: #fff; }
+.vc-lys.met-prent .vc-ry.myne .vc-bel { background: #EDE8F8; }
+.vc-lys.met-prent .vc-uitgevee,
+.vc-lys.met-prent .vc-wenk {
+  background: rgba(255, 255, 255, .82);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
