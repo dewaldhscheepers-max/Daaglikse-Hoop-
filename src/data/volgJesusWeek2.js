@@ -280,10 +280,100 @@ export const WEEK2_VOLGENDE = {
      + 'Volgende week kyk ons wat dit werklik beteken om jou lewe agter Jesus aan te rig.',
 }
 
-/* Die transkripsie van die stemboodskap. Dewald stuur dit; tot dan wys die
-   speler net die klank, sonder 'n toegevoude transkripsie. 'n Leë string is
-   die regte antwoord — nie 'n plekhouer wat later as egte teks lees nie. */
-export const WEEK2_TRANSKRIPSIE = ''
+/* Die transkripsie van die stemboodskap, BY VERSTEK TOEGEVOU (Stemboodskap.jsx).
+   Dewald: "hier is die transkripsie onder die stemnota soos met week 1 dag 1."
+
+   Dit staan hier en nie in die admin nie, om dieselfde rede as die dae: dit is
+   deel van die week se inhoud, nie 'n instelling nie. */
+export const WEEK2_TRANSKRIPSIE = `Jesus is pas gedoop.
+
+Die Vader verklaar: “Dit is my geliefde Seun.”
+
+Daarna lei die Gees Jesus die woestyn in — maar dit is die duiwel wat Hom daar versoek.
+
+Na veertig dae se vas is Jesus honger. En juis daar kom die versoeking.
+
+Jesus was nie daar omdat Hy iets verkeerd gedoen het nie. Hy was presies waar die Gees Hom gelei het.
+
+Hier is vier dinge wat Jesus ons leer wanneer versoeking kom.
+
+Eerstens: moenie versoeking as bewys lees dat God ver is nie.
+
+Hebreërs 4:15 sê Jesus is versoek soos ons, maar sonder sonde. Versoeking is dus nie dieselfde as sonde nie.
+
+Moenie vir jouself sê: “As ek regtig naby aan God was, sou ek nie hiermee worstel nie.”
+
+’n Versoeking kan by jou deur aanklop sonder dat jy die deur oopmaak. Moenie God se nabyheid meet aan die afwesigheid van versoeking nie.
+
+Tweedens: toets die stem aan wat God reeds gesê het.
+
+By Jesus se doop sê die Vader: “Dit is my geliefde Seun.”
+
+Kort daarna sê die versoeker: “As U die Seun van God is…”
+
+Sien dit raak. Die Vader maak ’n verklaring. Die versoeker probeer daarvan ’n vraag maak.
+
+Moenie ’n vraagteken sit waar God reeds waarheid gespreek het nie.
+
+God sê daar is vergifnis in Christus. Dan kom die stem: “Ja, maar nie ná wat jy gedoen het nie.”
+
+God sê Hy sal jou nie verlaat nie. Dan kom: “Waar is Hy dan nou?”
+
+En by die tempel haal die duiwel selfs Psalm 91 aan. ’n Vers kan korrek aangehaal word en steeds verkeerd toegepas word.
+
+Daarom toets ons nie God se Woord aan ’n stem nie. Ons toets die stem aan God se Woord.
+
+Derdens: net omdat jy iets nodig het, beteken dit nie enige manier om dit te kry is reg nie.
+
+Jesus was werklik honger. Die duiwel sê: “Sê dat hierdie klippe brode word.”
+
+Die behoefte was werklik. Maar nie elke manier om dit te bevredig was reg nie.
+
+En versoeking klink vandag nog so: “Jy verdien dit.” “Jy het dit nodig.” “Net hierdie een keer.” “Niemand sal weet nie.”
+
+Omdat jy eensaam is, beteken nie enige verhouding is reg nie. Omdat jy geld nodig het, beteken nie enige manier om dit te kry is reg nie. Omdat iemand jou seergemaak het, beteken nie wraak is reg nie.
+
+Jesus laat nie Sy honger besluit wat reg is nie.
+
+Vierdens: as die prys ongehoorsaamheid is, stap weg.
+
+Die duiwel wys vir Jesus die koninkryke van die wêreld en sê: “Dit alles sal ek vir U gee as U neerval en my aanbid.”
+
+Die aanbod lyk groot. Maar die prys is ongehoorsaamheid.
+
+Dit is die versoeking van ’n kortpad: die kroon sonder die kruis.
+
+Nie elke kortpad is God se voorsiening nie. As jy God moet ongehoorsaam om daar uit te kom, is dit nie God se pad nie.
+
+Jakobus 4:7 sê: “Onderwerp julle dan aan God; weerstaan die duiwel, en hy sal van julle wegvlug.”
+
+Nie onderhandel nie. Weerstaan.
+
+Drie keer kom die versoeking. Drie keer antwoord Jesus: “Daar staan geskrywe.”
+
+Jesus aanvaar nie ’n stem as waarheid net omdat dit dringend, slim of oortuigend klink nie. Hy meet dit aan wat God gesê het.
+
+En as ons Jesus wil volg, moet ons dieselfde leer doen.
+
+NIE ELKE STEM WAT MET JOU PRAAT, VERDIEN DAT JY HOM GLO NIE.
+
+Toets die stem aan God se Woord. Weerstaan wat jou van gehoorsaamheid wegtrek. Moenie met die leuen onderhandel nie.
+
+En wanneer dit weer praat — antwoord soos Jesus: “Daar staan geskrywe.”
+
+Hemelse Vader, ek bid vir die persoon wat nou luister.
+
+Wanneer versoeking kom, help hulle om nie uit skaamte van U af weg te kruip nie, maar nader aan U te beweeg.
+
+Wanneer ’n leuen hard praat, help hulle om U waarheid te herken.
+
+Wanneer ’n werklike behoefte hulle na ’n verkeerde antwoord probeer trek, gee hulle krag om gehoorsaam te bly.
+
+En wanneer ’n kortpad goed lyk, gee hulle onderskeiding om die prys raak te sien.
+
+Leer ons om vas te staan en soos Jesus te antwoord: “Daar staan geskrywe.”
+
+In Jesus se Naam. Amen.`
 
 export function blokkeVirDag2(n) {
   const dag = WEEK2_DAE.find(d => d.n === n)
