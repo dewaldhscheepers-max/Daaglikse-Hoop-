@@ -379,3 +379,20 @@ export function blokkeVirDag2(n) {
   const dag = WEEK2_DAE.find(d => d.n === n)
   return dag ? dag.blokke : []
 }
+
+/* Die groepsessie vir hierdie week. Sien die nota by WEEK1_SESSIE. */
+export const WEEK2_SESSIE = {
+  titel: 'Staan saam vas',
+  skrifte: ['Matteus 4:1\u201311', 'Jakobus 4:7\u20138'],
+  vrae: [
+    'Watter deel van Jesus se reaksie op versoeking in Matteus 4 het jou die meeste getref, en waarom?',
+    'Waarom is dit belangrik om jou swak plekke te ken voordat versoeking kom?',
+    'Wat is die verskil tussen om bloot teen versoeking te probeer veg en om vooraf \u2019n praktiese uitweg te beplan?',
+    'Wat beteken hierdie sin vir jou: \u201cDie sterkste \u2018nee\u2019 vir versoeking begin met \u2019n dieper \u2018ja\u2019 vir Jesus\u201d?',
+  ],
+  gebed:
+    'Hemelse Vader, dankie dat Jesus vir ons gewys het hoe gehoorsaamheid lyk '
+    + 'wanneer versoeking kom. Leer ons om nie elke stem te glo wat met ons praat '
+    + 'nie. Wys ons waar ons maklik getrek word. B\u00eare U Woord diep in ons harte. '
+    + 'En laat ons liefde vir Jesus al hoe dieper word. Amen.',
+}

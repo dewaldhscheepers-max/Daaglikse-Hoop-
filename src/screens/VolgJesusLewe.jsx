@@ -279,7 +279,8 @@ export default function VolgJesusLewe({ onClose: opToe }) {
        eintlik nie nodig nie." Hy is reg — die groepsessie sê alles wat 'n mens
        nodig het om die gesprek te lei, en 'n tweede skerm met notas is nog 'n
        ding om te lees voordat 'n mens kan begin. */
-    sessie: <Groepsessie opTerug={() => setGroepBlad('instellings')} />,
+    sessie: <Groepsessie weeknommer={keuse.nommer || keuse.klaar || 1}
+                         opTerug={() => setGroepBlad('instellings')} />,
   }[groepBlad]
 
   if (modus === 'wag') {

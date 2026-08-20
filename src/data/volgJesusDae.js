@@ -24,11 +24,11 @@
  */
 import {
   WEEK1_DAE, WEEK1_REIS, WEEK1_OPENING, WEEK1_DEELSIN, WEEK1_VOLGENDE,
-  WEEK1_TRANSKRIPSIE,
+  WEEK1_TRANSKRIPSIE, WEEK1_SESSIE,
 } from './volgJesusWeek1.js'
 import {
   WEEK2_DAE, WEEK2_REIS, WEEK2_OPENING, WEEK2_DEELSIN, WEEK2_VOLGENDE,
-  WEEK2_TRANSKRIPSIE,
+  WEEK2_TRANSKRIPSIE, WEEK2_SESSIE,
 } from './volgJesusWeek2.js'
 
 const WEKE = {
@@ -39,6 +39,7 @@ const WEKE = {
     deelsin: WEEK1_DEELSIN,
     volgende: WEEK1_VOLGENDE,
     transkripsie: WEEK1_TRANSKRIPSIE,
+    sessie: WEEK1_SESSIE,
   },
   2: {
     dae: WEEK2_DAE,
@@ -47,6 +48,7 @@ const WEKE = {
     deelsin: WEEK2_DEELSIN,
     volgende: WEEK2_VOLGENDE,
     transkripsie: WEEK2_TRANSKRIPSIE,
+    sessie: WEEK2_SESSIE,
   },
 }
 
@@ -58,7 +60,12 @@ export function hetDae(w) {
 
 /* Alles vir een week. Gee 'n LEË week terug vir 'n nommer wat ons nie ken nie —
    die skerm wys dan niks eerder as om om te val. */
-const LEEG = { dae: [], reis: [], opening: '', deelsin: '', volgende: null, transkripsie: '' }
+const LEEG = {
+  dae: [], reis: [], opening: '', deelsin: '', volgende: null, transkripsie: '',
+  /* 'n Sessie sonder inhoud, nie `null` nie: die skerm hoef nie te toets of dit
+     bestaan voor dit kan teken nie. */
+  sessie: { titel: '', skrifte: [], vrae: [], gebed: '' },
+}
 
 export function weekDae(w)         { return (WEKE[Number(w)] || LEEG).dae }
 export function weekReis(w)        { return (WEKE[Number(w)] || LEEG).reis }
@@ -66,6 +73,9 @@ export function weekOpening(w)     { return (WEKE[Number(w)] || LEEG).opening }
 export function weekDeelsin(w)     { return (WEKE[Number(w)] || LEEG).deelsin }
 export function weekVolgende(w)    { return (WEKE[Number(w)] || LEEG).volgende }
 export function weekTranskripsie(w){ return (WEKE[Number(w)] || LEEG).transkripsie }
+/* Die groepsessie volg die OOP week. Dit het op die skerm hardgekodeer gestaan
+   en het Week 1 se Skrif en vrae gewys nadat Week 2 lewendig geword het. */
+export function weekSessie(w)      { return (WEKE[Number(w)] || LEEG).sessie }
 
 /* Die blokke vir een dag van een week. */
 export function blokkeVir(w, n) {

@@ -362,3 +362,27 @@ En vandag wil ek jou met dieselfde vraag los waarmee Jesus Sy dissipels gekonfro
 Want uiteindelik antwoord jy daardie vraag nie net met jou mond nie.
 
 Jou lewe wys wie jy glo Jesus is.`
+
+/* ── Die groepsessie ──
+ *
+ * Dit het op die SKERM hardgekodeer gestaan, en toe Week 2 lewendig gaan, het
+ * die groep steeds Week 1 se Skrif en Week 1 se vrae gesien. Dewald: "die groep
+ * sessie is week 1 sin." Nou woon dit by die week self.
+ *
+ * Dit staan hier en nie in die admin nie om dieselfde rede as die dae: dit is
+ * inhoud. Die openbare eindpunt dra dit ook nie — dit is 'n witlys, en 'n week
+ * wat nog geskryf word, moet nie sy vrae lek nie. */
+export const WEEK1_SESSIE = {
+  titel: 'Kyk saam na Jesus',
+  skrifte: ['Matteus 16:13\u201317', 'Johannes 1:1\u201318'],
+  vrae: [
+    'Wat het jou hierdie week die meeste van Jesus getref?',
+    'Waarom dink jy maak Jesus die vraag persoonlik: \u201cWie s\u00ea j\u00falle is Ek?\u201d',
+    'Waar vorm ons maklik \u2019n Jesus wat by ons eie voorkeure pas?',
+    'Wat beteken dit prakties om Jesus nie net as Helper te wil h\u00ea nie, maar Hom as Here te volg?',
+  ],
+  gebed:
+    'Here Jesus, help ons om U te sien soos U werklik is. Waar ons U kleiner '
+    + 'gemaak het, korrigeer ons. Waar ons nog self die laaste s\u00ea wil h\u00ea, leer '
+    + 'ons om U te vertrou. Leer ons om U saam te volg. Amen.',
+}

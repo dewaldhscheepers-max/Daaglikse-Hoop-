@@ -16,6 +16,7 @@ import {
 } from '../data/volgJesusGroepApi'
 import { keurGroepkode, uitnodiging, nooiNudge } from '../data/volgJesusGroep'
 import { haalLede } from '../data/volgJesusChat'
+import { weekSessie } from '../data/volgJesusDae'
 import './VolgJesusGroep.css'
 
 const deel = async teks => {
@@ -327,21 +328,21 @@ export function NooiPastoor({ opTerug }) {
  * Dit staan APART van die vyf dae en dit blokkeer niks. 30–40 minute, en dit
  * word NIE met materiaal volgestop om 'n uur te vul nie.
  */
-export function Groepsessie({ opTerug }) {
+export function Groepsessie({ weeknommer = 1, opTerug }) {
+  /* Die sessie volg die OOP week. Dit het hier hardgekodeer gestaan met Week 1
+     se Skrif en Week 1 se vrae, en toe Week 2 lewendig gaan, het die groep
+     steeds Week 1 gesien. Dewald: "die groep sessie is week 1 sin." */
+  const s = weekSessie(weeknommer)
+
   return (
     <div className="vg">
       <div className="vg-kop">
         <button className="vg-terug" onClick={opTerug}>‹ Terug</button>
-        <div className="vg-merk">GROEPSESSIE · 30–40 MINUTE</div>
-        <h1>Kyk saam na Jesus</h1>
+        <div className="vg-merk">GROEPSESSIE · WEEK {weeknommer} · 30–40 MINUTE</div>
+        <h1>{s.titel || 'Kyk saam na Jesus'}</h1>
       </div>
 
-      {/* HOE dit werk, voordat 'n mens hoor wat dit is.
-       *
-       * Dewald het hierdie sin gevra. Dit is die belangrikste een op die skerm:
-       * 'n groep hoef nie fisies te vergader nie. Sonder dit lees "GROEPSESSIE ·
-       * 30–40 MINUTE" soos 'n afspraak wat 'n mens moet reël, en dit is presies
-       * waar 'n klein groep sterf. */}
+      {/* HOE dit werk, voordat 'n mens hoor wat dit is. */}
       <div className="vg-kaart vg-sessie-hoe">
         <p>Kom een keer per week bymekaar — of gesels deur die groepchat.</p>
       </div>
@@ -353,39 +354,36 @@ export function Groepsessie({ opTerug }) {
         </p>
       </div>
 
-      <div className="vg-kaart">
-        <div className="vg-kop2">LEES SAAM</div>
-        <p className="vg-skrifreel">Matteus 16:13–17</p>
-        <p className="vg-skrifreel">Johannes 1:1–18</p>
-      </div>
+      {s.skrifte.length > 0 && (
+        <div className="vg-kaart">
+          <div className="vg-kop2">LEES SAAM</div>
+          {s.skrifte.map(sk => <p key={sk} className="vg-skrifreel">{sk}</p>)}
+        </div>
+      )}
 
-      <div className="vg-kaart">
-        <div className="vg-kop2">PRAAT SAAM</div>
-        <ol className="vg-vrae">
-          <li>Wat het jou hierdie week die meeste van Jesus getref?</li>
-          <li>Waarom dink jy maak Jesus die vraag persoonlik: “Wie sê júlle is Ek?”</li>
-          <li>Waar vorm ons maklik ’n Jesus wat by ons eie voorkeure pas?</li>
-          <li>Wat beteken dit prakties om Jesus nie net as Helper te wil hê nie, maar Hom as Here te volg?</li>
-        </ol>
-      </div>
+      {s.vrae.length > 0 && (
+        <div className="vg-kaart">
+          <div className="vg-kop2">PRAAT SAAM</div>
+          <ol className="vg-vrae">
+            {s.vrae.map((v, i) => <li key={i}>{v}</li>)}
+          </ol>
+        </div>
+      )}
 
       <div className="vg-kaart">
         <div className="vg-kop2">STIL OOMBLIK</div>
         <p>Gee die groep ’n paar minute stilte. Moenie dit te vinnig probeer vul nie.</p>
       </div>
 
-      <div className="vg-kaart vg-gebed">
-        <div className="vg-kop2">BID SAAM</div>
-        <p>
-          Here Jesus, help ons om U te sien soos U werklik is. Waar ons U kleiner
-          gemaak het, korrigeer ons. Waar ons nog self die laaste sê wil hê, leer
-          ons om U te vertrou. Leer ons om U saam te volg. Amen.
-        </p>
-      </div>
+      {s.gebed && (
+        <div className="vg-kaart vg-gebed">
+          <div className="vg-kop2">BID SAAM</div>
+          <p>{s.gebed}</p>
+        </div>
+      )}
     </div>
   )
 }
-
 export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
   const [nota, setNota]   = useState('')
   const [kode, setKode]   = useState(groep.kode)
