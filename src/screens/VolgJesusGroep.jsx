@@ -12,7 +12,7 @@
  */
 import { useState, useEffect } from 'react'
 import {
-  skepGroep, kykGroep, sluitAan, verlaatGroep, roteerKode, stelChat,
+  skepGroep, kykGroep, sluitAan, verlaatGroep, stelChat,
 } from '../data/volgJesusGroepApi'
 import { keurGroepkode, uitnodiging, nooiNudge } from '../data/volgJesusGroep'
 import { haalLede } from '../data/volgJesusChat'
@@ -425,17 +425,19 @@ export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
         DIE GROEPSESSIE
       </button>
 
-      {myLid && myLid.rol === 'fasiliteerder' && groep.eienaar === myLid.uid && (
-        <button className="vg-tweede" disabled={besig} onClick={async () => {
-          setBesig(true)
-          const r = await roteerKode(groep.id)
-          setBesig(false)
-          if (r.ok) { setKode(r.kode); setNota('Die ou kode werk nie meer nie.') }
-          else setNota(r.fout)
-        }}>
-          GENEREER ’N NUWE GROEPKODE
-        </button>
-      )}
+      {/* ── Waarom "Genereer 'n nuwe groepkode" weg is ──
+       *
+       * Dewald: "is die genereer nuwe groep kode nodig???"
+       *
+       * Nee. Dit is vir een geval — 'n kode wat uitgelek het — en dit is die
+       * duurste knoppie op hierdie skerm: die oomblik wat 'n mens hom druk,
+       * gaan ELKE uitnodiging dood wat hy al gestuur het. Iemand wat more eers
+       * die WhatsApp oopmaak, kry 'n kode wat nie meer bestaan nie, en hy weet
+       * nie hoekom nie.
+       *
+       * Vir 'n klein private groep is dit 'n knoppie wat 'n mens net per
+       * ongeluk druk. Die bediener se `kode`-aksie bly staan en is getoets;
+       * gebeur dit ooit werklik, kom die knoppie in 'n minuut terug. */}
 
       {nota && <p className="vg-nota">{nota}</p>}
 

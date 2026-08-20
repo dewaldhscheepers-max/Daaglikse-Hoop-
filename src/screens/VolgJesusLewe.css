@@ -153,3 +153,19 @@
   color: var(--text-muted, #6b6b6b);
   text-align: center;
 }
+
+/* Die spyskaart in die VOLG JESUS-balk. Dieselfde drie strepies as in die
+   chat, want dit gaan na dieselfde plek. Die groep se naam was al 'n knoppie,
+   maar niks het dit gewys nie — 'n mens moet nie ontdek dat 'n opskrif 'n
+   knoppie is nie. */
+.vjl-menu {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 0;
+  border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.14);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vjl-menu:active { background: rgba(255, 255, 255, 0.28); }
+.vjl-menu span {
+  display: block; width: 16px; height: 2px; border-radius: 2px; background: #fff;
+}

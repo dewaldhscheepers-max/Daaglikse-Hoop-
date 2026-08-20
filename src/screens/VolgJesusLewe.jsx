@@ -391,6 +391,21 @@ export default function VolgJesusLewe({ onClose: opToe }) {
         ) : (
           <span className="vjl-balk-naam">VOLG JESUS</span>
         )}
+
+        {/* Die spyskaart, ook HIER.
+         *
+         * Dit was net bo in die chat. Dewald: "die menu moet nie net in die
+         * groepchat wees nie."
+         *
+         * Die groep se naam in die balk het al na die instellings gegaan, maar
+         * niks het dit gewys nie — 'n mens moet nie ontdek dat 'n opskrif 'n
+         * knoppie is nie. Drie strepies se dit. */}
+        {modus === 'groep' && groep && !groepBlad && (
+          <button className="vjl-menu" onClick={() => setGroepBlad('instellings')}
+                  aria-label="Groep-instellings">
+            <span /><span /><span />
+          </button>
+        )}
         {/* Die weekkieser. Iemand wat by Week 3 is, moet Week 1 weer kan
             oopmaak — die program is 'n pad, nie 'n toets. Dit wys eers
             wanneer daar meer as een week is. */}
