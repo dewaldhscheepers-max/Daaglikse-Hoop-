@@ -95,4 +95,56 @@ export const WEKE = {
       'Die vraag "Wie s\u00ea j\u00fd is Jesus?" is persoonlik, maar dit beteken NIE dat elkeen self besluit Wie Jesus vir hulle is nie. Die Evangelies bepaal die inhoud van die antwoord; ons antwoord op Jesus, ons skep Hom nie. Moenie beweer dat Jesus Caesarea Filippi gekies het om Sy dissipels van openbare opinie te isoleer nie \u2014 Matteus gee nie daardie motief nie. Moenie maak asof Petrus reeds alles van Jesus se lyding en kruis verstaan het nie.',
     pastoraleRisiko: 'medium',
   },
+
+  /* ── Week 2 ──
+   *
+   * Dewald het dit lyn vir lyn taalversorg en die fasiliteerder-afdeling
+   * doelbewus uitgelaat. Daardie twee velde is dus nie meer verplig nie — die
+   * fasiliteerder-gids is in elk geval van die skerm af weg. */
+  2: {
+    weeknommer: 2,
+    titel: 'Wanneer versoeking kom',
+    doel:
+      'Om by Jesus te leer hoe om versoeking te herken, vooraf in die waarheid vas te staan, die uitweg te kies en gehoorsaam te bly.',
+    weekKern:
+      'Nie elke stem wat met jou praat, verdien dat jy hom glo nie.',
+    openingskerm:
+      'Jesus is versoek \u2014 maar Hy het nie toegegee nie.\n\n'
+      + 'Hierdie week kyk ons hoe versoeking werk, waar dit ons probeer vasvang en hoe Jesus daarop reageer.\n\n'
+      + 'Die doel is nie om nooit weer versoek te word nie, maar om te leer hoe om gehoorsaam te bly wanneer versoeking kom.',
+    primereSkrif: 'Matteus 4:1\u201311',
+    ondersteunendeSkrif: 'Jakobus 1:13\u201316',
+    videoId: '',
+    stemboodskapUrl: '',
+    kernwaarheid:
+      'Nie elke stem wat met jou praat, verdien dat jy hom glo nie.',
+    eenSin:
+      'Die sterkste \u201cnee\u201d vir versoeking begin met \u2019n dieper \u201cja\u201d vir Jesus.',
+    privaatRefleksie:
+      'Waarmee onderhandel ek steeds, terwyl ek eintlik reeds weet wat gehoorsaamheid aan Jesus van my vra?',
+    gehoorsaamheidStap:
+      'Bou jou persoonlike plan. WANNEER: wanneer is ek gewoonlik die kwesbaarste? DIE LEUEN: wat probeer die versoeking my laat glo? DIE WAARHEID: wat s\u00ea God se Woord? DIE AKSIE: wat gaan ek onmiddellik doen wanneer die versoeking weer kom? Hou dit eenvoudig genoeg dat jy dit werklik sal gebruik.',
+    gebed:
+      'Hemelse Vader, dankie dat Jesus vir ons gewys het hoe gehoorsaamheid lyk wanneer versoeking kom. Leer my om nie elke stem te glo wat met my praat nie. Wys my waar ek maklik getrek word. B\u00eare U Woord diep in my hart, sodat ek reeds weet wat waar is wanneer die druk kom. Gee my die nederigheid om die uitweg te neem wanneer ek versoek word. En bo alles: laat my liefde vir Jesus al hoe dieper word. Ek wil nie net beter word om \u201cnee\u201d te s\u00ea nie. Ek wil al hoe dieper \u201cja\u201d s\u00ea vir Jesus. In Jesus se Naam. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'M\u00f4re: ons kyk na die plek waar jy die maklikste getrek word \u2014 en hoekom dit juis daar gebeur.',
+    dag1Titel: 'Nie elke stem verdien dat jy dit glo nie',
+    dag2Titel: 'Ken jou swak plek',
+    dag3Titel: 'Besluit vooraf wat waar is',
+    dag4Titel: 'Maak afstand',
+    dag5Titel: 'Kies wie jy volg',
+    groepVraag1:
+      'Watter deel van Jesus se reaksie op versoeking in Matteus 4 het jou die meeste getref, en waarom?',
+    groepVraag2:
+      'Waarom is dit belangrik om jou swak plekke te ken voordat versoeking kom?',
+    groepVraag3:
+      'Wat is die verskil tussen om bloot teen versoeking te probeer veg en om vooraf \u2019n praktiese uitweg te beplan?',
+    groepVraag4:
+      'Wat beteken hierdie sin vir jou: \u201cDie sterkste \u2018nee\u2019 vir versoeking begin met \u2019n dieper \u2018ja\u2019 vir Jesus\u201d?',
+    fasiliteerderHoofpunt: '',
+    fasiliteerderGrens: '',
+    pastoraleRisiko: 'medium',
+  },
 }

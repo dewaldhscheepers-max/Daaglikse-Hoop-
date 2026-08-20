@@ -27,6 +27,7 @@ import { useEffect, useState, useCallback } from 'react'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
 import { kiesWeek, binnekort } from '../data/volgJesusOpenbaar'
+import { hetDae } from '../data/volgJesusDae'
 import { leesNooi, veeNooi, leesWeek, veeWeek } from '../data/volgJesusNooi'
 import { tel } from '../data/volgJesusTel'
 import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
@@ -357,7 +358,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
        plaas van 'n video, en 'n oomblik op Dag 5 waar die app die mens sy eie
        Dag 1-woorde teruggee. Daardie vorm pas nie in die ou plat uitleg nie,
        en die ou skerm bly staan vir elke week wat nog so geskryf is. */
-    binne = week.weeknommer === 1 ? (
+    binne = hetDae(week.weeknommer) ? (
       <VolgJesusStap
         week={week}
         binnekort={weekBoodskap}

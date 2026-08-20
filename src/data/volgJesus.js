@@ -80,14 +80,26 @@ export const VERPLIGTE_VELDE = [
   'groepVraag1',
   'groepVraag2',
   'groepVraag3',
-  'fasiliteerderHoofpunt',
-  'fasiliteerderGrens',
 ]
+
+/* ── Waarom die fasiliteerder-velde nie meer verplig is nie ──
+ *
+ * Die fasiliteerder-gids is van die skerm af weg. Dewald: "die fasiliteerder se
+ * notas is eintlik nie nodig nie" — die groepsessie se alles wat 'n mens nodig
+ * het om die gesprek te lei.
+ *
+ * 'n Hek wat vra vir 'n veld wat nerens meer gewys word nie, is 'n hek wat 'n
+ * week keer om lewendig te gaan sonder 'n rede. Dit is presies dieselfde fout
+ * as `videoId` vir 'n week met 'n stemboodskap.
+ *
+ * Die velde bestaan nog en die admin wys hulle nog; hulle is net opsioneel. */
 
 /* Leeg maar toegelaat: 'n week kan geldig wees sonder 'n dag 4-vraag as die
    week se vorm dit nie vra nie. Hulle staan hier sodat die admin weet om
    hulle te WYS, nie om hulle te EIS nie. */
 export const OPSIONELE_VELDE = [
+  'fasiliteerderHoofpunt',
+  'fasiliteerderGrens',
   /* Die week se stemboodskap. Dit VERVANG die video: Dewald neem dit self op
      en laai dit op, en die app speel dit. Sien Stemboodskap.jsx. */
   'stemboodskapUrl',

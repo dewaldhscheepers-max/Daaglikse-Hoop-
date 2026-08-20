@@ -24,10 +24,13 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ontleedVerwysing } from '../data/volgJesus'
+/* Die week se dae kom uit die REGISTER, nie uit Week 1 nie. Hierdie skerm was
+   aan week 1 vasgemaak; nou bedien dit elke week wat 'n dag-pad het. Sien
+   volgJesusDae.js. */
 import {
-  WEEK1_DAE, WEEK1_REIS, WEEK1_TRANSKRIPSIE, WEEK1_OPENING, WEEK1_DEELSIN,
-  WEEK1_VOLGENDE, blokkeVirDag,
-} from '../data/volgJesusWeek1'
+  weekDae, weekReis, weekOpening, weekDeelsin, weekVolgende,
+  weekTranskripsie, blokkeVir,
+} from '../data/volgJesusDae'
 import Stemboodskap from '../components/Stemboodskap'
 import '../components/Stemboodskap.css'
 import { weekSkakel } from '../data/volgJesusNooi'
@@ -140,7 +143,9 @@ export default function VolgJesusStap({
     if (opDagKlaar) { try { opDagKlaar(n) } catch {} }
   }
 
-  const dagInfo = WEEK1_DAE.find(d => d.n === dag) || WEEK1_DAE[0]
+  const DAE = weekDae(w)
+  const volgende = weekVolgende(w)
+  const dagInfo = DAE.find(d => d.n === dag) || DAE[0] || {}
   const isKlaar = n => klaarDae.includes(n)
   const hoeveelKlaar = klaarDae.length
 
@@ -170,7 +175,7 @@ export default function VolgJesusStap({
         <div className="vs-open">
           <div className="vs-merk">WEEK {w} VAN 52</div>
           <h1 className="vs-open-titel">{week.titel}</h1>
-          <p className="vs-open-teks">{week.openingskerm || WEEK1_OPENING}</p>
+          <p className="vs-open-teks">{week.openingskerm || weekOpening(w)}</p>
           <p className="vs-privaat">
             🔒 Alles wat jy persoonlik hier skryf, bly privaat.
           </p>
@@ -185,7 +190,7 @@ export default function VolgJesusStap({
         )}
 
         <div className="vs-dae">
-          {WEEK1_DAE.map(d => {
+          {DAE.map(d => {
             const klaar = isKlaar(d.n)
             return (
               <button
@@ -231,7 +236,7 @@ export default function VolgJesusStap({
      Sy woorde terug, albei wallpapers, die deelbare kaart, en 'n rede om
      volgende week terug te kom. */
   if (blad === 'weekklaar') {
-    const rye = WEEK1_REIS
+    const rye = weekReis(w)
       .map(r => ({ kop: r.kop, teks: String(antwoorde[r.id] || '').trim() }))
       .filter(r => r.teks)
 
@@ -265,18 +270,22 @@ export default function VolgJesusStap({
             wat hierdie skerm lig moet hou. */}
         <div className="vs-hou">
           <div className="vs-hou-kop">DEEL DIT MET IEMAND</div>
-          <p>{WEEK1_DEELSIN}</p>
-          <button className="vs-deel" onClick={() => deelWoorde(WEEK1_DEELSIN)}>
+          <p>{weekDeelsin(w)}</p>
+          <button className="vs-deel" onClick={() => deelWoorde(weekDeelsin(w))}>
             📤  Deel met iemand
           </button>
         </div>
 
+        {/* Wat volgende week wag. Is daar niks — die laaste geskrewe week —
+            wys ons NIKS eerder as 'n leë kaart. */}
+        {volgende && (
         <div className="vs-kaart vs-volgende">
-          <div className="vs-kop">WEEK {WEEK1_VOLGENDE.nommer}</div>
-          <h3>{WEEK1_VOLGENDE.titel}</h3>
-          <p className="vs-lyf">{WEEK1_VOLGENDE.lyf}</p>
+          <div className="vs-kop">WEEK {volgende.nommer}</div>
+          <h3>{volgende.titel}</h3>
+          <p className="vs-lyf">{volgende.lyf}</p>
           {binnekort && <p className="vs-fyn">{binnekort.lyf}</p>}
         </div>
+        )}
 
         <button className="vs-hoofknop" onClick={() => { setBlad('oop'); boToe(); if (opSluit) opSluit() }}>
           KLAAR
@@ -290,7 +299,7 @@ export default function VolgJesusStap({
      versteek nie, hulle is nie daar nie. 'n Vroeer weergawe het hierdie
      filter op 'n ketting gehad wat nie meer bestaan het, en toe het 'n
      solo-mens die groepbrug gesien. Die blaaiertoets het dit gevang. */
-  const blokke = blokkeVirDag(dag).filter(b => !b.netGroep || inGroep)
+  const blokke = blokkeVir(w, dag).filter(b => !b.netGroep || inGroep)
   return (
     <div className="vs" ref={bladRef}>
       <div className="vs-balk">
@@ -324,7 +333,7 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
         titel={b.titel}
         duurTeks={b.duur}
         sleutel={`w${w}`}
-        transkripsie={w === 1 ? WEEK1_TRANSKRIPSIE : week.transkripsie}
+        transkripsie={weekTranskripsie(w) || week.transkripsie}
       />
     )
   }
