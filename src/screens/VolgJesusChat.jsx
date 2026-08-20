@@ -33,6 +33,7 @@ import {
 } from '../data/volgJesusGroep'
 import { stelChat } from '../data/volgJesusGroepApi'
 import { haalAgtergrond, leesKas } from '../data/vjChatAgtergrond'
+import { VERSTEK } from '../data/vjChatPrent'
 import './VolgJesusChat.css'
 
 /* Die vier vinnige aansette ná die stemboodskap (§40). Hulle vul die kassie —
@@ -140,12 +141,15 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
 
   /* Die agtergrond agter die boodskappe. Die gekasde adres is DADELIK daar,
      sodat die patroon nie inskuif nadat die gesprek al staan nie. */
-  const [agtergrond, setAgtergrond] = useState(leesKas)
+  const [agtergrond, setAgtergrond] = useState(() => leesKas() || VERSTEK)
 
   const onderRef = useRef(null)
   const lysRef   = useRef(null)
 
-  useEffect(() => { haalAgtergrond(setAgtergrond) }, [])
+  /* Die verstek staan dadelik; 'n eie prent vervang hom sodra Firestore
+     antwoord. Gee die admin niks, val ons terug op die verstek — die chat is
+     nooit sonder 'n agtergrond nie. */
+  useEffect(() => { haalAgtergrond(u => setAgtergrond(u || VERSTEK)) }, [])
 
   /* Die privaatheidsreël wys EEN keer per toestel (§42). */
   useEffect(() => {

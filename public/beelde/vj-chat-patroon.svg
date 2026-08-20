@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520">
+  <!-- ── Die groepchat se agtergrond ──
+       Dewald het 'n liggeel patroon gestuur en gevra of dit agter die
+       boodskappe kan staan. Ek kan nie 'n prent uit 'n gesprek aflaai nie, dus
+       is dit hier geteken — in dieselfde gees: dun lynwerk, room, en niks wat
+       met die teks meeding nie.
+
+       Dit TEEL naatloos: geen element raak 'n rand nie. 'n Element wat oor 'n
+       rand loop, moet aan albei kante herhaal word, en 'n halwe kruis by 'n
+       naat is presies wat 'n patroon goedkoop laat lyk.
+
+       Dit is 'n SVG en nie 'n foto nie: dit weeg 'n paar kilogreep, dit bly
+       skerp op elke skerm, en dit laai voordat die eerste boodskap staan. -->
+  <defs>
+    <g id="kruis">
+      <path d="M0 -9 V9 M-5 -3 H5" />
+    </g>
+    <g id="blaar">
+      <path d="M0 8 C0 0 3 -6 8 -9 C7 -3 5 3 0 8" />
+      <path d="M0 8 C0 0 -3 -6 -8 -9 C-7 -3 -5 3 0 8" />
+      <path d="M0 9 V2" />
+    </g>
+    <g id="hart">
+      <path d="M0 6 C-6 1 -7 -3 -4.5 -5 C-2.5 -6.5 -0.5 -5 0 -3
+               C0.5 -5 2.5 -6.5 4.5 -5 C7 -3 6 1 0 6 Z" />
+    </g>
+    <g id="vonk">
+      <path d="M0 -7 C0.6 -2.4 2.4 -0.6 7 0 C2.4 0.6 0.6 2.4 0 7
+               C-0.6 2.4 -2.4 0.6 -7 0 C-2.4 -0.6 -0.6 -2.4 0 -7 Z" />
+    </g>
+    <g id="duif">
+      <path d="M-11 2 C-6 -3 2 -5 9 -2 C6 1 1 3 -4 3 Z" />
+      <path d="M-2 -2 C0 -8 5 -10 9 -9 C7 -5 4 -2 1 -1" />
+      <path d="M9 -2 L13 0 L9 1" />
+    </g>
+    <g id="boek">
+      <path d="M-10 -6 C-6 -8 -3 -8 0 -6 C3 -8 6 -8 10 -6 L10 6
+               C6 4 3 4 0 6 C-3 4 -6 4 -10 6 Z" />
+      <path d="M0 -6 V6" />
+    </g>
+    <g id="kerk">
+      <path d="M-9 8 V-2 L0 -8 L9 -2 V8 Z" />
+      <path d="M-3 8 V1 H3 V8" />
+      <path d="M0 -8 V-13 M-2.5 -11 H2.5" />
+    </g>
+    <g id="vis">
+      <path d="M-11 0 C-6 -5 3 -5 8 0 C3 5 -6 5 -11 0 Z" />
+      <path d="M8 0 L13 -4 M8 0 L13 4" />
+    </g>
+    <g id="kroon">
+      <path d="M-9 5 L-9 -5 L-4.5 0 L0 -6 L4.5 0 L9 -5 L9 5 Z" />
+    </g>
+    <g id="lam">
+      <path d="M-8 3 C-10 -1 -7 -4 -4 -4 C-2 -6 2 -6 4 -4
+               C7 -4 9 -1 7 3 C4 5 -5 5 -8 3 Z" />
+      <path d="M-6 4 V7 M-2 5 V8 M2 5 V8 M6 4 V7" />
+      <path d="M7 -2 C10 -3 11 -1 10 1" />
+    </g>
+    <g id="bidhande">
+      <path d="M0 8 C-4 5 -6 0 -5 -6 C-4.5 -8 -2.5 -8 -2.5 -6 L-2.5 0" />
+      <path d="M0 8 C4 5 6 0 5 -6 C4.5 -8 2.5 -8 2.5 -6 L2.5 0" />
+    </g>
+    <g id="strale">
+      <path d="M0 -12 V-7 M8.5 -8.5 L5 -5 M12 0 H7 M8.5 8.5 L5 5
+               M0 12 V7 M-8.5 8.5 L-5 5 M-12 0 H-7 M-8.5 -8.5 L-5 -5" />
+      <circle cx="0" cy="0" r="4" />
+    </g>
+  </defs>
+
+  <rect width="360" height="520" fill="#FBF6EA" />
+
+  <!-- Die lynwerk. Een groep, een kleur, een dikte: 'n patroon met wisselende
+       lyndiktes lees soos ruis agter teks. -->
+  <g fill="none" stroke="#DFCDA8" stroke-width="1.15"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <use href="#kruis"     transform="translate(46 40)" />
+    <use href="#duif"      transform="translate(150 34) rotate(-8)" />
+    <use href="#blaar"     transform="translate(250 46) rotate(24)" />
+    <use href="#vonk"      transform="translate(318 30) scale(0.8)" />
+
+    <use href="#kroon"     transform="translate(38 118) scale(0.9)" />
+    <use href="#lam"       transform="translate(132 112)" />
+    <use href="#strale"    transform="translate(238 118) scale(0.85)" />
+    <use href="#hart"      transform="translate(316 106)" />
+
+    <use href="#boek"      transform="translate(58 196)" />
+    <use href="#kruis"     transform="translate(152 190) scale(1.15)" />
+    <use href="#blaar"     transform="translate(232 200) rotate(-30)" />
+    <use href="#kerk"      transform="translate(312 194) scale(0.9)" />
+
+    <use href="#vis"       transform="translate(44 272) scale(0.85)" />
+    <use href="#vonk"      transform="translate(118 262) scale(0.7)" />
+    <use href="#duif"      transform="translate(214 268) rotate(6) scale(0.95)" />
+    <use href="#kruis"     transform="translate(310 274)" />
+
+    <use href="#bidhande"  transform="translate(50 350)" />
+    <use href="#blaar"     transform="translate(126 344) rotate(12)" />
+    <use href="#hart"      transform="translate(196 356) scale(0.85)" />
+    <use href="#boek"      transform="translate(288 348) scale(0.9)" />
+
+    <use href="#kerk"      transform="translate(46 434) scale(0.85)" />
+    <use href="#kruis"     transform="translate(140 440) scale(0.95)" />
+    <use href="#lam"       transform="translate(232 436) scale(0.9)" />
+    <use href="#vonk"      transform="translate(316 428) scale(0.75)" />
+
+    <!-- 'n Paar klein dingetjies wat die ruimte tussenin breek, sodat die
+         rooster nie sigbaar word nie. -->
+    <use href="#vonk"      transform="translate(92 74) scale(0.5)" />
+    <use href="#hart"      transform="translate(196 78) scale(0.6)" />
+    <use href="#vonk"      transform="translate(276 152) scale(0.5)" />
+    <use href="#blaar"     transform="translate(92 156) rotate(-14) scale(0.7)" />
+    <use href="#hart"      transform="translate(180 232) scale(0.55)" />
+    <use href="#vonk"      transform="translate(268 320) scale(0.55)" />
+    <use href="#blaar"     transform="translate(160 306) rotate(40) scale(0.7)" />
+    <use href="#vonk"      transform="translate(96 398) scale(0.5)" />
+    <use href="#hart"      transform="translate(250 398) scale(0.6)" />
+    <use href="#blaar"     transform="translate(190 480) rotate(-20) scale(0.75)" />
+    <use href="#vonk"      transform="translate(92 490) scale(0.55)" />
+  </g>
+</svg>
