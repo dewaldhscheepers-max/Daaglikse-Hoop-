@@ -28,7 +28,8 @@ import {
   reageer, luisterReaksies, speldVas, rapporteer, REAKSIES,
 } from '../data/volgJesusChat'
 import {
-  keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, magChatVerwyder, ongeleesTel,
+  keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, magChatVerwyder,
+  ongeleesTel, wysNaam,
 } from '../data/volgJesusGroep'
 import { stelChat } from '../data/volgJesusGroepApi'
 import './VolgJesusChat.css'
@@ -346,7 +347,8 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
         {alles.map((b, i) => {
           const myne = b.uid === myUid
           const vorige = alles[i - 1]
-          const nuweSpreker = !vorige || vorige.uid !== b.uid
+          /* 'n Uitgeveede boodskap breek die ry — sien wysNaam(). */
+          const nuweSpreker = wysNaam(vorige, b)
           if (b.uitgevee) {
             return <div key={b.id} className="vc-uitgevee">Hierdie boodskap is verwyder.</div>
           }

@@ -192,6 +192,29 @@ export function magVerlaat(groep, uid, aantalLede) {
   }
 }
 
+/* ── Wanneer die naam bo 'n boodskap wys ──
+ *
+ * 'n Chat wys nie 'n naam bo ELKE boodskap nie — twee boodskappe agtereen van
+ * dieselfde mens hoort saam. Maar 'n UITGEVEEDE boodskap breek daardie
+ * saamhoort.
+ *
+ * Dewald: "nadat Nadia haar boodskap verwyder het en weer 'n boodskap gestuur
+ * het, toe wys haar naam nie saam die laaste boodskap nie."
+ *
+ * Die uitgeveede boodskap bly in die lys — sag uitgevee, sodat 'n fasiliteerder
+ * kan modereer sonder om gate in die gesprek te laat — en dit het steeds getel
+ * as "sy het laas gepraat". Op die skerm staan daar egter "Hierdie boodskap is
+ * verwyder" in die middel, en dan hang 'n naamlose bel onder 'n vreemde reël.
+ *
+ * Alles wat TUSSENIN geteken word, breek die ry: 'n ander spreker, en 'n
+ * uitgeveede boodskap. */
+export function wysNaam(vorige, boodskap) {
+  if (!boodskap) return false
+  if (!vorige) return true
+  if (vorige.uitgevee) return true
+  return vorige.uid !== boodskap.uid
+}
+
 /* ── Die ongeleesde telling ──
  *
  * §39: dit moet OPVALLEND wees. En dit moet reg wees: 'n mens se eie boodskap

@@ -17,7 +17,7 @@ import {
   keurVertoonnaam, keurGroepnaam, keurGemeente,
   keurBoodskap, MAKS_BOODSKAP,
   isFasiliteerder, isEienaar, magLees, magStuur, magNooi,
-  magUitvee, magVasspeld, magChatVerwyder, inChat, magVerlaat,
+  magUitvee, magVasspeld, magChatVerwyder, inChat, wysNaam, magVerlaat,
   ongeleesTel, ongeleesWoorde, uitnodiging, nooiNudge,
 } from './volgJesusGroep.js'
 
@@ -223,6 +223,30 @@ console.log('\n── Uit die GROEPCHAT, maar nie uit die groep nie ──\n')
      stilweg as "uit" tel nie — dan is 'n datafout 'n mens wat stilgemaak is. */
   is('n string tel nie as uit nie', inChat({ ...lid, chatAf: 'true' }), true)
   is('wie nie meer n lid is nie, is buite', inChat({ ...lid, status: 'verwyder' }), false)
+}
+
+console.log('\n── Wanneer die naam bo n boodskap wys ──\n')
+{
+  const nadia1 = { id: 'b1', uid: 'u-nadia', naam: 'Nadia' }
+  const nadia2 = { id: 'b2', uid: 'u-nadia', naam: 'Nadia' }
+  const dewald = { id: 'b3', uid: 'u-dewald', naam: 'Dewald' }
+  const weg    = { id: 'b4', uid: 'u-nadia', naam: 'Nadia', uitgevee: true }
+
+  is('die eerste boodskap kry n naam', wysNaam(null, nadia1), true)
+  is('twee agtereen van dieselfde mens: net een naam', wysNaam(nadia1, nadia2), false)
+  is('n ander spreker kry n naam', wysNaam(nadia1, dewald), true)
+
+  /* Dewald: "nadat Nadia haar boodskap verwyder het en weer n boodskap gestuur
+     het, toe wys haar naam nie saam die laaste boodskap nie."
+     Die uitgeveede boodskap bly in die lys, maar op die skerm staan daar
+     "Hierdie boodskap is verwyder" in die middel — en dan hang 'n naamlose bel
+     onder 'n vreemde reel. */
+  is('NA n uitgeveede boodskap kom die naam terug', wysNaam(weg, nadia2), true)
+  is('ook al is dit dieselfde mens', wysNaam(weg, nadia2), true)
+  is('en ook vir n ander mens', wysNaam(weg, dewald), true)
+
+  is('geen boodskap', wysNaam(nadia1, null), false)
+  is('geen vorige EN geen boodskap', wysNaam(null, null), false)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)
