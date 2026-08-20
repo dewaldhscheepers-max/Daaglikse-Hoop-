@@ -338,11 +338,16 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
     )
   }
 
+  /* 'n Teksblok mag 'n Skrifgedeelte dra. Week 2 se Dag 5 het "JAKOBUS 4:7–8"
+     as opskrif gehad met NIKS om dit oop te maak nie — 'n verwysing sonder 'n
+     knoppie lees soos 'n stukkende LEES-kaart, en dit is presies hoe dit vir
+     Dewald gelyk het. Die knoppie hoort waar die verwysing staan. */
   if (b.soort === 'teks') {
     return (
       <div className="vs-kaart">
         {b.kop && <div className="vs-kop">{b.kop}</div>}
         <p className="vs-lyf">{b.lyf}</p>
+        <BybelKnop skrif={b.skrif} />
       </div>
     )
   }
@@ -490,13 +495,13 @@ function Kassie({ id, prompt, waarde, stel }) {
 /* Die LEES-blok. 'n Klein reël en 'n knoppie — geen "EK HET GELEES" wat die
    pad blokkeer nie. Kan die verwysing nie ontleed word nie, verdwyn net die
    knoppie; niemand kry 'n knoppie wat niks doen nie. */
-function Lees({ merk, skrif, lyf }) {
+function BybelKnop({ skrif, bo }) {
   const [gestuur, setGestuur] = useState(false)
   const spanne = ontleedVerwysing(skrif)
   const eerste = spanne && spanne[0]
+  if (!eerste) return null
 
   function maakOop() {
-    if (!eerste) return
     try {
       window.dispatchEvent(new CustomEvent('open-bybel', {
         detail: { boek: eerste.boek, hoofstuk: eerste.hoofstuk, vers: eerste.van || null },
@@ -506,16 +511,23 @@ function Lees({ merk, skrif, lyf }) {
   }
 
   return (
+    <>
+      <button className={bo ? 'vs-lees-knop' : 'vs-lees-knop vs-lees-knop-onder'}
+              onClick={maakOop}>
+        📖  Maak in Bybel oop
+      </button>
+      {gestuur && <p className="vs-lees-nota">Die Bybel maak by {skrif} oop.</p>}
+    </>
+  )
+}
+
+function Lees({ merk, skrif, lyf }) {
+  return (
     <div className="vs-kaart vs-lees">
       {merk && <div className="vs-kop">{merk}</div>}
       <p className="vs-skrif">{skrif}</p>
-      {eerste && (
-        <button className="vs-lees-knop" onClick={maakOop}>
-          📖  Maak in Bybel oop
-        </button>
-      )}
+      <BybelKnop skrif={skrif} bo />
       {lyf && <p className="vs-lyf vs-lees-nota-lyf">{lyf}</p>}
-      {gestuur && <p className="vs-lees-nota">Die Bybel maak by {skrif} oop.</p>}
     </div>
   )
 }

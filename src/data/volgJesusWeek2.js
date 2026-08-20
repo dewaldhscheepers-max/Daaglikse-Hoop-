@@ -190,6 +190,9 @@ const DAG5 = [
   {
     soort: 'teks',
     kop: 'JAKOBUS 4:7–8',
+    /* Die verwysing staan in die opskrif, dus MOET die Bybel hier oopmaak.
+       Sonder hierdie veld is dit 'n Skrifverwysing met niks agter hom nie. */
+    skrif: 'Jakobus 4:7–8',
     lyf: 'Jakobus sê nie net “weerstaan die duiwel” nie. Hy begin met: '
        + '“Onderwerp julle aan God.” Dit verander die hele prentjie.\n\n'
        + 'Die Christelike lewe gaan nie net oor alles waarvoor jy “nee” moet sê '

@@ -22,6 +22,7 @@ import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
+import { magHerlaai, WAG_MS } from './data/herlaaiBesluit'
 import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
@@ -1043,18 +1044,48 @@ export default function App() {
     function opWakker() { if (!document.hidden) kykVirNuut() }
     document.addEventListener('visibilitychange', opWakker)
     window.addEventListener('focus', opWakker)
-    function doRefresh() {
-      if (!refreshing && !isPlayingRef.current) { refreshing = true; window.location.reload() }
+    /* 'n Nuwe weergawe WAG; hy word nie afgedwing nie. Sien magHerlaai() in
+       src/data/herlaaiBesluit.js vir hoekom. Kortom: die vorige kode het by
+       elke ontplooiing elke oop app herlaai, en Dewald het dit reg gelees as
+       "die app skop mense uit". */
+    let wagtend = false
+    /* Word die app in die agtergrond gemonteer, tel daardie tyd van NOU af. */
+    let versteekSedert = document.hidden ? Date.now() : null
+    let wekker = null
+
+    function weeg() {
+      if (magHerlaai({
+        wagtend, versteekSedert, nou: Date.now(),
+        speelKlank: isPlayingRef.current, herlaaiTans: refreshing,
+      })) { refreshing = true; window.location.reload() }
     }
-    function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') doRefresh() }
-    function onControllerChange()                                      { doRefresh() }
+    /* Terwyl die app weg is, weeg ons dit weer sodra die wagtyd verby is. 'n
+       Tydhouer in die agtergrond word deur die blaaier gerem en kan laat vuur
+       — laat is heeltemal goed genoeg, want niemand kyk nie. */
+    function stelWekker() {
+      clearTimeout(wekker)
+      if (!wagtend || versteekSedert === null) return
+      wekker = setTimeout(weeg, Math.max(1000, WAG_MS - (Date.now() - versteekSedert)) + 500)
+    }
+    function opSigbaarheid() {
+      versteekSedert = document.hidden ? Date.now() : null
+      if (!document.hidden) clearTimeout(wekker)
+      else stelWekker()
+    }
+    function merkWagtend() { wagtend = true; stelWekker(); weeg() }
+
+    function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') merkWagtend() }
+    function onControllerChange()                                      { merkWagtend() }
+    document.addEventListener('visibilitychange', opSigbaarheid)
     navigator.serviceWorker.addEventListener('message',          onMessage)
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
     return () => {
       stop = true
       clearInterval(tik)
+      clearTimeout(wekker)
       document.removeEventListener('visibilitychange', opWakker)
       window.removeEventListener('focus', opWakker)
+      document.removeEventListener('visibilitychange', opSigbaarheid)
       navigator.serviceWorker.removeEventListener('message',          onMessage)
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
     }

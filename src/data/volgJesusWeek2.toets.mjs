@@ -9,7 +9,7 @@ import {
 } from './volgJesusWeek2.js'
 import { hetDae, weekDae, blokkeVir, weekDeelsin } from './volgJesusDae.js'
 import { WEKE } from './volgJesusWeke.js'
-import { magPubliseer, publiseerFoute } from './volgJesus.js'
+import { magPubliseer, publiseerFoute, ontleedVerwysing } from './volgJesus.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -42,6 +42,22 @@ for (const d of WEEK2_DAE) {
   for (const b of d.blokke.filter(x => x.soort === 'teks')) {
     const paragrawe = String(b.lyf || '').split('\n\n').filter(Boolean).length
     waar(`dag ${d.n} se teksblok is hoogstens 3 paragrawe (${paragrawe})`, paragrawe <= 3)
+  }
+}
+
+/* Staan daar 'n Skrifverwysing op 'n blok, MOET die Bybel daar oopmaak.
+   Week 2 se Dag 5 het "JAKOBUS 4:7–8" as opskrif gehad met niks agter hom nie,
+   en dit lees soos 'n stukkende LEES-kaart. Dewald: "waar de vok staan daar
+   maak die bybel ook". Dit is 'n perk, nie 'n eenmalige regmaak nie. */
+console.log('\n── Elke Skrifverwysing maak die Bybel oop ──\n')
+for (const d of WEEK2_DAE) {
+  for (const b of d.blokke) {
+    const kopIsSkrif = (ontleedVerwysing(b.kop || '') || []).length > 0
+    if (!kopIsSkrif) continue
+    /* Die knoppie kom uit `skrif`, nooit uit die opskrif nie — 'n LEES-kaart en
+       'n teksblok werk albei so. Ontbreek `skrif`, is daar geen knoppie. */
+    const kanOopmaak = (ontleedVerwysing(b.skrif || '') || []).length > 0
+    waar(`dag ${d.n} se "${b.kop}" maak die Bybel oop`, kanOopmaak)
   }
 }
 

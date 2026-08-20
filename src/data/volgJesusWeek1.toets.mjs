@@ -21,6 +21,7 @@ import {
   WEEK1_DAE, WEEK1_REIS, WEEK1_TRANSKRIPSIE, WEEK1_OPENING, WEEK1_DEELSIN,
   WEEK1_VOLGENDE, blokkeVirDag,
 } from './volgJesusWeek1.js'
+import { ontleedVerwysing } from './volgJesus.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -58,6 +59,19 @@ for (const d of DAE) {
     if (b.soort !== 'teks') continue
     const paragrawe = String(b.lyf || '').split('\n\n').length
     waar(`dag ${d.n} se teksblok is hoogstens 3 paragrawe (${paragrawe})`, paragrawe <= 3)
+  }
+}
+
+/* Staan daar 'n Skrifverwysing op 'n blok, MOET die Bybel daar oopmaak. Die
+   knoppie kom uit `skrif`, nooit uit die opskrif nie. Week 2 se Dag 5 het 'n
+   verwysing as opskrif gehad met niks agter hom nie, en dit lees soos 'n
+   stukkende LEES-kaart. Dieselfde perk geld hier. */
+console.log('\n── Elke Skrifverwysing maak die Bybel oop ──\n')
+for (const d of DAE) {
+  for (const b of d.blokke) {
+    if (!(ontleedVerwysing(b.kop || '') || []).length) continue
+    waar(`dag ${d.n} se "${b.kop}" maak die Bybel oop`,
+         (ontleedVerwysing(b.skrif || '') || []).length > 0)
   }
 }
 

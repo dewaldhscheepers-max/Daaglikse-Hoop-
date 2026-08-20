@@ -132,6 +132,8 @@
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 .vs-lees-knop:active { background: #221C42; }
+/* Wanneer die knoppie ONDER 'n teksblok se woorde staan in plaas van bo. */
+.vs-lees-knop-onder { margin-top: 16px; }
 .vs-lees-nota { font-size: 12.5px; color: var(--purple-dark); margin-top: 10px; }
 
 /* ── HOU DIT VAS ── */
