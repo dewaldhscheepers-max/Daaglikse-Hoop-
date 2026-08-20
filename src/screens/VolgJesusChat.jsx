@@ -104,7 +104,7 @@ export function telReaksies(lys, myUid) {
   return uit
 }
 
-export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
+export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aanset = '' }) {
   const groepId = groep && groep.id
   const myUid = myLid && myLid.uid
 
@@ -283,6 +283,16 @@ export default function VolgJesusChat({ groep, myLid, opSluit, aanset = '' }) {
             {groep.aantalLede || 0} {(groep.aantalLede || 0) === 1 ? 'lid' : 'lede'}
           </span>
         </div>
+        {/* Die spyskaart. Alles wat 'n mens met die GROEP doen — nooi, die
+            groepsessie, wie uit die chat is, verlaat — staan op een plek, en dit
+            is bereikbaar van BINNE die gesprek af. Dit was net bo op die
+            VOLG JESUS-skerm, en 'n fasiliteerder wat in die chat sit, moes eers
+            uitklim om by die instellings te kom. */}
+        {opInstellings && (
+          <button className="vc-menu" onClick={opInstellings} aria-label="Groep-instellings">
+            <span /><span /><span />
+          </button>
+        )}
       </div>
 
       {/* §42. Een keer, en dan nooit weer nie. */}

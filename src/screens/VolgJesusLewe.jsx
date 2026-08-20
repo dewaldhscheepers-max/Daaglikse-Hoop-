@@ -32,7 +32,7 @@ import { tel } from '../data/volgJesusTel'
 import VolgJesusChat, { GroepKnoppie, useOngelees } from './VolgJesusChat'
 import {
   GroepOfSolo, KryJouByMense, VoorJyAlleenBegin, SluitAan, BeginGroep,
-  GroepGereed, NooiPastoor, GroepInstellings, Groepsessie, FasiliteerderGids,
+  GroepGereed, NooiPastoor, GroepInstellings, Groepsessie,
 } from './VolgJesusGroep'
 import { myGroepe } from '../data/volgJesusGroepApi'
 import { myUid } from '../data/volgJesusIdentiteit'
@@ -273,12 +273,12 @@ export default function VolgJesusLewe({ onClose: opToe }) {
                           opBlad={setGroepBlad}
                           opUit={() => { setGroep(null); setMyLid(null); kiesSolo() }} />
       : null,
-    /* Die groepsessie staan APART van die vyf dae en blokkeer niks (§44). Die
-       gids wys NET vir 'n fasiliteerder. */
+    /* Die groepsessie staan APART van die vyf dae en blokkeer niks (§44).
+       Die fasiliteerder-gids is weg. Dewald: "die fasiliteerder se notas is
+       eintlik nie nodig nie." Hy is reg — die groepsessie sê alles wat 'n mens
+       nodig het om die gesprek te lei, en 'n tweede skerm met notas is nog 'n
+       ding om te lees voordat 'n mens kan begin. */
     sessie: <Groepsessie opTerug={() => setGroepBlad('instellings')} />,
-    gids: myLid && myLid.rol === 'fasiliteerder'
-      ? <FasiliteerderGids opTerug={() => setGroepBlad('instellings')} />
-      : null,
   }[groepBlad]
 
   if (modus === 'wag') {
@@ -445,6 +445,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
           groep={groep}
           myLid={myLid}
           aanset={chatAanset}
+          opInstellings={() => { setChatAanset(''); setGroepBlad('instellings') }}
           opSluit={() => { setGroepBlad(null); setChatAanset('') }}
         />
       )}

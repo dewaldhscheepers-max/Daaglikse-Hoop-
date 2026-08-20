@@ -14,7 +14,6 @@ import { useState, useEffect } from 'react'
 import {
   skepGroep, kykGroep, sluitAan, verlaatGroep, roteerKode, stelChat,
 } from '../data/volgJesusGroepApi'
-import { koppelGoogle, isGekoppel, KOPPEL_REDE } from '../data/volgJesusIdentiteit'
 import { keurGroepkode, uitnodiging, nooiNudge } from '../data/volgJesusGroep'
 import { haalLede } from '../data/volgJesusChat'
 import './VolgJesusGroep.css'
@@ -377,123 +376,10 @@ export function Groepsessie({ opTerug }) {
   )
 }
 
-/* ── Die fasiliteerder-gids (§45) ──
- *
- * "Die fasiliteerder moet nie 'n tweede kursus moet studeer nie. Maksimum
- * ongeveer 3 minute voorbereiding."
- *
- * Dit wys NET vir 'n fasiliteerder. 'n Gewone deelnemer sien dit nooit.
- */
-export function FasiliteerderGids({ opTerug }) {
-  return (
-    <div className="vg">
-      <div className="vg-kop">
-        <button className="vg-terug" onClick={opTerug}>‹ Terug</button>
-        <div className="vg-merk">FASILITEERDER · ±3 MINUTE OM TE LEES</div>
-        <h1>Jou doel</h1>
-        <p className="vg-groot">Help mense om na Jesus te kyk.</p>
-      </div>
-
-      <div className="vg-kaart">
-        <div className="vg-kop2">DIE KERNWAARHEID</div>
-        <p>
-          Die vraag is persoonlik, maar die Evangelies bepaal die inhoud van die
-          antwoord. Ons antwoord op Jesus — ons skep Hom nie.
-        </p>
-        <p>Hou aan vra: <strong>“Wat wys die teks vir ons oor Jesus?”</strong></p>
-      </div>
-
-      <div className="vg-kaart">
-        <div className="vg-kop2">MOENIE</div>
-        <ul className="vg-lys">
-          <li>private dinge uit mense probeer trek nie</li>
-          <li>twyfel verneder nie</li>
-          <li>elke antwoord met ’n mini-preek opvolg nie</li>
-          <li>teologiese antwoorde uitdink nie</li>
-          <li>stilte vrees nie</li>
-        </ul>
-      </div>
-
-      <div className="vg-kaart">
-        <div className="vg-kop2">AS IEMAND SÊ: “EK WEET NIE OF EK GLO NIE”</div>
-        <p className="vg-aanhaling">
-          Dankie dat jy eerlik is. Hou saam met ons aan om na Jesus te kyk.
-        </p>
-      </div>
-
-      <div className="vg-kaart">
-        <div className="vg-kop2">AS DIE GROEP STIL RAAK</div>
-        <p className="vg-aanhaling">
-          As Johannes 1 al was wat ons oor Jesus gehad het, wat sou ons vandag
-          van Hom weet?
-        </p>
-      </div>
-
-      <div className="vg-kaart vg-veilig">
-        <div className="vg-kop2">VEILIGHEID</div>
-        <p>
-          Beskryf iemand onmiddellike gevaar, mishandeling of selfbesering,
-          hanteer dit NIE as gewone groepsgesprek nie. Gebruik die app se
-          Hulp&nbsp;Nou.
-        </p>
-      </div>
-    </div>
-  )
-}
-
-/* ── Wie uit die groepchat is ────────────────────────────────────────
- *
- * Die fasiliteerder haal iemand uit die gesprek by die boodskap self. Hier is
- * die pad TERUG, en dit is die helfte wat 'n mens vergeet om te bou: 'n knoppie
- * wat 'n mens per ongeluk druk, moet 'n weg terug hê.
- *
- * Die lede kom direk uit Firestore — 'n lid mag sy eie groep se lede lees. */
-function UitDieChat({ groep }) {
-  const [uit, setUit]   = useState(null)   /* null = nog nie gekyk nie */
-  const [besig, setBesig] = useState('')
-
-  useEffect(() => {
-    let dood = false
-    if (!groep || !groep.id) return
-    haalLede(groep.id)
-      .then(l => { if (!dood) setUit(l.filter(x => x.chatAf === true)) })
-      .catch(() => { if (!dood) setUit([]) })
-    return () => { dood = true }
-  }, [groep && groep.id])
-
-  async function terug(lid) {
-    setBesig(lid.uid)
-    const r = await stelChat(groep.id, lid.uid, true)
-    setBesig('')
-    if (r && r.ok) setUit(v => v.filter(x => x.uid !== lid.uid))
-  }
-
-  if (!uit || !uit.length) return null
-
-  return (
-    <div className="vg-kaart vg-uitchat">
-      <div className="vg-kop2">UIT DIE GROEPCHAT</div>
-      <p className="vg-fyn">
-        Hulle doen die program soos altyd — net die gesprek is toe.
-      </p>
-      {uit.map(l => (
-        <div key={l.uid} className="vg-uitchat-ry">
-          <span>{l.naam || 'Iemand'}</span>
-          <button disabled={besig === l.uid} onClick={() => terug(l)}>
-            {besig === l.uid ? 'Besig…' : 'Sit terug'}
-          </button>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-/* ── Die groep se instellings ───────────────────────────────────────── */
 export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
   const [nota, setNota]   = useState('')
   const [kode, setKode]   = useState(groep.kode)
   const [besig, setBesig] = useState(false)
-  const [gekoppel, setGekoppel] = useState(isGekoppel())
   const nudge = nooiNudge(groep.aantalLede)
 
   return (
@@ -520,40 +406,24 @@ export function GroepInstellings({ groep, myLid, opTerug, opUit, opBlad }) {
         + NOOI IEMAND
       </button>
 
-      {/* ── Beveilig die groep ──
-          Nie 'n muur nie: die groep werk met of sonder dit. Wat 'n mens sonder
-          dit verloor, is herstel ná 'n herinstallasie — en dit staan hier in
-          soveel woorde. */}
-      {!gekoppel && (
-        <div className="vg-kaart vg-koppel">
-          <div className="vg-kop2">BEVEILIG JOU GROEP</div>
-          <p>{KOPPEL_REDE}</p>
-          <button className="vg-tweede" disabled={besig} onClick={async () => {
-            setBesig(true); setNota('')
-            const r = await koppelGoogle()
-            setBesig(false)
-            if (r.ok) { setGekoppel(true); setNota('Jou groep is nou aan jou rekening gekoppel.') }
-            else if (r.fout) setNota(r.fout)
-          }}>
-            {besig ? 'Besig…' : 'MELD AAN MET GOOGLE'}
-          </button>
-        </div>
-      )}
-
-      {/* Wie uit die groepchat is. Dit wys NET as daar iemand is — 'n leë blok
-          met 'n opskrif is 'n blok wat 'n mens leer om te ignoreer.
-          Die bevestiging in die chat belowe hierdie pad terug; sonder dit is
-          'n mens wat per ongeluk gedruk het, vas. */}
-      {myLid && myLid.rol === 'fasiliteerder' && <UitDieChat groep={groep} />}
+      {/* ── Waarom "Meld aan met Google" weg is ──
+       *
+       * Dewald: "werk meld aan met google? is dit nie beter om dit af te haal
+       * nie."
+       *
+       * Dit het NIE gewerk nie. Google-aanmelding moet in die Firebase-projek
+       * aangeskakel wees, en net Anonymous is aan. Die knoppie sou dus misluk
+       * het — en 'n knoppie wat niks doen nie, is erger as geen knoppie: die
+       * mens dink die app is stukkend, en dit was sy enigste tree.
+       *
+       * Wat 'n mens daarsonder verloor, is herstel ná 'n herinstallasie. Dit is
+       * regtig iets, maar dit is nie soveel werd soos 'n belofte wat breek nie.
+       * Skakel Google eendag aan in die konsole, dan kom hierdie blok terug —
+       * die kode daaragter (koppelGoogle in volgJesusIdentiteit.js) bly staan. */}
 
       <button className="vg-tweede" onClick={() => opBlad && opBlad('sessie')}>
         DIE GROEPSESSIE
       </button>
-      {myLid && myLid.rol === 'fasiliteerder' && (
-        <button className="vg-tweede" onClick={() => opBlad && opBlad('gids')}>
-          FASILITEERDER-GIDS
-        </button>
-      )}
 
       {myLid && myLid.rol === 'fasiliteerder' && groep.eienaar === myLid.uid && (
         <button className="vg-tweede" disabled={besig} onClick={async () => {
