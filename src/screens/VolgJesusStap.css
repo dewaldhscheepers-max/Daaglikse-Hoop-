@@ -152,8 +152,15 @@
 .vs-bid {
   background: #F6F2FD; border: 1px solid #E4DAF6; border-radius: 16px; padding: 22px 18px;
 }
+/* Die gebed was in Cormorant Garamond op 17px. Daardie letter is 'n
+   vertoonletter met 'n klein x-hoogte en dun stamme — op 'n foon in die hand
+   lees dit sowat 'n derde kleiner as wat die getal se, en dit is presies die
+   blok wat 'n mens hardop moet kan lees. Dit staan nou in die lyfletter,
+   groter en swaarder. */
 .vs-bid p {
-  font-family: var(--font-serif); font-size: 17px; line-height: 1.85;
+  font-family: var(--font-body);
+  font-size: clamp(18px, 4.9vw, 20px); line-height: 1.75; font-weight: 500;
+  letter-spacing: -.1px;
   white-space: pre-line; color: var(--text); margin: 0;
 }
 
@@ -199,7 +206,7 @@
   opacity: .9; margin-bottom: 12px;
 }
 .vs-terugblik blockquote {
-  margin: 0; font-family: var(--font-serif); font-size: 19px; line-height: 1.7;
+  margin: 0; font-family: var(--font-serif); font-size: 21px; line-height: 1.6;
   white-space: pre-line;
   border-left: 3px solid var(--gold, #E0B872); padding-left: 14px;
 }
@@ -207,7 +214,7 @@
 .vs-reis-ry { margin-top: 16px; }
 .vs-reis-ry span { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
 .vs-reis-ry blockquote {
-  margin: 0; font-family: var(--font-serif); font-size: 16.5px; line-height: 1.7;
+  margin: 0; font-family: var(--font-serif); font-size: 18.5px; line-height: 1.6;
   white-space: pre-line; color: var(--text);
   border-left: 3px solid #E0D6F4; padding-left: 13px;
 }

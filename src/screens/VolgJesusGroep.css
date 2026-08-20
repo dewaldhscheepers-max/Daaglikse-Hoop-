@@ -120,7 +120,11 @@
 .vg-vrae li { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 10px; }
 .vg-vrae li:last-child { margin-bottom: 0; }
 .vg-gebed { background: #F6F2FD; border-color: #E4DAF6; }
-.vg-gebed p { font-family: var(--font-serif); font-size: 16.5px !important; line-height: 1.8 !important; }
+/* Dieselfde as .vs-bid: 'n gebed word hardop gelees, dus lyfletter. */
+.vg-gebed p {
+  font-family: var(--font-body); font-size: 17.5px !important;
+  line-height: 1.75 !important; font-weight: 500;
+}
 .vg-aanhaling {
   font-family: var(--font-serif); font-size: 16px !important; line-height: 1.7 !important;
   border-left: 3px solid #E0D6F4; padding-left: 13px; color: var(--text) !important;
