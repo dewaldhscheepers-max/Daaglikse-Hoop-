@@ -44,8 +44,16 @@ console.log('\n── Dit mag nie soos huiswerk voel nie ──\n')
 /* Die getal blokke is die naaste ding aan "hoe lank voel dit". Meer as vyf op
    een dag, en 'n mens skuif deur 'n werkboek. Dag 1 dra die stemboodskap en
    mag die grootste wees. */
+/* Die wallpaper en die groepbrug tel NIE saam nie. Hulle is nie werk wat 'n
+   mens moet deurwerk — die een is 'n prent om te hou, die ander 'n deur na die
+   groep. Hulle saamgetel het my Week 2 se Dag 5 se LEES-kaart laat uitgooi om
+   binne vyf te bly, en toe staan daar 'n Skrifverwysing sonder 'n knoppie.
+   Dewald: "waar de vok staan daar maak die bybel ook". Ons meet dus die INHOUD. */
+const EKSTRA = ['wallpaper', 'groepbrug']
+const inhoudBlokke = d => d.blokke.filter(b => !EKSTRA.includes(b.soort))
 for (const d of DAE) {
-  waar(`dag ${d.n} het hoogstens 5 blokke (${d.blokke.length})`, d.blokke.length <= 5)
+  const n = inhoudBlokke(d).length
+  waar(`dag ${d.n} het hoogstens 5 inhoudsblokke (${n})`, n <= 5)
 }
 /* Hoogstens twee private antwoorde per dag. Dit is Dewald se eie perk. */
 for (const d of DAE) {
@@ -53,12 +61,14 @@ for (const d of DAE) {
     b.soort === 'vraag' ? [b.id] : (b.soort === 'kies' && b.vraag ? [b.vraag.id] : []))
   waar(`dag ${d.n} vra hoogstens 2 antwoorde (${vrae.length})`, vrae.length <= 2)
 }
-/* Geen "DINK HIERAAN"-blok van ses paragrawe nie. */
+/* Dit was "hoogstens 3 paragrawe". Daardie getal het die verkeerde ding gemeet:
+   Dewald skryf in kort paragrawe met wit tussenin, en dit LEES makliker as drie
+   dig gepakte blokke. Wat werklik saak maak, is hoeveel daar is om te lees. */
 for (const d of DAE) {
   for (const b of d.blokke) {
     if (b.soort !== 'teks') continue
-    const paragrawe = String(b.lyf || '').split('\n\n').length
-    waar(`dag ${d.n} se teksblok is hoogstens 3 paragrawe (${paragrawe})`, paragrawe <= 3)
+    const woorde = String(b.lyf || '').split(/\s+/).filter(Boolean).length
+    waar(`dag ${d.n} se teksblok is hoogstens 180 woorde (${woorde})`, woorde <= 180)
   }
 }
 
@@ -155,11 +165,13 @@ waar(`hoogstens 5 paragrawe (${WEEK1_OPENING.split('\n\n').length})`,
      WEEK1_OPENING.split('\n\n').length <= 5)
 waar('en hoogstens 400 karakters', WEEK1_OPENING.length <= 400)
 
-console.log('\n── Elke gebed is een kort reel, en uniek ──\n')
+console.log('\n── Elke gebed is kort genoeg om hardop te bid, en uniek ──\n')
 const gebede = DAE.flatMap(d => d.blokke.filter(b => b.soort === 'gebed').map(b => b.lyf))
 is('elke gebed is uniek', new Set(gebede).size, gebede.length)
 for (const g of gebede.slice(0, gebede.length - 1)) {
-  waar(`"${g.slice(0, 28)}…" is kort`, g.length < 140)
+  /* 140 was te styf sodra 'n gebed die dag se vraag opneem. 300 is steeds
+     hoogstens 'n paar sinne — genoeg om in een asem hardop te bid. */
+  waar(`"${g.slice(0, 28)}…" is kort (${g.length})`, g.length <= 300)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

@@ -410,6 +410,7 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
         {gekies && b.vraag && (
           <div className="vs-opvolg">
             <div className="vs-kop">{b.vraag.kop}</div>
+            {b.vraag.lyf && <p className="vs-lyf">{b.vraag.lyf}</p>}
             <Kassie id={b.vraag.id} prompt={b.vraag.prompt || 'Skryf dit hier neer…'}
                     waarde={antwoorde[b.vraag.id] || ''} stel={stel} />
           </div>

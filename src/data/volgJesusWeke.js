@@ -78,8 +78,8 @@ export const WEKE = {
       'M\u00f4re: ons hou vir \u2019n paar minute op vra wat Jesus vir ons kan doen, en kyk net na Wie Hy is.',
     dag1Titel: 'Wie s\u00ea j\u00fd is Jesus?',
     dag2Titel: 'Kyk weer na Jesus',
-    dag3Titel: 'Wat wys my lewe eintlik oor wat ek glo?',
-    dag4Titel: 'Het ek Jesus kleiner gemaak?',
+    dag3Titel: 'Waar raak dit jou lewe?',
+    dag4Titel: 'Volg ek Jesus soos Hy werklik is?',
     dag5Titel: 'Nou antwoord jy',
     groepVraag1:
       'Waarom is dit makliker om te vertel wat ander mense van Jesus glo as om self te antwoord?',
@@ -132,7 +132,7 @@ export const WEKE = {
       'M\u00f4re: ons kyk na die plek waar jy die maklikste getrek word \u2014 en hoekom dit juis daar gebeur.',
     dag1Titel: 'Nie elke stem verdien dat jy dit glo nie',
     dag2Titel: 'Ken jou swak plek',
-    dag3Titel: 'Besluit vooraf wat waar is',
+    dag3Titel: 'Weet vooraf wat waar is',
     dag4Titel: 'Maak afstand',
     dag5Titel: 'Kies wie jy volg',
     groepVraag1:

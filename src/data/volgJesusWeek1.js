@@ -113,48 +113,92 @@ const DAG2 = [
 
 const DAG3 = [
   {
+    soort: 'teks',
+    kop: 'DINK EERLIK HIERAAN',
+    lyf: 'Dit is maklik om te sê:\n\n'
+       + '“Jesus is Here.”\n\n'
+       + 'Maar daardie waarheid raak ons lewe juis op die plekke waar dit '
+       + 'moeilik is om Hom te vertrou of te gehoorsaam.\n\n'
+       + 'Miskien is daar vandag een area waar jy nog alles self probeer beheer.',
+  },
+  {
     soort: 'kies',
+    /* Die id bly `area`. Verander dit, en elke mens wat hierdie dag reeds
+       gedoen het, verloor sy antwoord — dit lê onder `vj_a_w1_area` op sy
+       eie foon en niemand kan dit vir hom terugsit nie. */
     id: 'area',
-    kop: 'KIES EEN.',
-    lyf: 'Waar is dit vandag vir jou die moeilikste om Jesus te vertrou of te volg?',
+    kop: 'WAAR IS DIT VIR JOU DIE MOEILIKSTE OM JESUS TE VERTROU OF TE VOLG?',
     opsies: [
       { waarde: 'vrees',   woorde: 'Vrees' },
       { waarde: 'geld',    woorde: 'Geld' },
       { waarde: 'seer',    woorde: 'Iemand het my seergemaak' },
-      { waarde: 'besluit', woorde: 'Ek moet ’n besluit neem' },
+      { waarde: 'besluit', woorde: 'Ek moet ’n belangrike besluit neem' },
       { waarde: 'privaat', woorde: 'My private lewe' },
+      { waarde: 'anders',  woorde: 'Iets anders' },
     ],
     /* EEN opvolgvraag, en dieselfde een vir elke keuse. Vyf verskillende
        vraagpare was vyf keer soveel skerm vir dieselfde ding. */
     vraag: {
       id: 'volg3',
-      kop: 'AS JESUS WERKLIK HERE IS, HOE SOU DIT LYK OM HOM JUIS HIER TE VERTROU EN TE VOLG?',
+      kop: 'WAT SOU DIT BETEKEN OM JESUS JUIS HIER TE VOLG?',
+      lyf: 'Dink aan die area wat jy gekies het.\n\n'
+         + 'Vra jouself:\n\n'
+         + 'As Jesus werklik Here is, wat sou dit vandag beteken om Hom juis '
+         + 'hiermee te vertrou en te gehoorsaam?',
+      prompt: 'Skryf dit hier neer…',
     },
   },
-  { soort: 'gebed', lyf: 'Jesus, leer my om U juis hier te vertrou en te volg. Amen.' },
+  {
+    soort: 'gebed',
+    lyf: 'Jesus, U weet presies waar ek sukkel om U te vertrou. Help my om nie '
+       + 'net met my mond te sê dat U Here is nie, maar om U ook in hierdie deel '
+       + 'van my lewe te volg. Wys my wat my volgende tree van vertroue en '
+       + 'gehoorsaamheid is. Amen.',
+  },
 ]
 
 const DAG4 = [
   {
     soort: 'teks',
-    /* Hoogstens 100–150 woorde. Dit is die hele devotional vir Dag 4. */
-    lyf: 'Ons hou maklik van Jesus wat troos, help en vergewe.\n\n' +
-         'Maar dieselfde Jesus lei. Hy korrigeer. Hy roep ons om te verander.\n\n' +
-         'Daarom moet elke dissipel soms vra: volg ek Jesus soos Hy werklik is… of net die weergawe van Jesus wat vir my gemaklik is?',
+    lyf: 'Dit is maklik om Jesus te volg wanneer Sy woorde ons troos, hoop gee '
+       + 'en moed gee.\n\n'
+       + 'Maar Jesus doen meer as dit.\n\n'
+       + 'Hy lei ons.\n'
+       + 'Hy wys vir ons waar ons verkeerd loop.\n'
+       + 'Hy wys vir ons wat in ons lewe moet verander.\n'
+       + 'En soms vra gehoorsaamheid dat ons iets moet doen wat nie maklik is nie.\n\n'
+       + 'Daarom moet ons onsself eerlik vra:\n\n'
+       + 'Volg ek Jesus soos Hy werklik is — of net wanneer dit wat Hy sê, by my '
+       + 'eie wil pas?\n\n'
+       + 'As ek net die dele van Jesus aanvaar waarvan ek hou, volg ek '
+       + 'uiteindelik ’n Jesus wat ek self gevorm het.',
   },
-  { soort: 'groot', lyf: '’n Jesus wat jy self kan vorm,\nkan jou nooit vorm nie.' },
+  { soort: 'groot', lyf: '’N JESUS WAT JY SELF KAN VORM,\nKAN JOU NOOIT VORM NIE.' },
   {
     soort: 'kies',
     id: 'moeilikste',
-    kop: 'WAT IS VIR JOU DIE MOEILIKSTE?',
+    kop: 'WAAR SUKKEL JY DIE MEESTE?',
     opsies: [
-      { waarde: 'lei',       woorde: 'Wanneer Jesus my lei' },
-      { waarde: 'korrigeer', woorde: 'Wanneer Jesus my korrigeer' },
-      { waarde: 'verander',  woorde: 'Wanneer Jesus my roep om te verander' },
+      { waarde: 'lei',       woorde: 'Wanneer Jesus my lei in ’n rigting wat ek nie self sou kies nie' },
+      { waarde: 'korrigeer', woorde: 'Wanneer Sy Woord vir my wys dat iets in my lewe moet verander' },
+      { waarde: 'verander',  woorde: 'Wanneer gehoorsaamheid aan Jesus vir my moeilik is' },
+      { waarde: 'anders',    woorde: 'Iets anders' },
     ],
-    vraag: { id: 'waarom4', kop: 'WAAROM?' },
   },
-  { soort: 'gebed', lyf: 'Jesus, gee my die nederigheid om U te volg, ook wanneer U my uitdaag. Amen.' },
+  {
+    soort: 'vraag',
+    id: 'waarom4',
+    kop: 'DINK EERLIK HIEROOR',
+    lyf: 'Is daar iets in jou lewe waarvan jy reeds weet Jesus wil hê jy moet '
+       + 'dit anders doen, maar waarmee jy steeds sukkel?',
+    prompt: 'Skryf dit hier neer…',
+  },
+  {
+    soort: 'gebed',
+    lyf: 'Jesus, help my om U te volg soos U werklik is, ook wanneer dit wat U '
+       + 'vra nie maklik is nie. Wys my waar ek moet verander en gee my die '
+       + 'nederigheid en moed om U te gehoorsaam. Amen.',
+  },
 ]
 
 const DAG5 = [
@@ -194,13 +238,13 @@ export const WEEK1_DAE = [
     blokke: DAG2,
   },
   {
-    n: 3, titel: 'Waar raak dit my lewe?', merk: 'MY WERKLIKE LEWE',
+    n: 3, titel: 'Waar raak dit jou lewe?', merk: 'MY WERKLIKE LEWE',
     knop: 'KLAAR VIR VANDAG',
     klaarKop: 'DAG 3 KLAAR.',
     blokke: DAG3,
   },
   {
-    n: 4, titel: 'Het ek ’n Jesus gevorm wat by mý pas?', merk: 'DIE SNY',
+    n: 4, titel: 'Volg ek Jesus soos Hy werklik is?', merk: 'DIE SNY',
     knop: 'KLAAR VIR VANDAG',
     klaarKop: 'DAG 4 KLAAR.',
     blokke: DAG4,

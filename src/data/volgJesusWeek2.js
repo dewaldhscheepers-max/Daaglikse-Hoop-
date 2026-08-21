@@ -72,18 +72,27 @@ const DAG2 = [
     soort: 'lees',
     merk: 'LEES EERS',
     skrif: 'Jakobus 1:13–16',
-    lyf: 'Lees stadig en let op hoe Jakobus beskryf dat begeerte ’n mens kan wegtrek en verlei.',
+    lyf: 'Lees stadig en let op hoe Jakobus verduidelik dat versoeking dikwels '
+       + 'by ons eie begeertes aanknoop en ons probeer wegtrek van wat reg is.',
   },
   {
     soort: 'teks',
-    kop: '’N STERK BEGEERTE IS NIE GOD SE TOESTEMMING NIE',
-    lyf: 'Versoeking kom nie altyd op dieselfde manier nie. Jakobus wys dat dit '
-       + 'by ons begeertes kan aanknoop en ons kan probeer wegtrek. Daarom is '
-       + 'dit belangrik om te weet wanneer jy die kwesbaarste is.\n\n'
-       + 'Vir die een is dit wanneer hy eensaam voel. Vir iemand anders is dit '
-       + 'wanneer hy kwaad, moeg, bang, verwerp of onder geweldige druk is.\n\n'
-       + 'Jesus was honger toe die versoeker Hom uitdaag om klippe in brood te '
-       + 'verander. Die honger was werklik. Maar Sy behoefte het nie bepaal wat reg is nie.',
+    kop: '’N STERK BEHOEFTE MAAK ’N VERKEERDE KEUSE NIE REG NIE',
+    lyf: 'Versoeking tref ons nie almal op dieselfde plek nie.\n\n'
+       + 'Vir die een kom dit wanneer hy eensaam voel. Vir iemand anders wanneer '
+       + 'hy kwaad, moeg, bang, verwerp of onder groot druk is.\n\n'
+       + 'Daarom is dit belangrik om jou eie swak plekke te ken.\n\n'
+       + 'Jesus was honger toe die duiwel Hom versoek het om klippe in brood te '
+       + 'verander. Sy honger was werklik, maar dit het ’n verkeerde keuse nie '
+       + 'reg gemaak nie.\n\n'
+       + 'Dieselfde geld vir ons.\n\n'
+       + 'Jy kan werklik eensaam wees, maar dit beteken nie enige verhouding is '
+       + 'reg nie.\n\n'
+       + 'Jy kan werklik geld nodig hê, maar dit beteken nie enige manier om dit '
+       + 'te kry, is reg nie.\n\n'
+       + 'Jy kan werklik seergekry het, maar dit maak wraak nie reg nie.\n\n'
+       + 'Wanneer jy weet wanneer jy die kwesbaarste is, kan jy versoeking vroeër '
+       + 'raaksien voordat dit jou wegtrek.',
   },
   {
     soort: 'kies',
@@ -92,24 +101,18 @@ const DAG2 = [
     opsies: [
       { waarde: 'eensaam',  woorde: 'Wanneer ek eensaam voel' },
       { waarde: 'kwaad',    woorde: 'Wanneer ek kwaad of seergemaak is' },
-      { waarde: 'moeg',     woorde: 'Wanneer ek moeg of gestres is' },
+      { waarde: 'moeg',     woorde: 'Wanneer ek moeg of onder groot druk is' },
       { waarde: 'bang',     woorde: 'Wanneer ek bang is' },
       { waarde: 'verwerp',  woorde: 'Wanneer ek verwerp voel' },
       { waarde: 'geld',     woorde: 'Wanneer ek geld of sekuriteit nodig het' },
-      { waarde: 'anders',   woorde: 'Iets anders' },
     ],
-    vraag: {
-      id: 'kwesbaar2_hoekom',
-      kop: 'WAT PROBEER JY IN DAARDIE OOMBLIK KRY, BEWYS OF LAAT OPHOU VOEL?',
-      prompt: 'Skryf dit hier neer…',
-    },
   },
   {
     soort: 'gebed',
-    lyf: 'Vader, wys my waar ek maklik getrek word. Gee my die eerlikheid om my '
-       + 'swak plekke raak te sien sonder om dit weg te steek of te verskoon. '
-       + 'Help my om nie ’n verkeerde antwoord te kies net omdat die behoefte '
-       + 'sterk voel nie. Amen.',
+    lyf: 'Vader, wys my waar ek die maklikste versoek word. Help my om eerlik te '
+       + 'wees oor my swak plekke en dit nie weg te steek of te verskoon nie. '
+       + 'Gee my wysheid om versoeking vroeg raak te sien en krag om te kies wat '
+       + 'reg is, selfs wanneer die behoefte sterk voel. Amen.',
   },
   { soort: 'wallpaper', bronVeld: 'wallpaperDag1', kop: 'HOU DIT VOOR JOU' },
 ]
@@ -119,24 +122,35 @@ const DAG3 = [
     soort: 'lees',
     merk: 'LEES EERS',
     skrif: 'Psalm 119:9–11',
-    lyf: 'Let op hoe die psalmdigter God se Woord in sy hart bêre.',
+    lyf: 'Lees stadig en let op hoe die psalmdigter God se Woord in sy hart '
+       + 'bewaar, sodat dit sy lewe kan rig.',
   },
   {
     soort: 'teks',
-    kop: 'BESLUIT VOORAF',
-    lyf: 'Toe Jesus versoek word, antwoord Hy: “Daar staan geskrywe.” Hy begin '
-       + 'nie eers in die oomblik van versoeking uitwerk wat reg en waar is '
-       + 'nie. Hy antwoord vanuit wat God reeds gesê het.\n\n'
-       + 'Dit is waarom voorbereiding belangrik is. As jy weet waar jy maklik '
-       + 'struikel, moet jy vooraf weet wat God se Woord daaroor sê.\n\n'
-       + 'Wanneer die druk kom, is dit baie moeiliker om helder te dink.',
+    kop: 'MOENIE WAG TOTDAT VERSOEKING KOM OM TE BESLUIT WAT REG IS NIE',
+    lyf: 'Toe Jesus in die woestyn versoek is, het Hy telkens geantwoord:\n\n'
+       + '“Daar staan geskrywe…”\n\n'
+       + 'Jesus het geweet wat God gesê het, en Hy het daarby gebly.\n\n'
+       + 'Dit leer ons iets belangriks:\n\n'
+       + 'Moenie eers in die middel van versoeking probeer besluit wat reg en '
+       + 'verkeerd is nie.\n\n'
+       + 'As jy weet waar jy maklik struikel, vra vooraf: wat sê God se Woord '
+       + 'hieroor?\n\n'
+       + 'Wanneer jy eensaam, kwaad, bang of onder groot druk is, kan dit '
+       + 'moeiliker wees om helder te dink. Daarom is dit belangrik om God se '
+       + 'waarheid reeds te ken voordat daardie oomblik kom.\n\n'
+       + 'As jy byvoorbeeld weet dat jy maklik teruggaan na iets wat jou van God '
+       + 'af wegtrek, besluit vooraf:\n\n'
+       + '“Wanneer hierdie versoeking weer kom, gaan ek nie my gevoelens laat '
+       + 'bepaal wat reg is nie. Ek gaan kies wat God sê.”',
   },
   {
     soort: 'vraag',
-    kop: 'WAT IS DIE WAARHEID?',
+    kop: 'WAT MOET JY ONTHOU WANNEER VERSOEKING WEER KOM?',
     id: 'waarheid3',
-    lyf: 'Dink aan die versoeking wat jy hierdie week geïdentifiseer het.',
-    prompt: 'Watter waarheid uit God se Woord moet reeds in jou hart wees wanneer dit weer kom?',
+    lyf: 'Watter waarheid uit God se Woord moet reeds in jou hart wees wanneer '
+       + 'jy weer versoek word?',
+    prompt: 'Skryf dit hier neer…',
   },
   {
     soort: 'groot',
@@ -144,9 +158,10 @@ const DAG3 = [
   },
   {
     soort: 'gebed',
-    lyf: 'Here, bêre U Woord diep in my hart. Help my om nie net die waarheid te '
-       + 'ken wanneer alles rustig is nie, maar daarop te staan wanneer die druk '
-       + 'kom. Help my om vooraf te besluit: ek wil U gehoorsaam. Amen.',
+    lyf: 'Here, help my om U Woord te ken en in my hart te bewaar. Wanneer '
+       + 'versoeking of druk kom, help my om nie deur my gevoelens of begeertes '
+       + 'gelei te word nie, maar deur wat U reeds gesê het. Gee my die krag om '
+       + 'vooraf te besluit dat ek U wil gehoorsaam. Amen.',
   },
 ]
 
@@ -155,74 +170,92 @@ const DAG4 = [
     soort: 'lees',
     merk: 'LEES EERS',
     skrif: '1 Korintiërs 10:12–13',
-    lyf: 'Lees stadig wat Paulus oor versoeking en die uitkoms sê.',
+    lyf: 'Lees stadig en let op wat Paulus sê: wanneer versoeking kom, gee God '
+       + 'ook ’n uitweg sodat jy kan staande bly.',
   },
   {
     soort: 'teks',
-    kop: 'SOMS LYK WEERSTAND SOOS WEGSTAP',
-    lyf: 'Ons dink soms geestelike krag beteken dat jy naby versoeking kan bly '
-       + 'en dit net harder moet probeer weerstaan. Maar die Bybel sê dat God '
-       + 'saam met die versoeking ook ’n uitkoms gee.\n\n'
-       + 'Daardie uitweg kan baie prakties wees. Maak dit toe. Stap weg. Verlaat '
-       + 'die gesprek. Blokkeer die nommer. Moenie weer alleen na daardie plek '
-       + 'gaan nie. Bel iemand voordat jy toegee. Verwyder toegang tot dit '
-       + 'waarmee jy gereeld struikel.\n\n'
-       + 'Jy hoef nie te bewys hoe sterk jy is deur so naby moontlik aan '
-       + 'versoeking te bly nie. God se uitweg help jou nie as jy aanhou staan '
-       + 'waar jy versoek word nie.',
+    kop: 'SOMS BETEKEN WEERSTAAN DAT JY MOET WEGSTAP',
+    lyf: 'Ons dink soms ons moet bewys hoe sterk ons is deur naby versoeking te '
+       + 'bly en net harder te probeer om nie toe te gee nie.\n\n'
+       + 'Maar soms is die wysste ding wat jy kan doen, eenvoudig om afstand te '
+       + 'maak.\n\n'
+       + 'Maak dit toe.\n'
+       + 'Stap weg.\n'
+       + 'Verlaat die gesprek.\n'
+       + 'Blokkeer die nommer.\n'
+       + 'Moenie teruggaan na ’n plek waar jy weet jy maklik struikel nie.\n'
+       + 'Bel iemand voordat jy toegee.\n'
+       + 'Verwyder toegang tot iets wat jou telkens laat struikel.\n\n'
+       + 'Jy hoef nie te bewys hoe sterk jy is deur te kyk hoe naby jy aan '
+       + 'versoeking kan kom sonder om te val nie.\n\n'
+       + 'As jy weet iets trek jou telkens weg van wat reg is, skep afstand '
+       + 'tussen jou en daardie versoeking.\n\n'
+       + 'Soms is dit presies hoe die uitweg lyk wat God vir jou gee.',
   },
   {
     soort: 'vraag',
     kop: 'WAT GAAN JY VERANDER?',
     id: 'verander4',
-    prompt: 'Een praktiese ding wat jy vandag kan verander…',
+    lyf: 'Wat is een praktiese ding wat jy vandag kan verander om meer afstand '
+       + 'tussen jou en die versoeking te skep?',
+    prompt: 'Skryf dit hier neer…',
   },
   {
     soort: 'gebed',
-    lyf: 'Here, gee my die nederigheid om nie met versoeking te speel nie. Help '
-       + 'my om die uitweg raak te sien en die moed te hê om dit te neem. '
-       + 'Wanneer wegstap gehoorsaamheid is, help my om weg te stap. Amen.',
+    lyf: 'Here, help my om nie met versoeking te speel nie. Wys my die uitweg en '
+       + 'gee my die moed om dit te kies. Wanneer ek moet wegstap, help my om '
+       + 'weg te stap en gehoorsaam aan U te bly. Amen.',
   },
   { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG5 = [
+  /* Dag 5 het "JAKOBUS 4:7–8" as 'n blote opskrif gehad, sonder 'n knoppie.
+     Dewald: "waar de vok staan daar maak die bybel ook". Dit is nou 'n regte
+     LEES-kaart soos elke ander dag s'n, en volgJesusWeek2.toets.mjs dwing die
+     reel af sodat dit nie weer kan gebeur nie. */
   {
-    soort: 'teks',
-    kop: 'JAKOBUS 4:7–8',
-    /* Die verwysing staan in die opskrif, dus MOET die Bybel hier oopmaak.
-       Sonder hierdie veld is dit 'n Skrifverwysing met niks agter hom nie. */
+    soort: 'lees',
+    merk: 'LEES EERS',
     skrif: 'Jakobus 4:7–8',
-    lyf: 'Jakobus sê nie net “weerstaan die duiwel” nie. Hy begin met: '
-       + '“Onderwerp julle aan God.” Dit verander die hele prentjie.\n\n'
-       + 'Die Christelike lewe gaan nie net oor alles waarvoor jy “nee” moet sê '
-       + 'nie. Dit gaan eerstens oor die Een vir Wie jy “ja” gesê het. Jy sê nee '
-       + 'vir die kortpad omdat jy ja gesê het vir Jesus. Jy sê nee vir die leuen '
-       + 'omdat jy ja gesê het vir Sy waarheid.\n\n'
-       + 'Versoeking bring jou uiteindelik voor hierdie vraag: wie gaan jy volg?',
+    lyf: 'Lees stadig en let op die volgorde: Jakobus sê eers “Onderwerp julle '
+       + 'aan God” en daarna “weerstaan die duiwel.”',
   },
   {
-    soort: 'terugblik',
-    bronId: 'stem1',
-    kop: 'DIE STEM MAG WEER PRAAT',
-    lyf: 'Daardie stem mag weer praat. Maar nou weet jy: jy hoef dit nie te glo '
-       + 'nie. Jy kan jou swak plek herken. Jy kan vooraf besluit wat waar is. '
-       + 'Jy kan die uitweg neem. En jy kan kies om Jesus te volg.',
+    soort: 'teks',
+    kop: 'JY SÊ NIE NET “NEE” VIR SONDE NIE — JY SÊ “JA” VIR JESUS',
+    lyf: 'Die Christelike lewe gaan nie net oor alles waarvoor jy nee moet sê '
+       + 'nie.\n\n'
+       + 'Dit gaan eerstens oor Wie jy gekies het om te volg.\n\n'
+       + 'Wanneer versoeking kom, gaan dit uiteindelik oor meer as net daardie '
+       + 'een oomblik. Die vraag is: wie gaan die laaste sê hê?\n\n'
+       + 'Jy sê nee vir die kortpad, omdat jy Jesus wil gehoorsaam.\n\n'
+       + 'Jy sê nee vir die leuen, omdat jy kies om God se waarheid te glo.\n\n'
+       + 'Jy stap weg van iets wat jou laat struikel, omdat jou verhouding met '
+       + 'Jesus vir jou belangriker is as wat daardie versoeking jou belowe.\n\n'
+       + 'Daarom begin Jakobus nie met “Probeer net harder” nie. Hy begin met: '
+       + '“Onderwerp julle aan God.”\n\n'
+       + 'Gee jouself eers weer aan God. Weerstaan dan dit wat jou van Hom '
+       + 'probeer wegtrek.',
+  },
+  {
+    soort: 'groot',
+    lyf: 'VERSOEKING BRING JOU UITEINDELIK\nBY HIERDIE VRAAG:\nWIE GAAN JY VOLG?',
   },
   {
     soort: 'vraag',
     kop: 'JOU BESLUIT',
     id: 'besluit5',
     lyf: 'Voltooi hierdie sin:',
-    prompt: 'Wanneer hierdie versoeking weer kom, gaan ek… omdat my “ja” aan Jesus behoort.',
+    prompt: 'Wanneer hierdie versoeking weer kom, gaan ek ____________, omdat ek gekies het om Jesus te volg.',
   },
   {
     soort: 'gebed',
-    lyf: 'Here Jesus, ek wil U nie net volg wanneer dit maklik is nie. Ek wil U '
-       + 'volg wanneer iets anders hard aan my trek. Leer my om die leuen te '
-       + 'herken, U waarheid te onthou en die uitweg te neem. Maar meer as '
-       + 'enigiets anders: laat my liefde vir U groter word as my begeerte om '
-       + 'met sonde te onderhandel. My diepste “ja” behoort aan U. Amen.',
+    lyf: 'Here Jesus, ek wil U volg, ook wanneer dit moeilik is. Help my om die '
+       + 'leuen raak te sien, U waarheid te onthou en die uitweg te kies. Leer '
+       + 'my om nie met sonde te onderhandel nie, maar om gehoorsaam aan U te '
+       + 'bly. My diepste “ja” behoort aan U. Amen.',
   },
   { soort: 'wallpaper', bronVeld: 'wallpaper', kop: 'HOU DIT VOOR JOU' },
 ]
@@ -243,7 +276,7 @@ export const WEEK2_DAE = [
     blokke: DAG2,
   },
   {
-    n: 3, titel: 'Besluit vooraf wat waar is', merk: 'VOORAF',
+    n: 3, titel: 'Weet vooraf wat waar is', merk: 'VOORAF',
     knop: 'EK BESLUIT VOORAF',
     klaarKop: 'DAG 3 KLAAR.',
     klaarLyf: 'Moenie eers onder druk besluit wat jy glo nie.',
@@ -251,7 +284,7 @@ export const WEEK2_DAE = [
   },
   {
     n: 4, titel: 'Maak afstand', merk: 'DIE UITWEG',
-    knop: 'EK VAT DIE UITWEG',
+    knop: 'EK KIES DIE UITWEG',
     klaarKop: 'DAG 4 KLAAR.',
     klaarLyf: 'Soms lyk weerstand soos wegstap.',
     blokke: DAG4,

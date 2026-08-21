@@ -28,8 +28,13 @@ for (const d of WEEK2_DAE) {
 }
 
 console.log('\n── Die perke: dit mag nie soos huiswerk voel nie ──\n')
+/* Die wallpaper en die groepbrug tel NIE saam nie — sien volgJesusWeek1.toets.
+   Hulle saamtel het presies die fout gemaak wat Dag 5 se Skrifverwysing sonder
+   'n Bybel-knoppie gelaat het. */
+const EKSTRA = ['wallpaper', 'groepbrug']
 for (const d of WEEK2_DAE) {
-  waar(`dag ${d.n} het hoogstens 5 blokke (${d.blokke.length})`, d.blokke.length <= 5)
+  const n = d.blokke.filter(b => !EKSTRA.includes(b.soort)).length
+  waar(`dag ${d.n} het hoogstens 5 inhoudsblokke (${n})`, n <= 5)
 }
 /* Hoogstens twee private antwoorde per dag. */
 for (const d of WEEK2_DAE) {
@@ -37,11 +42,11 @@ for (const d of WEEK2_DAE) {
     || (b.soort === 'kies' && b.vraag))
   waar(`dag ${d.n} vra hoogstens 2 antwoorde (${vrae.length})`, vrae.length <= 2)
 }
-/* Geen teksblok van meer as drie paragrawe. */
+/* Woorde, nie paragrawe nie — sien volgJesusWeek1.toets.mjs vir hoekom. */
 for (const d of WEEK2_DAE) {
   for (const b of d.blokke.filter(x => x.soort === 'teks')) {
-    const paragrawe = String(b.lyf || '').split('\n\n').filter(Boolean).length
-    waar(`dag ${d.n} se teksblok is hoogstens 3 paragrawe (${paragrawe})`, paragrawe <= 3)
+    const woorde = String(b.lyf || '').split(/\s+/).filter(Boolean).length
+    waar(`dag ${d.n} se teksblok is hoogstens 180 woorde (${woorde})`, woorde <= 180)
   }
 }
 
@@ -71,7 +76,9 @@ console.log('\n── Geen Skrifgedeelte twee dae na mekaar nie ──\n')
     if (!skrifte[i] || !skrifte[i - 1]) { reg++; continue }
     waar(`dag ${i + 1} herhaal nie dag ${i} se skrif nie`, skrifte[i] !== skrifte[i - 1])
   }
-  is('vier dae lees Skrif', skrifte.filter(Boolean).length, 4)
+  /* Al VYF dae lees nou Skrif. Dag 5 s'n het ontbreek en die verwysing het as
+     'n blote opskrif gestaan — die fout wat hierdie blok nou vashou. */
+  is('al vyf dae lees Skrif', skrifte.filter(Boolean).length, 5)
 }
 
 console.log('\n── Die stemboodskap staan op DAG 1 ──\n')
@@ -91,16 +98,17 @@ console.log('\n── Albei wallpapers is in die week ──\n')
 
 console.log('\n── Die terugblik wys n antwoord wat WERKLIK gevra is ──\n')
 {
+  /* Dag 5 dra nie meer 'n terugblik-blok nie; die weekoorsig (WEEK2_REIS) gee
+     die mens sy Dag 1-woorde terug. Is daar wel een op 'n dag, moet sy bron
+     steeds werklik gevra word — 'n terugblik na 'n id wat nerens bestaan nie,
+     is 'n lee aanhaling op die skerm. */
   const terug = WEEK2_DAE.flatMap(d => d.blokke.filter(b => b.soort === 'terugblik'))
-  is('een terugblik', terug.length, 1)
   const gevra = new Set(WEEK2_DAE.flatMap(d => d.blokke
     .filter(b => b.soort === 'vraag').map(b => b.id)))
-  /* Dit is die fout wat 'n leë aanhaling maak: 'n terugblik wat na 'n id wys
-     wat nerens gevra word nie. */
-  waar(`die bron "${terug[0].bronId}" word wel gevra`, gevra.has(terug[0].bronId))
-  is('en dit is Dag 1 se vraag', terug[0].bronId, 'stem1')
+  waar('die weekoorsig wys Dag 1 se woorde terug', WEEK2_REIS.some(r => r.id === 'stem1'))
+  for (const t of terug) waar(`terugblik "${t.bronId}" word wel gevra`, gevra.has(t.bronId))
+  if (!terug.length) { reg++; console.log('  (geen terugblik-blok op n dag — die weekoorsig dra dit)') }
 }
-
 console.log('\n── Die reis aan die einde wys net wat gevra is ──\n')
 {
   const gevra = new Set(WEEK2_DAE.flatMap(d => d.blokke
