@@ -19,6 +19,7 @@
 const crypto = require('crypto')
 const { magAdminDing } = require('./_geheim.js')
 const { velde } = require('./_volgJesusTelVelde.js')
+const { alleSkerfPaaie, kiesSkerf, skerfPad, telOp } = require('./_telSkerwe.js')
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 const DOK = 'tellers/volgJesus'
@@ -59,21 +60,19 @@ module.exports = async function handler(req, res) {
     if (!magAdminDing(req)) return res.status(401).json({ fout: 'Ongemagtig' })
     try {
       const token = await kryToken()
-      const r = await fetch(
-        `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${DOK}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      /* 404 beteken niemand het nog begin nie. Dit is 'n geldige antwoord,
-         nie 'n fout nie — die admin moet nulle sien en nie 'n rooi blok. */
-      if (r.status === 404) return res.status(200).json({ tellers: {} })
+      /* Al die skerwe in EEN versoek. Sien _telSkerwe.js. 'n Skerf wat nog
+         nooit geskryf is nie, kom terug as `missing` — dit is nul, nie 'n
+         fout nie, en die admin moet nulle sien en nie 'n rooi blok. */
+      const wortel = `projects/${PROJECT_ID}/databases/(default)/documents`
+      const r = await fetch(`https://firestore.googleapis.com/v1/${wortel}:batchGet`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documents: alleSkerfPaaie().map(p => `${wortel}/${p}`) }),
+      })
       if (!r.ok) return res.status(500).json({ fout: 'Firestore ' + r.status })
       const j = await r.json()
-      const tellers = {}
-      for (const [k, v] of Object.entries((j && j.fields) || {})) {
-        const n = Number(v && v.integerValue)
-        if (Number.isFinite(n)) tellers[k] = n
-      }
-      return res.status(200).json({ tellers })
+      const gevind = (Array.isArray(j) ? j : []).map(x => x && x.found).filter(Boolean)
+      return res.status(200).json({ tellers: telOp(gevind) })
     } catch (e) {
       console.error('[vj telling lees]', e && e.message)
       return res.status(500).json({ fout: 'Kon nie die tellers laai nie' })
@@ -101,7 +100,11 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           writes: [{
             transform: {
-              document: `projects/${PROJECT_ID}/databases/(default)/documents/${DOK}`,
+              /* 'n TOEVALLIGE skerf. Alles het op een dokument gestaan en
+                 Firestore hou sowat een skryf per sekonde daarop vol; die
+                 06:30-kennisgewing gaan na duisende fone tegelyk. Sien
+                 _telSkerwe.js. */
+              document: `projects/${PROJECT_ID}/databases/(default)/documents/${skerfPad(kiesSkerf(Math.random()))}`,
               fieldTransforms: paaie.map(p => ({
                 fieldPath: p, increment: { integerValue: '1' },
               })),

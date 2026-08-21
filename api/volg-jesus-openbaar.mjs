@@ -34,6 +34,8 @@
 import crypto from 'node:crypto'
 import { openbareWeek, gepubliseerdeNommers, binnekort, tot } from '../src/data/volgJesusOpenbaar.js'
 import berging from './_volgJesusBerging.js'
+import skerwe from './_telSkerwe.js'
+const { alleSkerfPaaie, telVeld } = skerwe
 
 const { dokNaam, uitFirestore } = berging
 
@@ -87,15 +89,19 @@ const basis = () =>
  * mag nooit op 'n teller wag nie. */
 async function kryDoen(kop) {
   try {
-    const r = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tellers/volgJesus`,
-      { headers: kop },
-    )
+    /* Die teller staan oor 'n paar dokumente — sien api/_telSkerwe.js. Op EEN
+       dokument stamp die skrywes teen mekaar sodra 'n paar duisend mense na
+       die oggendkennisgewing oopmaak, en dan is die getal hier te laag. */
+    const wortel = `projects/${PROJECT_ID}/databases/(default)/documents`
+    const r = await fetch(`https://firestore.googleapis.com/v1/${wortel}:batchGet`, {
+      method: 'POST',
+      headers: { ...kop, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ documents: alleSkerfPaaie().map(p => `${wortel}/${p}`) }),
+    })
     if (!r.ok) return 0
     const j = await r.json()
-    const w = ((j.fields || {}).doen || {}).integerValue
-    const n = Number(w)
-    return Number.isInteger(n) && n >= 0 ? n : 0
+    const gevind = (Array.isArray(j) ? j : []).map(x => x && x.found).filter(Boolean)
+    return telVeld(gevind, 'doen')
   } catch { return 0 }
 }
 
