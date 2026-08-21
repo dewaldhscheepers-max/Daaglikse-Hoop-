@@ -47,6 +47,9 @@ node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
 node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
+node api/_telSkerwe.toets.mjs                 # die tellers oor tien dokumente, 42 toetse
+node api/_volgJesusTellingSkerwe.toets.mjs    # en die draad daarheen, vals Firestore, 19 toetse
+node src/data/vjChatOnderwerp.toets.mjs       # waaroor die groepchat praat, 91 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/volgJesusMylpale.toets.mjs      # die mylpale + wat die kerk mag sien, 42 toetse
 node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde oorleef, 53 toetse
@@ -325,6 +328,17 @@ skerm oopmaak, is 'n knoppie wat niks doen nie.
 
 Vier heelgetalle plus een veld per week op `tellers/volgJesus`. Geen naam,
 geen e-pos, geen toestel-id, geen tydstempel per mens.
+
+**Hulle staan oor TIEN dokumente** (`api/_telSkerwe.js`). Firestore hou sowat
+een skryf per sekonde op EEN dokument vol, en die oggendkennisgewing gaan na
+duisende fone tegelyk — 'n groot deel maak binne minute oop. Op een dokument
+stamp die skrywes teen mekaar, party misluk, en die getal wat oorbly is te
+laag. Die mens sien niks daarvan nie; net die admin en die e-boekblad lieg.
+
+Skerf 0 **is** die ou dokument, `tellers/volgJesus`. Verander daardie naam en
+elke getal wat vandag bestaan, verdwyn. Elke leser moet almal optel — dit is
+`api/volg-jesus-telling.js` se GET **en** `kryDoen()` in
+`api/volg-jesus-openbaar.mjs`, wat die e-boekblad se R280-per-mens dra.
 
 Die POST is **oop** (dieselfde as `tel-toestemming`), en daarom stuur die
 kliënt **nooit 'n veldnaam** nie — hy stuur 'n gebeurtenis en 'n weeknommer,
