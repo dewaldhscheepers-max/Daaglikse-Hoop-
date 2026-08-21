@@ -5,7 +5,7 @@
  * daarvan is 'n blok bo-aan die gesprek wat plek vat en niks sê nie. Daar is
  * meer toetse vir daardie geval as vir die gewone een.
  */
-import { onderwerp, weekVrae, BEGINNE } from './vjChatOnderwerp.js'
+import { onderwerp, weekVrae, BEGINNE, normVraag } from './vjChatOnderwerp.js'
 import { WEEK1_SESSIE } from './volgJesusWeek1.js'
 import { WEEK2_SESSIE } from './volgJesusWeek2.js'
 
@@ -115,6 +115,58 @@ console.log('\n── Die vrae is regte vrae, kort genoeg vir n kaart ──\n')
       waar(`week ${w}: "${v.slice(0, 34)}…" pas op n kaart (${v.length})`, v.length <= 200)
     }
   }
+}
+
+console.log('\n── n Vraag wat AL gevra is, kom nooit weer nie ──\n')
+{
+  /* Dewald: "wys dieselfde vraag toe ek uit en weer in gaan… toe stuur ek
+     dieselfde vraag." Die GESPREK is die rekord, nie 'n teller in die skerm. */
+  const alle = weekVrae(2)
+  is('niks gestuur — die eerste vraag', onderwerp(2, 0, []).vraag, alle[0])
+  is('en dan is al vier oor', onderwerp(2, 0, []).aantal, alle.length)
+
+  const na1 = onderwerp(2, 0, [alle[0]])
+  is('vraag 1 gestuur — die kaart gee die volgende', na1.vraag, alle[1])
+  is('drie oor', na1.aantal, alle.length - 1)
+  is('en dit tel wat gevra is', na1.gevra, 1)
+
+  /* Presies sy geval: dieselfde vraag TWEE keer in die chat. */
+  const dubbel = onderwerp(2, 0, [alle[0], alle[0]])
+  is('twee keer dieselfde tel steeds as EEN', dubbel.vraag, alle[1])
+  is('en drie is oor', dubbel.aantal, alle.length - 1)
+
+  /* Die indeks kom uit die skerm en begin by 0 na elke oopmaak. Dit mag NIE
+     'n gevraagde vraag terugbring nie. */
+  for (let i = 0; i < 20; i++) {
+    const o = onderwerp(2, i, [alle[0], alle[1]])
+    if (!o || o.vraag === alle[0] || o.vraag === alle[1]) {
+      val++; console.log(`  VAL indeks ${i} bring n gevraagde vraag terug`); break
+    }
+    if (i === 19) reg++
+  }
+
+  is('al vier gevra — die kaart verdwyn', onderwerp(2, 0, alle), null)
+  is('en week 1 ook', onderwerp(1, 0, weekVrae(1)), null)
+  /* Een oor: die ↻-knoppie moet weg, want hy gee dieselfde vraag terug. */
+  is('een oor', onderwerp(2, 0, [alle[0], alle[1], alle[2]]).aantal, 1)
+
+  /* Die res van die gesprek is nie vrae nie en mag niks wegvat nie. */
+  const gewoon = ['Dankie', 'Plesier my dier ❤️', 'Dag 2 klaar gedoen!']
+  is('gewone boodskappe vat niks weg nie', onderwerp(2, 0, gewoon).aantal, alle.length)
+}
+
+console.log('\n── Spasies en hoofletters maak nie n ander vraag nie ──\n')
+{
+  const v = weekVrae(2)[0]
+  is('n ekstra spasie tel steeds', onderwerp(2, 0, [v + ' ']).vraag, weekVrae(2)[1])
+  is('hoofletters ook', onderwerp(2, 0, [v.toUpperCase()]).vraag, weekVrae(2)[1])
+  is('n dubbele spasie binne-in ook',
+     onderwerp(2, 0, [v.replace(' ', '  ')]).vraag, weekVrae(2)[1])
+  is('normVraag van rommel is leeg', normVraag(null), '')
+  is('normVraag van undefined is leeg', normVraag(undefined), '')
+  /* 'n Lee boodskap mag NOOIT 'n vraag uitwis nie. */
+  is('lee boodskappe vat niks weg nie', onderwerp(2, 0, ['', '  ', null]).aantal, weekVrae(2).length)
+  is('rommel in plaas van n lys', onderwerp(2, 0, 'nie n lys nie').aantal, weekVrae(2).length)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

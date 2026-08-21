@@ -21,13 +21,25 @@
  */
 import {
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
-  query, orderBy, limit, serverTimestamp, getDocs, addDoc,
+  query, orderBy, limit, limitToLast, serverTimestamp, getDocs, addDoc,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { keurBoodskap } from './volgJesusGroep'
 
 /* Hoeveel boodskappe ons hou. 'n Groepchat is nie 'n argief nie; wie verder
-   terug wil lees, kan later blaai. */
+   terug wil lees, kan later blaai.
+
+   Dit was `limit(VENSTER)` met `orderBy('geskep', 'asc')` — en dit is die
+   OUDSTE 200, nie die nuutste nie. 'n Groep wat by 200 boodskappe kom, sien
+   boodskap 201 NOOIT: die venster staan vas op die begin van die gesprek en
+   almal se nuwe boodskappe val buite. Die chat vries stil, en niemand weet
+   hoekom nie.
+
+   By tien mense oor 'n week wys dit nooit. By 'n gemeente wel, en dan is dit
+   'n gesprek wat doodgaan sonder 'n foutboodskap.
+
+   `limitToLast` gee die LAASTE 200 in dieselfde stygende volgorde — dus
+   verander die uitleg glad nie, net watter 200. */
 export const VENSTER = 200
 
 const boodskapPad = groepId => collection(db, 'vjGroepe', groepId, 'boodskappe')
@@ -43,7 +55,7 @@ const boodskapPad = groepId => collection(db, 'vjGroepe', groepId, 'boodskappe')
  * nie — dit is die reëls wat werk — en `opFout` sê dit vir die skerm. */
 export function luister(groepId, opNuut, opFout) {
   if (!groepId) return () => {}
-  const v = query(boodskapPad(groepId), orderBy('geskep', 'asc'), limit(VENSTER))
+  const v = query(boodskapPad(groepId), orderBy('geskep', 'asc'), limitToLast(VENSTER))
   return onSnapshot(
     v,
     kiek => {

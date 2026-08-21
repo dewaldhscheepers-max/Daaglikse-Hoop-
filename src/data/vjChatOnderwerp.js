@@ -52,13 +52,42 @@ export function weekVrae(weeknommer) {
   return vrae.map(v => String(v == null ? '' : v).trim()).filter(Boolean)
 }
 
+/* Twee vrae is DIESELFDE vraag as hulle net in spasies of hoofletters verskil.
+   Ons vergelyk 'n boodskap se teks met 'n vraag, en 'n mens se toetsbord voeg
+   maklik 'n spasie by. */
+export function normVraag(teks) {
+  return String(teks == null ? '' : teks).replace(/\s+/g, ' ').trim().toLowerCase()
+}
+
 /* Die onderwerp-kaart, of `null` as daar niks is om te wys nie.
  *
  * `null` is die belangrike geval: 'n week sonder groepvrae — of 'n weeknommer
  * wat nog nie bestaan nie — moet GEEN kaart wys nie. 'n Leë kaart bo-aan die
- * gesprek is erger as geen kaart, want dit vat plek en sê niks. */
-export function onderwerp(weeknommer, indeks) {
-  const vrae = weekVrae(weeknommer)
+ * gesprek is erger as geen kaart, want dit vat plek en sê niks.
+ *
+ * ── Waarom `gestuur` ──
+ *
+ * Dewald: "wys dieselfde vraag toe ek uit en weer in gaan… toe stuur ek
+ * dieselfde vraag." Hy is reg, en dit was my fout: die kaart het by elke
+ * oopmaak weer by vraag 1 begin, want die teller leef in die skerm en die
+ * skerm word afgebreek wanneer die chat toegaan.
+ *
+ * Die oplossing is nie om die nommer op die foon te stoor nie — dan sien twee
+ * mense in dieselfde groep verskillende vrae, en die een stuur wat die ander
+ * reeds gevra het. Die GESPREK self is die rekord: 'n vraag wat al in die chat
+ * staan, word nooit weer aangebied nie. Almal in die groep sien dus dieselfde
+ * volgende vraag, en dit kan nie twee keer gestuur word nie.
+ *
+ * Is al die vrae gevra, gee dit `null` — die kaart verdwyn. Die groep het sy
+ * onderwerp gehad; 'n kaart wat 'n vyfde keer dieselfde vier vrae aanbied, is
+ * geraas. */
+export function onderwerp(weeknommer, indeks, gestuur = []) {
+  const alle = weekVrae(weeknommer)
+  if (!alle.length) return null
+
+  const klaar = new Set(
+    (Array.isArray(gestuur) ? gestuur : []).map(normVraag).filter(Boolean))
+  const vrae = alle.filter(v => !klaar.has(normVraag(v)))
   if (!vrae.length) return null
 
   const n = Number(weeknommer)
@@ -77,6 +106,9 @@ export function onderwerp(weeknommer, indeks) {
     kop: `WEEK ${week} · PRAAT SAAM OOR`,
     vraag: vrae[i],
     indeks: i,
+    /* Hoeveel daar NOG oor is. Is dit een, verdwyn die ↻-knoppie — 'n knoppie
+       wat dieselfde vraag teruggee, is 'n knoppie wat niks doen nie. */
     aantal: vrae.length,
+    gevra: alle.length - vrae.length,
   }
 }

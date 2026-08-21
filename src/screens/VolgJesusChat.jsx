@@ -144,7 +144,6 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
   const [onderwerpToe, setOnderwerpToe] = useState(() => {
     try { return localStorage.getItem('vj_chat_onderwerp_toe') === '1' } catch { return false }
   })
-  const onderw = onderwerp(weeknommer, vraagI)
 
   /* Stel ons die teks van buite af (die vraag, of 'n aanloop), groei die
      kassie nie vanself nie — `onInput` vuur net wanneer 'n MENS tik. Sonder
@@ -271,6 +270,12 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
   }
 
   const alles = [...boodskappe, ...hangend]
+
+  /* Die GESPREK is die rekord van wat al gevra is — nie 'n teller in hierdie
+     skerm nie. Sien vjChatOnderwerp.js. 'n Uitgeveede boodskap tel nie: is die
+     vraag verwyder, is dit weer ongevra. */
+  const gevraAl = alles.filter(b => !b.uitgevee).map(b => b.teks)
+  const onderw = onderwerp(weeknommer, vraagI, gevraAl)
   const telling = keurBoodskap(teks).telling || 0
   const naByPerk = telling > MAKS_BOODSKAP - 300
 
