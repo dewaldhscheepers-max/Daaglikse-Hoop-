@@ -462,6 +462,9 @@ export default function VolgJesusLewe({ onClose: opToe }) {
           groep={groep}
           myLid={myLid}
           aanset={chatAanset}
+          /* Dieselfde week as die groepsessie. Die chat se onderwerp kom uit
+             daardie week se groepvrae — sien vjChatOnderwerp.js. */
+          weeknommer={keuse.nommer || keuse.klaar || 1}
           opInstellings={() => { setChatAanset(''); setGroepBlad('instellings') }}
           opSluit={() => { setGroepBlad(null); setChatAanset('') }}
         />

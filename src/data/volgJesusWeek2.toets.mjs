@@ -141,7 +141,11 @@ is('hetDae(2)', hetDae(2), true)
 is('hetDae(1) ook', hetDae(1), true)
 is('maar nie week 3 nie', hetDae(3), false)
 is('weekDae(2) gee vyf dae', weekDae(2).length, 5)
-is('blokkeVir(2, 1) gee Dag 1 se blokke', blokkeVir(2, 1).length, 5)
+/* Dag 1 dra vyf inhoudsblokke plus die groepbrug (§40: die brug kom NA die
+   stemboodskap). Die brug is nie werk nie — sien die perke hierbo. */
+is('blokkeVir(2, 1) gee Dag 1 se blokke', blokkeVir(2, 1).length, 6)
+is('waarvan vyf inhoud is',
+   blokkeVir(2, 1).filter(b => !['wallpaper', 'groepbrug'].includes(b.soort)).length, 5)
 is('n onbekende week gee niks', blokkeVir(9, 1), [])
 is('en die deelsin is die week s\'n', weekDeelsin(2), WEEK2_DEELSIN)
 waar('Week 1 en Week 2 se deelsinne verskil', weekDeelsin(1) !== weekDeelsin(2))

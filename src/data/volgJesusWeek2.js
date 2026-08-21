@@ -65,6 +65,11 @@ const DAG1 = [
        + 'saamstem. Wanneer ’n leuen praat, herinner my aan U waarheid. Gee my '
        + 'onderskeiding om te herken wat my van gehoorsaamheid probeer wegtrek. Amen.',
   },
+  /* §40: die brug na die groep kom NA die stemboodskap.
+     Die tweede staan op Dag 4 — een keer per week is te min om 'n gewoonte
+     te bou, en Dewald se chat het na vier dae nog geen gesprek oor die week
+     gehad nie. */
+  { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG2 = [

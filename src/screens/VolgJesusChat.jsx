@@ -31,6 +31,7 @@ import {
   keurBoodskap, MAKS_BOODSKAP, magUitvee, magVasspeld, magChatVerwyder,
   ongeleesTel, wysNaam,
 } from '../data/volgJesusGroep'
+import { onderwerp, BEGINNE } from '../data/vjChatOnderwerp'
 import { stelChat } from '../data/volgJesusGroepApi'
 import { haalAgtergrond, leesKas } from '../data/vjChatAgtergrond'
 import { VERSTEK } from '../data/vjChatPrent'
@@ -107,7 +108,7 @@ export function telReaksies(lys, myUid) {
   return uit
 }
 
-export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aanset = '' }) {
+export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aanset = '', weeknommer = 1 }) {
   const groepId = groep && groep.id
   const myUid = myLid && myLid.uid
 
@@ -133,6 +134,39 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
   /* Wie uit die groepchat gehaal word. Dit is 'n aparte tree, want dit maak 'n
      mens se gesprek toe — en dit is nie dieselfde as 'n boodskap uitvee nie. */
   const [chatUit, setChatUit] = useState(null)
+
+  /* ── Waaroor die groep praat ──
+     Sien vjChatOnderwerp.js. Die kaart staan ALTYD daar; toevou is 'n keuse
+     wat op HIERDIE foon bly, want 'n mens wat dit toegemaak het, moet dit nie
+     more weer wegdruk nie. */
+  const skryfRef = useRef(null)
+  const [vraagI, setVraagI] = useState(0)
+  const [onderwerpToe, setOnderwerpToe] = useState(() => {
+    try { return localStorage.getItem('vj_chat_onderwerp_toe') === '1' } catch { return false }
+  })
+  const onderw = onderwerp(weeknommer, vraagI)
+
+  /* Stel ons die teks van buite af (die vraag, of 'n aanloop), groei die
+     kassie nie vanself nie — `onInput` vuur net wanneer 'n MENS tik. Sonder
+     hierdie reel staan daar 'n vraag van drie reels in 'n kassie van een. */
+  const vulKassie = (waarde) => {
+    setTeks(waarde)
+    const el = skryfRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.style.height = 'auto'
+      el.style.height = Math.min(el.scrollHeight, 140) + 'px'
+      el.focus()
+      try { el.setSelectionRange(waarde.length, waarde.length) } catch { /* ouer blaaier */ }
+    })
+  }
+  const wisselOnderwerp = () => {
+    setOnderwerpToe(t => {
+      const nuut = !t
+      try { localStorage.setItem('vj_chat_onderwerp_toe', nuut ? '1' : '0') } catch { /* privaat venster */ }
+      return nuut
+    })
+  }
   const [chatNota, setChatNota] = useState('')
   /* Die wenk by die eerste boodskap. Een keer per toestel, en dan nooit weer. */
   const [wysWenk, setWysWenk] = useState(() => {
@@ -337,6 +371,42 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
         </div>
       )}
 
+      {/* ── Waaroor gepraat word ──
+       *
+       * Dit is 'n KAART van die app, nooit 'n boodskap in die gesprek nie. 'n
+       * app wat self "Praat saam oor…" plaas, voel binne twee weke soos spam,
+       * en dan is die chat huiswerk — presies wat nooit mag gebeur nie.
+       *
+       * Toegevou is dit EEN dun reel wat steeds sê waar 'n mens dit kry.
+       * Dewald: "dit moet nie die hele skerm bedek en onverstaanbaar wees nie."
+       */}
+      {onderw && (
+        <div className={`vc-onderwerp${onderwerpToe ? ' toe' : ''}`}>
+          <div className="vc-onderwerp-kop">
+            <span className="vc-onderwerp-merk">{onderw.kop}</span>
+            {!onderwerpToe && onderw.aantal > 1 && (
+              <button
+                className="vc-onderwerp-nog"
+                onClick={() => setVraagI(i => i + 1)}
+                aria-label="Nog ’n vraag"
+              >↻</button>
+            )}
+            <button
+              className="vc-onderwerp-vou"
+              onClick={wisselOnderwerp}
+              aria-label={onderwerpToe ? 'Wys die vraag' : 'Vou toe'}
+            >{onderwerpToe ? '⌄' : '⌃'}</button>
+          </div>
+          {!onderwerpToe && (
+            /* Tik daarop en die vraag land in die kassie — die mens stuur dit
+               self. Die app praat nooit namens hom nie. */
+            <button className="vc-onderwerp-vraag" onClick={() => vulKassie(onderw.vraag)}>
+              {onderw.vraag}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* 'n CSS-agtergrond op 'n ONDEURSIGTIGE houer, nooit 'n <img> nie — sien
           CLAUDE.md se "Android, Chrome, en gekleurde strepe". Die adres word
           AANGEHAAL: 'n Firebase-aflaai-URL dra `?alt=media&token=...` en 'n
@@ -492,8 +562,25 @@ export default function VolgJesusChat({ groep, myLid, opSluit, opInstellings, aa
         </div>
       )}
 
+      {/* ── Hoe om te begin ──
+       *
+       * 'n Ander probleem as die kaart hierbo: 'n mens kan weet waaroor dit
+       * gaan en steeds nie weet hoe om die eerste sin te skryf nie. Dit
+       * verdwyn sodra daar iets in die kassie is — dit is 'n aanloop, nie 'n
+       * spyskaart nie. */}
+      {!teks.trim() && !antwoordOp && (
+        <div className="vc-beginne">
+          {BEGINNE.map(b => (
+            <button key={b.id} className="vc-begin" onClick={() => vulKassie(b.aanset)}>
+              {b.woorde}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="vc-skryf">
         <textarea
+          ref={skryfRef}
           value={teks}
           onChange={e => setTeks(e.target.value)}
           placeholder="Skryf iets…"

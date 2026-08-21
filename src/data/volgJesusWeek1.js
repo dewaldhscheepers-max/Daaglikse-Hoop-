@@ -89,7 +89,6 @@ const DAG1 = [
    * waar 'n groep 'n groot uitnodiging kry; die res van die dae het net die
    * permanente knoppie, want vyf "praat nou met jou groep"-skerms is
    * gemeganiseerde gemeenskap (§41). */
-  { soort: 'groepbrug', netGroep: true },
   /* Die dag se wallpaper. Dit sluit Dag 1 af — die dag waarop die
      stemboodskap land — en die sin op die prent IS die boodskap se punt.
 
@@ -98,6 +97,8 @@ const DAG1 = [
      opgelaai het eers ná Dag 5. Is daar nog geen prent nie, verdwyn hierdie
      blok stil. */
   { soort: 'wallpaper', bronVeld: 'wallpaperDag1', kop: 'HOU DIT VOOR JOU' },
+  /* §40: die brug na die groep kom NA die stemboodskap. */
+  { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG2 = [
@@ -199,6 +200,8 @@ const DAG4 = [
        + 'vra nie maklik is nie. Wys my waar ek moet verander en gee my die '
        + 'nederigheid en moed om U te gehoorsaam. Amen.',
   },
+  /* Die tweede brug na die groep, laat in die week. */
+  { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG5 = [

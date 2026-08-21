@@ -256,6 +256,72 @@
 
 /* Die skryfkassie. Dit sit onder en die lys skuif bo hom — die klawerbord
    mag nooit die laaste boodskap toemaak nie. */
+/* ── Waaroor gepraat word ──────────────────────────────────────────────────
+ *
+ * Dewald: "dit moet nie die hele skerm bedek en onverstaanbaar wees nie."
+ * Oop is dit twee reels — sowat een boodskapborrel hoog. Toegevou is dit een
+ * dun reel wat steeds sê waar 'n mens dit kry.
+ *
+ * Geen `transform` op `:active` nie, en geen eie laag nie — sien CLAUDE.md se
+ * "Android, Chrome, en gekleurde strepe". Net kleur verander.
+ */
+.vc-onderwerp {
+  flex-shrink: 0; padding: 7px 12px 9px;
+  background: #F6F2FD; border-bottom: 1px solid #E4DAF6;
+}
+.vc-onderwerp.toe { padding-bottom: 6px; }
+.vc-onderwerp-kop { display: flex; align-items: center; gap: 8px; }
+.vc-onderwerp-merk {
+  flex: 1; min-width: 0;
+  font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+  color: var(--purple-dark, #4A3B7A);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vc-onderwerp-nog,
+.vc-onderwerp-vou {
+  flex-shrink: 0; width: 22px; height: 22px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 8px; background: transparent;
+  color: var(--purple-dark, #4A3B7A); font-size: 14px; line-height: 1;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vc-onderwerp-nog:active,
+.vc-onderwerp-vou:active { background: #E7DEF8; }
+
+/* Die vraag SELF is die knoppie. Dit lyk soos 'n knoppie sodat 'n mens weet
+   hy kan daaraan tik — 'n gewone paragraaf lyk soos teks en niemand tik. */
+.vc-onderwerp-vraag {
+  display: block; width: 100%; box-sizing: border-box; margin-top: 5px;
+  text-align: left; border: 1px solid #E0D6F4; border-radius: 11px;
+  background: #fff; padding: 8px 10px;
+  font-family: var(--font-body); font-size: 13.5px; line-height: 1.45;
+  font-weight: 500; color: var(--text);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  /* Hoogstens twee reels. 'n Vraag wat die halwe skerm vat, is die ding
+     waaroor Dewald bekommerd was. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vc-onderwerp-vraag:active { background: #F3EFFC; }
+
+/* ── Hoe om te begin ──
+ * Een ry, horisontaal skuifbaar, en dit verdwyn sodra daar iets in die kassie
+ * is. Dit is 'n aanloop, nie 'n spyskaart nie. */
+.vc-beginne {
+  flex-shrink: 0; display: flex; gap: 7px; overflow-x: auto;
+  padding: 8px 12px 0; background: #fff;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.vc-beginne::-webkit-scrollbar { display: none; }
+.vc-begin {
+  flex-shrink: 0; border: 1px solid #E2DAF0; border-radius: 14px;
+  background: #FBFAFD; padding: 7px 12px;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+  color: var(--purple-dark, #4A3B7A); white-space: nowrap;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vc-begin:active { background: #EFEAF9; }
+
 .vc-skryf {
   flex-shrink: 0; display: flex; align-items: flex-end; gap: 8px;
   padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
