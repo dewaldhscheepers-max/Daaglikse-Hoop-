@@ -297,10 +297,14 @@
   font-family: var(--font-body); font-size: 13.5px; line-height: 1.45;
   font-weight: 500; color: var(--text);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
-  /* Hoogstens twee reels. 'n Vraag wat die halwe skerm vat, is die ding
-     waaroor Dewald bekommerd was. */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden;
+  /* HIER het `-webkit-line-clamp: 2` gestaan. Op 'n <button> klem Chrome dit
+     nie skoon nie: die derde reel het HALF onder die kassie uitgesteek en die
+     woord in die middel deurgesny. Dewald: "jirre dit lyk kak. sny die woorde
+     af."
+     Die vrae is hoogstens 109 karakters — dit is drie reels op die smalste
+     foon. Dit wys nou HEELTEMAL. 'n Vraag wat 'n mens net half kan lees, is
+     erger as 'n kaart wat 'n reel hoer is. */
+  overflow-wrap: break-word;
 }
 .vc-onderwerp-vraag:active { background: #F3EFFC; }
 
