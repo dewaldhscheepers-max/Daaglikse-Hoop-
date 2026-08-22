@@ -97,14 +97,36 @@ for (const d of DAE) {
 reg++
 is('Dag 1 lees Matteus 16', DAE[0].blokke.filter(b => b.soort === 'lees').map(b => b.skrif), ['Matteus 16:13–17'])
 is('Dag 2 lees Johannes 1', DAE[1].blokke.filter(b => b.soort === 'lees').map(b => b.skrif), ['Johannes 1:1–18'])
-is('Dag 3, 4 en 5 lees niks nuuts nie',
-   DAE.slice(2).flatMap(d => d.blokke.filter(b => b.soort === 'lees')).length, 0)
+/* Dewald het die week oorgeskryf en ELKE dag lees nou Skrif. Die reel wat oor
+   is, is die belangrike een: staan daar 'n verwysing, moet die Bybel daar
+   oopmaak, en geen gedeelte kom twee dae voor nie (hierbo afgedwing). */
+is('al vyf dae lees Skrif',
+   DAE.flatMap(d => d.blokke.filter(b => b.soort === 'lees')).length, 5)
+is('Dag 3 lees Lukas 6', DAE[2].blokke.filter(b => b.soort === 'lees').map(b => b.skrif), ['Lukas 6:46–49'])
+is('Dag 4 lees Lukas 9', DAE[3].blokke.filter(b => b.soort === 'lees').map(b => b.skrif), ['Lukas 9:23–25'])
+is('en Dag 5 kom terug by Matteus 16',
+   DAE[4].blokke.filter(b => b.soort === 'lees').map(b => b.skrif), ['Matteus 16:15–17'])
 
 console.log('\n── Die stemboodskap ──\n')
 is('dit staan NET op Dag 1', DAE.filter(d => d.blokke.some(b => b.soort === 'stem')).map(d => d.n), [1])
-waar('dit is die nuwe boodskap', /die kruis vir jou skuld vat en die troon vir jouself hou/i.test(WEEK1_TRANSKRIPSIE))
-waar('en dit begin by n werklike lewe, nie by teologie nie',
-     /^As Jesus vandag niks vir jou regmaak nie/.test(WEEK1_TRANSKRIPSIE))
+/* Die twee sinne wat moet bly brand nadat die klank klaar is. Die eerste is
+   ook Dag 1 se stemblok se titel — die sin wat 'n mens hoor, is die sin wat op
+   die skerm staan. */
+waar('die kernsin staan daarin',
+     /Jesus pas nie by jou lewe aan nie\. Jou lewe verander rondom Hom\./i.test(WEEK1_TRANSKRIPSIE))
+waar('en die tweede een ook',
+     /“Here” beteken: Jesus kry die laaste sê|U kry die laaste sê/i.test(WEEK1_TRANSKRIPSIE))
+{
+  const stem = DAE[0].blokke.find(b => b.soort === 'stem')
+  waar('en Dag 1 se stemblok dra dieselfde sin',
+       WEEK1_TRANSKRIPSIE.includes(String(stem.titel || '').trim()))
+}
+waar('en dit begin waar Dewald begin het, nie by teologie nie',
+     /^Ek moet vandag iets eerlik sê/.test(WEEK1_TRANSKRIPSIE))
+waar('dit eindig met die gebed', /Amen\.$/.test(WEEK1_TRANSKRIPSIE.trim()))
+/* Die paragrawe moet BREEK — een blok van 3 400 karakters is onleesbaar. */
+waar(`dit is in paragrawe (${(WEEK1_TRANSKRIPSIE.match(/\n\n/g) || []).length})`,
+     (WEEK1_TRANSKRIPSIE.match(/\n\n/g) || []).length > 20)
 is('geen ontsnapte \\u in die woorde', /\\u[0-9a-f]{4}/i.test(WEEK1_TRANSKRIPSIE), false)
 
 /* Dewald oor hierdie weergawe: "Ek sou hom nie langer maak nie ... Ek sou nie
@@ -120,11 +142,10 @@ const woorde = WEEK1_TRANSKRIPSIE.trim().split(/\s+/).length
 waar(`dit bly onder ~5 minute (${woorde} woorde)`, woorde <= 820)
 waar('en dit is nie n stukkie nie', woorde >= 500)
 
-/* Die twee sinne wat moet bly brand nadat die klank klaar is. */
-waar('die eerste kern: wil ek Jesus he, of net wat Hy kan doen',
-     /vir Wie Hy is… of net vir wat ek hoop Hy vir my sal doen/.test(WEEK1_TRANSKRIPSIE))
-waar('en dit eindig by die lewe, nie by n les nie',
-     /Jou lewe wys wie jy glo Jesus is\.$/.test(WEEK1_TRANSKRIPSIE.trim()))
+/* Die vraag waarmee die hele week begin, moet in die boodskap self staan. */
+waar('die vraag van Matteus 16 staan daarin',
+     /wie, sê julle, is Ek\?/i.test(WEEK1_TRANSKRIPSIE))
+waar('en dit noem VOLG JESUS by die naam', /VOLG JESUS/.test(WEEK1_TRANSKRIPSIE))
 
 console.log('\n── Geen twee antwoorde deel n id nie ──\n')
 /* Deel twee velde 'n id, skryf die een die ander dood — en dan is die
@@ -154,7 +175,7 @@ waar('en dit kom van Dag 1 af', ids.get(terug[0].bronId) === 1)
 console.log('\n── Wat die week afsluit ──\n')
 for (const r of WEEK1_REIS) waar(`die weekoorsig se "${r.id}" word werklik gevra`, ids.has(r.id))
 waar('die deelsin is die week se kernlyn',
-     /kruis vir jou skuld vat en die troon vir jouself hou/i.test(WEEK1_DEELSIN))
+     /jou lewe wys uiteindelik wie die laaste sê kry/i.test(WEEK1_DEELSIN))
 is('volgende week is week 2', WEEK1_VOLGENDE.nommer, 2)
 waar('en dit gee n rede om terug te kom', String(WEEK1_VOLGENDE.lyf || '').length > 40)
 

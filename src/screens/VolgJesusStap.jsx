@@ -373,6 +373,10 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
     return (
       <div className="vs-kaart">
         {b.kop && <div className="vs-kop">{b.kop}</div>}
+        {/* Die vraag se eie woorde. Sonder hierdie reel wys 'n vraagblok net
+            'n opskrif en 'n leë kassie — en elke sin wat Dewald onder 'n
+            opskrif geskryf het, was stil onsigbaar. */}
+        {b.lyf && <p className="vs-lyf">{b.lyf}</p>}
         <Kassie id={b.id} prompt={b.prompt} waarde={antwoorde[b.id] || ''} stel={stel} />
         {/* Een deel-geleentheid per dag, nie vyf nie. */}
         {/* Ons deel die APP se skakel, NOOIT die klanklêer se adres nie.

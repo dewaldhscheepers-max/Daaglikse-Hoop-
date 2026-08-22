@@ -77,10 +77,10 @@ export const WEKE = {
     moreTeaser:
       'M\u00f4re: ons hou vir \u2019n paar minute op vra wat Jesus vir ons kan doen, en kyk net na Wie Hy is.',
     dag1Titel: 'Wie s\u00ea j\u00fd is Jesus?',
-    dag2Titel: 'Kyk weer na Jesus',
+    dag2Titel: 'Kyk self na Jesus',
     dag3Titel: 'Waar raak dit jou lewe?',
     dag4Titel: 'Volg ek Jesus soos Hy werklik is?',
-    dag5Titel: 'Nou antwoord jy',
+    dag5Titel: 'Wie s\u00ea j\u00fd nou is Jesus?',
     groepVraag1:
       'Waarom is dit makliker om te vertel wat ander mense van Jesus glo as om self te antwoord?',
     groepVraag2:
