@@ -176,7 +176,18 @@ export default function VolgJesusStap({
         <div className="vs-open">
           <div className="vs-merk">WEEK {w} VAN 52</div>
           <h1 className="vs-open-titel">{week.titel}</h1>
-          <p className="vs-open-teks">{week.openingskerm || weekOpening(w)}</p>
+          {/* ── Die KODE wen vir 'n week met 'n dag-pad ──
+           *
+           * Dit was `week.openingskerm || weekOpening(w)`, en Firestore het dus
+           * gewen. Toe Dewald Week 1 se teks laat oorskryf, het al vyf dae
+           * verander maar die OPENINGSBLAD het die ou woorde bly wys, want
+           * daardie rekord is maande gelede uit die ou saad geskryf. Van buite
+           * af lyk dit of die verandering nie ontplooi het nie.
+           *
+           * Vir 'n week wat sy dae in die kode dra, is die kode die bron van
+           * die hele week — die opening hoort daarby. Weke sonder 'n dag-pad
+           * gee `''` terug en val steeds op die rekord terug. */}
+          <p className="vs-open-teks">{weekOpening(w) || week.openingskerm}</p>
           <p className="vs-privaat">
             🔒 Alles wat jy persoonlik hier skryf, bly privaat.
           </p>

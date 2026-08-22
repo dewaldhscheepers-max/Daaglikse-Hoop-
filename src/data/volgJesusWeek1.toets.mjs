@@ -22,6 +22,7 @@ import {
   WEEK1_VOLGENDE, blokkeVirDag,
 } from './volgJesusWeek1.js'
 import { ontleedVerwysing } from './volgJesus.js'
+import { weekOpening } from './volgJesusDae.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -178,6 +179,18 @@ waar('die deelsin is die week se kernlyn',
      /jou lewe wys uiteindelik wie die laaste sê kry/i.test(WEEK1_DEELSIN))
 is('volgende week is week 2', WEEK1_VOLGENDE.nommer, 2)
 waar('en dit gee n rede om terug te kom', String(WEEK1_VOLGENDE.lyf || '').length > 40)
+
+console.log('\n── Die opening kom uit die KODE ──\n')
+/* Die skerm het `week.openingskerm || weekOpening(w)` gedoen, dus het die
+   Firestore-rekord gewen. Toe die week se teks verander, het die dae verander
+   en die openingsblad nie — want daardie rekord is uit die ou saad geskryf.
+   Die kode is nou die bron vir 'n week wat sy dae dra. */
+waar('weekOpening(1) gee die NUWE opening', weekOpening(1) === WEEK1_OPENING)
+waar('en dit is Dewald se nuwe woorde',
+     /Voordat ons vra hoe om Jesus te volg/.test(weekOpening(1)))
+waar('nie die ou een nie', !/Jy hoef nie hierdie week alles uit te werk nie/.test(weekOpening(1)))
+/* 'n Week sonder 'n dag-pad gee '' — dan val die skerm op die rekord terug. */
+is('n onbekende week gee n lee opening', weekOpening(9), '')
 
 console.log('\n── Die opening is KORT ──\n')
 /* Die vorige opening was sewe paragrawe. Dewald: "Moenie die huidige lang
