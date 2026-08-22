@@ -223,9 +223,11 @@ export default function VolgJesusStap({
 
         {/* ── Help my om dit gratis te hou ──
          *
-         * DIESELFDE donasie-vloei as oral elders in die app — `open-donation`.
-         * 'n Eie betaalpad hier sou 'n tweede plek wees wat stilweg agterbly
-         * die dag wanneer die stelsel verander.
+         * DIESELFDE donasie-vloei as oral elders — en DIESELFDE TWEE KEUSES.
+         * Dit was een knoppie, en dit was verkeerd: elke ander blad in die app
+         * bied eenmalig OF maandeliks, en 'n mens wat hier wil help, moet nie
+         * minder kry as op die e-boekblad nie. Net die woorde is VOLG JESUS
+         * s'n; die pad en die keuses is die app s'n.
          *
          * Dit staan ONDER die dae, nooit voor hulle nie: die mens kom hierheen
          * om die week te doen, nie om te betaal nie. En die klein reël onderaan
@@ -237,7 +239,6 @@ export default function VolgJesusStap({
           teks={'Ek dra self die kostes om Daaglikse Hoop en VOLG JESUS gratis '
               + 'beskikbaar te stel. As hierdie program jou help en jy wil my '
               + 'help om die kostes te dra, kan jy hier ’n vrywillige bydrae maak.'}
-          knop="HELP MY MET DIE KOSTES"
           fyn="Geen verpligting nie. VOLG JESUS bly gratis."
         />
       </div>

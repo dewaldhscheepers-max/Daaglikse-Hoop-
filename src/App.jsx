@@ -127,6 +127,19 @@ export default function App() {
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
   const [showVolgJesus, setShowVolgJesus]         = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
+
+  /* ── 'n Nuwe weergawe WAG ──
+   *
+   * Dewald: "gaan in en uit gaan heeltyd nie."
+   *
+   * `herlaaiBesluit.js` weier om te herlaai terwyl die app op die skerm is, en
+   * dit is reg — dit is presies die klagte "die app skop mense uit". Maar dan
+   * het 'n mens net EEN pad na die nuwe weergawe: die app toemaak en oopmaak.
+   *
+   * Dit is die derde pad: 'n klein strokie wat sê daar is iets nuuts, en dit
+   * met EEN tik haal. Niemand word ooit uitgeskop nie; wie dit wil hê, kry dit
+   * dadelik. Wie dit ignoreer, kry dit op die volgende oopmaak soos altyd. */
+  const [nuweWeergawe, setNuweWeergawe] = useState(false)
   /* Die id van 'n gedeelde gebedsversoek — /bid/<id>. Dit staan HIER by die
      res van die toestand en nie langs sy eie effek nie: die
      installasie-uitklap se effek noem dit in sy afhanklikheidslys, en daardie
@@ -1072,7 +1085,7 @@ export default function App() {
       if (!document.hidden) clearTimeout(wekker)
       else stelWekker()
     }
-    function merkWagtend() { wagtend = true; stelWekker(); weeg() }
+    function merkWagtend() { wagtend = true; setNuweWeergawe(true); stelWekker(); weeg() }
 
     function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') merkWagtend() }
     function onControllerChange()                                      { merkWagtend() }
@@ -1309,6 +1322,17 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* Een tik in plaas van toemaak-en-oopmaak. Dit staan BO alles, want dit
+          is die enigste ding op die skerm wat oor die app self gaan. */}
+      {nuweWeergawe && (
+        <button
+          className="nuwe-weergawe"
+          onClick={() => { try { window.location.reload() } catch {} }}
+        >
+          <span className="nuwe-weergawe-punt" aria-hidden="true" />
+          Nuwe weergawe gereed — tik om by te werk
+        </button>
+      )}
       {fbBanner}
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>
