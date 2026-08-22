@@ -36,6 +36,7 @@ import '../components/Stemboodskap.css'
 import { weekSkakel } from '../data/volgJesusNooi'
 import { prentPad } from '../data/prentPad'
 import './VolgJesusStap.css'
+import DonationCard from '../components/DonationCard'
 
 const antwoordSleutel = (w, id) => `vj_a_w${w}_${id}`
 const plekSleutel = w => `vj_plek_w${w}`
@@ -208,6 +209,26 @@ export default function VolgJesusStap({
             )
           })}
         </div>
+
+        {/* ── Help my om dit gratis te hou ──
+         *
+         * DIESELFDE donasie-vloei as oral elders in die app — `open-donation`.
+         * 'n Eie betaalpad hier sou 'n tweede plek wees wat stilweg agterbly
+         * die dag wanneer die stelsel verander.
+         *
+         * Dit staan ONDER die dae, nooit voor hulle nie: die mens kom hierheen
+         * om die week te doen, nie om te betaal nie. En die klein reël onderaan
+         * moet bly — 'n vraag om geld sonder "geen verpligting" lees soos 'n
+         * hek voor die program. */}
+        <DonationCard
+          klas="vs-steun"
+          titel="Help my om VOLG JESUS gratis te hou"
+          teks={'Ek dra self die kostes om Daaglikse Hoop en VOLG JESUS gratis '
+              + 'beskikbaar te stel. As hierdie program jou help en jy wil my '
+              + 'help om die kostes te dra, kan jy hier ’n vrywillige bydrae maak.'}
+          knop="HELP MY MET DIE KOSTES"
+          fyn="Geen verpligting nie. VOLG JESUS bly gratis."
+        />
       </div>
     )
   }
