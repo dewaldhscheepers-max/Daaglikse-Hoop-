@@ -390,27 +390,3 @@
   padding: 0 2px;
   flex-shrink: 0;
 }
-
-/* ── "Nuwe weergawe gereed" ──
- *
- * Dewald: "gaan in en uit gaan heeltyd nie." Die app weier om homself te
- * herlaai terwyl 'n mens dit gebruik (sien herlaaiBesluit.js) — dit was sy eie
- * vorige klagte. Hierdie strokie is die derde pad: sien dit, tik dit, klaar.
- *
- * GEEN `transform` op `:active` nie — sien CLAUDE.md se "Android, Chrome, en
- * gekleurde strepe". Net kleur. */
-.nuwe-weergawe {
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; box-sizing: border-box; border: none;
-  padding: 9px 14px calc(9px + env(safe-area-inset-top, 0px));
-  background: #2E7D4F; color: #fff;
-  font-family: var(--font-body); font-size: 13px; font-weight: 700;
-  letter-spacing: .2px; text-align: center;
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.nuwe-weergawe:active { background: #256040; }
-.nuwe-weergawe-punt {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #BFF0D2; flex-shrink: 0;
-}

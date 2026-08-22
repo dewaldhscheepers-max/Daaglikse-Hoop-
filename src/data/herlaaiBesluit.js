@@ -1,59 +1,41 @@
 /* MAG die app homself NOU herlaai?
  *
- * Dewald, 20 Augustus 2026: "die app refresh heeltyd en skop mense uit!!!!!!"
+ * ── Die geskiedenis, want dit het twee keer omgedraai ──
  *
- * Hy was reg, en dit was nie 'n raaisel nie. Die ketting was:
+ * 20 Augustus 2026, Dewald: "die app refresh heeltyd en skop mense uit!!!!!!"
+ * Hy was reg. Elke ontplooiing het elke oop bladsy onmiddellik herlaai, party
+ * mense middel-in 'n stemboodskap. Ons het toe 'n reel bygesit: nooit terwyl
+ * die app op die skerm is nie, en eers nadat dit vyf minute weg is.
  *
- *   ontplooi → sw.js install → skipWaiting() → activate → clients.claim()
- *            → `controllerchange` by elke oop bladsy
- *            → main.jsx se luisteraar → window.location.reload()
+ * Daardie reel het 'n prys gehad wat hy nie wou betaal nie: die enigste pad na
+ * 'n nuwe weergawe was om die app toe te maak en weer oop te maak. Ek het 'n
+ * strokie aangebied wat dit een tik maak. Sy antwoord: "vergeet di fokken blok
+ * en forseer dit. almal kry nou dadelik die nuwe weergawe."
  *
- * Daardie luisteraar in main.jsx het GEEN voorwaarde gehad nie. Hy het ook
- * eerste geregistreer, wat beteken App.jsx se `isPlayingRef`-hek — die een wat
- * juis moes keer dat 'n herlaai oor 'n stemboodskap heen loop — nooit 'n kans
- * gekry het nie. Op 'n dag waarop ons tien keer ontplooi, is elke mens wat die
- * app oophet tien keer uit sy blad geskop, party van hulle middel-in 'n
- * stemboodskap.
+ * Dit is sy oproep om te maak, en dit is nou die reel: 'n nuwe weergawe land
+ * SODRA sy daar is.
  *
- * Die versoeking is om die herlaai heeltemal weg te vat. Dit mag nie: sien
- * CLAUDE.md se "Die wit skerm". 'n Nuwe weergawe MOET die foon bereik.
+ * ── Die een hek wat bly ──
  *
- * Die punt is dus nie OF nie, maar WANNEER. Die reels:
+ * KLANK. Nie as 'n voorkeur nie — 'n herlaai middel-in 'n stemboodskap is die
+ * duurste enkele fout in hierdie app se geskiedenis, en die stemboodskap is
+ * die app. Speel daar klank, wag ons; die oomblik wat dit stop, herlaai dit.
  *
- *   1. nooit terwyl klank speel nie — 'n stemboodskap speel dikwels met die
- *      skerm af, dus is "versteek" nie bewys dat niemand luister nie;
- *   2. nooit terwyl die app op die skerm is nie — dit is die hele klagte;
- *   3. wel wanneer die app al 'n RUK weg is. Iemand wat vinnig WhatsApp toe
- *      gaan en terugkom, moet terugkom waar hy was. Iemand wat 'n halfuur weg
- *      is, verwag in elk geval om by die begin te land;
- *   4. hoogstens een keer.
- *
- * Gebeur niks hiervan nie — die mens los die app oop — dan bly hy op die ou
- * kode tot die volgende koue begin. Dit is reg so: die diensketter het sy
- * vooraf-kas reeds omgeruil, dus is die VOLGENDE oopmaak die nuwe weergawe.
- * Ons verloor 'n sessie; ons breek niemand se dag nie.
+ * Dit is die enigste ding wat 'n herlaai nou keer.
  *
  * Hierdie leer is suiwer sodat die besluit met plain node getoets kan word.
- * Die onsuiwer helfte — die luisteraars en die tydhouer — staan in App.jsx.
+ * Die onsuiwer helfte — die luisteraars — staan in App.jsx.
  */
-
-/* Hoe lank die app weg moet wees voordat 'n herlaai niemand kos nie. */
-export const WAG_MS = 5 * 60 * 1000
 
 export function magHerlaai({
   wagtend = false,        /* wag daar 'n nuwe weergawe? */
-  versteekSedert = null,  /* wanneer die app weggeraak het, of null as dit wys */
-  nou = 0,
   speelKlank = false,
   herlaaiTans = false,
 } = {}) {
   if (herlaaiTans) return false
   if (!wagtend) return false
-  /* Reel 1. 'n Stemboodskap speel met die skerm af — die duurste herlaai in
-     hierdie app se geskiedenis sou hierdie een wees. */
+  /* Die enigste hek. 'n Stemboodskap speel dikwels met die skerm af, dus is
+     "versteek" nooit bewys dat niemand luister nie. */
   if (speelKlank) return false
-  /* Reel 2. Wys die app, dan raak ons hom nie aan nie. */
-  if (!Number.isFinite(versteekSedert) || versteekSedert === null) return false
-  /* Reel 3. Lank genoeg weg dat 'n mens nie sy plek verloor nie. */
-  return nou - versteekSedert >= WAG_MS
+  return true
 }

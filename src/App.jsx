@@ -22,7 +22,7 @@ import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
-import { magHerlaai, WAG_MS } from './data/herlaaiBesluit'
+import { magHerlaai } from './data/herlaaiBesluit'
 import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
@@ -128,18 +128,18 @@ export default function App() {
   const [showVolgJesus, setShowVolgJesus]         = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
-  /* ── 'n Nuwe weergawe WAG ──
+  /* ── 'n Nuwe weergawe word AFGEDWING ──
    *
-   * Dewald: "gaan in en uit gaan heeltyd nie."
+   * Dewald het die reel twee keer omgedraai. Eers: "die app refresh heeltyd en
+   * skop mense uit." Toe, nadat die vyf-minute-reel beteken het dat 'n mens die
+   * app moet toemaak en oopmaak om iets nuuts te sien: "vergeet di fokken blok
+   * en forseer dit. almal kry nou dadelik die nuwe weergawe."
    *
-   * `herlaaiBesluit.js` weier om te herlaai terwyl die app op die skerm is, en
-   * dit is reg — dit is presies die klagte "die app skop mense uit". Maar dan
-   * het 'n mens net EEN pad na die nuwe weergawe: die app toemaak en oopmaak.
+   * Die enigste hek wat bly, is KLANK. Sien herlaaiBesluit.js.
    *
-   * Dit is die derde pad: 'n klein strokie wat sê daar is iets nuuts, en dit
-   * met EEN tik haal. Niemand word ooit uitgeskop nie; wie dit wil hê, kry dit
-   * dadelik. Wie dit ignoreer, kry dit op die volgende oopmaak soos altyd. */
-  const [nuweWeergawe, setNuweWeergawe] = useState(false)
+   * Hierdie verwysing laat die klank-terugroep die besluit weer weeg sodra 'n
+   * stemboodskap klaar is. */
+  const weegRef = useRef(null)
   /* Die id van 'n gedeelde gebedsversoek — /bid/<id>. Dit staan HIER by die
      res van die toestand en nie langs sy eie effek nie: die
      installasie-uitklap se effek noem dit in sy afhanklikheidslys, en daardie
@@ -150,6 +150,8 @@ export default function App() {
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
+    /* Klaar geluister — as 'n nuwe weergawe gewag het, kom dit nou. */
+    if (!playing && weegRef.current) { try { weegRef.current() } catch {} }
     if (!playing && pendingPopup) {
       setActivePopup(pendingPopup)
       setPendingPopup(null)
@@ -1057,48 +1059,32 @@ export default function App() {
     function opWakker() { if (!document.hidden) kykVirNuut() }
     document.addEventListener('visibilitychange', opWakker)
     window.addEventListener('focus', opWakker)
-    /* 'n Nuwe weergawe WAG; hy word nie afgedwing nie. Sien magHerlaai() in
-       src/data/herlaaiBesluit.js vir hoekom. Kortom: die vorige kode het by
-       elke ontplooiing elke oop app herlaai, en Dewald het dit reg gelees as
-       "die app skop mense uit". */
+    /* 'n Nuwe weergawe word AFGEDWING. Dewald: "vergeet di fokken blok en
+       forseer dit. almal kry nou dadelik die nuwe weergawe."
+       Die enigste hek wat oorbly is klank — sien magHerlaai(). */
     let wagtend = false
-    /* Word die app in die agtergrond gemonteer, tel daardie tyd van NOU af. */
-    let versteekSedert = document.hidden ? Date.now() : null
-    let wekker = null
 
     function weeg() {
       if (magHerlaai({
-        wagtend, versteekSedert, nou: Date.now(),
-        speelKlank: isPlayingRef.current, herlaaiTans: refreshing,
+        wagtend, speelKlank: isPlayingRef.current, herlaaiTans: refreshing,
       })) { refreshing = true; window.location.reload() }
     }
-    /* Terwyl die app weg is, weeg ons dit weer sodra die wagtyd verby is. 'n
-       Tydhouer in die agtergrond word deur die blaaier gerem en kan laat vuur
-       — laat is heeltemal goed genoeg, want niemand kyk nie. */
-    function stelWekker() {
-      clearTimeout(wekker)
-      if (!wagtend || versteekSedert === null) return
-      wekker = setTimeout(weeg, Math.max(1000, WAG_MS - (Date.now() - versteekSedert)) + 500)
-    }
-    function opSigbaarheid() {
-      versteekSedert = document.hidden ? Date.now() : null
-      if (!document.hidden) clearTimeout(wekker)
-      else stelWekker()
-    }
-    function merkWagtend() { wagtend = true; setNuweWeergawe(true); stelWekker(); weeg() }
+    /* Speel daar klank, wag ons — en weeg dan weer sodra dit stop. Sonder
+       hierdie draad bly 'n foon wat pas 'n stemboodskap klaar gespeel het op
+       die ou weergawe tot die volgende oopmaak. */
+    weegRef.current = weeg
+    function merkWagtend() { wagtend = true; weeg() }
 
     function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') merkWagtend() }
     function onControllerChange()                                      { merkWagtend() }
-    document.addEventListener('visibilitychange', opSigbaarheid)
     navigator.serviceWorker.addEventListener('message',          onMessage)
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
     return () => {
       stop = true
+      weegRef.current = null
       clearInterval(tik)
-      clearTimeout(wekker)
       document.removeEventListener('visibilitychange', opWakker)
       window.removeEventListener('focus', opWakker)
-      document.removeEventListener('visibilitychange', opSigbaarheid)
       navigator.serviceWorker.removeEventListener('message',          onMessage)
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
     }
@@ -1322,17 +1308,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Een tik in plaas van toemaak-en-oopmaak. Dit staan BO alles, want dit
-          is die enigste ding op die skerm wat oor die app self gaan. */}
-      {nuweWeergawe && (
-        <button
-          className="nuwe-weergawe"
-          onClick={() => { try { window.location.reload() } catch {} }}
-        >
-          <span className="nuwe-weergawe-punt" aria-hidden="true" />
-          Nuwe weergawe gereed — tik om by te werk
-        </button>
-      )}
       {fbBanner}
       <div className="screen" ref={screenRef}>
         <ErrorBoundary>

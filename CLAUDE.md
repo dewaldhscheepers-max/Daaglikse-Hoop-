@@ -67,6 +67,7 @@ node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 49 toetse
+node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 ```
 
