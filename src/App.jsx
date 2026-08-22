@@ -1006,6 +1006,8 @@ export default function App() {
   useEffect(() => {
     function onOpen(e) {
       const d = (e && e.detail) || null
+      /* `d` word heel deurgegee: boek, hoofstuk, vers EN versTot. Die
+         eindvers is wat die Bybel toelaat om die hele gedeelte te merk. */
       setBybelBeginBy(d && d.boek && d.hoofstuk ? d : null)
       setShowBybel(true)
     }

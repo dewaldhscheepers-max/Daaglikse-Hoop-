@@ -541,8 +541,16 @@ function BybelKnop({ skrif, bo }) {
 
   function maakOop() {
     try {
+      /* Die EINDVERS ry saam. Dit is hoekom die Bybel nog nooit kon wys
+         WAAR die gedeelte ophou nie: "Lukas 9:23–25" het net die 23
+         deurgestuur en die 25 is hier weggegooi. */
       window.dispatchEvent(new CustomEvent('open-bybel', {
-        detail: { boek: eerste.boek, hoofstuk: eerste.hoofstuk, vers: eerste.van || null },
+        detail: {
+          boek: eerste.boek,
+          hoofstuk: eerste.hoofstuk,
+          vers: eerste.van || null,
+          versTot: eerste.tot || eerste.van || null,
+        },
       }))
       setGestuur(true)
     } catch {}

@@ -279,6 +279,20 @@ Twee dinge maak hierdie Bybel anders as die res: **309 310 kruisverwysings**
 **soek deur die hele teks, aflyn**. Albei is so gebou dat gewone lees hulle
 nooit laai nie.
 
+**'n Sprong na 'n vers mag NOOIT op 'n tydhouer staatmaak nie.** `springNa` het
+`setTimeout(..., 400)` gedoen en dan die vers in die bladsy gesoek. Die eerste
+keer moet die hoofstuk oor die netwerk kom en die verse word eers daarna
+omhul — ná 400ms bestaan die vers nog nie, `if (el)` doen stilweg niks, en 'n
+mens bly by vers 1. Die tweede keer is dit gekas en dan werk dit, wat dit soos
+'n spook laat lyk. Die sprong hoort in die effek wat die verse omhul, want dit
+loop wanneer hulle werklik daar is. `doelRef` — nie `doel` — hou die "bo-toe by
+'n nuwe hoofstuk"-effek terug; met die toestand in sy afhanklikhede rol hy die
+bladsy terug op die oomblik dat die sprong klaar is.
+
+'n VOLG JESUS-gedeelte dra 'n BEGIN- en 'n EINDvers (`vers`, `versTot`), en die
+verse tussenin word gemerk. Die teks self word met geen karakter verander nie
+en die erkenning bly — dit is 'n klas op verse wat reeds bestaan.
+
 Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
 
 ---

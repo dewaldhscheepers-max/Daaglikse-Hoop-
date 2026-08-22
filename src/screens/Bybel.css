@@ -246,6 +246,28 @@
 
 .byb-vers:active { background: rgba(201, 169, 97, 0.22); }
 
+/* ── Die gedeelte wat gelees moet word ──
+ *
+ * Dewald: "kan ons nie die stuk wat gelees moet word highlight nie."
+ *
+ * 'n Merkpen, nie 'n verligting nie: die GAB se teks bly karakter vir karakter
+ * dieselfde en die erkenning bly staan — net die agtergrond wys waar 'n mens
+ * moet begin en waar dit ophou. Dit bly staan solank 'n mens in daardie
+ * hoofstuk is; blaai jy weg, is dit verby.
+ *
+ * Geen `transform` en geen `opacity`-animasie nie — sien CLAUDE.md se
+ * "Android, Chrome, en gekleurde strepe". Net kleur. */
+.byb-vers.gemerk {
+  background: rgba(224, 184, 114, 0.20);
+  box-shadow: 0 0 0 1px rgba(224, 184, 114, 0.20);
+  border-radius: 0;
+}
+/* Die begin en die einde kry hulle rondings, sodat 'n gedeelte oor meer as een
+   reël steeds soos EEN blok lees. */
+.byb-vers.gemerk-eerste { border-top-left-radius: 5px; border-bottom-left-radius: 5px; }
+.byb-vers.gemerk-laaste { border-top-right-radius: 5px; border-bottom-right-radius: 5px; }
+.byb-vers.gemerk:active { background: rgba(201, 169, 97, 0.34); }
+
 .byb-vers-blad {
   padding-bottom: calc(var(--safe-bottom, 0px) + 22px);
   /* Met die kruisverwysings by is hierdie blad langer as 'n foonskerm sodra

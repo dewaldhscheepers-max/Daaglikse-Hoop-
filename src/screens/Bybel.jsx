@@ -128,6 +128,27 @@ function omhulVerse(root) {
   root.dataset.omhul = '1'
 }
 
+/* Merk die gedeelte wat gelees moet word.
+ *
+ * Dit is 'n KLAS op verse wat reeds bestaan — die GAB se teks word met geen
+ * karakter verander nie, en die erkenning bly onaangeraak. Dit is presies soos
+ * 'n merkpen: dieselfde bladsy, net sigbaar waar 'n mens moet lees. */
+function merkGedeelte(root, van, tot) {
+  if (!root) return
+  root.querySelectorAll('.byb-vers.gemerk, .byb-vers.gemerk-eerste, .byb-vers.gemerk-laaste')
+      .forEach(el => el.classList.remove('gemerk', 'gemerk-eerste', 'gemerk-laaste'))
+  const a = Number(van)
+  if (!Number.isInteger(a) || a < 1) return
+  const b = Number.isInteger(Number(tot)) && Number(tot) >= a ? Number(tot) : a
+  for (let v = a; v <= b; v++) {
+    const el = root.querySelector(`.byb-vers[data-v="${v}"]`)
+    if (!el) continue
+    el.classList.add('gemerk')
+    if (v === a) el.classList.add('gemerk-eerste')
+    if (v === b) el.classList.add('gemerk-laaste')
+  }
+}
+
 /* ── Ondersteun Daaglikse Hoop ──
 
    Hierdie blok was 'n ruk lank heeltemal van die Bybelskerm af weg, want die
@@ -188,6 +209,10 @@ export default function Bybel({ onClose, beginBy = null }) {
   const [blad, setBlad]             = useState(false)   // vertaling-blad
   const [soek, setSoek]             = useState('')
   const [laaste, setLaaste]         = useState(() => lees('byb_laaste', null))
+  /* Waarheen ons wil spring, en watter gedeelte gemerk moet word. Dit bly
+     staan totdat die teks werklik in die bladsy is — sien springNa(). */
+  const [doel, setDoel]             = useState(null)
+  const doelRef                     = useRef(null)
   const [gekose, setGekose]         = useState(null)     // aangetikte vers
   const [oorVertaling, setOorVertaling] = useState(false)  // GAB se erkenningsblad
   const [teksSoek, setTeksSoek]     = useState(null)     // { besig, treffers, totaal }
@@ -200,7 +225,18 @@ export default function Bybel({ onClose, beginBy = null }) {
   const sleutel  = weergawe ? goedgekeurdeSleutel(weergawe.abbreviation) : null
 
   useEffect(() => { if (weergaweId) stoor('byb_weergawe', weergaweId) }, [weergaweId])
-  useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = 0 }, [view, boek, hoofstuk])
+  /* Bo-toe by 'n nuwe hoofstuk — MAAR nie wanneer ons juis na 'n gedeelte op
+     pad is nie.
+   *
+   * Die hek is 'n VERWYSING, nie die toestand nie. Met `doel` in die
+   * afhanklikhede het hierdie effek weer gevuur op die oomblik dat die
+   * spring-effek `setDoel(null)` doen — en toe rol dit die bladsy terug
+   * boontoe, net nadat ons by die regte vers gestop het. Die vers was reg;
+   * die skerm het by vers 1 gestaan. */
+  useEffect(() => {
+    if (doelRef.current) return
+    if (bodyRef.current) bodyRef.current.scrollTop = 0
+  }, [view, boek, hoofstuk])
 
   /* ── Weergawes laai ──
 
@@ -315,20 +351,37 @@ export default function Bybel({ onClose, beginBy = null }) {
     onthou(boek, nr)
   }
 
-  // Spring direk na 'n boek en hoofstuk (vanaf soek of "gaan voort")
-  function springNa(kode, nr, versNr) {
+  /* Spring direk na 'n boek en hoofstuk (vanaf soek, "gaan voort", of VOLG
+     JESUS se LEES-knoppie).
+   *
+   * ── Hoekom hier GEEN tydhouer meer is ──
+   *
+   * Dit het `setTimeout(..., 400)` gedoen en dan die vers in die bladsy gesoek.
+   * Die eerste keer moet die hoofstuk egter oor die netwerk kom, en die verse
+   * word eers DAARNA omhul. Ná 400ms bestaan die vers nog nie, `if (el)` doen
+   * stilweg niks, en 'n mens bly bo aan die hoofstuk staan.
+   *
+   * Dewald: "die bybel maak nooit presies oop nie. eerste keer as mens oopmaak
+   * gooi dit altyd vers 1 uit."
+   *
+   * Die tweede keer is die hoofstuk gekas en dan haal dit die 400ms — daarom
+   * het dit soms gewerk en soms nie. Ons onthou nou net WAARHEEN, en die
+   * effek wat die verse omhul, spring soontoe sodra hulle werklik daar is. */
+  function springNa(kode, nr, versNr, tot) {
     setBoek(kode); setHoofstuk(nr); setView('lees'); setSoek('')
     laaiHoofstukke(kode, weergaweId)
     laaiTeks(kode, nr, weergaweId)
     onthou(kode, nr)
-    if (versNr) setTimeout(() => {
-      const el = teksRef.current && teksRef.current.querySelector(`.byb-vers[data-v="${versNr}"]`)
-      if (el) el.scrollIntoView({ block: 'center' })
-    }, 400)
+    const d = versNr ? { van: versNr, tot: tot || versNr } : null
+    doelRef.current = d
+    setDoel(d)
   }
 
   function blaaiNa(nr) {
     if (nr < 1 || nr > hoofstukke.length) return
+    /* 'n Ander hoofstuk is 'n ander gedeelte. Die merk hoort nie saam nie. */
+    doelRef.current = null
+    setDoel(null)
     setHoofstuk(nr)
     laaiTeks(boek, nr, weergaweId)
     onthou(boek, nr)
@@ -346,8 +399,32 @@ export default function Bybel({ onClose, beginBy = null }) {
   }
 
   useEffect(() => {
-    if (view === 'lees' && inhoud && teksRef.current) omhulVerse(teksRef.current)
-  }, [view, inhoud])
+    if (view !== 'lees' || !inhoud || !teksRef.current) return
+    omhulVerse(teksRef.current)
+
+    /* Nou — en eers nou — bestaan die verse. Spring en merk. */
+    if (!doel) return
+    const wortel = teksRef.current
+    merkGedeelte(wortel, doel.van, doel.tot)
+    const el = wortel.querySelector(`.byb-vers[data-v="${doel.van}"]`)
+    if (!el) return
+    /* BO, nie in die middel nie. Dewald: "die eerste reel wat gelees moet word
+       moet bo wys." `block: 'center'` het die vers in die middel gesit met
+       teks bokant hom, en dan weet 'n mens nie waar om te begin nie.
+
+       Ons rol die HOUER self in plaas van scrollIntoView, want 'n mens het 'n
+       bietjie lug bo die vers nodig — anders druk hy teen die kopbalk vas. */
+    const houer = bodyRef.current
+    if (houer) {
+      const bo = el.getBoundingClientRect().top - houer.getBoundingClientRect().top
+      houer.scrollTop = Math.max(0, houer.scrollTop + bo - 14)
+    } else {
+      el.scrollIntoView({ block: 'start' })
+    }
+    /* Een keer. Blaai 'n mens dan self weg, moet dit hom nie terugpluk nie. */
+    doelRef.current = null
+    setDoel(null)
+  }, [view, inhoud, doel])
 
   /* ── Maak direk by 'n gedeelte oop ──
    *
@@ -362,10 +439,10 @@ export default function Bybel({ onClose, beginBy = null }) {
   const begonRef = useRef(false)
   useEffect(() => {
     if (begonRef.current || !beginBy || !weergaweId) return
-    const { boek: b, hoofstuk: h, vers } = beginBy
+    const { boek: b, hoofstuk: h, vers, versTot } = beginBy
     if (!b || !h) return
     begonRef.current = true
-    springNa(b, h, vers || null)
+    springNa(b, h, vers || null, versTot || vers || null)
   }, [beginBy, weergaweId])   // eslint-disable-line react-hooks/exhaustive-deps
 
   function tikVers(e) {
