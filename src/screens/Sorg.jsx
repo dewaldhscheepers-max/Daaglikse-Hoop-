@@ -101,6 +101,9 @@ export default function Sorg({ onNavigate }) {
      oopmaak weer gelees — 'n mens wat in 'n ander oortjie geskryf het, moet
      dit hier sien sonder om die app toe te maak. */
   const [saamDra, setSaamDra] = useState(() => leesSaamDra())
+  /* Watter gesprek 'n gedeelde skakel wil oopmaak. Dit bly staan totdat die
+     muur werklik gelaai is. */
+  const [springNa, setSpringNa] = useState('')
   const [data, setData] = useState(null)      // null = besig
   const [muur, setMuur] = useState(null)      // null = besig
 
@@ -191,6 +194,21 @@ export default function Sorg({ onNavigate }) {
     else if (doel.skerm === 'saam') setAfdeling('saam')
     else if (doel.skerm === 'videos' || doel.skerm === 'video') setAfdeling('videos')
     else if (doel.skerm === 'wag') setAfdeling('muur')
+    else if (doel.skerm === 'gesprek' && doel.id) {
+      /* ── 'n Gedeelde GESPREK ──
+       *
+       * Dewald se Nooi- en Deel-knoppies stuur nou 'n skakel na EEN storie.
+       * Die mens wat dit kry, moet by daardie storie land met die gesprek
+       * oop — nie op die muur se bokant nie, en beslis nie op die tuisblad
+       * nie.
+       *
+       * Die muur is dalk nog nie gelaai nie, dus wag ons daarvoor in plaas
+       * van om 'n tydhouer te gebruik. 'n Sprong wat op 'n tydhouer staatmaak,
+       * werk die tweede keer (gekas) en nooit die eerste keer nie — presies
+       * die fout wat die Bybel se springNa gehad het. Sien CLAUDE.md. */
+      setAfdeling('muur')
+      setSpringNa(doel.id)
+    }
   }, [])
 
   /* Die Saam dra-lys weer lees sodra 'n mens na daardie oortjie gaan. Sonder
@@ -320,6 +338,24 @@ export default function Sorg({ onNavigate }) {
      more se video plaas, val hierdie een vanself terug in sy groep. */
   const biblioteek = held ? videos.filter(v => v.id !== held.id) : videos
   const plasings = muur || []
+
+  /* ── Die sprong na 'n gedeelde gesprek ──
+   *
+   * Dit loop in die effek wat op die PLASINGS wag, nie op 'n tydhouer nie.
+   * Die eerste keer moet die muur oor die netwerk kom; 'n tydhouer van 400ms
+   * sou dan niks kry, en die tweede keer (gekas) sou dit werk — wat dit soos
+   * 'n spook laat lyk. */
+  useEffect(() => {
+    if (!springNa || !plasings.length) return
+    const el = document.getElementById(`sorg-plasing-${springNa}`)
+    setSpringNa('')
+    if (!el) return
+    el.scrollIntoView({ block: 'center' })
+    /* En maak die gesprek oop — dit is waarvoor hy gekom het. */
+    const knop = el.querySelectorAll('.ss-balk .ss-aksie')[1]
+    if (knop) knop.click()
+  }, [springNa, plasings.length])
+
 
   /* Wie nog min ondersteuning gekry het. Dit kom uit die muur wat reeds
      gelaai is — geen tweede versoek, geen nuwe eindpunt.
@@ -820,7 +856,20 @@ export default function Sorg({ onNavigate }) {
           as wat daar is nie. */}
       <SorgVorm
         oop={vormOop}
-        onSluit={() => { setVormOop(false); verfrisPlek(); vergeetMuur() }}
+        onSluit={() => {
+          setVormOop(false)
+          verfrisPlek()
+          /* ── Die nuwe storie moet DADELIK daar wees ──
+           *
+           * Dewald: "ek moes na ander page toe gaan en terug kom voor my
+           * plasing gewys het."
+           *
+           * `vergeetMuur()` alleen was nie genoeg nie: dit vee die kliënt se
+           * kas uit, maar niks vra die muur weer nie — die volgende oproep kom
+           * eers vyftien sekondes later. Ons haal hom self, hier. */
+          vergeetMuur()
+          haalMuur().then(d => setMuur(d)).catch(() => {})
+        }}
         videoData={data}
       />
     </div>

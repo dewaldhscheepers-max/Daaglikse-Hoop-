@@ -28,16 +28,25 @@
  * rond wat moet bly werk. */
 export const DEEL_WORTEL = 'https://dewaldscheepers.com'
 
-export function sorgSkakel(soort, id) {
+/* Die uitnodiging se veldtog. Sonder dit lyk elke mens wat deur 'n gedeelde
+   skakel kom, soos "direk", en dan lyk dit of deel niemand bring nie. Sien
+   src/data/sorgMeet.js. */
+const UITNODIGING_UTM = '?utm_source=uitnodiging&utm_medium=deel'
+
+export function sorgSkakel(soort, id, { veldtog = true } = {}) {
   const skoon = encodeURIComponent(String(id || ''))
-  return soort === 'video'
+  const pad = soort === 'video'
     ? `${DEEL_WORTEL}/sorg/video/${skoon}`
     : `${DEEL_WORTEL}/sorg/${skoon}`
+  return veldtog ? pad + UITNODIGING_UTM : pad
 }
 
 /* Lees 'n plasing- of video-id uit 'n PAD. Gee { soort, id } of null. */
 export function uitSorgPad(pad) {
-  const p = String(pad || '')
+  /* Die navraagstring en die hash val eers weg. 'n Gedeelde skakel dra nou 'n
+     veldtog (?utm_source=uitnodiging), en sonder hierdie reël sou daardie
+     skakel niks lees nie en die mens op die tuisblad land. */
+  const p = String(pad || '').split('?')[0].split('#')[0]
   let m = p.match(/^\/sorg\/video\/([^/?#]+)\/?$/)
   if (m) return { soort: 'video', id: decodeURIComponent(m[1]) }
   m = p.match(/^\/sorg\/([^/?#]+)\/?$/)
@@ -69,23 +78,38 @@ export function leesSorgSkakel(hash) {
   return m ? { soort: m[1], id: decodeURIComponent(m[2]) } : null
 }
 
-export async function deelSorg(soort, id, titel) {
-  const url = sorgSkakel(soort, id)
-  const teks = soort === 'video'
-    ? `${titel || 'Iets van Daaglikse Hoop'} — Sorg & Ondersteuning`
-    : 'Dit het my gehelp. Dalk help dit jou ook — Sorg & Ondersteuning op Daaglikse Hoop.'
-
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: 'Daaglikse Hoop', text: teks, url })
-      return true
+/* ── Stuur, presies soos Bid Nou stuur ──
+ *
+ * Dewald: "maak seker dit werk reg soos bid nou se share knopie dat dit die
+ * selfde stappe vat."
+ *
+ * Die verskil was een veld, en dit was sigbaar: ons het `{ text, url }` aan
+ * `navigator.share` gegee terwyl die adres AL in die teks was. WhatsApp plak
+ * dan albei aan mekaar, en die boodskap het die skakel TWEE KEER gedra.
+ *
+ * Bid Nou doen dit reg: die adres staan IN die teks, en `url` word nooit
+ * saamgestuur nie. Sien `stuurMyVersoek()` in BidSaam.jsx.
+ *
+ * Die terugval is ook syne: knipbord, en dan 'n prompt vir 'n blaaier waar
+ * die knipbord toe is. Dit is die enigste pad wat op elke foon werk.
+ */
+async function stuurDeel(teks) {
+  if (navigator.share) {
+    try { await navigator.share({ text: teks }); return true } catch (e) {
+      if (e && e.name === 'AbortError') return false
     }
-    await navigator.clipboard.writeText(teks + '\n' + url)
-    return true
-  } catch (e) {
-    if (e && e.name === 'AbortError') return false
-    try { await navigator.clipboard.writeText(teks + '\n' + url); return true } catch { return false }
   }
+  try {
+    await navigator.clipboard.writeText(teks)
+    return true
+  } catch {
+    try { window.prompt('Kopieer hierdie boodskap:', teks) } catch { /* geen venster */ }
+    return false
+  }
+}
+
+export async function deelSorg(soort, id, titel) {
+  return stuurDeel(nooiWoorde(sorgSkakel(soort, id)))
 }
 
 /* ── Nooi iemand om te ANTWOORD ──
@@ -103,29 +127,28 @@ export async function deelSorg(soort, id, titel) {
  *
  * Die skakel is dieselfde diep skakel as Deel, dus land die mens BY daardie
  * plasing en nie op die tuisblad nie. */
-export function nooiWoorde(titel) {
-  const oor = String(titel || '').trim()
-  return oor
-    ? `Ek het hierdie storie op Daaglikse Hoop se Sorg & Ondersteuning gesien: `
-      + `“${oor}”. Ek dink jy het dalk iets waardevols om vir hierdie persoon te sê.`
-    : 'Ek het hierdie storie op Daaglikse Hoop se Sorg & Ondersteuning gesien. '
-      + 'Ek dink jy het dalk iets waardevols om vir hierdie persoon te sê.'
+export function nooiWoorde(skakel) {
+  /* Dewald se eie woorde, 24 Augustus 2026. Hy het die vorige weergawe gelees
+     en gesê: "dit klink fokken dom."
+     
+     Wat sy weergawe reg doen en myne verkeerd gedoen het: dit praat met die
+     MENS wat dit kry, nie oor die blad nie. "Ek het gedink jy het dalk iets"
+     is 'n rede om te kom; "daar is mense wat wag" is 'n advertensie.
+     
+     Dit verklap NIKS: geen naam, geen sin uit die storie, geen onderwerp. Wie
+     dit kry, moet dit oopmaak om te sien waaroor dit gaan — en dan is hy op
+     die blad. */
+  return [
+    'Ek het hierdie storie op Daaglikse Hoop se Dra Mekaar gesien en gedink jy '
+      + 'het dalk iets wat hierdie persoon kan bemoedig.',
+    'As jy wil, lees hulle storie en deel ’n paar woorde van hoop.',
+    '',
+    String(skakel || ''),
+  ].join('\n')
 }
 
-export async function nooiOmTeAntwoord(soort, id, titel) {
-  const url = sorgSkakel(soort, id)
-  const teks = nooiWoorde(titel)
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: 'Daaglikse Hoop', text: teks, url })
-      return true
-    }
-    await navigator.clipboard.writeText(teks + '\n' + url)
-    return true
-  } catch (e) {
-    if (e && e.name === 'AbortError') return false
-    try { await navigator.clipboard.writeText(teks + '\n' + url); return true } catch { return false }
-  }
+export async function nooiOmTeAntwoord(soort, id) {
+  return stuurDeel(nooiWoorde(sorgSkakel(soort, id)))
 }
 
 
@@ -150,10 +173,16 @@ export async function nooiOmTeAntwoord(soort, id, titel) {
  * Die tweede dra NIKS van 'n storie nie. Dit is die een wat 'n mens op
  * Facebook kan plak sonder om iemand se seer in 'n openbare tydlyn te sit.
  */
-export function algemeneWoorde() {
-  return 'Daar is mense op Daaglikse Hoop se Dra Mekaar se Laste wat vandag ' +
-    'geskryf het en nog niemand het geantwoord nie. Jy hoef niks te weet nie — ' +
-    'net te luister. ' + WORTEL_UITNODIGING
+export function algemeneWoorde(skakel = WORTEL_UITNODIGING) {
+  /* Dieselfde stem as `nooiWoorde`, net sonder 'n spesifieke storie. Dit word
+     gebruik wanneer daar niks is om na te wys nie. */
+  return [
+    'Ek het op Daaglikse Hoop se Dra Mekaar gesien daar is mense wat vandag '
+      + 'geskryf het en nog vir iemand wag.',
+    'As jy wil, gaan lees een van hulle stories en deel ’n paar woorde van hoop.',
+    '',
+    String(skakel || ''),
+  ].join('\n')
 }
 
 /* Dit lei DIREK na "Wag nog vir iemand", nooit na die tuisblad nie. Sien

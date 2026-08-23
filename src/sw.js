@@ -35,8 +35,10 @@ import { magKas } from './data/kasBesluit.js'
  *
  * 5: Dra Mekaar se Laste — die name, die foto's en die opmerkings het almal
  * verander, en Dewald se vrou moes die app toe- en oopmaak voordat sy die
- * nuwe weergawe gesien het. */
-const SPOEL = 5
+ * nuwe weergawe gesien het.
+ * 6: die opmerkings mag 2 000 karakters wees en behou hul paragrawe; die muur
+ * word nie meer op die rand gekas nie. */
+const SPOEL = 6
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

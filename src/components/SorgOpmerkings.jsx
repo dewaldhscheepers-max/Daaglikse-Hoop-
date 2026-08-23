@@ -40,7 +40,7 @@ import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
 import SorgDeelSteun from './SorgDeelSteun'
 import { REDES, redeNaam, blokMerk, kanBlok, sonderGeblok } from '../data/sorgModereer'
-import { algemeneWoorde, WORTEL_UITNODIGING } from '../data/sorgDeel'
+import { nooiOmTeAntwoord } from '../data/sorgDeel'
 import { meet } from '../data/sorgMeetStuur'
 import { leesGeblok, blokkeer } from '../data/sorgMuur'
 import './SorgOpmerkings.css'
@@ -696,13 +696,34 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                       ? <img src={profiel.foto} alt="" width="32" height="32" />
                       : voorletters(profiel.naam))}
                   </span>
-                  <input
+                  {/* 'n TEKSKASSIE, nie 'n enkelreel-veld nie.
+                   *
+                   * Dewald het 'n hele pastorale antwoord getik — Skrif, gebed,
+                   * 'n seën — en die app het dit afgekap. Die perk was 200
+                   * karakters; dit is nou 2 000 (sien MAKS_WOORD).
+                   *
+                   * En 'n veld wat een reel wys, is in elk geval onbruikbaar vir
+                   * so 'n boodskap: 'n mens sien nie wat hy geskryf het nie. Dit
+                   * groei saam met die woorde, tot 'n punt.
+                   *
+                   * Enter maak 'n NUWE REEL. 'n Gebed het paragrawe, en 'n
+                   * kassie waar Enter stuur, breek elke gebed in vyf stukke. */}
+                  <textarea
                     className="op-invoer"
                     value={eie}
+                    rows={1}
+                    /* Die hoogte word inlyn gestel terwyl 'n mens tik. Word die
+                       kassie leeggemaak nadat hy gestuur het, moet dit weer
+                       inkrimp — anders bly daar 'n leë blok van vyf reëls staan
+                       wat lyk of daar iets in is. */
+                    ref={el => { if (el && !eie) el.style.height = 'auto' }}
                     onChange={e => setEie(e.target.value.slice(0, MAKS_WOORD))}
                     maxLength={MAKS_WOORD}
                     placeholder="Skryf ’n opmerking…"
-                    onKeyDown={e => { if (e.key === 'Enter' && eie.trim()) stuur('') }}
+                    onInput={e => {
+                      e.target.style.height = 'auto'
+                      e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
+                    }}
                   />
                   <button
                     className="op-plaas"
@@ -744,15 +765,13 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                   <button
                     className="op-nooi-knop"
                     onClick={() => {
-                      const teks = algemeneWoorde()
                       meet('uitnodigingGedeel')
-                      if (navigator.share) {
-                        navigator.share({ text: teks, url: WORTEL_UITNODIGING }).catch(() => {})
-                      } else {
-                        try { navigator.clipboard.writeText(teks) } catch { /* geen knipbord */ }
-                        setDankie('Die uitnodiging is gekopieer.')
-                        setTimeout(() => setDankie(''), 4000)
-                      }
+                      /* Na DIE storie waarby hy pas gaan sit het, nie na 'n
+                         algemene lys nie. Die woorde verklap niks — geen
+                         naam, geen sin, geen onderwerp — en die mens wat dit
+                         kry, land BY die gesprek in plaas van op 'n tuisblad.
+                         Dieselfde stuur-pad as Bid Nou s'n. */
+                      nooiOmTeAntwoord(soort === 'video' ? 'video' : 'plasing', plasing.id)
                     }}
                   >
                     Nooi iemand om saam te dra

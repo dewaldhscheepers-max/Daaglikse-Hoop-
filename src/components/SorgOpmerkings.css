@@ -242,6 +242,9 @@
   line-height: 1.5;
   color: var(--s-teks, #302A3A);
   overflow-wrap: anywhere;
+  /* Die paragrawe wat die mens getik het, BLY. Sonder dit vou die blaaier elke
+     reëlbreuk in 'n spasie en 'n gebed word een blok teks. */
+  white-space: pre-wrap;
 }
 
 /* 'n WOORD, nie drie kolletjies nie. Die kolletjies was 'n raaisel: niemand
@@ -299,7 +302,9 @@
 
 .op-tik {
   display: flex;
-  align-items: center;
+  /* Onder-in, sodat die kring en die knoppie by die kassie se laaste reel bly
+     staan wanneer dit groei. */
+  align-items: flex-end;
   gap: 8px;
 }
 
@@ -308,11 +313,17 @@
   min-width: 0;
   padding: 11px 15px;
   border: 1px solid #E2DBEC;
-  border-radius: 999px;
+  /* Nie meer 'n pil nie: dit groei nou saam met die woorde, en 'n pil van vyf
+     reels lyk stukkend. */
+  border-radius: 18px;
   background: var(--s-kaart, #FFFFFF);
   color: var(--s-teks, #302A3A);
   font-family: var(--font-body);
-  font-size: 14.5px;
+  font-size: 15px;
+  line-height: 1.45;
+  resize: none;
+  overflow-y: auto;
+  max-height: 160px;
 }
 
 .op-plaas {

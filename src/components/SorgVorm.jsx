@@ -67,11 +67,21 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
    * Gebruik my naam en foto · Plaas anoniem... Die anonimiteitskeuse geld
    * per plasing."
    *
-   * PER PLASING, en die verstek is ANONIEM. Dieselfde vrou kan haar naam by
-   * 'n gebed sit en anoniem oor haar huwelik skryf, en sy moet nooit per
-   * ongeluk die verkeerde een kry nie. Die veilige kant is die verstek. */
-  const [anoniem, setAnoniem] = useState(true)
+   * PER PLASING. Die verstek hang af van of die mens 'n PROFIEL het:
+   *
+   *   geen profiel → anoniem. Hy het nooit 'n naam gekies nie, en 'n naam wat
+   *                  hy nie gekies het nie, mag nooit verskyn nie.
+   *   wél 'n profiel → sy naam. Hy HET gekies, en dit was die hele punt van
+   *                  daardie keuse.
+   *
+   * Dit was eers altyd anoniem, ook vir iemand met 'n profiel. Dewald het sy
+   * naam en foto opgestel, 'n storie gedeel, en dit het as "Anoniem" verskyn:
+   * "Dit moet die mense se name wys as hulle dit so verkies."
+   *
+   * Anoniem bly een druk weg, en dit staan EERSTE in die lys — wie dit nodig
+   * het, sien dit voor hy iets anders sien. */
   const [profiel, setProfiel] = useState(() => myProfiel())
+  const [anoniem, setAnoniem] = useState(() => !myProfiel())
   const [profielOop, setProfielOop] = useState(false)
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)

@@ -184,7 +184,21 @@ export default async function handler(req, res) {
        *
        * Tien, nie sestig nie: die skerm vra in elk geval elke vyftien
        * sekondes weer, en 'n muur wat 'n minuut agter is, voel dood. */
-      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=10, stale-while-revalidate=60')
+      /* ── GEEN randkas nie ──
+       *
+       * Hier het `s-maxage=10, stale-while-revalidate=60` gestaan. Dit was
+       * bedoel om die blad vinniger te laat laai, en dit het presies een ding
+       * gedoen: 'n mens plaas sy storie, kom terug na die muur, en dit is nie
+       * daar nie. Dewald: "ek moes na ander page toe gaan en terug kom voor my
+       * plasing gewys het."
+       *
+       * `stale-while-revalidate=60` beteken Vercel mag 'n MINUUT lank 'n ou
+       * antwoord teruggee. Op 'n muur waar 'n mens sy eie woorde soek, is dit
+       * die verskil tussen "dit werk" en "dit is weg".
+       *
+       * Die antwoord is klein en die skerm vra in elk geval elke vyftien
+       * sekondes weer. Die kas het niks gekoop wat hierdie prys werd was nie. */
+      res.setHeader('Cache-Control', 'no-store')
       const alles = await lysDokke(MUUR, { grootte: 300 })
 
       /* Net wat WYS. Wat vir Dewald se oog wag, en wat hy weggesteek het,

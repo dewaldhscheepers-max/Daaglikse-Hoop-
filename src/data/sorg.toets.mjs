@@ -170,7 +170,11 @@ afdeling('Anoniem is die VERSTEK, nie die enigste keuse nie')
   const muur = sonder(fs.readFileSync(path.join(wortel, 'api', 'sorg-muur.mjs'), 'utf8'))
 
   kyk('die vorm vra hoe jy wil verskyn', /Hoe wil jy verskyn/.test(vorm))
-  kyk('en die verstek is anoniem', /useState\(true\)/.test(vorm.match(/const \[anoniem[^\n]*/)?.[0] || ''),
+  /* Die verstek hang af van of die mens 'n PROFIEL het. Geen profiel → anoniem;
+     wel 'n profiel → sy naam, want hy HET gekies. Dewald: "Dit moet die mense
+     se name wys as hulle dit so verkies." */
+  kyk('geen profiel beteken anoniem',
+      /useState\(\(\) => !myProfiel\(\)\)/.test(vorm.match(/const \[anoniem[^\n]*/)?.[0] || ''),
       vorm.match(/const \[anoniem[^\n]*/)?.[0])
 
   /* Die bediener vertrou nooit die kliënt se naam nie. */
@@ -261,8 +265,10 @@ afdeling('Deel — die skakel moet by die REGTE ding uitkom')
   /* Dit is nou 'n PAD, soos Bid Nou s'n — /sorg/<id>, nie '#sorg-plasing-<id>'
      nie. 'n Hash oorleef nie altyd 'n plak nie en WhatsApp wys niks van hom.
      Die ou hash bly leesbaar, want daar loop skakels in gesprekke rond. */
-  kyk('plasing', sorgSkakel('plasing', 'm1').endsWith('/sorg/m1'), sorgSkakel('plasing', 'm1'))
-  kyk('video', sorgSkakel('video', 'LK-kieYHZJA').endsWith('/sorg/video/LK-kieYHZJA'))
+  /* Die skakel dra nou 'n veldtog, dus begin dit met die pad in plaas van om
+     daarop te eindig. Sien src/data/sorgDeel.js. */
+  kyk('plasing', sorgSkakel('plasing', 'm1').includes('/sorg/m1'), sorgSkakel('plasing', 'm1'))
+  kyk('video', sorgSkakel('video', 'LK-kieYHZJA').includes('/sorg/video/LK-kieYHZJA'))
   kyk('lees plasing terug', JSON.stringify(leesSorgSkakel('#sorg-plasing-m1')) === '{"soort":"plasing","id":"m1"}',
       leesSorgSkakel('#sorg-plasing-m1'))
   kyk('lees video terug', leesSorgSkakel('#sorg-video-abc123').id === 'abc123')

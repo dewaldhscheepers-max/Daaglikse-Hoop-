@@ -41,7 +41,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { REAKSIES, wysReaksies, telOpmerkings } from '../data/sorgSaamstaan'
 import { stuurReaksie, myReaksie } from '../data/sorgMuur'
-import { deelSorg, magBuiteDeel, algemeneWoorde, WORTEL_UITNODIGING } from '../data/sorgDeel'
+import { deelSorg } from '../data/sorgDeel'
 import SorgOpmerkings from './SorgOpmerkings'
 import './SorgSaamstaan.css'
 
@@ -101,16 +101,49 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
     })
   }, [plasing.reaksies])
 
-  /* Dieselfde vir die opmerkings: alles wat die bediener stuur, plus wat
-     hierdie foon pas bygesit het en die bediener nog nie teruggegee het nie. */
+  /* ── Wat van die bediener af kom, word met MYNE saamgevoeg ──
+   *
+   * Dewald: "ek het gecomment toe wys my naam. toe ek uit die comments gaan is
+   * my naam weg toe ek terug gaan."
+   *
+   * Hier het gestaan: alles wat die bediener stuur, plus my eie woorde wat hy
+   * nog nie ken nie. Sodra hy die opmerking WEL terugstuur, is my plaaslike
+   * kopie weggegooi — en met haar die naam en die foto wat ek pas gekies het.
+   *
+   * Dit lyk soos 'n bediener-fout en dit is dit nie: die bediener se antwoord
+   * kan 'n oomblik ouer wees as my druk, of 'n randkas kan 'n ou weergawe
+   * teruggee. Wat ook al die rede is, my eie naam mag nie uit die skerm
+   * verdwyn nie.
+   *
+   * Ons hou dus per id die BESTE van albei: die bediener se velde wen, maar
+   * waar hy niks het nie, bly myne staan. */
   useEffect(() => {
     const bediener = plasing.woorde || []
     setWoorde(ou => {
-      const ids = new Set(bediener.map(w => w.id))
-      const myne = ou.filter(w => w.myne && !ids.has(w.id))
-      if (!myne.length && bediener.length === ou.length &&
-          bediener.every((w, i) => w.id === ou[i].id)) return ou
-      return [...bediener, ...myne]
+      const myneOp = new Map(ou.filter(w => w.myne).map(w => [w.id, w]))
+      const saam = bediener.map(w => {
+        const m = myneOp.get(w.id)
+        if (!m) return w
+        myneOp.delete(w.id)
+        return {
+          ...w,
+          myne: true,
+          naam: w.naam || m.naam || '',
+          foto: w.foto || m.foto || '',
+          geverifieer: w.geverifieer || m.geverifieer || false,
+        }
+      })
+      /* Wat die bediener nog glad nie ken nie, bly agteraan staan. */
+      const oor = [...myneOp.values()]
+      const nuutLys = [...saam, ...oor]
+      /* Niks verander nie? Gee dieselfde verwysing terug, anders teken React
+         hierdie kaart elke vyftien sekondes oor. */
+      if (nuutLys.length === ou.length &&
+          nuutLys.every((w, i) => w.id === ou[i].id && w.naam === ou[i].naam &&
+                                  w.teks === ou[i].teks && w.foto === ou[i].foto)) {
+        return ou
+      }
+      return nuutLys
     })
   }, [plasing.woorde])
 
@@ -216,22 +249,6 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
             className="ss-aksie"
             onClick={() => {
               setKiesOop(false)
-              /* ── Twee toestemmings, en hulle is nie dieselfde ding nie ──
-               *
-               * Dewald: "'n Spesifieke storie mag slegs buite Sorg gedeel word
-               * indien die skrywer afsonderlik toestemming gee. Hierdie
-               * toestemming is standaard afgeskakel."
-               *
-               * "Plaas my storie op die muur" en "sit my storie op Facebook"
-               * is vir die mens wat dit geskryf het twee heeltemal
-               * verskillende dinge. Sonder daardie tweede ja deel ons die
-               * ALGEMENE uitnodiging, wat niemand se naam of storie dra nie. */
-              if (soort === 'muur' && !magBuiteDeel(plasing)) {
-                const teks = algemeneWoorde()
-                if (navigator.share) navigator.share({ text: teks, url: WORTEL_UITNODIGING }).catch(() => {})
-                else { try { navigator.clipboard.writeText(teks) } catch { /* geen knipbord */ } }
-                return
-              }
               deelSorg(deel.soort, deel.id, deel.titel)
             }}
           >

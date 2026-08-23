@@ -148,7 +148,16 @@ export function klaarWoordTeks(sleutel) {
   return w ? w.teks : ''
 }
 
-export const MAKS_WOORD = 200
+/* ── Hoe lank 'n opmerking mag wees ──
+ *
+ * 200 was 'n SIN. Dewald het 'n hele pastorale antwoord getik — Skrif,
+ * gebed, 'n seën — en die app het dit in die middel van 'n woord afgekap.
+ *
+ * Dit was nooit 'n tegniese perk nie; ek het 'n kort bemoediging veronderstel.
+ * Mense wat mekaar dra, skryf gebede. 2 000 is ruim genoeg vir wat hy geskryf
+ * het, en klein genoeg dat vyftig van hulle op een muur nog steeds niks weeg
+ * nie. */
+export const MAKS_WOORD = 2000
 
 /* ── Wat 'n eie woord mag wees ──
 
@@ -161,8 +170,21 @@ export const MAKS_WOORD = 200
    gemaak; sien CLAUDE.md. */
 export function skoonWoord(t) {
   return String(t || '')
+    /* Beheerkarakters uit — maar NIE \n nie. Dit is 'n eksplisiete lys, nie 'n
+       reeks nie; sien CLAUDE.md se karakterreeks-fout. */
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, ' ')
-    .replace(/\s+/g, ' ')
+    /* ── Die PARAGRAWE bly ──
+     *
+     * Hier het `.replace(/\s+/g, ' ')` gestaan, en dit het elke reëlbreuk in 'n
+     * spasie verander. Dewald het 'n pastorale antwoord getik — 'n groet, vier
+     * paragrawe, 'n gebed — en dit het as EEN blok teks op die muur beland.
+     *
+     * Dieselfde reël as `skoonTeks` in api/sorg-stuur.mjs, wat dit vir STORIES
+     * al reg gedoen het: spasies binne 'n reël vou in, drie of meer leë reëls
+     * word twee. 'n Mens skryf sy swaar ding in paragrawe. */
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .split('\n').map(r => r.trim()).join('\n')
     .trim()
     .slice(0, MAKS_WOORD)
 }

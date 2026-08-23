@@ -97,8 +97,22 @@ afdeling('Die klaargemaakte woorde')
 afdeling('n Eie woord word skoongemaak')
 {
   kyk('gewone teks bly heel', skoonWoord('Ek bid vir jou.') === 'Ek bid vir jou.')
-  kyk('spasies word saamgetrek', skoonWoord('Ek   bid \n\n vir jou') === 'Ek bid vir jou')
-  kyk('dit word afgekap op 200', skoonWoord('a'.repeat(400)).length === MAKS_WOORD)
+  kyk('spasies BINNE n reel word saamgetrek', skoonWoord('Ek   bid  vir jou') === 'Ek bid vir jou')
+  /* ── Die PARAGRAWE bly ──
+     Hier het `\s+ → ' '` gestaan, en dit het elke reëlbreuk in 'n spasie
+     verander. Dewald het 'n pastorale antwoord getik — 'n groet, vier
+     paragrawe, 'n gebed — en dit het as EEN blok teks op die muur beland. */
+  kyk('n paragraaf bly n paragraaf',
+      skoonWoord('Goeiedag.\n\nEk bid vir jou.') === 'Goeiedag.\n\nEk bid vir jou.',
+      skoonWoord('Goeiedag.\n\nEk bid vir jou.'))
+  kyk('drie of meer lee reels word twee',
+      skoonWoord('een\n\n\n\ntwee') === 'een\n\ntwee', skoonWoord('een\n\n\n\ntwee'))
+  kyk('spasies aan die einde van n reel val weg',
+      skoonWoord('een   \ntwee') === 'een\ntwee', skoonWoord('een   \ntwee'))
+  kyk(`dit word afgekap op ${MAKS_WOORD}`, skoonWoord('a'.repeat(4000)).length === MAKS_WOORD)
+  /* Dewald se egte boodskap is sowat 1 200 karakters. Dit moet HEEL deurkom. */
+  kyk('n boodskap van 1 200 karakters kom heel deur',
+      skoonWoord('a'.repeat(1200)).length === 1200)
   kyk('leeg bly leeg', skoonWoord('') === '')
   kyk('null breek nie', skoonWoord(null) === '')
 
@@ -173,8 +187,10 @@ afdeling('n Gewone woord WYS DADELIK')
       woordStatus({ teks: ' ', sensitief: false }).status === 'weier')
   kyk('die skoongemaakte teks kom saam terug',
       woordStatus({ teks: '  Ek   bid  ', sensitief: false }).teks === 'Ek bid')
-  kyk('dit word afgekap op 200',
-      woordStatus({ teks: 'a'.repeat(500), sensitief: false }).teks.length === MAKS_WOORD)
+  kyk(`dit word afgekap op ${MAKS_WOORD}`,
+      woordStatus({ teks: 'a'.repeat(4000), sensitief: false }).teks.length === MAKS_WOORD)
+  kyk('en n lang pastorale antwoord kom heel deur',
+      woordStatus({ teks: 'a'.repeat(1200), sensitief: false }).teks.length === 1200)
 }
 
 
