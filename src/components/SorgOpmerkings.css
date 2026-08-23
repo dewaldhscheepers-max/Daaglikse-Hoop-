@@ -21,7 +21,10 @@
   margin-right: auto;
   width: 100%;
   max-width: 480px;
-  height: 82svh;
+  /* Byna volskerm. Dewald: "Die comments kan amper vol skerm oopmaak. Met
+     kruisie bo." 'n Blad van 82svh het die gesprek in 'n gleuf gedruk terwyl
+     die helfte van 'n dooie muur bo hom sigbaar bly. */
+  height: 94svh;
   z-index: 301;
   display: flex;
   flex-direction: column;
@@ -168,22 +171,33 @@
   color: var(--text-muted, #8A7E9A);
 }
 
-.op-bemoedig {
+/* ── Drie tekens: 👍🏻 👏🏻 👎🏻 ──
+   Dewald het die woord "Bemoedig" hier weggevat. Die tekens is klein en dof
+   totdat een gedruk is; dan bly net daardie een vol. Geen transform en geen
+   opacity op :active nie — net kleur en filter. Sien CLAUDE.md. */
+.op-tekens-ry { display: inline-flex; align-items: center; gap: 10px; }
+
+.op-teken-knop {
   padding: 0;
   border: 0;
   background: none;
+  font-size: 15px;
+  line-height: 1;
+  filter: grayscale(1);
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.12s;
+}
+.op-teken-knop.myne { filter: none; }
+/* 'n Gekose reaksie laat die ander twee VERDWYN — 'n mens mag een keer druk,
+   en dooie knoppies wat niks doen nie lyk stukkend. */
+.op-teken-knop:disabled:not(.myne) { display: none; }
+
+.op-teken-tel {
   font-family: var(--font-body);
   font-size: 12.5px;
   font-weight: 700;
   color: var(--text-muted, #8A7E9A);
-  -webkit-tap-highlight-color: transparent;
-  transition: color 0.12s;
 }
-.op-bemoedig:active { color: var(--purple, #7C6FAF); }
-.op-bemoedig.myne,
-.op-bemoedig:disabled { color: var(--purple, #7C6FAF); }
-
-.op-bemoedig-tel { font-weight: 700; color: var(--purple, #7C6FAF); }
 
 /* Daaglikse Hoop se kring dra die app se kleur, sodat 'n mens sonder om te
    lees sien dat hierdie een anders is. */
@@ -430,3 +444,29 @@
   text-decoration: underline;
   -webkit-tap-highlight-color: transparent;
 }
+
+
+/* Die kruisie bo. Die greep bly ook — 'n mens wat swiep, verwag hom — maar 'n
+   kruisie is die ding waarna 'n hand soek wanneer 'n blad byna die hele skerm
+   vul. */
+.op-kruis {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted, #8A7E9A);
+  font-size: 21px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, color 0.12s;
+}
+.op-kruis:active { background: var(--cream-dark, #F0EBE3); color: var(--text); }

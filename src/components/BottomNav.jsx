@@ -27,7 +27,10 @@ export default function BottomNav({ active, onChange, onBybel }) {
          bring 'n mens steeds daarheen. Ses oortjies sou op 'n klein foon
          begin knyp. */
       id: 'sorg',
-      label: 'Sorg',
+      /* "Dra mekaar", nie "Sorg" nie. Dewald het dit gevra, en die woord doen
+         werk: "Sorg" is 'n afdeling in 'n gebou, "Dra mekaar" is 'n opdrag
+         aan die mens wat dit lees. Die blad self heet "Dra Mekaar se Laste". */
+      label: 'Dra mekaar',
       icon: (
         /* 'n Hand wat 'n hart dra. Nie 'n hart alleen nie — die punt is dat
            iemand dit vir jou vashou. */

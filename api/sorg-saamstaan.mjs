@@ -272,7 +272,12 @@ async function doenRapport(res, woordId) {
  *
  * 'n Woord wat gerapporteer is (`status !== 'wys'`) kan nie bemoedig word
  * nie — anders staan daar 'n telling op iets wat niemand mag sien nie. */
-async function doenBemoedig(res, { woordId, toestel }) {
+/* Watter tekens 'n mens mag stuur. 'n WITLYS: die kliënt kies 'n sleutel se
+   teken, en enigiets anders word 'n duim. Sonder dit skryf iemand met 'n
+   gereedskapstuk enige string in daardie veld en dit verskyn op die muur. */
+const TEKENS = ['\u{1F44D}\u{1F3FB}', '\u{1F44F}\u{1F3FB}', '\u{1F44E}\u{1F3FB}']
+
+async function doenBemoedig(res, { woordId, toestel, teken }) {
   const w = await leesDok(WOORDE, woordId)
   if (!w || w.status !== 'wys') {
     return res.status(404).json({ fout: 'daardie opmerking bestaan nie' })
@@ -285,13 +290,18 @@ async function doenBemoedig(res, { woordId, toestel }) {
   }
 
   await skryfDok(SAAM, merkId, {
-    woordId, toestel, soort: 'bemoedig',
+    woordId, toestel, soort: 'bemoedig', teken,
     dag: new Date().toISOString().slice(0, 10),
   })
 
   const bemoedig = (Number(w.bemoedig) || 0) + 1
-  await skryfDok(WOORDE, woordId, { bemoedig }, { velde: ['bemoedig'] })
-  return res.status(200).json({ ok: true, bemoedig })
+  /* Hoeveel van elke teken. Die skerm wys vandag een totaal; die opsplitsing
+     staan reeds hier sodat 'n mens later kan sien WATTER reaksie gekom het,
+     sonder om die data van vandag af te verloor. */
+  const tekens = { ...(w.tekens || {}) }
+  tekens[teken] = (Number(tekens[teken]) || 0) + 1
+  await skryfDok(WOORDE, woordId, { bemoedig, tekens }, { velde: ['bemoedig', 'tekens'] })
+  return res.status(200).json({ ok: true, bemoedig, tekens })
 }
 
 export default async function handler(req, res) {
@@ -316,7 +326,8 @@ export default async function handler(req, res) {
       /* Sonder 'n toestel-id kan ons nie 'n dubbele druk keer nie, en dan tel
          ons liewer niks as om 'n telling te laat lieg. */
       if (!t) return res.status(200).json({ ok: true, reeds: true })
-      return await doenBemoedig(res, { woordId, toestel: t })
+      const teken = TEKENS.includes(lyf.teken) ? lyf.teken : TEKENS[0]
+      return await doenBemoedig(res, { woordId, toestel: t, teken })
     }
 
     const muurId = skoonId(lyf.muurId)

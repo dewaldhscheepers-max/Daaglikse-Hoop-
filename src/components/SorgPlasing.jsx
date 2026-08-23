@@ -60,7 +60,6 @@
 import { useState } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { voorletters } from '../data/sorgProfiel'
-import SorgDeelSteun from './SorgDeelSteun'
 import SorgSaamstaan from './SorgSaamstaan'
 import './SorgPlasing.css'
 
@@ -217,22 +216,24 @@ export default function SorgPlasing({ plasing, myne = false, wag = false }) {
       {/* ── Die gemeenskap ──
           Vier reaksies en woorde van ondersteuning, in plaas van die een
           knoppie wat op 'n jong muur "1 mens dra dit saam met jou" gesê het. */}
-      <SorgSaamstaan plasing={plasing} />
+      {/* Deel sit nou IN die aksiebalk, waar 'n mens se hand dit soek — nie
+          in 'n eie ry onder die kaart nie. */}
+      <SorgSaamstaan
+        plasing={plasing}
+        deel={{ soort: 'plasing', id: plasing.id, titel: plasing.titel }}
+      />
 
-      {/* ── Deel en nooi ──
+      {/* ── Deel en nooi staan nie meer HIER nie ──
        *
-       * Dit het BINNE die antwoord-blok gestaan, en dus het dit net verskyn
-       * op 'n plasing wat Dewald reeds beantwoord het. Die hele groei van die
-       * blad was dus aan een mens se arbeid vasgeknoop: geen antwoord, geen
-       * deel, geen nuwe mens.
+       * Dewald: "Hou net die reaction icon en die comment icon en share icon...
+       * Doen 'nooi iemand wat jy ken om hierdie persoon te bemoedig' kan ook
+       * binne die comments sit."
        *
-       * Dewald: "die app moet heavy fokken groei" — en tegelyk "ek kan nie
-       * almal antw nie." Daardie twee kon nie albei waar wees solank hierdie
-       * knoppie hier binne gesit het.
-       *
-       * Dit staan nou onder ELKE plasing. En dit is juis die ONBEANTWOORDE
-       * een wat 'n uitnodiging nodig het: daar is nog niemand wat dra nie. */}
-      <SorgDeelSteun soort="plasing" id={plasing.id} titel={plasing.titel} wysNooi wysRapport />
+       * Deel het na die aksiebalk geskuif. Nooi en Rapporteer sit binne die
+       * opmerkings-blad: dit is waar 'n mens is wanneer hy besluit het om
+       * werklik iets vir hierdie persoon te doen. Op die kaart was dit 'n ry
+       * van vyf knoppies onder elke storie. */}
+
     </article>
   )
 }

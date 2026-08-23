@@ -196,32 +196,45 @@ export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort =
    Die bediener hou sy eie merk; hierdie een is vir die oog. */
 const BEMOEDIG_SLEUTEL = 'sorg_bemoedig'
 
-function leesMerkies(sleutel) {
+/* 'n KAART, nie 'n lys nie: die id wys na die TEKEN wat gedruk is, sodat die
+   regte een gevul bly staan ná 'n herlaai. Die ou vorm was 'n lys van id's;
+   'n mens wat toe reeds gedruk het, se merkie bly werk — sien hieronder. */
+function leesMerkies() {
   try {
-    const x = JSON.parse(localStorage.getItem(sleutel) || '[]')
-    return Array.isArray(x) ? x.filter(s => typeof s === 'string') : []
-  } catch { return [] }
+    const x = JSON.parse(localStorage.getItem(BEMOEDIG_SLEUTEL) || '{}')
+    if (Array.isArray(x)) {
+      /* Die ou vorm. Ons weet nie watter teken dit was nie, dus word dit 'n
+         duim — dit is wat "Bemoedig" beteken het. */
+      const uit = {}
+      for (const id of x) if (typeof id === 'string') uit[id] = '\u{1F44D}\u{1F3FB}'
+      return uit
+    }
+    return x && typeof x === 'object' ? x : {}
+  } catch { return {} }
 }
 
 export function bemoedigdes() {
-  return leesMerkies(BEMOEDIG_SLEUTEL)
+  return leesMerkies()
 }
 
-export async function bemoedigWoord(woordId) {
+export async function bemoedigWoord(woordId, teken = '\u{1F44D}\u{1F3FB}') {
   const id = String(woordId || '').trim()
   if (!id) return null
   /* Die merkie word GESKRYF VOOR ons stuur. 'n Swak lyn mag nie elke
      mislukte versoek weer laat tel nie — dieselfde reël as die tellers. */
   try {
-    const lys = leesMerkies(BEMOEDIG_SLEUTEL)
-    if (!lys.includes(id)) localStorage.setItem(BEMOEDIG_SLEUTEL, JSON.stringify([...lys, id].slice(-400)))
+    const kaart = leesMerkies()
+    if (!kaart[id]) {
+      kaart[id] = teken
+      localStorage.setItem(BEMOEDIG_SLEUTEL, JSON.stringify(kaart))
+    }
   } catch { /* privaat venster; die knoppie werk steeds */ }
 
   try {
     const r = await fetch(SAAM_PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ aksie: 'bemoedig', woordId: id, toestel: toestelId() }),
+      body: JSON.stringify({ aksie: 'bemoedig', woordId: id, teken, toestel: toestelId() }),
     })
     return await r.json()
   } catch {

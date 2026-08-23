@@ -147,38 +147,19 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
   return (
     <div className="ss">
 
-      {/* ── Die opsomming ──
-          Net WATTER reaksies gestuur is. Die getal staan langs die hartjie,
-          waar 'n mens dit soek. Die LEESTELLING is heeltemal weg van hier af
-          — sien `sorgSaamstaan.js`. */}
-      {gewys.length > 0 && (
-        <div className="ss-som">
-          <span className="ss-tekens" aria-hidden="true">
-            {gewys.map(r => <span key={r.sleutel} className="ss-teken">{r.teken}</span>)}
-          </span>
-        </div>
-      )}
+      {/* Die emoji-opsomming bo die balk is WEG. Dewald: "Hou net die
+          reaction icon en die comment icon en share icon en die getalle."
 
-      {/* ── BEMOEDIG HIERDIE PERSOON ──
-       *
-       * Dewald: "BEMOEDIG IEMAND VANDAG MOET ORAL SIGBAAR WEES. Bo-aan. Bo
-       * die gemeenskapsvoer. En op elke individuele plasing."
-       *
-       * Dit is die HOOFaksie op 'n plasing, nie 'n ikoon in 'n ry nie. Dit
-       * maak dieselfde blad oop as "Reageer" — dieselfde pad, sigbaarder
-       * deur.
-       *
-       * Die verduidelikende reël hierbo is WEG. Op 'n plasing wat nog wag,
-       * het daar drie dinge direk onder mekaar gestaan wat almal dieselfde
-       * sê: die "Nog geen antwoord"-merkie, "Hierdie persoon het vandag nog
-       * min woorde van bemoediging ontvang", en die knoppie self. 'n Blad wat
-       * homself drie keer herhaal, lees soos bedel. */}
-      <button
-        className="ss-bemoedig"
-        onClick={() => { setKiesOop(false); setBladOop(true) }}
-      >
-        Bemoedig hierdie persoon
-      </button>
+          Die getal het in elk geval twee keer gestaan — een keer hier en een
+          keer langs die hartjie in die balk. */}
+
+      {/* Die "Bemoedig hierdie persoon"-knoppie is WEG. Dewald: "hulle kan
+          net op die comment icon kliek."
+
+          Hy is reg: die knoppie het presies dieselfde blad oopgemaak as die
+          spraakborrel langsaan. Twee deure na een kamer laat 'n mens dink hy
+          mis iets, en 'n groot knoppie op elke kaart maak van 'n gesprek 'n
+          versoek. */}
 
       {/* ── Die aksiebalk ──
           Ikoon met die GETAL langsaan, soos elke muur wat 'n mens ken. Sonder
@@ -208,7 +189,7 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
           aria-expanded={kiesOop}
         >
           <span className="ss-aksie-teken" aria-hidden="true">{myReak ? myReak.teken : '♡'}</span>
-          <span>{totaal > 0 ? totaal : 'Hou van'}</span>
+          <span>{totaal > 0 ? totaal : ''}</span>
         </button>
 
         <button
@@ -216,7 +197,7 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
           onClick={() => { setKiesOop(false); setBladOop(true) }}
         >
           <span className="ss-aksie-teken" aria-hidden="true">💬</span>
-          <span>{woorde.length > 0 ? `${woorde.length}` : 'Reageer'}</span>
+          <span>{woorde.length > 0 ? `${woorde.length}` : ''}</span>
         </button>
 
         {/* Deel het in 'n aparte reeltjie ONDER die kaart gestaan. Op elke
@@ -234,56 +215,20 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
                 <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
               </svg>
             </span>
-            <span>Deel</span>
+            <span />
           </button>
         )}
       </div>
 
-      {/* ── Twee opmerkings as voorskou ──
-          Soos 'n mens dit in 'n stroom sien: die gesprek is daar, maar dit
-          neem nie die kaart oor nie. Druk op enigeen maak die blad oop. */}
-      {/* Ook wanneer die gemeenskap nog niks gesê het nie: as Dewald geantwoord
-          het, moet dit hier wys. Andersins lyk die kaart of niemand daar was
-          nie terwyl hy juis geantwoord het. */}
-      {(woorde.length > 0 || antwoord) && (
-        <button className="ss-voorskou" onClick={() => setBladOop(true)}>
-          {/* ── Dewald se antwoord staan EERSTE ──
-           *
-           * Dewald: "waar daaglikse hoop wys moet my comment wys eerste."
-           *
-           * Sy antwoord het net in die opmerkingsblad gelewe, dus moes 'n mens
-           * eers alles oopmaak om te sien dat hy geantwoord het. Op die kaart
-           * self het die eerste twee gesaaide woorde gestaan en syne was
-           * nêrens. Vasgespeld beteken BO, ook in die voorskou. */}
-          {antwoord && (
-            <span className="ss-voorskou-ry">
-              {/* Sy eie foto, soos in die opmerkingsblad. Dewald: "haal daai
-                  bruin strepie uit langs my naam skryf dit reg soos die ander
-                  comments en sit my profile pic." */}
-              <img className="ss-avatar foto" src="/beelde/dewald.jpg" alt="" width="26" height="26" />
-              <span className="ss-voorskou-teks">
-                <b>Dewald Scheepers</b>
-                <span className="ss-merk" aria-hidden="true">✓</span>
-                {' '}
-                {String(antwoord.teks || 'het met ’n stemboodskap geantwoord.').slice(0, 120)}
-              </span>
-            </span>
-          )}
-          {woorde.slice(0, antwoord ? 1 : 2).map(w => (
-            <span key={w.id} className="ss-voorskou-ry">
-              <span className={`ss-avatar${w.hoop ? ' hoop' : ''}`} aria-hidden="true" />
-              <span className="ss-voorskou-teks">
-                <b>{w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')}</b>
-                {w.hoop && <span className="ss-merk" aria-hidden="true">✓</span>}
-                {' '}{w.teks}
-              </span>
-            </span>
-          ))}
-          {woorde.length > 2 && (
-            <span className="ss-voorskou-meer">Wys al {woorde.length} opmerkings</span>
-          )}
-        </button>
-      )}
+      {/* ── Die VOORSKOU is weg ──
+       *
+       * Dewald: "Verwyder die preview comments op elke post. Hou net die
+       * reaction icon en die comment icon en share icon."
+       *
+       * Twee opmerkings onder elke kaart het van 'n voer 'n muur van teks
+       * gemaak: 'n mens moes deur ander se antwoorde lees om by die volgende
+       * MENS te kom. Die drie ikone sê alles wat 'n mens moet weet, en die
+       * gesprek is een druk weg. */}
 
       <SorgOpmerkings
         plasing={plasing}

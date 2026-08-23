@@ -38,7 +38,16 @@ import { gelede, kringKleur } from '../data/sorgTyd'
 import { voorletters } from '../data/sorgProfiel'
 import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
+import SorgDeelSteun from './SorgDeelSteun'
 import './SorgOpmerkings.css'
+
+/* Die drie tekens onder 'n opmerking. Presies wat Dewald gevra het, en niks
+   meer nie — 'n ry van agt reaksies maak van 'n gesprek 'n keuselys. */
+export const OP_TEKENS = [
+  { sleutel: 'duim',  teken: '\u{1F44D}\u{1F3FB}', naam: 'Ek stem saam' },
+  { sleutel: 'hande', teken: '\u{1F44F}\u{1F3FB}', naam: 'Mooi gesê' },
+  { sleutel: 'af',    teken: '\u{1F44E}\u{1F3FB}', naam: 'Dit voel verkeerd' },
+]
 
 const MAANDE = [
   'Januarie', 'Februarie', 'Maart', 'April', 'Mei', 'Junie',
@@ -85,7 +94,9 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
   /* Wat hierdie foon reeds bemoedig het, plus wat in hierdie sessie bygekom
      het. Die tellings kom van die bediener; hierdie merk is vir die oog,
      sodat die hartjie gevul bly ná 'n herlaai. */
-  const [myBemoedig, setMyBemoedig] = useState(() => new Set(bemoedigdes()))
+  /* Watter teken hierdie foon op watter opmerking gedruk het. 'n Kaart, nie
+     'n stel nie — die gekose teken bly gevul staan ná 'n herlaai. */
+  const [myBemoedig, setMyBemoedig] = useState(() => new Map(Object.entries(bemoedigdes())))
   /* ── Wie praat ──
    *
    * Dewald: "Wanneer iemand die eerste keer antwoord, laat hulle 'n
@@ -176,11 +187,11 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
    *
    * Dit tel DADELIK op die skerm, voor die bediener antwoord. 'n Hartjie wat
    * eers 'n sekonde later vul, voel stukkend, en 'n mens druk hom weer. */
-  function bemoedig(id) {
+  function bemoedig(id, teken) {
     if (myBemoedig.has(id)) return
-    setMyBemoedig(s => new Set(s).add(id))
+    setMyBemoedig(s => new Map(s).set(id, teken))
     setEkstra(e => ({ ...e, [id]: (e[id] || 0) + 1 }))
-    bemoedigWoord(id)
+    bemoedigWoord(id, teken)
   }
 
   async function rapporteer(id) {
@@ -194,6 +205,10 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
       <div className="op-agter" onClick={onSluit} />
       <div className="op-blad" role="dialog" aria-modal="true" aria-label="Opmerkings">
         <button className="op-greep" onClick={onSluit} aria-label="Maak toe" />
+        {/* Dewald: "Met kruisie bo." Die greep bly ook — wie swiep, verwag hom
+            — maar 'n kruisie is waarna 'n hand soek op 'n blad wat byna die
+            hele skerm vul. */}
+        <button className="op-kruis" onClick={onSluit} aria-label="Maak toe">×</button>
 
         <div className="op-kop">
           {totaal > 0 && (
@@ -210,6 +225,25 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
         </div>
 
         <div className="op-lys" ref={lysRef}>
+          {/* ── Nooi iemand wat jy ken ──
+           *
+           * Dewald: "Doen 'nooi iemand wat jy ken om hierdie persoon te
+           * bemoedig' kan ook binne die comments sit."
+           *
+           * Dit is die regte plek. Op die kaart was dit een van vyf knoppies
+           * onder 'n storie; hier is 'n mens al binne die gesprek en het pas
+           * besluit om iets te doen. Die woorde vra om ERVARING, nie om 'n
+           * aflaai — sien src/data/sorgNooi.toets.mjs. */}
+          {soort === 'muur' && (
+            <SorgDeelSteun
+              soort="plasing"
+              id={plasing.id}
+              titel={plasing.titel}
+              wysDeel={false}
+              wysNooi
+              wysRapport
+            />
+          )}
           {/* ── Vasgespeld, BO die ander opmerkings ──
            *
            * Dewald: "Vasgespeld moet in die comments wees saam die ander. nie
@@ -333,7 +367,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
               : (w.naam ? w.naam : (w.myne ? 'Jy' : 'Anoniem'))
             const tyd = gelede(w.geskepOp || w.wanneer) || skryfDag(w.wanneer)
             const tel = (Number(w.bemoedig) || 0) + (ekstra[w.id] || 0)
-            const myne = myBemoedig.has(w.id)
+            const myne = myBemoedig.get(w.id) || ''
             return (
               <div key={w.id} className="op-item">
                 <span
@@ -362,18 +396,39 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                   <div className="op-aksies">
                     {tyd ? <span className="op-wanneer">{tyd}</span> : null}
                     {/* Jou eie woorde bemoedig jy nie. */}
+                    {/* ── Drie tekens, nie een woord nie ──
+                     *
+                     * Dewald: "Die reaksie op elke comment moet nie wees
+                     * '♡ Bemoedig'. Dit moet wees like 👍🏻 of 👎🏻 of 👏🏻."
+                     *
+                     * Dit is wat elke mens met 'n foon reeds ken, en dit doen
+                     * meer werk as een hartjie: 'n duim OP sê "ja, so is dit",
+                     * die hande sê "mooi gesê", en die duim AF is die stil
+                     * manier om te sê dat 'n antwoord verkeerd voel — sonder
+                     * om 'n mens in 'n donker plek reg te help voor almal.
+                     *
+                     * Een druk, en dan is dit klaar. Geen aftrek nie: 'n
+                     * aftrek op 'n telling wat baie toestelle gelyktydig
+                     * verhoog, is presies waar tellings verkeerd raak. */}
                     {!w.myne && (
-                      <button
-                        className={`op-bemoedig${myne ? ' myne' : ''}`}
-                        onClick={() => bemoedig(w.id)}
-                        disabled={myne}
-                        aria-label="Bemoedig hierdie opmerking"
-                      >
-                        {myne ? '♥' : '♡'} Bemoedig{tel > 0 ? ` · ${tel}` : ''}
-                      </button>
+                      <span className="op-tekens-ry">
+                        {OP_TEKENS.map(t => (
+                          <button
+                            key={t.sleutel}
+                            className={`op-teken-knop${myne === t.teken ? ' myne' : ''}`}
+                            onClick={() => bemoedig(w.id, t.teken)}
+                            disabled={!!myne}
+                            aria-label={t.naam}
+                            title={t.naam}
+                          >
+                            {t.teken}
+                          </button>
+                        ))}
+                        {tel > 0 && <span className="op-teken-tel">{tel}</span>}
+                      </span>
                     )}
                     {w.myne && tel > 0 && (
-                      <span className="op-bemoedig-tel">♥ {tel}</span>
+                      <span className="op-teken-tel">👍🏻 {tel}</span>
                     )}
                     {!w.myne && !w.hoop && (
                       <button

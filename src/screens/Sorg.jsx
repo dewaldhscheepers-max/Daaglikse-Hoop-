@@ -344,7 +344,7 @@ export default function Sorg({ onNavigate }) {
          *
          * Een reël wat sê wat hierdie plek is, en EEN vers. Die res van die
          * Skrif leef in die blad se werkwoorde, nie in 'n blok bo-aan nie. */}
-        <h1>Sorg</h1>
+        <h1>Dra Mekaar se Laste</h1>
 
         {/* ── Die kampvuur ──
          *
@@ -460,16 +460,10 @@ export default function Sorg({ onNavigate }) {
           </div>
         </div>
 
-        {/* ── Hier is regte mense ──
-         *
-         * Een reël, geen kaart. Dit is die verskil tussen 'n statiese blad en
-         * 'n plek waar iets gebeur. Dit wys NET wanneer daar werklik iets is
-         * om te wys — 'n "0 mense" is erger as stilte. */}
-        {saamVandag > 0 && (
-          <p className="sorg-leef">
-            <b>{saamVandag}</b> {saamVandag === 1 ? 'mens het' : 'mense het'} vandag saamgedra.
-          </p>
-        )}
+        {/* Die "N mense het vandag saamgedra"-reël is WEG. Dewald het dit
+            gevra, en hy is reg: dit was 'n TELLING op 'n blad waar mense oor
+            hul huwelike skryf. Dit lees soos 'n bord by 'n ingang, en dit is
+            die eerste tree na 'n muur wat soos 'n wedstryd voel. */}
 
         {/* ── Bid Saam bly APART, maar klein ──
          *
@@ -484,29 +478,13 @@ export default function Sorg({ onNavigate }) {
           <b>Gaan na Bid Saam →</b>
         </button>
 
-        {/* ── Die daaglikse video ──
+        {/* Die "Vandag se video"-kaartjie is WEG van hierdie blad af.
+            Dewald: "Video's bly in die Video's-oortjie. Moenie video's bo
+            mense se stories op die hoofstroom plaas nie."
 
-            Dieselfde kaartjie as in die biblioteek, en dit SPEEL waar dit
-            staan. Die eerste weergawe het na die Video's-oortjie genavigeer;
-            'n mens druk 'n speel-driehoek en verwag dat dit speel, nie dat
-            die blad onder hom uitskuif nie.
-
-            Sonder die aksiebalk — die hoofblad se werk is die uitnodiging en
-            die muur. Wie wil reageer of deel, kry dit op die Video's-oortjie
-            waar dieselfde video met sy volle balk staan.
-
-            Hy bly hier omdat die volgorde op hierdie blad HOOP VOOR PYN is:
-            iemand wat in krisis aankom en dadelik veertig plasings van ander
-            se lyding lees, gaan slegter weg.
-
-            NET op die muur-oortjie. Die kaartjie sit bo die oortjies, dus sou
-            hy andersins ook op die Video's-oortjie wys — en dan staan
-            dieselfde video twee keer op een skerm. */}
-        {held && afdeling === 'muur' && (
-          <div className="sorg-vandag">
-            <SorgVideo video={held} etiket="Vandag se video" wysBalk={false} />
-          </div>
-        )}
+            Hy is reg: 'n video bo-aan die voer sê vir 'n mens wat wag dat die
+            eerste ding wat hierdie plek wys, nie 'n mens is nie. Die video
+            staan steeds in sy eie oortjie, groot en heel. */}
 
         {/* ── Twee afdelings ── */}
         {/* ── Twee duidelike afdelings ──
@@ -650,12 +628,6 @@ export default function Sorg({ onNavigate }) {
                *
                * Twee dinge wat dieselfde sê, direk onder mekaar, lees soos 'n
                * blad wat homself herhaal. */}
-              <p className="sorg-muur-fyn">
-                Elke storie hier is met die skrywer se toestemming geplaas.
-                Sien jy iets wat nie hier hoort nie, druk <b>Rapporteer</b> —
-                ons kyk daarna.
-              </p>
-
               {/* ── WAG NOG VIR IEMAND, eerste ──
                *
                * Dewald: "Wys onbeantwoorde stories eerste onder: Wag nog vir
@@ -692,7 +664,6 @@ export default function Sorg({ onNavigate }) {
                 <>
                   <div className="sorg-groepkop">
                     <h2>Gesprekke wat loop</h2>
-                    <p>Hier is mense reeds by mekaar. Jy kan gerus aansluit.</p>
                   </div>
                   {beantwoord.slice(0, wysAantal).map(p => (
                     <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} />

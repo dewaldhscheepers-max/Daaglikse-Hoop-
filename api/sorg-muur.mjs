@@ -27,7 +27,6 @@
 
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
-import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
 import { saamTelReaksies } from '../src/data/sorgSaamstaan.js'
 
 const MUUR = 'sorg_muur'
@@ -42,53 +41,31 @@ function hasToestel(t) {
   return crypto.createHash('sha256').update(sout + ':' + s).digest('hex').slice(0, 24)
 }
 
-/* ── Die eerste reaksies en woorde ──
+/* ── Die SAAI-lopie is weg ──
+ *
+ * Dewald, 23 Augustus 2026: "Verwyder die automatiese reaksies en comments."
+ *
+ * Hier het drie reaksies en drie opmerkings vanself op elke nuwe plasing
+ * verskyn — een van Daaglikse Hoop en twee "anoniem" — sodat 'n jong muur nie
+ * leeg lyk nie. Die bedoeling was goed en die gevolg was 'n leuen: 'n mens wat
+ * geskryf het, het gedink drie mense het geantwoord, en niemand het.
+ *
+ * Op 'n blad waar dit oor eerlikheid gaan, is 'n uitgedinkte opmerking die
+ * duurste ding wat daar kan staan.
+ *
+ * Wat REEDS gesaai is, bly in Firestore staan. Dit word hier uitgefilter — 'n
+ * uitvee-lopie oor die lewende data hoort in die admin, met 'n mens se hand
+ * daarop, nie in 'n leesversoek nie. Sien `saaiWeg()` hieronder.
+ */
 
-   Drie reaksies en drie opmerkings — een van Daaglikse Hoop, twee anoniem.
-   Sien `sorgSaai.js` vir wat dit is en wat dit nie is nie.
-
-   Dit is IDEMPOTENT, en dit is die hele truuk:
-
-     · die reaksies le in 'n APARTE veld (`saai`) wat GESTEL word, nie
-       opgetel nie. Loop dit twee keer, is die antwoord dieselfde;
-     · die opmerkings kry vaste id's (`saai_<muurId>_<n>`), dus oorskryf 'n
-       tweede lopie hulle in plaas van om hulle te verdubbel.
-
-   Dit is nodig omdat dit LUI gebeur: wanneer die muur gelees word en 'n
-   plasing nog nie gesaai is nie. So kry alles wat reeds op die muur staan
-   dit vanself, sonder dat iemand aan die databasis raak — en twee besoekers
-   op dieselfde oomblik kan niks verdubbel nie. */
-const MAKS_SAAI_PER_OPROEP = 8
-
-async function saai(plasings) {
-  const oor = plasings.filter(m => m.gesaai !== true).slice(0, MAKS_SAAI_PER_OPROEP)
-  for (const m of oor) {
-    await skryfDok(MUUR, m.id, { saai: saaiReaksies(m.id), gesaai: true },
-      { velde: ['saai', 'gesaai'] })
-    m.saai = saaiReaksies(m.id)
-    m.gesaai = true
-
-    const woorde = saaiWoorde(m.id)
-    for (let i = 0; i < woorde.length; i++) {
-      const w = woorde[i]
-      await skryfDok(WOORDE, `saai_${m.id}_${i}`, {
-        muurId: m.id,
-        toestel: `saai:${i}`,
-        teks: w.teks,
-        naam: w.naam,
-        bron: w.bron,
-        status: 'wys',
-        sleutel: '',
-        rang: i,
-        dag: String(m.datum || '').slice(0, 10),
-        gerapporteer: 0,
-      })
-    }
-  }
-  return oor.length
+/* 'n Gesaaide opmerking het 'n vaste id: `saai_<muurId>_<n>`. Dit is hoe ons
+   hulle nou uitken sonder om 'n veld by te sit wat op ou dokumente ontbreek. */
+function isGesaai(w) {
+  return String((w && w.id) || '').startsWith('saai_') ||
+         String((w && w.toestel) || '').startsWith('saai:')
 }
 
-/* Nuutste eerste, tot op die sekonde. */
+/* Nuutste eerste, tot op die sekonde. *//* Nuutste eerste, tot op die sekonde. */
 function volgorde(a, b) {
   const t = x => String(x.geskep || x.datum || '') + '|' + String(x.id || '')
   return t(b).localeCompare(t(a))
@@ -122,7 +99,9 @@ function virDieSkerm(m, woorde) {
     saam: Number(m.saam) || 0,
     /* Wat mense gedruk het, PLUS die eerstes. Hulle le apart sodat die
        saai-lopie nooit iemand se regte druk kan oorskryf nie. */
-    reaksies: saamTel(m.reaksies, m.saai),
+    /* Net WERKLIKE drukke. Die tweede argument was die drie gesaaide
+       reaksies; hulle is weg. */
+    reaksies: saamTel(m.reaksies, null),
     /* Die skerm moet dit weet om die skryfblok weg te laat. Dit is 'n
        vlaggie, nie inligting oor die mens nie — dit se net dat hierdie
        storie te swaar is vir 'n vreemdeling se raad. */
@@ -206,19 +185,13 @@ export default async function handler(req, res) {
       /* Net wat WYS. Wat vir Dewald se oog wag, en wat hy weggesteek het,
          kom nooit hier uit nie. Oudste eerste binne 'n plasing — 'n gesprek
          lees van bo af, nie andersom nie. */
-      /* Vul aan wat nog nie gesaai is nie — dit dek ALLES wat reeds op die
-         muur staan, sonder dat iemand aan die databasis raak. */
-      /* Die saai-lopie is 'n SKRYF in 'n leesversoek. Dit loop net wanneer
-         daar werklik iets ongesaai is — anders kos dit niks — maar dit mag
-         nooit die antwoord ophou nie. */
-      const ongesaai = alles.filter(m => m.gepubliseer !== false && m.teks && m.gesaai !== true)
-      if (ongesaai.length) await saai(ongesaai)
-
       const woorde = (await lysDokke(WOORDE, { grootte: 300 }))
+        /* Wat vroeer gesaai is, wys nie meer nie. Sien hierbo. */
+        .filter(w => !isGesaai(w))
         .filter(w => w.status === 'wys' && w.teks)
-        /* Die eerstes bo, in hul eie volgorde (Daaglikse Hoop heel eerste),
-           dan wat mense werklik gestuur het, in die volgorde waarin dit
-           gekom het. */
+        /* Oudste eerste — 'n gesprek lees van bo af. Die `rang`-sortering
+           hierbo het die gesaaide woorde boontoe gehou; hulle bestaan nie
+           meer nie, maar die reël bly onskadelik vir ou dokumente. */
         .sort((a, b) => {
           const s = (b.rang !== undefined ? 1 : 0) - (a.rang !== undefined ? 1 : 0)
           if (s) return s
