@@ -316,6 +316,20 @@ export default function BidSaam() {
     try {
       fokus = sessionStorage.getItem('bidsaam_fokus')
       if (fokus) sessionStorage.removeItem('bidsaam_fokus')
+      /* ── Woorde wat van Sorg af saamkom ──
+       *
+       * Dewald: "Indien die persoon reeds teks ingetik het, dra die teks waar
+       * moontlik na Bid Saam se gebedsversoekveld oor."
+       *
+       * 'n Mens wat in Sorg begin tik het en dan besef dit is eintlik 'n
+       * gebed, moet nie kies tussen sy woorde en die regte plek nie. Ons vul
+       * dit net in as die kassie leeg is — sy eie halwe sin hier weeg
+       * swaarder as iets wat van 'n ander skerm af kom. */
+      const dra = sessionStorage.getItem('bidsaam_teks')
+      if (dra) {
+        sessionStorage.removeItem('bidsaam_teks')
+        setText(t => (t.trim() ? t : dra.slice(0, 500)))
+      }
     } catch { /* privaat modus */ }
     if (fokus !== 'versoek') return
 

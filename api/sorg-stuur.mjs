@@ -21,6 +21,7 @@ import crypto from 'node:crypto'
 import { leesDok, skryfDok } from './_sorgFirestore.mjs'
 import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
 import { krisisTreffers, kontakTreffers, hulpversoekTreffers } from '../src/data/sorgKrisis.js'
+import { besluit as veiligBesluit } from '../src/data/sorgVeilig.js'
 
 const INKOMEND = 'sorg_inkomend'
 const MUUR     = 'sorg_muur'
@@ -202,6 +203,26 @@ export default async function handler(req, res) {
   /* Die krisis-toets loop HIER, nie net op die skerm nie. 'n Mens kan die
      JavaScript verander; hierdie kant nie. */
   const krisis = krisisTreffers(teks)
+
+  /* ── Wat teruggehou word, en wat NIE ──
+   *
+   * Dewald, 23 Augustus 2026: "'n Persoon wat oor selfmoordgedagtes,
+   * depressie of ernstige emosionele nood praat, moet nie bloot as
+   * 'ongewenste inhoud' versteek word nie... Publiseer die storie indien dit
+   * andersins veilig is."
+   *
+   * Dit draai die vorige reël om, en dit is die regte draai. 'n Mens skryf
+   * die swaarste sin van sy lewe, druk stuur, en dit verskyn nêrens nie —
+   * terwyl elke ander mens se storie dadelik lewe. Die een wat die meeste
+   * nodig het om gehoor te word, was die een wat weggesteek is.
+   *
+   * KRISIS gaan nou OP, met die noodnommers dadelik op sy skerm en 'n
+   * dringende merk in die admin. Wat teruggehou word, is ONVEILIG: spam,
+   * dreigemente, teistering, onwettige of seksuele inhoud, doxxing.
+   *
+   * Die reëls staan suiwer in src/data/sorgVeilig.js en word met plain node
+   * getoets. Die twee mag nooit weer een ding word nie. */
+  const veilig = veiligBesluit(teks, { krisis })
   const kontak = kontakTreffers(teks)
   /* Vra hy om geld of goed? Dit keer niks — dit wys net vir Dewald waaroor
      die boodskap gaan sodat hy nie hoef te sorteer nie. */
@@ -249,8 +270,16 @@ export default async function handler(req, res) {
       toestel,
       dag,
       kode,
-      status: krisis.length ? 'gevaar' : 'nuut',
+      status: veilig.status === 'outo' ? 'nuut' : veilig.status,
       krisisWoorde: krisis.slice(0, 10),
+      /* Waarom dit teruggehou is, as dit teruggehou is. 'n Rede is nie 'n
+         etiket op die MENS nie — dit is 'n etiket op die teks, en dit is wat
+         die admin sien in plaas van om elke keer te raai. */
+      onveiligRedes: veilig.onveilig,
+      /* Bo in die admin, met 'n rooi reël. 'n Krisis is dringend OOK wanneer
+         die storie reeds op die muur lewe — dit is nie 'n teenstelling nie,
+         dit is die hele punt. */
+      dringend: veilig.dringend,
       kontakWaarskuwing: kontak,
       hulpversoek: hulpversoek.slice(0, 6),
       toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
@@ -274,21 +303,24 @@ export default async function handler(req, res) {
      * DADELIK op, en enigiemand kan dit rapporteer. Dewald vee uit wat moet
      * gaan, in plaas van om alles te moet goedkeur voordat enigiets bestaan.
      *
-     * ── Die EEN uitsondering ──
+     * ── Wat WEL teruggehou word ──
      *
-     * Krisis. Selfmoord, selfbesering, geweld, mishandeling. Daardie plasings
-     * gaan NIE vanself op nie — hulle land in die Gevaar-hopie en 'n mens
-     * kyk daarna. Dit is Dewald se eie reel uit die opdrag: "Selfmoord,
-     * selfbesering, geweld, mishandeling en ander ernstige gevaar moet steeds
-     * prioriteit kry." 'n Storie oor selfmoordgedagtes wat outomaties
-     * openbaar gaan, is die een geval waar hierdie hele verandering skade kan
-     * doen.
+     * Nie meer krisis nie. Dewald het dit op 23 Augustus 2026 omgedraai:
+     * "'n Persoon wat oor selfmoordgedagtes... praat, moet nie bloot as
+     * 'ongewenste inhoud' versteek word nie. Publiseer die storie indien dit
+     * andersins veilig is. Wys onmiddellik die bestaande Hulp nou-inligting.
+     * Merk dit dringend vir admin se aandag."
+     *
+     * Wat oorbly is ONVEILIG: spam, dreigemente, teistering, onwettige of
+     * seksuele inhoud, doxxing. Daardie gaan nie op nie en 'n mens besluit.
+     * Sien src/data/sorgVeilig.js — die twee begrippe staan apart en mag
+     * nooit weer een ding word nie.
      *
      * Val hierdie skryf om, is die boodskap NIE verlore nie — hy le in
      * `sorg_inkomend` en Dewald kan hom met die hand plaas. Daarom is dit 'n
      * `try`, en daarom weier ons nie die indiening as dit misluk nie. */
     let muurId = null
-    if (!krisis.length) {
+    if (veilig.wys) {
       try {
         muurId = 'm' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex')
         await skryfDok(MUUR, muurId, {
@@ -307,13 +339,21 @@ export default async function handler(req, res) {
           saam: 0,
           reaksies: {},
           gelees: 0,
-          /* Geen krisis nie, want dan sou ons nie hier gewees het nie. Die
-             vlag bly staan sodat 'wysig' hom kan aanskakel. */
-          sensitief: false,
+          /* 'n Krisisstorie leef nou OP die muur, en dan dra hy die
+             sensitief-vlag: die opmerkings kry hul riglyn en die kaart lees
+             anders. Sien SorgOpmerkings.jsx. */
+          sensitief: veilig.sensitief,
+          /* Bo in die admin. Die storie is openbaar EN 'n mens moet daarna
+             kyk — albei tegelyk. */
+          dringend: veilig.dringend,
           /* Niemand het dit nog gerapporteer nie. Sien api/sorg-muur.mjs. */
           rapporte: 0,
         })
-        await skryfDok(INKOMEND, id, { status: 'outo', muurId },
+        /* 'n Krisis bly 'gevaar', ook noudat sy storie op die muur lewe.
+           Sou ons hom hier op 'outo' sit, verdwyn hy uit Dewald se hopie en
+           dan kyk NIEMAND daarna nie — presies die skade wat hierdie hele
+           verandering moet vermy. */
+        await skryfDok(INKOMEND, id, { status: veilig.dringend ? 'gevaar' : 'outo', muurId },
                        { velde: ['status', 'muurId'] })
       } catch {
         /* Die muur-skryf het misluk. Die boodskap staan steeds in INKOMEND
@@ -329,8 +369,15 @@ export default async function handler(req, res) {
       kode,
       onderwerp,
       krisis: krisis.length > 0,
+      /* Wys die skerm die noodnommers DADELIK? Dit hang aan die KRISIS, nie
+         aan die publikasie nie: 'n mens in nood moet daardie nommers sien of
+         sy storie nou lewe of nie. */
+      hulpNou: veilig.hulpNou,
       /* Die skerm weet nou of die storie reeds lewe. */
       opDieMuur: !!muurId,
+      /* Is dit teruggehou, en hoekom. Die skerm sê dit vir die mens — 'n
+         boodskap wat stilweg verdwyn, is erger as een wat geweier word. */
+      teruggehou: !veilig.wys,
     })
   } catch (e) {
     return res.status(500).json({ fout: 'Ons kon dit nie stoor nie. Probeer asseblief weer.', detail: String(e && e.message) })

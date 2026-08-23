@@ -164,22 +164,59 @@ console.log('\n── n Gewone plasing gaan DADELIK op ──\n')
   is('en hulle wys na mekaar', muur[0].bronId, ink[0].id)
 }
 
-console.log('\n── n KRISIS gaan NIE vanself op nie ──\n')
+console.log('\n── n KRISIS gaan OOK op — nood is nie oortreding nie ──\n')
 {
+  /* Dewald draai dit op 23 Augustus 2026 om: "'n Persoon wat oor
+     selfmoordgedagtes, depressie of ernstige emosionele nood praat, moet nie
+     bloot as 'ongewenste inhoud' versteek word nie... Publiseer die storie
+     indien dit andersins veilig is. Wys onmiddellik die bestaande Hulp
+     nou-inligting. Merk dit dringend vir admin se aandag."
+
+     Die ou reël het die swaarste storie weggesteek terwyl elke ander mens s'n
+     dadelik lewe. Die een wat die meeste nodig het om gehoor te word, was die
+     een wat nêrens verskyn nie. */
   berging.clear()
   const uit = await plaas(KRISIS)
   is('dit is aanvaar', uit.lyf && uit.lyf.ok, true)
   is('die skerm weet dit is n krisis', uit.lyf.krisis, true)
-  /* DIE toets. 'n Storie oor selfmoordgedagtes mag nooit outomaties openbaar
-     gaan nie — dit is die een geval waar hierdie hele verandering skade kan
-     doen. */
-  is('en dit is NIE op die muur nie', uit.lyf.opDieMuur, false)
+  is('en Hulp nou wys DADELIK', uit.lyf.hulpNou, true)
+  is('dit is NIE teruggehou nie', uit.lyf.teruggehou, false)
+  is('dit IS op die muur', uit.lyf.opDieMuur, true)
+
+  const muur = muurDokke()
+  is('daar is een plasing', muur.length, 1)
+  is('met die mens se woorde', muur[0].teks, KRISIS)
+  /* Die opmerkings kry hul riglyn; die kaart lees anders. */
+  is('en dit dra die sensitief-vlag', muur[0].sensitief, true)
+  is('en dit is dringend', muur[0].dringend, true)
+
+  const ink = inkomendes()
+  /* DIE toets. Die storie lewe openbaar EN staan bo in die admin. Sou dit
+     hier op 'outo' beland, verdwyn dit uit Dewald se hopie en kyk NIEMAND
+     daarna nie. */
+  is('dit staan STEEDS bo in die GEVAAR-hopie', ink[0].status, 'gevaar')
+  is('en dit is dringend gemerk', ink[0].dringend, true)
+  waar('met die krisiswoorde daarby', (ink[0].krisisWoorde || []).length > 0)
+  waar('en dit wys na die muur-plasing', !!ink[0].muurId)
+  is('geen "onveilig"-etiket op die mens nie', ink[0].onveiligRedes, [])
+}
+
+console.log('\n── ONVEILIG gaan WEL NIE op nie ──\n')
+{
+  /* Wat oorbly ná die draai: spam, dreigemente, teistering, onwettige of
+     seksuele inhoud, doxxing. Dit is 'n ander mens se veiligheid, nie hierdie
+     mens se nood nie. */
+  berging.clear()
+  const uit = await plaas('Ek gaan jou vermoor as jy weer hier kom')
+  is('dit is aanvaar', uit.lyf && uit.lyf.ok, true)
+  is('maar dit is TERUGGEHOU', uit.lyf.teruggehou, true)
+  is('en dit is nie op die muur nie', uit.lyf.opDieMuur, false)
   is('daar is niks op die muur nie', muurDokke().length, 0)
 
   const ink = inkomendes()
-  is('dit wag in die GEVAAR-hopie', ink[0].status, 'gevaar')
-  waar('en dit dra die krisiswoorde', (ink[0].krisisWoorde || []).length > 0)
-  waar('geen muur-id nie', !ink[0].muurId)
+  is('dit wag in die ONVEILIG-hopie', ink[0].status, 'onveilig')
+  waar('met n REDE, sodat niemand hoef te raai nie',
+       (ink[0].onveiligRedes || []).includes('dreigement'))
 }
 
 console.log('\n── Val die muur-skryf om, is die boodskap NIE verlore nie ──\n')

@@ -26,11 +26,19 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
   return (
     <div className="sv-blok">
 
-      {uitslag.krisis && (
+      {/* ── Hulp nou, DADELIK ──
+       *
+       * Dit hang aan die KRISIS, nie aan die publikasie nie. 'n Mens in nood
+       * moet daardie nommers sien of sy storie nou lewe of nie.
+       *
+       * `hulpNou` kom van die bediener; `krisis` is die ou veld en bly hier
+       * as terugval sodat 'n foon met 'n ou bundel presies soos altyd loop. */}
+      {(uitslag.hulpNou || uitslag.krisis) && (
         <div className="sv-krisis">
           <p className="sv-krisis-kop">Wat jy geskryf het, klink dringend.</p>
           <p className="sv-krisis-teks">
-            Moenie vir 'n antwoord hier wag nie. Bel asseblief nou.
+            Ons gemeenskap gaan langs jou kom staan — maar gewone
+            gemeenskapsraad vervang nie noodhulp nie. Bel asseblief nou.
           </p>
           <SorgNommers wys="dringend" />
         </div>
@@ -49,13 +57,17 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
       <h2 className="sv-klaar-kop">Dankie. Jou boodskap is ontvang.</h2>
       {uitslag.opDieMuur ? (
         <p className="sv-klaar-teks">
-          Jou storie is nou op die Sorg &amp; Ondersteuning-muur. Die gemeenskap
-          kan van hier af langs jou kom staan.
+          Jou storie is nou op Sorg. Die gemeenskap kan van hier af langs jou
+          kom staan.
         </p>
       ) : (
+        /* Teruggehou. Dit is nou net ONVEILIGE inhoud — spam, dreigemente,
+           teistering — en nooit meer 'n mens in nood. Sien
+           src/data/sorgVeilig.js. Ons sê dit reguit: 'n boodskap wat stilweg
+           verdwyn, laat 'n mens dink hy is weggegooi. */
         <p className="sv-klaar-teks">
-          Ons gaan dit eers met sorg lees voordat dit op die Sorg &amp;
-          Ondersteuning-muur verskyn.
+          Ons gaan eers self hierna kyk voordat dit op Sorg verskyn. Jou
+          woorde is nie weg nie.
         </p>
       )}
 

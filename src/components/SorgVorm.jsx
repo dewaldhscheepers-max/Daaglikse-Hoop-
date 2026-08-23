@@ -99,11 +99,23 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
        iemand dit druk. Wie 'n paar honderd woorde neergesit het en dit dan
        per ongeluk druk, verloor alles sonder 'n woord, en dit is nie 'n plek
        waar 'n mens iemand se woorde mag weggooi nie. */
-    if (teks.trim().length >= 40 &&
-        !window.confirm('Jy het al iets getik. Gaan jy na Bid Saam toe, gaan hierdie woorde verlore.\n\nWil jy voortgaan?')) {
-      return
-    }
-    try { sessionStorage.setItem('bidsaam_fokus', 'versoek') } catch { /* privaat modus */ }
+    /* ── Sy woorde gaan SAAM ──
+     *
+     * Dewald: "Indien die persoon reeds teks ingetik het, dra die teks waar
+     * moontlik na Bid Saam se gebedsversoekveld oor."
+     *
+     * Hier het 'n waarskuwing gestaan wat gesê het die woorde gaan verlore,
+     * en dan moes 'n mens kies tussen sy woorde en die regte plek. Dit is 'n
+     * keuse wat niemand moet maak nie: die kassie aan die ander kant is
+     * dieselfde soort kassie.
+     *
+     * Bid Saam se veld vat 500 karakters. Wat langer is, word afgekap — die
+     * res sou in elk geval nie ingaan nie. */
+    try {
+      const dra = teks.trim().slice(0, 500)
+      if (dra) sessionStorage.setItem('bidsaam_teks', dra)
+      sessionStorage.setItem('bidsaam_fokus', 'versoek')
+    } catch { /* privaat modus */ }
     onSluit()
     window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
   }
