@@ -498,8 +498,10 @@
    twee knoppies met woorde op mekaar verdring, en dan word albei klein. */
 .sds {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  /* Deel en Nooi langs mekaar, "dankie" daaronder. Dit was 'n kolom toe daar
+     net twee dinge was. */
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin: -4px 4px 16px;
 }
@@ -525,6 +527,36 @@
 .sds-deel:active {
   background: var(--s-pers, #624A84);
   border-color: var(--s-pers, #624A84);
+  color: #FFFFFF;
+}
+
+/* ── Nooi iemand ──
+ *
+ * Dieselfde vorm as Deel, maar GROEN — want dit is 'n ander versoek. Deel sê
+ * "kyk hierna". Nooi sê "jy het iets om te sê vir hierdie mens". Sien
+ * nooiOmTeAntwoord() in sorgDeel.js.
+ *
+ * Dewald: "die app moet heavy fokken groei." Dit is die knoppie wat dit doen,
+ * want die versoek is nie 'n advertensie nie — dit is 'n mens wat gevra word
+ * om te help. */
+.sds-nooi {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border: 1px solid rgba(46, 125, 79, 0.30);
+  border-radius: 999px;
+  background: #EDF7F0;
+  color: #2E7D4F;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.sds-nooi:active {
+  background: #2E7D4F;
+  border-color: #2E7D4F;
   color: #FFFFFF;
 }
 
@@ -783,3 +815,73 @@
   text-transform: uppercase;
   color: var(--s-sag, #77717D);
 }
+
+/* ── Sorg & Ondersteuning · Fase 1 ────────────────────────────────────────
+ *
+ * Dewald: "die Pastorale Sorg-blad maak my ongelooflik moeg."
+ *
+ * Die blad het EEN groot kaart gehad met sy gesig en "Waarmee kan ek jou
+ * help?". Dit is nou TWEE ingange: een om te vra, een om te gee. Sonder die
+ * tweede is die muur honderd persent krisis, en dan is daar niks om te gee
+ * nie — net om te vra.
+ *
+ * Geen `transform` op `:active` nie — sien CLAUDE.md se gekleurde strepe. */
+
+.sorg-skrifte { margin-top: 12px; }
+.sorg-skrifte p {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 15px; line-height: 1.5; opacity: .95;
+}
+.sorg-skrifte p:last-child { margin-bottom: 0; }
+.sorg-skrifte span {
+  font-family: var(--font-body); font-size: 11.5px; font-weight: 700;
+  letter-spacing: .3px; opacity: .75; white-space: nowrap;
+}
+
+.sorg-doen { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.sorg-doen-kaart {
+  background: #fff; border: 1px solid #EDE8F8; border-radius: 18px;
+  padding: 18px 18px 16px;
+}
+.sorg-doen-kaart.hoop { background: #F4FBF6; border-color: #D8EDDF; }
+.sorg-doen-kaart.bemoedig { background: #FDF5F5; border-color: #F0DADA; }
+.sorg-doen-kop {
+  font-size: 12px; font-weight: 800; letter-spacing: .8px;
+  color: var(--purple-dark, #4A3B7A); margin-bottom: 8px;
+}
+.sorg-doen-kaart.hoop .sorg-doen-kop { color: #2E7D4F; }
+.sorg-doen-kaart.bemoedig .sorg-doen-kop { color: #B0483F; }
+.sorg-doen-kaart p {
+  margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--text-muted);
+}
+/* Die groen knoppie deel die vorm se styl, net in die hoop-kleur. */
+.sorg-vertel.hoop { background: #2E7D4F; }
+.sorg-vertel.hoop:active { background: #256040; }
+.sorg-vertel.bemoedig { background: #B0483F; }
+.sorg-vertel.bemoedig:active { background: #913A33; }
+.sorg-doen-fyn {
+  margin: 2px 0 0; text-align: center;
+  font-size: 12.5px; color: var(--text-muted);
+}
+
+/* Bid Saam bly APART. Klein, want dit is 'n wegwyser, nie 'n aanbod nie. */
+.sorg-bidsaam {
+  margin-top: 14px; padding: 14px 16px;
+  background: #F6F2FD; border: 1px solid #E4DAF6; border-radius: 14px;
+  text-align: center;
+}
+.sorg-bidsaam-kop {
+  margin: 0 0 4px; font-size: 13.5px; font-weight: 800;
+  color: var(--purple-dark, #4A3B7A);
+}
+.sorg-bidsaam-fyn {
+  margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--text-muted);
+}
+.sorg-bidsaam-knop {
+  border: 1.5px solid #D6C9EF; border-radius: 11px; background: #fff;
+  padding: 9px 18px; font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 700; color: var(--purple-dark, #4A3B7A);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.sorg-bidsaam-knop:active { background: #F1EBFB; }

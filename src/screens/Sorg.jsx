@@ -37,7 +37,6 @@ import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
-import SorgDeelSteun from '../components/SorgDeelSteun'
 import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo,
@@ -106,7 +105,7 @@ function SpeelIkoon() {
   )
 }
 
-export default function Sorg() {
+export default function Sorg({ onNavigate }) {
   const [hulpOop, setHulpOop] = useState(false)
   const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('muur')
@@ -267,6 +266,24 @@ export default function Sorg() {
   const biblioteek = held ? videos.filter(v => v.id !== held.id) : videos
   const plasings = muur || []
 
+  /* Wie nog niemand het wat saam dra nie. Dit kom uit die muur wat reeds
+     gelaai is — geen tweede versoek, geen nuwe eindpunt. */
+  const alleen = plasings.filter(p => !Number(p.saam))
+
+  /* Vat die mens na EEN mens toe, nie na 'n voer van dertig se trauma nie. */
+  function naEenAlleen() {
+    const eerste = alleen[0]
+    if (!eerste) return
+    setAfdeling('muur')
+    /* Die muur is dalk pas eers gewys; gee die blad 'n raam om te teken. */
+    requestAnimationFrame(() => {
+      try {
+        const el = document.getElementById(`sorg-plasing-${eerste.id}`)
+        if (el) el.scrollIntoView({ block: 'center' })
+      } catch {}
+    })
+  }
+
 
   return (
     <div className="sorg">
@@ -288,8 +305,26 @@ export default function Sorg() {
         <div className="sorg-hero-knoppe">
           <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
         </div>
-        <h1>Pastorale Sorg</h1>
-        <p>Bring die swaar ding. Jy hoef dit nie alleen te dra nie.</p>
+        {/* ── "Sorg & Ondersteuning", nie "Pastorale Sorg" nie ──
+         *
+         * Dewald: "die Pastorale Sorg-blad maak my ongelooflik moeg. ek kan
+         * nie almal antw nie."
+         *
+         * Die naam self was deel van die probleem. "Pastorale Sorg" beteken
+         * vir 'n mens: die pastoor sorg vir my. Die hele blad het daardie
+         * belofte gemaak, en een mens kan dit nie hou nie.
+         *
+         * Die nuwe naam en die twee Skrifpilare sê iets anders: ONS dra
+         * mekaar. Dewald is deel daarvan, nie die enjin nie. */}
+        <h1>Sorg &amp; Ondersteuning</h1>
+        <p>
+          God het ons nie gemaak om alles alleen te dra nie. Ons is hier om
+          mekaar se laste te dra.
+        </p>
+        <div className="sorg-skrifte">
+          <p>“Dra mekaar se laste.” <span>— Galasiërs 6:2</span></p>
+          <p>“Bemoedig mekaar en bou mekaar op.” <span>— 1 Tessalonisense 5:11</span></p>
+        </div>
       </div>
 
       <div className="sorg-body">
@@ -304,112 +339,131 @@ export default function Sorg() {
             Die getal kom uit dieselfde teller wat 'n indiening laat deurgaan
             of keer. Daar is nie 'n tweede som op die skerm nie — dan sou die
             blad plek kon belowe wat die vorm dan weier. */}
-        {plek && (
-          <div className={`sorg-plek${plek.vol ? ' vol' : ''}`}>
-            {plek.vol ? (
-              <>
-                <p className="sorg-plek-kop">Vandag se plekke is vol</p>
-                <p className="sorg-plek-fyn">
-                  Dankie dat jy hier is. Ek kan vandag nie meer boodskappe
-                  behoorlik lees nie, maar môre maak ek weer plek. Kom asseblief
-                  terug — en as dit dringend is, is <b>Hulp nou</b> bo-aan die
-                  blad daar, dag en nag.
-                </p>
-              </>
-            ) : (
-              <>
-                {/* ── Aandag, nie 'n aftelling nie ──
-
-                    Hier het 'n balk gestaan met "2 van 7 reeds ingestuur ·
-                    nog 5 plekke oop".
-
-                    Die bedoeling was 'n belofte. Wat dit WYS is iets anders:
-                    by 2 uit 7 is die balk 'n derde vol, en 'n balk wat leeg
-                    staan sê "dit is stil hier". Dit is sosiale bewys wat
-                    agteruit loop. En 'n aftelling laat 'n hurtende mens
-                    dink iemand anders het daardie plek nodiger as ek — juis
-                    die mens wat ons wil hê moet skryf, kies homself uit.
-
-                    Skaarsheid werk net wanneer dit amper op is. Met 'n
-                    handjievol boodskappe per dag gaan daardie balk nooit vol
-                    wees nie, dus is die meganisme self verkeerd, nie die
-                    woorde nie.
-
-                    Die limiet BLY — dit is hoeveel een mens in 'n dag
-                    behoorlik kan lees, en die bediener hou dit in elk geval
-                    af. Dit word net nie meer as 'n telling gewys nie. */}
-                <p className="sorg-plek-kop">
-                  Elke boodskap word deur 'n mens gelees
-                </p>
-                <p className="sorg-plek-fyn">
-                  Ek neem elke dag 'n beperkte aantal boodskappe aan sodat
-                  elkeen werklik aandag kry.
-                </p>
-              </>
-            )}
+        {/* ── Net wanneer die dag VOL is ──
+         *
+         * Hier het altyd 'n blokkie gestaan, ook wanneer daar plek was: eers
+         * "Ek neem elke dag 'n beperkte aantal boodskappe aan", daarna "Jy
+         * skryf nie in 'n leë kamer nie". Dewald oor die tweede: "maak glad
+         * nie sin in afrikaans nie dit kan netsowel uit."
+         *
+         * Albei was gerusstelling voor die knoppies, en gerusstelling wat
+         * niemand gevra het nie, lees soos verskoning. Die blad se kop, sy
+         * twee Skrifpilare en sy twee ingange sê reeds wat hierdie plek is.
+         *
+         * Wat oorbly is die enigste geval waar 'n mens iets MOET weet: die
+         * dag is vol en die knoppie gaan hom weier. */}
+        {plek && plek.vol && (
+          <div className="sorg-plek vol">
+            <p className="sorg-plek-kop">Vandag se plekke is vol</p>
+            <p className="sorg-plek-fyn">
+              Dankie dat jy hier is. Ons neem vandag nie meer nuwe boodskappe
+              aan nie, maar môre is daar weer plek. Kom asseblief terug — en as
+              dit dringend is, is <b>Hulp nou</b> bo-aan die blad daar, dag en
+              nag. Jy kan intussen gerus die stories hieronder lees en iemand
+              anders bemoedig.
+            </p>
           </div>
         )}
 
         {/* ── Die uitnodiging ──
-
-            Die foto en die NAAM staan saam op een reel, en die opskrif kry
-            sy eie spasie daaronder. Toe hulle langs mekaar was, het dit
-            gelyk of "Waarmee kan ek jou help?" sy naam is, en 'n lang
-            opskrif is in 'n handbreedte gedruk.
-
-            "Ek lees dit self" is uit. 'n Helper gaan ook boodskappe nagaan,
-            en dan sou dit nie meer waar wees nie. "Ek antwoord met 'n
-            stemboodskap waar ek kan" hou die persoonlike gevoel en bly
-            eerlik. */}
-        <div className="sorg-uitnodig">
-          <div className="sorg-uitnodig-wie">
-            <img className="sorg-gesig" src="/beelde/dewald.jpg" alt="Dewald Scheepers" width="46" height="46" />
-            <span className="sorg-uitnodig-naam">Dewald Scheepers</span>
+         *
+         * Hier het 'n groot kaart gestaan met Dewald se GESIG, sy NAAM, en
+         * die opskrif "Waarmee kan ek jou help?" — en daaronder: "Ek lees die
+         * boodskappe en antwoord van hulle persoonlik."
+         *
+         * Dit was 'n eerlike kaart en dit het presies gedoen wat dit gesê het.
+         * Dit is ook die rede waarom die blad hom uitgeput het: dit belowe
+         * EEN MENS aan die ander kant. Elke plasing word dan 'n skuld op sy
+         * naam, en die getal kan net groei.
+         *
+         * Die gesig en die belofte is weg. Die knoppie bly presies waar dit
+         * was — dieselfde vorm, dieselfde perk, dieselfde krisisvloei. Wat
+         * verander, is wie die mens verwag aan die ander kant: die
+         * GEMEENSKAP, met Dewald daarby.
+         *
+         * Twee ingange nou, nie een nie. Die tweede is die belangrike: sonder
+         * getuienisse is die muur honderd persent krisis, en dan is daar niks
+         * om te gee nie — net om te vra. */}
+        <div className="sorg-doen">
+          <div className="sorg-doen-kaart">
+            <div className="sorg-doen-kop">🤝 EK HET ONDERSTEUNING NODIG</div>
+            <p>
+              Vertel wat jou swaar dra. Die gemeenskap kom langs jou staan —
+              jy hoef dit nie alleen te dra nie.
+            </p>
+            <button
+              className="sorg-vertel"
+              onClick={() => { telSorg('vorm'); setVormOop(true) }}
+              disabled={!!(plek && plek.vol)}
+            >
+              {plek && plek.vol ? 'Vandag se plekke is vol — môre weer' : 'Deel wat swaar is'}
+            </button>
           </div>
 
-          <h2 className="sorg-uitnodig-titel">Waarmee kan ek jou help?</h2>
+          <div className="sorg-doen-kaart hoop">
+            <div className="sorg-doen-kop">🌱 EK WIL IEMAND HOOP GEE</div>
+            <p>
+              Het jy deur iets moeiliks gegaan? Wat jy geleer het, kan vandag
+              vir iemand anders die pad wys.
+            </p>
+            <button
+              className="sorg-vertel hoop"
+              onClick={() => { telSorg('vorm'); setVormOop(true) }}
+              disabled={!!(plek && plek.vol)}
+            >
+              Deel wat jou gehelp het
+            </button>
+          </div>
 
-          {/* ── Net genoeg om die doel duidelik te maak ──
+          {/* ── Die derde ding, en die belangrikste vir die kultuur ──
+           *
+           * Sonder hierdie kaart kom 'n mens net om te ONTVANG, en dan is die
+           * blad 'n hulplyn met 'n gemeenskap se naam.
+           *
+           * Dit wys NET wanneer daar werklik iemand is vir wie niemand nog
+           * opgedaag het nie. 'n Knoppie wat "0 mense wag" sê, is 'n knoppie
+           * wat niks doen nie — en 'n leë muur mag nooit soos 'n verwyt lees
+           * nie.
+           *
+           * Dit is 'n UITNODIGING, nooit 'n voorwaarde. Niemand moet eers help
+           * voordat hy self hulp verdien nie. */}
+          {alleen.length > 0 && (
+            <div className="sorg-doen-kaart bemoedig">
+              <div className="sorg-doen-kop">❤️ BEMOEDIG IEMAND</div>
+              <p>
+                {alleen.length === 1
+                  ? 'Daar is iemand wat vandag nog geen woord gekry het nie.'
+                  : `Daar is ${alleen.length} mense wat vandag nog geen woord gekry het nie.`}
+                {' '}Jy hoef nie raad te hê nie — “ek hoor jou” is genoeg.
+              </p>
+              <button className="sorg-vertel bemoedig" onClick={naEenAlleen}>
+                Gee iemand hoop
+              </button>
+            </div>
+          )}
 
-              Hier het vier paragrawe gestaan. Hulle was nie verkeerd nie —
-              hulle het net twee verskillende werke gedoen op dieselfde plek:
-              'n UITNODIGING (kom, vertel my) en 'n KONTRAK (dit is wat met
-              jou woorde gaan gebeur).
-
-              Die uitnodiging hoort waar iemand besluit of hy wil. Die kontrak
-              hoort op die oomblik van verbintenis — reg voor hy stuur. Die
-              reels oor die openbare muur, die privaatheid en die ander wat 'n
-              woord kan laat, staan nou op die indieningskerm, waar ELKEEN wat
-              stuur hulle sien. Vantevore het iemand wat via 'n kennisgewing
-              reguit na die vorm gegaan het, hulle nooit gesien nie. */}
-          <p className="sorg-uitnodig-teks">
-            Vertel my wat in jou lewe gebeur. Hier kan jy anoniem jou hart
-            uitpraat, jou storie deel en vra vir pastorale raad en praktiese
-            Bybelse wysheid oor jou huwelik, verhoudings, grense, vergifnis,
-            angs, geloof of 'n moeilike besluit.
+          <p className="sorg-doen-fyn">
+            Jy kan jou naam gebruik of anoniem bly.
           </p>
+        </div>
 
-          <p className="sorg-uitnodig-teks">
-            Ek lees die boodskappe en antwoord van hulle persoonlik met
-            pastorale begeleiding. Die stories en antwoorde kan ook ander mense
-            help wat deur dieselfde dinge gaan.
+        {/* ── Bid Saam bly APART ──
+         *
+         * Hierdie blad mag nie Bid Saam se werk oorneem nie. Daar word gebid;
+         * hier word gedra, geluister en ervaring gedeel. 'n Mens wat net
+         * gebed soek, hoort dus daar — en dan bly albei blaaie skerp. */}
+        <div className="sorg-bidsaam">
+          <p className="sorg-bidsaam-kop">🙏 Soek jy net gebed?</p>
+          <p className="sorg-bidsaam-fyn">
+            Plaas jou gebedsversoek op Bid Saam — daar bid ander daagliks saam
+            met jou.
           </p>
-
-          <p className="sorg-uitnodig-grens">
-            Hierdie afdeling is vir pastorale begeleiding — nie vir geldelike
-            of materiële hulpversoeke nie.
-          </p>
-
-          {/* Is die dag vol, sê die knoppie so eerder as om iemand 'n vorm
-              te laat volskryf wat dan geweier word. */}
           <button
-            className="sorg-vertel"
-            onClick={() => { telSorg('vorm'); setVormOop(true) }}
-            disabled={!!(plek && plek.vol)}
+            className="sorg-bidsaam-knop"
+            onClick={() => onNavigate && onNavigate('bidsaam')}
           >
-            {plek && plek.vol ? 'Vandag se plekke is vol — môre weer' : 'Vertel my wat swaar is'}
+            Gaan na Bid Saam
           </button>
-          <p className="sorg-uitnodig-fyn">Jou identiteit bly anoniem.</p>
         </div>
 
         {/* ── Die daaglikse video ──
@@ -504,8 +558,9 @@ export default function Sorg() {
               {held && (
                 <div className="sorg-nuut" id={`sorg-video-${held.videoId}`}>
                   <span className="sorg-nuut-merk">Nuut vandag</span>
+                  {/* Die videokaart dra sy EIE Deel-knoppie; hier het net die
+                      "dankie" gestaan en dit is weg. */}
                   <SorgVideo video={held} />
-                  <SorgDeelSteun soort="video" id={held.videoId} titel={held.titel} wysDeel={false} />
                 </div>
               )}
 
@@ -527,7 +582,6 @@ export default function Sorg() {
               {biblioteek.map(v => (
                 <div key={v.id} id={`sorg-video-${v.videoId}`}>
                   <SorgVideo video={v} />
-                  <SorgDeelSteun soort="video" id={v.videoId} titel={v.titel} wysDeel={false} />
                 </div>
               ))}
             </>

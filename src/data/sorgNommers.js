@@ -20,7 +20,7 @@ export const NOODNOMMERS = [
 /* Wat Pastorale Sorg is, en wat dit nie is nie. Dit moet daar wees en dit
    moet eerlik wees, maar dit moet nie skreeu nie. */
 export const GRENSSIN =
-  'Pastorale Sorg bied Bybelse hoop en bemoediging. Dit is nie \'n nooddiens, ' +
+  'Sorg & Ondersteuning bied Bybelse hoop en bemoediging. Dit is nie \'n nooddiens, ' +
   'terapie of mediese sorg nie en waarborg nie \'n persoonlike antwoord nie. ' +
   'Hierdie muur word nie voortdurend gemonitor nie. Wanneer jy of iemand ' +
   'anders in onmiddellike gevaar is, gebruik die hulpnommers en moenie hier ' +

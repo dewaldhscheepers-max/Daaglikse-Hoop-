@@ -205,7 +205,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               <p className="sv-openbaar-kop">Voor jy jou boodskap deel</p>
               <p>
                 Jou boodskap sal, nadat dit nagegaan is, <b>anoniem en openbaar
-                op die Pastorale Sorg-muur</b> verskyn, sodat ander wat deur
+                op die Sorg &amp; Ondersteuning-muur</b> verskyn, sodat ander wat deur
                 dieselfde dinge gaan ook daaruit kan leer.
               </p>
               <p>
@@ -303,7 +303,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               <input type="checkbox" checked={toestem} onChange={() => setToestem(t => !t)} />
               <span>
                 Ek verstaan dat my boodskap ná goedkeuring openbaar op die
-                Pastorale Sorg-muur geplaas word en dat dit verkort of aangepas
+                Sorg &amp; Ondersteuning-muur geplaas word en dat dit verkort of aangepas
                 mag word om mense se privaatheid te beskerm.
               </span>
             </label>

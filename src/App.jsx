@@ -1334,7 +1334,10 @@ export default function App() {
           </div>
           {tab === 'bidsaam' && <BidSaam />}
           {tab === 'bidnou'  && <BidNou />}
-          {tab === 'sorg'    && <Sorg />}
+          {/* Sorg kan na Bid Saam toe stuur — sien die "Soek jy net gebed?"-
+              kaart. Dit gebruik dieselfde handleNav as die onderste nav, nie
+              'n eie gebeurtenis nie. */}
+          {tab === 'sorg'    && <Sorg onNavigate={handleNav} />}
           {tab === 'speel'   && <Speel />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} installPrompt={installPrompt} isInstalled={isInstalled} onNavigate={handleNav} />}
         </ErrorBoundary>

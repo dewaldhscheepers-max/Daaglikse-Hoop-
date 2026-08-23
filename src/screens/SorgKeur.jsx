@@ -145,7 +145,7 @@ export default function SorgKeur({ geheim }) {
   if (!data) {
     return (
       <div className="sk">
-        <div className="admin-section-title">🤍 Pastorale Sorg — Boodskappe</div>
+        <div className="admin-section-title">🤍 Sorg &amp; Ondersteuning — Boodskappe</div>
         {boodskap && boodskap.fout ? (
           <>
             <div className="admin-error">{boodskap.fout}</div>
@@ -163,7 +163,7 @@ export default function SorgKeur({ geheim }) {
 
   return (
     <div className="sk">
-      <div className="admin-section-title">🤍 Pastorale Sorg — Boodskappe</div>
+      <div className="admin-section-title">🤍 Sorg &amp; Ondersteuning — Boodskappe</div>
 
       <div className="sk-hopies">
         {HOPIES.map(h => {
@@ -408,10 +408,23 @@ function Woorde({ data, doen, besig }) {
   )
 }
 
-/* Onbeantwoord eerste, dan die klaardes, dan wat afgehaal is. */
+/* ── Wat BO staan ──
+ *
+ * Dit was: onbeantwoord eerste. 'n Plasing het as onbeantwoord getel totdat
+ * DEWALD hom beantwoord het — nie totdat iemand gehelp het nie.
+ *
+ * Dewald: "die Pastorale Sorg-blad maak my ongelooflik moeg. ek het net teveel
+ * om te doen. en kan nie almal antw nie."
+ *
+ * Daardie sortering was 'n deel van die rede. Dit het elke dag 'n groeiende
+ * lys skuld boontoe gestoot, met sy naam op.
+ *
+ * Nou staan bo wat die GEMEENSKAP nog nie gedra het nie. Dit is die plasing
+ * wat werklik aandag nodig het — 'n mens wat geskryf het en vir wie niemand
+ * opgedaag het nie. Of Dewald geantwoord het, verander die volgorde glad nie. */
 function rangMuur(m) {
   if (m.gepubliseer === false) return 2
-  return m.antwoord ? 1 : 0
+  return Number(m.saam) > 0 ? 1 : 0
 }
 
 /* ── Wat reeds op die muur is, en Dewald se antwoord daaronder ── */
@@ -462,23 +475,43 @@ function Muur({ data, doen, besig }) {
     if (d && d.ok) setWysigOop(null)
   }
 
-  const wag = muur.filter(m => !m.antwoord && m.gepubliseer !== false).length
+  /* Wat NIEMAND nog gedra het nie. Hier het "N plasings wag nog op jou
+     antwoord" gestaan, en daardie getal kon net groei. Dit is nou 'n getal
+     oor die gemeenskap, nie oor Dewald nie — en dit is 'n getal wat kan daal
+     sonder dat hy 'n vinger lig. */
+  const alleen = muur.filter(m => m.gepubliseer !== false && !Number(m.saam)).length
+  const gedra = muur.filter(m => m.gepubliseer !== false && Number(m.saam) > 0).length
 
   return (
     <>
-      {wag > 0 && (
+      {alleen > 0 ? (
         <p className="sk-wag">
-          {wag === 1 ? 'Een plasing wag nog op jou antwoord.' : `${wag} plasings wag nog op jou antwoord.`}
+          {alleen === 1
+            ? 'Een plasing het nog niemand wat saam dra nie.'
+            : `${alleen} plasings het nog niemand wat saam dra nie.`}
           {' '}Hulle staan hier bo.
+        </p>
+      ) : muur.length > 0 && (
+        <p className="sk-gedra">
+          Die gemeenskap dra elke plasing op die muur.
+        </p>
+      )}
+      {gedra > 0 && (
+        <p className="sk-gedra-fyn">
+          {gedra === 1 ? 'Een plasing word gedra' : `${gedra} plasings word gedra`} —
+          {' '}jy hoef nie op hulle te antwoord nie.
         </p>
       )}
 
+      {/* Die merkie is nou vir 'n plasing wat ALLEEN staan, nie vir een
+          sonder Dewald se antwoord nie. En "nog geen antwoord" is weg: 'n
+          plasing is nie stukkend omdat hy nie geantwoord is nie. */}
       {muur.map(m => (
-        <div key={m.id} className={`sk-ry${!m.antwoord && m.gepubliseer !== false ? ' wag' : ''}`}>
+        <div key={m.id} className={`sk-ry${m.gepubliseer !== false && !Number(m.saam) ? ' wag' : ''}`}>
           <div className="sk-ry-fyn">
             {m.datum} · {m.naam || 'Anoniem'}
-            {m.antwoord ? ' · beantwoord' : ' · nog geen antwoord'}
-            {m.saam ? ` · ${m.saam} dra dit saam` : ''}
+            {Number(m.saam) ? ` · ${m.saam} dra dit saam` : ' · nog niemand dra dit saam'}
+            {m.antwoord ? ' · jy het bygevoeg' : ''}
           </div>
           {/* Die opskrif, sodat 'n mens 'n plasing kan uitken sonder om die
               storie te lees. Op 'n vol muur is dit die verskil tussen soek en

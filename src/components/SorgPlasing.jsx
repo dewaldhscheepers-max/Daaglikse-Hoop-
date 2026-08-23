@@ -255,9 +255,6 @@ export default function SorgPlasing({ plasing, myne = false }) {
             </>
           )}
 
-          {/* Deel eerste. 'n Antwoord wat iemand gehelp het, is die beste
-              ding wat gedeel kan word — en elke deel bring iemand nuut. */}
-          <SorgDeelSteun soort="plasing" id={plasing.id} />
         </div>
       )}
 
@@ -265,6 +262,21 @@ export default function SorgPlasing({ plasing, myne = false }) {
           Vier reaksies en woorde van ondersteuning, in plaas van die een
           knoppie wat op 'n jong muur "1 mens dra dit saam met jou" gesê het. */}
       <SorgSaamstaan plasing={plasing} />
+
+      {/* ── Deel en nooi ──
+       *
+       * Dit het BINNE die antwoord-blok gestaan, en dus het dit net verskyn
+       * op 'n plasing wat Dewald reeds beantwoord het. Die hele groei van die
+       * blad was dus aan een mens se arbeid vasgeknoop: geen antwoord, geen
+       * deel, geen nuwe mens.
+       *
+       * Dewald: "die app moet heavy fokken groei" — en tegelyk "ek kan nie
+       * almal antw nie." Daardie twee kon nie albei waar wees solank hierdie
+       * knoppie hier binne gesit het.
+       *
+       * Dit staan nou onder ELKE plasing. En dit is juis die ONBEANTWOORDE
+       * een wat 'n uitnodiging nodig het: daar is nog niemand wat dra nie. */}
+      <SorgDeelSteun soort="plasing" id={plasing.id} titel={plasing.titel} wysNooi />
     </article>
   )
 }

@@ -39,7 +39,7 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
       <h2 className="sv-klaar-kop">Dankie. Jou boodskap is ontvang.</h2>
       <p className="sv-klaar-teks">
         Ons gaan dit eers met sorg lees. Ná goedkeuring sal dit openbaar op die
-        Pastorale Sorg-muur verskyn.
+        Sorg &amp; Ondersteuning-muur verskyn.
       </p>
 
       {/* ── Terwyl jy wag ──
@@ -52,7 +52,7 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
           e-boeke was al die tyd daar. */}
       <SorgWag onderwerp={onderwerp} videoData={videoData} />
 
-      <button className="sv-groot-knop" onClick={onSluit}>Terug na Pastorale Sorg</button>
+      <button className="sv-groot-knop" onClick={onSluit}>Terug na Sorg &amp; Ondersteuning</button>
     </div>
   )
 }
