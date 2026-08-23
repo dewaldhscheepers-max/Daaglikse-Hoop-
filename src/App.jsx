@@ -95,6 +95,13 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installBannerDismissed, setInstallBannerDismissed] = useState(false)
   const [showInstallPopup, setShowInstallPopup] = useState(false)
+  /* ── Iemand het deur 'n gedeelde Sorg-skakel gekom ──
+   *
+   * Presies dieselfde twee vlae as Bid Nou se `gebedId` / `gebedGebid`: het hy
+   * deur 'n skakel gekom, en het hy al iets gedoen. Solank die eerste waar is
+   * en die tweede nie, vra ons hom niks. */
+  const [sorgGesprek, setSorgGesprek] = useState(false)
+  const [sorgGedra, setSorgGedra] = useState(false)
   const [samsungBannerDismissed, setSamsungBannerDismissed] = useState(
     () => !!localStorage.getItem('samsungBannerDismissed')
   )
@@ -207,6 +214,21 @@ export default function App() {
        vra -- presies dieselfde vloei as 'n nuwe mens wat die app in 'n
        blaaier oopmaak. Sien gebedGebidHanteer(). */
     if (gebedId && !gebedGebid) return
+    /* ── Dieselfde uitstel vir 'n gedeelde SORG-skakel ──
+     *
+     * Dewald: "maak seker dit werk reg soos bid nou se share knoppie... sodat
+     * dit eventually die app installeer op hulle fone en notification stuur
+     * elke oggend."
+     *
+     * Bid Nou vra NADAT die mens gebid het. Sorg het na drie sekondes gevra —
+     * terwyl iemand nog besig is om 'n vreemdeling se storie te lees. Dit is
+     * die verkeerde oomblik: hy het nog niks van hierdie plek gekry nie, en
+     * dan is die venster net 'n hindernis wat hy wegdruk.
+     *
+     * Ons wag totdat hy iets GEDOEN het — 'n woord van bemoediging geskryf.
+     * Dan is hy 'n mens wat by iemand gaan sit het, en dan is die vraag
+     * verdien. Sien `sorgGedraHanteer()`. */
+    if (sorgGesprek && !sorgGedra) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
     const t = setTimeout(() => {
@@ -216,7 +238,7 @@ export default function App() {
       }
     }, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled, gebedId, gebedGebid])
+  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -838,6 +860,11 @@ export default function App() {
        * gemonteer is. */
       if (h === '#sorg' || pad === '/sorg' || pad.startsWith('/sorg/')) {
         sessionStorage.setItem('sorg_versoek', '1')
+        /* 'n Skakel na 'n SPESIFIEKE gesprek — dus iemand wat genooi is. Die
+           vlag oorleef die diensketter se herlaai, net soos die pad self. */
+        if (/^\/sorg\/[^/]+/.test(pad) && !/^\/sorg\/(deel|wag|saam|videos)$/.test(pad)) {
+          sessionStorage.setItem('sorg_genooi', '1')
+        }
         if (pad.startsWith('/sorg')) sessionStorage.setItem('sorg_pad', window.location.pathname)
         window.history.replaceState({}, '', '/' + window.location.search)
       }
@@ -845,6 +872,7 @@ export default function App() {
          diensketter herlaai die bladsy 'n oomblik later, is die bedoeling
          weg en land hy weer op Luister. Hy word uitgevee wanneer die mens
          self 'n ander oortjie kies — sien handleNav. */
+      if (sessionStorage.getItem('sorg_genooi') === '1') setSorgGesprek(true)
       if (sessionStorage.getItem('sorg_versoek') === '1') {
         setTab('sorg')
         return
@@ -902,6 +930,29 @@ export default function App() {
       vraKennisgewingsDalk()
     }
   }
+
+  /* ── Hy het by iemand gaan sit ──
+   *
+   * Dieselfde vloei as `gebedGebidHanteer()`: eers vra of hy die app op sy
+   * foon wil hê, en DAARNA of hy kennisgewings wil kry. Vra 'n mens vir
+   * kennisgewings in 'n blaaier waar die app nie geïnstalleer is nie, is die
+   * toestemming in elk geval minder werd.
+   *
+   * Dit loop vir ELKE mens wat 'n woord skryf, nie net vir wie deur 'n skakel
+   * gekom het nie — maar die venster kom hoogstens een keer per dag op, en dit
+   * is presies die oomblik waarop dit die minste soos 'n hindernis voel. */
+  function sorgGedraHanteer() {
+    setSorgGedra(true)
+    try { sessionStorage.removeItem('sorg_genooi') } catch { /* privaat venster */ }
+    if (!isInstalled) setShowInstallPopup(true)
+    else vraKennisgewingsDalk()
+  }
+
+  useEffect(() => {
+    const aan = () => sorgGedraHanteer()
+    window.addEventListener('sorg-gedra', aan)
+    return () => window.removeEventListener('sorg-gedra', aan)
+  })
 
   function gebedKlaar(waarheen) {
     try { sessionStorage.removeItem('gebed_versoek') } catch {}

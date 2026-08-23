@@ -37,8 +37,9 @@ import { magKas } from './data/kasBesluit.js'
  * verander, en Dewald se vrou moes die app toe- en oopmaak voordat sy die
  * nuwe weergawe gesien het.
  * 6: die opmerkings mag 2 000 karakters wees en behou hul paragrawe; die muur
- * word nie meer op die rand gekas nie. */
-const SPOEL = 6
+ * word nie meer op die rand gekas nie.
+ * 7: die uitnodiging se woorde en die installasie-trechter. */
+const SPOEL = 7
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

@@ -271,7 +271,15 @@ export function onthouSaamDra(muurId, woorde = 0) {
    * net in ANDER oortjies), dus het die blad se telling eers verander wanneer
    * 'n mens self na daardie oortjie gegaan het. Een gebeurtenis, en die blad
    * lees weer. */
-  try { window.dispatchEvent(new CustomEvent('sorg-saamdra')) } catch { /* geen venster */ }
+  try {
+    window.dispatchEvent(new CustomEvent('sorg-saamdra'))
+    /* ── Die groei-lus, presies soos Bid Nou s'n ──
+     *
+     * Hy het by iemand gaan sit. NOU mag die app vra of hy dit op sy foon wil
+     * hê, en daarna of hy die oggendboodskap wil kry. Sien
+     * `sorgGedraHanteer()` in App.jsx. */
+    window.dispatchEvent(new CustomEvent('sorg-gedra'))
+  } catch { /* geen venster */ }
   return lys
 }
 
