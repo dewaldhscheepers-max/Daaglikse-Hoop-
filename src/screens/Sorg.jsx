@@ -478,58 +478,20 @@ export default function Sorg({ onNavigate }) {
 
       <div className="sorg-body">
 
-        {/* ── Hoeveel plek daar vandag is ──
+        {/* ── DIE "VANDAG IS VOL"-BLOK IS WEG ──
+         *
+         * Dewald, 24 Augustus 2026: "dit wys vandag se plekke is vol!!!!! haal
+         * dit af. moet nooit wys."
+         *
+         * Die plafon het bestaan vir 'n blad waar HY elke boodskap self moes
+         * lees. Twintig per dag was 'n grens op sy aande, nie op die
+         * gemeenskap nie. Daardie blad bestaan nie meer nie — plasings gaan
+         * vanself op en die gemeenskap dra mekaar.
+         *
+         * 'n Mens wat op sy swaarste dag "vandag is vol" lees en 'n dooie
+         * knoppie kry, kom nie môre terug nie. Die hek is ook op die bediener
+         * weg; sien api/sorg-stuur.mjs. */}
 
-            Dit is 'n BELOFTE, nie 'n meter nie. Dit sê drie goed tegelyk vir
-            iemand wat oorweeg om te skryf: daar gaan werklik na jou boodskap
-            gekyk word, daar is 'n MENS aan die ander kant met 'n grens, en
-            die plek is nie oneindig nie.
-
-            Die getal kom uit dieselfde teller wat 'n indiening laat deurgaan
-            of keer. Daar is nie 'n tweede som op die skerm nie — dan sou die
-            blad plek kon belowe wat die vorm dan weier. */}
-        {/* ── Net wanneer die dag VOL is ──
-         *
-         * Hier het altyd 'n blokkie gestaan, ook wanneer daar plek was: eers
-         * "Ek neem elke dag 'n beperkte aantal boodskappe aan", daarna "Jy
-         * skryf nie in 'n leë kamer nie". Dewald oor die tweede: "maak glad
-         * nie sin in afrikaans nie dit kan netsowel uit."
-         *
-         * Albei was gerusstelling voor die knoppies, en gerusstelling wat
-         * niemand gevra het nie, lees soos verskoning. Die blad se kop, sy
-         * twee Skrifpilare en sy twee ingange sê reeds wat hierdie plek is.
-         *
-         * Wat oorbly is die enigste geval waar 'n mens iets MOET weet: die
-         * dag is vol en die knoppie gaan hom weier. */}
-        {plek && plek.vol && (
-          <div className="sorg-plek vol">
-            <p className="sorg-plek-kop">Vandag se plekke is vol</p>
-            <p className="sorg-plek-fyn">
-              Dankie dat jy hier is. Ons neem vandag nie meer nuwe boodskappe
-              aan nie, maar môre is daar weer plek. Kom asseblief terug — en as
-              dit dringend is, is <b>Hulp nou</b> bo-aan die blad daar, dag en
-              nag. Jy kan intussen gerus die stories hieronder lees en iemand
-              anders bemoedig.
-            </p>
-          </div>
-        )}
-
-        {/* ── TWEE aksies, en net twee ──
-         *
-         * Dewald: "Remove 'DEEL WAT JOU GEHELP HET' completely. There must
-         * only be TWO primary actions... Do not add a third primary action."
-         *
-         * Die derde knoppie het die blad ingewikkeld gemaak sonder om iets by
-         * te voeg: "deel wat jou gehelp het" is nie 'n aparte pad nie, dit is
-         * wat 'n mens SÊ wanneer hy iemand bemoedig. Dit leef nou binne
-         * Bemoedig.
-         *
-         * Die hele blad se logika is dus twee vrae:
-         *
-         *     HET JY IEMAND NODIG?   ↔   KAN JY VANDAG IEMAND DRA?
-         *
-         * Die tweede moet visueel net so sterk wees as die eerste. Dit is die
-         * een wat van 'n "help my"-muur 'n gemeenskap maak. */}
         {/* ── EEN kaart, TWEE knoppies ──
          *
          * Dewald se goedgekeurde uitleg: "Op die Sorg-tuisblad moet die twee
@@ -549,9 +511,8 @@ export default function Sorg({ onNavigate }) {
             <button
               className="sorg-knop"
               onClick={() => { telSorg('vorm'); meet('klikDeel'); meet('storieBegin'); setVormOop(true) }}
-              disabled={!!(plek && plek.vol)}
             >
-              {plek && plek.vol ? 'Vandag is vol' : 'Deel wat swaar is'}
+              Deel wat swaar is
             </button>
             <button className="sorg-knop uit" onClick={() => { meet('klikLuister'); naEenAlleen() }}>
               Luister na iemand

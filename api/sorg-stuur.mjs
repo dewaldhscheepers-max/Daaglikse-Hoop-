@@ -246,34 +246,32 @@ export default async function handler(req, res) {
   const hulpversoek = hulpversoekTreffers(teks)
 
   try {
-    const { plafon, oop } = await haalInstellings()
+    const { oop } = await haalInstellings()
     const teller = await haalTeller(dag)
 
-    /* 'n Krisisboodskap gaan ALTYD deur, ook wanneer die dag vol is. Iemand
-       wat vanaand skryf dat hy nie meer wil lewe nie, mag nie 'n plafon in
-       die gesig kry nie. */
-    if (!krisis.length) {
-      if (!oop) {
-        return res.status(200).json({
-          ok: false, vol: true,
-          boodskap: 'Die muur is vir \'n rukkie toe. Kom asseblief later terug.',
-        })
-      }
-
-      if (teller.totaal >= plafon) {
-        return res.status(200).json({
-          ok: false, vol: true,
-          boodskap: 'Vandag se boodskappe is vol. Kom asseblief môre terug. Ons wil elke boodskap behoorlik en met sorg lees.',
-        })
-      }
-
-      const synes = Number(teller.toestelle[toestel]) || 0
-      if (toestel && synes >= PER_TOESTEL_PER_DAG) {
-        return res.status(200).json({
-          ok: false, vol: true,
-          boodskap: 'Jy het vandag al \'n paar keer geskryf. Kom asseblief môre weer — ons lees wat jy gestuur het.',
-        })
-      }
+    /* ── DIE DAAGLIKSE PLAFON IS WEG ──
+     *
+     * Dewald, 24 Augustus 2026: "dit wys vandag se plekke is vol!!!!! haal dit
+     * af. moet nooit wys."
+     *
+     * Die plafon het bestaan vir 'n blad waar HY elke boodskap self moes lees.
+     * Twintig per dag was 'n grens op sy aande, nie op die gemeenskap nie.
+     *
+     * Daardie blad bestaan nie meer nie. Plasings gaan vanself op, die
+     * gemeenskap dra mekaar, en hy antwoord waar hy kan. 'n Plafon op hoeveel
+     * mense vandag hulp mag vra, is nou net 'n toe deur — en 'n mens wat op sy
+     * swaarste dag "vandag is vol" lees, kom nie môre terug nie.
+     *
+     * Wat BLY: die `oop`-skakelaar in die admin. Dit is 'n noodrem wat hy self
+     * moet omdraai, nie iets wat vanself toegaan nie.
+     *
+     * Die teller bly ook loop — dit is hoe hy sien hoeveel mense skryf. Dit
+     * KEER net niks meer nie. */
+    if (!krisis.length && !oop) {
+      return res.status(200).json({
+        ok: false, vol: true,
+        boodskap: 'Die muur is vir \'n rukkie toe. Kom asseblief later terug.',
+      })
     }
 
     const kode = maakKode()
