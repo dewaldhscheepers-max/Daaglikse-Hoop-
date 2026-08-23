@@ -23,6 +23,7 @@ import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
 import { krisisTreffers, kontakTreffers, hulpversoekTreffers } from '../src/data/sorgKrisis.js'
 
 const INKOMEND = 'sorg_inkomend'
+const MUUR     = 'sorg_muur'
 const CONFIG   = 'sorg_config'
 const TELLERS  = 'sorg_tellers'
 
@@ -259,6 +260,68 @@ export default async function handler(req, res) {
       geskep: new Date(),
     })
 
+    /* ── DIREK op die muur ────────────────────────────────────────────
+     *
+     * Dewald, 23 Augustus 2026: "ek wil nie alles heeltyd na gaan nie die
+     * gemeenskap moet mekaar dra... ek antwoord net nou en dan boodskappe.
+     * mense moet kan report."
+     *
+     * Elke plasing het gewag totdat hy dit met die hand gelees, 'n opskrif
+     * geskryf en 'n knoppie gedruk het. Dit was die bottelnek: die blad kon
+     * nooit vinniger loop as een mens se aande nie.
+     *
+     * Dit werk nou soos die VOLG JESUS-groepchat, wat reeds so loop: dit gaan
+     * DADELIK op, en enigiemand kan dit rapporteer. Dewald vee uit wat moet
+     * gaan, in plaas van om alles te moet goedkeur voordat enigiets bestaan.
+     *
+     * ── Die EEN uitsondering ──
+     *
+     * Krisis. Selfmoord, selfbesering, geweld, mishandeling. Daardie plasings
+     * gaan NIE vanself op nie — hulle land in die Gevaar-hopie en 'n mens
+     * kyk daarna. Dit is Dewald se eie reel uit die opdrag: "Selfmoord,
+     * selfbesering, geweld, mishandeling en ander ernstige gevaar moet steeds
+     * prioriteit kry." 'n Storie oor selfmoordgedagtes wat outomaties
+     * openbaar gaan, is die een geval waar hierdie hele verandering skade kan
+     * doen.
+     *
+     * Val hierdie skryf om, is die boodskap NIE verlore nie — hy le in
+     * `sorg_inkomend` en Dewald kan hom met die hand plaas. Daarom is dit 'n
+     * `try`, en daarom weier ons nie die indiening as dit misluk nie. */
+    let muurId = null
+    if (!krisis.length) {
+      try {
+        muurId = 'm' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex')
+        await skryfDok(MUUR, muurId, {
+          bronId: id,
+          /* Geen opskrif nie. Dewald het hom vantevore self geskryf; die kaart
+             werk sonder een, en hy kan later een byvoeg met 'wysig'. 'n
+             Outomatiese opskrif uit die eerste sin lieg te maklik. */
+          titel: '',
+          teks,
+          naam: '',               // die muur is anoniem, altyd
+          onderwerp,
+          datum: new Date().toISOString().slice(0, 10),
+          geskep: new Date(),
+          gepubliseer: true,
+          antwoord: null,
+          saam: 0,
+          reaksies: {},
+          gelees: 0,
+          /* Geen krisis nie, want dan sou ons nie hier gewees het nie. Die
+             vlag bly staan sodat 'wysig' hom kan aanskakel. */
+          sensitief: false,
+          /* Niemand het dit nog gerapporteer nie. Sien api/sorg-muur.mjs. */
+          rapporte: 0,
+        })
+        await skryfDok(INKOMEND, id, { status: 'outo', muurId },
+                       { velde: ['status', 'muurId'] })
+      } catch {
+        /* Die muur-skryf het misluk. Die boodskap staan steeds in INKOMEND
+           met status 'nuut', dus sien Dewald hom en kan hom self plaas. */
+        muurId = null
+      }
+    }
+
     await telOp(dag, teller, toestel)
 
     return res.status(200).json({
@@ -266,6 +329,8 @@ export default async function handler(req, res) {
       kode,
       onderwerp,
       krisis: krisis.length > 0,
+      /* Die skerm weet nou of die storie reeds lewe. */
+      opDieMuur: !!muurId,
     })
   } catch (e) {
     return res.status(500).json({ fout: 'Ons kon dit nie stoor nie. Probeer asseblief weer.', detail: String(e && e.message) })

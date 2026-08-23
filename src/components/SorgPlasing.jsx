@@ -276,7 +276,7 @@ export default function SorgPlasing({ plasing, myne = false }) {
        *
        * Dit staan nou onder ELKE plasing. En dit is juis die ONBEANTWOORDE
        * een wat 'n uitnodiging nodig het: daar is nog niemand wat dra nie. */}
-      <SorgDeelSteun soort="plasing" id={plasing.id} titel={plasing.titel} wysNooi />
+      <SorgDeelSteun soort="plasing" id={plasing.id} titel={plasing.titel} wysNooi wysRapport />
     </article>
   )
 }

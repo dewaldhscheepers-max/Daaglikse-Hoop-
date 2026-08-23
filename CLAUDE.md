@@ -29,6 +29,7 @@ node src/data/sorgVideos.toets.mjs            # die geplakte video-lys, 17 toets
 node src/data/sorgOnderwerpe.toets.mjs        # raai die onderwerp uit 'n titel, 23 toetse
 node src/data/sorgSaai.toets.mjs              # die eerste reaksies en opmerkings, 63 toetse
 node src/data/sorgNooi.toets.mjs              # "nooi iemand om te antwoord", 28 toetse
+node api/_sorgOutoPlaas.toets.mjs             # plasings gaan DADELIK op, behalwe krisis, 34
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
@@ -496,6 +497,34 @@ Drie dinge het verander, en hulle hang saam:
   verskyn op 'n plasing wat Dewald reeds beantwoord het: geen antwoord, geen
   deel, geen nuwe mens. Die hele groei van die blad was aan een mens se arbeid
   vasgeknoop. Dit staan nou onder ELKE plasing.
+
+**'n Plasing gaan DADELIK op die muur.** Dit het gewag totdat Dewald dit met
+die hand gelees, 'n opskrif geskryf en 'n knoppie gedruk het — die blad kon
+nooit vinniger loop as een mens se aande nie. Dewald: *"ek wil nie alles
+heeltyd na gaan nie die gemeenskap moet mekaar dra… mense moet kan report."*
+
+Dit werk nou soos die VOLG JESUS-groepchat: niks wag vooraf nie, en die
+gemeenskap wys wat moet gaan. **Een uitsondering, en dit mag nooit verval nie:
+KRISIS.** Selfmoord, selfbesering, geweld, mishandeling — daardie plasings land
+in die Gevaar-hopie en 'n MENS kyk daarna. 'n Storie oor selfmoordgedagtes wat
+outomaties openbaar gaan, is die enigste geval waar hierdie verandering skade
+kan doen. `api/_sorgOutoPlaas.toets.mjs` sit 'n vals Firestore agter die
+eindpunt en dwing dit af.
+
+Val die muur-skryf om, is die boodskap **nie verlore** nie — hy lê in
+`sorg_inkomend` met status `nuut` en Dewald kan hom self plaas. Daarom is dit
+'n `try` wat die indiening nooit laat misluk nie.
+
+Elke plasing dra 'n **Rapporteer**-knoppie. Een rapport per toestel, met
+dieselfde merkie-truuk as saamstaan. Die plasing verdwyn NIE vanself nie —
+'n outomatiese verwydering is 'n knoppie waarmee enigiemand iemand anders se
+seer kan uitvee. Dit gaan bo in die admin, met 'n rooi reël.
+
+**Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
+dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
+goedkeuring sal dit verskyn"*. 'n Blad wat oor sy eie moderasie lieg, is erger
+as een sonder 'n nota. Die klaar-skerm sê nou die waarheid vir albei gevalle,
+en `kykSorg.mjs` dwing af dat daardie ou woorde nooit terugkom nie.
 
 **`nooiOmTeAntwoord()` is nie dieselfde ding as Deel nie.** Deel sê "kyk
 hierna", na almal. Nooi sê "JY het iets om te sê vir hierdie mens", na een

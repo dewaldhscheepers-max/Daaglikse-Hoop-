@@ -232,3 +232,50 @@ export async function haalMyPlasings() {
     return []
   }
 }
+
+/* ── Rapporteer 'n plasing ──
+ *
+ * Plasings gaan nou DADELIK op die muur. Dewald: "ek wil nie alles heeltyd na
+ * gaan nie... mense moet kan report."
+ *
+ * Dit gaan na `/api/sorg-muur`, nie na die saamstaan-pad nie — dieselfde
+ * eindpunt as die plasing self, met `aksie: 'rapporteer'`.
+ *
+ * Die merkie word op HIERDIE foon gestoor voordat ons stuur, sodat 'n swak
+ * lyn nie 'n mens vyf keer laat rapporteer nie. Dieselfde reel as die tellers
+ * in VOLG JESUS: eerder een keer te min as vyf keer te veel.
+ *
+ * Die plasing verdwyn nie vanself nie. Dit gaan boontoe in die admin. */
+const RAPPORT_SLEUTEL = 'sorg_gerapporteer'
+
+function gerapporteerdes() {
+  try {
+    const rou = JSON.parse(localStorage.getItem(RAPPORT_SLEUTEL) || '[]')
+    return Array.isArray(rou) ? rou : []
+  } catch { return [] }
+}
+
+export function reedsGerapporteer(muurId) {
+  return gerapporteerdes().includes(String(muurId))
+}
+
+export async function rapporteerPlasing(muurId, rede = '') {
+  const id = String(muurId || '')
+  if (!id) return false
+  if (reedsGerapporteer(id)) return true
+  try {
+    const lys = gerapporteerdes()
+    lys.push(id)
+    localStorage.setItem(RAPPORT_SLEUTEL, JSON.stringify(lys.slice(-200)))
+  } catch { /* privaat venster */ }
+  try {
+    await fetch(PAD, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aksie: 'rapporteer', muurId: id, toestel: toestelId(), rede }),
+    })
+    return true
+  } catch {
+    return true
+  }
+}

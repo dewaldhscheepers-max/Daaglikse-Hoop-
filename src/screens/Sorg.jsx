@@ -598,9 +598,24 @@ export default function Sorg({ onNavigate }) {
             </p>
           ) : (
             <>
+              {/* ── Dit was 'n LEUEN geword ──
+               *
+               * Hier het gestaan: "Elke boodskap hier is deur 'n mens gelees
+               * en met toestemming geplaas. Niks kom outomaties op hierdie
+               * muur nie."
+               *
+               * Plasings gaan nou dadelik op (sien api/sorg-stuur.mjs), dus
+               * was daardie sin vals op die oomblik dat dit ontplooi het. 'n
+               * Blad wat oor sy eie moderasie lieg, is erger as een sonder 'n
+               * nota.
+               *
+               * Wat WEL waar bly: elke mens gee toestemming voordat hy stuur,
+               * krisis-plasings wag steeds vir 'n mens, en enigiemand kan
+               * rapporteer. */}
               <p className="sorg-muur-fyn">
-                Elke boodskap hier is deur 'n mens gelees en met toestemming
-                geplaas. Niks kom outomaties op hierdie muur nie.
+                Elke storie hier is met die skrywer se toestemming geplaas.
+                Sien jy iets wat nie hier hoort nie, druk <b>Rapporteer</b> —
+                ons kyk daarna.
               </p>
               {plasings.slice(0, wysAantal).map(p => (
                 <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} />

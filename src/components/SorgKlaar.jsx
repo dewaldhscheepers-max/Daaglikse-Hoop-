@@ -36,11 +36,28 @@ export default function SorgKlaar({ uitslag, videoData, onSluit }) {
         </div>
       )}
 
+      {/* ── Wat NOU met sy storie gebeur ──
+       *
+       * Dit het altyd gesê "ná goedkeuring". Plasings gaan nou dadelik op die
+       * muur (sien api/sorg-stuur.mjs), behalwe wanneer die krisis-opsporing
+       * iets raaksien — dan wag dit wel vir 'n mens.
+       *
+       * Die skerm mag nie die verkeerde een sê nie. Iemand wat hoor "dit wag
+       * vir goedkeuring" en dit dan dadelik op die muur sien, weet nie meer
+       * wat om die app te glo nie; en iemand wat hoor "dit is nou op" en dit
+       * nie sien nie, dink hy is weggegooi. */}
       <h2 className="sv-klaar-kop">Dankie. Jou boodskap is ontvang.</h2>
-      <p className="sv-klaar-teks">
-        Ons gaan dit eers met sorg lees. Ná goedkeuring sal dit openbaar op die
-        Sorg &amp; Ondersteuning-muur verskyn.
-      </p>
+      {uitslag.opDieMuur ? (
+        <p className="sv-klaar-teks">
+          Jou storie is nou op die Sorg &amp; Ondersteuning-muur. Die gemeenskap
+          kan van hier af langs jou kom staan.
+        </p>
+      ) : (
+        <p className="sv-klaar-teks">
+          Ons gaan dit eers met sorg lees voordat dit op die Sorg &amp;
+          Ondersteuning-muur verskyn.
+        </p>
+      )}
 
       {/* ── Terwyl jy wag ──
 

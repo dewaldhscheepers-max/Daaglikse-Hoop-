@@ -26,10 +26,21 @@
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
    ──────────────────────────────────────────────────────────── */
 
+import { useState } from 'react'
 import { deelSorg, nooiOmTeAntwoord } from '../data/sorgDeel'
+import { rapporteerPlasing, reedsGerapporteer } from '../data/sorgMuur'
 
-export default function SorgDeelSteun({ soort, id, titel, wysDeel = true, wysNooi = false }) {
-  if (!wysDeel && !wysNooi) return null
+export default function SorgDeelSteun({ soort, id, titel, wysDeel = true, wysNooi = false, wysRapport = false }) {
+  const [gerapporteer, setGerapporteer] = useState(() => wysRapport && reedsGerapporteer(id))
+  if (!wysDeel && !wysNooi && !wysRapport) return null
+
+  async function rapporteer() {
+    /* Geen bevestigingsvenster nie. 'n Rapport vee niks uit — dit stoot die
+       plasing net boontoe in die admin — dus is 'n tweede vraag net 'n
+       hindernis voor die ding wat ons wil hê iemand moet doen. */
+    setGerapporteer(true)
+    await rapporteerPlasing(id)
+  }
 
   return (
     <div className="sds">
@@ -50,6 +61,24 @@ export default function SorgDeelSteun({ soort, id, titel, wysDeel = true, wysNoo
             <circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" />
           </svg>
           Nooi iemand
+        </button>
+      )}
+
+      {/* ── Rapporteer ──
+       *
+       * Plasings gaan nou DADELIK op die muur. Dewald: "ek wil nie alles
+       * heeltyd na gaan nie... mense moet kan report." Dit is die ander kant
+       * van daardie ruil, en sonder dit is die muur onbewaak.
+       *
+       * Dit staan stil en klein, heel regs. Dit is nie 'n aksie wat ons
+       * aanmoedig nie — dit is 'n uitweg wat daar moet wees. */}
+      {wysRapport && (
+        <button
+          className={`sds-rapport${gerapporteer ? ' gedoen' : ''}`}
+          onClick={rapporteer}
+          disabled={gerapporteer}
+        >
+          {gerapporteer ? 'Gerapporteer' : 'Rapporteer'}
         </button>
       )}
     </div>

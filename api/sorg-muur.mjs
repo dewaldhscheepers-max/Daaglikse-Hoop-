@@ -120,6 +120,9 @@ function virDieSkerm(m, woorde) {
        vlaggie, nie inligting oor die mens nie — dit se net dat hierdie
        storie te swaar is vir 'n vreemdeling se raad. */
     sensitief: m.sensitief === true,
+    /* Hoeveel mense dit gerapporteer het. Die MUUR wys dit nooit — dit is vir
+       die admin. Sien die rapporteer-aksie hieronder. */
+    rapporte: Number(m.rapporte) || 0,
     /* Die eerste twee woorde, en hoeveel daar in totaal is. */
     /* AL die opmerkings, nie net die eerste paar nie.
 
@@ -262,6 +265,44 @@ export default async function handler(req, res) {
 
   const toestel = hasToestel(lyf.toestel)
   if (!toestel) return res.status(200).json({ ok: true, reeds: true })
+
+  /* ── Rapporteer ────────────────────────────────────────────────────────
+   *
+   * Plasings gaan nou DADELIK op die muur (sien api/sorg-stuur.mjs). Dewald:
+   * "ek wil nie alles heeltyd na gaan nie... mense moet kan report."
+   *
+   * Dit is dieselfde ruil as die VOLG JESUS-groepchat: niks wag vooraf nie,
+   * en die gemeenskap wys wat moet gaan.
+   *
+   * EEN rapport per toestel per plasing, met dieselfde merkie-truuk as
+   * saamstaan — anders kan een mens 'n storie van die muur af stem.
+   *
+   * Die plasing verdwyn NIE vanself nie. Sy telling gaan op, en die admin
+   * wys hom bo. 'n Outomatiese verwydering is 'n knoppie waarmee enigiemand
+   * iemand anders se seer kan uitvee. */
+  if (lyf.aksie === 'rapporteer') {
+    try {
+      const plasing = await leesDok(MUUR, muurId)
+      if (!plasing || plasing.gepubliseer === false) {
+        /* Dit is al weg. Dit is 'n goeie uitkoms, nie 'n fout nie. */
+        return res.status(200).json({ ok: true })
+      }
+      const merkId = `r_${muurId}_${toestel}`
+      const reeds = await leesDok(SAAM, merkId)
+      if (reeds) return res.status(200).json({ ok: true, reeds: true })
+
+      await skryfDok(SAAM, merkId, {
+        muurId, toestel, soort: 'rapport',
+        rede: String(lyf.rede || '').slice(0, 300),
+        dag: new Date().toISOString().slice(0, 10),
+      })
+      const rapporte = (Number(plasing.rapporte) || 0) + 1
+      await skryfDok(MUUR, muurId, { rapporte }, { velde: ['rapporte'] })
+      return res.status(200).json({ ok: true })
+    } catch (e) {
+      return res.status(500).json({ fout: String(e && e.message) })
+    }
+  }
 
   try {
     const plasing = await leesDok(MUUR, muurId)

@@ -423,8 +423,11 @@ function Woorde({ data, doen, besig }) {
  * wat werklik aandag nodig het — 'n mens wat geskryf het en vir wie niemand
  * opgedaag het nie. Of Dewald geantwoord het, verander die volgorde glad nie. */
 function rangMuur(m) {
-  if (m.gepubliseer === false) return 2
-  return Number(m.saam) > 0 ? 1 : 0
+  if (m.gepubliseer === false) return 3
+  /* Gerapporteer staan HEEL BO. Plasings gaan nou dadelik op die muur, dus is
+     'n rapport die enigste sein dat 'n mens moet kyk. */
+  if (Number(m.rapporte) > 0) return 0
+  return Number(m.saam) > 0 ? 2 : 1
 }
 
 /* ── Wat reeds op die muur is, en Dewald se antwoord daaronder ── */
@@ -482,8 +485,20 @@ function Muur({ data, doen, besig }) {
   const alleen = muur.filter(m => m.gepubliseer !== false && !Number(m.saam)).length
   const gedra = muur.filter(m => m.gepubliseer !== false && Number(m.saam) > 0).length
 
+  const gerapporteer = muur.filter(m => m.gepubliseer !== false && Number(m.rapporte) > 0)
+
   return (
     <>
+      {/* Die enigste ding op hierdie blad wat Dewald se oog MOET vang.
+          Plasings gaan dadelik op; 'n rapport is die sein dat iets fout is. */}
+      {gerapporteer.length > 0 && (
+        <p className="sk-rapport-kop">
+          ⚠ {gerapporteer.length === 1
+            ? 'Een plasing is gerapporteer'
+            : `${gerapporteer.length} plasings is gerapporteer`} — hulle staan heel bo.
+        </p>
+      )}
+
       {alleen > 0 ? (
         <p className="sk-wag">
           {alleen === 1
@@ -507,11 +522,12 @@ function Muur({ data, doen, besig }) {
           sonder Dewald se antwoord nie. En "nog geen antwoord" is weg: 'n
           plasing is nie stukkend omdat hy nie geantwoord is nie. */}
       {muur.map(m => (
-        <div key={m.id} className={`sk-ry${m.gepubliseer !== false && !Number(m.saam) ? ' wag' : ''}`}>
+        <div key={m.id} className={`sk-ry${Number(m.rapporte) ? ' gerapporteer' : m.gepubliseer !== false && !Number(m.saam) ? ' wag' : ''}`}>
           <div className="sk-ry-fyn">
             {m.datum} · {m.naam || 'Anoniem'}
             {Number(m.saam) ? ` · ${m.saam} dra dit saam` : ' · nog niemand dra dit saam'}
             {m.antwoord ? ' · jy het bygevoeg' : ''}
+            {Number(m.rapporte) ? ` · ⚠ ${m.rapporte} rapport${m.rapporte === 1 ? '' : 'e'}` : ''}
           </div>
           {/* Die opskrif, sodat 'n mens 'n plasing kan uitken sonder om die
               storie te lees. Op 'n vol muur is dit die verskil tussen soek en

@@ -560,6 +560,26 @@
   color: #FFFFFF;
 }
 
+/* ── Rapporteer ──
+ *
+ * Stil en klein, en heel regs. Dit is nie 'n aksie wat ons aanmoedig nie —
+ * dit is 'n uitweg wat daar moet wees noudat plasings dadelik op die muur
+ * gaan. Geen rand, geen kleur wat die oog vang. */
+.sds-rapport {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  padding: 9px 4px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sds-rapport:active { color: #B0483F; }
+.sds-rapport.gedoen { color: var(--text-muted); opacity: .6; cursor: default; }
+
 /* ── Die dankie ──
 
    Dit was 'n vol kaart oor die hele breedte, met 'n groot goue opskrif. Dit
