@@ -152,17 +152,24 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setFout('')
     const d = await stuurBoodskap({
       teks,
-      /* Anoniem wen altyd: sonder 'n profiel gaan daar niks saam nie, ook al
-         het iemand op "gebruik my naam" gedruk. */
+      /* ── Hier het `naam` en `anoniem` TWEE KEER gestaan ──
+       *
+       * Onder die nuwe velde het die ou "ALTYD anoniem"-paar bly staan:
+       * `naam: ''` en `anoniem: true`. In JavaScript wen die LAASTE sleutel in
+       * 'n voorwerp-letterlik, stil-stil, sonder 'n waarskuwing. Elke storie
+       * het dus anoniem gegaan — ook wanneer die kaart "Gebruik my naam" gewys
+       * het en die mens sy profiel opgestel het.
+       *
+       * Dewald het dit drie keer gerapporteer voordat ek dit gevind het, en
+       * elke keer het ek na die bediener gekyk. Die skerm het van die begin af
+       * die verkeerde ding gestuur.
+       *
+       * Anoniem wen steeds wanneer daar GEEN profiel is nie: 'n naam wat 'n
+       * mens nooit gekies het nie, mag nooit verskyn nie. */
       anoniem: anoniem || !profiel,
       naam: !anoniem && profiel ? profiel.naam : '',
       foto: !anoniem && profiel ? (profiel.foto || '') : '',
       onderwerp: onderwerp || 'ander',
-      /* ALTYD anoniem. Die kaart se dit twee keer, en 'n vorm wat dan
-         "Gebruik my voornaam" aanbied, maak van daardie belofte 'n leuen.
-         Die bediener stoor in elk geval geen naam meer nie. */
-      naam: '',
-      anoniem: true,
       toestemmings: { openbaar: true, redigeer: true, geenWaarborg: true },
     })
     setBesig(false)

@@ -182,6 +182,31 @@ afdeling('Anoniem is die VERSTEK, nie die enigste keuse nie')
   kyk('en anoniem is waar sodra daar geen naam is nie', /const anoniem = !naam/.test(stuur))
   kyk('die keuse hang aan anoniem === false', /lyf\.anoniem === false/.test(stuur))
 
+  /* ── Geen DUBBELE sleutel in wat die vorm stuur nie ──
+   *
+   * Dit is die fout wat drie rapporte gekos het. Onder die nuwe velde het die
+   * ou "ALTYD anoniem"-paar bly staan:
+   *
+   *     anoniem: anoniem || !profiel,   ← die regte een
+   *     ...
+   *     anoniem: true,                  ← die ou een, wat STIL wen
+   *
+   * In JavaScript wen die LAASTE sleutel in 'n voorwerp-letterlik, sonder 'n
+   * waarskuwing en sonder 'n fout. Elke storie het anoniem gegaan terwyl die
+   * skerm "Gebruik my naam" gewys het.
+   *
+   * Ons lees die versoek se sleutels uit die bron en tel hulle. */
+  {
+    const blok = vorm.slice(vorm.indexOf('await stuurBoodskap({'))
+    const einde = blok.indexOf('\n    })')
+    const lyf = blok.slice(0, einde > 0 ? einde : 600)
+    const sleutels = (lyf.match(/^\s{6}([a-zA-Z]+):/gm) || [])
+      .map(x => x.trim().replace(':', ''))
+    const dubbel = sleutels.filter((k, i) => sleutels.indexOf(k) !== i)
+    kyk('geen sleutel staan twee keer in die versoek nie', dubbel.length === 0, dubbel)
+    kyk('en "anoniem" is een van hulle', sleutels.includes('anoniem'), sleutels)
+  }
+
   /* Die MUUR stuur die naam net oor die draad wanneer die mens dit gekies
      het. Dit is nie "die skerm wys dit nie" — die veld is leeg. */
   kyk('die muur hou n naam terug tensy die mens dit gekies het',
