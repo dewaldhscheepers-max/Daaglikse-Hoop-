@@ -127,3 +127,54 @@ export async function nooiOmTeAntwoord(soort, id, titel) {
     try { await navigator.clipboard.writeText(teks + '\n' + url); return true } catch { return false }
   }
 }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Die veilige uitnodigingslus
+   ══════════════════════════════════════════════════════════════ */
+
+/* Dewald, punt 16:
+ *
+ *   "Nadat iemand 'n ondersteuningantwoord geplaas het, wys: Jy het vandag by
+ *    iemand gaan sit. Nooi iemand anders om ook saam te dra."
+ *
+ *   "Die algemene uitnodiging mag nie die skrywer se naam wys nie. Mag nie hul
+ *    storie of sensitiewe besonderhede wys nie. Moet direk na Wag nog vir
+ *    iemand lei."
+ *
+ * Die verskil tussen hierdie een en `nooiWoorde()` is die hele punt:
+ *
+ *   nooiOmTeAntwoord  → "hierdie MENS wag" — na een mens, oor een storie.
+ *   algemeneWoorde    → "daar wag MENSE"  — na almal, oor niemand.
+ *
+ * Die tweede dra NIKS van 'n storie nie. Dit is die een wat 'n mens op
+ * Facebook kan plak sonder om iemand se seer in 'n openbare tydlyn te sit.
+ */
+export function algemeneWoorde() {
+  return 'Daar is mense op Daaglikse Hoop se Dra Mekaar se Laste wat vandag ' +
+    'geskryf het en nog niemand het geantwoord nie. Jy hoef niks te weet nie — ' +
+    'net te luister. ' + WORTEL_UITNODIGING
+}
+
+/* Dit lei DIREK na "Wag nog vir iemand", nooit na die tuisblad nie. Sien
+   src/data/sorgSkakels.js. */
+export const WORTEL_UITNODIGING = DEEL_WORTEL + '/sorg/wag?utm_source=uitnodiging&utm_medium=deel'
+
+/* ── Mag hierdie storie BUITE Sorg gedeel word? ──
+ *
+ * Dewald: "'n Spesifieke storie mag slegs buite Sorg gedeel word indien die
+ * skrywer afsonderlik toestemming gee. Hierdie toestemming is standaard
+ * afgeskakel. Is apart van toestemming om die storie binne Sorg te plaas."
+ *
+ * Twee toestemmings, en hulle is nie dieselfde ding nie: "plaas my storie op
+ * die muur" en "sit my storie op Facebook" is vir die mens wat dit geskryf
+ * het, twee heeltemal verskillende dinge.
+ *
+ * Die verstek is AF, en 'n ontbrekende veld is af. Elke ou plasing — en elke
+ * plasing wat vandag geskryf word sonder om die blokkie te merk — kan dus net
+ * BINNE die app gedeel word, en 'n mens wat "Deel" druk, kry die algemene
+ * uitnodiging in plaas daarvan.
+ */
+export function magBuiteDeel(plasing) {
+  return !!(plasing && plasing.deelBuite === true)
+}

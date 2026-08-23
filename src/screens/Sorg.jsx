@@ -46,6 +46,8 @@ import { saamDraLys } from '../data/sorgSaamDra'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { telSorg } from '../data/telSorg'
+import { meet, meetOopmaak } from '../data/sorgMeetStuur'
+import { uitPad } from '../data/sorgSkakels'
 import { NOODNOMMERS, GRENSSIN } from '../data/sorgNommers'
 import './Sorg.css'
 
@@ -147,9 +149,56 @@ export default function Sorg({ onNavigate }) {
      Eenmalig, want React se ontwikkelingsmodus roep effekte twee keer. */
   useEffect(() => { telSorg('oop', { eenmalig: true }) }, [])
 
+  /* ── Die groei-oorsig ──
+   *
+   * Dewald se punt 18. Wat gemeet word en wat NOOIT, staan in
+   * src/data/sorgMeet.js: 'n gebeurtenis en 'n dag, en niks anders. Geen
+   * toestel-id, geen tydstempel per mens, geen plasing-id.
+   *
+   * Dit tel OOK die veldtog waaruit hierdie mens gekom het, en dit oorleef die
+   * installasie — sonder dit weet niemand 'n week later meer of Facebook
+   * iemand gebring het nie. */
+  useEffect(() => {
+    try {
+      let pad = ''
+      try { pad = sessionStorage.getItem('sorg_pad') || window.location.pathname } catch { pad = '' }
+      meetOopmaak(window.location.search, pad)
+    } catch { /* 'n teller mag nooit 'n skerm breek nie */ }
+  }, [])
+
+  /* ── 'n Diep skakel land op die REGTE skerm ──
+   *
+   * Dewald: "Moenie die gebruiker eers na die algemene app-tuisblad stuur
+   * nie." Dit is presies die fout wat installasie in hierdie projek maande
+   * lank stukkend gehou het.
+   *
+   * Dit loop EEN keer, en dit vee die pad daarna skoon (history.replaceState)
+   * sodat 'n herlaai nie weer die vorm oopruk nie. */
+  useEffect(() => {
+    let doel = null
+    try {
+      /* Uit sessionStorage, NIE uit die adresbalk nie. App.jsx vee die pad
+         skoon voordat hierdie skerm gemonteer word, en die diensketter kan
+         die bladsy by 'n eerste besoek herlaai — dan is die pad in elk geval
+         weg. Dieselfde patroon as die Steun-blad en /bid/<id>. */
+      const gestoor = sessionStorage.getItem('sorg_pad')
+      if (gestoor) sessionStorage.removeItem('sorg_pad')
+      doel = uitPad(gestoor || window.location.pathname)
+    } catch { doel = null }
+    if (!doel) return
+    if (doel.skerm === 'deel') { telSorg('vorm'); meet('storieBegin'); setVormOop(true) }
+    else if (doel.skerm === 'saam') setAfdeling('saam')
+    else if (doel.skerm === 'videos' || doel.skerm === 'video') setAfdeling('videos')
+    else if (doel.skerm === 'wag') setAfdeling('muur')
+  }, [])
+
   /* Die Saam dra-lys weer lees sodra 'n mens na daardie oortjie gaan. Sonder
      dit wys 'n gesprek waarby hy pas gaan sit het, eers ná 'n herlaai. */
-  useEffect(() => { if (afdeling === 'saam') setSaamDra(leesSaamDra()) }, [afdeling])
+  useEffect(() => {
+    if (afdeling !== 'saam') return
+    setSaamDra(leesSaamDra())
+    meet('saamDraOop')
+  }, [afdeling])
 
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])
@@ -449,12 +498,12 @@ export default function Sorg({ onNavigate }) {
           <div className="sorg-doen-knoppe">
             <button
               className="sorg-knop"
-              onClick={() => { telSorg('vorm'); setVormOop(true) }}
+              onClick={() => { telSorg('vorm'); meet('klikDeel'); meet('storieBegin'); setVormOop(true) }}
               disabled={!!(plek && plek.vol)}
             >
               {plek && plek.vol ? 'Vandag is vol' : 'Deel wat swaar is'}
             </button>
-            <button className="sorg-knop uit" onClick={naEenAlleen}>
+            <button className="sorg-knop uit" onClick={() => { meet('klikLuister'); naEenAlleen() }}>
               Luister na iemand
             </button>
           </div>
@@ -473,7 +522,10 @@ export default function Sorg({ onNavigate }) {
          *
          * Bid Saam bly die plek vir gebedsversoeke; hier word gedra, geluister
          * en ervaring gedeel. */}
-        <button className="sorg-bidsaam" onClick={() => onNavigate && onNavigate('bidsaam')}>
+        <button
+          className="sorg-bidsaam"
+          onClick={() => { meet('klikBidSaam'); onNavigate && onNavigate('bidsaam') }}
+        >
           <span>Soek jy spesifiek gebed?</span>
           <b>Gaan na Bid Saam →</b>
         </button>

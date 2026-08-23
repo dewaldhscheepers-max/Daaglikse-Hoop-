@@ -397,3 +397,33 @@
   font-size: 12.5px;
   color: var(--text-muted);
 }
+
+
+/* ── Die groei-oorsig ──
+   Agter die admin-geheim, en nerens anders nie. Sien src/data/sorgMeet.js. */
+.sk-groei {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--cream-dark, #F0EBE3);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text);
+}
+.sk-groei-kop {
+  margin: 0 0 7px;
+  font-size: 13px; font-weight: 800;
+  color: var(--text);
+}
+.sk-groei-ry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+.sk-groei-bronne {
+  margin: 7px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}

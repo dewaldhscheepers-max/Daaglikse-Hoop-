@@ -34,6 +34,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ONDERWERPE } from '../data/sorgOnderwerpe'
 import { krisisTreffers } from '../data/sorgKrisis'
+import { meet } from '../data/sorgMeetStuur'
 import { voorletters } from '../data/sorgProfiel'
 import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
@@ -160,6 +161,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
       /* Die laaste sport van die trechter, en die enigste een wat werklik
          tel. Sien api/tel-sorg.js. */
       telSorg('gestuur')
+      meet('storieKlaar')
       setTeks('')          // uit die geheue uit; ons het dit nie meer nodig nie
       setUitslag(d)
       if (bo.current) bo.current.scrollTop = 0

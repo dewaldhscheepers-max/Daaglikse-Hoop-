@@ -35,6 +35,8 @@ node src/data/sorgTyd.toets.mjs               # "3 u" in plaas van "19 Augustus"
 node src/data/sorgVeilig.toets.mjs            # KRISIS gaan OP, ONVEILIG nie, 153 toetse
 node src/data/sorgProfiel.toets.mjs           # wie praat, en wie nie Dewald mag wees nie, 116
 node src/data/sorgModereer.toets.mjs          # een rapport verwyder NIKS, 89 toetse
+node src/data/sorgSkakels.toets.mjs           # elke skerm se eie skakel + UTM, 82 toetse
+node src/data/sorgMeet.toets.mjs              # wat gemeet word en wat NOOIT, 124 toetse
 node src/data/sorgMigrasie.toets.mjs          # die eenmalige lopie se besluit, 79 toetse
 node api/_sorgMigreer.toets.mjs               # en die draad: geen duplikaat, 53 toetse
 node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 toetse

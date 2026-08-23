@@ -159,6 +159,23 @@ export default function SorgKeur({ geheim }) {
    * Die droëloop loop PRESIES dieselfde kode en skryf net nie. Hy gee ook die
    * rugsteun terug — alles wat gaan skuif, presies soos dit gaan lyk — as 'n
    * lêer wat 'n mens stoor voordat hy die egte knoppie druk. */
+  /* ── Die groei-oorsig ──
+   *
+   * Dewald: "Maak 'n eenvoudige interne groei-oorsig. Moenie hierdie
+   * statistiek publiek op die Sorg-blad wys nie."
+   *
+   * Dus HIER, agter die admin-geheim, en nêrens anders nie. Op 'n blad waar
+   * mense oor hul huwelike skryf, is 'n publieke teller 'n wedstryd. */
+  const [groei, setGroei] = useState(null)
+
+  useEffect(() => {
+    if (!geheim) return
+    fetch('/api/sorg-meet', { headers: { 'x-sorg-geheim': geheim } })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d && !d.fout) setGroei(d) })
+      .catch(() => { /* 'n oorsig wat nie laai nie, mag nie die admin breek nie */ })
+  }, [geheim])
+
   const [migrasie, setMigrasie] = useState(null)
   const [migBesig, setMigBesig] = useState(false)
 
@@ -298,6 +315,36 @@ export default function SorgKeur({ geheim }) {
           </div>
         )}
       </div>
+
+      {/* ── Die groei-oorsig ──
+          Nie 'n paneel vol grafieke nie: die TRECHTER, want die getal wat saak
+          maak is nie hoeveel mense kom nie — dit is waar hulle val. */}
+      {groei && groei.besoek > 0 && (
+        <div className="sk-groei">
+          <p className="sk-groei-kop">Groei</p>
+          <div className="sk-groei-ry">
+            <span><b>{groei.besoek}</b> besoeke</span>
+            <span><b>{groei.diepPct}%</b> op ’n diep skakel</span>
+            <span><b>{groei.terug.kennisOop}</b> uit ’n kennisgewing</span>
+          </div>
+          <div className="sk-groei-ry">
+            <span>Deel wat swaar is: <b>{groei.vra.klik}</b> klik → <b>{groei.vra.klaar}</b> klaar ({groei.vra.voltooiPct}%)</span>
+          </div>
+          <div className="sk-groei-ry">
+            <span>Luister na iemand: <b>{groei.gee.klik}</b> klik → <b>{groei.gee.klaar}</b> klaar ({groei.gee.voltooiPct}%)</span>
+          </div>
+          <div className="sk-groei-ry">
+            <span>Saam dra: <b>{groei.terug.saamDraOop}</b> oop</span>
+            <span>Uitnodigings: <b>{groei.terug.uitnodiging}</b></span>
+            <span>Bid Saam: <b>{groei.bidSaam}</b></span>
+          </div>
+          {groei.bronne.length > 0 && (
+            <p className="sk-groei-bronne">
+              {groei.bronne.map(b => `${b.bron} ${b.tel}`).join(' · ')}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="sk-hopies">
         {HOPIES.map(h => {

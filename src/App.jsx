@@ -826,9 +826,20 @@ export default function App() {
          Die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar
          'n nuwe weergawe is, en dan is die hash weg. Presies dieselfde fout
          het die Steun-blad gehad; sien die kommentaar daar bo. */
-      if (h === '#sorg' || pad === '/sorg') {
+      /* ── ELKE Sorg-pad, nie net /sorg nie ──
+       *
+       * Dewald se punt 15: /sorg/deel, /sorg/wag, /sorg/saam, /sorg/videos en
+       * /sorg/<id> moet elkeen op sy EIE skerm land. "Moenie die gebruiker
+       * eers na die algemene app-tuisblad stuur nie."
+       *
+       * Die pad self gaan ook in sessionStorage — Sorg lees dit daar, en nie
+       * uit die adresbalk nie, want ons vee die adresbalk hier onder skoon en
+       * die diensketter kan die bladsy in elk geval herlaai voordat Sorg
+       * gemonteer is. */
+      if (h === '#sorg' || pad === '/sorg' || pad.startsWith('/sorg/')) {
         sessionStorage.setItem('sorg_versoek', '1')
-        window.history.replaceState({}, '', '/')
+        if (pad.startsWith('/sorg')) sessionStorage.setItem('sorg_pad', window.location.pathname)
+        window.history.replaceState({}, '', '/' + window.location.search)
       }
       /* Die vlag word HIER nie uitgevee nie. Doen 'n mens dit, en die
          diensketter herlaai die bladsy 'n oomblik later, is die bedoeling

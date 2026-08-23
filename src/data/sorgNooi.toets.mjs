@@ -12,7 +12,8 @@
  * hou daardie verskil vas, want dit is presies die soort ding wat 'n mens
  * later "vereenvoudig" deur hulle een te maak.
  */
-import { sorgSkakel, leesSorgSkakel, uitSorgPad, nooiWoorde, DEEL_WORTEL } from './sorgDeel.js'
+import { sorgSkakel, leesSorgSkakel, uitSorgPad, nooiWoorde, algemeneWoorde,
+         magBuiteDeel, WORTEL_UITNODIGING, DEEL_WORTEL } from './sorgDeel.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -100,6 +101,46 @@ console.log('\n── n Skakel wat niks beteken nie, gee niks ──\n')
   is('n ander hash', leesSorgSkakel('#iets-anders'), null)
   is('half', leesSorgSkakel('#sorg-plasing-'), null)
   is('n onbekende soort', leesSorgSkakel('#sorg-gedig-1'), null)
+}
+
+console.log('\n── Die ALGEMENE uitnodiging verklap NIKS ──\n')
+{
+  /* Dewald: "Die algemene uitnodiging mag nie die skrywer se naam wys nie.
+     Mag nie hul storie of sensitiewe besonderhede wys nie."
+
+     Dit is die een wat 'n mens op Facebook kan plak. Sou 'n naam of 'n sin uit
+     iemand se storie hier inglip, sit ons iemand se seer in 'n openbare
+     tydlyn — en dan is die hele blad se belofte weg. */
+  const w = algemeneWoorde()
+  waar('dit noem geen mens nie', !/Maria|Johan|Elna|Anoniem/.test(w))
+  waar('dit dra geen aanhaling nie', !/[""\u201c\u201d]/.test(w))
+  waar('dit noem geen onderwerp nie', !/huwelik|selfmoord|kind|geld|rou/i.test(w))
+  waar('dit is kort genoeg vir WhatsApp', w.length <= 320)
+  waar('een paragraaf', !/\n/.test(w))
+
+  /* Dit lei DIREK na "Wag nog vir iemand", nooit na die tuisblad nie. */
+  waar('dit dra die skakel', w.includes(WORTEL_UITNODIGING))
+  waar('en die skakel gaan na /sorg/wag', WORTEL_UITNODIGING.includes('/sorg/wag'))
+  waar('nie na die tuisblad nie', !/dewaldscheepers\.com\/?$/.test(WORTEL_UITNODIGING))
+  waar('en dit dra n veldtog', /utm_source=uitnodiging/.test(WORTEL_UITNODIGING))
+
+  /* En dit is nie 'n advertensie nie — dieselfde reël as nooiWoorde. */
+  waar('dit vra NIE dat iemand die app aflaai nie', !/laai.*af|installeer|download/i.test(w))
+  waar('en dit bedel nie', !/asseblief deel|help my groei|donasie/i.test(w))
+}
+
+console.log('\n── Buite Sorg deel is STANDAARD AF ──\n')
+{
+  /* "Plaas my storie op die muur" en "sit my storie op Facebook" is vir die
+     mens wat dit geskryf het, twee heeltemal verskillende dinge. */
+  is('geen veld: af', magBuiteDeel({ id: 'm1' }), false)
+  is('n ou plasing: af', magBuiteDeel({ id: 'm1', toestemmings: { openbaar: true } }), false)
+  is('uitdruklik af', magBuiteDeel({ deelBuite: false }), false)
+  /* 'n String is nie 'n ja nie — presies die soort ding wat 'n ou rekord dra. */
+  is('die string "true" tel NIE', magBuiteDeel({ deelBuite: 'true' }), false)
+  is('die getal 1 ook nie', magBuiteDeel({ deelBuite: 1 }), false)
+  is('null breek nie', magBuiteDeel(null), false)
+  is('net n egte ja', magBuiteDeel({ deelBuite: true }), true)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

@@ -40,6 +40,8 @@ import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
 import SorgDeelSteun from './SorgDeelSteun'
 import { REDES, redeNaam, blokMerk, kanBlok, sonderGeblok } from '../data/sorgModereer'
+import { algemeneWoorde, WORTEL_UITNODIGING } from '../data/sorgDeel'
+import { meet } from '../data/sorgMeetStuur'
 import { leesGeblok, blokkeer } from '../data/sorgMuur'
 import './SorgOpmerkings.css'
 
@@ -115,6 +117,14 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
   const [rapOop, setRapOop] = useState('')
   const [geblok, setGeblok] = useState(() => leesGeblok())
   const [dankie, setDankie] = useState('')
+  /* ── Die veilige uitnodigingslus ──
+   *
+   * Dewald: "Nadat iemand 'n ondersteuningantwoord geplaas het, wys: Jy het
+   * vandag by iemand gaan sit. Nooi iemand anders om ook saam te dra."
+   *
+   * Dit kom NA sy woorde, nooit voor nie. 'n Blad wat vra dat jy iemand nooi
+   * voordat jy self iets gedoen het, is 'n advertensie. */
+  const [nooiOop, setNooiOop] = useState(false)
   const [ekstra, setEkstra] = useState({})
   const lysRef = useRef(null)
 
@@ -131,6 +141,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
        maar net vir 'n gesprek wat reeds in daardie lys is; `merkGesien` voeg
        niks by nie. */
     merkSaamDraGesien(plasing.id, woorde.length)
+    meet('antwoordBegin')
   }, [oop])
 
   /* Terug op die foon maak die blad toe, nie die hele app nie. Sonder dit
@@ -169,6 +180,8 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
        * is elke opmerking 'n doodloopstraat: 'n mens skryf, gaan weg, en kry
        * die storie nooit weer op 'n muur van veertig plasings nie. */
       onthouSaamDra(plasing.id, woorde.length + 1)
+      meet('antwoordKlaar')
+      setNooiOop(true)
       /* Rol na die nuwe een toe, sodat 'n mens sien dit is daar. */
       setTimeout(() => {
         if (lysRef.current) lysRef.current.scrollTop = lysRef.current.scrollHeight
@@ -617,6 +630,42 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                     {profiel ? 'Verander' : 'Wys my naam'}
                   </button>
                 </p>
+              )}
+
+              {/* ── Jy het vandag by iemand gaan sit ──
+               *
+               * Die uitnodiging dra NIKS van hierdie storie nie: geen naam,
+               * geen sin, geen onderwerp. Sien `algemeneWoorde()` — dit is die
+               * een wat 'n mens op Facebook kan plak sonder om iemand se seer
+               * in 'n openbare tydlyn te sit. En dit lei na "Wag nog vir
+               * iemand", nie na die tuisblad nie. */}
+              {nooiOop && (
+                <div className="op-nooi">
+                  <p className="op-nooi-kop">Jy het vandag by iemand gaan sit.</p>
+                  <p className="op-nooi-fyn">
+                    Nooi iemand anders om ook saam te dra. Die uitnodiging noem
+                    niemand se naam of storie nie.
+                  </p>
+                  <button
+                    className="op-nooi-knop"
+                    onClick={() => {
+                      const teks = algemeneWoorde()
+                      meet('uitnodigingGedeel')
+                      if (navigator.share) {
+                        navigator.share({ text: teks, url: WORTEL_UITNODIGING }).catch(() => {})
+                      } else {
+                        try { navigator.clipboard.writeText(teks) } catch { /* geen knipbord */ }
+                        setDankie('Die uitnodiging is gekopieer.')
+                        setTimeout(() => setDankie(''), 4000)
+                      }
+                    }}
+                  >
+                    Nooi iemand om saam te dra
+                  </button>
+                  <button className="op-nooi-laat" onClick={() => setNooiOop(false)}>
+                    Nie nou nie
+                  </button>
+                </div>
               )}
 
               {fout && <p className="op-fout">{fout}</p>}

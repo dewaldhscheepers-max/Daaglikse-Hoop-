@@ -509,3 +509,54 @@
 .op-rede-knop:active { background: var(--lavender-soft, #EDE8F8); }
 .op-rede-knop.blok { color: #A33A3A; font-weight: 700; }
 .op-rede-knop.laat { background: none; color: var(--text-muted, #8A7E9A); text-align: center; }
+
+
+/* ── Die veilige uitnodiging, NA jou woorde ──
+   'n Blad wat vra dat jy iemand nooi voordat jy self iets gedoen het, is 'n
+   advertensie. */
+.op-nooi {
+  margin: 9px 0 0;
+  padding: 12px 13px;
+  border-radius: 14px;
+  background: var(--lavender-soft, #EDE8F8);
+}
+
+.op-nooi-kop {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 800;
+  color: var(--purple-dark, #5C4E8E);
+}
+
+.op-nooi-fyn {
+  margin: 4px 0 0;
+  font-family: var(--font-body);
+  font-size: 12.5px; line-height: 1.5;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.op-nooi-knop {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 16px;
+  border: 0; border-radius: 12px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s;
+}
+.op-nooi-knop:active { background: #3B2F63; }
+
+.op-nooi-laat {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 5px;
+  border: 0; background: none;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+  -webkit-tap-highlight-color: transparent;
+}

@@ -41,7 +41,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { REAKSIES, wysReaksies } from '../data/sorgSaamstaan'
 import { stuurReaksie, myReaksie } from '../data/sorgMuur'
-import { deelSorg } from '../data/sorgDeel'
+import { deelSorg, magBuiteDeel, algemeneWoorde, WORTEL_UITNODIGING } from '../data/sorgDeel'
 import SorgOpmerkings from './SorgOpmerkings'
 import './SorgSaamstaan.css'
 
@@ -206,7 +206,26 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
         {deel && (
           <button
             className="ss-aksie"
-            onClick={() => { setKiesOop(false); deelSorg(deel.soort, deel.id, deel.titel) }}
+            onClick={() => {
+              setKiesOop(false)
+              /* ── Twee toestemmings, en hulle is nie dieselfde ding nie ──
+               *
+               * Dewald: "'n Spesifieke storie mag slegs buite Sorg gedeel word
+               * indien die skrywer afsonderlik toestemming gee. Hierdie
+               * toestemming is standaard afgeskakel."
+               *
+               * "Plaas my storie op die muur" en "sit my storie op Facebook"
+               * is vir die mens wat dit geskryf het twee heeltemal
+               * verskillende dinge. Sonder daardie tweede ja deel ons die
+               * ALGEMENE uitnodiging, wat niemand se naam of storie dra nie. */
+              if (soort === 'muur' && !magBuiteDeel(plasing)) {
+                const teks = algemeneWoorde()
+                if (navigator.share) navigator.share({ text: teks, url: WORTEL_UITNODIGING }).catch(() => {})
+                else { try { navigator.clipboard.writeText(teks) } catch { /* geen knipbord */ } }
+                return
+              }
+              deelSorg(deel.soort, deel.id, deel.titel)
+            }}
           >
             <span className="ss-aksie-teken" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
