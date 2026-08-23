@@ -109,6 +109,55 @@ export default function SorgKeur({ geheim }) {
     } finally { setBesig(false) }
   }
 
+  /* ── Die eenmalige migrasie ──
+   *
+   * Dewald: "Publiseer hulle sonder om duplikate te skep... Neem 'n veilige
+   * databasisrugsteun voor die migrasie."
+   *
+   * TWEE knoppies, en die droëloop is die eerste. Daar is geen "probeer weer"
+   * ná 'n migrasie oor lewende data nie: 'n storie wat verkeerdelik openbaar
+   * gaan, kan afgehaal word maar nie ongesien gemaak word nie.
+   *
+   * Die droëloop loop PRESIES dieselfde kode en skryf net nie. Hy gee ook die
+   * rugsteun terug — alles wat gaan skuif, presies soos dit gaan lyk — as 'n
+   * lêer wat 'n mens stoor voordat hy die egte knoppie druk. */
+  const [migrasie, setMigrasie] = useState(null)
+  const [migBesig, setMigBesig] = useState(false)
+
+  async function loopMigrasie(droog) {
+    if (migBesig) return
+    if (!droog) {
+      const n = migrasie ? migrasie.inHierdieLopie : '?'
+      if (!window.confirm(
+        `Publiseer ${n} plasings op die muur?\n\n` +
+        'Dit gaan LEWENDIG. Het jy die rugsteun afgelaai?')) return
+    }
+    setMigBesig(true)
+    setBoodskap(null)
+    try {
+      const r = await fetch('/api/sorg-migreer' + (droog ? '?kyk=1' : ''), {
+        method: 'POST',
+        headers: { 'x-sorg-geheim': geheim },
+      })
+      const d = await r.json()
+      if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return }
+      setMigrasie(d)
+      if (!droog) { vergeetMuur(); await haal() }
+    } catch (e) {
+      setBoodskap({ fout: String(e && e.message) })
+    } finally { setMigBesig(false) }
+  }
+
+  function laaiRugsteun() {
+    if (!migrasie || !migrasie.rugsteun) return
+    const blob = new Blob([JSON.stringify(migrasie.rugsteun, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'sorg-migrasie-rugsteun.json'
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000)
+  }
+
   function maakOop(b) {
     setOop(b.id)
     setTeks(b.teks || '')
@@ -164,6 +213,53 @@ export default function SorgKeur({ geheim }) {
   return (
     <div className="sk">
       <div className="admin-section-title">🤍 Sorg &amp; Ondersteuning — Boodskappe</div>
+
+      {/* ── Die migrasie ──
+          Dit staan BO die hopies, want dit is 'n eenmalige ding wat eers
+          gedoen moet word; daarna is die getalle almal nul en dan verdwyn dit
+          in die agtergrond. */}
+      <div className="sk-migrasie">
+        <p className="sk-migrasie-kop">Publiseer die plasings wat nog wag</p>
+        <p className="sk-migrasie-fyn">
+          Die goedkeuringshek is weg. Hierdie lopie vat die ou plasings wat net
+          daar gewag het en sit hulle op die muur — met hul oorspronklike datum,
+          onderwerp, inhoud en anonimiteitskeuse. Krisis, gerapporteerde, spam en
+          plasings sonder toestemming bly uit. Dit kan nie duplikate maak nie.
+        </p>
+        <div className="sk-migrasie-knoppe">
+          <button className="sk-knop" disabled={migBesig} onClick={() => loopMigrasie(true)}>
+            {migBesig ? 'Besig…' : '🔍 Gaan na, skryf niks'}
+          </button>
+          {migrasie && migrasie.droog && migrasie.gepubliseer > 0 && (
+            <>
+              <button className="sk-knop" onClick={laaiRugsteun}>⬇ Laai die rugsteun af</button>
+              <button className="sk-knop sk-plaas" disabled={migBesig} onClick={() => loopMigrasie(false)}>
+                Publiseer {migrasie.inHierdieLopie} nou
+              </button>
+            </>
+          )}
+        </div>
+
+        {migrasie && (
+          <div className="sk-migrasie-uitslag">
+            <p>
+              <b>{migrasie.gepubliseer}</b> {migrasie.droog ? 'gaan publiseer' : 'gepubliseer'}
+              {' · '}<b>{migrasie.uitgesluit}</b> uitgesluit
+              {' · '}<b>{migrasie.reedsDaar}</b> reeds daar
+              {' · '}<b>{migrasie.misluk}</b> misluk
+              {migrasie.nogOor > 0 && <> · <b>{migrasie.nogOor}</b> nog oor (druk weer)</>}
+            </p>
+            {/* "Uitgesluit: 12" op sy eie is geen inligting nie. */}
+            {migrasie.redes && Object.keys(migrasie.redes).length > 0 && (
+              <ul className="sk-migrasie-redes">
+                {Object.entries(migrasie.redes).map(([rede, n]) => (
+                  <li key={rede}>{n} × {rede}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="sk-hopies">
         {HOPIES.map(h => {

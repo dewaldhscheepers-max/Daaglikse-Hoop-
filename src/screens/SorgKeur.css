@@ -347,3 +347,53 @@
   color: #A03B33; font-size: 13.5px; font-weight: 700; line-height: 1.5;
 }
 .sk-ry.gerapporteer { border-color: #E8C4C0; background: #FDF7F6; }
+
+
+/* ── Die eenmalige migrasie ──
+   Dit staan BO die hopies: dit moet eers gedoen word, en daarna is die
+   getalle nul. Geen transform op :active nie. */
+.sk-migrasie {
+  margin: 0 0 16px;
+  padding: 14px 15px;
+  border-radius: 14px;
+  background: var(--lavender-soft, #EDE8F8);
+  border-left: 3px solid var(--purple-dark, #5C4E8E);
+}
+
+.sk-migrasie-kop {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14.5px; font-weight: 800;
+  color: var(--text);
+}
+
+.sk-migrasie-fyn {
+  margin: 5px 0 0;
+  font-family: var(--font-body);
+  font-size: 12.5px; line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.sk-migrasie-knoppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.sk-migrasie-uitslag {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(92, 78, 142, 0.18);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+}
+.sk-migrasie-uitslag p { margin: 0; }
+
+.sk-migrasie-redes {
+  margin: 7px 0 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}

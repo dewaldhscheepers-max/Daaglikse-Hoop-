@@ -34,6 +34,9 @@ node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei
 node src/data/sorgTyd.toets.mjs               # "3 u" in plaas van "19 Augustus", 50 toetse
 node src/data/sorgVeilig.toets.mjs            # KRISIS gaan OP, ONVEILIG nie, 153 toetse
 node src/data/sorgProfiel.toets.mjs           # wie praat, en wie nie Dewald mag wees nie, 116
+node src/data/sorgMigrasie.toets.mjs          # die eenmalige lopie se besluit, 79 toetse
+node api/_sorgMigreer.toets.mjs               # en die draad: geen duplikaat, 53 toetse
+node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 toetse
 node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
