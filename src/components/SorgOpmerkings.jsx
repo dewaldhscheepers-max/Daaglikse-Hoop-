@@ -186,6 +186,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
      argument in plaas daarvan om `profiel` te lees. */
   async function stuurMet(watProfiel, sleutel) {
     if (besig) return
+    setFout('')
     setBesig(true)
     setFout('')
     const d = await stuurWoord(
@@ -197,11 +198,47 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
       watProfiel,
     )
     setBesig(false)
-    if (d && d.fout) { setFout(d.fout); return }
+    if (d && d.fout) {
+      setFout(d.fout)
+      /* ── Die poging BLY staan ──
+       *
+       * 'n Verkeerde kode het die opmerking laat val, en dan was daar niks om
+       * weer te probeer nie: 'n mens maak die profiel weer oop, tik die regte
+       * kode, druk stoor — en niks gebeur. Sy woorde staan nog in die kassie
+       * en hy moet self raai dat hy weer "Plaas" moet druk.
+       *
+       * Ons hou dus die poging vas. Sodra die profiel reggemaak is, gaan dit
+       * vanself deur. */
+      wagRef.current = sleutel || ''
+      return
+    }
     setEie('')
 
     if (d && d.woord) {
-      onNuut({ id: d.woord.id, teks: d.woord.teks, myne: true })
+      /* ── Jou EIE opmerking moet jou naam en jou foto wys ──
+       *
+       * Dewald: "ek het go comment en dit wys anoniem... en my foto wys ook
+       * nie."
+       *
+       * Hier het net `{ id, teks, myne: true }` gestaan. Die skerm het dus 'n
+       * ry geteken sonder naam en sonder foto — en die reël wat besluit wie
+       * praat, val dan terug op "Jy" met 'n leë kring. Ná 'n verfrissing kom
+       * dit reg, want dan kom dit van die bediener af, maar die eerste
+       * oomblik — die enigste een wat 'n mens onthou — het gelieg.
+       *
+       * Die profiel gaan nou saam, presies soos die bediener dit gaan
+       * teruggee. */
+      onNuut({
+        id: d.woord.id,
+        teks: d.woord.teks,
+        myne: true,
+        naam: (watProfiel && watProfiel.naam) || '',
+        foto: (watProfiel && watProfiel.foto) || '',
+        /* Die merk kom van die BEDIENER af — hy sê of die kode reg was. Ons
+           raai dit nie hier nie. */
+        geverifieer: !!(d.woord && d.woord.geverifieer),
+        geskepOp: new Date().toISOString(),
+      })
       setFout('')
       /* ── Jy het by hierdie mens gaan sit ──
        *
@@ -444,6 +481,9 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
           {sonderGeblok(woorde, geblok).map(w => {
             /* Wie praat. 'n Opmerking sonder 'n naam is anoniem, en dit is
                steeds die verstek — 'n mens hoef nooit 'n naam te kies nie. */
+            /* Wie praat. Jou EIE naam wen oor "Jy": 'n mens wat pas sy naam
+               gekies het, moet dit sien staan — anders lyk dit of die keuse
+               niks gedoen het nie. "Jy" bly vir wie anoniem geskryf het. */
             const wie = w.hoop ? (w.naam || 'Daaglikse Hoop')
               : (w.naam ? w.naam : (w.myne ? 'Jy' : 'Anoniem'))
             const tyd = gelede(w.geskepOp || w.wanneer) || skryfDag(w.wanneer)

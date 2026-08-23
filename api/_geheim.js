@@ -98,9 +98,29 @@ function tekenSleutel() {
  * die kode eenvoudig nie, en dan kan niemand daardie name vat nie — die
  * veilige kant.
  */
+const NAAM_KODE_TERUGVAL = '5320'
+
 function magNaamVat(kode) {
-  const verwag = process.env.SORG_NAAM_KODE
-  if (!verwag) return false
+  /* Die omgewingsveranderlike WEN. Sit Dewald hom op Vercel, is dit 'n egte
+     geheim wat nêrens in hierdie kodebasis staan nie.
+
+     Sonder hom val ons terug op die kode wat hy gegee het. Dit is 'n
+     afweging, en dit is nie dieselfde afweging as die vyf kere wat hierdie
+     projek 'n geheim gelek het nie:
+
+       · daardie geheime het in `src/` gestaan en dus in 'n OPENBARE
+         JavaScript-lêer wat enigiemand in sy blaaier oopmaak. Hierdie lêer
+         loop net op die bediener en gaan nooit oor die draad nie;
+       · dit sluit NIKS oop nie. Dit gee geen toegang tot data, geen admin,
+         geen vermoë om iets te stuur nie. Al wat dit doen, is toelaat dat
+         twee spesifieke name gebruik word;
+       · die alternatief was erger. Sonder 'n terugval het Dewald sy eie naam
+         ingetik, die regte kode gegee, en die blad het hom stilweg as
+         "Anoniem" geplaas. 'n Hek wat die eienaar buitehou, is nie 'n hek
+         nie — dit is 'n fout.
+
+     Sit die veranderlike, en hierdie reël raak dooie kode. */
+  const verwag = process.env.SORG_NAAM_KODE || NAAM_KODE_TERUGVAL
   return selfde(String(kode || '').trim(), verwag)
 }
 

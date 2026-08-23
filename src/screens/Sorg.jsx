@@ -201,6 +201,15 @@ export default function Sorg({ onNavigate }) {
     meet('saamDraOop')
   }, [afdeling])
 
+  /* Skryf 'n mens onder 'n storie, moet die Saam dra-oortjie se telling
+     DADELIK verander — nie eers wanneer hy daarheen gaan nie. localStorage
+     stuur geen sein binne dieselfde bladsy nie; sien `onthouSaamDra`. */
+  useEffect(() => {
+    const nuut = () => setSaamDra(leesSaamDra())
+    window.addEventListener('sorg-saamdra', nuut)
+    return () => window.removeEventListener('sorg-saamdra', nuut)
+  }, [])
+
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])
   useEffect(() => {

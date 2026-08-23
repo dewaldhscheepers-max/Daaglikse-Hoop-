@@ -28,7 +28,15 @@ import { magKas } from './data/kasBesluit.js'
       klank-inskrywing daar staan, bly die stemboodskap stukkend — CacheFirst
       gee dieselfde liggaam elke dag weer terug. Hierdie is die enigste
       hefboom wat 'n foon bereik wat ons nie kan raak nie. */
-const SPOEL = 4
+/* ── SPOEL ──
+ *
+ * Verhoog dit wanneer 'n foon wat ons nie kan raak nie, se ou kas moet gaan.
+ * Dit is die enigste hefboom wat daardie foon bereik. Sien CLAUDE.md.
+ *
+ * 5: Dra Mekaar se Laste — die name, die foto's en die opmerkings het almal
+ * verander, en Dewald se vrou moes die app toe- en oopmaak voordat sy die
+ * nuwe weergawe gesien het. */
+const SPOEL = 5
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

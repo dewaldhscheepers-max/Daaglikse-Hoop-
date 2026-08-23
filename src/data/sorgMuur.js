@@ -262,6 +262,16 @@ export function leesSaamDra() {
 export function onthouSaamDra(muurId, woorde = 0) {
   const lys = voegBy(leesSaamDra(), muurId, { wanneer: new Date().toISOString(), woorde })
   skryfSaamDra(lys)
+  /* ── Die Saam dra-oortjie moet dit DADELIK weet ──
+   *
+   * Dewald: "ek moes ook eers op die boonste tab saamdra kliek voordat dit
+   * gewys het ek dra saam."
+   *
+   * localStorage stuur geen sein binne dieselfde bladsy nie (`storage` vuur
+   * net in ANDER oortjies), dus het die blad se telling eers verander wanneer
+   * 'n mens self na daardie oortjie gegaan het. Een gebeurtenis, en die blad
+   * lees weer. */
+  try { window.dispatchEvent(new CustomEvent('sorg-saamdra')) } catch { /* geen venster */ }
   return lys
 }
 

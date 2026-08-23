@@ -161,19 +161,32 @@ function keurSkrywer({ naam, foto, kode }) {
   if (k.fout || !k.naam) return { naam: '', foto: '', anoniem: true }
 
   const f = String(foto || '')
-  const skoonFoto = /^data:image\/(jpeg|png|webp);base64,/.test(f) && f.length < 200000 ? f : ''
+  /* 60 000 karakters, nie 200 000 nie. Die muur lees 300 opmerkings in EEN
+     versoek; teen 200KB elk is dit 'n antwoord van sestig megagreep en die
+     blad laai nooit klaar op 'n Suid-Afrikaanse lyn nie. 'n Foto wat op die
+     foon tot 256px gekrop is, is sowat 15–25KB. */
+  const skoonFoto = /^data:image\/(jpeg|png|webp);base64,/.test(f) && f.length < 60000 ? f : ''
 
   /* ── Die twee name wat 'n KODE vra ──
    *
    * Die kode word HIER vergelyk, nooit op die skerm nie: `src/` ship in 'n
    * openbare JavaScript-lêer wat enigiemand kan oopmaak. Sien CLAUDE.md.
    *
-   * Sonder die regte kode word die opmerking ANONIEM in plaas van geweier —
-   * die mens se woorde hoort op die muur; sy gekose naam nie. Dit is ook die
-   * enigste antwoord wat niks verklap nie: 'n weiering wat sê "verkeerde
-   * kode" bevestig vir 'n aanvaller dat daar 'n kode is om te raai. */
+   * ── Wat gebeur as die kode VERKEERD is ──
+   *
+   * Dit het stilweg ANONIEM geword, en die redenasie was dat 'n weiering vir
+   * 'n aanvaller bevestig dat daar 'n kode is om te raai.
+   *
+   * Dit was verkeerd, en Dewald het dit binne 'n uur raakgeloop: hy het sy eie
+   * naam getik, die regte kode gegee, en sy opmerking het as "Anoniem"
+   * verskyn sonder 'n woord van verduideliking. 'n Stelsel wat stil die
+   * teenoorgestelde doen van wat 'n mens gevra het, is erger as een wat nee
+   * sê. Die "geheim" wat ons beskerm het, is in elk geval net die BESTAAN van
+   * 'n kode — en die skerm vra reeds daarvoor, dus weet 'n aanvaller dit klaar.
+   *
+   * Nou sê dit dit reguit, en die opmerking word NIE geplaas nie. */
   if (vraKode(k.naam)) {
-    if (!magNaamVat(kode)) return { naam: '', foto: '', anoniem: true }
+    if (!magNaamVat(kode)) return { fout: 'Die kode is verkeerd. Daardie naam is beskerm.' }
     return {
       /* Kanoniek gespel, ongeag hoe dit getik is. */
       naam: KANONIEK[plat(k.naam)] || k.naam,
@@ -190,6 +203,10 @@ function keurSkrywer({ naam, foto, kode }) {
 }
 
 async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skrywer }) {
+  /* 'n Verkeerde kode op 'n beskermde naam. Die mens moet dit HOOR, nie
+     stilweg as "Anoniem" verskyn nie. */
+  if (skrywer && skrywer.fout) return res.status(400).json({ fout: skrywer.fout })
+
   const plasing = await leesDok(versamelingVir(waar), muurId)
   if (!plasing || plasing.gepubliseer === false) {
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
@@ -262,7 +279,14 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skryw
   return res.status(200).json({
     ok: true,
     wag: doc.status === 'wag',
-    woord: doc.status === 'wys' ? { id, teks: doc.teks, bron: doc.bron } : null,
+    /* Die skerm teken hierdie een DADELIK, voordat die muur weer gelees word.
+       Dit moet dus alles dra wat 'n ry nodig het — anders wys jou eie vars
+       opmerking sonder jou naam en sonder jou foto. */
+    woord: doc.status === 'wys' ? {
+      id, teks: doc.teks, bron: doc.bron,
+      naam: skrywer.naam, foto: skrywer.foto, anoniem: skrywer.anoniem,
+      geverifieer: skrywer.rol === 'dewald' || skrywer.rol === 'bediening',
+    } : null,
   })
 }
 
