@@ -119,11 +119,29 @@
    se id (sien src/data/sorgTyd.js) en word inlyn gestel. */
 .op-avatar {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  overflow: hidden;
   background: #EDE6F7;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 800;
 }
+.op-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 'n Mens wat sy eie naam gekies het, kry die app se kleur in plaas van 'n
+   kleur uit sy id — hy is nie een van baie anonieme stemme nie. */
+.op-avatar.genoem { background: var(--purple, #7C6FAF); }
+
+/* Die kring in die tikbalk. Wie nog geen naam gekies het nie, kry 'n leë
+   sagte kring — nie 'n letter uit die woord "Anoniem" nie. */
+.op-tik .op-avatar { background: var(--lavender-soft, #EDE8F8); }
+.op-tik .op-avatar.myne { background: var(--purple, #7C6FAF); }
 
 /* Daaglikse Hoop se kring dra die app se kleur, sodat 'n mens sonder om te
    lees sien dat hierdie een anders is. */
@@ -388,4 +406,27 @@
 .op-lys .sp-antwoord-titel {
   margin-bottom: 6px;
   font-size: 15px;
+}
+
+
+/* ── "Jy antwoord as Elna." ──
+   Een reël, want dit is 'n voetnoot en nie 'n besluit nie. */
+.op-wie-is-ek {
+  margin: 7px 2px 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.op-wie-knop {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple, #7C6FAF);
+  text-decoration: underline;
+  -webkit-tap-highlight-color: transparent;
 }

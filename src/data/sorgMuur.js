@@ -163,12 +163,21 @@ export async function stuurReaksie(muurId, reaksie, soort = 'muur') {
 
    `woord` is 'n SLEUTEL uit Dewald se klaargemaakte lys; `teks` is iemand se
    eie woorde. Nooit albei nie. */
-export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort = 'muur') {
+export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort = 'muur', profiel = null) {
   try {
     const r = await fetch(SAAM_PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ muurId, toestel: toestelId(), soort, ...(woord ? { woord } : { teks }) }),
+      body: JSON.stringify({
+        muurId, toestel: toestelId(), soort,
+        ...(woord ? { woord } : { teks }),
+        /* Die profiel gaan SAAM, of glad nie. Sonder een bly die opmerking
+           anoniem, presies soos die hele muur voorheen was. Die bediener
+           keur die naam weer — 'n kliënt se woord oor sy eie naam is nooit
+           genoeg nie, want dit is presies hoe iemand "Dewald Scheepers"
+           word. */
+        ...(profiel && profiel.naam ? { naam: profiel.naam, foto: profiel.foto || '' } : {}),
+      }),
     })
     return await r.json()
   } catch {

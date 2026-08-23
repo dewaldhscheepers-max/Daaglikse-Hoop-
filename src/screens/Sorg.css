@@ -1183,3 +1183,58 @@
   background: var(--lavender-soft);
   color: var(--purple-dark);
 }
+
+
+/* ── "Hoe wil jy verskyn?" op die vorm ──
+   Twee keuses, en ANONIEM is die verstek — die veilige kant om op te
+   fouteer. Sien SorgVorm.jsx. */
+.sv-wie { display: flex; flex-direction: column; gap: 9px; margin: 2px 0 4px; }
+
+.sv-wie-kaart {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 12px 13px;
+  border: 1.5px solid var(--cream-dark, #F0EBE3);
+  border-radius: 15px;
+  background: var(--white, #fff);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.sv-wie-kaart.gekies {
+  border-color: var(--purple, #7C6FAF);
+  background: var(--lavender-soft, #EDE8F8);
+}
+
+.sv-wie-kring {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--cream-dark, #F0EBE3);
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 800;
+}
+.sv-wie-kring img { width: 100%; height: 100%; object-fit: cover; }
+
+.sv-wie-teks { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sv-wie-teks b {
+  font-family: var(--font-body);
+  font-size: 14.5px; font-weight: 700;
+  color: var(--text);
+}
+.sv-wie-teks span {
+  font-family: var(--font-body);
+  font-size: 12.5px; line-height: 1.45;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sv-profiel-blok { margin: 4px 0 6px; }

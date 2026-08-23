@@ -153,19 +153,38 @@ afdeling('Versoeke om geld of goed word gemerk')
   kyk('dit gee net n lys', Array.isArray(hulpversoekTreffers('n bed')))
 }
 
-afdeling('Die muur is ALTYD anoniem')
+afdeling('Anoniem is die VERSTEK, nie die enigste keuse nie')
 {
-  /* Kommentaar tel nie — daar verduidelik ons juis hoekom die keuse weg is. */
+  /* Dewald het dit op 23 Augustus 2026 verander: "Wanneer iemand 'n storie
+     plaas, moet hulle duidelik kies: Gebruik my naam en foto · Plaas
+     anoniem. Die anonimiteitskeuse geld per plasing."
+
+     Wat hier getoets word, is nie dat die keuse bestaan nie — dit is dat
+     ANONIEM WEN wanneer die veld nie deurkom nie. 'n Ou bundel op iemand se
+     foon, 'n halwe versoek, 'n gereedskapstuk: elkeen van hulle moet in
+     "anoniem" beland, want 'n naam wat per ongeluk by 'n storie oor iemand se
+     huwelik kom, kan nie ongedaan gemaak word nie. */
   const sonder = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
   const vorm = sonder(fs.readFileSync(path.join(wortel, 'src', 'components', 'SorgVorm.jsx'), 'utf8'))
-  const stuur = fs.readFileSync(path.join(wortel, 'api', 'sorg-stuur.mjs'), 'utf8')
-  const keur = fs.readFileSync(path.join(wortel, 'api', 'sorg-keur.mjs'), 'utf8')
+  const stuur = sonder(fs.readFileSync(path.join(wortel, 'api', 'sorg-stuur.mjs'), 'utf8'))
+  const muur = sonder(fs.readFileSync(path.join(wortel, 'api', 'sorg-muur.mjs'), 'utf8'))
 
-  kyk('geen naamkeuse op die vorm', !/Gebruik my voornaam|sv-keuse|sv-naam/.test(vorm),
-      vorm.match(/.{0,40}(voornaam|sv-keuse).{0,40}/))
-  kyk('die vorm stuur altyd anoniem', /anoniem: true/.test(vorm))
-  kyk('die bediener stoor geen naam', /const naam = ''/.test(stuur))
-  kyk('die muur kry geen naam', /naam: '',/.test(keur))
+  kyk('die vorm vra hoe jy wil verskyn', /Hoe wil jy verskyn/.test(vorm))
+  kyk('en die verstek is anoniem', /useState\(true\)/.test(vorm.match(/const \[anoniem[^\n]*/)?.[0] || ''),
+      vorm.match(/const \[anoniem[^\n]*/)?.[0])
+
+  /* Die bediener vertrou nooit die kliënt se naam nie. */
+  kyk('die bediener keur die naam self', /keurNaam\(lyf\.naam\)/.test(stuur))
+  kyk('en anoniem is waar sodra daar geen naam is nie', /const anoniem = !naam/.test(stuur))
+  kyk('die keuse hang aan anoniem === false', /lyf\.anoniem === false/.test(stuur))
+
+  /* Die MUUR stuur die naam net oor die draad wanneer die mens dit gekies
+     het. Dit is nie "die skerm wys dit nie" — die veld is leeg. */
+  kyk('die muur hou n naam terug tensy die mens dit gekies het',
+      /m\.anoniem === false \? String\(m\.naam \|\| ''\) : ''/.test(muur))
+  kyk('en n foto ook', /m\.anoniem === false \? String\(m\.foto \|\| ''\) : ''/.test(muur))
+  kyk('n opmerking se naam volg dieselfde reel',
+      /w\.anoniem === false \? String\(w\.skrywerNaam \|\| ''\) : ''/.test(muur))
 }
 
 afdeling('Die onderwerpe')

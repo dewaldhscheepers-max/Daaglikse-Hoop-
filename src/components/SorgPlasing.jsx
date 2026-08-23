@@ -59,6 +59,7 @@
 
 import { useState } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
+import { voorletters } from '../data/sorgProfiel'
 import SorgDeelSteun from './SorgDeelSteun'
 import SorgSaamstaan from './SorgSaamstaan'
 import './SorgPlasing.css'
@@ -118,10 +119,11 @@ function egteAntwoord(a) {
 }
 
 /* Die merkie langs 'n naam. 'n Anonieme mens kry 'n neutrale kolletjie, nie 'n
-   letter uit die woord "Anoniem" nie — dit sou lyk of almal dieselfde mens is. */
-function voorletter(naam) {
+   letter uit die woord "Anoniem" nie — dit sou lyk of almal dieselfde mens is.
+   Wie sy naam gekies het, kry sy voorletters (sien src/data/sorgProfiel.js). */
+function merkie(naam) {
   const n = String(naam || '').trim()
-  return n ? n[0].toUpperCase() : '·'
+  return n ? voorletters(n) : '·'
 }
 
 export default function SorgPlasing({ plasing, myne = false, wag = false }) {
@@ -169,7 +171,11 @@ export default function SorgPlasing({ plasing, myne = false, wag = false }) {
        * sy naam, hoe lank gelede, en waaroor dit gaan. Die titel kom DAARNA,
        * want die mens kom eerste. */}
       <div className="sp-kop">
-        <span className="sp-merk" aria-hidden="true">{voorletter(plasing.naam)}</span>
+        <span className={`sp-merk${plasing.naam ? ' genoem' : ''}`} aria-hidden="true">
+          {plasing.foto
+            ? <img src={plasing.foto} alt="" width="30" height="30" />
+            : merkie(plasing.naam)}
+        </span>
         <span className="sp-kop-naam">{plasing.naam || 'Anoniem'}</span>
         {/* Net wanneer `skryfDatum` werklik iets teruggee. Die kolletjie kom
             uit CSS (`::before`), dus het 'n leë datum 'n los "·" langs die

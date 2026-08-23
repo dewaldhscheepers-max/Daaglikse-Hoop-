@@ -52,13 +52,16 @@ export function toestelId() {
      { ok: false, vol: true, boodskap }        die dag is vol
      { ok: false, fout: 'boodskap vir die mens' }
 */
-export async function stuurBoodskap({ teks, onderwerp, naam, anoniem, toestemmings }) {
+export async function stuurBoodskap({ teks, onderwerp, naam, foto, anoniem, toestemmings }) {
   try {
     const r = await fetch(PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         teks, onderwerp, naam, anoniem,
+        /* Die foto gaan net saam wanneer die mens NIE anoniem is nie. Dit is
+           die skerm se keuse; die bediener keur dit weer. */
+        ...(anoniem ? {} : { foto }),
         toestemmings,
         toestel: toestelId(),
       }),

@@ -31,6 +31,7 @@ import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 import {
   keurReaksie, klaarWoordTeks, woordStatus, saamTelReaksies, REAKSIES,
 } from '../src/data/sorgSaamstaan.js'
+import { keurNaam } from '../src/data/sorgProfiel.js'
 
 const MUUR = 'sorg_muur'
 const VIDEOS = 'sorg_videos'
@@ -131,7 +132,33 @@ async function doenReaksie(res, { muurId, toestel, reaksie, waar }) {
 }
 
 /* ── 'n Woord van ondersteuning ── */
-async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar }) {
+/* ── Die naam word HIER weer gekeur ──
+ *
+ * Die skerm keur dit ook, en dit maak nie saak nie: 'n kliënt se woord oor sy
+ * eie naam is nooit genoeg nie. Wie die versoek met 'n gereedskapstuk stuur,
+ * omseil elke veld op die skerm — en dit is presies hoe iemand "Dewald
+ * Scheepers" word onder 'n pastorale antwoord.
+ *
+ * Dieselfde reëls, een lêer: src/data/sorgProfiel.js. 'n Geweierde naam maak
+ * die opmerking ANONIEM in plaas van om dit te weier — die mens se woorde
+ * hoort op die muur; sy gekose naam nie.
+ *
+ * `rol` word NOOIT uit die versoek gelees nie. Die verifikasie-merk hang aan
+ * 'n veld wat net die bediener stel. */
+function keurSkrywer({ naam, foto }) {
+  const k = keurNaam(naam)
+  if (k.fout || !k.naam) return { naam: '', foto: '', anoniem: true }
+  const f = String(foto || '')
+  return {
+    naam: k.naam,
+    /* 'n Gekropte data-URI (sien src/data/sorgProfielBerging.js) of 'n
+       http-adres. Niks anders word 'n <img src> op 'n openbare blad nie. */
+    foto: /^data:image\/(jpeg|png|webp);base64,/.test(f) && f.length < 200000 ? f : '',
+    anoniem: false,
+  }
+}
+
+async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skrywer }) {
   const plasing = await leesDok(versamelingVir(waar), muurId)
   if (!plasing || plasing.gepubliseer === false) {
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
@@ -189,7 +216,15 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar }) {
   }
 
   const id = 'w' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex')
-  await skryfDok(WOORDE, id, { ...doc, dag: vandag, geskep: new Date(), gerapporteer: 0 })
+  await skryfDok(WOORDE, id, {
+    ...doc,
+    /* Wie praat. Sonder 'n profiel is dit leeg en die opmerking bly anoniem,
+       presies soos die hele muur voorheen was. */
+    skrywerNaam: skrywer.naam,
+    skrywerFoto: skrywer.foto,
+    anoniem: skrywer.anoniem,
+    dag: vandag, geskep: new Date(), gerapporteer: 0, bemoedig: 0,
+  })
 
   return res.status(200).json({
     ok: true,
@@ -300,6 +335,7 @@ export default async function handler(req, res) {
         muurId, toestel, waar,
         woordSleutel: lyf.woord ? String(lyf.woord).slice(0, 40) : '',
         teks: lyf.teks,
+        skrywer: keurSkrywer({ naam: lyf.naam, foto: lyf.foto }),
       })
     }
     return res.status(400).json({ fout: 'niks om te doen nie' })

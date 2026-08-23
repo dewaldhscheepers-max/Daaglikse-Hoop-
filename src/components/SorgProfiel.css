@@ -1,0 +1,124 @@
+/* Die profiel-blokkie. Bid Nou se tokens, geen eie palet — sien Sorg.css.
+   Geen transform of opacity op :active nie. */
+
+.sp-profiel {
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  background: var(--white, #fff);
+  box-shadow: 0 2px 16px var(--shadow, rgba(92, 78, 142, 0.12));
+  border-left: 3px solid var(--purple-dark, #5C4E8E);
+}
+
+.sp-profiel h3 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16.5px; font-weight: 800; letter-spacing: -.2px;
+  color: var(--text);
+}
+
+.sp-profiel-fyn {
+  margin: 5px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px; line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.sp-profiel-ry {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 14px 0 4px;
+  flex-wrap: wrap;
+}
+
+/* Die kring wys NOU al hoe dit gaan lyk. */
+.sp-profiel-kring {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--lavender-soft, #EDE8F8);
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 19px; font-weight: 800;
+}
+.sp-profiel-kring img { width: 100%; height: 100%; object-fit: cover; }
+
+.sp-profiel-kies {
+  border: 1.5px solid var(--purple, #7C6FAF);
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: var(--white, #fff);
+  color: var(--purple-dark, #5C4E8E);
+  font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s;
+}
+.sp-profiel-kies:active { background: var(--lavender-soft, #EDE8F8); }
+
+.sp-profiel-weg {
+  border: 0; background: none;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sp-profiel-etiket {
+  display: block;
+  margin: 12px 0 5px;
+  font-family: var(--font-body);
+  font-size: 12.5px; font-weight: 700;
+  color: var(--text);
+}
+
+.sp-profiel-invoer {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--cream-dark, #F0EBE3);
+  border-radius: 13px;
+  background: var(--cream, #FAF8F5);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+}
+
+.sp-profiel-fout {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 12.5px; line-height: 1.5;
+  color: #A33A3A;
+}
+
+.sp-profiel-stoor {
+  width: 100%;
+  margin-top: 13px;
+  border: 0; border-radius: 14px;
+  padding: 13px 18px;
+  background: var(--purple-dark, #5C4E8E);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s;
+}
+.sp-profiel-stoor:active { background: #3B2F63; }
+.sp-profiel-stoor:disabled { background: #CFC7E0; cursor: default; }
+
+.sp-profiel-anon {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 6px;
+  border: 0; background: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+  -webkit-tap-highlight-color: transparent;
+}

@@ -108,7 +108,14 @@ function virDieSkerm(m, woorde) {
     id: m.id,
     titel: m.titel || '',
     teks: m.teks,
-    naam: m.naam || '',
+    /* ── Wie by hierdie storie verskyn ──
+     *
+     * `anoniem` wen altyd, en dit is die verstek: 'n ou plasing het nie eens
+     * die veld nie en bly presies soos hy was. Die naam en die foto gaan net
+     * oor die draad wanneer die mens dit self gekies het — dit is nie "die
+     * skerm wys dit nie", die velde is eenvoudig leeg. */
+    naam: m.anoniem === false ? String(m.naam || '') : '',
+    foto: m.anoniem === false ? String(m.foto || '') : '',
     onderwerp: m.onderwerp || 'ander',
     datum: m.datum || '',
     antwoord: m.antwoord || null,
@@ -149,9 +156,22 @@ function virDieSkerm(m, woorde) {
          op ELKE opmerking, en dit is nie versiering nie: dit is hoe 'n mens
          wat iets moois geskryf het, sien dat dit gehelp het. */
       bemoedig: Number(w.bemoedig) || 0,
-      /* Net Daaglikse Hoop dra 'n naam. Alles anders bly anoniem, soos die
-         hele muur. */
-      naam: w.bron === 'hoop' ? (w.naam || '') : '',
+      /* ── Wie praat ──
+       *
+       * Tot nou het NET Daaglikse Hoop 'n naam gedra en alles anders was
+       * "Anoniem". Dewald het dit omgedraai: 'n mens kies self, en die
+       * keuse geld per opmerking.
+       *
+       * Dit is 'n WITLYS: net hierdie drie velde gaan oor die draad, uit die
+       * dokument gelees. Voeg iemand more 'n veld by, kom dit eers uit
+       * wanneer dit HIER bygesit word — dieselfde reël as VOLG JESUS se
+       * openbare eindpunt, en om dieselfde rede.
+       *
+       * `anoniem` wen altyd. 'n Ou opmerking het nie eens die veld nie, en
+       * dan bly hy presies soos hy was. */
+      naam: w.bron === 'hoop' ? (w.naam || 'Daaglikse Hoop')
+        : (w.anoniem === false ? String(w.skrywerNaam || '') : ''),
+      foto: w.bron === 'hoop' ? '' : (w.anoniem === false ? String(w.skrywerFoto || '') : ''),
       hoop: w.bron === 'hoop',
     })),
     woordeTotaal: myne.length,

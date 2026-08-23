@@ -265,3 +265,10 @@
   font-weight: 700;
   color: #8A5A1E;
 }
+
+
+/* Die kring by 'n plasing dra nou 'n foto of voorletters wanneer die mens sy
+   naam gekies het. Anoniem bly 'n neutrale kolletjie. */
+.sp-merk { overflow: hidden; }
+.sp-merk img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.sp-merk.genoem { background: var(--purple, #7C6FAF); color: #fff; }

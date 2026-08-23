@@ -22,6 +22,7 @@ import { leesDok, skryfDok } from './_sorgFirestore.mjs'
 import { keurOnderwerp } from '../src/data/sorgOnderwerpe.js'
 import { krisisTreffers, kontakTreffers, hulpversoekTreffers } from '../src/data/sorgKrisis.js'
 import { besluit as veiligBesluit } from '../src/data/sorgVeilig.js'
+import { keurNaam } from '../src/data/sorgProfiel.js'
 
 const INKOMEND = 'sorg_inkomend'
 const MUUR     = 'sorg_muur'
@@ -185,18 +186,34 @@ export default async function handler(req, res) {
 
   const onderwerp = keurOnderwerp(lyf.onderwerp)
 
-  /* ALTYD anoniem.
-
-     Daar was 'n keuse tussen anoniem en 'n voornaam. Die kaart op die
-     Sorg-blad se nou twee keer dat dit anoniem is, en 'n stelsel wat dan
-     tog 'n naam stoor, breek daardie belofte — ook al het net EEN mens die
-     ander knoppie gedruk.
-
-     Daar was 'n `skoonNaam` wat 'n voornaam skoongemaak het. Dit is weg —
-     nie een plek roep dit meer nie. Die kommentaar het gese die keurpaneel
-     gebruik dit; dit was nie waar nie, en 'n kommentaar wat lieg, hou dooie
-     kode vir jare aan die lewe. */
-  const naam = ''
+  /* ── Wie verskyn by hierdie storie ──
+   *
+   * Dit was ALTYD anoniem, en die redenasie was goed: die kaart het twee keer
+   * gesê dit is anoniem, en 'n stelsel wat dan tog 'n naam stoor, breek
+   * daardie belofte.
+   *
+   * Dewald het dit op 23 Augustus 2026 verander: "Wanneer iemand 'n storie
+   * plaas, moet hulle duidelik kies: Gebruik my naam en foto · Plaas
+   * anoniem." Die belofte bly heel omdat die SKERM nou vra en die keuse per
+   * plasing geld.
+   *
+   * ANONIEM WEN ALTYD. Kom die veld nie deur nie — 'n ou bundel op iemand se
+   * foon, 'n halwe versoek — is dit anoniem. Die veilige kant is die verstek,
+   * want 'n naam wat per ongeluk by 'n storie oor iemand se huwelik beland,
+   * kan nie ongedaan gemaak word nie.
+   *
+   * Die naam word HIER gekeur, met dieselfde reëls as die skerm
+   * (src/data/sorgProfiel.js). 'n Kliënt se woord oor sy eie naam is nooit
+   * genoeg nie — dit is presies hoe iemand "Dewald Scheepers" word. 'n
+   * Geweierde naam maak die plasing ANONIEM in plaas van om dit te weier:
+   * die mens se woorde hoort op die muur; sy gekose naam nie. */
+  const wilNaam = lyf.anoniem === false
+  const keurN = wilNaam ? keurNaam(lyf.naam) : { naam: '', fout: '' }
+  const naam = keurN.naam
+  const anoniem = !naam
+  const rouFoto = String(lyf.foto || '')
+  const foto = !anoniem && /^data:image\/(jpeg|png|webp);base64,/.test(rouFoto) && rouFoto.length < 200000
+    ? rouFoto : ''
   const toestel = hasToestel(lyf.toestel)
   const dag = vandagSAST()
 
@@ -265,8 +282,9 @@ export default async function handler(req, res) {
     await skryfDok(INKOMEND, id, {
       teks,                       // die rou teks — geen kliënt lees ooit hierdie versameling
       onderwerp,
-      naam,                       // altyd leeg — sien hierbo
-      anoniem: true,
+      naam,                       // leeg wanneer die mens anoniem gekies het
+      foto,
+      anoniem,
       toestel,
       dag,
       kode,
@@ -330,7 +348,12 @@ export default async function handler(req, res) {
              Outomatiese opskrif uit die eerste sin lieg te maklik. */
           titel: '',
           teks,
-          naam: '',               // die muur is anoniem, altyd
+          /* Wat op die muur wys. Anoniem beteken die naam gaan NIE oor die
+             draad nie — dit is nie "die skerm wys dit nie", die veld is
+             eenvoudig leeg. */
+          naam,
+          foto,
+          anoniem,
           onderwerp,
           datum: new Date().toISOString().slice(0, 10),
           geskep: new Date(),

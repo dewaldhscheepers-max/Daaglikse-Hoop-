@@ -34,6 +34,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { ONDERWERPE } from '../data/sorgOnderwerpe'
 import { krisisTreffers } from '../data/sorgKrisis'
+import { voorletters } from '../data/sorgProfiel'
+import { myProfiel } from '../data/sorgProfielBerging'
+import SorgProfiel from './SorgProfiel'
 import { stuurBoodskap } from '../data/sorgStuur'
 import { telSorg } from '../data/telSorg'
 import SorgNommers from './SorgNommers'
@@ -57,6 +60,18 @@ const WYS_EERS = 10
 export default function SorgVorm({ oop, onSluit, videoData }) {
   const [teks, setTeks] = useState('')
   const [onderwerp, setOnderwerp] = useState('')
+  /* ── Hoe wil jy verskyn? ──
+   *
+   * Dewald: "Wanneer iemand 'n storie plaas, moet hulle duidelik kies:
+   * Gebruik my naam en foto · Plaas anoniem... Die anonimiteitskeuse geld
+   * per plasing."
+   *
+   * PER PLASING, en die verstek is ANONIEM. Dieselfde vrou kan haar naam by
+   * 'n gebed sit en anoniem oor haar huwelik skryf, en sy moet nooit per
+   * ongeluk die verkeerde een kry nie. Die veilige kant is die verstek. */
+  const [anoniem, setAnoniem] = useState(true)
+  const [profiel, setProfiel] = useState(() => myProfiel())
+  const [profielOop, setProfielOop] = useState(false)
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)
   const [alleOnderwerpe, setAlleOnderwerpe] = useState(false)
@@ -126,6 +141,11 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setFout('')
     const d = await stuurBoodskap({
       teks,
+      /* Anoniem wen altyd: sonder 'n profiel gaan daar niks saam nie, ook al
+         het iemand op "gebruik my naam" gedruk. */
+      anoniem: anoniem || !profiel,
+      naam: !anoniem && profiel ? profiel.naam : '',
+      foto: !anoniem && profiel ? (profiel.foto || '') : '',
       onderwerp: onderwerp || 'ander',
       /* ALTYD anoniem. Die kaart se dit twee keer, en 'n vorm wat dan
          "Gebruik my voornaam" aanbied, maak van daardie belofte 'n leuen.
@@ -318,14 +338,76 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               )}
             </div>
 
+            {/* ── Hoe wil jy verskyn? ──
+             *
+             * Dewald: "Jy beheer of mense jou naam en foto sien. Hierdie
+             * keuse geld net vir hierdie plasing."
+             *
+             * Twee keuses, en ANONIEM is die verstek — dit is die veilige
+             * kant om op te fouteer. Iemand wat per ongeluk sy naam by 'n
+             * storie oor sy huwelik kry, kan dit nie ongedaan maak nie. */}
+            <label className="sv-etiket">Hoe wil jy verskyn?</label>
+            <div className="sv-wie">
+              <button
+                className={`sv-wie-kaart${anoniem ? ' gekies' : ''}`}
+                onClick={() => setAnoniem(true)}
+              >
+                <span className="sv-wie-kring" aria-hidden="true">·</span>
+                <span className="sv-wie-teks">
+                  <b>Plaas anoniem</b>
+                  <span>Geen naam of foto word gewys nie</span>
+                </span>
+              </button>
+
+              <button
+                className={`sv-wie-kaart${!anoniem ? ' gekies' : ''}`}
+                onClick={() => {
+                  /* Sonder 'n profiel kan hierdie keuse niks doen nie, dus
+                     maak dit die opstel-blokkie oop in plaas van om 'n
+                     knoppie te wees wat niks doen nie. */
+                  if (!profiel) { setProfielOop(true); return }
+                  setAnoniem(false)
+                }}
+              >
+                <span className="sv-wie-kring" aria-hidden="true">
+                  {profiel && profiel.foto
+                    ? <img src={profiel.foto} alt="" width="34" height="34" />
+                    : (profiel ? voorletters(profiel.naam) : '+')}
+                </span>
+                <span className="sv-wie-teks">
+                  <b>Gebruik my naam</b>
+                  <span>
+                    {profiel
+                      ? `${profiel.naam}${profiel.foto ? ' · wys my profielfoto' : ' · wys my voorletters'}`
+                      : 'Kies ’n vertoonnaam en foto'}
+                  </span>
+                </span>
+              </button>
+            </div>
+
+            {profielOop && (
+              <div className="sv-profiel-blok">
+                <SorgProfiel
+                  profiel={profiel}
+                  kop="Kies hoe jy verskyn"
+                  fyn="Jou naam en foto bly dieselfde in elke gesprek. Jy kan dit later verander."
+                  onKlaar={p => { setProfiel(p); setAnoniem(false); setProfielOop(false) }}
+                  onSluit={() => { setProfielOop(false); setAnoniem(true) }}
+                />
+              </div>
+            )}
+
             {/* ── Een blokkie ── */}
             <label className="sv-blok-merk">
               <input type="checkbox" checked={toestem} onChange={() => setToestem(t => !t)} />
               <span>
-                Ek verstaan dat my boodskap anoniem en openbaar op die
-                Sorg &amp; Ondersteuning-muur geplaas word, dat ander daarop kan
-                reageer, en dat dit verkort of aangepas mag word om mense se
-                privaatheid te beskerm.
+                {/* Dit het ALTYD "anoniem" gesê. Noudat 'n mens sy naam kan
+                    kies, sou daardie woord 'n leuen wees op presies die
+                    plasing waar dit die duurste is. */}
+                Ek verstaan dat my boodskap {anoniem ? 'anoniem ' : ''}
+                openbaar op Sorg geplaas word, dat ander daarop kan reageer, en
+                dat dit verkort of aangepas mag word om mense se privaatheid te
+                beskerm.
               </span>
             </label>
 

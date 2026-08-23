@@ -35,6 +35,9 @@ import { useState, useEffect, useRef } from 'react'
 import { klaarWoordeVir, wysReaksies, MAKS_WOORD } from '../data/sorgSaamstaan'
 import { stuurWoord, rapporteerWoord, bemoedigWoord, bemoedigdes, onthouSaamDra, merkSaamDraGesien } from '../data/sorgMuur'
 import { gelede, kringKleur } from '../data/sorgTyd'
+import { voorletters } from '../data/sorgProfiel'
+import { myProfiel } from '../data/sorgProfielBerging'
+import SorgProfiel from './SorgProfiel'
 import './SorgOpmerkings.css'
 
 const MAANDE = [
@@ -83,6 +86,17 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
      het. Die tellings kom van die bediener; hierdie merk is vir die oog,
      sodat die hartjie gevul bly ná 'n herlaai. */
   const [myBemoedig, setMyBemoedig] = useState(() => new Set(bemoedigdes()))
+  /* ── Wie praat ──
+   *
+   * Dewald: "Wanneer iemand die eerste keer antwoord, laat hulle 'n
+   * eenvoudige profiel opstel... Moenie hulle by elke antwoord weer hul naam
+   * laat intik nie."
+   *
+   * Dus EEN KEER. Daarna word die profiel by elke antwoord saamgestuur en
+   * die kassie is net 'n kassie. Wie nie 'n naam wil kies nie, bly anoniem —
+   * lees en skryf vra nooit registrasie nie. */
+  const [profiel, setProfiel] = useState(() => myProfiel())
+  const [profielOop, setProfielOop] = useState(false)
   const [ekstra, setEkstra] = useState({})
   const lysRef = useRef(null)
 
@@ -116,7 +130,14 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
     if (besig) return
     setBesig(true)
     setFout('')
-    const d = await stuurWoord(plasing.id, sleutel ? { woord: sleutel } : { teks: eie.trim() }, soort)
+    const d = await stuurWoord(
+      plasing.id,
+      sleutel ? { woord: sleutel } : { teks: eie.trim() },
+      soort,
+      /* Sonder 'n profiel gaan daar niks saam nie en die opmerking is
+         anoniem, presies soos voorheen. */
+      profiel,
+    )
     setBesig(false)
     if (d && d.fout) { setFout(d.fout); return }
     setEie('')
@@ -306,17 +327,26 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
            * Wat NIE oorkom nie: reaksie-gesiggies, "Meest relevant", en 'n
            * telling wat soos 'n wedstryd lees. Dit is nie 'n voer nie. */}
           {woorde.map(w => {
-            const wie = w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')
+            /* Wie praat. 'n Opmerking sonder 'n naam is anoniem, en dit is
+               steeds die verstek — 'n mens hoef nooit 'n naam te kies nie. */
+            const wie = w.hoop ? (w.naam || 'Daaglikse Hoop')
+              : (w.naam ? w.naam : (w.myne ? 'Jy' : 'Anoniem'))
             const tyd = gelede(w.geskepOp || w.wanneer) || skryfDag(w.wanneer)
             const tel = (Number(w.bemoedig) || 0) + (ekstra[w.id] || 0)
             const myne = myBemoedig.has(w.id)
             return (
               <div key={w.id} className="op-item">
                 <span
-                  className={`op-avatar${w.hoop ? ' hoop' : ''}`}
+                  className={`op-avatar${w.hoop ? ' hoop' : ''}${w.naam && !w.hoop ? ' genoem' : ''}`}
                   aria-hidden="true"
-                  style={w.hoop ? undefined : { background: kringKleur(w.id) }}
-                />
+                  style={w.hoop || w.foto ? undefined : { background: kringKleur(w.id) }}
+                >
+                  {/* 'n Foto as daar een is, anders die voorletters, anders
+                      'n kleur wat per opmerking verskil. */}
+                  {!w.hoop && w.foto
+                    ? <img src={w.foto} alt="" width="32" height="32" />
+                    : (!w.hoop && w.naam ? voorletters(w.naam) : null)}
+                </span>
                 <div className="op-item-teks">
                   <div className="op-borrel">
                     <p className="op-wie">
@@ -411,8 +441,28 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                   moenie raad gee oor medisyne of behandeling nie.
                 </p>
               )}
+              {/* ── Die profiel, EEN KEER ──
+               *
+               * Dit staan in die plek van die kassie, nie voor die blad nie:
+               * 'n mens wat kom LEES, word niks gevra nie. Eers wanneer hy
+               * self oopmaak om te skryf, kies hy 'n naam — en daarna nooit
+               * weer nie. */}
+              {profielOop ? (
+                <SorgProfiel
+                  profiel={profiel}
+                  onKlaar={p => { setProfiel(p); setProfielOop(false) }}
+                  onSluit={() => setProfielOop(false)}
+                />
+              ) : (
                 <div className="op-tik">
-                  <span className="op-avatar" aria-hidden="true" />
+                  <span
+                    className={`op-avatar${profiel ? ' myne' : ''}`}
+                    aria-hidden="true"
+                  >
+                    {profiel && (profiel.foto
+                      ? <img src={profiel.foto} alt="" width="32" height="32" />
+                      : voorletters(profiel.naam))}
+                  </span>
                   <input
                     className="op-invoer"
                     value={eie}
@@ -429,6 +479,20 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                     Plaas
                   </button>
                 </div>
+              )}
+
+              {/* Wie praat, en hoe om dit te verander. Een reël, want dit is
+                  'n voetnoot en nie 'n besluit nie. */}
+              {!profielOop && (
+                <p className="op-wie-is-ek">
+                  {profiel
+                    ? <>Jy antwoord as <b>{profiel.naam}</b>. </>
+                    : <>Jy antwoord <b>anoniem</b>. </>}
+                  <button className="op-wie-knop" onClick={() => setProfielOop(true)}>
+                    {profiel ? 'Verander' : 'Wys my naam'}
+                  </button>
+                </p>
+              )}
 
               {fout && <p className="op-fout">{fout}</p>}
             </>
