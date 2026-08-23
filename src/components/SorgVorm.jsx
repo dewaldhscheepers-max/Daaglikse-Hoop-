@@ -203,10 +203,14 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 een druk weg en dit bly volledig — niks is weggegooi nie. */}
             <div className="sv-openbaar">
               <p className="sv-openbaar-kop">Voor jy jou boodskap deel</p>
+              {/* Dit het gesê "nadat dit nagegaan is". 'n Plasing gaan nou
+                  DADELIK op (sien api/sorg-stuur.mjs), en 'n vorm wat oor sy
+                  eie moderasie lieg, is die ergste plek om te lieg — 'n mens
+                  gee juis hier toestemming. */}
               <p>
-                Jou boodskap sal, nadat dit nagegaan is, <b>anoniem en openbaar
-                op die Sorg &amp; Ondersteuning-muur</b> verskyn, sodat ander wat deur
-                dieselfde dinge gaan ook daaruit kan leer.
+                Jou boodskap verskyn <b>dadelik en anoniem op die Sorg &amp;
+                Ondersteuning-muur</b>, sodat die gemeenskap saam met jou kan
+                dra en ander wat deur dieselfde dinge gaan, daaruit kan leer.
               </p>
               <p>
                 Jou naam wys nooit. Moenie name, kontakbesonderhede of
@@ -215,18 +219,22 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               {reelsOop ? (
                 <>
                   <p>
-                    Dewald kan jou boodskap verkort of liggies aanpas om jou en
-                    ander mense se privaatheid te beskerm.
+                    Dewald lees gereeld saam en gee waar hy kan pastorale
+                    begeleiding. Hy kan jou boodskap ook verkort of liggies
+                    aanpas om jou en ander mense se privaatheid te beskerm.
                   </p>
                   {/* Dit is 'n TOESTEMMINGSITEM, nie 'n kenmerk nie. Iemand wat
                       sy hart uitstort en dan vreemdelinge onder sy storie sien
                       skryf, skrik — en dit is presies die verrassing wat 'n mens
                       op hierdie blad nie wil he nie. */}
+                  {/* Ook 'n leuen geword: mense KAN nou skryf. Dewald: "hoe de
+                      fok moet hulle mekaar bemoedig as hul nie kan komment
+                      nie." */}
                   <p>
-                    Ander wat op die muur lees, kan met 'n kort woord van
-                    ondersteuning saam met jou staan. Niemand gee raad nie en
-                    niemand kan jou antwoord nie — dit is net mense wat laat weet
-                    hulle dra dit saam.
+                    Ander wat op die muur lees, kan saam met jou staan en jou
+                    bemoedig — met 'n kort woord, hul eie ervaring, of iets wat
+                    hulle gehelp het. Enigiets wat nie hier hoort nie, kan
+                    gerapporteer word.
                   </p>
                   <p>
                     Hierdie afdeling is vir pastorale begeleiding — nie vir
@@ -302,9 +310,10 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
             <label className="sv-blok-merk">
               <input type="checkbox" checked={toestem} onChange={() => setToestem(t => !t)} />
               <span>
-                Ek verstaan dat my boodskap ná goedkeuring openbaar op die
-                Sorg &amp; Ondersteuning-muur geplaas word en dat dit verkort of aangepas
-                mag word om mense se privaatheid te beskerm.
+                Ek verstaan dat my boodskap anoniem en openbaar op die
+                Sorg &amp; Ondersteuning-muur geplaas word, dat ander daarop kan
+                reageer, en dat dit verkort of aangepas mag word om mense se
+                privaatheid te beskerm.
               </span>
             </label>
 
@@ -315,8 +324,9 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
             </button>
 
             <p className="sv-onder-fyn">
-              Elke boodskap word eers nagegaan. Dewald antwoord gereeld, maar
-              'n persoonlike antwoord kan nie gewaarborg word nie.
+              Die gemeenskap dra saam. Dewald lees gereeld saam en antwoord
+              hier en daar, maar 'n persoonlike antwoord kan nie gewaarborg
+              word nie.
             </p>
           </div>
         )}

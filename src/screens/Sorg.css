@@ -1016,3 +1016,18 @@
   box-shadow: none;
 }
 .op-lys .sp-antwoord-wie { margin-bottom: 10px; }
+
+/* Dewald se antwoord, vasgespeld in die VOORSKOU op die kaart. */
+.ss-voorskou-ry.vasgespeld {
+  border-left: 3px solid #C9A961;
+  padding-left: 9px;
+  margin-left: -1px;
+}
+.ss-avatar.dewald { background: #4A3B7A; }
+
+/* Die riglyn op 'n swaar storie staan nou BO die kassie, nie in die plek
+   daarvan nie. Sien SorgOpmerkings.jsx. */
+.op-riglyn {
+  margin: 0 0 10px;
+  font-size: 12.5px; line-height: 1.55; color: #96702F;
+}

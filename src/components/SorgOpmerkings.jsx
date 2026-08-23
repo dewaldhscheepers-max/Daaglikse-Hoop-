@@ -292,12 +292,30 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                 ))}
               </div>
 
-              {plasing.sensitief ? (
+              {/* ── ELKE plasing kan geskryf word ──
+               *
+               * Hier het 'n hek gestaan: op 'n `sensitief`-plasing kon 'n mens
+               * NET 'n klaargemaakte frase kies. Die bedoeling was om iemand
+               * in 'n donker plek te beskerm teen verkeerde raad.
+               *
+               * Dewald: "hoe de fok moet hulle mekaar bemoedig as hul nie kan
+               * komment nie."
+               *
+               * Hy is reg, en die hek het die hele blad se punt weerspreek.
+               * 'n Gemeenskap wat mekaar dra, moet kan PRAAT. Die beskerming
+               * bly, net op die regte plek: die swaarste stories (selfmoord,
+               * selfbesering, geweld) gaan nie vanself op die muur nie — 'n
+               * mens kyk eers daarna (sien api/sorg-stuur.mjs) — en elke
+               * opmerking kan gerapporteer word.
+               *
+               * Op 'n swaar storie staan die riglyn nou BO die kassie in
+               * plaas van in die plek daarvan. */}
+              {plasing.sensitief && (
                 <p className="op-riglyn">
-                  Hierdie storie is swaar. Kies een van die woorde hier bo —
-                  dit is genoeg, en dit is die veiligste ding om te stuur.
+                  Hierdie storie is swaar. Praat sag, deel jou eie ervaring, en
+                  moenie raad gee oor medisyne of behandeling nie.
                 </p>
-              ) : (
+              )}
                 <div className="op-tik">
                   <span className="op-avatar" aria-hidden="true" />
                   <input
@@ -316,7 +334,6 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                     Plaas
                   </button>
                 </div>
-              )}
 
               {fout && <p className="op-fout">{fout}</p>}
             </>

@@ -48,12 +48,23 @@ import './SorgSaamstaan.css'
 /* Die een wat die hart wys wanneer 'n mens nog niks gekies het nie. */
 const VOORAF = 'hoor'
 
+/* 'n Antwoord met NIKS in nie, is geen antwoord nie. */
+function egteAntwoord(a) {
+  if (!a) return null
+  const teks = String(a.teks || '').trim()
+  const bron = String(a.bron || '').trim()
+  return teks || bron ? a : null
+}
+
 export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) {
   const [tellings, setTellings] = useState(plasing.reaksies || {})
   const [myne, setMyne] = useState(() => myReaksie(plasing.id))
   const [woorde, setWoorde] = useState(plasing.woorde || [])
   const [kiesOop, setKiesOop] = useState(false)
   const [bladOop, setBladOop] = useState(false)
+  /* Dewald se antwoord. Dit staan vasgespeld bo in die voorskou EN bo in die
+     opmerkingsblad — sien SorgOpmerkings.jsx. */
+  const antwoord = egteAntwoord(plasing && plasing.antwoord)
   const [besig, setBesig] = useState(false)
   const balkRef = useRef(null)
 
@@ -233,9 +244,31 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
       {/* ── Twee opmerkings as voorskou ──
           Soos 'n mens dit in 'n stroom sien: die gesprek is daar, maar dit
           neem nie die kaart oor nie. Druk op enigeen maak die blad oop. */}
-      {woorde.length > 0 && (
+      {/* Ook wanneer die gemeenskap nog niks gesê het nie: as Dewald geantwoord
+          het, moet dit hier wys. Andersins lyk die kaart of niemand daar was
+          nie terwyl hy juis geantwoord het. */}
+      {(woorde.length > 0 || antwoord) && (
         <button className="ss-voorskou" onClick={() => setBladOop(true)}>
-          {woorde.slice(0, 2).map(w => (
+          {/* ── Dewald se antwoord staan EERSTE ──
+           *
+           * Dewald: "waar daaglikse hoop wys moet my comment wys eerste."
+           *
+           * Sy antwoord het net in die opmerkingsblad gelewe, dus moes 'n mens
+           * eers alles oopmaak om te sien dat hy geantwoord het. Op die kaart
+           * self het die eerste twee gesaaide woorde gestaan en syne was
+           * nêrens. Vasgespeld beteken BO, ook in die voorskou. */}
+          {antwoord && (
+            <span className="ss-voorskou-ry vasgespeld">
+              <span className="ss-avatar dewald" aria-hidden="true" />
+              <span className="ss-voorskou-teks">
+                <b>Dewald Scheepers</b>
+                <span className="ss-merk" aria-hidden="true">✓</span>
+                {' '}
+                {String(antwoord.teks || 'het met ’n stemboodskap geantwoord.').slice(0, 120)}
+              </span>
+            </span>
+          )}
+          {woorde.slice(0, antwoord ? 1 : 2).map(w => (
             <span key={w.id} className="ss-voorskou-ry">
               <span className={`ss-avatar${w.hoop ? ' hoop' : ''}`} aria-hidden="true" />
               <span className="ss-voorskou-teks">
