@@ -11,6 +11,7 @@
 
 import { toestelId } from './sorgStuur'
 import { SLEUTEL as SAAMDRA_SLEUTEL, lees as leesSaamDraRou, voegBy, merkGesien } from './sorgSaamDra'
+import { BLOK_SLEUTEL, leesBlok, blokBy, blokWeg } from './sorgModereer'
 
 const PAD = '/api/sorg-muur'
 const SAAM_PAD = '/api/sorg-saamstaan'
@@ -274,18 +275,42 @@ export function merkSaamDraGesien(muurId, woorde) {
    Dit haal die woord dadelik van die muur af en sit dit in Dewald se hopie.
    Die skerm verwyder dit ook plaaslik, sodat die mens wat gedruk het, sien
    dat iets gebeur het. */
-export async function rapporteerWoord(woordId) {
+export async function rapporteerWoord(woordId, rede = '') {
   try {
     const r = await fetch(SAAM_PAD, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rapporteer: woordId }),
+      body: JSON.stringify({ rapporteer: woordId, rede, toestel: toestelId() }),
     })
     const d = await r.json()
-    return !!(d && d.ok)
+    /* `weg` sê of dit WERKLIK van die muur af is. Een rapport haal niks meer
+       af nie — sien src/data/sorgModereer.js — dus mag die skerm nie meer
+       aanvaar dat 'n druk beteken dit is weg nie. */
+    return d && d.ok ? { ok: true, weg: !!d.weg } : { ok: false }
   } catch {
-    return false
+    return { ok: false }
   }
+}
+
+/* ── Wie hierdie foon geblokkeer het ──
+
+   Dit le PLAASLIK en gaan nooit na 'n bediener nie: 'n opvraagbare lys van
+   "wie blokkeer wie" op 'n anonieme muur is presies die rekord wat hierdie
+   blad nie mag hê nie. */
+export function leesGeblok() {
+  try { return leesBlok(localStorage.getItem(BLOK_SLEUTEL)) } catch { return [] }
+}
+
+export function blokkeer(merk) {
+  const lys = blokBy(leesGeblok(), merk)
+  try { localStorage.setItem(BLOK_SLEUTEL, JSON.stringify(lys)) } catch { /* privaat venster */ }
+  return lys
+}
+
+export function deblokkeer(merk) {
+  const lys = blokWeg(leesGeblok(), merk)
+  try { localStorage.setItem(BLOK_SLEUTEL, JSON.stringify(lys)) } catch { /* privaat venster */ }
+  return lys
 }
 
 /* ── "Jou storie" ──

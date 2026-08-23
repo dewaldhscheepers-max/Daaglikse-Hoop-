@@ -39,6 +39,8 @@ import { voorletters } from '../data/sorgProfiel'
 import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
 import SorgDeelSteun from './SorgDeelSteun'
+import { REDES, redeNaam, blokMerk, kanBlok, sonderGeblok } from '../data/sorgModereer'
+import { leesGeblok, blokkeer } from '../data/sorgMuur'
 import './SorgOpmerkings.css'
 
 /* Die drie tekens onder 'n opmerking. Presies wat Dewald gevra het, en niks
@@ -108,6 +110,11 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
    * lees en skryf vra nooit registrasie nie. */
   const [profiel, setProfiel] = useState(() => myProfiel())
   const [profielOop, setProfielOop] = useState(false)
+  /* Watter opmerking se rede-kiesertjie oop is, en wie hierdie foon geblok
+     het. Die blok-lys le plaaslik; sien src/data/sorgModereer.js. */
+  const [rapOop, setRapOop] = useState('')
+  const [geblok, setGeblok] = useState(() => leesGeblok())
+  const [dankie, setDankie] = useState('')
   const [ekstra, setEkstra] = useState({})
   const lysRef = useRef(null)
 
@@ -194,10 +201,39 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
     bemoedigWoord(id, teken)
   }
 
-  async function rapporteer(id) {
-    if (!window.confirm('Rapporteer hierdie opmerking?\n\nDit gaan dadelik weg en Dewald kyk daarna.')) return
-    onNuut(null, id)
-    await rapporteerWoord(id)
+  /* ── Rapporteer, met 'n REDE ──
+   *
+   * Dewald: "Laat die gebruiker 'n kort rede kies. Bevestig dat die report
+   * suksesvol ontvang is."
+   *
+   * Die opmerking verdwyn NIE meer op een druk nie (sien
+   * src/data/sorgModereer.js) — dus mag die skerm ook nie meer maak of dit
+   * weg is nie. Ons sê wat werklik gebeur het. */
+  async function rapporteer(id, rede) {
+    setRapOop('')
+    const d = await rapporteerWoord(id, rede)
+    if (!d || !d.ok) { setDankie('Ons kon dit nie deurstuur nie. Probeer asseblief weer.'); return }
+    if (d.weg) {
+      onNuut(null, id)
+      setDankie('Dankie. Dit is van die muur af en ons kyk daarna.')
+    } else {
+      setDankie('Dankie — dit is aangemeld en ons kyk daarna.')
+    }
+    setTimeout(() => setDankie(''), 5000)
+  }
+
+  /* ── Blokkeer ──
+   *
+   * Net iemand wat sy NAAM gekies het. Om 'n anonieme mens te kan blokkeer,
+   * sou 'n stabiele merk vir hom vereis — en daardie merk laat enigiemand
+   * sien watter "Anoniem"-plasings van dieselfde mens af kom. Sien
+   * src/data/sorgModereer.js. */
+  function blok(w) {
+    const merk = blokMerk(w)
+    if (!merk) return
+    if (!window.confirm(`Blokkeer ${w.naam}?\n\nJy sien niks meer wat hierdie mens skryf nie. Niemand anders merk iets nie, en jy kan dit later terugdraai.`)) return
+    setGeblok(blokkeer(merk))
+    setRapOop('')
   }
 
   return (
@@ -360,7 +396,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
            *
            * Wat NIE oorkom nie: reaksie-gesiggies, "Meest relevant", en 'n
            * telling wat soos 'n wedstryd lees. Dit is nie 'n voer nie. */}
-          {woorde.map(w => {
+          {sonderGeblok(woorde, geblok).map(w => {
             /* Wie praat. 'n Opmerking sonder 'n naam is anoniem, en dit is
                steeds die verstek — 'n mens hoef nooit 'n naam te kies nie. */
             const wie = w.hoop ? (w.naam || 'Daaglikse Hoop')
@@ -434,16 +470,50 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                       <button
                         className="op-rap"
                         aria-label="Rapporteer hierdie opmerking"
-                        onClick={() => rapporteer(w.id)}
+                        onClick={() => setRapOop(o => (o === w.id ? '' : w.id))}
                       >
                         Rapporteer
                       </button>
                     )}
                   </div>
+
+                  {/* ── Kies 'n rede ──
+                   *
+                   * 'n Rapport sonder 'n rede sê die admin niks: hy moet elke
+                   * keer die hele gesprek lees om te raai wat fout is. Ses
+                   * kort redes in gewone Afrikaans; 'n lys van tien juridiese
+                   * kategorieë beteken niemand kies een nie. */}
+                  {rapOop === w.id && (
+                    <div className="op-redes">
+                      <p className="op-redes-kop">Wat is fout?</p>
+                      {REDES.map(r => (
+                        <button
+                          key={r.sleutel}
+                          className="op-rede-knop"
+                          onClick={() => rapporteer(w.id, r.sleutel)}
+                        >
+                          {r.naam}
+                        </button>
+                      ))}
+                      {/* Blokkeer staan hier, nie in die aksiery nie: dit is
+                          'n swaarder ding as 'n rapport en dit hoort nie langs
+                          'n duimpie nie. */}
+                      {kanBlok(w) && (
+                        <button className="op-rede-knop blok" onClick={() => blok(w)}>
+                          Blokkeer {w.naam} — ek wil niks meer van hierdie mens sien nie
+                        </button>
+                      )}
+                      <button className="op-rede-knop laat" onClick={() => setRapOop('')}>
+                        Laat maar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )
           })}
+
+          {dankie && <p className="op-dankie">{dankie}</p>}
         </div>
 
         {/* ── Die tikbalk, VAS onderaan ── */}

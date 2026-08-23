@@ -39,16 +39,52 @@ import { vergeetMuur } from '../data/sorgMuur'
 import SorgOpname from '../components/SorgOpname'
 import './SorgKeur.css'
 
+/* ── Dit is nie meer 'n PUBLIKASIEHEK nie ──
+ *
+ * Dewald: "Verander Sorg Admin na 'n eenvoudige veiligheids- en
+ * modereringsblad... Admin is nie meer 'n publikasiehek nie."
+ *
+ * Elke plasing gaan vanself op (sien api/sorg-stuur.mjs). Wat hier oorbly, is
+ * die vier dinge waaroor 'n MENS moet besluit:
+ *
+ *   Dringend    krisis, en wat iemand as "iemand is in gevaar" gemerk het
+ *   Gemerk      outomaties as onveilig gemerk, of genoeg rapporte gekry
+ *   Op die muur alles wat lewe — vir wanneer hy iets moet gaan soek
+ *   Weg         versteek, verwyder, spam
+ *
+ * "Nuut" is weg. Daar is nie meer 'n hopie wat op sy oog wag nie, en dit was
+ * die hele punt van hierdie verandering: die getal wat net kon groei, met sy
+ * naam op. */
 const HOPIES = [
-  { sleutel: 'gevaar', naam: 'Gevaar' },
-  { sleutel: 'nuut',   naam: 'Nuut' },
+  { sleutel: 'gevaar', naam: 'Dringend' },
+  { sleutel: 'gemerk', naam: 'Gemerk' },
   { sleutel: 'gekeur', naam: 'Op die muur' },
   /* Net die GEVLAGDE woorde. Wat reeds wys en niemand gepla het nie, kom
      nooit hier nie — dit is die hele punt van die ontwerp: Dewald lees nie
      elke woord nie, net dié waaroor iets gese is. */
-  { sleutel: 'woorde', naam: 'Woorde' },
-  { sleutel: 'weg',    naam: 'Gelees' },
+  { sleutel: 'woorde', naam: 'Opmerkings' },
+  { sleutel: 'weg',    naam: 'Weg' },
 ]
+
+
+/* ── Watter plasing in watter hopie hoort ──
+ *
+ * Dit was 'n reguit `status === hopie`. Dit werk nie meer nie, want die
+ * statusse gaan nou oor MODEREERING en nie oor publikasie nie: 'n plasing kan
+ * tegelyk op die muur wees EN dringend wees (sien src/data/sorgVeilig.js).
+ *
+ * Die volgorde tel: `gevaar` wen oor alles, want 'n mens moet dit NOU sien. */
+function inHopie(b, hopie) {
+  const status = String(b.status || 'nuut')
+  const rapporte = Number(b.rapporte || b.gerapporteer) || 0
+  const gemerk = (b.onveiligRedes || []).length > 0 || status === 'onveilig' || rapporte > 0
+
+  if (hopie === 'gevaar')  return status === 'gevaar' || b.dringend === true
+  if (hopie === 'gemerk')  return gemerk && status !== 'gevaar' && status !== 'weg' && status !== 'verwyder'
+  if (hopie === 'weg')     return status === 'weg' || status === 'verwyder' || status === 'spam'
+  /* "Op die muur" tel die MUUR self, nie hierdie lys nie — sien hieronder. */
+  return false
+}
 
 export default function SorgKeur({ geheim }) {
   const [data, setData] = useState(null)
@@ -83,9 +119,11 @@ export default function SorgKeur({ geheim }) {
   useEffect(() => {
     if (hopie !== null || !data) return
     const inkom = data.inkomend || []
-    const tel = k => inkom.filter(b => (b.status || 'nuut') === k).length
+    const tel = k => inkom.filter(b => inHopie(b, k)).length
     const eerste = HOPIES.map(h => h.sleutel).find(k => tel(k) > 0)
-    setHopie(eerste || 'nuut')
+    /* Is daar nêrens werk nie, land 'n mens op die muur self — nie op 'n leë
+       hopie nie. Dit is die goeie geval: niks wag vir hom nie. */
+    setHopie(eerste || 'gekeur')
   }, [data, hopie])
 
   async function doen(lyf) {
@@ -208,7 +246,7 @@ export default function SorgKeur({ geheim }) {
   }
 
   const inkomend = data.inkomend || []
-  const lys = inkomend.filter(b => (b.status || 'nuut') === hopie)
+  const lys = inkomend.filter(b => inHopie(b, hopie))
 
   return (
     <div className="sk">
@@ -270,7 +308,7 @@ export default function SorgKeur({ geheim }) {
             ? (data.muur || []).length
             : h.sleutel === 'woorde'
               ? (data.woorde || []).length
-              : inkomend.filter(b => (b.status || 'nuut') === h.sleutel).length
+              : inkomend.filter(b => inHopie(b, h.sleutel)).length
           return (
             <button
               key={h.sleutel}

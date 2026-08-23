@@ -470,3 +470,42 @@
   transition: background-color 0.12s, color 0.12s;
 }
 .op-kruis:active { background: var(--cream-dark, #F0EBE3); color: var(--text); }
+
+
+/* ── Kies 'n rede ──
+   'n Rapport sonder 'n rede sê die admin niks. Ses kort redes, en Blokkeer
+   heel onder omdat dit swaarder is as 'n rapport. */
+.op-redes {
+  margin: 8px 0 0 41px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: var(--cream-dark, #F0EBE3);
+}
+
+.op-redes-kop {
+  margin: 0 0 7px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.op-rede-knop {
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--white, #fff);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.op-rede-knop:active { background: var(--lavender-soft, #EDE8F8); }
+.op-rede-knop.blok { color: #A33A3A; font-weight: 700; }
+.op-rede-knop.laat { background: none; color: var(--text-muted, #8A7E9A); text-align: center; }

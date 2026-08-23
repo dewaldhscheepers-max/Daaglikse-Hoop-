@@ -28,6 +28,7 @@
 import crypto from 'node:crypto'
 import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 import { saamTelReaksies } from '../src/data/sorgSaamstaan.js'
+import { keurRede, naRapport } from '../src/data/sorgModereer.js'
 
 const MUUR = 'sorg_muur'
 const SAAM = 'sorg_saam'
@@ -318,12 +319,24 @@ export default async function handler(req, res) {
 
       await skryfDok(SAAM, merkId, {
         muurId, toestel, soort: 'rapport',
-        rede: String(lyf.rede || '').slice(0, 300),
+        rede: keurRede(lyf.rede),
         dag: new Date().toISOString().slice(0, 10),
       })
       const rapporte = (Number(plasing.rapporte) || 0) + 1
-      await skryfDok(MUUR, muurId, { rapporte }, { velde: ['rapporte'] })
-      return res.status(200).json({ ok: true })
+      const redes = [...new Set([...(Array.isArray(plasing.redes) ? plasing.redes : []),
+                                 keurRede(lyf.rede)].filter(Boolean))]
+      const uit = naRapport({ rapporte, redes, outoOnveilig: plasing.outoOnveilig === true })
+      await skryfDok(MUUR, muurId, {
+        rapporte,
+        redes,
+        dringend: uit.dringend,
+        /* Dit BLY op die muur tot by die drempel. Een mens se druk is 'n
+           mening; drie verskillende toestelle is 'n patroon. Sien
+           src/data/sorgModereer.js. */
+        gepubliseer: uit.wys,
+        modRede: uit.rede,
+      }, { velde: ['rapporte', 'redes', 'dringend', 'gepubliseer', 'modRede'] })
+      return res.status(200).json({ ok: true, weg: !uit.wys, rapporte })
     } catch (e) {
       return res.status(500).json({ fout: String(e && e.message) })
     }

@@ -32,6 +32,7 @@ import {
   keurReaksie, klaarWoordTeks, woordStatus, saamTelReaksies, REAKSIES,
 } from '../src/data/sorgSaamstaan.js'
 import { keurNaam } from '../src/data/sorgProfiel.js'
+import { keurRede, naRapport } from '../src/data/sorgModereer.js'
 
 const MUUR = 'sorg_muur'
 const VIDEOS = 'sorg_videos'
@@ -234,74 +235,66 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skryw
 }
 
 /* ── Rapporteer ──
-
-   Een druk haal die woord DADELIK van die muur af en sit dit in Dewald se
-   hopie. Dit is met opset ongebalanseerd: 'n woord wat verkeerdelik weg is,
-   kan hy terugsit, maar 'n woord wat iemand seermaak, mag nie staan en wag
-   nie.
-
-   Dit kan misbruik word — iemand kan elke woord rapporteer. Dan sien Dewald
-   'n hopie vol goeie woorde en sit hulle terug. Dit is die goedkoopste
-   moontlike skade, en die alternatief is dat 'n slegte sin uur na uur onder
-   iemand se storie bly staan. */
-async function doenRapport(res, woordId) {
+ *
+ * EEN rapport verwyder NIKS meer nie.
+ *
+ * Hier het een druk 'n opmerking DADELIK van die muur afgehaal. Die redenasie
+ * was regverdig op 'n klein muur: 'n woord wat verkeerdelik weg is, kan Dewald
+ * terugsit, en 'n woord wat iemand seermaak, moet nie staan en wag nie.
+ *
+ * Op 'n groot muur is dit iets anders: 'n knoppie waarmee enige mens enige
+ * ander mens se woorde kan laat verdwyn. Op 'n blad waar mense oor hul
+ * huwelike en hul kinders skryf, is dit presies die mag wat misbruik gaan word
+ * teen die een wat iemand wil stilmaak.
+ *
+ * Dewald: "Een report moet nie gewone veilige inhoud outomaties permanent
+ * verwyder nie. Ernstige outomatiese veiligheidsmerke mag inhoud tydelik
+ * versteek totdat dit nagegaan is."
+ *
+ * Dus TEL dit, en by drie verskillende toestelle word dit versteek. Een druk
+ * per toestel, met dieselfde merkie-truuk as saamstaan — anders is die drempel
+ * betekenisloos.
+ *
+ * "Dit klink of iemand in gevaar is" versteek NIKS. Dit maak die ding dringend
+ * sodat 'n mens NOU kyk. Nood is nie oortreding nie; sien
+ * src/data/sorgModereer.js. */
+async function doenRapport(res, { woordId, toestel, rede }) {
   const w = await leesDok(WOORDE, woordId)
   if (!w) return res.status(404).json({ fout: 'daardie woord bestaan nie' })
+
+  /* Een per toestel. Sonder dit kan een mens die drempel op sy eie haal en dan
+     is die hele verandering niks werd nie. */
+  if (toestel) {
+    const merkId = `wr_${woordId}_${toestel}`
+    const reeds = await leesDok(SAAM, merkId)
+    if (reeds) return res.status(200).json({ ok: true, reeds: true })
+    await skryfDok(SAAM, merkId, {
+      woordId, toestel, soort: 'rapport', rede,
+      dag: new Date().toISOString().slice(0, 10),
+    })
+  }
+
+  const rapporte = (Number(w.gerapporteer) || 0) + 1
+  const redes = [...new Set([...(Array.isArray(w.redes) ? w.redes : []), rede].filter(Boolean))]
+  const uit = naRapport({ rapporte, redes, outoOnveilig: w.outoOnveilig === true })
+
   await skryfDok(WOORDE, woordId, {
-    status: 'wag',
-    gerapporteer: (Number(w.gerapporteer) || 0) + 1,
-    rede: 'gerapporteer',
-  }, { velde: ['status', 'gerapporteer', 'rede'] })
-  return res.status(200).json({ ok: true })
-}
+    /* Dit BLY wys tot by die drempel. Dit is die hele verandering. */
+    status: uit.wys ? (w.status || 'wys') : 'wag',
+    gerapporteer: rapporte,
+    redes,
+    dringend: uit.dringend,
+    rede: uit.rede,
+  }, { velde: ['status', 'gerapporteer', 'redes', 'dringend', 'rede'] })
 
-/* ── Bemoedig 'n OPMERKING ──
- *
- * Dewald het ons opmerkings langs Facebook s'n gesit. Die ding wat daar op
- * ELKE opmerking staan en hier nêrens nie, is 'n telling: "52". Dit lyk soos
- * versiering en dit is dit nie.
- *
- * 'n Mens wat vir 'n vreemdeling geskryf het "ek bid vanaand vir jou" kry
- * vandag NIKS terug nie. Hy weet nie of iemand dit gelees het nie. Dit is
- * presies die rede waarom mense ophou skryf, en 'n muur waar niemand meer
- * skryf nie, is 'n muur waar Dewald weer die enigste stem is.
- *
- * Een druk per toestel per opmerking, met dieselfde merkie-truuk as
- * saamstaan. Geen aftrek nie: 'n aftrek op 'n telling wat deur baie
- * toestelle gelyktydig verhoog word, is presies waar tellings verkeerd raak.
- *
- * 'n Woord wat gerapporteer is (`status !== 'wys'`) kan nie bemoedig word
- * nie — anders staan daar 'n telling op iets wat niemand mag sien nie. */
-/* Watter tekens 'n mens mag stuur. 'n WITLYS: die kliënt kies 'n sleutel se
-   teken, en enigiets anders word 'n duim. Sonder dit skryf iemand met 'n
-   gereedskapstuk enige string in daardie veld en dit verskyn op die muur. */
-const TEKENS = ['\u{1F44D}\u{1F3FB}', '\u{1F44F}\u{1F3FB}', '\u{1F44E}\u{1F3FB}']
-
-async function doenBemoedig(res, { woordId, toestel, teken }) {
-  const w = await leesDok(WOORDE, woordId)
-  if (!w || w.status !== 'wys') {
-    return res.status(404).json({ fout: 'daardie opmerking bestaan nie' })
-  }
-
-  const merkId = `b_${woordId}_${toestel}`
-  const reeds = await leesDok(SAAM, merkId)
-  if (reeds) {
-    return res.status(200).json({ ok: true, reeds: true, bemoedig: Number(w.bemoedig) || 0 })
-  }
-
-  await skryfDok(SAAM, merkId, {
-    woordId, toestel, soort: 'bemoedig', teken,
-    dag: new Date().toISOString().slice(0, 10),
+  return res.status(200).json({
+    ok: true,
+    /* Die skerm moet WEET of dit weg is. 'n Bevestiging wat sê "dit is weg"
+       terwyl dit nog staan, is 'n leuen; en een wat niks sê nie, laat 'n mens
+       wonder of sy druk gewerk het. */
+    weg: !uit.wys,
+    rapporte,
   })
-
-  const bemoedig = (Number(w.bemoedig) || 0) + 1
-  /* Hoeveel van elke teken. Die skerm wys vandag een totaal; die opsplitsing
-     staan reeds hier sodat 'n mens later kan sien WATTER reaksie gekom het,
-     sonder om die data van vandag af te verloor. */
-  const tekens = { ...(w.tekens || {}) }
-  tekens[teken] = (Number(tekens[teken]) || 0) + 1
-  await skryfDok(WOORDE, woordId, { bemoedig, tekens }, { velde: ['bemoedig', 'tekens'] })
-  return res.status(200).json({ ok: true, bemoedig, tekens })
 }
 
 export default async function handler(req, res) {
@@ -317,7 +310,13 @@ export default async function handler(req, res) {
   if (!lyf || typeof lyf !== 'object') return res.status(400).json({ fout: 'geen data nie' })
 
   try {
-    if (lyf.rapporteer) return await doenRapport(res, String(lyf.rapporteer).slice(0, 40))
+    if (lyf.rapporteer) {
+      return await doenRapport(res, {
+        woordId: String(lyf.rapporteer).slice(0, 40),
+        toestel: hasToestel(lyf.toestel),
+        rede: keurRede(lyf.rede),
+      })
+    }
 
     if (lyf.aksie === 'bemoedig') {
       const woordId = skoonId(lyf.woordId)
