@@ -28,6 +28,7 @@ node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
 node src/data/sorgVideos.toets.mjs            # die geplakte video-lys, 17 toetse
 node src/data/sorgOnderwerpe.toets.mjs        # raai die onderwerp uit 'n titel, 23 toetse
 node src/data/sorgSaai.toets.mjs              # die eerste reaksies en opmerkings, 63 toetse
+node src/data/sorgNooi.toets.mjs              # "nooi iemand om te antwoord", 28 toetse
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
@@ -468,6 +469,48 @@ die boodskap wat skuif wanneer week 2 publiseer), `kykPubliseer.mjs` en
 `kykTellers.mjs`.
 
 ---
+
+## Sorg & Ondersteuning dra mekaar — Dewald is nie die enjin nie
+
+Die blad het "Pastorale Sorg" geheet en presies gedoen wat die naam sê. Bo-aan
+het 'n kaart met Dewald se GESIG gestaan — *"Waarmee kan ek jou help?"* en *"Ek
+lees die boodskappe en antwoord van hulle persoonlik"* — en in die admin het
+elke oopmaak begroet met **"17 plasings wag nog op jou antwoord."**
+
+Dewald, 23 Augustus 2026: *"die Pastorale Sorg-blad maak my ongelooflik moeg.
+ek het net teveel om te doen. en kan nie almal antw nie."*
+
+Die stelsel het 'n plasing as ONBEANTWOORD getel totdat HY hom beantwoord het —
+nie totdat iemand gehelp het nie. Daardie getal kon net groei. Dit was 'n
+skuldmasjien met sy naam op.
+
+Drie dinge het verander, en hulle hang saam:
+
+* **Die admin tel nie meer sy skuld nie.** `rangMuur()` sorteer op wat die
+  GEMEENSKAP nog nie gedra het nie (`saam === 0`), en die reël bo-aan praat oor
+  die gemeenskap. Of hy geantwoord het, verander die volgorde glad nie.
+* **Die gesig en die belofte is weg.** Twee ingange in hul plek: 🤝 vra en
+  🌱 gee. Sonder die tweede is die muur honderd persent krisis — en 'n muur
+  van net krisis word nie gedeel nie, dus groei die blad nie.
+* **`SorgDeelSteun` het BINNE die antwoord-blok gestaan.** Deel het dus net
+  verskyn op 'n plasing wat Dewald reeds beantwoord het: geen antwoord, geen
+  deel, geen nuwe mens. Die hele groei van die blad was aan een mens se arbeid
+  vasgeknoop. Dit staan nou onder ELKE plasing.
+
+**`nooiOmTeAntwoord()` is nie dieselfde ding as Deel nie.** Deel sê "kyk
+hierna", na almal. Nooi sê "JY het iets om te sê vir hierdie mens", na een
+mens. Die tweede is die een wat mense laat kom, want dit is nie 'n advertensie
+nie. `sorgNooi.toets.mjs` dwing af dat daardie woorde NOOIT "laai die app af"
+word nie.
+
+Sy antwoord bly presies soos dit was — die stemgreep, die teks, die
+"waarop antwoord jy"-titel. Net die BETEKENIS het verander: dit is 'n
+toevoeging, nie die voltooiing nie.
+
+Wat NIE mag terugkom nie: 'n geldknoppie tussen die stories. "Stuur vir Dewald
+'n dankie" het onder elke antwoord gestaan; noudat die ry onder ELKE plasing
+sit, ook onder 'n rou storie, lees dit soos 'n tolhek voor iemand se seer. Die
+versoek staan heel onder in dieselfde `DonationCard` as oral elders.
 
 ## Ranglyste
 
