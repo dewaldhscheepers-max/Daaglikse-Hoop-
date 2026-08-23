@@ -153,6 +153,10 @@ function virDieSkerm(m, woorde) {
         : (w.anoniem === false ? String(w.skrywerNaam || '') : ''),
       foto: w.bron === 'hoop' ? '' : (w.anoniem === false ? String(w.skrywerFoto || '') : ''),
       hoop: w.bron === 'hoop',
+      /* Die verifikasie-merk. Dit kom uit die ROL wat die bediener gestel het
+         toe die opmerking geskryf is — nooit uit die naam nie, en nooit uit
+         die versoek nie. Sien `keurSkrywer()` in api/sorg-saamstaan.mjs. */
+      geverifieer: w.rol === 'dewald' || w.rol === 'bediening' || w.bron === 'hoop',
     })),
     woordeTotaal: myne.length,
   }

@@ -82,4 +82,26 @@ function tekenSleutel() {
   return sleutel
 }
 
-module.exports = { selfde, wieMag, magAdminDing, tekenSleutel }
+/* ── Die kode wat 'n beskermde NAAM oopsluit ──
+ *
+ * Dewald: "As ek Dewald Scheepers intik moet dit vra vir kode... en gee haar
+ * verified merk ook."
+ *
+ * Die vergelyking staan HIER, saam met die res, en om dieselfde rede: 'n
+ * geheim wat op sewe plekke vergelyk word, is een wat op ses plekke agterbly
+ * wanneer dit verander.
+ *
+ * Die waarde bestaan NET as 'n omgewingsveranderlike (`SORG_NAAM_KODE`). Daar
+ * is geen terugval in hierdie lêer nie, en dit is met opset: hierdie projek
+ * het presies daardie fout vyf keer gemaak, en 'n terugval-string is 'n
+ * geheim wat vir altyd in die geskiedenis staan. Sonder die veranderlike werk
+ * die kode eenvoudig nie, en dan kan niemand daardie name vat nie — die
+ * veilige kant.
+ */
+function magNaamVat(kode) {
+  const verwag = process.env.SORG_NAAM_KODE
+  if (!verwag) return false
+  return selfde(String(kode || '').trim(), verwag)
+}
+
+module.exports = { selfde, wieMag, magAdminDing, tekenSleutel, magNaamVat }

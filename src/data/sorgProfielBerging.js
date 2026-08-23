@@ -7,10 +7,13 @@ export function myProfiel() {
   try { return leesProfiel(localStorage.getItem(PROFIEL_SLEUTEL)) } catch { return null }
 }
 
-export function stoorProfiel({ naam, foto }) {
+export function stoorProfiel({ naam, foto, kode = '' }) {
   const keur = keurNaam(naam)
   if (keur.fout) return { fout: keur.fout }
-  const p = { naam: keur.naam, foto: String(foto || '') }
+  /* Die kode word saam met die profiel gestoor sodat 'n mens dit nie by elke
+     opmerking weer hoef te tik nie. Dit word NOOIT hier vergelyk nie — die hek
+     staan op die bediener. Sien api/_geheim.js. */
+  const p = { naam: keur.naam, foto: String(foto || ''), kode: String(kode || '').slice(0, 12) }
   try { localStorage.setItem(PROFIEL_SLEUTEL, JSON.stringify(p)) } catch { /* privaat venster */ }
   return { profiel: p, fout: '' }
 }

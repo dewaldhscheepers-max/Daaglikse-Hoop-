@@ -33,7 +33,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState } from 'react'
-import { voorletters, MAKS_NAAM } from '../data/sorgProfiel'
+import { voorletters, vraKode, MAKS_NAAM } from '../data/sorgProfiel'
 import { stoorProfiel, kropFoto } from '../data/sorgProfielBerging'
 import './SorgProfiel.css'
 
@@ -42,6 +42,15 @@ export default function SorgProfiel({ profiel, onKlaar, onSluit, kop, fyn }) {
   const [foto, setFoto] = useState(profiel ? profiel.foto : '')
   const [fout, setFout] = useState('')
   const [besig, setBesig] = useState(false)
+  /* ── Die kode ──
+   *
+   * Dewald: "As ek Dewald Scheepers intik moet dit vra vir kode."
+   *
+   * Die veld verskyn sodra die naam een van die twee beskermde name is. Die
+   * kode word NOOIT hier vergelyk nie — hierdie lêer ship in 'n openbare
+   * JavaScript-lêer wat enigiemand kan oopmaak. Die hek staan op die
+   * bediener; sien api/_geheim.js. */
+  const [kode, setKode] = useState(profiel ? (profiel.kode || '') : '')
 
   async function kiesFoto(e) {
     const leer = e.target.files && e.target.files[0]
@@ -59,7 +68,11 @@ export default function SorgProfiel({ profiel, onKlaar, onSluit, kop, fyn }) {
   }
 
   function stoor() {
-    const r = stoorProfiel({ naam, foto })
+    if (vraKode(naam) && !kode.trim()) {
+      setFout('Daardie naam is beskerm. Tik die kode in om dit te gebruik.')
+      return
+    }
+    const r = stoorProfiel({ naam, foto, kode: kode.trim() })
     if (r.fout) { setFout(r.fout); return }
     onKlaar(r.profiel)
   }
@@ -103,6 +116,26 @@ export default function SorgProfiel({ profiel, onKlaar, onSluit, kop, fyn }) {
         onChange={e => { setNaam(e.target.value); setFout('') }}
         onKeyDown={e => { if (e.key === 'Enter' && naam.trim()) stoor() }}
       />
+
+      {vraKode(naam) && (
+        <>
+          <label className="sp-profiel-etiket" htmlFor="sp-kode">
+            Hierdie naam is beskerm — tik die kode
+          </label>
+          <input
+            id="sp-kode"
+            className="sp-profiel-invoer"
+            value={kode}
+            inputMode="numeric"
+            maxLength={12}
+            placeholder="••••"
+            onChange={e => { setKode(e.target.value); setFout('') }}
+          />
+          <p className="sp-profiel-fyn">
+            Sonder die regte kode verskyn jou opmerking anoniem.
+          </p>
+        </>
+      )}
 
       {fout && <p className="sp-profiel-fout">{fout}</p>}
 

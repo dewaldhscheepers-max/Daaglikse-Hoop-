@@ -31,7 +31,17 @@ import { lysDokke, leesDok, skryfDok } from './_sorgFirestore.mjs'
 import {
   keurReaksie, klaarWoordTeks, woordStatus, saamTelReaksies, REAKSIES,
 } from '../src/data/sorgSaamstaan.js'
-import { keurNaam } from '../src/data/sorgProfiel.js'
+import { keurNaam, vraKode, plat } from '../src/data/sorgProfiel.js'
+/* `_geheim.js` is CommonJS. 'n Verstek-invoer gee die hele module.exports. */
+import geheim from './_geheim.js'
+const { magNaamVat } = geheim
+
+/* Die name presies soos hulle op die skerm moet staan. 'n Mens tik "dewald
+   scheepers" in kleinletters; sy naam moet steeds reg lyk. */
+const KANONIEK = {
+  dewaldscheepers: 'Dewald Scheepers',
+  nadiascheepers: 'Nadia Scheepers',
+}
 import { keurRede, naRapport } from '../src/data/sorgModereer.js'
 
 const MUUR = 'sorg_muur'
@@ -146,17 +156,37 @@ async function doenReaksie(res, { muurId, toestel, reaksie, waar }) {
  *
  * `rol` word NOOIT uit die versoek gelees nie. Die verifikasie-merk hang aan
  * 'n veld wat net die bediener stel. */
-function keurSkrywer({ naam, foto }) {
+function keurSkrywer({ naam, foto, kode }) {
   const k = keurNaam(naam)
   if (k.fout || !k.naam) return { naam: '', foto: '', anoniem: true }
+
   const f = String(foto || '')
-  return {
-    naam: k.naam,
-    /* 'n Gekropte data-URI (sien src/data/sorgProfielBerging.js) of 'n
-       http-adres. Niks anders word 'n <img src> op 'n openbare blad nie. */
-    foto: /^data:image\/(jpeg|png|webp);base64,/.test(f) && f.length < 200000 ? f : '',
-    anoniem: false,
+  const skoonFoto = /^data:image\/(jpeg|png|webp);base64,/.test(f) && f.length < 200000 ? f : ''
+
+  /* ── Die twee name wat 'n KODE vra ──
+   *
+   * Die kode word HIER vergelyk, nooit op die skerm nie: `src/` ship in 'n
+   * openbare JavaScript-lêer wat enigiemand kan oopmaak. Sien CLAUDE.md.
+   *
+   * Sonder die regte kode word die opmerking ANONIEM in plaas van geweier —
+   * die mens se woorde hoort op die muur; sy gekose naam nie. Dit is ook die
+   * enigste antwoord wat niks verklap nie: 'n weiering wat sê "verkeerde
+   * kode" bevestig vir 'n aanvaller dat daar 'n kode is om te raai. */
+  if (vraKode(k.naam)) {
+    if (!magNaamVat(kode)) return { naam: '', foto: '', anoniem: true }
+    return {
+      /* Kanoniek gespel, ongeag hoe dit getik is. */
+      naam: KANONIEK[plat(k.naam)] || k.naam,
+      foto: skoonFoto,
+      anoniem: false,
+      /* DIE merk. Dit kom uit hierdie hek en NOOIT uit die versoek nie — 'n
+         naam is 'n string wat enigiemand tik; 'n rol is 'n hek. Sien
+         `wieWys()` in src/data/sorgProfiel.js. */
+      rol: 'dewald',
+    }
   }
+
+  return { naam: k.naam, foto: skoonFoto, anoniem: false, rol: '' }
 }
 
 async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skrywer }) {
@@ -224,6 +254,8 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skryw
     skrywerNaam: skrywer.naam,
     skrywerFoto: skrywer.foto,
     anoniem: skrywer.anoniem,
+    /* Leeg vir gewone mense. Dit is die enigste bron van die verifikasie-merk. */
+    rol: skrywer.rol || '',
     dag: vandag, geskep: new Date(), gerapporteer: 0, bemoedig: 0,
   })
 
@@ -345,7 +377,7 @@ export default async function handler(req, res) {
         muurId, toestel, waar,
         woordSleutel: lyf.woord ? String(lyf.woord).slice(0, 40) : '',
         teks: lyf.teks,
-        skrywer: keurSkrywer({ naam: lyf.naam, foto: lyf.foto }),
+        skrywer: keurSkrywer({ naam: lyf.naam, foto: lyf.foto, kode: lyf.kode }),
       })
     }
     return res.status(400).json({ fout: 'niks om te doen nie' })

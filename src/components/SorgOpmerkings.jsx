@@ -125,6 +125,10 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
    * Dit kom NA sy woorde, nooit voor nie. 'n Blad wat vra dat jy iemand nooi
    * voordat jy self iets gedoen het, is 'n advertensie. */
   const [nooiOop, setNooiOop] = useState(false)
+  /* Wat gestuur moet word sodra die profiel klaar is. 'n Ref, nie toestand
+     nie: dit word binne dieselfde druk gelees en mag nie 'n hertekening
+     afwag nie. */
+  const wagRef = useRef(null)
   const [ekstra, setEkstra] = useState({})
   const lysRef = useRef(null)
 
@@ -157,6 +161,31 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
 
   async function stuur(sleutel) {
     if (besig) return
+    /* ── Die EERSTE keer word daar om 'n naam gevra ──
+     *
+     * Dewald: "as iemand die eerste keer comment moet dit vra vir jou naam en
+     * profile pic."
+     *
+     * Dit gebeur HIER en nie wanneer die blad oopgaan nie: 'n mens wat kom
+     * LEES, word niks gevra nie. Eers wanneer hy werklik iets wil sê, kies hy
+     * 'n naam — en daarna nooit weer nie.
+     *
+     * Sy woorde bly staan. Die kassie word nie leeggemaak nie en die
+     * klaargemaakte frase word onthou, sodat een druk op "Stoor en gaan
+     * voort" die opmerking klaar plaas. */
+    if (!profiel) {
+      wagRef.current = sleutel || ''
+      setProfielOop(true)
+      return
+    }
+    return stuurMet(profiel, sleutel)
+  }
+
+  /* Dieselfde stuur, maar met 'n profiel wat NOU pas gekies is. Die toestand
+     is op daardie oomblik nog nie herteken nie, dus kry dit die profiel as 'n
+     argument in plaas daarvan om `profiel` te lees. */
+  async function stuurMet(watProfiel, sleutel) {
+    if (besig) return
     setBesig(true)
     setFout('')
     const d = await stuurWoord(
@@ -165,7 +194,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
       soort,
       /* Sonder 'n profiel gaan daar niks saam nie en die opmerking is
          anoniem, presies soos voorheen. */
-      profiel,
+      watProfiel,
     )
     setBesig(false)
     if (d && d.fout) { setFout(d.fout); return }
@@ -269,7 +298,10 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
             </span>
           )}
           <span className="op-kop-regs">
-            {woorde.length} {woorde.length === 1 ? 'opmerking' : 'opmerkings'}
+            {/* Dewald se vasgespelde antwoord tel saam — dit staan in hierdie
+                lys, dus moet dit ook in die getal wees. */}
+            {woorde.length + (antwoord ? 1 : 0)}{' '}
+            {woorde.length + (antwoord ? 1 : 0) === 1 ? 'opmerking' : 'opmerkings'}
           </span>
         </div>
 
@@ -438,7 +470,11 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                           op die hele muur wat 'n naam dra, en dit moet
                           duidelik wees dat dit die bediening is en nie 'n
                           vreemdeling nie. */}
-                      {w.hoop && <span className="op-merk" aria-label="Geverifieer">✓</span>}
+                      {/* Die merk kom uit die BEDIENER se rol, nooit uit die
+                          naam nie. 'n Naam is 'n string wat enigiemand tik. */}
+                      {(w.hoop || w.geverifieer) && (
+                        <span className="op-merk" aria-label="Geverifieer">✓</span>
+                      )}
                     </p>
                     <p className="op-teks">{w.teks}</p>
                   </div>
@@ -588,8 +624,27 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
               {profielOop ? (
                 <SorgProfiel
                   profiel={profiel}
-                  onKlaar={p => { setProfiel(p); setProfielOop(false) }}
-                  onSluit={() => setProfielOop(false)}
+                  kop="Wie praat hier?"
+                  fyn="Mense moet weet wie saam met hulle praat. Jou naam en foto bly dieselfde in elke gesprek — jy tik dit net hierdie een keer."
+                  onKlaar={p => {
+                    setProfiel(p)
+                    setProfielOop(false)
+                    /* Klaar. Stuur nou wat hy wou stuur, sonder dat hy weer
+                       moet druk. */
+                    const wag = wagRef.current
+                    wagRef.current = null
+                    if (wag !== null) setTimeout(() => stuurMet(p, wag), 0)
+                  }}
+                  onSluit={() => {
+                    /* "Ek wil eerder anoniem bly" — dan gaan sy woorde STEEDS
+                       deur. Iemand wat sy sin getik het en dan by 'n naamveld
+                       beland, mag nie sy woorde verloor omdat hy anoniem wil
+                       wees nie. */
+                    setProfielOop(false)
+                    const wag = wagRef.current
+                    wagRef.current = null
+                    if (wag !== null) setTimeout(() => stuurMet(null, wag), 0)
+                  }}
                 />
               ) : (
                 <div className="op-tik">

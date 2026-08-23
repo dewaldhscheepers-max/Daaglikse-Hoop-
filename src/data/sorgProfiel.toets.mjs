@@ -8,10 +8,17 @@
  * Die ander helfte gaan oor die teenoorgestelde risiko: 'n vrou wat ANONIEM
  * oor haar huwelik geskryf het en wie se naam per ongeluk deurkom.
  */
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import {
   keurNaam, isBeskerm, plat, voorletters, wieWys, leesProfiel,
-  middelKrop, MAKS_NAAM, BESKERM,
+  middelKrop, MAKS_NAAM, BESKERM, KODE_NAME, vraKode,
 } from './sorgProfiel.js'
+
+const hier = path.dirname(fileURLToPath(import.meta.url))
+const wortel = path.resolve(hier, '..', '..')
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -20,24 +27,56 @@ const is = (n, kry, wag) => {
 }
 const waar = (n, k) => is(n, !!k, true)
 
-console.log('\n── Niemand mag Dewald wees nie ──\n')
+console.log('\n── Niemand mag Dewald NABOOTS nie ──\n')
 {
-  /* Elke een van hierdie is 'n manier waarop 'n mens 'n naamfilter omseil.
-     Hulle moet ALMAL val. */
+  /* Elke een van hierdie is 'n manier waarop 'n mens 'n naamfilter omseil, en
+     nie een van hulle is die VOLLE naam nie. Hulle moet ALMAL val, en 'n kode
+     maak hulle nie reg nie — dit is naboots. */
   const pogings = [
-    'Dewald Scheepers', 'dewald scheepers', 'DEWALD SCHEEPERS',
-    'Dewald  Scheepers', 'Dewald.Scheepers', 'Dewald-Scheepers',
-    'D e w a l d', 'Déwald Schéépers', 'Dewa1d', 'Dew4ld', 'Sch33pers',
-    'Scheepers', 'Ps Dewald', 'Pastoor Dewald', 'Dewald S',
+    'Dewald', 'dewald', 'DEWALD', 'Scheepers', 'D e w a l d',
+    'Dewa1d', 'Dew4ld', 'Sch33pers',
+    'Ps Dewald', 'Pastoor Dewald', 'Dewald S',
+    'Dewald Scheepers Bediening', 'Die egte Dewald',
     'Daaglikse Hoop', 'DaaglikseHoop', 'Daagliks3 Hoop',
-    'Admin', 'admin', 'Moderator', 'Die egte Dewald',
-    'Dewald Scheepers Bediening',
+    'Admin', 'admin', 'Moderator',
   ]
   for (const p of pogings) {
     const r = keurNaam(p)
     is(`"${p}" word geweier`, r.naam, '')
     waar(`"${p}" kry n rede`, /gereserveer/.test(r.fout))
+    is(`"${p}" vra NIE n kode nie`, vraKode(p), false)
   }
+}
+
+console.log('\n── Die VOLLE naam vra n KODE ──\n')
+{
+  /* Dewald: "As ek Dewald Scheepers intik moet dit vra vir kode. net met my
+     naam." Dieselfde vir Nadia Scheepers.
+
+     Die naam kom deur die skerm se keuring, MET 'n vlag dat 'n kode nodig is.
+     Die kode self word NOOIT hier vergelyk nie — hierdie lêer ship in 'n
+     openbare JavaScript-lêer wat enigiemand kan oopmaak. Sien api/_geheim.js. */
+  for (const n of ['Dewald Scheepers', 'dewald scheepers', 'DEWALD SCHEEPERS',
+                   'Dewald  Scheepers', 'Déwald Schéépers',
+                   'Nadia Scheepers', 'nadia scheepers', 'NADIA SCHEEPERS']) {
+    const r = keurNaam(n)
+    waar(`"${n}" kom deur`, !!r.naam)
+    is(`  → sonder n fout`, r.fout, '')
+    is(`  → maar dit VRA n kode`, r.vraKode, true)
+  }
+
+  /* Presies twee name, en niks meer nie. */
+  is('twee beskermde name', KODE_NAME.length, 2)
+  is('n gewone naam vra geen kode', keurNaam('Elna').vraKode, false)
+  is('en leeg ook nie', vraKode(''), false)
+  is('null breek nie', vraKode(null), false)
+
+  /* Die kode staan NERENS in die app se kode nie. Dit is die reël wat hierdie
+     projek al vyf keer gebreek het. */
+  const bron = fs.readFileSync(path.join(wortel, 'src', 'data', 'sorgProfiel.js'), 'utf8')
+  waar('geen kode in die suiwer leer', !/\b5320\b/.test(bron))
+  const vorm = fs.readFileSync(path.join(wortel, 'src', 'components', 'SorgProfiel.jsx'), 'utf8')
+  waar('en geen kode op die skerm', !/\b5320\b/.test(vorm))
 }
 
 console.log('\n── Gewone name werk WEL ──\n')
@@ -143,11 +182,16 @@ console.log('\n── Die profiel op die foon ──\n')
   is('niks', leesProfiel(null), null)
   is('stukkende JSON', leesProfiel('{{{'), null)
   is('geen naam', leesProfiel('{"foto":"https://x/y.jpg"}'), null)
-  is('n beskermde naam word nie gestoor nie', leesProfiel('{"naam":"Dewald Scheepers"}'), null)
-  is('n gewone profiel', leesProfiel('{"naam":"Elna","foto":""}'), { naam: 'Elna', foto: '' })
+  /* 'n NABOOTSING word nie gestoor nie. */
+  is('n nabootsing word nie gestoor nie', leesProfiel('{"naam":"Ps Dewald"}'), null)
+  /* Die volle naam WEL — die kode-hek staan op die bediener. */
+  waar('die volle naam word gestoor', !!leesProfiel('{"naam":"Dewald Scheepers","kode":"x"}'))
+  is('n gewone profiel', leesProfiel('{"naam":"Elna","foto":""}'), { naam: 'Elna', foto: '', kode: '' })
 
   const dataUri = 'data:image/jpeg;base64,/9j/4AAQ'
   is('n gekropte foto oorleef', leesProfiel(JSON.stringify({ naam: 'Elna', foto: dataUri })).foto, dataUri)
+  is('die kode word saamgestoor', leesProfiel('{"naam":"Elna","kode":"1234"}').kode, '1234')
+  is('en dit word afgekap', leesProfiel('{"naam":"Elna","kode":"' + '9'.repeat(40) + '"}').kode.length, 12)
   is('n SVG-data-uri NIE', leesProfiel('{"naam":"Elna","foto":"data:image/svg+xml,<svg/>"}').foto, '')
   is('en javascript: ook nie', leesProfiel('{"naam":"Elna","foto":"javascript:1"}').foto, '')
 }

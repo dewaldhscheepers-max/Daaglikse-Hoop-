@@ -43,6 +43,7 @@ import {
 } from '../data/sorgVideos'
 import { haalMuur, haalMyPlasings, vergeetMuur, leesSaamDra, POLS_MS } from '../data/sorgMuur'
 import { saamDraLys } from '../data/sorgSaamDra'
+import { telOpmerkings } from '../data/sorgSaamstaan'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { telSorg } from '../data/telSorg'
@@ -329,9 +330,13 @@ export default function Sorg({ onNavigate }) {
    * WAG = geen opmerking nie. Nie "min reaksies" nie: 'n hartjie is nie 'n
    * antwoord nie, en 'n mens wat vyf hartjies en geen woord gekry het, wag
    * steeds. */
-  const woordeVan = p => Number(p.woordeTotaal) || (Array.isArray(p.woorde) ? p.woorde.length : 0)
-  const wag = plasings.filter(p => woordeVan(p) === 0)
-  const beantwoord = plasings.filter(p => woordeVan(p) > 0)
+  /* Dewald se vasgespelde antwoord TEL as 'n opmerking. Sy antwoord het in 'n
+     aparte veld gelewe en nooit in die opmerkings-lys nie, dus het 'n plasing
+     wat hy beantwoord het steeds onder "Wag nog vir iemand" bly staan — en dan
+     stuur die blad mense na 'n mens wat reeds gehelp is terwyl iemand anders
+     werklik wag. Sien `telOpmerkings` in src/data/sorgSaamstaan.js. */
+  const wag = plasings.filter(p => telOpmerkings(p) === 0)
+  const beantwoord = plasings.filter(p => telOpmerkings(p) > 0)
 
   /* Hoeveel keer daar vandag saamgedra is. Een reël, geen kaart — dit is die
      verskil tussen 'n statiese blad en 'n plek waar iets gebeur. */

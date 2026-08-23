@@ -61,15 +61,37 @@ export function plat(s) {
    soos hy. En die bediening self — "Daaglikse Hoop" is die geverifieerde
    stem op die muur. */
 export const BESKERM = [
-  'dewald', 'dewaldscheepers', 'scheepers', 'dewalds',
+  'dewald', 'dewaldscheepers', 'scheepers', 'dewalds', 'nadiascheepers', 'nadias',
   'daaglikshoop', 'daaglikschoop', 'daaglikseehoop', 'daagliksehoop',
   'pastoordewald', 'psdewald', 'dsdewald',
   'admin', 'moderator', 'bediening',
 ]
 
+/* ── Die twee name wat MET 'n kode gebruik mag word ──
+ *
+ * Dewald: "As ek Dewald Scheepers intik moet dit vra vir kode. net met my
+ * naam... en gee haar verified merk ook."
+ *
+ * Dit is 'n ANDER ding as die res van die beskermde lys. "admin",
+ * "moderator" en 'n kaal "Dewald" mag niemand ooit vat nie. Hierdie twee is
+ * regte mense wat hul eie naam moet kan gebruik, en die kode is die bewys.
+ *
+ * Dit is PRESIES die volle naam. "Dewald" alleen, "Scheepers" alleen en
+ * "Dewald Scheepers Bediening" bly geweier — daardie name is naboots, en 'n
+ * kode maak hulle nie reg nie.
+ */
+export const KODE_NAME = ['dewaldscheepers', 'nadiascheepers']
+
+export function vraKode(naam) {
+  return KODE_NAME.includes(plat(naam))
+}
+
 export function isBeskerm(naam) {
   const p = plat(naam)
   if (!p) return false
+  /* 'n Naam wat 'n KODE kan oopsluit, is nie hier geblokkeer nie — daardie
+     hek staan op die bediener, waar die kode vergelyk word. */
+  if (KODE_NAME.includes(p)) return false
   /* `includes`, nie `===` nie. "Dewald Scheepers Bediening" en
      "die egte dewald" moet albei val — 'n naam wat sy naam BEVAT, word
      gelees as hy. */
@@ -100,13 +122,20 @@ export function keurNaam(rou) {
   if (/\d{5,}/.test(skoon)) {
     return { naam: '', fout: 'Los asseblief nommers uit ’n naam.' }
   }
+  if (vraKode(skoon)) {
+    /* Die naam is geldig, MAAR daar moet 'n kode by. Die kode word NOOIT hier
+       vergelyk nie — hierdie lêer ship in 'n openbare JavaScript-lêer wat
+       enigiemand kan oopmaak. Sien CLAUDE.md: daar is geen geheim in die app
+       se kode nie. Die vergelyking staan op die bediener. */
+    return { naam: skoon, fout: '', vraKode: true }
+  }
   if (isBeskerm(skoon)) {
     return {
       naam: '',
       fout: 'Daardie naam is gereserveer. Kies asseblief ’n ander een.',
     }
   }
-  return { naam: skoon, fout: '' }
+  return { naam: skoon, fout: '', vraKode: false }
 }
 
 /* ── Die voorletters ──
@@ -172,6 +201,10 @@ export function leesProfiel(rou) {
        data-URI gestoor. 'n http-adres is ook reg. Enigiets anders nie. */
     foto: /^data:image\/(jpeg|png|webp);base64,/.test(foto) || /^https?:\/\//i.test(foto)
       ? foto : '',
+    /* Die kode vir 'n beskermde naam, sodat 'n mens dit nie by elke opmerking
+       weer hoef te tik nie. Dit is nie 'n geheim wat hier beskerm word nie —
+       dit le op sy EIE foon, en die vergelyking staan op die bediener. */
+    kode: String(x.kode || '').slice(0, 12),
   }
 }
 

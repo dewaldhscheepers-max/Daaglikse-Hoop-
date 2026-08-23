@@ -235,3 +235,43 @@ export function woordStatus({ teks, sensitief }) {
     ...(vlae.length ? { vlae, rede: vlae.join(' en ') } : {}),
   }
 }
+
+
+/* ── Hoeveel opmerkings 'n plasing WERKLIK het ──
+ *
+ * Dewald: "my comment wat vasgespeld is moet ook as comment tel en ook langs
+ * die comment icon wys. dit wys geen antw maar ek het geantwoord. dit moet dan
+ * skuif na gesprekke wat loop."
+ *
+ * Hy is reg, en dit was 'n egte fout met twee sigbare gevolge:
+ *
+ *   · die spraakborrel het "0" gewys op 'n plasing wat hy beantwoord het;
+ *   · daardie plasing het onder "Wag nog vir iemand" bly staan, en dan stuur
+ *     die blad mense na 'n mens wat reeds gehelp is terwyl iemand anders
+ *     werklik wag.
+ *
+ * Sy antwoord het in 'n APARTE veld gelewe (`plasing.antwoord`) en nooit in
+ * die opmerkings-lys nie, dus het geen telling hom gesien nie. Hierdie funksie
+ * is die een plek waar dit reggemaak word — die skerm EN die sortering vra
+ * albei hier.
+ *
+ * `egteAntwoord` is dieselfde toets as op die skerm: 'n antwoord met 'n
+ * onbekende tipe of 'n stemnota sonder klank is geen antwoord nie, en dit mag
+ * nie 'n leë plasing na "Gesprekke wat loop" skuif nie.
+ */
+export function egteAntwoord(a) {
+  if (!a) return null
+  const teks = String(a.teks || '').trim()
+  const bron = String(a.bron || '').trim()
+  if (a.tipe === 'oudio' && bron) return a
+  if (a.tipe === 'video' && bron) return a
+  return teks ? a : null
+}
+
+export function telOpmerkings(plasing) {
+  const p = plasing || {}
+  const woorde = Number(p.woordeTotaal)
+  const lys = Array.isArray(p.woorde) ? p.woorde.length : 0
+  const gemeenskap = Number.isFinite(woorde) ? woorde : lys
+  return gemeenskap + (egteAntwoord(p.antwoord) ? 1 : 0)
+}

@@ -177,7 +177,9 @@ export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort =
            keur die naam weer — 'n kliënt se woord oor sy eie naam is nooit
            genoeg nie, want dit is presies hoe iemand "Dewald Scheepers"
            word. */
-        ...(profiel && profiel.naam ? { naam: profiel.naam, foto: profiel.foto || '' } : {}),
+        ...(profiel && profiel.naam
+          ? { naam: profiel.naam, foto: profiel.foto || '', kode: profiel.kode || '' }
+          : {}),
       }),
     })
     return await r.json()

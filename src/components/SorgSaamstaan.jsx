@@ -39,7 +39,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useRef, useEffect } from 'react'
-import { REAKSIES, wysReaksies } from '../data/sorgSaamstaan'
+import { REAKSIES, wysReaksies, telOpmerkings } from '../data/sorgSaamstaan'
 import { stuurReaksie, myReaksie } from '../data/sorgMuur'
 import { deelSorg, magBuiteDeel, algemeneWoorde, WORTEL_UITNODIGING } from '../data/sorgDeel'
 import SorgOpmerkings from './SorgOpmerkings'
@@ -69,6 +69,11 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
   const balkRef = useRef(null)
 
   const { gewys, totaal } = wysReaksies(tellings, plasing.saam)
+  /* Wat die spraakborrel wys: die gemeenskap se woorde PLUS Dewald se
+     vasgespelde antwoord. Ons gebruik die lys wat hierdie skerm werklik het —
+     `woorde` groei wanneer 'n mens pas iets gestuur het en die bediener dit
+     nog nie teruggegee het nie. */
+  const aantal = telOpmerkings({ ...plasing, woordeTotaal: woorde.length })
   const myReak = myne ? REAKSIES.find(r => r.sleutel === myne) : null
 
   /* ── Wat van die bediener af inkom, wen ──
@@ -197,7 +202,10 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
           onClick={() => { setKiesOop(false); setBladOop(true) }}
         >
           <span className="ss-aksie-teken" aria-hidden="true">💬</span>
-          <span>{woorde.length > 0 ? `${woorde.length}` : ''}</span>
+          {/* Dewald se vasgespelde antwoord TEL saam. Dit het in 'n aparte
+              veld gelewe en die borrel het "0" gewys op 'n plasing wat hy
+              beantwoord het. Sien `telOpmerkings`. */}
+          <span>{aantal > 0 ? `${aantal}` : ''}</span>
         </button>
 
         {/* Deel het in 'n aparte reeltjie ONDER die kaart gestaan. Op elke
