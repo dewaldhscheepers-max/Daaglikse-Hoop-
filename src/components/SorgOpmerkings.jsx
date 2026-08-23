@@ -47,7 +47,18 @@ function skryfDag(d) {
   return `${Number(m[3])} ${MAANDE[Number(m[2]) - 1] || ''}`
 }
 
+/* 'n Antwoord met NIKS in nie, is geen antwoord nie. Sien SorgPlasing.jsx. */
+function egteAntwoord(a) {
+  if (!a) return null
+  const teks = String(a.teks || '').trim()
+  const bron = String(a.bron || '').trim()
+  return teks || bron ? a : null
+}
+
 export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, woorde, onNuut, tellings }) {
+  const [antwOop, setAntwOop] = useState(false)
+  const antwoord = egteAntwoord(plasing && plasing.antwoord)
+  const antwLank = String(antwoord?.teks || '').length > 320
   const [eie, setEie] = useState('')
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
@@ -135,7 +146,93 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
         </div>
 
         <div className="op-lys" ref={lysRef}>
-          {!woorde.length && (
+          {/* ── Vasgespeld, BO die ander opmerkings ──
+           *
+           * Dewald: "Vasgespeld moet in die comments wees saam die ander. nie
+           * deel van die post nie... 'n pinned post op facebook is in die
+           * comments."
+           *
+           * Dit het binne die PLASING gesit, en dan lees die blad soos 'n
+           * vraag met 'n amptelike antwoord — die ding wat die hele blad op
+           * een mens laat rus het. Hier is dit een stem tussen stemme, met
+           * meer gewig. */}
+      {antwoord && (
+        <div className="sp-antwoord">
+          {/* ── Wie praat ──
+
+              "Dewald antwoord" is 'n etiket op 'n boks. Met die gesig
+              daarby is dit 'n mens wat praat, en dit is die hele verskil
+              tussen 'n vraag-en-antwoord-blad en 'n pastorale een.
+
+              "Vasgespeld" doen nog iets: sodra ander mense se woorde van
+              ondersteuning hieronder kom, sê dit hoekom hierdie een bo bly
+              staan. Dit maak van Dewald die stem met die meeste gewig
+              sonder om hom die enigste stem te maak. */}
+          <div className="sp-antwoord-wie">
+            <img
+              className="sp-antwoord-gesig"
+              src="/beelde/dewald.jpg"
+              alt="Dewald Scheepers"
+              width="34"
+              height="34"
+              loading="lazy"
+            />
+            <div className="sp-antwoord-wie-teks">
+              <p className="sp-antwoord-kop">Dewald se pastorale begeleiding</p>
+              <p className="sp-vasgespeld">Vasgespeld</p>
+            </div>
+          </div>
+          {antwoord.titel && <p className="sp-antwoord-titel">{antwoord.titel}</p>}
+
+          {antwoord.tipe === 'oudio' && (
+            /* `preload="metadata"`, nie "none" nie. Met "none" weet die
+               blaaier nie hoe lank die opname is nie en die speler wys
+               0:00 / 0:00 — dit lyk stukkend, en 'n mens druk dit nie. Net
+               die metadata is 'n paar kilogreep; die klank self laai steeds
+               eers wanneer iemand speel. */
+            <>
+              {/* Die lengte, sodra die blaaier dit weet. Dit is die verskil
+                  tussen "gaan dit 'n minuut of twintig vat?" en 'n mens wat
+                  druk. Ons stoor dit nie — dit kom uit die lêer self. */}
+              <p className="sp-oudio-kop">
+                Luister na Dewald se begeleiding
+                {duur ? <span className="sp-duur"> · {duur}</span> : null}
+              </p>
+              <audio
+                className="sp-oudio"
+                controls
+                preload="metadata"
+                src={antwoord.bron}
+                onLoadedMetadata={e => setDuur(skryfDuur(e.target.duration))}
+              >
+                Jou blaaier kan nie hierdie opname speel nie.
+              </audio>
+            </>
+          )}
+
+          {antwoord.tipe === 'video' && (
+            <a className="sp-antwoord-skakel" href={antwoord.bron} target="_blank" rel="noopener noreferrer">
+              Kyk Dewald se antwoord
+            </a>
+          )}
+
+          {antwoord.teks && (
+            <>
+              <p className={`sp-antwoord-teks${antwLank && !antwOop ? ' kort' : ''}`}>
+                {antwoord.teks}
+              </p>
+              {antwLank && (
+                <button className="sp-meer" onClick={() => setAntwOop(o => !o)}>
+                  {antwOop ? 'Wys minder' : 'Lees meer'}
+                </button>
+              )}
+            </>
+          )}
+
+        </div>
+      )}
+
+          {!woorde.length && !antwoord && (
             <p className="op-leeg">
               Nog niemand het iets gesê nie. Jy kan die eerste wees.
             </p>

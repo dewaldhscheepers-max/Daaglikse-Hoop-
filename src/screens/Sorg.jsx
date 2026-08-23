@@ -74,7 +74,10 @@ export function HulpNou({ oop, onSluit }) {
 }
 
 const AFDELINGS = [
-  { sleutel: 'muur',   naam: 'Die Muur' },
+  /* "Gemeenskap", nie "Die Muur" nie. 'n Muur is 'n ding waarop iets geplak
+     word; 'n gemeenskap is mense. Dewald: "verander 'Die Muur' na
+     'Gemeenskap'." */
+  { sleutel: 'muur',   naam: 'Gemeenskap' },
   /* "Video's", nie "Die Video's" nie. Met 'n ikoon, 'n naam en 'n telling
      langs mekaar het "Die Video's" op 'n 320px-skerm nie gepas nie. */
   { sleutel: 'videos', naam: 'Video\'s' },
@@ -266,15 +269,23 @@ export default function Sorg({ onNavigate }) {
   const biblioteek = held ? videos.filter(v => v.id !== held.id) : videos
   const plasings = muur || []
 
-  /* Wie nog niemand het wat saam dra nie. Dit kom uit die muur wat reeds
-     gelaai is — geen tweede versoek, geen nuwe eindpunt. */
-  const alleen = plasings.filter(p => !Number(p.saam))
+  /* Wie nog min ondersteuning gekry het. Dit kom uit die muur wat reeds
+     gelaai is — geen tweede versoek, geen nuwe eindpunt.
+     MIN, nie NUL nie: 'n plasing met een reaksie is steeds byna alleen. */
+  const alleen = plasings.filter(p => Number(p.saam || 0) < 3)
 
-  /* Vat die mens na EEN mens toe, nie na 'n voer van dertig se trauma nie. */
+  /* Hoeveel keer daar vandag saamgedra is. Een reël, geen kaart — dit is die
+     verskil tussen 'n statiese blad en 'n plek waar iets gebeur. */
+  const saamVandag = plasings.reduce((n, p) => n + (Number(p.saam) || 0), 0)
+
+  /* Vat die mens na EEN mens toe, nie na 'n voer van dertig se trauma nie.
+     Dewald: "moenie hulle dadelik in 'n lang lys swaar stories gooi nie."
+     Is daar niemand met min ondersteuning nie, gaan ons na die voer se bokant
+     — daar is altyd iemand om te lees. */
   function naEenAlleen() {
-    const eerste = alleen[0]
-    if (!eerste) return
     setAfdeling('muur')
+    const eerste = alleen[0] || plasings[0]
+    if (!eerste) return
     /* Die muur is dalk pas eers gewys; gee die blad 'n raam om te teken. */
     requestAnimationFrame(() => {
       try {
@@ -305,26 +316,20 @@ export default function Sorg({ onNavigate }) {
         <div className="sorg-hero-knoppe">
           <button className="sorg-hulp-knop" onClick={() => setHulpOop(true)}>Hulp nou</button>
         </div>
-        {/* ── "Sorg & Ondersteuning", nie "Pastorale Sorg" nie ──
+        {/* ── Kort ──
          *
-         * Dewald: "die Pastorale Sorg-blad maak my ongelooflik moeg. ek kan
-         * nie almal antw nie."
+         * Hier het drie Skrifreëls en twee paragrawe gestaan. Dewald: "die
+         * bokant moet baie korter en moderner wees... geen lang teksblok wat
+         * die helfte van die skerm vul nie."
          *
-         * Die naam self was deel van die probleem. "Pastorale Sorg" beteken
-         * vir 'n mens: die pastoor sorg vir my. Die hele blad het daardie
-         * belofte gemaak, en een mens kan dit nie hou nie.
-         *
-         * Die nuwe naam en die twee Skrifpilare sê iets anders: ONS dra
-         * mekaar. Dewald is deel daarvan, nie die enjin nie. */}
+         * Een reël wat sê wat hierdie plek is, en EEN vers. Die res van die
+         * Skrif leef in die blad se werkwoorde, nie in 'n blok bo-aan nie. */}
         <h1>Sorg &amp; Ondersteuning</h1>
         <p>
-          God het ons nie gemaak om alles alleen te dra nie. Ons is hier om
-          mekaar se laste te dra.
+          Ons is nie gemaak om alles alleen te dra nie. Hier dra ons mekaar se
+          laste, bemoedig ons mekaar en bou ons mekaar op.
         </p>
-        <div className="sorg-skrifte">
-          <p>“Dra mekaar se laste.” <span>— Galasiërs 6:2</span></p>
-          <p>“Bemoedig mekaar en bou mekaar op.” <span>— 1 Tessalonisense 5:11</span></p>
-        </div>
+        <p className="sorg-vers">“Dra mekaar se laste.” <span>Galasiërs 6:2</span></p>
       </div>
 
       <div className="sorg-body">
@@ -365,34 +370,28 @@ export default function Sorg({ onNavigate }) {
           </div>
         )}
 
-        {/* ── Die uitnodiging ──
+        {/* ── TWEE aksies, en net twee ──
          *
-         * Hier het 'n groot kaart gestaan met Dewald se GESIG, sy NAAM, en
-         * die opskrif "Waarmee kan ek jou help?" — en daaronder: "Ek lees die
-         * boodskappe en antwoord van hulle persoonlik."
+         * Dewald: "Remove 'DEEL WAT JOU GEHELP HET' completely. There must
+         * only be TWO primary actions... Do not add a third primary action."
          *
-         * Dit was 'n eerlike kaart en dit het presies gedoen wat dit gesê het.
-         * Dit is ook die rede waarom die blad hom uitgeput het: dit belowe
-         * EEN MENS aan die ander kant. Elke plasing word dan 'n skuld op sy
-         * naam, en die getal kan net groei.
+         * Die derde knoppie het die blad ingewikkeld gemaak sonder om iets by
+         * te voeg: "deel wat jou gehelp het" is nie 'n aparte pad nie, dit is
+         * wat 'n mens SÊ wanneer hy iemand bemoedig. Dit leef nou binne
+         * Bemoedig.
          *
-         * Die gesig en die belofte is weg. Die knoppie bly presies waar dit
-         * was — dieselfde vorm, dieselfde perk, dieselfde krisisvloei. Wat
-         * verander, is wie die mens verwag aan die ander kant: die
-         * GEMEENSKAP, met Dewald daarby.
+         * Die hele blad se logika is dus twee vrae:
          *
-         * Twee ingange nou, nie een nie. Die tweede is die belangrike: sonder
-         * getuienisse is die muur honderd persent krisis, en dan is daar niks
-         * om te gee nie — net om te vra. */}
+         *     HET JY IEMAND NODIG?   ↔   KAN JY VANDAG IEMAND DRA?
+         *
+         * Die tweede moet visueel net so sterk wees as die eerste. Dit is die
+         * een wat van 'n "help my"-muur 'n gemeenskap maak. */}
         <div className="sorg-doen">
           <div className="sorg-doen-kaart">
-            <div className="sorg-doen-kop">🤝 EK HET ONDERSTEUNING NODIG</div>
-            <p>
-              Vertel wat jou swaar dra. Die gemeenskap kom langs jou staan —
-              jy hoef dit nie alleen te dra nie.
-            </p>
+            <h2>Ek het ondersteuning nodig</h2>
+            <p>Vertel wat swaar is. Jy hoef dit nie alleen te dra nie.</p>
             <button
-              className="sorg-vertel"
+              className="sorg-knop"
               onClick={() => { telSorg('vorm'); setVormOop(true) }}
               disabled={!!(plek && plek.vol)}
             >
@@ -400,71 +399,38 @@ export default function Sorg({ onNavigate }) {
             </button>
           </div>
 
-          <div className="sorg-doen-kaart hoop">
-            <div className="sorg-doen-kop">🌱 EK WIL IEMAND HOOP GEE</div>
-            <p>
-              Het jy deur iets moeiliks gegaan? Wat jy geleer het, kan vandag
-              vir iemand anders die pad wys.
-            </p>
-            <button
-              className="sorg-vertel hoop"
-              onClick={() => { telSorg('vorm'); setVormOop(true) }}
-              disabled={!!(plek && plek.vol)}
-            >
-              Deel wat jou gehelp het
+          <div className="sorg-doen-kaart gee">
+            <h2>Bemoedig iemand vandag</h2>
+            <p>Lees iemand se storie en spreek 'n woord van hoop.</p>
+            <button className="sorg-knop gee" onClick={naEenAlleen}>
+              Bemoedig iemand
             </button>
           </div>
-
-          {/* ── Die derde ding, en die belangrikste vir die kultuur ──
-           *
-           * Sonder hierdie kaart kom 'n mens net om te ONTVANG, en dan is die
-           * blad 'n hulplyn met 'n gemeenskap se naam.
-           *
-           * Dit wys NET wanneer daar werklik iemand is vir wie niemand nog
-           * opgedaag het nie. 'n Knoppie wat "0 mense wag" sê, is 'n knoppie
-           * wat niks doen nie — en 'n leë muur mag nooit soos 'n verwyt lees
-           * nie.
-           *
-           * Dit is 'n UITNODIGING, nooit 'n voorwaarde. Niemand moet eers help
-           * voordat hy self hulp verdien nie. */}
-          {alleen.length > 0 && (
-            <div className="sorg-doen-kaart bemoedig">
-              <div className="sorg-doen-kop">❤️ BEMOEDIG IEMAND</div>
-              <p>
-                {alleen.length === 1
-                  ? 'Daar is iemand wat vandag nog geen woord gekry het nie.'
-                  : `Daar is ${alleen.length} mense wat vandag nog geen woord gekry het nie.`}
-                {' '}Jy hoef nie raad te hê nie — “ek hoor jou” is genoeg.
-              </p>
-              <button className="sorg-vertel bemoedig" onClick={naEenAlleen}>
-                Gee iemand hoop
-              </button>
-            </div>
-          )}
-
-          <p className="sorg-doen-fyn">
-            Jy kan jou naam gebruik of anoniem bly.
-          </p>
         </div>
 
-        {/* ── Bid Saam bly APART ──
+        {/* ── Hier is regte mense ──
          *
-         * Hierdie blad mag nie Bid Saam se werk oorneem nie. Daar word gebid;
-         * hier word gedra, geluister en ervaring gedeel. 'n Mens wat net
-         * gebed soek, hoort dus daar — en dan bly albei blaaie skerp. */}
-        <div className="sorg-bidsaam">
-          <p className="sorg-bidsaam-kop">🙏 Soek jy net gebed?</p>
-          <p className="sorg-bidsaam-fyn">
-            Plaas jou gebedsversoek op Bid Saam — daar bid ander daagliks saam
-            met jou.
+         * Een reël, geen kaart. Dit is die verskil tussen 'n statiese blad en
+         * 'n plek waar iets gebeur. Dit wys NET wanneer daar werklik iets is
+         * om te wys — 'n "0 mense" is erger as stilte. */}
+        {saamVandag > 0 && (
+          <p className="sorg-leef">
+            <b>{saamVandag}</b> {saamVandag === 1 ? 'mens het' : 'mense het'} vandag saamgedra.
           </p>
-          <button
-            className="sorg-bidsaam-knop"
-            onClick={() => onNavigate && onNavigate('bidsaam')}
-          >
-            Gaan na Bid Saam
-          </button>
-        </div>
+        )}
+
+        {/* ── Bid Saam bly APART, maar klein ──
+         *
+         * Dit was 'n kaart met 'n eie knoppie, en dit het soos 'n derde aksie
+         * gelees. Dewald: "moenie nog 'n groot kaart bou nie... gebruik eerder
+         * 'n eenvoudige, dun skakelbalk."
+         *
+         * Bid Saam bly die plek vir gebedsversoeke; hier word gedra, geluister
+         * en ervaring gedeel. */}
+        <button className="sorg-bidsaam" onClick={() => onNavigate && onNavigate('bidsaam')}>
+          <span>Soek jy spesifiek gebed?</span>
+          <b>Gaan na Bid Saam →</b>
+        </button>
 
         {/* ── Die daaglikse video ──
 
@@ -612,6 +578,26 @@ export default function Sorg({ onNavigate }) {
                * Wat WEL waar bly: elke mens gee toestemming voordat hy stuur,
                * krisis-plasings wag steeds vir 'n mens, en enigiemand kan
                * rapporteer. */}
+              {/* ── Bemoedig, WEER, bo die voer ──
+               *
+               * Dewald: "BEMOEDIG IEMAND VANDAG MOET ORAL SIGBAAR WEES.
+               * Bo-aan. Bo die gemeenskapsvoer. En op elke individuele
+               * plasing."
+               *
+               * Dit is die ding wat van 'n "help-my"-muur 'n gemeenskap maak,
+               * en 'n mens wat tot hier gerol het, is presies die een wat dit
+               * kan doen. */}
+              {alleen.length > 0 && (
+                <button className="sorg-voer-bemoedig" onClick={naEenAlleen}>
+                  <b>Bemoedig iemand →</b>
+                  <span>
+                    {alleen.length === 1
+                      ? 'Een mens wag nog vir ’n woord'
+                      : `${alleen.length} mense wag nog vir ’n woord`}
+                  </span>
+                </button>
+              )}
+
               <p className="sorg-muur-fyn">
                 Elke storie hier is met die skrywer se toestemming geplaas.
                 Sien jy iets wat nie hier hoort nie, druk <b>Rapporteer</b> —

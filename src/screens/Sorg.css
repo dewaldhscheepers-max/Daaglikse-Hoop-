@@ -836,72 +836,183 @@
   color: var(--s-sag, #77717D);
 }
 
-/* ── Sorg & Ondersteuning · Fase 1 ────────────────────────────────────────
+/* ── Sorg & Ondersteuning ────────────────────────────────────────────────
  *
- * Dewald: "die Pastorale Sorg-blad maak my ongelooflik moeg."
+ * Dewald: "kyk na bidsaam. dis simpel mooi alles staan uit en werk mooi."
  *
- * Die blad het EEN groot kaart gehad met sy gesig en "Waarmee kan ek jou
- * help?". Dit is nou TWEE ingange: een om te vra, een om te gee. Sonder die
- * tweede is die muur honderd persent krisis, en dan is daar niks om te gee
- * nie — net om te vra.
+ * Hy het gelyk, en die antwoord was al die tyd in sy eie app. Bid Saam se
+ * taal, en ons gebruik dieselfde waardes:
+ *
+ *   .card       — wit, radius 20, padding 20, box-shadow 0 2px 16px
+ *   'n KANTLYN  — 3px links, pers of goud, wat sê watter SOORT ding dit is
+ *   .btn-primary— radius 14, padding 14/24, NIE vol breedte nie
+ *   groot koppe (16–17px, gewig 700) en lyf op 14–15px met line-height 1.6
+ *
+ * My vorige poging was plat teks sonder kaarte, en toe staan niks uit nie.
+ * Bid Saam is die teenoorgestelde: ALLES is 'n kaart, maar die kaarte is
+ * groot, lugtig, opgelig, en die kantlyn sê wat wat is.
  *
  * Geen `transform` op `:active` nie — sien CLAUDE.md se gekleurde strepe. */
 
-.sorg-skrifte { margin-top: 12px; }
-.sorg-skrifte p {
-  margin: 0 0 4px;
+.sorg-vers {
+  margin: 9px 0 0;
   font-family: var(--font-serif);
-  font-size: 15px; line-height: 1.5; opacity: .95;
+  font-size: 15px; line-height: 1.45; opacity: .92;
 }
-.sorg-skrifte p:last-child { margin-bottom: 0; }
-.sorg-skrifte span {
-  font-family: var(--font-body); font-size: 11.5px; font-weight: 700;
-  letter-spacing: .3px; opacity: .75; white-space: nowrap;
+.sorg-vers span {
+  font-family: var(--font-body); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .6px; text-transform: uppercase; opacity: .7;
+  margin-left: 6px; white-space: nowrap;
 }
 
-.sorg-doen { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+/* ── Die twee aksies ── */
+.sorg-doen { display: flex; flex-direction: column; gap: 14px; margin: 2px 0 0; }
+
 .sorg-doen-kaart {
-  background: #fff; border: 1px solid #EDE8F8; border-radius: 18px;
-  padding: 18px 18px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--white, #fff);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 16px var(--shadow, rgba(60, 45, 95, 0.10));
+  /* Die kantlyn sê watter SOORT ding dit is — presies soos Bid Saam. */
+  border-left: 3px solid var(--purple-dark, #4A3B7A);
 }
-.sorg-doen-kaart.hoop { background: #F4FBF6; border-color: #D8EDDF; }
-.sorg-doen-kaart.bemoedig { background: #FDF5F5; border-color: #F0DADA; }
-.sorg-doen-kop {
-  font-size: 12px; font-weight: 800; letter-spacing: .8px;
-  color: var(--purple-dark, #4A3B7A); margin-bottom: 8px;
+.sorg-doen-kaart.gee { border-left-color: #C9A961; }
+
+.sorg-doen-kaart h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; letter-spacing: -.2px;
+  color: var(--text-dark, var(--text));
 }
-.sorg-doen-kaart.hoop .sorg-doen-kop { color: #2E7D4F; }
-.sorg-doen-kaart.bemoedig .sorg-doen-kop { color: #B0483F; }
 .sorg-doen-kaart p {
-  margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--text-muted);
-}
-/* Die groen knoppie deel die vorm se styl, net in die hoop-kleur. */
-.sorg-vertel.hoop { background: #2E7D4F; }
-.sorg-vertel.hoop:active { background: #256040; }
-.sorg-vertel.bemoedig { background: #B0483F; }
-.sorg-vertel.bemoedig:active { background: #913A33; }
-.sorg-doen-fyn {
-  margin: 2px 0 0; text-align: center;
-  font-size: 12.5px; color: var(--text-muted);
+  margin: 0;
+  font-size: 14px; line-height: 1.6; color: var(--text-muted);
 }
 
-/* Bid Saam bly APART. Klein, want dit is 'n wegwyser, nie 'n aanbod nie. */
+/* NIE vol breedte nie. 'n Knoppie wat die hele breedte vat, lyk soos 'n balk;
+   een wat links staan, lyk soos 'n keuse. Presies Bid Saam se maat. */
+.sorg-knop {
+  align-self: flex-start;
+  border: none; border-radius: 14px;
+  background: var(--purple-dark, #4A3B7A); color: #fff;
+  padding: 12px 22px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+  margin-top: 2px;
+}
+.sorg-knop:active { background: #3B2F63; }
+.sorg-knop:disabled { background: #CFC7E0; cursor: default; }
+.sorg-knop.gee { background: #B98A3E; }
+.sorg-knop.gee:active { background: #9C7333; }
+
+.sorg-leef {
+  margin: 14px 2px 0; text-align: center;
+  font-size: 13px; color: var(--text-muted);
+}
+.sorg-leef b { color: var(--purple-dark, #4A3B7A); font-weight: 700; }
+
+/* Bid Saam: 'n stil teksskakel. Dit is 'n wegwyser, nie 'n aanbod nie. */
 .sorg-bidsaam {
-  margin-top: 14px; padding: 14px 16px;
-  background: #F6F2FD; border: 1px solid #E4DAF6; border-radius: 14px;
-  text-align: center;
-}
-.sorg-bidsaam-kop {
-  margin: 0 0 4px; font-size: 13.5px; font-weight: 800;
-  color: var(--purple-dark, #4A3B7A);
-}
-.sorg-bidsaam-fyn {
-  margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--text-muted);
-}
-.sorg-bidsaam-knop {
-  border: 1.5px solid #D6C9EF; border-radius: 11px; background: #fff;
-  padding: 9px 18px; font-family: var(--font-body);
-  font-size: 13.5px; font-weight: 700; color: var(--purple-dark, #4A3B7A);
+  display: block; width: 100%; margin: 14px 0 2px;
+  border: none; background: transparent; padding: 8px 2px;
+  font-family: var(--font-body); font-size: 13.5px; text-align: center;
+  color: var(--text-muted);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.sorg-bidsaam-knop:active { background: #F1EBFB; }
+.sorg-bidsaam b { color: var(--purple-dark, #4A3B7A); font-weight: 700; margin-left: 6px; }
+.sorg-bidsaam:active b { opacity: .6; }
+
+/* Bemoedig, bo die voer — een reël, want die kaart staan reeds bo. */
+.sorg-voer-bemoedig {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  width: 100%; box-sizing: border-box;
+  margin: 0 0 14px; text-align: left;
+  border: none; background: transparent; padding: 0 2px;
+  font-family: var(--font-body);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.sorg-voer-bemoedig:active { opacity: .6; }
+.sorg-voer-bemoedig b {
+  font-size: 14.5px; font-weight: 700; color: #B98A3E; white-space: nowrap;
+}
+.sorg-voer-bemoedig span {
+  font-size: 12.5px; line-height: 1.4; color: var(--text-muted); text-align: right;
+}
+
+/* ── Die kop ── */
+.sorg .sorg-header { padding: 44px 22px 28px; }
+.sorg .sorg-header h1 { font-size: clamp(27px, 7.6vw, 34px); line-height: 1.1; }
+.sorg .sorg-header > p {
+  font-size: 14.5px; line-height: 1.6; max-width: 34ch;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ── Die plasing: dieselfde kaart as Bid Saam se gebedsversoek ── */
+.sorg .sp-kaart {
+  background: var(--white, #fff);
+  border: none;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 16px var(--shadow, rgba(60, 45, 95, 0.10));
+  margin-bottom: 16px;
+}
+
+.sp-kop {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin: 0 0 10px;
+}
+.sp-merk {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--purple-dark, #4A3B7A); color: #fff;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.sp-kop-naam { font-size: 14.5px; font-weight: 700; color: var(--text-dark, var(--text)); }
+.sp-kop-tyd  { font-size: 12.5px; color: var(--text-muted); }
+.sp-kop-tyd::before { content: '·'; margin-right: 8px; opacity: .5; }
+.sp-kop-onderwerp {
+  margin-left: auto;
+  background: var(--lavender-soft, #F3F0F9); border: none; border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11.5px; font-weight: 600; color: var(--purple-dark, #4A3B7A);
+  white-space: nowrap;
+}
+
+/* ── Bemoedig hierdie persoon ── */
+.ss-min {
+  margin: 12px 0 8px;
+  font-size: 13px; line-height: 1.55; color: #96702F;
+}
+.ss-bemoedig {
+  align-self: flex-start;
+  display: inline-block;
+  margin: 10px 0 4px;
+  border: none; border-radius: 14px;
+  background: #B98A3E; color: #fff;
+  padding: 12px 22px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+.ss-bemoedig:active { background: #9C7333; }
+
+.sorg-muur-fyn {
+  margin: 0 2px 16px;
+  font-size: 12.5px; line-height: 1.55; color: var(--text-muted); opacity: .85;
+}
+
+/* Dewald se antwoord, vasgespeld BO in die opmerkings. */
+.op-lys .sp-antwoord {
+  margin: 0 0 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #FDF7EC 0%, #FDFAF6 100%);
+  border: none;
+  border-left: 3px solid #C9A961;
+  border-radius: 0 16px 16px 0;
+  box-shadow: none;
+}
+.op-lys .sp-antwoord-wie { margin-bottom: 10px; }

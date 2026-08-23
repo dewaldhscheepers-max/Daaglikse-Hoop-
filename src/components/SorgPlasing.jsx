@@ -117,6 +117,13 @@ function egteAntwoord(a) {
   return null
 }
 
+/* Die merkie langs 'n naam. 'n Anonieme mens kry 'n neutrale kolletjie, nie 'n
+   letter uit die woord "Anoniem" nie — dit sou lyk of almal dieselfde mens is. */
+function voorletter(naam) {
+  const n = String(naam || '').trim()
+  return n ? n[0].toUpperCase() : '·'
+}
+
 export default function SorgPlasing({ plasing, myne = false }) {
   const [oop, setOop] = useState(false)
   const [antwOop, setAntwOop] = useState(false)
@@ -147,28 +154,31 @@ export default function SorgPlasing({ plasing, myne = false }) {
 
           Dit wys NET op haar eie foon. Niemand anders sien dit nie. */}
       {myne && <p className="sp-myne">Jou storie</p>}
+
+      {/* ── Wie, op EEN ry ──
+       *
+       * Dit was drie los reels onder mekaar: die titel, "Anoniem het 'n
+       * boodskap gedeel", en dan die datum met die onderwerp. Dewald: "die
+       * huidige groot wit kaart met 'n groot titel... voel swaar en outyds."
+       *
+       * Nou lees dit soos 'n mens in 'n gesprek: 'n merkie met sy voorletter,
+       * sy naam, hoe lank gelede, en waaroor dit gaan. Die titel kom DAARNA,
+       * want die mens kom eerste. */}
+      <div className="sp-kop">
+        <span className="sp-merk" aria-hidden="true">{voorletter(plasing.naam)}</span>
+        <span className="sp-kop-naam">{plasing.naam || 'Anoniem'}</span>
+        {/* Net wanneer `skryfDatum` werklik iets teruggee. Die kolletjie kom
+            uit CSS (`::before`), dus het 'n leë datum 'n los "·" langs die
+            naam laat staan. */}
+        {skryfDatum(plasing.datum) && (
+          <span className="sp-kop-tyd">{skryfDatum(plasing.datum)}</span>
+        )}
+        {onderwerpNaam(plasing.onderwerp) && (
+          <span className="sp-kop-onderwerp">{onderwerpNaam(plasing.onderwerp)}</span>
+        )}
+      </div>
+
       {plasing.titel && <h3 className="sp-titel">{plasing.titel}</h3>}
-
-      {/* ── Wie ──
-
-          Dit was "Anoniem · 6 Augustus · Angs en bekommernis" — 'n ry velde
-          uit 'n databasis. "Anoniem" op sy eie is 'n nul; dit se NIEMAND,
-          terwyl daar 'n mens agter sit wat besluit het om te praat.
-
-          "Anoniem het 'n boodskap gedeel" is dieselfde inligting, maar dit
-          is iemand wat iets DOEN. Die datum en die onderwerp sak na 'n
-          tweede, fyner reel — hulle is konteks, nie die hoofsaak nie. */}
-      <p className="sp-wie">
-        <span className="sp-wie-naam">{plasing.naam || 'Anoniem'}</span>
-        {' het ’n boodskap gedeel'}
-      </p>
-      {(plasing.datum || onderwerpNaam(plasing.onderwerp)) && (
-        <p className="sp-wanneer">
-          {skryfDatum(plasing.datum)}
-          {plasing.datum && onderwerpNaam(plasing.onderwerp) ? ' · ' : ''}
-          {onderwerpNaam(plasing.onderwerp)}
-        </p>
-      )}
 
       <p className={`sp-teks${lank && !oop ? ' kort' : ''}`}>{plasing.teks}</p>
       {/* Dit gaan OOP en dit gaan weer TOE. Die knoppie het verdwyn sodra 'n
@@ -182,81 +192,17 @@ export default function SorgPlasing({ plasing, myne = false }) {
       )}
 
       {/* ── Dewald se antwoord, DIREK onder die woorde ── */}
-      {antwoord && (
-        <div className="sp-antwoord">
-          {/* ── Wie praat ──
-
-              "Dewald antwoord" is 'n etiket op 'n boks. Met die gesig
-              daarby is dit 'n mens wat praat, en dit is die hele verskil
-              tussen 'n vraag-en-antwoord-blad en 'n pastorale een.
-
-              "Vasgespeld" doen nog iets: sodra ander mense se woorde van
-              ondersteuning hieronder kom, sê dit hoekom hierdie een bo bly
-              staan. Dit maak van Dewald die stem met die meeste gewig
-              sonder om hom die enigste stem te maak. */}
-          <div className="sp-antwoord-wie">
-            <img
-              className="sp-antwoord-gesig"
-              src="/beelde/dewald.jpg"
-              alt="Dewald Scheepers"
-              width="34"
-              height="34"
-              loading="lazy"
-            />
-            <div className="sp-antwoord-wie-teks">
-              <p className="sp-antwoord-kop">Dewald se pastorale begeleiding</p>
-              <p className="sp-vasgespeld">Vasgespeld</p>
-            </div>
-          </div>
-          {antwoord.titel && <p className="sp-antwoord-titel">{antwoord.titel}</p>}
-
-          {antwoord.tipe === 'oudio' && (
-            /* `preload="metadata"`, nie "none" nie. Met "none" weet die
-               blaaier nie hoe lank die opname is nie en die speler wys
-               0:00 / 0:00 — dit lyk stukkend, en 'n mens druk dit nie. Net
-               die metadata is 'n paar kilogreep; die klank self laai steeds
-               eers wanneer iemand speel. */
-            <>
-              {/* Die lengte, sodra die blaaier dit weet. Dit is die verskil
-                  tussen "gaan dit 'n minuut of twintig vat?" en 'n mens wat
-                  druk. Ons stoor dit nie — dit kom uit die lêer self. */}
-              <p className="sp-oudio-kop">
-                Luister na Dewald se begeleiding
-                {duur ? <span className="sp-duur"> · {duur}</span> : null}
-              </p>
-              <audio
-                className="sp-oudio"
-                controls
-                preload="metadata"
-                src={antwoord.bron}
-                onLoadedMetadata={e => setDuur(skryfDuur(e.target.duration))}
-              >
-                Jou blaaier kan nie hierdie opname speel nie.
-              </audio>
-            </>
-          )}
-
-          {antwoord.tipe === 'video' && (
-            <a className="sp-antwoord-skakel" href={antwoord.bron} target="_blank" rel="noopener noreferrer">
-              Kyk Dewald se antwoord
-            </a>
-          )}
-
-          {antwoord.teks && (
-            <>
-              <p className={`sp-antwoord-teks${antwLank && !antwOop ? ' kort' : ''}`}>
-                {antwoord.teks}
-              </p>
-              {antwLank && (
-                <button className="sp-meer" onClick={() => setAntwOop(o => !o)}>
-                  {antwOop ? 'Wys minder' : 'Lees meer'}
-                </button>
-              )}
-            </>
-          )}
-
-        </div>
-      )}
+      {/* ── Dewald se antwoord staan NIE meer hier nie ──
+       *
+       * Dewald: "Vasgespeld moet in die comments wees saam die ander. nie
+       * deel van die post nie... 'n pinned post op facebook is in die
+       * comments."
+       *
+       * Hy is reg, en dit is meer as 'n plek: solank sy antwoord IN die
+       * plasing gesit het, was dit deel van die storie self — en dan lees die
+       * blad weer soos 'n vraag met 'n amptelike antwoord. In die opmerkings,
+       * vasgespeld bo die ander, is dit een stem tussen stemme, met meer
+       * gewig. Sien SorgOpmerkings.jsx. */}
 
       {/* ── Die gemeenskap ──
           Vier reaksies en woorde van ondersteuning, in plaas van die een

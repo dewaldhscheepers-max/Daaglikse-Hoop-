@@ -148,6 +148,29 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
         </div>
       )}
 
+      {/* ── BEMOEDIG HIERDIE PERSOON ──
+       *
+       * Dewald: "BEMOEDIG IEMAND VANDAG MOET ORAL SIGBAAR WEES. Bo-aan. Bo
+       * die gemeenskapsvoer. En op elke individuele plasing."
+       *
+       * Dit is die HOOFaksie op 'n plasing, nie 'n ikoon in 'n ry nie. Dit
+       * maak dieselfde blad oop as "Reageer" — dieselfde pad, sigbaarder
+       * deur.
+       *
+       * Die reël daarbo verskyn net wanneer daar werklik min is. 'n Plasing
+       * wat reeds gedra word, hoef nie soos 'n versoek te lees nie. */}
+      {woorde.length < 2 && (
+        <p className="ss-min">
+          Hierdie persoon het vandag nog min woorde van bemoediging ontvang.
+        </p>
+      )}
+      <button
+        className="ss-bemoedig"
+        onClick={() => { setKiesOop(false); setBladOop(true) }}
+      >
+        Bemoedig hierdie persoon
+      </button>
+
       {/* ── Die aksiebalk ──
           Ikoon met die GETAL langsaan, soos elke muur wat 'n mens ken. Sonder
           die getal is die knoppie 'n bevel; met die getal is dit 'n plek waar
