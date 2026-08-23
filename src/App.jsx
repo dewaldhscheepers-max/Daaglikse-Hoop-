@@ -1077,7 +1077,14 @@ export default function App() {
     weegRef.current = weeg
     function merkWagtend() { wagtend = true; weeg() }
 
-    function onMessage(e)        { if (e.data?.type === 'SW_UPDATED') merkWagtend() }
+    function onMessage(e) {
+      if (e.data?.type !== 'SW_UPDATED') return
+      /* Sê vir die diensketter ons vat dit self. Doen ons dit nie, herlaai HY
+         die bladsy ná 'n paar sekondes — wat presies is wat 'n ou weergawe
+         nodig het, maar hier sou dit ons klank-hek omseil. Sien sw.js. */
+      try { e.source && e.source.postMessage({ type: 'EK_HANTEER' }) } catch {}
+      merkWagtend()
+    }
     function onControllerChange()                                      { merkWagtend() }
     navigator.serviceWorker.addEventListener('message',          onMessage)
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)

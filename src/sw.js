@@ -38,6 +38,29 @@ async function spoelLooptyd() {
 
 self.addEventListener('install', () => self.skipWaiting())
 
+/* ── Wie sê hy hanteer sy eie herlaai ──
+ *
+ * 'n NUWE weergawe antwoord `EK_HANTEER` op `SW_UPDATED` en herlaai homself,
+ * met sy eie hek vir klank (sien herlaaiBesluit.js). Daardie bladsy laat ons
+ * uit.
+ *
+ * 'n OU weergawe antwoord niks. Sy kode ken hierdie ooreenkoms nie, en dit is
+ * juis daardie fone wat vasgesteek sit — die reel wat forseer, sit ín die nuwe
+ * weergawe, en 'n foon kan net gehoorsaam aan kode wat hy reeds het. Vir hulle
+ * doen die diensketter dit self.
+ *
+ * Dewald: "push it hard so it is live on all phones. no need for them to press
+ * the button." */
+const hanteerders = new Set()
+self.addEventListener('message', e => {
+  const d = e && e.data
+  if (d && d.type === 'EK_HANTEER' && e.source && e.source.id) hanteerders.add(e.source.id)
+})
+
+/* Hoe lank ons vir daardie antwoord wag. Lank genoeg dat 'n besige bladsy kan
+   antwoord, kort genoeg dat 'n mens nie sit en kyk nie. */
+const ANTWOORD_MS = 2000
+
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try {
@@ -52,12 +75,25 @@ self.addEventListener('activate', event => {
 
     await self.clients.claim()
 
-    /* En se vir elke oop bladsy om te herlaai. Die app luister hierna in
-       main.jsx en in App.jsx, en doen dit al lank — ook die ou weergawes wat
-       nou op mense se fone loop. Dit is hoekom hierdie boodskap 'n ou app kan
-       red. */
+    /* Se vir elke oop bladsy om te herlaai. */
     const clients = await self.clients.matchAll({ type: 'window' })
     clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }))
+
+    /* En herlaai self elkeen wat NIE geantwoord het nie.
+     *
+     * Dit is die enigste ding wat 'n foon bereik wat nog op die ou bundel
+     * loop: hierdie leer is die een lêer wat 'n blaaier altyd vars gaan haal,
+     * dus loop HIERDIE kode daar, ook al is die res van die app oud.
+     *
+     * Dit gebeur EEN keer per weergawe — `activate` vuur een keer — dus is
+     * daar geen lus nie. Die bladsy wat hierna laai, word deur dieselfde
+     * reeds-geaktiveerde ketter bedien en kry niks meer nie. */
+    await new Promise(r => setTimeout(r, ANTWOORD_MS))
+    const oor = await self.clients.matchAll({ type: 'window' })
+    for (const c of oor) {
+      if (hanteerders.has(c.id)) continue
+      try { await c.navigate(c.url) } catch { /* 'n bladsy wat weg is, is klaar */ }
+    }
   })())
 })
 
