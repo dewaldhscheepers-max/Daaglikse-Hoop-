@@ -33,13 +33,29 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { klaarWoordeVir, wysReaksies, MAKS_WOORD } from '../data/sorgSaamstaan'
-import { stuurWoord, rapporteerWoord } from '../data/sorgMuur'
+import { stuurWoord, rapporteerWoord, bemoedigWoord, bemoedigdes, onthouSaamDra, merkSaamDraGesien } from '../data/sorgMuur'
+import { gelede, kringKleur } from '../data/sorgTyd'
 import './SorgOpmerkings.css'
 
 const MAANDE = [
   'Januarie', 'Februarie', 'Maart', 'April', 'Mei', 'Junie',
   'Julie', 'Augustus', 'September', 'Oktober', 'November', 'Desember',
 ]
+
+/* 1:42. 'n Opname sonder 'n lengte laat 'n mens wonder of dit twintig minute
+   is, en dan druk hy nie. Kom die lengte nie deur nie, wys ons niks eerder as
+   'n leuen soos 0:00.
+
+   Dit het HIER ONTBREEK. Die stemnota-blok is uit SorgPlasing hierheen
+   geskuif en `skryfDuur` en `duur` het agtergebly — dus het die hele
+   opmerkings-blad omgeval sodra Dewald se antwoord 'n STEMNOTA was. */
+function skryfDuur(sekondes) {
+  const s = Number(sekondes)
+  if (!Number.isFinite(s) || s <= 0) return ''
+  const m = Math.floor(s / 60)
+  const r = Math.round(s % 60)
+  return `${m}:${String(r === 60 ? 0 : r).padStart(2, '0')}`
+}
 
 function skryfDag(d) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''))
@@ -62,6 +78,12 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
   const [eie, setEie] = useState('')
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
+  const [duur, setDuur] = useState('')
+  /* Wat hierdie foon reeds bemoedig het, plus wat in hierdie sessie bygekom
+     het. Die tellings kom van die bediener; hierdie merk is vir die oog,
+     sodat die hartjie gevul bly ná 'n herlaai. */
+  const [myBemoedig, setMyBemoedig] = useState(() => new Set(bemoedigdes()))
+  const [ekstra, setEkstra] = useState({})
   const lysRef = useRef(null)
 
   const { gewys, totaal } = wysReaksies(tellings, plasing.saam)
@@ -73,6 +95,10 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
     setEie('')
     setBesig(false)
     setFout('')
+    /* Jy het nou hier gekyk. Die "Nuwe antwoord"-merkie in Saam dra mag weg —
+       maar net vir 'n gesprek wat reeds in daardie lys is; `merkGesien` voeg
+       niks by nie. */
+    merkSaamDraGesien(plasing.id, woorde.length)
   }, [oop])
 
   /* Terug op die foon maak die blad toe, nie die hele app nie. Sonder dit
@@ -98,6 +124,12 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
     if (d && d.woord) {
       onNuut({ id: d.woord.id, teks: d.woord.teks, myne: true })
       setFout('')
+      /* ── Jy het by hierdie mens gaan sit ──
+       *
+       * Die gesprek kom nou in die Saam dra-oortjie. Sonder hierdie een reël
+       * is elke opmerking 'n doodloopstraat: 'n mens skryf, gaan weg, en kry
+       * die storie nooit weer op 'n muur van veertig plasings nie. */
+      onthouSaamDra(plasing.id, woorde.length + 1)
       /* Rol na die nuwe een toe, sodat 'n mens sien dit is daar. */
       setTimeout(() => {
         if (lysRef.current) lysRef.current.scrollTop = lysRef.current.scrollHeight
@@ -117,6 +149,17 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
        stukkend op die presiese oomblik waarop iemand moed bymekaargeskraap
        het om iets te sê. */
     setFout('Ons kon dit nie plaas nie. Probeer asseblief weer.')
+  }
+
+  /* ── Bemoedig 'n opmerking ──
+   *
+   * Dit tel DADELIK op die skerm, voor die bediener antwoord. 'n Hartjie wat
+   * eers 'n sekonde later vul, voel stukkend, en 'n mens druk hom weer. */
+  function bemoedig(id) {
+    if (myBemoedig.has(id)) return
+    setMyBemoedig(s => new Set(s).add(id))
+    setEkstra(e => ({ ...e, [id]: (e[id] || 0) + 1 }))
+    bemoedigWoord(id)
   }
 
   async function rapporteer(id) {
@@ -238,32 +281,84 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
             </p>
           )}
 
-          {woorde.map(w => (
-            <div key={w.id} className="op-item">
-              <span className={`op-avatar${w.hoop ? ' hoop' : ''}`} aria-hidden="true" />
-              <div className="op-item-teks">
-                <p className="op-wie">
-                  {w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')}
-                  {/* Die merkie sê wie praat. Dit is die enigste opmerking op
-                      die hele muur wat 'n naam dra, en dit moet duidelik wees
-                      dat dit die bediening is en nie 'n vreemdeling nie. */}
-                  {w.hoop && <span className="op-merk" aria-label="Geverifieer">✓</span>}
-                  {w.wanneer ? <span className="op-wanneer"> · {skryfDag(w.wanneer)}</span> : null}
-                </p>
-                <p className="op-teks">{w.teks}</p>
+          {/* ── Die opmerkings, teen Facebook s'n gemeet ──
+           *
+           * Dewald het die twee skerms langs mekaar gesit en gevra hoekom
+           * hulle s'n beter lyk en beter werk. Vier verskille, en al vier is
+           * meganies eerder as smaak:
+           *
+           *   1. 'n Kring wat VERSKIL. Hulle wys gesigte; ons kan nie, want
+           *      die muur is anoniem — maar 'n ry identiese bleek kolletjies
+           *      laat twintig opmerkings soos EEN mens lyk. Die kleur kom uit
+           *      die opmerking se id en is dus stabiel.
+           *   2. "3 u", nie "19 Augustus" nie. 'n Datum laat 'n mens som en
+           *      laat 'n lewendige gesprek dood lyk.
+           *   3. 'n BORREL. Hier was plat teks met 'n naam bo, en die hele
+           *      lys het soos een grys blok gelees — Dewald: "Niks staan uit
+           *      nie." Die borrel is die goedkoopste manier om te wys waar
+           *      een mens ophou en die volgende begin. Dit is 'n sagte blok
+           *      met die naam BINNE, nie 'n kletsborrel met 'n stert nie.
+           *   4. 'n AKSIERY onder die borrel. By hulle is dit Like · Reply.
+           *      Hier is dit die tyd en ♥ Bemoedig — sodat iemand wat vir 'n
+           *      vreemdeling geskryf het, sien dat dit gehelp het. Dit is die
+           *      rede waarom mense wéér skryf.
+           *
+           * Wat NIE oorkom nie: reaksie-gesiggies, "Meest relevant", en 'n
+           * telling wat soos 'n wedstryd lees. Dit is nie 'n voer nie. */}
+          {woorde.map(w => {
+            const wie = w.hoop ? (w.naam || 'Daaglikse Hoop') : (w.myne ? 'Jy' : 'Anoniem')
+            const tyd = gelede(w.geskepOp || w.wanneer) || skryfDag(w.wanneer)
+            const tel = (Number(w.bemoedig) || 0) + (ekstra[w.id] || 0)
+            const myne = myBemoedig.has(w.id)
+            return (
+              <div key={w.id} className="op-item">
+                <span
+                  className={`op-avatar${w.hoop ? ' hoop' : ''}`}
+                  aria-hidden="true"
+                  style={w.hoop ? undefined : { background: kringKleur(w.id) }}
+                />
+                <div className="op-item-teks">
+                  <div className="op-borrel">
+                    <p className="op-wie">
+                      {wie}
+                      {/* Die merkie sê wie praat. Dit is die enigste opmerking
+                          op die hele muur wat 'n naam dra, en dit moet
+                          duidelik wees dat dit die bediening is en nie 'n
+                          vreemdeling nie. */}
+                      {w.hoop && <span className="op-merk" aria-label="Geverifieer">✓</span>}
+                    </p>
+                    <p className="op-teks">{w.teks}</p>
+                  </div>
+                  <div className="op-aksies">
+                    {tyd ? <span className="op-wanneer">{tyd}</span> : null}
+                    {/* Jou eie woorde bemoedig jy nie. */}
+                    {!w.myne && (
+                      <button
+                        className={`op-bemoedig${myne ? ' myne' : ''}`}
+                        onClick={() => bemoedig(w.id)}
+                        disabled={myne}
+                        aria-label="Bemoedig hierdie opmerking"
+                      >
+                        {myne ? '♥' : '♡'} Bemoedig{tel > 0 ? ` · ${tel}` : ''}
+                      </button>
+                    )}
+                    {w.myne && tel > 0 && (
+                      <span className="op-bemoedig-tel">♥ {tel}</span>
+                    )}
+                    {!w.myne && !w.hoop && (
+                      <button
+                        className="op-rap"
+                        aria-label="Rapporteer hierdie opmerking"
+                        onClick={() => rapporteer(w.id)}
+                      >
+                        Rapporteer
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              {!w.myne && !w.hoop && (
-                <button
-                  className="op-rap"
-                  aria-label="Rapporteer hierdie opmerking"
-                  title="Rapporteer"
-                  onClick={() => rapporteer(w.id)}
-                >
-                  ⋯
-                </button>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* ── Die tikbalk, VAS onderaan ── */}

@@ -10,6 +10,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { toestelId } from './sorgStuur'
+import { SLEUTEL as SAAMDRA_SLEUTEL, lees as leesSaamDraRou, voegBy, merkGesien } from './sorgSaamDra'
 
 const PAD = '/api/sorg-muur'
 const SAAM_PAD = '/api/sorg-saamstaan'
@@ -173,6 +174,77 @@ export async function stuurWoord(muurId, { woord = '', teks = '' } = {}, soort =
   } catch {
     return { fout: 'Ons kon nie deurkom nie. Probeer asseblief weer.' }
   }
+}
+
+/* ── Bemoedig 'n OPMERKING ──
+
+   Facebook wys 'n telling op elke opmerking. Dit lyk soos versiering en dit
+   is dit nie: 'n mens wat vir 'n vreemdeling geskryf het "ek bid vanaand vir
+   jou", kry vandag NIKS terug nie en weet nie eens of iemand dit gelees het
+   nie. Dit is presies hoekom mense ophou skryf.
+
+   Die merkie word plaaslik gehou sodat die hartjie ná 'n herlaai gevul bly.
+   Die bediener hou sy eie merk; hierdie een is vir die oog. */
+const BEMOEDIG_SLEUTEL = 'sorg_bemoedig'
+
+function leesMerkies(sleutel) {
+  try {
+    const x = JSON.parse(localStorage.getItem(sleutel) || '[]')
+    return Array.isArray(x) ? x.filter(s => typeof s === 'string') : []
+  } catch { return [] }
+}
+
+export function bemoedigdes() {
+  return leesMerkies(BEMOEDIG_SLEUTEL)
+}
+
+export async function bemoedigWoord(woordId) {
+  const id = String(woordId || '').trim()
+  if (!id) return null
+  /* Die merkie word GESKRYF VOOR ons stuur. 'n Swak lyn mag nie elke
+     mislukte versoek weer laat tel nie — dieselfde reël as die tellers. */
+  try {
+    const lys = leesMerkies(BEMOEDIG_SLEUTEL)
+    if (!lys.includes(id)) localStorage.setItem(BEMOEDIG_SLEUTEL, JSON.stringify([...lys, id].slice(-400)))
+  } catch { /* privaat venster; die knoppie werk steeds */ }
+
+  try {
+    const r = await fetch(SAAM_PAD, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aksie: 'bemoedig', woordId: id, toestel: toestelId() }),
+    })
+    return await r.json()
+  } catch {
+    return null
+  }
+}
+
+/* ── Saam dra: watter gesprekke dra hierdie foon ──
+
+   Die reëls is suiwer en staan in `src/data/sorgSaamDra.js`. Hier is net
+   die berging. */
+
+function skryfSaamDra(lys) {
+  try { localStorage.setItem(SAAMDRA_SLEUTEL, JSON.stringify(lys)) } catch { /* privaat venster */ }
+}
+
+export function leesSaamDra() {
+  try { return leesSaamDraRou(localStorage.getItem(SAAMDRA_SLEUTEL)) } catch { return [] }
+}
+
+/* Jy het by hierdie mens gaan sit. */
+export function onthouSaamDra(muurId, woorde = 0) {
+  const lys = voegBy(leesSaamDra(), muurId, { wanneer: new Date().toISOString(), woorde })
+  skryfSaamDra(lys)
+  return lys
+}
+
+/* Jy het nou daar gekyk — die "Nuwe antwoord"-merkie mag weg. */
+export function merkSaamDraGesien(muurId, woorde) {
+  const lys = merkGesien(leesSaamDra(), muurId, woorde)
+  skryfSaamDra(lys)
+  return lys
 }
 
 /* ── Rapporteer 'n woord ──

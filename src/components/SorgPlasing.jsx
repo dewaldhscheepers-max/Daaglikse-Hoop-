@@ -124,7 +124,7 @@ function voorletter(naam) {
   return n ? n[0].toUpperCase() : '·'
 }
 
-export default function SorgPlasing({ plasing, myne = false }) {
+export default function SorgPlasing({ plasing, myne = false, wag = false }) {
   const [oop, setOop] = useState(false)
   const [antwOop, setAntwOop] = useState(false)
   const [duur, setDuur] = useState('')
@@ -154,6 +154,10 @@ export default function SorgPlasing({ plasing, myne = false }) {
 
           Dit wys NET op haar eie foon. Niemand anders sien dit nie. */}
       {myne && <p className="sp-myne">Jou storie</p>}
+
+      {/* "Wag nog" — die enigste merkie op 'n kaart, en dit vra iets van die
+          leser in plaas van om iets oor die skrywer te sê. */}
+      {wag && !myne && <p className="sp-wag">Nog geen antwoord</p>}
 
       {/* ── Wie, op EEN ry ──
        *

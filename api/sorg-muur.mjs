@@ -134,7 +134,21 @@ function virDieSkerm(m, woorde) {
     woorde: myne.slice(0, 50).map(w => ({
       id: w.id,
       teks: w.teks,
+      /* `wanneer` is die DAG ("2026-08-23") en dit bly, want die ou woorde in
+         Firestore het niks anders nie.
+
+         `geskepOp` is die egte tydstempel, en dit is wat die skerm laat "3 u"
+         skryf in plaas van "23 Augustus". Dewald het ons opmerkings langs
+         Facebook s'n gesit: 'n absolute datum op 'n vars opmerking laat 'n
+         mens som, en dan lyk 'n lewendige gesprek dood. Kom dit nie deur nie
+         — 'n ou woord — val die skerm terug op die dag. Sien
+         `src/data/sorgTyd.js`. */
+      geskepOp: typeof w.geskep === 'string' ? w.geskep : '',
       wanneer: w.dag || '',
+      /* Hoeveel mense hierdie opmerking bemoedig het. Facebook wys 'n telling
+         op ELKE opmerking, en dit is nie versiering nie: dit is hoe 'n mens
+         wat iets moois geskryf het, sien dat dit gehelp het. */
+      bemoedig: Number(w.bemoedig) || 0,
       /* Net Daaglikse Hoop dra 'n naam. Alles anders bly anoniem, soos die
          hele muur. */
       naam: w.bron === 'hoop' ? (w.naam || '') : '',
@@ -152,6 +166,21 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      /* ── Waarom die muur nou by die RAND gekas word ──
+       *
+       * Dewald: "die post load kak lank as ek op die bladsy kliek."
+       *
+       * Elke oopmaak het TWEE lyste van 300 dokumente uit Firestore gelees en
+       * boonop 'n skryf-lopie (`saai`) gedoen — in 'n LEESversoek. Vir die
+       * mens is dit 'n leë blad met "Besig om te laai…" terwyl dit gebeur.
+       *
+       * Tien sekondes by die rand maak die tweede mens se oopmaak
+       * onmiddellik, en `stale-while-revalidate` beteken die derde een kry
+       * die ou antwoord DADELIK terwyl 'n vars een agter die skerms haal.
+       *
+       * Tien, nie sestig nie: die skerm vra in elk geval elke vyftien
+       * sekondes weer, en 'n muur wat 'n minuut agter is, voel dood. */
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=10, stale-while-revalidate=60')
       const alles = await lysDokke(MUUR, { grootte: 300 })
 
       /* Net wat WYS. Wat vir Dewald se oog wag, en wat hy weggesteek het,
@@ -159,7 +188,11 @@ export default async function handler(req, res) {
          lees van bo af, nie andersom nie. */
       /* Vul aan wat nog nie gesaai is nie — dit dek ALLES wat reeds op die
          muur staan, sonder dat iemand aan die databasis raak. */
-      await saai(alles.filter(m => m.gepubliseer !== false && m.teks))
+      /* Die saai-lopie is 'n SKRYF in 'n leesversoek. Dit loop net wanneer
+         daar werklik iets ongesaai is — anders kos dit niks — maar dit mag
+         nooit die antwoord ophou nie. */
+      const ongesaai = alles.filter(m => m.gepubliseer !== false && m.teks && m.gesaai !== true)
+      if (ongesaai.length) await saai(ongesaai)
 
       const woorde = (await lysDokke(WOORDE, { grootte: 300 }))
         .filter(w => w.status === 'wys' && w.teks)
@@ -215,7 +248,6 @@ export default async function handler(req, res) {
       }, 0)
       const woordeTotaal = lys.reduce((n, m) => n + (Number(m.woordeTotaal) || 0), 0)
 
-      res.setHeader('Cache-Control', 'no-store')
       return res.status(200).json({
         plasings: lys,
         saamtel: { saam: saamTotaal, woorde: woordeTotaal, stories: lys.length },

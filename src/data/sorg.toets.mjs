@@ -239,8 +239,11 @@ afdeling('Die noodnommers')
 afdeling('Deel — die skakel moet by die REGTE ding uitkom')
 {
   globalThis.window = globalThis.window || { location: { origin: 'https://daagliksehoop.co.za' } }
-  kyk('plasing', sorgSkakel('plasing', 'm1').endsWith('#sorg-plasing-m1'), sorgSkakel('plasing', 'm1'))
-  kyk('video', sorgSkakel('video', 'LK-kieYHZJA').endsWith('#sorg-video-LK-kieYHZJA'))
+  /* Dit is nou 'n PAD, soos Bid Nou s'n — /sorg/<id>, nie '#sorg-plasing-<id>'
+     nie. 'n Hash oorleef nie altyd 'n plak nie en WhatsApp wys niks van hom.
+     Die ou hash bly leesbaar, want daar loop skakels in gesprekke rond. */
+  kyk('plasing', sorgSkakel('plasing', 'm1').endsWith('/sorg/m1'), sorgSkakel('plasing', 'm1'))
+  kyk('video', sorgSkakel('video', 'LK-kieYHZJA').endsWith('/sorg/video/LK-kieYHZJA'))
   kyk('lees plasing terug', JSON.stringify(leesSorgSkakel('#sorg-plasing-m1')) === '{"soort":"plasing","id":"m1"}',
       leesSorgSkakel('#sorg-plasing-m1'))
   kyk('lees video terug', leesSorgSkakel('#sorg-video-abc123').id === 'abc123')

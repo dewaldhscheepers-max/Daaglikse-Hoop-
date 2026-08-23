@@ -249,3 +249,19 @@
   text-transform: uppercase;
   color: var(--s-goud, #C69A32);
 }
+
+
+/* "Wag nog vir iemand" — die enigste merkie op 'n kaart, en dit vra iets van
+   die LESER in plaas van om iets oor die skrywer te sê. Goud, want dit is
+   die een ding op hierdie blad wat 'n mens se oog moet vang. */
+.sp-wag {
+  display: inline-block;
+  margin: 0 0 9px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #FCF3E6;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #8A5A1E;
+}

@@ -12,7 +12,7 @@
  * hou daardie verskil vas, want dit is presies die soort ding wat 'n mens
  * later "vereenvoudig" deur hulle een te maak.
  */
-import { sorgSkakel, leesSorgSkakel, nooiWoorde } from './sorgDeel.js'
+import { sorgSkakel, leesSorgSkakel, uitSorgPad, nooiWoorde, DEEL_WORTEL } from './sorgDeel.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -53,21 +53,45 @@ console.log('\n── Dit is n WhatsApp-boodskap, nie n opstel nie ──\n')
   waar('een paragraaf, geen reëlbreuke', !/\n/.test(lank))
 }
 
+console.log('\n── Die skakel lyk soos Bid Nou s\'n: n PAD, nie n hash nie ──\n')
+{
+  /* Dewald: "dit moet soos bid nou se deel links werk." Bid Nou deel
+     https://dewaldscheepers.com/bid/<id>. 'n Hash oorleef nie altyd 'n plak
+     nie, en WhatsApp wys niks van hom nie. */
+  const u = sorgSkakel('plasing', 'm123')
+  is('die plasing se skakel', u, `${DEEL_WORTEL}/sorg/m123`)
+  is('die video s\'n', sorgSkakel('video', 'abc'), `${DEEL_WORTEL}/sorg/video/abc`)
+  waar('geen hash meer nie', !u.includes('#'))
+  waar('en dit is dieselfde gasheer as Bid Nou', u.startsWith('https://dewaldscheepers.com/'))
+
+  /* Heen en terug. */
+  is('die pad lees terug', uitSorgPad('/sorg/m123'), { soort: 'plasing', id: 'm123' })
+  is('die video-pad ook', uitSorgPad('/sorg/video/abc'), { soort: 'video', id: 'abc' })
+  is('met n skuinsstreep aan die einde', uitSorgPad('/sorg/m123/'), { soort: 'plasing', id: 'm123' })
+  is('die tuisblad gee niks', uitSorgPad('/'), null)
+  is('n ander pad ook nie', uitSorgPad('/bid/xyz'), null)
+  is('en /sorg op sy eie ook nie', uitSorgPad('/sorg'), null)
+
+  /* 'n Rare id oorleef die rondreis. */
+  const raar = 'a b/c'
+  const u2 = sorgSkakel('plasing', raar)
+  waar('n rare id word geskryf', !u2.includes(' '))
+  is('en dit lees terug', uitSorgPad('/sorg/' + encodeURIComponent(raar)),
+     { soort: 'plasing', id: raar })
+
+  /* Die OU hash moet bly werk — daar loop skakels in mense se gesprekke rond. */
+  is('n ou hash-skakel werk nog', leesSorgSkakel('#sorg-plasing-oud1'),
+     { soort: 'plasing', id: 'oud1' })
+}
+
 console.log('\n── Die skakel land BY die plasing, nie op die tuisblad nie ──\n')
 {
   /* Dit is die verskil tussen 'n mens wat die storie sien en 'n mens wat op 'n
      vreemde blad land en weggaan. */
   const u = sorgSkakel('plasing', 'abc123')
   waar('dit dra die plasing se id', u.includes('abc123'))
-  is('en dit lees weer reg terug', leesSorgSkakel('#sorg-plasing-abc123'),
+  is('en dit lees weer reg terug', uitSorgPad('/sorg/abc123'),
      { soort: 'plasing', id: 'abc123' })
-
-  /* 'n Id met vreemde karakters mag die skakel nie breek nie. */
-  const raar = 'a b/c#d?e&f'
-  const u2 = sorgSkakel('plasing', raar)
-  is('n rare id oorleef die rondreis', leesSorgSkakel(u2.slice(u2.indexOf('#'))),
-     { soort: 'plasing', id: raar })
-  waar('en die # bly een keer in die adres', (u2.match(/#/g) || []).length === 1)
 }
 
 console.log('\n── n Skakel wat niks beteken nie, gee niks ──\n')

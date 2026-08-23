@@ -168,13 +168,11 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
        * maak dieselfde blad oop as "Reageer" — dieselfde pad, sigbaarder
        * deur.
        *
-       * Die reël daarbo verskyn net wanneer daar werklik min is. 'n Plasing
-       * wat reeds gedra word, hoef nie soos 'n versoek te lees nie. */}
-      {woorde.length < 2 && (
-        <p className="ss-min">
-          Hierdie persoon het vandag nog min woorde van bemoediging ontvang.
-        </p>
-      )}
+       * Die verduidelikende reël hierbo is WEG. Op 'n plasing wat nog wag,
+       * het daar drie dinge direk onder mekaar gestaan wat almal dieselfde
+       * sê: die "Nog geen antwoord"-merkie, "Hierdie persoon het vandag nog
+       * min woorde van bemoediging ontvang", en die knoppie self. 'n Blad wat
+       * homself drie keer herhaal, lees soos bedel. */}
       <button
         className="ss-bemoedig"
         onClick={() => { setKiesOop(false); setBladOop(true) }}
@@ -258,8 +256,11 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
            * self het die eerste twee gesaaide woorde gestaan en syne was
            * nêrens. Vasgespeld beteken BO, ook in die voorskou. */}
           {antwoord && (
-            <span className="ss-voorskou-ry vasgespeld">
-              <span className="ss-avatar dewald" aria-hidden="true" />
+            <span className="ss-voorskou-ry">
+              {/* Sy eie foto, soos in die opmerkingsblad. Dewald: "haal daai
+                  bruin strepie uit langs my naam skryf dit reg soos die ander
+                  comments en sit my profile pic." */}
+              <img className="ss-avatar foto" src="/beelde/dewald.jpg" alt="" width="26" height="26" />
               <span className="ss-voorskou-teks">
                 <b>Dewald Scheepers</b>
                 <span className="ss-merk" aria-hidden="true">✓</span>

@@ -109,25 +109,68 @@
 .op-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 9px;
+  margin-bottom: 14px;
 }
 
-/* Die muur is anoniem. 'n Gesig sou 'n leuen wees. */
+/* Die muur is anoniem. 'n Gesig sou 'n leuen wees — maar 'n ry identiese
+   bleek kolletjies laat twintig opmerkings soos EEN mens lyk, en dit is
+   presies wat Facebook se regte foto's keer. Die KLEUR kom uit die opmerking
+   se id (sien src/data/sorgTyd.js) en word inlyn gestel. */
 .op-avatar {
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: #EDE6F7;
-  border: 1px solid #E0D7EF;
 }
 
 /* Daaglikse Hoop se kring dra die app se kleur, sodat 'n mens sonder om te
    lees sien dat hierdie een anders is. */
+
+/* ── Die borrel ──
+   Hier was plat teks met 'n naam bo, en die hele lys het soos een grys blok
+   gelees. Die borrel is die goedkoopste manier om te wys waar een mens ophou
+   en die volgende begin. Geen stert, geen kletsprogram — 'n sagte blok. */
+.op-borrel {
+  padding: 9px 13px 10px;
+  border-radius: 16px;
+  background: var(--cream-dark, #F0EBE3);
+}
+
+/* ── Die aksiery, onder die borrel ──
+   By Facebook is dit Like · Reply · 2h. Hier is dit die tyd en Bemoedig. */
+.op-aksies {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 13px 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.op-bemoedig {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted, #8A7E9A);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s;
+}
+.op-bemoedig:active { color: var(--purple, #7C6FAF); }
+.op-bemoedig.myne,
+.op-bemoedig:disabled { color: var(--purple, #7C6FAF); }
+
+.op-bemoedig-tel { font-weight: 700; color: var(--purple, #7C6FAF); }
+
+/* Daaglikse Hoop se kring dra die app se kleur, sodat 'n mens sonder om te
+   lees sien dat hierdie een anders is. */
 .op-avatar.hoop {
-  background: var(--s-pers, #624A84);
-  border-color: var(--s-pers, #624A84);
+  background: var(--purple, #7C6FAF);
 }
 
 .op-merk {
@@ -148,39 +191,38 @@
 .op-item-teks { flex: 1; min-width: 0; }
 
 .op-wie {
-  margin: 0 0 2px;
+  margin: 0 0 3px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   color: var(--s-teks, #302A3A);
 }
 
-.op-wanneer {
-  font-weight: 500;
-  color: var(--s-sag, #77717D);
-}
+.op-wanneer { white-space: nowrap; }
 
-/* Plat teks, nie 'n borrel nie. Op 'n blad waar mense oor 'n sterwende ma
-   skryf, lees borrels soos 'n kletsprogram. */
+/* Groter as voorheen (14.5px). Dit is die WOORDE — die rede waarom hierdie
+   blad bestaan — en op Facebook is die opmerking self die grootste teks in
+   die ry. */
 .op-teks {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 14.5px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--s-teks, #302A3A);
   overflow-wrap: anywhere;
 }
 
+/* 'n WOORD, nie drie kolletjies nie. Die kolletjies was 'n raaisel: niemand
+   het geweet dit rapporteer nie, en 'n knoppie wat niemand verstaan nie, is
+   geen moderasie nie. */
 .op-rap {
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  margin-left: auto;
   padding: 0;
   border: 0;
   background: none;
+  font-family: var(--font-body);
+  font-size: 12.5px;
   color: #B7B0C0;
-  font-size: 17px;
-  line-height: 1;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.12s;
 }
@@ -275,4 +317,75 @@
   background: #EDE6F7;
   font-size: 13px;
   color: var(--s-pers, #624A84);
+}
+
+
+/* ── Dewald se vasgespelde antwoord LYK soos 'n opmerking ──
+ *
+ * Dewald: "'n pinned post op facebook is in die comments" — en op Facebook
+ * lyk 'n vasgespelde opmerking soos elke ander opmerking, met net 'n
+ * "Pinned"-etiket bo. Hier het dit as 'n eie geelbruin kaart met 'n goue
+ * rand gestaan, en dan lees dit weer soos 'n amptelike antwoord in plaas van
+ * een stem tussen stemme — presies wat hy weg wou hê.
+ *
+ * Dieselfde borrel, dieselfde ritme, dieselfde grootte. Net sy foto en die
+ * etiket sê dat dit hy is. */
+.op-lys .sp-antwoord {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.op-lys .sp-antwoord-wie {
+  flex: 1 1 100%;
+  gap: 9px;
+  margin-bottom: 6px;
+}
+
+.op-lys .sp-antwoord-gesig {
+  width: 32px;
+  height: 32px;
+  box-shadow: none;
+}
+
+.op-lys .sp-antwoord-kop {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--s-teks, #302A3A);
+}
+
+.op-lys .sp-vasgespeld {
+  font-size: 10px;
+  color: var(--purple, #7C6FAF);
+}
+
+/* Die woorde self kry dieselfde sagte blok as elke ander opmerking, en dit
+   staan ingekeep sodat dit onder die foto in lyn is met die res. */
+.op-lys .sp-antwoord-titel,
+.op-lys .sp-antwoord-teks,
+.op-lys .sp-oudio-kop,
+.op-lys .sp-antwoord-skakel,
+.op-lys .sp-oudio {
+  flex: 1 1 100%;
+  margin-left: 41px;
+}
+
+.op-lys .sp-antwoord-teks {
+  padding: 9px 13px 10px;
+  border-radius: 16px;
+  background: var(--lavender-soft, #EDE8F8);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.op-lys .sp-antwoord-titel {
+  margin-bottom: 6px;
+  font-size: 15px;
 }

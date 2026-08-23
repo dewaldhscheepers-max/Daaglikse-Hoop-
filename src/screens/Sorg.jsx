@@ -41,7 +41,8 @@ import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo,
 } from '../data/sorgVideos'
-import { haalMuur, haalMyPlasings, vergeetMuur, POLS_MS } from '../data/sorgMuur'
+import { haalMuur, haalMyPlasings, vergeetMuur, leesSaamDra, POLS_MS } from '../data/sorgMuur'
+import { saamDraLys } from '../data/sorgSaamDra'
 import { haalPlek, vergeetPlek } from '../data/sorgPlek'
 import { leesSorgSkakel } from '../data/sorgDeel'
 import { telSorg } from '../data/telSorg'
@@ -73,45 +74,30 @@ export function HulpNou({ oop, onSluit }) {
   )
 }
 
+/* ── Drie oortjies ──
+ *
+ * Dewald: "Die drie hoof-oortjies bly: Gesprekke · Saam dra · Video's."
+ *
+ * "Gesprekke", nie "Gemeenskap" en nie "Die Muur" nie. 'n Muur is 'n ding
+ * waarop iets geplak word; 'n gesprek is twee mense. Die woord doen werk:
+ * dit sê vir iemand wat lees dat daar geantwoord word.
+ *
+ * "Saam dra" is die PAD TERUG. Sonder dit skryf 'n mens een sin onder 'n
+ * vreemdeling se storie en kry daardie storie nooit weer nie. */
 const AFDELINGS = [
-  /* "Gemeenskap", nie "Die Muur" nie. 'n Muur is 'n ding waarop iets geplak
-     word; 'n gemeenskap is mense. Dewald: "verander 'Die Muur' na
-     'Gemeenskap'." */
-  { sleutel: 'muur',   naam: 'Gemeenskap' },
-  /* "Video's", nie "Die Video's" nie. Met 'n ikoon, 'n naam en 'n telling
-     langs mekaar het "Die Video's" op 'n 320px-skerm nie gepas nie. */
+  { sleutel: 'muur',   naam: 'Gesprekke' },
+  { sleutel: 'saam',   naam: 'Saam dra' },
   { sleutel: 'videos', naam: 'Video\'s' },
 ]
-
-/* ── Die twee ikone ──
-
-   Lyntekeninge, nie emoji nie. 'n Emoji word deur die stelsel geteken: op
-   een foon is dit plat, op 'n ander blink, en dit erf nooit die knoppie se
-   kleur nie. Op 'n pers pil moet die ikoon wit word saam met die teks, en
-   dit kan net gebeur as dit 'n SVG met `currentColor` is. */
-function HartIkoon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" />
-    </svg>
-  )
-}
-
-function SpeelIkoon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-         strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="3.5" />
-      <path d="M10.4 9.1v5.8l4.8-2.9z" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
 
 export default function Sorg({ onNavigate }) {
   const [hulpOop, setHulpOop] = useState(false)
   const [vormOop, setVormOop] = useState(false)
   const [afdeling, setAfdeling] = useState('muur')
+  /* Wat hierdie foon saamdra. Dit kom uit localStorage en word by elke
+     oopmaak weer gelees — 'n mens wat in 'n ander oortjie geskryf het, moet
+     dit hier sien sonder om die app toe te maak. */
+  const [saamDra, setSaamDra] = useState(() => leesSaamDra())
   const [data, setData] = useState(null)      // null = besig
   const [muur, setMuur] = useState(null)      // null = besig
 
@@ -160,6 +146,10 @@ export default function Sorg({ onNavigate }) {
      api/tel-sorg.js: drie heelgetalle, geen naam en geen toestel-id.
      Eenmalig, want React se ontwikkelingsmodus roep effekte twee keer. */
   useEffect(() => { telSorg('oop', { eenmalig: true }) }, [])
+
+  /* Die Saam dra-lys weer lees sodra 'n mens na daardie oortjie gaan. Sonder
+     dit wys 'n gesprek waarby hy pas gaan sit het, eers ná 'n herlaai. */
+  useEffect(() => { if (afdeling === 'saam') setSaamDra(leesSaamDra()) }, [afdeling])
 
   /* ── Watter plasing op die muur is hierdie mens s'n ── */
   const [myPlasings, setMyPlasings] = useState([])
@@ -250,7 +240,10 @@ export default function Sorg({ onNavigate }) {
     gespring.current = true
     const el = document.getElementById(`sorg-${s.soort}-${s.id}`)
     if (el) el.scrollIntoView({ block: 'center' })
-    try { window.history.replaceState({}, '', '/') } catch { /* ou blaaier */ }
+    try {
+      window.history.replaceState({}, '', '/')
+      sessionStorage.removeItem('sorg_skakel')
+    } catch { /* ou blaaier */ }
   }, [muur, data])
 
   const videos = (data && data.videos) || []
@@ -274,9 +267,34 @@ export default function Sorg({ onNavigate }) {
      MIN, nie NUL nie: 'n plasing met een reaksie is steeds byna alleen. */
   const alleen = plasings.filter(p => Number(p.saam || 0) < 3)
 
+
+  /* ── Wie WAG nog vir iemand ──
+   *
+   * Dewald: "Wys onbeantwoorde stories eerste onder: Wag nog vir iemand."
+   *
+   * Dit is die belangrikste sortering op die hele blad. 'n Voer op datum wys
+   * die nuutste eerste, en dan bly die mens wat drie dae gelede geskryf het
+   * en wie NIEMAND geantwoord het nie, vir altyd onder — presies die een wat
+   * iemand nodig het.
+   *
+   * WAG = geen opmerking nie. Nie "min reaksies" nie: 'n hartjie is nie 'n
+   * antwoord nie, en 'n mens wat vyf hartjies en geen woord gekry het, wag
+   * steeds. */
+  const woordeVan = p => Number(p.woordeTotaal) || (Array.isArray(p.woorde) ? p.woorde.length : 0)
+  const wag = plasings.filter(p => woordeVan(p) === 0)
+  const beantwoord = plasings.filter(p => woordeVan(p) > 0)
+
   /* Hoeveel keer daar vandag saamgedra is. Een reël, geen kaart — dit is die
      verskil tussen 'n statiese blad en 'n plek waar iets gebeur. */
   const saamVandag = plasings.reduce((n, p) => n + (Number(p.saam) || 0), 0)
+
+  /* ── Saam dra ──
+   *
+   * Die gesprekke waarby HIERDIE foon gaan sit het. Die lys lê in
+   * localStorage (sien src/data/sorgSaamDra.js) en die woorde kom uit die
+   * muur wat reeds gelaai is — geen tweede oproep, en niks wat 'n bediener
+   * oor wie-wie-ondersteun kan verklap nie. */
+  const myGesprekke = saamDraLys(saamDra, plasings)
 
   /* Vat die mens na EEN mens toe, nie na 'n voer van dertig se trauma nie.
      Dewald: "moenie hulle dadelik in 'n lang lys swaar stories gooi nie."
@@ -284,7 +302,9 @@ export default function Sorg({ onNavigate }) {
      — daar is altyd iemand om te lees. */
   function naEenAlleen() {
     setAfdeling('muur')
-    const eerste = alleen[0] || plasings[0]
+    /* Na die mens wat WAG, nie na die een met min hartjies. 'n Hartjie is
+       nie 'n antwoord nie, en die hele blad sorteer nou so. */
+    const eerste = wag[0] || alleen[0] || plasings[0]
     if (!eerste) return
     /* Die muur is dalk pas eers gewys; gee die blad 'n raam om te teken. */
     requestAnimationFrame(() => {
@@ -324,12 +344,37 @@ export default function Sorg({ onNavigate }) {
          *
          * Een reël wat sê wat hierdie plek is, en EEN vers. Die res van die
          * Skrif leef in die blad se werkwoorde, nie in 'n blok bo-aan nie. */}
-        <h1>Sorg &amp; Ondersteuning</h1>
-        <p>
-          Ons is nie gemaak om alles alleen te dra nie. Hier dra ons mekaar se
-          laste, bemoedig ons mekaar en bou ons mekaar op.
+        <h1>Sorg</h1>
+
+        {/* ── Die kampvuur ──
+         *
+         * Mense om 'n vuur, onder sterre, met 'n kruis op die rand. Dit is
+         * die hele blad in een prent: niemand sit alleen nie.
+         *
+         * Drie reëls hou dit heel:
+         *
+         *   · Dit is 'n CSS-`background-image` op 'n ONDEURSIGTIGE houer, nie
+         *     'n `<img>` nie. 'n Volskerm-`<img>` is die grootste tekstuur in
+         *     die app en Chrome gee dit maklik sy eie laag — dit is presies
+         *     waar Vrugtefees se gekleurde strepe vandaan gekom het. Sien
+         *     CLAUDE.md.
+         *   · 16:9, dieselfde verhouding as die foto. Op ELKE skermwydte wys
+         *     dus die volle breedte: al agt mense EN die kruis bly in. 'n
+         *     Vaste hoogte sou op 'n smal foon links en regs afsny, en dan is
+         *     die kruis weg.
+         *   · Die woorde staan heel ONDER, oor die klippe en die vuur — nooit
+         *     oor 'n gesig nie. Die gesigte lê in die middelband. */}
+        <div className="sorg-vuur">
+          <div className="sorg-vuur-woorde">
+            <p className="sorg-vuur-vers">“Dra mekaar se laste.”</p>
+            <p className="sorg-vuur-bron">Galasiërs 6:2</p>
+          </div>
+        </div>
+
+        <p className="sorg-inlei">
+          Hier luister ons, hier bid ons, en hier dra ons saam. Bring wat op jou
+          hart is — sonder oordeel, en sonder om dit alleen te dra.
         </p>
-        <p className="sorg-vers">“Dra mekaar se laste.” <span>Galasiërs 6:2</span></p>
       </div>
 
       <div className="sorg-body">
@@ -386,24 +431,31 @@ export default function Sorg({ onNavigate }) {
          *
          * Die tweede moet visueel net so sterk wees as die eerste. Dit is die
          * een wat van 'n "help my"-muur 'n gemeenskap maak. */}
+        {/* ── EEN kaart, TWEE knoppies ──
+         *
+         * Dewald se goedgekeurde uitleg: "Op die Sorg-tuisblad moet die twee
+         * hoofkeuses duidelik wees: Deel wat swaar is · Luister na iemand."
+         *
+         * Dit was twee groot kaarte onder mekaar. Hulle het saam sowat 'n
+         * halwe skerm gevat, en die gevolg was meetbaar: die eerste GESPREK
+         * het eers 1 049px van bo af begin — 'n mens moes verby 'n hele
+         * skerm van knoppies rol voordat hy 'n enkele mens sien.
+         *
+         * Een kaart met twee knoppies langs mekaar sê presies dieselfde ding
+         * en die mense begin binne een skerm. */}
         <div className="sorg-doen">
-          <div className="sorg-doen-kaart">
-            <h2>Ek het ondersteuning nodig</h2>
-            <p>Vertel wat swaar is. Jy hoef dit nie alleen te dra nie.</p>
+          <h2>Wat is vandag op jou hart?</h2>
+          <p>Jy kan iets deel, na iemand luister, of later terugkom na 'n gesprek.</p>
+          <div className="sorg-doen-knoppe">
             <button
               className="sorg-knop"
               onClick={() => { telSorg('vorm'); setVormOop(true) }}
               disabled={!!(plek && plek.vol)}
             >
-              {plek && plek.vol ? 'Vandag se plekke is vol — môre weer' : 'Deel wat swaar is'}
+              {plek && plek.vol ? 'Vandag is vol' : 'Deel wat swaar is'}
             </button>
-          </div>
-
-          <div className="sorg-doen-kaart gee">
-            <h2>Bemoedig iemand vandag</h2>
-            <p>Lees iemand se storie en spreek 'n woord van hoop.</p>
-            <button className="sorg-knop gee" onClick={naEenAlleen}>
-              Bemoedig iemand
+            <button className="sorg-knop uit" onClick={naEenAlleen}>
+              Luister na iemand
             </button>
           </div>
         </div>
@@ -473,15 +525,18 @@ export default function Sorg({ onNavigate }) {
               className={`sorg-oortjie${afdeling === a.sleutel ? ' aktief' : ''}`}
               onClick={() => setAfdeling(a.sleutel)}
             >
-              <span className="sorg-oortjie-ikoon" aria-hidden="true">
-                {a.sleutel === 'muur' ? <HartIkoon /> : <SpeelIkoon />}
-              </span>
+              {/* Die ikoon is weg. Met DRIE oortjies naas mekaar het 'n
+                  ikoon, 'n naam en 'n telling nie op 'n 390px-skerm gepas
+                  nie, en "Gesprekke" is as "Gespre…" afgekap. 'n Afgekapte
+                  woord is erger as geen ikoon. */}
               <span className="sorg-oortjie-naam">{a.naam}</span>
               <span className="sorg-oortjie-tel">
                 {/* Wat WERKLIK in die oortjie is. Vandag se video staan
                     hierbo en is uit die biblioteek gehaal, dus sou
                     `videos.length` een meer belowe as wat 'n mens daar kry. */}
-                {a.sleutel === 'muur' ? plasings.length : biblioteek.length}
+                {a.sleutel === 'muur' ? plasings.length
+                  : a.sleutel === 'saam' ? myGesprekke.length
+                  : biblioteek.length}
               </span>
             </button>
           ))}
@@ -587,32 +642,116 @@ export default function Sorg({ onNavigate }) {
                * Dit is die ding wat van 'n "help-my"-muur 'n gemeenskap maak,
                * en 'n mens wat tot hier gerol het, is presies die een wat dit
                * kan doen. */}
-              {alleen.length > 0 && (
-                <button className="sorg-voer-bemoedig" onClick={naEenAlleen}>
-                  <b>Bemoedig iemand →</b>
-                  <span>
-                    {alleen.length === 1
-                      ? 'Een mens wag nog vir ’n woord'
-                      : `${alleen.length} mense wag nog vir ’n woord`}
-                  </span>
-                </button>
-              )}
-
+              {/* ── Die "Bemoedig iemand →"-strook is WEG ──
+               *
+               * Sy werk word nou deur die "Wag nog vir iemand"-kop hieronder
+               * gedoen, en beter: die strook het net GESE dat iemand wag en
+               * dan na 'n plasing gespring; die kop wys die mense self.
+               *
+               * Twee dinge wat dieselfde sê, direk onder mekaar, lees soos 'n
+               * blad wat homself herhaal. */}
               <p className="sorg-muur-fyn">
                 Elke storie hier is met die skrywer se toestemming geplaas.
                 Sien jy iets wat nie hier hoort nie, druk <b>Rapporteer</b> —
                 ons kyk daarna.
               </p>
-              {plasings.slice(0, wysAantal).map(p => (
-                <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} />
-              ))}
 
-              {plasings.length > wysAantal && (
-                <button className="sorg-meer" onClick={() => setWysAantal(n => n + 6)}>
-                  Wys meer
-                  <span>{plasings.length - wysAantal} nog</span>
-                </button>
+              {/* ── WAG NOG VIR IEMAND, eerste ──
+               *
+               * Dewald: "Wys onbeantwoorde stories eerste onder: Wag nog vir
+               * iemand."
+               *
+               * 'n Voer op datum stoot die mens wat drie dae gelede geskryf
+               * het en wie niemand geantwoord het nie, vir altyd onder toe —
+               * presies die een wat iemand nodig het. Hierdie kop draai dit
+               * om, en dit is die enigste sortering op die blad wat werklik
+               * iets vir iemand verander. */}
+              {wag.length > 0 && (
+                <>
+                  <div className="sorg-groepkop">
+                    <h2>Wag nog vir iemand</h2>
+                    <p>
+                      {wag.length === 1
+                        ? 'Een mens het nog geen woord gekry nie.'
+                        : `${wag.length} mense het nog geen woord gekry nie.`}
+                    </p>
+                  </div>
+                  {wag.slice(0, wysAantal).map(p => (
+                    <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} wag />
+                  ))}
+                  {wag.length > wysAantal && (
+                    <button className="sorg-meer" onClick={() => setWysAantal(n => n + 6)}>
+                      Wys meer wat wag
+                      <span>{wag.length - wysAantal} nog</span>
+                    </button>
+                  )}
+                </>
               )}
+
+              {beantwoord.length > 0 && (
+                <>
+                  <div className="sorg-groepkop">
+                    <h2>Gesprekke wat loop</h2>
+                    <p>Hier is mense reeds by mekaar. Jy kan gerus aansluit.</p>
+                  </div>
+                  {beantwoord.slice(0, wysAantal).map(p => (
+                    <SorgPlasing key={p.id} plasing={p} myne={myPlasings.includes(p.id)} />
+                  ))}
+                  {beantwoord.length > wysAantal && (
+                    <button className="sorg-meer" onClick={() => setWysAantal(n => n + 6)}>
+                      Wys meer
+                      <span>{beantwoord.length - wysAantal} nog</span>
+                    </button>
+                  )}
+                </>
+              )}
+            </>
+          )
+        )}
+
+        {/* ── Saam dra ──
+         *
+         * Dewald: "Die doel is dat ondersteuning 'n voortdurende gesprek word
+         * en nie net een los opmerking nie."
+         *
+         * Dit is die pad terug. Iemand skryf een sin onder 'n vreemdeling se
+         * storie, gaan weg, en kry daardie storie nooit weer op 'n muur van
+         * veertig plasings nie — nie omdat hy nie omgee nie, maar omdat daar
+         * niks was wat hom teruggevat het nie. */}
+        {afdeling === 'saam' && (
+          muur === null ? (
+            <p className="sorg-leeg">Besig om te laai…</p>
+          ) : !myGesprekke.length ? (
+            <div className="sorg-groepkop">
+              <h2>Waar ek saam dra</h2>
+              <p>
+                Sodra jy onder iemand se storie skryf, kom daardie gesprek
+                hierheen — sodat jy weet waar om terug te gaan en weer te vra
+                hoe dit gaan.
+              </p>
+              <button className="sorg-knop gee" onClick={naEenAlleen}>
+                Bemoedig iemand
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="sorg-groepkop">
+                <h2>Waar ek saam dra</h2>
+                <p>'n Las word nie met een opmerking gedra nie. Kom terug. Vra weer.</p>
+              </div>
+              {myGesprekke.map(g => (
+                <div key={g.plasing.id} className="sorg-saamdra">
+                  {g.nuut && (
+                    <p className="sorg-saamdra-merk nuut">
+                      {g.nuweWoorde === 1 ? 'Nuwe antwoord' : `${g.nuweWoorde} nuwe antwoorde`}
+                    </p>
+                  )}
+                  {!g.nuut && g.vraWeer && (
+                    <p className="sorg-saamdra-merk">Vra weer hoe dit gaan</p>
+                  )}
+                  <SorgPlasing plasing={g.plasing} myne={myPlasings.includes(g.plasing.id)} />
+                </div>
+              ))}
             </>
           )
         )}

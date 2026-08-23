@@ -220,6 +220,45 @@ async function doenRapport(res, woordId) {
   return res.status(200).json({ ok: true })
 }
 
+/* ── Bemoedig 'n OPMERKING ──
+ *
+ * Dewald het ons opmerkings langs Facebook s'n gesit. Die ding wat daar op
+ * ELKE opmerking staan en hier nêrens nie, is 'n telling: "52". Dit lyk soos
+ * versiering en dit is dit nie.
+ *
+ * 'n Mens wat vir 'n vreemdeling geskryf het "ek bid vanaand vir jou" kry
+ * vandag NIKS terug nie. Hy weet nie of iemand dit gelees het nie. Dit is
+ * presies die rede waarom mense ophou skryf, en 'n muur waar niemand meer
+ * skryf nie, is 'n muur waar Dewald weer die enigste stem is.
+ *
+ * Een druk per toestel per opmerking, met dieselfde merkie-truuk as
+ * saamstaan. Geen aftrek nie: 'n aftrek op 'n telling wat deur baie
+ * toestelle gelyktydig verhoog word, is presies waar tellings verkeerd raak.
+ *
+ * 'n Woord wat gerapporteer is (`status !== 'wys'`) kan nie bemoedig word
+ * nie — anders staan daar 'n telling op iets wat niemand mag sien nie. */
+async function doenBemoedig(res, { woordId, toestel }) {
+  const w = await leesDok(WOORDE, woordId)
+  if (!w || w.status !== 'wys') {
+    return res.status(404).json({ fout: 'daardie opmerking bestaan nie' })
+  }
+
+  const merkId = `b_${woordId}_${toestel}`
+  const reeds = await leesDok(SAAM, merkId)
+  if (reeds) {
+    return res.status(200).json({ ok: true, reeds: true, bemoedig: Number(w.bemoedig) || 0 })
+  }
+
+  await skryfDok(SAAM, merkId, {
+    woordId, toestel, soort: 'bemoedig',
+    dag: new Date().toISOString().slice(0, 10),
+  })
+
+  const bemoedig = (Number(w.bemoedig) || 0) + 1
+  await skryfDok(WOORDE, woordId, { bemoedig }, { velde: ['bemoedig'] })
+  return res.status(200).json({ ok: true, bemoedig })
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -234,6 +273,16 @@ export default async function handler(req, res) {
 
   try {
     if (lyf.rapporteer) return await doenRapport(res, String(lyf.rapporteer).slice(0, 40))
+
+    if (lyf.aksie === 'bemoedig') {
+      const woordId = skoonId(lyf.woordId)
+      if (!woordId) return res.status(400).json({ fout: 'geen opmerking nie' })
+      const t = hasToestel(lyf.toestel)
+      /* Sonder 'n toestel-id kan ons nie 'n dubbele druk keer nie, en dan tel
+         ons liewer niks as om 'n telling te laat lieg. */
+      if (!t) return res.status(200).json({ ok: true, reeds: true })
+      return await doenBemoedig(res, { woordId, toestel: t })
+    }
 
     const muurId = skoonId(lyf.muurId)
     if (!muurId) return res.status(400).json({ fout: 'geen plasing nie' })

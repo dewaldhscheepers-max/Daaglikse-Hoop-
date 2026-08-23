@@ -23,34 +23,46 @@
    Kaarte staan nou op die agtergrond met 'n sagte skaduwee eerder as om met
    'n lyn uitgesny te wees. Dit is wat 'n bladsy laat lewe: dieptes, nie
    omlyning nie. */
+/* ── EEN kleurstelsel ──
+ *
+ * Dewald: "Hergebruik die werklike CSS-design tokens of klasse van Bid Nou.
+ * Moenie nuwe kleure raai of 'n tweede kleursisteem skep nie."
+ *
+ * Sorg het sy eie palet gehad — 'n pers blad (#F8F5FF), warm beige rande
+ * (#EBE3D8), 'n eie pers (#624A84) en 'n eie goud. Dit was 'n tweede
+ * kleurstelsel langs die app s'n, en dit is presies hoekom die blad langs
+ * Bid Nou vreemd gelyk het.
+ *
+ * Die `--s-*`-name BLY, want hulle staan in vier lêers se reëls. Wat verander
+ * het, is waar hulle vandaan kom: elkeen wys nou na 'n token in index.css.
+ * Verander die app se palet eendag, verander Sorg saam.
+ *
+ * Hulle staan op `:root` en nie op `.sorg` nie, want die opmerkings-blad en
+ * die Hulp-nou-blad is `position: fixed` BUITE `.sorg` — daar het hulle
+ * andersins op hul terugval-kleure geval, en dan is die helfte van die blad
+ * die ou palet.
+ */
+:root {
+  --s-blad:      var(--cream);
+  --s-kaart:     var(--white);
+  --s-antwoord:  var(--lavender-soft);
+  --s-pers:      var(--purple);
+  --s-pers-diep: var(--purple-dark);
+  --s-teks:      var(--text);
+  --s-sag:       var(--text-muted);
+  --s-goud:      var(--gold);
+  /* Groen vir Ondersteun — die enigste plek op hierdie blad waar oor geld
+     gepraat word, en dit MOET van die res verskil. Dieselfde groen as elders
+     in die app. */
+  --s-groen:     #2E7D4F;
+  --s-reaksie:   var(--lavender-soft);
+  --s-hart:      var(--gold);
+  --s-rand:      var(--cream-dark);
+  --s-skadu:     0 2px 16px var(--shadow);
+}
+
 .sorg {
   min-height: 100%;
-  /* Die blad was 'n warm room (#FAF7F2). Dewald wil dieselfde ligte pers as
-     Luister he — daar is `.luister-body` rgba(248,245,255,0.90), wat op die
-     app se agtergrond as sowat #F8F5FF lees. Een app, een agtergrond: 'n
-     mens wat van Luister af hierheen swiep, moet nie voel hy is in 'n ander
-     program nie. */
-  --s-blad:      #F8F5FF;
-  --s-kaart:     #FFFFFF;
-  --s-antwoord:  #F5EFE3;
-  --s-pers:      #624A84;
-  --s-pers-diep: #4C3A6B;
-  --s-teks:      #302A3A;
-  --s-sag:       #77717D;
-  --s-goud:      #C69A32;
-  /* Groen vir Ondersteun. Dit is die enigste plek op hierdie blad waar oor
-     geld gepraat word, en dit MOET van die pers en goud verskil — 'n knoppie
-     wat soos die res lyk, word deel van die agtergrond. #2E7D4F word reeds
-     elders in die app gebruik. */
-  --s-groen:     #2E7D4F;
-  --s-reaksie:   #F1EDF6;
-  --s-hart:      #B96868;
-  /* Die rand was #EBE3D8 en het op 'n foon in die son eenvoudig verdwyn —
-     die kaarte het in mekaar geloop. Nou donkerder EN koeler: 'n warm beige
-     rand op 'n pers blad lees geel, en dan lyk elke kaart vuil. Dit is 'n
-     rand, nie 'n lyn wat skree nie. */
-  --s-rand:      #D9D2E4;
-  --s-skadu:     0 1px 2px rgba(48, 42, 58, 0.04), 0 4px 14px rgba(48, 42, 58, 0.06);
   background: var(--s-blad);
 }
 
@@ -866,45 +878,66 @@
 }
 
 /* ── Die twee aksies ── */
-.sorg-doen { display: flex; flex-direction: column; gap: 14px; margin: 2px 0 0; }
-
-.sorg-doen-kaart {
-  display: flex; flex-direction: column; gap: 8px;
+/* ── Een kaart, twee knoppies ──
+   Dit was twee kaarte onder mekaar en hulle het saam 'n halwe skerm gevat.
+   Sien Sorg.jsx. */
+.sorg-doen {
   background: var(--white, #fff);
   border-radius: 20px;
-  padding: 20px;
+  padding: 18px 18px 16px;
+  margin: 2px 0 0;
   box-shadow: 0 2px 16px var(--shadow, rgba(60, 45, 95, 0.10));
   /* Die kantlyn sê watter SOORT ding dit is — presies soos Bid Saam. */
   border-left: 3px solid var(--purple-dark, #4A3B7A);
 }
-.sorg-doen-kaart.gee { border-left-color: #C9A961; }
 
-.sorg-doen-kaart h2 {
+.sorg-doen h2 {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 17px; font-weight: 700; letter-spacing: -.2px;
-  color: var(--text-dark, var(--text));
+  font-size: 17px; font-weight: 800; letter-spacing: -.2px;
+  color: var(--text);
 }
-.sorg-doen-kaart p {
-  margin: 0;
-  font-size: 14px; line-height: 1.6; color: var(--text-muted);
+.sorg-doen p {
+  margin: 5px 0 0;
+  font-size: 14px; line-height: 1.55; color: var(--text-muted);
 }
 
-/* NIE vol breedte nie. 'n Knoppie wat die hele breedte vat, lyk soos 'n balk;
-   een wat links staan, lyk soos 'n keuse. Presies Bid Saam se maat. */
+/* Langs mekaar, en albei ewe belangrik. Die tweede is die een wat van 'n
+   "help-my"-muur 'n gemeenskap maak; sit hy onder die eerste, lees hy soos
+   'n nagedagte. `flex-wrap` vang die smalste fone op. */
+.sorg-doen-knoppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 14px;
+}
+
 .sorg-knop {
-  align-self: flex-start;
+  /* `1 1 0` en nie `1 1 auto` nie: met `auto` is die basis die teks se eie
+     breedte, die twee tel saam meer as die kaart, en dan breek hulle onder
+     mekaar af. Met 0 deel hulle die ry gelyk. */
+  flex: 1 1 0;
+  min-width: 0;
   border: none; border-radius: 14px;
   background: var(--purple-dark, #4A3B7A); color: #fff;
-  padding: 12px 22px;
+  padding: 12px 10px;
   font-family: var(--font-body);
-  font-size: 15px; font-weight: 700;
+  font-size: 14.5px; font-weight: 700;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s;
-  margin-top: 2px;
+  transition: background 0.2s, border-color 0.2s;
 }
 .sorg-knop:active { background: #3B2F63; }
 .sorg-knop:disabled { background: #CFC7E0; cursor: default; }
+
+/* Die tweede knoppie is 'n omlyning, nie 'n tweede vol kleur nie. Twee vol
+   knoppies langs mekaar veg met mekaar en dan kies 'n mens nie een nie. */
+.sorg-knop.uit {
+  background: var(--white, #fff);
+  color: var(--purple-dark, #4A3B7A);
+  border: 1.5px solid var(--purple-dark, #4A3B7A);
+}
+.sorg-knop.uit:active { background: var(--lavender-soft, #EDE8F8); }
+
 .sorg-knop.gee { background: #B98A3E; }
 .sorg-knop.gee:active { background: #9C7333; }
 
@@ -1005,29 +1038,148 @@
   font-size: 12.5px; line-height: 1.55; color: var(--text-muted); opacity: .85;
 }
 
-/* Dewald se antwoord, vasgespeld BO in die opmerkings. */
-.op-lys .sp-antwoord {
-  margin: 0 0 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #FDF7EC 0%, #FDFAF6 100%);
-  border: none;
-  border-left: 3px solid #C9A961;
-  border-radius: 0 16px 16px 0;
-  box-shadow: none;
-}
-.op-lys .sp-antwoord-wie { margin-bottom: 10px; }
+/* Die room-kaart is WEG. Sien SorgOpmerkings.css: Dewald se vasgespelde
+   antwoord lyk nou soos elke ander opmerking — dieselfde borrel, dieselfde
+   ritme — met net sy foto en 'n VASGESPELD-etiket wat sê dat dit hy is. 'n
+   Eie kaart om sy woorde het weer soos 'n amptelike antwoord gelees. */
 
-/* Dewald se antwoord, vasgespeld in die VOORSKOU op die kaart. */
-.ss-voorskou-ry.vasgespeld {
-  border-left: 3px solid #C9A961;
-  padding-left: 9px;
-  margin-left: -1px;
-}
-.ss-avatar.dewald { background: #4A3B7A; }
+/* Dewald se antwoord in die voorskou lyk soos ELKE ander opmerking — net met
+   sy eie foto. Dewald: "haal daai bruin strepie uit... skryf dit reg soos die
+   ander comments en sit my profile pic." */
+.ss-avatar.foto { object-fit: cover; border-radius: 50%; }
 
 /* Die riglyn op 'n swaar storie staan nou BO die kassie, nie in die plek
    daarvan nie. Sien SorgOpmerkings.jsx. */
 .op-riglyn {
   margin: 0 0 10px;
   font-size: 12.5px; line-height: 1.55; color: #96702F;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Die kampvuur, die groepkoppe en Saam dra
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Die kampvuurprent ──
+ *
+ * 'n CSS-`background-image` op 'n ONDEURSIGTIGE houer, nie 'n `<img>` nie.
+ * 'n Volskerm-`<img>` is die grootste tekstuur in die app en Chrome gee dit
+ * maklik sy eie saamgestelde laag — dit is presies waar Vrugtefees se
+ * gekleurde strepe vandaan gekom het. In die ouer se laag geverf, wys 'n
+ * ongeverfde teel die agtergrondkleur in plaas van gemors. Sien CLAUDE.md.
+ *
+ * `aspect-ratio: 16 / 9` is die foto se eie verhouding. Dit beteken op ELKE
+ * skermwydte wys die volle breedte: al agt mense EN die houtkruis bly in.
+ * 'n Vaste hoogte met `cover` sou op 'n smal foon links en regs afsny, en
+ * die kruis staan heel regs.
+ */
+.sorg-vuur {
+  position: relative;
+  margin: 14px 0 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+  /* Die nagkleur van die foto self. 'n Ongeverfde teel wys dit in plaas van
+     wit — en op 'n stadige lyn is dit die verskil tussen 'n donker blok wat
+     invul en 'n wit blits. */
+  background-color: #131A2A;
+  background-image: image-set(
+    url('/beelde/sorg-kampvuur-800.webp') 1x,
+    url('/beelde/sorg-kampvuur-1200.webp') 2x
+  );
+  background-image: -webkit-image-set(
+    url('/beelde/sorg-kampvuur-800.webp') 1x,
+    url('/beelde/sorg-kampvuur-1200.webp') 2x
+  );
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Die woorde staan heel ONDER, oor die klippe en die vuur — nooit oor 'n
+   gesig nie. Die gesigte lê in die middelband van die foto. Die skerm loop
+   net oor die onderste derde, sodat die sterre en die kruis skoon bly. */
+.sorg-vuur-woorde {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 34px 16px 13px;
+  background: linear-gradient(to top, rgba(10, 14, 24, 0.86) 0%, rgba(10, 14, 24, 0.55) 45%, rgba(10, 14, 24, 0) 100%);
+}
+
+.sorg-vuur-vers {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(19px, 5.2vw, 23px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: #FFFFFF;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.sorg-vuur-bron {
+  margin: 4px 0 0;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--peach, #F2C4A0);
+}
+
+/* Donker, nie gedemp nie. Die kop se agtergrond is die app se sonsopkoms-
+   verloop, en `--text-muted` op daardie perske was byna onleesbaar. */
+.sorg-inlei {
+  margin: 13px 0 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* ── Die koppe wat die voer in twee deel ──
+   "Wag nog vir iemand" en "Gesprekke wat loop". Sonder hulle is dit een lang
+   lys en dan bly die mens wat niemand geantwoord het nie, vir altyd onder. */
+.sorg-groepkop {
+  margin: 24px 0 12px;
+}
+
+.sorg-groepkop h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.sorg-groepkop p {
+  margin: 4px 0 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.sorg-groepkop .sorg-knop { margin-top: 14px; }
+
+/* ── Saam dra ── */
+.sorg-saamdra { margin-bottom: 4px; }
+
+.sorg-saamdra-merk {
+  display: inline-block;
+  margin: 0 0 -4px 4px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--cream-dark);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.sorg-saamdra-merk.nuut {
+  background: var(--lavender-soft);
+  color: var(--purple-dark);
 }

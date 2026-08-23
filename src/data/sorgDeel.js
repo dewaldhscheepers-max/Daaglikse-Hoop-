@@ -10,13 +10,60 @@
    sorg-luisteraar) en maak Sorg by daardie plasing oop.
    ──────────────────────────────────────────────────────────── */
 
+/* ── Die skakel ──
+ *
+ * Dewald: "dit moet soos bid nou se deel links werk."
+ *
+ * Bid Nou deel `https://dewaldscheepers.com/bid/<id>` — 'n gewone PAD. Sorg
+ * het 'n HASH gedeel (`…/#sorg-plasing-<id>`) op wat ook al die blaaier se
+ * eie gasheer was. Twee dinge daaraan is stukkend:
+ *
+ *   'n hash oorleef nie altyd wanneer 'n mens 'n skakel plak nie, en WhatsApp
+ *   wys niks van hom nie;
+ *   binne die geïnstalleerde app is `location.origin` daagliksehoop.co.za,
+ *   dus het dieselfde app twee verskillende adresse gedeel.
+ *
+ * Nou is dit dieselfde vorm as Bid Nou: /sorg/<id>. Die ou hash word STEEDS
+ * gelees (sien leesSorgSkakel), want daar loop skakels in mense se gesprekke
+ * rond wat moet bly werk. */
+export const DEEL_WORTEL = 'https://dewaldscheepers.com'
+
 export function sorgSkakel(soort, id) {
-  const wortel = typeof window !== 'undefined' ? window.location.origin : ''
-  return `${wortel}/#sorg-${soort}-${encodeURIComponent(id)}`
+  const skoon = encodeURIComponent(String(id || ''))
+  return soort === 'video'
+    ? `${DEEL_WORTEL}/sorg/video/${skoon}`
+    : `${DEEL_WORTEL}/sorg/${skoon}`
+}
+
+/* Lees 'n plasing- of video-id uit 'n PAD. Gee { soort, id } of null. */
+export function uitSorgPad(pad) {
+  const p = String(pad || '')
+  let m = p.match(/^\/sorg\/video\/([^/?#]+)\/?$/)
+  if (m) return { soort: 'video', id: decodeURIComponent(m[1]) }
+  m = p.match(/^\/sorg\/([^/?#]+)\/?$/)
+  if (m && m[1] !== 'video') return { soort: 'plasing', id: decodeURIComponent(m[1]) }
+  return null
 }
 
 /* Lees 'n skakel wat pas oopgemaak is. Gee { soort, id } of null. */
+/* Wat pas oopgemaak is — 'n PAD (/sorg/<id>, nuut) of 'n HASH (#sorg-…, oud).
+ *
+ * Die pad word onthou in sessionStorage voordat ons dit uit die adresbalk vee,
+ * want die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar 'n
+ * nuwe weergawe is — en dan is die pad weg. Dieselfde patroon as /bid/<id>. */
 export function leesSorgSkakel(hash) {
+  if (typeof window !== 'undefined' && hash === undefined) {
+    try {
+      const uitPad = uitSorgPad(window.location.pathname)
+      if (uitPad) {
+        sessionStorage.setItem('sorg_skakel', JSON.stringify(uitPad))
+        window.history.replaceState({}, '', '/')
+        return uitPad
+      }
+      const onthou = sessionStorage.getItem('sorg_skakel')
+      if (onthou) return JSON.parse(onthou)
+    } catch { /* privaat venster */ }
+  }
   const h = String(hash || (typeof window !== 'undefined' ? window.location.hash : ''))
   const m = /^#sorg-(plasing|video)-(.+)$/.exec(h)
   return m ? { soort: m[1], id: decodeURIComponent(m[2]) } : null

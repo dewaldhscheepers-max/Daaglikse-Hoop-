@@ -31,6 +31,8 @@ node src/data/sorgSaai.toets.mjs              # die eerste reaksies en opmerking
 node src/data/sorgNooi.toets.mjs              # "nooi iemand om te antwoord", 28 toetse
 node api/_sorgOutoPlaas.toets.mjs             # plasings gaan DADELIK op, behalwe krisis, 34
 node src/data/sorg.toets.mjs                  # Sorg se indiening en krisisvloei, 88 toetse
+node src/data/sorgTyd.toets.mjs               # "3 u" in plaas van "19 Augustus", 50 toetse
+node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
