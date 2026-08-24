@@ -37,6 +37,7 @@ import SorgVideo from '../components/SorgVideo'
 import SorgNommers from '../components/SorgNommers'
 import SorgVorm from '../components/SorgVorm'
 import SorgPlasing from '../components/SorgPlasing'
+import SorgBemoedigVloei from '../components/SorgBemoedigVloei'
 import DonationCard from '../components/DonationCard'
 import {
   haalVideos, weekVideo,
@@ -104,6 +105,15 @@ export default function Sorg({ onNavigate }) {
   /* Watter gesprek 'n gedeelde skakel wil oopmaak. Dit bly staan totdat die
      muur werklik gelaai is. */
   const [springNa, setSpringNa] = useState('')
+  /* ── "Luister na iemand" ──
+   *
+   * Dewald: "dieselfde moet gebeur wanneer ek op Luister na iemand kliek...
+   * maar in plek dat jy saam bid klik kan jy die persoon bemoedig deur te
+   * komment."
+   *
+   * Dit is Bid Saam se saamgebed-vloei, met 'n kassie in plaas van 'n
+   * "Ek het gebid"-knoppie. Sien SorgBemoedigVloei.jsx. */
+  const [vloeiOop, setVloeiOop] = useState(false)
   const [data, setData] = useState(null)      // null = besig
   const [muur, setMuur] = useState(null)      // null = besig
 
@@ -514,7 +524,10 @@ export default function Sorg({ onNavigate }) {
             >
               Deel wat swaar is
             </button>
-            <button className="sorg-knop uit" onClick={() => { meet('klikLuister'); naEenAlleen() }}>
+            <button
+              className="sorg-knop uit"
+              onClick={() => { meet('klikLuister'); meet('antwoordBegin'); setVloeiOop(true) }}
+            >
               Luister na iemand
             </button>
           </div>
@@ -806,6 +819,26 @@ export default function Sorg({ onNavigate }) {
 
         <p className="sorg-grens">{GRENSSIN}</p>
       </div>
+
+      {/* ── Een mens op 'n slag ──
+       *
+       * Dieselfde vorm as Bid Saam se saamgebed: 'n vordering-balk bo, een
+       * storie op die skerm, en 'n knoppie wat jou na die volgende vat. Die
+       * verskil is die kassie: hier SKRYF 'n mens in plaas van om te druk. */}
+      {vloeiOop && (
+        <SorgBemoedigVloei
+          plasings={plasings}
+          gereed={muur !== null}
+          onClose={() => {
+            setVloeiOop(false)
+            /* Wat hy pas geskryf het, moet dadelik op die muur wees. */
+            vergeetMuur()
+            haalMuur().then(d => setMuur(d)).catch(() => {})
+            setSaamDra(leesSaamDra())
+          }}
+          onGeskryf={() => setSaamDra(leesSaamDra())}
+        />
+      )}
 
       <HulpNou oop={hulpOop} onSluit={() => setHulpOop(false)} />
 
