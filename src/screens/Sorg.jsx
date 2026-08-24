@@ -836,7 +836,16 @@ export default function Sorg({ onNavigate }) {
             haalMuur().then(d => setMuur(d)).catch(() => {})
             setSaamDra(leesSaamDra())
           }}
-          onGeskryf={() => setSaamDra(leesSaamDra())}
+          /* Elke woord wat hier gestuur word, moet DADELIK op die muur agter
+             hierdie vloei wys — nie eers wanneer die mens die hele ry klaar
+             gedoen het en toemaak nie. Dewald: "maak seker as iemand hier
+             comment dat dit dadelik op die blad ook wys." Dieselfde
+             vergeetMuur()+haalMuur()-paar as onClose, net per storie. */
+          onGeskryf={() => {
+            setSaamDra(leesSaamDra())
+            vergeetMuur()
+            haalMuur().then(d => setMuur(d)).catch(() => {})
+          }}
         />
       )}
 

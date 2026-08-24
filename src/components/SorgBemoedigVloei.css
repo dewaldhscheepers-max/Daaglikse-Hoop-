@@ -11,12 +11,25 @@
 
 /* Die storie kan lank wees, en die kassie ook. Bid Saam se liggaam is
    gesentreer omdat 'n gebed drie reels is; hier moet dit kan rol. */
+/* ── Niks in hierdie kolom mag KRIMP nie ──
+ *
+ * `.sg-body` is 'n flex-kolom met `flex: 1`. Bid Saam se inhoud is kort — 'n
+ * gebed en een knoppie — dus het niks ooit gekrimp nie.
+ *
+ * Hier is daar 'n storie, vyf klaar woorde, 'n tekskassie en drie knoppies. Die
+ * kolom loop oor, en dan doen flex wat flex doen: dit KRIMP die items. Die
+ * storie het 'n `overflow: auto` gehad, wat beteken hy mag tot NUL krimp — en
+ * die kaart het leeg op die skerm gestaan met die naam half afgesny onderaan.
+ *
+ * `flex: 0 0 auto` op elke kind: niks krimp, en die BLAD rol in plaas daarvan. */
 .sbv-body {
   justify-content: flex-start;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 28px;
 }
+
+.sbv-body > * { flex: 0 0 auto; }
 
 .sbv-titel {
   margin: 0 0 8px;
@@ -28,11 +41,13 @@
 }
 
 /* Die HELE storie. 'n Mens kan nie iemand bemoedig oor 'n halwe sin nie, dus
-   word niks hier afgekap nie — en die paragrawe bly. */
+   word niks hier afgekap nie — en die paragrawe bly.
+   
+   Geen `max-height` en geen `overflow` nie: albei laat hierdie blok in 'n
+   flex-kolom tot nul krimp. Is die storie lank, rol die BLAD. */
 .sbv-teks {
   white-space: pre-wrap;
-  max-height: 38vh;
-  overflow-y: auto;
+  min-height: 1.7em;
 }
 
 .sbv-vinnig {

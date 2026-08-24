@@ -41,8 +41,11 @@ import { magKas } from './data/kasBesluit.js'
  * 7: die uitnodiging se woorde en die installasie-trechter.
  * 8: die dubbele `anoniem`-sleutel wat elke storie anoniem laat gaan het.
  * 9: die daaglikse plafon is weg — "Vandag se plekke is vol" mag nooit wys.
- * 10: "Luister na iemand" is nou Bid Saam se vloei, met 'n kassie. */
-const SPOEL = 10
+ * 10: "Luister na iemand" is nou Bid Saam se vloei, met 'n kassie.
+ * 11: die storiekaart in daardie vloei het leeg gestaan — .sg-body se
+ *     flex-kolom het die storieteks tot niks laat krimp. Nuwe muur-plasings
+ *     wys nou dadelik agter die vloei, nie eers wanneer dit toemaak nie. */
+const SPOEL = 11
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
