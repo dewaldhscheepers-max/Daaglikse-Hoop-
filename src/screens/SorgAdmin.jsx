@@ -130,6 +130,13 @@ export default function SorgAdmin({ geheim = '' }) {
       if (!r.ok) { setBoodskap({ fout: d.fout || ('HTTP ' + r.status) }); return }
       setInvoerUit(d)
       setSkakels('')
+      /* `haal()` hierbo lees reguit met die admin-geheim en wys dus reg — maar
+         die Dra Mekaar-blad se `haalVideos()` hou sy EIE kas (`belofte`), en
+         niks het dit ooit hier gestel nie. Dewald plak 'n lys, sien dit
+         dadelik hier, en dit staan glad nie op die egte blad nie — dieselfde
+         video wat "opgelaai" het en tog wegbly. Sien `stuur()` hierbo, wat
+         dit reg doen vir die enkel-vorm. */
+      vergeetVideos()
       await haal(geheim)
     } catch (e) {
       setBoodskap({ fout: String(e && e.message) })
