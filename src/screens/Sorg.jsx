@@ -828,6 +828,7 @@ export default function Sorg({ onNavigate }) {
       {vloeiOop && (
         <SorgBemoedigVloei
           plasings={plasings}
+          saamDra={saamDra}
           gereed={muur !== null}
           onClose={() => {
             setVloeiOop(false)

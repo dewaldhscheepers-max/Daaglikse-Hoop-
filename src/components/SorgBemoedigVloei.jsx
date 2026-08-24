@@ -35,7 +35,12 @@ import { meet } from '../data/sorgMeetStuur'
 import SorgProfiel from './SorgProfiel'
 import './SorgBemoedigVloei.css'
 
-export default function SorgBemoedigVloei({ plasings, gereed, onClose, onGeskryf }) {
+/* Hoeveel dae oud 'n storie nog in die ry mag wees. Bid Saam gebruik twee
+   dae; hier is dit vier — 'n mens wat 'n storie skryf, wag nie oornag op
+   antwoord soos 'n gebedsversoek nie, en die muur is stiller. */
+const VIER_DAE_MS = 4 * 24 * 60 * 60 * 1000
+
+export default function SorgBemoedigVloei({ plasings, saamDra, gereed, onClose, onGeskryf }) {
   const [idx, setIdx] = useState(0)
   const [gedoen, setGedoen] = useState(new Set())
   const [klaar, setKlaar] = useState(false)
@@ -51,12 +56,25 @@ export default function SorgBemoedigVloei({ plasings, gereed, onClose, onGeskryf
    * die blad self ("Wag nog vir iemand" bo), en dit is die hele punt van
    * hierdie skerm: die mens wat die langste gewag het, kry die eerste woord.
    *
-   * Wat hierdie foon reeds beantwoord het, val uit. 'n Mens moet nie deur sy
-   * eie antwoorde blaai nie. */
+   * Dewald: "dit moet net die boodskappe wys wat ek nog nie geantwoord het
+   * nie. en ook nie ouer as 4 dae nie. kyk hoe bidsaam werk." Bid Saam se
+   * `SaamgebedFlow` doen presies dit: `!prayed.has(p.id)` en 'n dae-grens op
+   * `queueRef`-bou. Hier is `prayed` se ewebeeld `saamDra` — die gesprekke
+   * waarby HIERDIE foon reeds gaan sit het (sien sorgSaamDra.js). Wat langer
+   * as vier dae oud is, val ook uit: 'n storie van verlede week het reeds
+   * ander mense se antwoorde gehad, en hoort nie meer in 'n "nou-nou"-ry
+   * nie. */
   const ryRef = useRef(null)
   if (ryRef.current === null && gereed) {
+    const gedra = new Set((saamDra || []).map(r => r.id))
+    const grens = Date.now() - VIER_DAE_MS
     ryRef.current = [...(plasings || [])]
       .filter(p => p && p.id && p.teks)
+      .filter(p => !gedra.has(p.id))
+      .filter(p => {
+        const ms = Date.parse(p.geskep || p.datum || '')
+        return Number.isFinite(ms) && ms >= grens
+      })
       .sort((a, b) => {
         const n = telOpmerkings(a) - telOpmerkings(b)
         if (n !== 0) return n

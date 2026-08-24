@@ -44,8 +44,10 @@ import { magKas } from './data/kasBesluit.js'
  * 10: "Luister na iemand" is nou Bid Saam se vloei, met 'n kassie.
  * 11: die storiekaart in daardie vloei het leeg gestaan — .sg-body se
  *     flex-kolom het die storieteks tot niks laat krimp. Nuwe muur-plasings
- *     wys nou dadelik agter die vloei, nie eers wanneer dit toemaak nie. */
-const SPOEL = 11
+ *     wys nou dadelik agter die vloei, nie eers wanneer dit toemaak nie.
+ * 12: die vloei wys nou net stories wat hierdie foon nog nie geantwoord het
+ *     nie, en niks ouer as vier dae nie — soos Bid Saam s'n. */
+const SPOEL = 12
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
