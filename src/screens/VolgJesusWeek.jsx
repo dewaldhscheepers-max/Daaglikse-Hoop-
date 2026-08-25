@@ -561,8 +561,20 @@ function Lees({ skrif, fyn }) {
   function maakBybelOop() {
     if (!eerste) return
     try {
+      /* Dieselfde regstelling as VolgJesusStap.jsx se BybelKnop: die
+         eindvers ry saam, en 'n gedeelte met TWEE stukke in dieselfde
+         hoofstuk (soos "Johannes 6:26–27, 66–69") stuur die tweede stuk ook
+         deur — anders merk en maak dit nooit oop nie. */
       window.dispatchEvent(new CustomEvent('open-bybel', {
-        detail: { boek: eerste.boek, hoofstuk: eerste.hoofstuk, vers: eerste.van || null },
+        detail: {
+          boek: eerste.boek,
+          hoofstuk: eerste.hoofstuk,
+          vers: eerste.van || null,
+          versTot: eerste.tot || eerste.van || null,
+          ekstraSpanne: spanne.slice(1)
+            .filter(s => s.hoofstuk === eerste.hoofstuk)
+            .map(s => ({ van: s.van, tot: s.tot || s.van })),
+        },
       }))
       setGestuur(true)
     } catch {}

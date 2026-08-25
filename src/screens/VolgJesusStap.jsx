@@ -543,13 +543,21 @@ function BybelKnop({ skrif, bo }) {
     try {
       /* Die EINDVERS ry saam. Dit is hoekom die Bybel nog nooit kon wys
          WAAR die gedeelte ophou nie: "Lukas 9:23–25" het net die 23
-         deurgestuur en die 25 is hier weggegooi. */
+         deurgestuur en die 25 is hier weggegooi.
+
+         'n Gedeelte soos "Johannes 6:26–27, 66–69" ontleed as TWEE stukke in
+         dieselfde hoofstuk. Net die eerste stuur, en die 66–69 het nooit
+         gemerk of oopgemaak nie — presies wat Dewald raakgeloop het. Elke
+         stuk NA die eerste gaan hier saam as `ekstraSpanne`. */
       window.dispatchEvent(new CustomEvent('open-bybel', {
         detail: {
           boek: eerste.boek,
           hoofstuk: eerste.hoofstuk,
           vers: eerste.van || null,
           versTot: eerste.tot || eerste.van || null,
+          ekstraSpanne: spanne.slice(1)
+            .filter(s => s.hoofstuk === eerste.hoofstuk)
+            .map(s => ({ van: s.van, tot: s.tot || s.van })),
         },
       }))
       setGestuur(true)

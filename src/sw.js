@@ -60,8 +60,11 @@ import { magKas } from './data/kasBesluit.js'
  *     het; dit gebruik nou dieselfde hetDae()-register as die egte skerm.
  * 18: die stemboodskap het op die verkeerde dag gestaan. Dit hoort by Dag 3
  *     ("Gee vir Jesus jou leë boot"), nie Dag 1 nie — met Dewald se egte
- *     woorde as transkripsie, ongewysig. */
-const SPOEL = 18
+ *     woorde as transkripsie, ongewysig.
+ * 19: "Maak in Bybel oop" het net die EERSTE stuk van 'n gedeelte met twee
+ *     los verse-reekse in dieselfde hoofstuk gemerk en oopgemaak (bv.
+ *     "Johannes 6:26–27, 66–69") — die tweede stuk het nooit gewys nie. */
+const SPOEL = 19
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
