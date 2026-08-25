@@ -46,8 +46,11 @@ import { magKas } from './data/kasBesluit.js'
  *     flex-kolom het die storieteks tot niks laat krimp. Nuwe muur-plasings
  *     wys nou dadelik agter die vloei, nie eers wanneer dit toemaak nie.
  * 12: die vloei wys nou net stories wat hierdie foon nog nie geantwoord het
- *     nie, en niks ouer as vier dae nie — soos Bid Saam s'n. */
-const SPOEL = 12
+ *     nie, en niks ouer as vier dae nie — soos Bid Saam s'n.
+ * 13: die donasie-opspringer vra nou vir 'n Maandelikse Hoop-Vennoot OF 'n
+ *     eenmalige bydrae, nie net eenmalig nie; en die Bybel-knoppie is nou 'n
+ *     leesbare pil in plaas van "BYBEL" in 7.5px. */
+const SPOEL = 13
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

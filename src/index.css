@@ -139,37 +139,41 @@ body {
       en dieselfde reel geld hier. Ons sentreer met 'n negatiewe marge, wat
       niks saamstel nie. Die ou `transition: transform` was ook 'n oorblyfsel
       van die scale wat lankal uit is. */
+/* Dewald: "die woord bybel is onduidelik. miskien moet ons die maak soos die
+   groep chat se knoppie. 📖Bybel." Dit was 'n 48×48px vierkant met "BYBEL" in
+   7.5px ONDER die ikoon — te klein om te lees. Nou is dit dieselfde pil-vorm
+   as VOLG JESUS se groep-knoppie (`.vc-knop` in VolgJesusChat.css): ikoon en
+   woord langs mekaar, nie ikoon bo woord nie. */
 .nav-bybel {
   position: absolute;
-  /* Die balk het 5 oortjies, dus sit Luister se middel op 10% */
+  /* Die balk het 5 oortjies, dus sit Luister se middel op 10%. Die pil is
+     wyer as die ou vierkant, dus 'n groter negatiewe kantlyn om dit steeds
+     daar te sentreer. */
   left: 10%;
-  margin-left: -24px;          /* die helfte van die breedte — presies op Luister se middel */
+  margin-left: -30px;
   bottom: calc(100% - 2px);
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 999px;
   background: linear-gradient(150deg, #6B4FA0 0%, #523D82 100%);
   border: 2px solid #D9AE4A;
   box-shadow: 0 4px 14px rgba(45, 32, 64, 0.3);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 0;
   cursor: pointer;
   color: #FFFFFF;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.12s;
 }
 
-.nav-bybel svg { width: 20px; height: 20px; }
+.nav-bybel svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 .nav-bybel span {
-  font-family: var(--font-serif);
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: #F0D389;
   line-height: 1;
 }

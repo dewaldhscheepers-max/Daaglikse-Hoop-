@@ -122,6 +122,46 @@ a.popup-btn-primary {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Die donasie-opspringer se twee knoppies ──
+ *
+ * Dieselfde kleure as DonationCard.css se `.donation-card-btn-monthly` en
+ * `.donation-card-btn-once`, sodat die opspringer soos elke ander
+ * donasie-plek in die app lyk. Geen `transform` op `:active` nie — net
+ * opasiteit. Sien CLAUDE.md se "Android, Chrome, en gekleurde strepe": 'n
+ * NUWE knoppie kry nie die ou fout wat elders nog rondlê nie. */
+.popup-btn-monthly {
+  width: 100%;
+  background: #2e7d4f;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-top: 6px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.popup-btn-monthly:active { opacity: 0.85; }
+
+.popup-btn-once {
+  width: 100%;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.popup-btn-once:active { opacity: 0.7; }
+
 /* ─── Share popup additions ─── */
 .share-dots {
   display: flex;

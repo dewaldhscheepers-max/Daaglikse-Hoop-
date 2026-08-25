@@ -314,9 +314,18 @@ export default function App() {
     setTargetBookId(bookId)
   }
 
-  function handleDonationCta() {
+  /* Twee paaie, nie een nie. Dewald: "Daar moet 2 knopies wees... Word 'n
+     Maandelikse Hoop-Vennoot of Eenmalige bydrae." Aan die einde van 'n
+     maand — wanneer mense besluit om te gee — moes hierdie opspringer die
+     maandelikse opsie glad nie gewys het nie. */
+  function handleDonationOnce() {
     dismissPopup()
     setDonation(true)
+  }
+
+  function handleDonationMonthly() {
+    dismissPopup()
+    setShowHoopVennoot(true)
   }
 
   async function handleShareApp() {
@@ -1444,7 +1453,8 @@ export default function App() {
 
       {activePopup?.type === 'donation' && (
         <DonationPopup
-          onDonate={handleDonationCta}
+          onMonthly={handleDonationMonthly}
+          onOnce={handleDonationOnce}
           onClose={dismissPopup}
         />
       )}

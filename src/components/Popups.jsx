@@ -2,7 +2,16 @@ import InstallTelling from './InstallTelling'
 import { useState, useEffect } from 'react'
 import './PopupStyles.css'
 
-export function DonationPopup({ onDonate, onClose }) {
+/* Dewald: "Die popup vra vir donasie maar dit vra net eenmalig. Daar moet 2
+ * knopies wees... Word 'n Maandelikse Hoop-Vennoot of Eenmalige bydrae. Soos
+ * al die ander kaarte in die app."
+ *
+ * `DonationCard.jsx` het presies hierdie twee knoppies al oral in die app —
+ * op Luister, Speel, Bid Nou, Sorg, ensovoorts. Hierdie opspringer was die
+ * EEN plek wat agtergebly het: dit het net na die eenmalige vloei gewys, en
+ * aan die einde van 'n maand — wanneer mense juis besluit om te gee — is 'n
+ * maandelikse opsie wat glad nie gevra word nie, geld wat nooit kom nie. */
+export function DonationPopup({ onMonthly, onOnce, onClose }) {
   return (
     <div className="popup-backdrop" onClick={onClose}>
       <div className="popup-card" onClick={e => e.stopPropagation()}>
@@ -15,7 +24,8 @@ export function DonationPopup({ onDonate, onClose }) {
         <p className="popup-body">
           Jou bydrae help ons om daaglikse stemnotas, gebed en geestelike hulpbronne beskikbaar te hou vir mense wat swaar dra.
         </p>
-        <button className="popup-btn-primary" onClick={onDonate}>Maak 'n bydrae</button>
+        <button className="popup-btn-monthly" onClick={onMonthly}>Word 'n Maandelikse Hoop-Vennoot</button>
+        <button className="popup-btn-once" onClick={onOnce}>Eenmalige bydrae</button>
         <button className="popup-btn-secondary" onClick={onClose}>Nie nou nie</button>
       </div>
     </div>
