@@ -69,8 +69,11 @@ import { magKas } from './data/kasBesluit.js'
  * 21: nuwe speletjie: Hou die Vlam.
  * 22: die tik-teiken was HELFTE so breed as die getekende goue sone — 'n
  *     tik binne die sigbare sone is soms as 'n mis getel. En die
- *     donasie-kaart is van die spel se skerm af weg. */
-const SPOEL = 22
+ *     donasie-kaart is van die spel se skerm af weg.
+ * 23: Hou die Vlam is heeltemal verwyder. Die regstelling het steeds nie op
+ *     'n regte foon gewerk nie — waarskynlik raak-vertraging wat 'n toets
+ *     in 'n houer nie kon wys nie. Dewald: "verwyder dit net." */
+const SPOEL = 23
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

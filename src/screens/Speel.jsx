@@ -64,21 +64,6 @@ const SPELETJIES = [
       </>
     ),
   },
-  {
-    id:      'hou-die-vlam',
-    event:   'open-hou-die-vlam',
-    titel:   'Hou die Vlam',
-    beskryf: 'Tik wanneer die vlam in die goue sone is. Hoe langer jy hou, hoe vinniger word dit.',
-    merk:    'Speel nou',
-    tint:    '#2A2140',
-    stroke:  '#E0B872',
-    ikoon: (
-      <>
-        <path d="M12 3c1 2.5 3.5 4 3.5 7.5A3.5 3.5 0 0 1 12 14a3.5 3.5 0 0 1-3.5-3.5C8.5 7 11 5.5 12 3Z"/>
-        <path d="M9 17.5c0 1.9 1.34 3.5 3 3.5s3-1.6 3-3.5"/>
-      </>
-    ),
-  },
 ]
 
 export default function Speel() {

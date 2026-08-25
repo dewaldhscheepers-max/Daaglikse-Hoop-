@@ -44,7 +44,6 @@ import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
-import HouDieVlam from './screens/HouDieVlam'
 import VolgJesusLewe from './screens/VolgJesusLewe'
 import {
   kodeUitAdres, stoorNooi, leesNooi,
@@ -133,7 +132,6 @@ export default function App() {
   const [bybelBeginBy, setBybelBeginBy]           = useState(null)
   const [showArk, setShowArk]                     = useState(false)
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
-  const [showHouDieVlam, setShowHouDieVlam]       = useState(false)
   const [showVolgJesus, setShowVolgJesus]         = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
 
@@ -1033,13 +1031,6 @@ export default function App() {
     return () => window.removeEventListener('open-vrugtefees', onOpen)
   }, [])
 
-  // ── Hou die Vlam, vanaf die Speel-blad ──
-  useEffect(() => {
-    function onOpen() { setShowHouDieVlam(true) }
-    window.addEventListener('open-hou-die-vlam', onOpen)
-    return () => window.removeEventListener('open-hou-die-vlam', onOpen)
-  }, [])
-
   // ── VOLG JESUS ──
   // Die kaart op Luister staan direk onder die speler en stuur hierheen.
   useEffect(() => {
@@ -1220,7 +1211,6 @@ export default function App() {
     { oop: showBybel,               toe: () => setShowBybel(false) },
     { oop: showArk,                 toe: () => setShowArk(false) },
     { oop: showVrugtefees,          toe: () => setShowVrugtefees(false) },
-    { oop: showHouDieVlam,          toe: () => setShowHouDieVlam(false) },
     { oop: showVredepad,            toe: () => setShowVredepad(false) },
     { oop: showHuise,               toe: () => setShowHuise(false) },
     { oop: showJourney,             toe: () => setShowJourney(false) },
@@ -1551,10 +1541,6 @@ export default function App() {
 
       {showVrugtefees && (
         <Vrugtefees onClose={() => setShowVrugtefees(false)} />
-      )}
-
-      {showHouDieVlam && (
-        <HouDieVlam onClose={() => setShowHouDieVlam(false)} />
       )}
 
       {showVolgJesus && (
