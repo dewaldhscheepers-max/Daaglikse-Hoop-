@@ -49,8 +49,10 @@ import { magKas } from './data/kasBesluit.js'
  *     nie, en niks ouer as vier dae nie — soos Bid Saam s'n.
  * 13: die donasie-opspringer vra nou vir 'n Maandelikse Hoop-Vennoot OF 'n
  *     eenmalige bydrae, nie net eenmalig nie; en die Bybel-knoppie is nou 'n
- *     leesbare pil in plaas van "BYBEL" in 7.5px. */
-const SPOEL = 13
+ *     leesbare pil in plaas van "BYBEL" in 7.5px.
+ * 14: daardie pil was te wyd en het oor "Vandag se wallpaper" se kaart gesit.
+ *     Nou staan hy regs onder, kleiner. */
+const SPOEL = 14
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

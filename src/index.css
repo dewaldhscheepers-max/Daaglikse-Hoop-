@@ -141,22 +141,23 @@ body {
       van die scale wat lankal uit is. */
 /* Dewald: "die woord bybel is onduidelik. miskien moet ons die maak soos die
    groep chat se knoppie. 📖Bybel." Dit was 'n 48×48px vierkant met "BYBEL" in
-   7.5px ONDER die ikoon — te klein om te lees. Nou is dit dieselfde pil-vorm
-   as VOLG JESUS se groep-knoppie (`.vc-knop` in VolgJesusChat.css): ikoon en
-   woord langs mekaar, nie ikoon bo woord nie. */
+   7.5px ONDER die ikoon — te klein om te lees. Eers is dit 'n groter pil
+   gemaak, links bo Luister — maar 'n pil van 110px wyd, op 'n VASTE plek op
+   die skerm, vee oor watter kaart ook al daaronder rol. Op Dewald se foon het
+   dit reg oor "Vandag se wallpaper" se ikoon en woorde gesit.
+
+   Dewald: "sit dit regs onder en maak dit kleiner. korter woord en kleiner
+   opvulling." Regs is stiller — die kaarte se eie inhoud staan links en
+   middel; 'n klein merkie in die regter-onderhoek raak selde iets. */
 .nav-bybel {
   position: absolute;
-  /* Die balk het 5 oortjies, dus sit Luister se middel op 10%. Die pil is
-     wyer as die ou vierkant, dus 'n groter negatiewe kantlyn om dit steeds
-     daar te sentreer. */
-  left: 10%;
-  margin-left: -30px;
+  right: 10px;
   bottom: calc(100% - 2px);
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 7px;
-  padding: 10px 16px;
+  gap: 4px;
+  padding: 6px 10px;
   border-radius: 999px;
   background: linear-gradient(150deg, #6B4FA0 0%, #523D82 100%);
   border: 2px solid #D9AE4A;
@@ -167,13 +168,13 @@ body {
   transition: background-color 0.12s;
 }
 
-.nav-bybel svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-bybel svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 .nav-bybel span {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: #F0D389;
   line-height: 1;
 }
