@@ -51,8 +51,9 @@ import { magKas } from './data/kasBesluit.js'
  *     eenmalige bydrae, nie net eenmalig nie; en die Bybel-knoppie is nou 'n
  *     leesbare pil in plaas van "BYBEL" in 7.5px.
  * 14: daardie pil was te wyd en het oor "Vandag se wallpaper" se kaart gesit.
- *     Nou staan hy regs onder, kleiner. */
-const SPOEL = 14
+ *     Nou staan hy regs onder, kleiner.
+ * 15: die Bybel-pil skuif 6mm hoër bo die balk, en is 'n bietjie groter. */
+const SPOEL = 15
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

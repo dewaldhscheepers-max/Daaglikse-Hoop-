@@ -148,16 +148,20 @@ body {
 
    Dewald: "sit dit regs onder en maak dit kleiner. korter woord en kleiner
    opvulling." Regs is stiller — die kaarte se eie inhoud staan links en
-   middel; 'n klein merkie in die regter-onderhoek raak selde iets. */
+   middel; 'n klein merkie in die regter-onderhoek raak selde iets.
+
+   Dewald: "dit moet klein bietjie boontoe. so 6 milimeter. klein bietjie
+   groter." 6mm is by die gewone 96dpi-omskakeling sowat 23px — dit skuif nou
+   verder BO die balk se rand in plaas van amper daarop. */
 .nav-bybel {
   position: absolute;
   right: 10px;
-  bottom: calc(100% - 2px);
+  bottom: calc(100% + 21px);
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
+  gap: 5px;
+  padding: 7px 12px;
   border-radius: 999px;
   background: linear-gradient(150deg, #6B4FA0 0%, #523D82 100%);
   border: 2px solid #D9AE4A;
@@ -168,11 +172,11 @@ body {
   transition: background-color 0.12s;
 }
 
-.nav-bybel svg { width: 14px; height: 14px; flex-shrink: 0; }
+.nav-bybel svg { width: 15.5px; height: 15.5px; flex-shrink: 0; }
 
 .nav-bybel span {
   font-family: var(--font-body);
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: #F0D389;
