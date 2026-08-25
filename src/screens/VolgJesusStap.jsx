@@ -24,6 +24,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ontleedVerwysing } from '../data/volgJesus'
+import { boekNaam } from '../data/bybelBoeke'
 /* Die week se dae kom uit die REGISTER, nie uit Week 1 nie. Hierdie skerm was
    aan week 1 vasgemaak; nou bedien dit elke week wat 'n dag-pad het. Sien
    volgJesusDae.js. */
@@ -530,34 +531,29 @@ function Kassie({ id, prompt, waarde, stel }) {
   )
 }
 
-/* Die LEES-blok. 'n Klein reël en 'n knoppie — geen "EK HET GELEES" wat die
-   pad blokkeer nie. Kan die verwysing nie ontleed word nie, verdwyn net die
-   knoppie; niemand kry 'n knoppie wat niks doen nie. */
-function BybelKnop({ skrif, bo }) {
+/* Die LEES-blok se knoppie — EEN reeks, EEN knoppie.
+ *
+ * Dewald: "sit Johannes 6:26 en dan... maak in bybel oop... dan sê jy lees
+ * ook Johannes 66–69... en weer maak in bybel oop." 'n Gedeelte met twee los
+ * verse-reekse in dieselfde hoofstuk (soos "Johannes 6:26–27, 66–69") kry
+ * dus TWEE aparte knoppies, elk vir sy EIE reeks — nie een knoppie wat albei
+ * saam oopmaak nie.
+ *
+ * Kan die verwysing nie ontleed word nie, verdwyn net die knoppie; niemand
+ * kry 'n knoppie wat niks doen nie. */
+function BybelKnop({ span, bo }) {
   const [gestuur, setGestuur] = useState(false)
-  const spanne = ontleedVerwysing(skrif)
-  const eerste = spanne && spanne[0]
-  if (!eerste) return null
+  if (!span) return null
+  const teks = skrifTeks(span)
 
   function maakOop() {
     try {
-      /* Die EINDVERS ry saam. Dit is hoekom die Bybel nog nooit kon wys
-         WAAR die gedeelte ophou nie: "Lukas 9:23–25" het net die 23
-         deurgestuur en die 25 is hier weggegooi.
-
-         'n Gedeelte soos "Johannes 6:26–27, 66–69" ontleed as TWEE stukke in
-         dieselfde hoofstuk. Net die eerste stuur, en die 66–69 het nooit
-         gemerk of oopgemaak nie — presies wat Dewald raakgeloop het. Elke
-         stuk NA die eerste gaan hier saam as `ekstraSpanne`. */
       window.dispatchEvent(new CustomEvent('open-bybel', {
         detail: {
-          boek: eerste.boek,
-          hoofstuk: eerste.hoofstuk,
-          vers: eerste.van || null,
-          versTot: eerste.tot || eerste.van || null,
-          ekstraSpanne: spanne.slice(1)
-            .filter(s => s.hoofstuk === eerste.hoofstuk)
-            .map(s => ({ van: s.van, tot: s.tot || s.van })),
+          boek: span.boek,
+          hoofstuk: span.hoofstuk,
+          vers: span.van || null,
+          versTot: span.tot || span.van || null,
         },
       }))
       setGestuur(true)
@@ -570,18 +566,38 @@ function BybelKnop({ skrif, bo }) {
               onClick={maakOop}>
         📖  Maak in Bybel oop
       </button>
-      {gestuur && <p className="vs-lees-nota">Die Bybel maak by {skrif} oop.</p>}
+      {gestuur && <p className="vs-lees-nota">Die Bybel maak by {teks} oop.</p>}
     </>
   )
 }
 
+/* "Johannes 6:26–27" uit 'n ontleedde span. Sonder eindvers, of met dieselfde
+   begin- en eindvers, staan net die een vers. */
+function skrifTeks(span) {
+  const reeks = span.tot && span.tot !== span.van ? `${span.van}–${span.tot}` : span.van
+  return `${boekNaam(span.boek)} ${span.hoofstuk}:${reeks}`
+}
+
 function Lees({ merk, skrif, lyf }) {
+  const spanne = ontleedVerwysing(skrif)
+  const eerste = spanne && spanne[0]
+  /* Stukke NA die eerste, in DIESELFDE hoofstuk — elkeen kry sy eie "lees
+     ook"-reël en sy eie knoppie. 'n Stuk in 'n ander hoofstuk val weg: die
+     Bybel wys een hoofstuk op 'n slag. */
+  const ekstra = eerste ? spanne.slice(1).filter(s => s.hoofstuk === eerste.hoofstuk) : []
+
   return (
     <div className="vs-kaart vs-lees">
       {merk && <div className="vs-kop">{merk}</div>}
-      <p className="vs-skrif">{skrif}</p>
-      <BybelKnop skrif={skrif} bo />
+      <p className="vs-skrif">{eerste ? skrifTeks(eerste) : skrif}</p>
+      <BybelKnop span={eerste} bo />
       {lyf && <p className="vs-lyf vs-lees-nota-lyf">{lyf}</p>}
+      {ekstra.map((s, i) => (
+        <div key={i} className="vs-lees-ekstra">
+          <p className="vs-lees-ekstra-lyf">Lees ook {skrifTeks(s)}.</p>
+          <BybelKnop span={s} bo />
+        </div>
+      ))}
     </div>
   )
 }

@@ -26,6 +26,7 @@
  */
 import { useState } from 'react'
 import { geldigeVideoId, ontleedVerwysing } from '../data/volgJesus'
+import { boekNaam } from '../data/bybelBoeke'
 import { mylpaalVir, biedKontak, antwoordVir } from '../data/volgJesusMylpale'
 import { prentPad } from '../data/prentPad'
 import './VolgJesusWeek.css'
@@ -551,29 +552,29 @@ function Privaat({ kop, teks, sleutel }) {
  * Kan ons die verwysing nie ontleed nie (of loop ons in die admin se
  * voorskou, waar App.jsx nie luister nie), dan bly die woorde staan en verdwyn
  * net die knoppie. Niemand kry 'n knoppie wat niks doen nie. */
-function Lees({ skrif, fyn }) {
+/* "Johannes 6:26–27" uit 'n ontleedde span. Sonder eindvers, of met dieselfde
+   begin- en eindvers, staan net die een vers. */
+function skrifTeks(span) {
+  const reeks = span.tot && span.tot !== span.van ? `${span.van}–${span.tot}` : span.van
+  return `${boekNaam(span.boek)} ${span.hoofstuk}:${reeks}`
+}
+
+/* Dewald: "sit Johannes 6:26 en dan... maak in bybel oop... dan sê jy lees
+   ook Johannes 66–69... en weer maak in bybel oop." 'n Gedeelte met twee los
+   verse-reekse in dieselfde hoofstuk (soos "Johannes 6:26–27, 66–69") kry
+   dus TWEE aparte knoppies, elk vir sy EIE reeks. */
+function LeesKnop({ span }) {
   const [gestuur, setGestuur] = useState(false)
-  if (!skrif) return null
+  if (!span) return null
 
-  const spanne = ontleedVerwysing(skrif)
-  const eerste = spanne && spanne[0]
-
-  function maakBybelOop() {
-    if (!eerste) return
+  function maakOop() {
     try {
-      /* Dieselfde regstelling as VolgJesusStap.jsx se BybelKnop: die
-         eindvers ry saam, en 'n gedeelte met TWEE stukke in dieselfde
-         hoofstuk (soos "Johannes 6:26–27, 66–69") stuur die tweede stuk ook
-         deur — anders merk en maak dit nooit oop nie. */
       window.dispatchEvent(new CustomEvent('open-bybel', {
         detail: {
-          boek: eerste.boek,
-          hoofstuk: eerste.hoofstuk,
-          vers: eerste.van || null,
-          versTot: eerste.tot || eerste.van || null,
-          ekstraSpanne: spanne.slice(1)
-            .filter(s => s.hoofstuk === eerste.hoofstuk)
-            .map(s => ({ van: s.van, tot: s.tot || s.van })),
+          boek: span.boek,
+          hoofstuk: span.hoofstuk,
+          vers: span.van || null,
+          versTot: span.tot || span.van || null,
         },
       }))
       setGestuur(true)
@@ -581,23 +582,41 @@ function Lees({ skrif, fyn }) {
   }
 
   return (
+    <>
+      <button className="vw-lees-knop" onClick={maakOop}>
+        📖  Lees dit in die app se Bybel
+      </button>
+      {gestuur && <p className="vw-lees-nota">Die Bybel maak by {skrifTeks(span)} oop.</p>}
+    </>
+  )
+}
+
+function Lees({ skrif, fyn }) {
+  if (!skrif) return null
+
+  const spanne = ontleedVerwysing(skrif)
+  const eerste = spanne && spanne[0]
+  const ekstra = eerste ? spanne.slice(1).filter(s => s.hoofstuk === eerste.hoofstuk) : []
+
+  return (
     <div className="vw-kaart vw-lees">
       <div className="vw-kop">LEES</div>
-      <p className="vw-skrif">{skrif}</p>
+      <p className="vw-skrif">{eerste ? skrifTeks(eerste) : skrif}</p>
       <p className="vw-lees-eis">
         Moenie hierdie deel oorslaan nie. Die res van vandag bou op hierdie
         gedeelte — gaan lees dit eers.
       </p>
-      {eerste && (
-        <button className="vw-lees-knop" onClick={maakBybelOop}>
-          📖  Lees dit in die app se Bybel
-        </button>
-      )}
+      <LeesKnop span={eerste} />
       <p className="vw-fyn">
         {eerste ? 'Of lees dit in jou eie Bybel. ' : ''}
         {fyn}
       </p>
-      {gestuur && <p className="vw-lees-nota">Die Bybel maak by {skrif} oop.</p>}
+      {ekstra.map((s, i) => (
+        <div key={i} className="vw-lees-ekstra">
+          <p className="vw-lees-ekstra-lyf">Lees ook {skrifTeks(s)}.</p>
+          <LeesKnop span={s} />
+        </div>
+      ))}
     </div>
   )
 }

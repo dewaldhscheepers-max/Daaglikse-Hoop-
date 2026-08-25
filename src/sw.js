@@ -63,8 +63,10 @@ import { magKas } from './data/kasBesluit.js'
  *     woorde as transkripsie, ongewysig.
  * 19: "Maak in Bybel oop" het net die EERSTE stuk van 'n gedeelte met twee
  *     los verse-reekse in dieselfde hoofstuk gemerk en oopgemaak (bv.
- *     "Johannes 6:26–27, 66–69") — die tweede stuk het nooit gewys nie. */
-const SPOEL = 19
+ *     "Johannes 6:26–27, 66–69") — die tweede stuk het nooit gewys nie.
+ * 20: nee, nie EEN knoppie wat albei stukke oopmaak nie — 'n LEES-kaart met
+ *     twee los reekse kry nou twee aparte "Maak in Bybel oop"-knoppies. */
+const SPOEL = 20
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

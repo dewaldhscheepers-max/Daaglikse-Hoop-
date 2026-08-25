@@ -403,3 +403,12 @@
 }
 .vw-lees-knop:active { background: #362B57; }
 .vw-lees-nota { margin-top: 8px; font-size: 12.5px; color: var(--purple-dark); }
+
+/* 'n Tweede (of derde) los verse-reeks in dieselfde hoofstuk — sien LeesKnop
+   in VolgJesusWeek.jsx. */
+.vw-lees-ekstra {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid #E6DFF5;
+}
+.vw-lees-ekstra-lyf {
+  font-size: 14.5px; line-height: 1.6; color: var(--text); margin: 0 0 10px;
+}

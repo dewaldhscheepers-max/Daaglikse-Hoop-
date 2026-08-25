@@ -133,25 +133,19 @@ function omhulVerse(root) {
  * Dit is 'n KLAS op verse wat reeds bestaan — die GAB se teks word met geen
  * karakter verander nie, en die erkenning bly onaangeraak. Dit is presies soos
  * 'n merkpen: dieselfde bladsy, net sigbaar waar 'n mens moet lees. */
-/* `spanne` is 'n lys { van, tot } — meer as een wanneer 'n gedeelte soos
-   "Johannes 6:26–27, 66–69" twee los stukke in DIESELFDE hoofstuk is. Elke
-   stuk kry sy eie "gemerk-eerste"/"gemerk-laaste", anders lyk dit of hulle
-   een deurlopende gedeelte is. */
-function merkGedeelte(root, spanne) {
+function merkGedeelte(root, van, tot) {
   if (!root) return
   root.querySelectorAll('.byb-vers.gemerk, .byb-vers.gemerk-eerste, .byb-vers.gemerk-laaste')
       .forEach(el => el.classList.remove('gemerk', 'gemerk-eerste', 'gemerk-laaste'))
-  for (const { van, tot } of spanne || []) {
-    const a = Number(van)
-    if (!Number.isInteger(a) || a < 1) continue
-    const b = Number.isInteger(Number(tot)) && Number(tot) >= a ? Number(tot) : a
-    for (let v = a; v <= b; v++) {
-      const el = root.querySelector(`.byb-vers[data-v="${v}"]`)
-      if (!el) continue
-      el.classList.add('gemerk')
-      if (v === a) el.classList.add('gemerk-eerste')
-      if (v === b) el.classList.add('gemerk-laaste')
-    }
+  const a = Number(van)
+  if (!Number.isInteger(a) || a < 1) return
+  const b = Number.isInteger(Number(tot)) && Number(tot) >= a ? Number(tot) : a
+  for (let v = a; v <= b; v++) {
+    const el = root.querySelector(`.byb-vers[data-v="${v}"]`)
+    if (!el) continue
+    el.classList.add('gemerk')
+    if (v === a) el.classList.add('gemerk-eerste')
+    if (v === b) el.classList.add('gemerk-laaste')
   }
 }
 
@@ -373,18 +367,12 @@ export default function Bybel({ onClose, beginBy = null }) {
    * Die tweede keer is die hoofstuk gekas en dan haal dit die 400ms — daarom
    * het dit soms gewerk en soms nie. Ons onthou nou net WAARHEEN, en die
    * effek wat die verse omhul, spring soontoe sodra hulle werklik daar is. */
-  /* `ekstraSpanne` is bykomende { van, tot }-stukke in DIESELFDE hoofstuk —
-     "Johannes 6:26–27, 66–69" gee die eerste stuk as versNr/tot en die
-     tweede hier. Sonder dit het die knoppie net die eerste stuk gemerk en
-     die tweede het nooit oopgemaak of gemerk nie. */
-  function springNa(kode, nr, versNr, tot, ekstraSpanne) {
+  function springNa(kode, nr, versNr, tot) {
     setBoek(kode); setHoofstuk(nr); setView('lees'); setSoek('')
     laaiHoofstukke(kode, weergaweId)
     laaiTeks(kode, nr, weergaweId)
     onthou(kode, nr)
-    const d = versNr
-      ? { spanne: [{ van: versNr, tot: tot || versNr }, ...(ekstraSpanne || [])] }
-      : null
+    const d = versNr ? { van: versNr, tot: tot || versNr } : null
     doelRef.current = d
     setDoel(d)
   }
@@ -417,10 +405,8 @@ export default function Bybel({ onClose, beginBy = null }) {
     /* Nou — en eers nou — bestaan die verse. Spring en merk. */
     if (!doel) return
     const wortel = teksRef.current
-    merkGedeelte(wortel, doel.spanne)
-    /* Bo, na die EERSTE stuk se begin-vers — 'n mens lees van bo af. */
-    const eersteVan = doel.spanne[0] && doel.spanne[0].van
-    const el = wortel.querySelector(`.byb-vers[data-v="${eersteVan}"]`)
+    merkGedeelte(wortel, doel.van, doel.tot)
+    const el = wortel.querySelector(`.byb-vers[data-v="${doel.van}"]`)
     if (!el) return
     /* BO, nie in die middel nie. Dewald: "die eerste reel wat gelees moet word
        moet bo wys." `block: 'center'` het die vers in die middel gesit met
@@ -453,10 +439,10 @@ export default function Bybel({ onClose, beginBy = null }) {
   const begonRef = useRef(false)
   useEffect(() => {
     if (begonRef.current || !beginBy || !weergaweId) return
-    const { boek: b, hoofstuk: h, vers, versTot, ekstraSpanne } = beginBy
+    const { boek: b, hoofstuk: h, vers, versTot } = beginBy
     if (!b || !h) return
     begonRef.current = true
-    springNa(b, h, vers || null, versTot || vers || null, ekstraSpanne)
+    springNa(b, h, vers || null, versTot || vers || null)
   }, [beginBy, weergaweId])   // eslint-disable-line react-hooks/exhaustive-deps
 
   function tikVers(e) {
