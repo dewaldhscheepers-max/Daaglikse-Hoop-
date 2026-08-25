@@ -139,7 +139,9 @@ waar(`en hoogstens 400 karakters (${WEEK2_OPENING.length})`, WEEK2_OPENING.lengt
 console.log('\n── Die register ken Week 2 ──\n')
 is('hetDae(2)', hetDae(2), true)
 is('hetDae(1) ook', hetDae(1), true)
-is('maar nie week 3 nie', hetDae(3), false)
+/* Week 3 het intussen bygekom (sien volgJesusWeek3.js) — hierdie toets vra
+   net of die register Week 2 self ken, nie of Week 3 nog ontbreek nie. */
+is('en n week wat nog nie bestaan nie, gee niks', hetDae(9), false)
 is('weekDae(2) gee vyf dae', weekDae(2).length, 5)
 /* Dag 1 dra vyf inhoudsblokke plus die groepbrug (§40: die brug kom NA die
    stemboodskap). Die brug is nie werk nie — sien die perke hierbo. */

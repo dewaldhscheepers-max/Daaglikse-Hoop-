@@ -54,8 +54,11 @@ import { magKas } from './data/kasBesluit.js'
  *     Nou staan hy regs onder, kleiner.
  * 15: die Bybel-pil skuif 6mm hoër bo die balk, en is 'n bietjie groter.
  * 16: die admin kan nou een tik 'n video "vandag s'n" maak — voorheen het 'n
- *     bulk-invoer se video vir altyd agter die ou een gestaan. */
-const SPOEL = 16
+ *     bulk-invoer se video vir altyd agter die ou een gestaan.
+ * 17: Week 3 — "Kom, volg My" — is bygekom. Die admin se voorskou het ook
+ *     Week 2 se dae al die verkeerde (ou) skerm gewys sedert Week 2 bygekom
+ *     het; dit gebruik nou dieselfde hetDae()-register as die egte skerm. */
+const SPOEL = 17
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

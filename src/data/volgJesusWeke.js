@@ -147,4 +147,57 @@ export const WEKE = {
     fasiliteerderGrens: '',
     pastoraleRisiko: 'medium',
   },
+
+  /* ── Week 3 ──
+   *
+   * Dewald het die hele week geskryf en gestuur — die dae staan in
+   * src/data/volgJesusWeek3.js. Hierdie rekord is net die plat velde vir die
+   * publiseer-hek, sodat hy hulle met "↓ Laai die geskrewe teks" in een
+   * knoppie in die vorm kan laai in plaas van dit oor te tik. */
+  3: {
+    weeknommer: 3,
+    titel: 'Kom, volg My',
+    doel:
+      'Om mense te help verstaan dat om Jesus te volg beteken om Sy roepstem te beantwoord, Sy wil bo jou eie te kies, Sy Woord te vertrou, Hom bo Sy gawes te kies en na Hom toe terug te keer wanneer jy misluk.',
+    weekKern:
+      'Jesus roep jou nie om eers alles reg te kry en Hom dan te volg nie. Hy roep jou om Hom te volg en jou lewe onder Sy leiding te plaas.',
+    openingskerm:
+      'Jesus roep jou nie net om in Hom te glo nie.\n\n' +
+      'Hy roep jou om Hom te volg.\n\n' +
+      'Om Jesus te volg beteken dat Hy die rigting van jou lewe bepaal — wanneer dit maklik is, wanneer dit jou iets kos, wanneer jy teleurgesteld is, wanneer dinge goed gaan en selfs wanneer jy misluk.',
+    primereSkrif: 'Lukas 9:23',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    kernwaarheid:
+      'Jesus roep jou nie om eers alles reg te kry en Hom dan te volg nie. Hy roep jou om Hom te volg en jou lewe onder Sy leiding te plaas.',
+    eenSin:
+      'Jesus roep jou nie net op die dag waarop jy begin nie. Hy roep jou elke dag weer: “Volg My.”',
+    privaatRefleksie:
+      'Wat beteken dit op hierdie stadium van my lewe prakties om Jesus te volg?',
+    gehoorsaamheidStap:
+      'Identifiseer een konkrete area waarin Jesus se Woord reeds vir jou duidelik is, en neem hierdie week die volgende gehoorsame stap.',
+    gebed:
+      'Here Jesus, ek wil U nie net ken nie; ek wil U volg. Leer my om U te vertrou, U te gehoorsaam, U bo alles te kies en na U toe terug te gaan wanneer ek val. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: ons kyk na wat dit kos om Jesus te volg wanneer Sy wil met joune bots.',
+    dag1Titel: 'Kom, volg My',
+    dag2Titel: 'Wanneer dit jou iets kos',
+    dag3Titel: 'Gee vir Jesus jou leë boot',
+    dag4Titel: 'Volg jy Jesus vir Jesus?',
+    dag5Titel: 'Wanneer jy misluk, hardloop na Jesus',
+    groepVraag1:
+      'Wat beteken Jesus se woorde “Volg My” prakties vir jou lewe?',
+    groepVraag2:
+      'Waar moet Jesus se Woord tans swaarder weeg as jou eie ervaring of teleurstelling?',
+    groepVraag3:
+      'Hoe kan ons onderskei tussen om Jesus vir Sy seëninge te volg en om Jesus te volg omdat ons Hom liefhet?',
+    groepVraag4:
+      'Wat leer Petrus se reaksies in Lukas 5 en Johannes 21 jou oor sonde, genade en mislukking?',
+    fasiliteerderHoofpunt: '',
+    fasiliteerderGrens: '',
+    pastoraleRisiko: 'laag',
+  },
 }

@@ -8,6 +8,7 @@
 import { onderwerp, weekVrae, BEGINNE, normVraag } from './vjChatOnderwerp.js'
 import { WEEK1_SESSIE } from './volgJesusWeek1.js'
 import { WEEK2_SESSIE } from './volgJesusWeek2.js'
+import { WEEK3_SESSIE } from './volgJesusWeek3.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -20,22 +21,26 @@ console.log('\n── Die vrae kom uit die week se groepsessie ──\n')
 {
   is('week 1 se vrae', weekVrae(1), WEEK1_SESSIE.vrae)
   is('week 2 se vrae', weekVrae(2), WEEK2_SESSIE.vrae)
+  is('week 3 se vrae', weekVrae(3), WEEK3_SESSIE.vrae)
   waar('en daar is werklik vrae', weekVrae(1).length >= 3)
   waar('week 2 ook', weekVrae(2).length >= 3)
+  waar('week 3 ook', weekVrae(3).length >= 3)
   /* Dit is die punt van die hele ding: geen nuwe inhoud om te skryf nie. */
   is('week 2 se eerste vraag staan reeds in die sessie', weekVrae(2)[0], WEEK2_SESSIE.vrae[0])
 }
 
 console.log('\n── Geen kaart wanneer daar niks is nie ──\n')
 {
-  is('week 3 bestaan nog nie', onderwerp(3, 0), null)
+  /* Week 3 het intussen bygekom (sien volgJesusWeek3.js) — hierdie toets
+     gebruik nou 'n week wat werklik nog nie bestaan nie. */
+  is('week 4 bestaan nog nie', onderwerp(4, 0), null)
   is('week 52 ook nie', onderwerp(52, 0), null)
   is('geen weeknommer', onderwerp(undefined, 0), null)
   is('null', onderwerp(null, 0), null)
   is('rommel', onderwerp('appelkoos', 0), null)
   is('nul', onderwerp(0, 0), null)
   is('negatief', onderwerp(-1, 0), null)
-  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(3), [])
+  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(4), [])
   is('weekVrae van rommel', weekVrae({}), [])
 }
 

@@ -27,6 +27,7 @@ import {
   publiseerFoute, magPubliseer, geldigeVideoId, ontleedVerwysing,
 } from '../data/volgJesus'
 import { WEKE } from '../data/volgJesusWeke'
+import { hetDae } from '../data/volgJesusDae'
 import { keurVideoInset } from '../data/youtubeId'
 import VolgJesusWeek from './VolgJesusWeek'
 import VolgJesusStap from './VolgJesusStap'
@@ -475,24 +476,32 @@ export default function VolgJesusAdmin({ geheim = '' }) {
             Die groep- en fasiliteerderblaaie leef nog net in die ou skerm, dus
             gaan net die solo-rol na die stapskerm. */}
         <div className="vj-skerm" key={rol}>
-          {/* ── Week 1 gaan deur DIESELFDE skerm, ongeag die rol ──
+          {/* ── Elke week met 'n dag-pad gaan deur DIESELFDE skerm, ongeag die rol ──
               Dewald: "alleen en groep en fasiliteerder se dae is nie dieselfde
               nie. dag 2 by groep wys niks."
 
               Hy is reg, en dit was 'n regte breuk. Die groep- en
               fasiliteerderrolle het na die OU skerm gegaan, en daardie skerm
               lees `week.dag2Skrif`, `week.dag2Prompt` ensovoorts — velde wat
-              in die nuwe Week 1 nie meer bestaan nie. Dus: 'n leë Dag 2.
+              in 'n dag-pad-week nie meer bestaan nie. Dus: 'n leë Dag 2.
 
               Die DAE is vir almal dieselfde. Wat 'n groep of 'n fasiliteerder
               EKSTRA kry, is die groepchat en die groepsessie — en dié is nog
               nie gebou nie. Solank hulle nie bestaan nie, is dit eerliker om
-              dit te SÊ as om 'n leë skerm te wys. */}
-          {week.weeknommer === 1
+              dit te SÊ as om 'n leë skerm te wys.
+
+              Hierdie was `week.weeknommer === 1` — hardgekodeer voor
+              `volgJesusDae.js` se register bestaan het. Toe Week 2 bygekom
+              het, het sy voorskou steeds die OU plat skerm gewys, presies die
+              leuen wat die nota hierbo waarsku teen. `hetDae()` is die
+              register wat VolgJesusLewe.jsx (wat 'n GEBRUIKER werklik sien)
+              ook gebruik — een plek besluit, nie twee wat kan uitmekaar dryf
+              nie. */}
+          {hetDae(week.weeknommer)
             ? <VolgJesusStap week={week} voorskou />
             : <VolgJesusWeek week={week} rol={rol} />}
         </div>
-        {week.weeknommer === 1 && rol !== 'solo' && (
+        {hetDae(week.weeknommer) && rol !== 'solo' && (
           <p className="vj-rolnota">
             Die vyf dae is vir almal dieselfde — dit is wat jy hierbo sien.
             Wat 'n {rol === 'groep' ? 'groepslid' : 'fasiliteerder'} EKSTRA

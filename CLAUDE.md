@@ -47,6 +47,7 @@ node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toet
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
 node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 58 toetse
 node src/data/volgJesusWeek2.toets.mjs        # Week 2 se pad, teen dieselfde perke, 69 toetse
+node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde perke, 81 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse

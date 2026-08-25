@@ -30,6 +30,10 @@ import {
   WEEK2_DAE, WEEK2_REIS, WEEK2_OPENING, WEEK2_DEELSIN, WEEK2_VOLGENDE,
   WEEK2_TRANSKRIPSIE, WEEK2_SESSIE,
 } from './volgJesusWeek2.js'
+import {
+  WEEK3_DAE, WEEK3_REIS, WEEK3_OPENING, WEEK3_DEELSIN, WEEK3_VOLGENDE,
+  WEEK3_TRANSKRIPSIE, WEEK3_SESSIE,
+} from './volgJesusWeek3.js'
 
 const WEKE = {
   1: {
@@ -49,6 +53,15 @@ const WEKE = {
     volgende: WEEK2_VOLGENDE,
     transkripsie: WEEK2_TRANSKRIPSIE,
     sessie: WEEK2_SESSIE,
+  },
+  3: {
+    dae: WEEK3_DAE,
+    reis: WEEK3_REIS,
+    opening: WEEK3_OPENING,
+    deelsin: WEEK3_DEELSIN,
+    volgende: WEEK3_VOLGENDE,
+    transkripsie: WEEK3_TRANSKRIPSIE,
+    sessie: WEEK3_SESSIE,
   },
 }
 
