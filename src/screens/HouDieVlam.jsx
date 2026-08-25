@@ -26,7 +26,6 @@
  *   4. die doek se buffer kom net uit sy BREEDTE, nooit sy hoogte nie
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import DonationCard from '../components/DonationCard'
 import './HouDieVlam.css'
 
 const SLEUTEL = 'hdv_beste'
@@ -216,7 +215,13 @@ export default function HouDieVlam({ onClose }) {
 
     const st = s.current
     const frac = (Math.sin(st.hoek) + 1) / 2
-    const afstandVanMiddel = Math.abs(frac - 0.5) * 2   // 0 = perfek, 1 = kant toe
+    /* Moet DIESELFDE eenhede as die GETEKENDE sone gebruik. Die sone in
+       teken() strek van frac 0.5-sone/2 tot 0.5+sone/2 — dus is die regte
+       afstand eenvoudig |frac-0.5|, nie |frac-0.5|*2 nie. Die *2 was hier
+       'n regte fout: dit het die tik-teiken presies die HELFTE so breed
+       gemaak as wat gewys is. Dewald: "die vlam is in goue sone maar dit
+       sê elke nou en dan ek misluk" — dit was hierdie. */
+    const afstandVanMiddel = Math.abs(frac - 0.5)   // 0 = perfek, 0.5 = kant toe
     const soneHalf = st.sone / 2
 
     if (afstandVanMiddel <= soneHalf) {
@@ -269,7 +274,7 @@ export default function HouDieVlam({ onClose }) {
         {staat === 'klaar' && (
           <div className="hdv-oorlegskerm">
             <p className="hdv-oorleg-kop">
-              {naSone < 0.04 ? 'So naby!' : 'Amper!'}
+              {naSone < 0.02 ? 'So naby!' : 'Amper!'}
             </p>
             {nuweBeste && <p className="hdv-oorleg-nuut">🏅 Nuwe beste: {telling}</p>}
             <p className="hdv-oorleg-lyf">Jy het {telling} keer die vlam gehou.</p>
@@ -279,12 +284,6 @@ export default function HouDieVlam({ onClose }) {
       </div>
 
       <p className="hdv-fyn">Tik enige plek op die doek — geen presiese teiken nodig nie.</p>
-
-      <DonationCard
-        titel="Hou Daaglikse Hoop gratis"
-        teks="Speletjies soos hierdie een bly altyd gratis. Jou bydrae help ons om dit so te hou."
-        klas="hdv-steun"
-      />
     </div>
   )
 }
