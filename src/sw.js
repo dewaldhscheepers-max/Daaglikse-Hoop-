@@ -57,8 +57,11 @@ import { magKas } from './data/kasBesluit.js'
  *     bulk-invoer se video vir altyd agter die ou een gestaan.
  * 17: Week 3 — "Kom, volg My" — is bygekom. Die admin se voorskou het ook
  *     Week 2 se dae al die verkeerde (ou) skerm gewys sedert Week 2 bygekom
- *     het; dit gebruik nou dieselfde hetDae()-register as die egte skerm. */
-const SPOEL = 17
+ *     het; dit gebruik nou dieselfde hetDae()-register as die egte skerm.
+ * 18: die stemboodskap het op die verkeerde dag gestaan. Dit hoort by Dag 3
+ *     ("Gee vir Jesus jou leë boot"), nie Dag 1 nie — met Dewald se egte
+ *     woorde as transkripsie, ongewysig. */
+const SPOEL = 18
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

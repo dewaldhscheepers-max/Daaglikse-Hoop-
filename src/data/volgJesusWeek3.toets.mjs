@@ -75,11 +75,14 @@ console.log('\n── Geen Skrifgedeelte twee dae na mekaar nie ──\n')
   }
 }
 
-console.log('\n── Die stemboodskap staan op DAG 1 ──\n')
+console.log('\n── Die stemboodskap staan op DAG 3 ──\n')
 {
+  /* Dewald se egte opname is "Gee vir Jesus jou leë boot" — dieselfde
+     verhaal as Dag 3 se LEES-blok (Lukas 5). Dit was eers verkeerdelik op
+     Dag 1 geplaas. */
   const stemDae = WEEK3_DAE.filter(d => d.blokke.some(b => b.soort === 'stem'))
   is('presies een dag dra die stemboodskap', stemDae.length, 1)
-  is('en dit is Dag 1', stemDae[0].n, 1)
+  is('en dit is Dag 3', stemDae[0].n, 3)
 }
 
 console.log('\n── Albei wallpapers is in die week ──\n')

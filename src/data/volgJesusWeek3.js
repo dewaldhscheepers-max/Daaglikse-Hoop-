@@ -23,30 +23,30 @@
  * woorde na God toe draai; geen nuwe gedagte staan daarin wat nie reeds in
  * daardie dag se teks was nie.
  *
- * Dag 3 het twee weergawes gehad: 'n korter "OP U WOORD" en 'n langer, later
- * "GEE VIR JESUS JOU LEË BOOT" wat ook vooruitgryp na Johannes 21. Ek het die
- * langer, latere weergawe gebruik (dit staan aan die einde van sy boodskap,
- * ná die admin-velde — die laaste woord wen) en dit ingekort tot 180 woorde.
- * Die Johannes 21-gedeelte daarin het ek na EEN sin ingekort ("Onthou hierdie
- * oomblik...") sodat Dag 5 — wat DIESELFDE toneel voluit vertel — nie sy eie
- * hoogtepunt vooruit wegneem nie.
+ * ── Regstelling: die stemboodskap is Dag 3 s'n, nie Dag 1 s'n nie ──
  *
- * Dag 5 se terugblik-blok is weg (soos Week 2 s'n): WEEK3_REIS gee die mens
- * sy vroeëre woorde aan die einde van die week terug, nie 'n blok middel-in
- * Dag 5 nie — dieselfde rede as Week 2.
+ * Dewald: "die transkripsie van die voicenote is verkeerd... jy het dit
+ * seker op verkeerde plek geplaas." Ek het eers Dag 1 se "Kom hier agter My
+ * aan"-teks as die opname se woorde geraai. Dit was verkeerd — sy egte
+ * stemboodskap IS "GEE VIR JESUS JOU LEË BOOT", woord vir woord soos hy dit
+ * gegee het. Dit hoort by DAG 3, waar die leë-boot-verhaal (Lukas 5) staan,
+ * nie by Dag 1 nie.
+ *
+ * Die STEM-blok het dus van Dag 1 na Dag 3 geskuif. Dag 3 s'n teks- en
+ * groot-blok (my eie verkorting van dieselfde verhaal) is weg — die opname
+ * dra nou daardie gewig, presies soos 'n Dag 1 in Week 1 en 2 nooit 'n eie
+ * teksblok langs die stem het nie. Dag 1 kry in sy plek 'n geskrewe
+ * teks-en-groot-blok van sy EIE oorspronklike inhoud ("Kom hier agter My
+ * aan"), wat nou nie meer verlore is nie — dit staan steeds op die skerm,
+ * net gelees eerder as gehoor. §40 se brug-na-die-groep-reël (kom NA die
+ * stemboodskap) het saam met die stem na Dag 3 geskuif.
+ *
+ * WEEK3_TRANSKRIPSIE is nou Dewald se eie leë-boot-teks, woord vir woord —
+ * ek het niks daaraan verander nie, ook nie die slotgebed nie.
  *
  * WEEK3_VOLGENDE bestaan nie. Ek weet nog nie wat Week 4 is nie, en 'n
  * geraaide titel is erger as niks — `weekVolgende()` gee dan eenvoudig niks
  * terug, en die skerm wys net Week 3 se eie klaar-skerm.
- *
- * ── Die stemboodskap se transkripsie ──
- *
- * Dag 1 se eie teks ("Kom hier agter My aan…") is geskryf soos 'n gesproke
- * boodskap, nie soos 'n leesblok nie — presies soos Week 1 en 2 se Dag 1-teks
- * die stemboodskap se woorde was. Ek het dit as WEEK3_TRANSKRIPSIE gebruik en
- * net 'n aanspreek-vorm en 'n slotgebed vir die luisteraar bygevoeg, soos
- * Week 1 en 2 s'n. Verander dit vir my sodra jy opgeneem het, sodat die
- * geskrewe teks onder die speler presies by jou stem pas.
  */
 
 /* ── Die openingsblad ── */
@@ -66,9 +66,23 @@ const DAG1 = [
        + 'en Andreas is — en hoe min Hy eers van hulle vra om te verstaan.',
   },
   {
-    soort: 'stem',
-    titel: 'Jy hoef nie die hele pad te sien om die volgende stap saam met Jesus te neem nie.',
-    duur: '±5 minute',
+    soort: 'teks',
+    kop: 'KOM HIER AGTER MY AAN',
+    lyf: 'Jesus vind Petrus en Andreas besig met hulle gewone werk. Hy sê nie: '
+       + '“Maak eers jou lewe reg.” Hy sê nie: “Verstaan eers alles.” Hy sê nie: '
+       + '“Bewys eers dat jy goed genoeg is.” Hy sê: “Volg My.”\n\n'
+       + 'Dissipelskap begin nie wanneer jy al die antwoorde het nie. Dit begin '
+       + 'wanneer Jesus jou roep en jy besluit om Hom te vertrou.\n\n'
+       + 'Petrus het daardie dag nie geweet waarheen Jesus hom sou lei nie — nie '
+       + 'van die storms wat voorlê, die wonderwerke wat hy sou sien, of sy eie '
+       + 'mislukking nie. Hy het net geweet: Jesus roep my. En hy het gevolg.\n\n'
+       + 'Daar gaan tye in jou lewe wees wanneer Jesus die volgende stap '
+       + 'duidelik maak, maar nie die hele pad wys nie. Dan moet jy besluit: '
+       + 'wag ek totdat ek alles verstaan, of vertrou ek die Een wat my roep?',
+  },
+  {
+    soort: 'groot',
+    lyf: 'JY HOEF NIE DIE HELE PAD TE SIEN\nOM DIE VOLGENDE STAP SAAM MET JESUS TE NEEM NIE.',
   },
   {
     soort: 'vraag',
@@ -79,7 +93,6 @@ const DAG1 = [
        + 'Identifiseer vandag een konkrete stap waarvan jy reeds weet dit is in '
        + 'lyn met Jesus se Woord — en neem dit.',
     prompt: 'Skryf dit hier neer…',
-    deelStem: true,
   },
   {
     soort: 'gebed',
@@ -88,8 +101,6 @@ const DAG1 = [
        + 'met U te gee. Ek wil U vertrou, ook wanneer ek nie die hele pad sien '
        + 'nie. Amen.',
   },
-  /* §40: die brug na die groep kom NA die stemboodskap. */
-  { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG2 = [
@@ -143,24 +154,9 @@ const DAG3 = [
        + 'een ding gewys, maar Jesus het gepraat.',
   },
   {
-    soort: 'teks',
-    kop: 'GEE VIR JESUS JOU LEË BOOT',
-    lyf: 'Petrus het die hele nag gewerk en niks gevang nie. Toe kom Jesus — en '
-       + 'klim in sy boot terwyl die nette nog leeg is.\n\n'
-       + 'Jesus sê vir hom om weer uit te vaar. Petrus antwoord: “Meester, ons '
-       + 'het die hele nag deur hard gewerk en niks gevang nie. Maar op U woord '
-       + 'sal ek die nette laat sak.” Sy ervaring het een ding gesê. Maar Jesus '
-       + 'het gepraat — en dít het swaarder geweeg.\n\n'
-       + 'Die nette word so vol dat hulle begin skeur. Petrus val voor Jesus '
-       + 'neer: “Gaan weg van my, Here, want ek is ’n sondige mens.” Jesus gaan '
-       + 'nie weg nie. Hy sê: “Moenie bang wees nie” — en roep hom om Hom te '
-       + 'volg.\n\n'
-       + 'Onthou hierdie oomblik: die boot, die leë nette, en Petrus wat sê '
-       + '“Gaan weg van my.” Later hierdie week kom ons hierheen terug.',
-  },
-  {
-    soort: 'groot',
-    lyf: 'JESUS WAG NIE DAT JOU BOOT VOL IS\nVOORDAT HY INKLIM NIE.',
+    soort: 'stem',
+    titel: 'Jou leë nette is nie die einde van jou verhaal nie.',
+    duur: '±6 minute',
   },
   {
     soort: 'vraag',
@@ -170,15 +166,20 @@ const DAG3 = [
        + 'uitgewerk het soos jy gehoop het nie?\n\n'
        + 'Wat sou dit beteken om dit vandag vir Jesus te gee?',
     prompt: 'Skryf dit hier neer…',
+    deelStem: true,
   },
   {
     soort: 'gebed',
     lyf: 'Here Jesus, hier is my leë boot. Hier is my teleurstelling, my '
        + 'mislukking en die dele van my lewe wat nie uitgewerk het soos ek '
        + 'gehoop het nie. Help my om U Woord meer te vertrou as wat ek gister '
-       + 'beleef het. Dankie dat U genade groter is as my mislukking. Ek wil U '
-       + 'volg. Amen.',
+       + 'beleef het. En wanneer ek val, leer my om nie van U af weg te kruip '
+       + 'nie, maar na U toe te hardloop. Dankie dat U genade groter is as my '
+       + 'mislukking. Ek wil U volg. Amen.',
   },
+  /* §40: die brug na die groep kom NA die stemboodskap — dié skuif saam met
+     die stem-blok van Dag 1 na hier. */
+  { soort: 'groepbrug', netGroep: true },
 ]
 
 const DAG4 = [
@@ -337,37 +338,184 @@ export function blokkeVirDag3(n) {
 }
 
 /* ── Die stemboodskap se transkripsie ──
- * Sien die lang nota bo-aan hierdie lêer: dit is Dag 1 se eie teks, in
- * gesproke vorm. Verander dit sodra die egte opname klaar is. */
-export const WEEK3_TRANSKRIPSIE = `Kom hier agter My aan.
+ * Dewald se eie woorde, presies soos hy dit gegee het — niks hier verkort of
+ * verander nie, ook nie die slotgebed nie. Dit hoort by Dag 3 se stem-blok;
+ * sien die nota bo-aan hierdie lêer. */
+export const WEEK3_TRANSKRIPSIE = `Daar is iets ongeloofliks in Petrus se verhaal wat jy maklik kan miskyk.
 
-Dit is een van die eenvoudigste uitnodigings in die Bybel, maar ook een van die grootste.
+Twee keer werk Petrus ’n hele nag en vang niks.
 
-Jesus vind Petrus en Andreas besig met hulle gewone werk. Hy sê nie: “Maak eers jou lewe reg.” Hy sê nie: “Verstaan eers alles.” Hy sê nie: “Bewys eers dat jy goed genoeg is.”
+Twee keer staan hy met leë nette.
 
-Hy sê: “Volg My.”
+Twee keer kom Jesus.
 
-Dissipelskap begin nie wanneer jy al die antwoorde het nie. Dit begin wanneer Jesus jou roep en jy besluit om Hom te vertrou.
+Twee keer sê Jesus vir hom waar om die nette uit te gooi.
 
-Petrus het daardie dag nie geweet waarheen Jesus hom sou lei nie. Hy het nie geweet van die storms wat voorlê, die wonderwerke wat hy sou sien, sy eie mislukking, of hoe Jesus sy lewe sou gebruik nie.
+En twee keer word die nette skielik vol.
 
-Hy het net geweet: Jesus roep my. En hy het gevolg.
+Maar Petrus se reaksie op Jesus is nie dieselfde nie.
 
-Daar gaan tye in jou lewe wees wanneer Jesus die volgende stap duidelik maak, maar nie vir jou die hele pad wys nie. Dan moet jy besluit: moet ek eers alles verstaan voordat ek gehoorsaam, of vertrou ek die Een wat my roep?
+En daarin lê vandag se boodskap.
 
-Jy hoef nie die hele pad te sien om die volgende stap saam met Jesus te neem nie.
+In Lukas 5 het Petrus die hele nag gewerk en niks gevang nie.
 
-Miskien wag jy vandag vir meer sekerheid, terwyl Jesus se Woord reeds vir jou wys wat die volgende gehoorsame stap is. Moenie langer wag nie. Neem die stap.
+Toe Jesus daar aankom, klim Hy in Petrus se boot.
 
-Hemelse Vader, ek bid vir die persoon wat nou luister.
+Dink hieraan:
 
-Waar hulle wag vir sekerheid voordat hulle gehoorsaam, gee hulle die moed om die volgende stap te neem, ook al sien hulle nie die hele pad nie.
+Jesus wag nie dat Petrus se boot vol is voordat Hy daarin klim nie.
 
-Herinner hulle dat U hulle geroep het, en dat U die Een is wat hulle lei.
+Hy klim in terwyl die nette leeg is.
 
-Leer hulle om U te vertrou soos Petrus en Andreas — nie omdat hulle alles verstaan het nie, maar omdat U geroep het.
+Daardie boot het daardie oggend een ding gesê:
 
-In Jesus se Naam. Amen.`
+“Ek het probeer. Ek het gewerk. Dit het nie gewerk nie.”
+
+Maar Jesus sien nie net wat Petrus nié gevang het nie.
+
+Hy sien wat Hy met Petrus se lewe gaan doen.
+
+Jesus sê vir hom om weer die nette uit te gooi.
+
+Petrus antwoord:
+
+“Meester, ons het die hele nag deur hard gewerk en niks gevang nie. Maar op U woord sal ek die nette laat sak.”
+
+Daardie een sin is geloof:
+
+“Dit het voorheen nie gewerk nie … maar U het gepraat.”
+
+Petrus moes besluit:
+
+Gaan gisteraand se teleurstelling die laaste woord hê?
+
+Of gaan Jesus se Woord die laaste woord hê?
+
+Toe Petrus gehoorsaam, word die nette so vol dat hulle begin skeur.
+
+Maar kyk wat gebeur daarna.
+
+Petrus val voor Jesus neer en sê:
+
+“Gaan weg van my, Here, want ek is ’n sondige mens.”
+
+Hy sien Jesus se grootheid en sy eie gebrokenheid en dink:
+
+“Jesus behoort nie naby iemand soos ek te wees nie.”
+
+Maar Jesus gaan nie weg nie.
+
+Hy sê:
+
+“Moenie bang wees nie.”
+
+En Hy roep Petrus om Hom te volg.
+
+Nou spring ons vorentoe na Johannes 21.
+
+Petrus het intussen iets baie erger as ’n onsuksesvolle nag op die water beleef.
+
+Hy het Jesus drie keer verloën.
+
+En raai waar kry ons hom weer?
+
+In ’n boot.
+
+Hy werk weer die hele nag.
+
+Hy vang weer niks.
+
+Weer leë nette.
+
+En weer staan Jesus daar.
+
+Maar hierdie keer gebeur iets merkwaardigs.
+
+Toe Petrus hoor:
+
+“Dit is die Here!”
+
+sê hy nie:
+
+“Gaan weg van my” nie.
+
+Hy spring in die water om so vinnig moontlik by Jesus uit te kom.
+
+Wat het verander?
+
+Nie Petrus se rekord nie.
+
+Sy rekord was eintlik erger.
+
+Petrus het genade leer ken.
+
+Die eerste keer het sy mislukking hom laat sê:
+
+“Jesus, gaan weg.”
+
+Die tweede keer laat sy mislukking hom na Jesus toe hardloop.
+
+Dít is wat genade aan ’n mens doen.
+
+Genade beteken nie dat jou mislukking nie saak maak nie.
+
+Genade leer jou waarheen om te gaan wanneer jy misluk.
+
+En daar op die strand verneder Jesus hom nie.
+
+Jesus maak vir hom kos.
+
+Jesus praat met hom.
+
+Drie keer het Petrus Hom verloën.
+
+Drie keer vra Jesus:
+
+“Het jy My lief?”
+
+En dan hoor Petrus weer die woorde:
+
+“Volg My.”
+
+Hoor dit vandag:
+
+Jesus het nie gewag totdat Petrus se nette vol was voordat Hy in sy boot geklim het nie.
+
+Hy het ingeklim terwyl hulle leeg was.
+
+En ná Petrus se grootste mislukking het Jesus hom nie weggegooi nie.
+
+Hy het hom gaan haal.
+
+Miskien kyk jy vandag na iets in jou lewe en al wat jy sien, is:
+
+“Ek het probeer.”
+
+“Ek het gefaal.”
+
+“Ek het niks om daarvoor te wys nie.”
+
+Moenie wegkruip nie.
+
+Gee vir Jesus die leë boot.
+
+En as jy geval het, moenie van Hom af weghardloop nie.
+
+Hardloop na Hom toe.
+
+Want jou leë nette is nie die einde van jou verhaal nie.
+
+En jou grootste mislukking is nie groter as Jesus se genade nie.
+
+Die vraag vandag is nie:
+
+“Hoe vol is my boot?”
+
+Die vraag is:
+
+“IS JESUS IN MY BOOT—EN SAL EK HOM VOLG?”
+
+Here Jesus, hier is my leë boot. Hier is my teleurstelling, my mislukking en die dele van my lewe wat nie uitgewerk het soos ek gehoop het nie. Help my om U Woord meer te vertrou as wat ek gister beleef het. En wanneer ek val, leer my om nie van U af weg te kruip nie, maar na U toe te hardloop. Dankie dat U genade groter is as my mislukking. Ek wil U volg. Amen.`
 
 /* ── Die groepsessie ── */
 export const WEEK3_SESSIE = {
