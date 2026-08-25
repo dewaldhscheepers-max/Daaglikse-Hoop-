@@ -458,6 +458,19 @@ export default function SorgAdmin({ geheim = '' }) {
             <button onClick={() => stuur({ ...v, gepubliseer: !v.gepubliseer })}>
               {v.gepubliseer ? 'Versteek' : 'Publiseer'}
             </button>
+            {/* Dewald: "ek het al 2 videos onder sorg in admin geplaas. en dis
+                nogsteeds nie op die dra saam blad nie." Hulle WAS daar — net
+                onder "Meer pastorale video's" — maar die "NUUT VANDAG"-blok
+                bo-aan bly op die video wat gemerk is, nie op die nuutste nie,
+                en 'n bulk-invoer merk nooit outomaties nie. Om dit te
+                verander, moes 'n mens Redigeer druk, afrol, die blokkie tik en
+                Werk by druk — vier dinge, presies die soort ding wat "↔ Maak
+                wyd" hierbo al opgelos het vir regop. Een tik hier ook. */}
+            {!v.weekVideo && (
+              <button onClick={() => stuur({ ...v, weekVideo: true })}>
+                ⭐ Maak vandag s'n
+              </button>
+            )}
             <button className="sa-vee" onClick={() => vee(v)}>Vee uit</button>
           </div>
         </div>
