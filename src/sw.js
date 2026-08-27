@@ -72,8 +72,11 @@ import { magKas } from './data/kasBesluit.js'
  *     donasie-kaart is van die spel se skerm af weg.
  * 23: Hou die Vlam is heeltemal verwyder. Die regstelling het steeds nie op
  *     'n regte foon gewerk nie — waarskynlik raak-vertraging wat 'n toets
- *     in 'n houer nie kon wys nie. Dewald: "verwyder dit net." */
-const SPOEL = 23
+ *     in 'n houer nie kon wys nie. Dewald: "verwyder dit net."
+ * 24: die EFT-opsie is nou 'n regte knoppie in plaas van 'n skakeltjie, dit
+ *     bestaan NOU OOK by die maandelikse vorm, en 'n mens kan die
+ *     rekeningnommer met een tik kopieer. */
+const SPOEL = 24
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

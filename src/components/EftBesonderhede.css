@@ -1,0 +1,103 @@
+/* Sien EftBesonderhede.jsx. Geen transform of opacity op :active nie — net
+   kleur. Sien CLAUDE.md se "Android, Chrome, en gekleurde strepe". */
+
+.eft { margin-top: 12px; }
+
+/* 'n Regte knoppie, nie 'n onderstreepte skakeltjie nie. Dit staan langs die
+   PayFast-knoppie as 'n KEUSE, nie onder hom as fyndruk nie. */
+.eft-knop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--cream-dark, #F0EBE3);
+  border-radius: 14px;
+  background: var(--white, #fff);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.eft-knop:active {
+  background: var(--cream, #FAF6F0);
+  border-color: var(--purple, #7C6FAF);
+}
+.eft-knop-ikoon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+.eft-knop-teks  { flex: 1; text-align: left; }
+.eft-knop-pyl   { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+
+.eft-blok {
+  background: var(--cream, #FAF6F0);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.eft-inlei {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.eft-ry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.eft-ry:last-of-type { border-bottom: none; }
+.eft-ry > span { color: var(--text-muted); flex-shrink: 0; }
+.eft-ry > b {
+  color: var(--text);
+  font-weight: 700;
+  text-align: right;
+  /* Die nommer moet groot en leesbaar wees — 'n mens tik dit oor in 'n
+     bank-app, en 'n verkeerde syfer stuur die geld nêrens heen nie. */
+  font-size: 15.5px;
+  letter-spacing: 0.02em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Die twee rye wat 'n mens kan tik om te kopieer. */
+.eft-ry-kopieer {
+  width: 100%;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background: none;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s;
+}
+.eft-ry-kopieer:active { background: rgba(124, 111, 175, 0.1); }
+
+.eft-kopie-merk {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--purple, #7C6FAF);
+  letter-spacing: 0;
+}
+
+.eft-nota {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 12px 0 0;
+  line-height: 1.55;
+}

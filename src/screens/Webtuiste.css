@@ -323,41 +323,6 @@
   margin: 0 0 6px;
 }
 
-/* ─── EFT section ─── */
-.eft-toggle {
-  background: none;
-  border: none;
-  color: var(--purple);
-  font-size: 16px;
-  font-family: var(--font-body);
-  cursor: pointer;
-  margin-top: 8px;
-  padding: 4px 0;
-  text-decoration: underline;
-}
-
-.eft-details {
-  background: var(--cream);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.eft-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin: 0;
-}
-
-.eft-row span { color: var(--text-muted); }
-
-.eft-note {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 4px 0 0;
-  line-height: 1.5;
-}
+/* Die EFT-blok het na components/EftBesonderhede.{jsx,css} geskuif —
+   een plek vir die bankbesonderhede, gedeel deur die eenmalige en die
+   maandelikse vorm. */

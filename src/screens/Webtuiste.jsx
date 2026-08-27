@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { checkoutBook } from '../utils/payfast'
 import NooimyModal from '../components/NooimyModal'
+import EftBesonderhede from '../components/EftBesonderhede'
 import './Webtuiste.css'
 
 const PRESET_AMOUNTS = [50, 100, 250, 1000]
@@ -12,7 +13,6 @@ export function DonationModal({ onClose, beginBedrag = null }) {
   /* Sien HoopVennoot: 'n bedrag wat nie 'n knoppie is nie, maak die eie-veld
      dadelik oop sodat niemand twee keer hoef te kies nie. */
   const [showCustom, setShowCustom] = useState(beginBedrag != null && preset === null)
-  const [showEft, setShowEft]   = useState(false)
   const [email, setEmail]       = useState('')
   const [error, setError]       = useState('')
   const [busy, setBusy]         = useState(false)
@@ -95,19 +95,10 @@ export function DonationModal({ onClose, beginBedrag = null }) {
 
         <p className="modal-secure">🔒 Kaart, EFT, SnapScan · Veilige betaling via PayFast</p>
 
-        <button className="eft-toggle" onClick={() => setShowEft(v => !v)}>
-          {showEft ? '▲ Verberg' : '▼ Skenk via direkte EFT'}
-        </button>
-
-        {showEft && (
-          <div className="eft-details">
-            <p className="eft-row"><span>Bank</span><strong>Capitec</strong></p>
-            <p className="eft-row"><span>Naam</span><strong>Dewald Scheepers</strong></p>
-            <p className="eft-row"><span>Rekening</span><strong>2427361174</strong></p>
-            <p className="eft-row"><span>Tak-kode</span><strong>470010</strong></p>
-            <p className="eft-note">Gebruik jou selfoonnommer as verwysing.</p>
-          </div>
-        )}
+        {/* Die EFT-blok staan in EftBesonderhede.jsx sodat die bankbesonderhede
+            op EEN plek lê — die eenmalige vorm en die maandelikse vorm wys
+            dieselfde ding. */}
+        <EftBesonderhede />
       </div>
     </div>
   )

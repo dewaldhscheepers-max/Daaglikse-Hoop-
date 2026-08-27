@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { checkoutSubscription } from '../utils/payfast'
+import EftBesonderhede from '../components/EftBesonderhede'
 import './HoopVennoot.css'
 
 const PRESET_AMOUNTS = [30, 50, 100, 200]
@@ -101,6 +102,12 @@ export default function HoopVennoot({ onClose, beginBedrag = null }) {
         </button>
 
         <p className="modal-secure">🔒 Veilig betaal met PayFast</p>
+
+        {/* Dewald: "by maandeliks wys dit nie eers nie." 'n Maandelikse EFT is
+            'n debietorder wat 'n mens by sy EIE bank opstel — vir baie mense
+            is dit die manier waarop hulle reeds gee, en dit vat geen snytjie
+            nie. Dieselfde komponent as die eenmalige vorm s'n. */}
+        <EftBesonderhede maandeliks />
 
         <div className="hv-cancel-section">
           <p className="hv-cancel-title">Wil jy jou maandelikse bydrae kanselleer?</p>
