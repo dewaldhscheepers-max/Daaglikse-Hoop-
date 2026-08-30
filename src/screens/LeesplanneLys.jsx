@@ -45,6 +45,21 @@ const ICONS = {
    staan bo — dieselfde reel as die e-boeke. */
 const PLANS = [
   {
+    id:           'grense',
+    countKey:     'rp_counted_grense',
+    bookId:       'grense',
+    event:        'open-grense',
+    icon:         'boundary',
+    tint:         '#EEF0EC',
+    stroke:       '#5F7355',
+    title:        'GRENSE',
+    desc:         "Vyf dae om te beskerm wat God aan jou toevertrou het — jou hart, jou vrede, jou kapasiteit, jou roeping en jou gesin. Bybelse grense gaan nie oor beheer nie; dit gaan oor beskerming.",
+    meta:         '5 dae · gratis',
+    completedKey: 'grense_completed',
+    lastDayKey:   'grense_lastDay',
+    total:        5,
+  },
+  {
     id:           'wat-is-myne',
     countKey:     'rp_counted_wimotd',
     bookId:       'wat-is-myne',

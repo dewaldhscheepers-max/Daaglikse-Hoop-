@@ -39,6 +39,7 @@ import WatIsMyne from './screens/WatIsMyne'
 import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
+import Grense from './screens/Grense'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
@@ -127,6 +128,7 @@ export default function App() {
   const [showDinkNuut,         setShowDinkNuut]         = useState(false)
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showToksies,            setShowToksies]            = useState(false)
+  const [showGrense,             setShowGrense]             = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showBybel, setShowBybel]                 = useState(false)
   const [bybelBeginBy, setBybelBeginBy]           = useState(null)
@@ -788,6 +790,13 @@ export default function App() {
     return () => window.removeEventListener('open-toksies', onOpen)
   }, [])
 
+  // ── GRENSE leesplan ──
+  useEffect(() => {
+    function onOpen() { setShowGrense(true) }
+    window.addEventListener('open-grense', onOpen)
+    return () => window.removeEventListener('open-grense', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -1226,6 +1235,7 @@ export default function App() {
     { oop: showDinkNuut,            toe: () => setShowDinkNuut(false) },
     { oop: showDeursoekBreekStuur,  toe: () => setShowDeursoekBreekStuur(false) },
     { oop: showToksies,             toe: () => setShowToksies(false) },
+    { oop: showGrense,              toe: () => setShowGrense(false) },
     { oop: wysSteun,                toe: () => { setWysSteun(false); try { sessionStorage.removeItem('steun_versoek') } catch {} } },
     { oop: showNooimy,              toe: () => setNooimy(false) },
     { oop: showLeesplanNotice,      toe: () => setShowLeesplanNotice(false) },
@@ -1532,6 +1542,10 @@ export default function App() {
       {showDeursoekBreekStuur && (
         <DeursoekBreekStuur onClose={() => setShowDeursoekBreekStuur(false)} />
       )}
+      {showGrense && (
+        <Grense onClose={() => setShowGrense(false)} />
+      )}
+
       {showToksies && (
         <Toksies onClose={() => setShowToksies(false)} />
       )}

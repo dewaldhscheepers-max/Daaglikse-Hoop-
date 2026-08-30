@@ -75,8 +75,9 @@ import { magKas } from './data/kasBesluit.js'
  *     in 'n houer nie kon wys nie. Dewald: "verwyder dit net."
  * 24: die EFT-opsie is nou 'n regte knoppie in plaas van 'n skakeltjie, dit
  *     bestaan NOU OOK by die maandelikse vorm, en 'n mens kan die
- *     rekeningnommer met een tik kopieer. */
-const SPOEL = 24
+ *     rekeningnommer met een tik kopieer.
+ * 25: nuwe leesplan: GRENSE (5 dae). */
+const SPOEL = 25
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
