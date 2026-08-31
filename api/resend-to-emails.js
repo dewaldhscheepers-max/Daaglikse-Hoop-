@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const { magAdminDing } = require('./_geheim.js')
+const { sifGeblok } = require('./_eposGeblok')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -93,7 +94,14 @@ module.exports = async function handler(req, res) {
   if (!subject || !body) return res.status(400).json({ error: 'Kampanje het geen inhoud nie' })
 
   const html  = buildHtml(body)
-  const clean = [...new Set(emails.map(e => e.toLowerCase().trim()).filter(Boolean))]
+  /* Hierdie eindpunt stuur 'n kampanje OOR na 'n handjievol adresse — gewoonlik
+     die wat die eerste keer geval het. Dit is 'n derde pad na Resend toe wat
+     nie deur `stuurBondel` loop nie, en 'n mens wat gevra het om af te kom,
+     sou juis hier weer 'n e-pos kry. Sien `_eposGeblok.js`. */
+  const { adresse: clean, geblok } = sifGeblok(
+    [...new Set(emails.map(e => e.toLowerCase().trim()).filter(Boolean))]
+  )
+  if (!clean.length) return res.json({ sent: 0, geblok, boodskap: 'Almal is geblok' })
 
   let sent = 0
   try {

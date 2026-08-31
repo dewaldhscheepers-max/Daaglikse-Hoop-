@@ -20,7 +20,13 @@
    Let wel: daar is TANS GEEN afmeld-veld in die data nie. Ons kan dus nie
    afgemelde mense tel nie, en ons maak nie of ons kan nie. Sien die nota
    onder by `afgemeld`.
+
+   Wat daar WEL is, is 'n blok-lys — mense wat gevra het om nie meer te hoor
+   nie. Dit is nie dieselfde ding as 'n afmeld-knoppie nie: dit is met die
+   hand ingesit. Sien `_eposGeblok.js`.
    ──────────────────────────────────────────────────────────── */
+
+const { isGeblok } = require('./_eposGeblok')
 
 /* ── Wat as 'n adres tel ──
 
@@ -53,6 +59,7 @@ function ontleedLys(documents) {
   let sonderVeld = 0     // dokument sonder 'n e-posveld hoegenaamd
   let ongeldig   = 0     // daar is iets, maar dit is nie 'n adres nie
   let duplikate  = 0     // dieselfde adres, meer as een dokument
+  let geblok     = 0     // 'n mens wat gevra het om nie meer te hoor nie
 
   for (const d of rou) {
     const rouAdres = d && d.fields && d.fields.email && d.fields.email.stringValue
@@ -61,6 +68,10 @@ function ontleedLys(documents) {
     const adres = String(rouAdres).toLowerCase().trim()
     if (!ADRES.test(adres)) { ongeldig++; continue }
     if (gesien.has(adres)) { duplikate++; continue }
+    /* NA die ontdubbeling, sodat een mens met vier dokumente een keer tel en
+       nie vier keer nie. Sien `_eposGeblok.js` vir waarom dit 'n blok is en
+       nie 'n uitvee nie. */
+    if (isGeblok(adres)) { gesien.add(adres); geblok++; continue }
 
     gesien.add(adres)
     adresse.push(adres)
@@ -73,6 +84,9 @@ function ontleedLys(documents) {
     duplikate,
     ongeldig,
     sonderVeld,
+    /* Mense wat gevra het om af te kom. Dit hoort NIE by `ongeldig` nie —
+       hulle adres is reg; ons stuur net nie. */
+    geblok,
     /* Uitgesluit = alles wat in die totaal is maar nie gestuur gaan word nie.
        Dit is die getal wat die verskil verduidelik. */
     uitgesluit: rou.length - adresse.length,

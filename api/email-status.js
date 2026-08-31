@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
      gebruik. Dit het vroeer die ROU dokumente getel terwyl die stuurder die
      UNIEKE adresse gestuur het, en daarom het die paneel "2731" belowe en
      "2131" gelewer. */
-  let lys = { totaal: 0, aktief: 0, duplikate: 0, ongeldig: 0, sonderVeld: 0, uitgesluit: 0, afgemeld: null }
+  let lys = { totaal: 0, aktief: 0, duplikate: 0, ongeldig: 0, sonderVeld: 0, uitgesluit: 0, geblok: 0, afgemeld: null }
   try { lys = await haalEnOntleed(projectId, token) } catch {}
 
   return res.json({
@@ -78,6 +78,8 @@ module.exports = async function handler(req, res) {
       duplikate:  lys.duplikate,
       ongeldig:   lys.ongeldig,
       sonderVeld: lys.sonderVeld,
+      /* Mense wat gevra het om af te kom. Sien _eposGeblok.js. */
+      geblok:     lys.geblok,
       afgemeld:   lys.afgemeld,
     },
     activeCampaign,

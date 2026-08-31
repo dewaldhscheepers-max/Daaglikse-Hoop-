@@ -24,6 +24,8 @@
    Dit is stadiger, maar net vir 'n bondel wat in elk geval sou misluk het.
    ──────────────────────────────────────────────────────────── */
 
+const { sifGeblok } = require('./_eposGeblok')
+
 const GELYK = 20
 
 async function stuurEen({ sleutel, to, van, antwoordNa, onderwerp, html }) {
@@ -39,8 +41,22 @@ async function stuurEen({ sleutel, to, van, antwoordNa, onderwerp, html }) {
 
 /* Stuur een bondel. Gee terug hoeveel werklik deurgekom het, en WATTER
    adresse geweier is. */
-async function stuurBondel({ sleutel, adresse, van, antwoordNa, onderwerp, html }) {
+async function stuurBondel({ sleutel, adresse: rou, van, antwoordNa, onderwerp, html }) {
   const slegtes = []
+
+  /* ── Die blok, hier en nie hoër nie ──
+
+     Dit sou netjieser lyk om die geblokte adresse by die LYS uit te haal en
+     hier niks te weet nie. Dit is nie genoeg nie: 'n veldtog wat reeds in
+     die ry staan, dra sy eie kopie van die adresse in
+     `campaign.pendingEmails`, en daardie kopie is gemaak voordat iemand
+     gevra het om af te kom.
+
+     Elke bulk-stuur in hierdie projek — `send-bulk-email.js` en
+     `process-email-queue.js` — kom hierlangs. Dit is die enigste plek waar
+     een sif almal dek. */
+  const { adresse, geblok } = sifGeblok(rou)
+  if (!adresse.length) return { gestuur: 0, misluk: 0, slegtes, geblok }
 
   try {
     const r = await fetch('https://api.resend.com/emails/batch', {
@@ -50,7 +66,7 @@ async function stuurBondel({ sleutel, adresse, van, antwoordNa, onderwerp, html 
         from: van, to, reply_to: antwoordNa, subject: onderwerp, html,
       }))),
     })
-    if (r.ok) return { gestuur: adresse.length, misluk: 0, slegtes }
+    if (r.ok) return { gestuur: adresse.length, misluk: 0, slegtes, geblok }
 
     const uit = await r.json().catch(() => ({}))
     console.error('Resend batch error:', JSON.stringify(uit))
@@ -73,7 +89,10 @@ async function stuurBondel({ sleutel, adresse, van, antwoordNa, onderwerp, html 
     }
   }
 
-  return { gestuur, misluk: adresse.length - gestuur, slegtes }
+  /* `misluk` tel net wat GEPROBEER is. 'n Geblokte adres het nie misluk
+     nie — ons het hom nooit gestuur nie, en dit as 'n mislukking tel, sou
+     die paneel laat lyk of iets stukkend is. */
+  return { gestuur, misluk: adresse.length - gestuur, slegtes, geblok }
 }
 
 module.exports = { stuurBondel, stuurEen, GELYK }

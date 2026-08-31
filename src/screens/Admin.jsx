@@ -1303,6 +1303,9 @@ export default function Admin({ onClose }) {
                     Uitgesluit: {lysOpsomming.duplikate} duplikate
                     {lysOpsomming.ongeldig > 0 && ` · ${lysOpsomming.ongeldig} ongeldige adresse`}
                     {lysOpsomming.sonderVeld > 0 && ` · ${lysOpsomming.sonderVeld} sonder adres`}
+                    {/* Mense wat gevra het om af te kom. Dit staan APART van
+                        "ongeldig" — hulle adres is reg, ons stuur net nie. */}
+                    {lysOpsomming.geblok > 0 && ` · ${lysOpsomming.geblok} het gevra om af te kom`}
                     {lysOpsomming.afgemeld === null && ' · afmeldings word nog nie aangeteken nie'}
                   </span>
                 </div>
