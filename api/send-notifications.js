@@ -109,6 +109,29 @@ async function leesToestemming(accessToken) {
   } catch { return null }
 }
 
+/* ── Waar elke token se dokument staan ──
+ *
+ * Ons het geweet WATTER tokens dood is en dit elke oggend gerapporteer, maar
+ * niks daarmee gedoen nie. Op 31 Augustus 2026 het die lys so gelyk:
+ *
+ *     vandag  2622 van 5326 gestuur · 2704 dood
+ *     gister  2625 van 5308 gestuur · 2683 dood
+ *
+ * Meer as die helfte van die lys is fone wat die app verwyder het, en die
+ * hoop GROEI — 2683 gister, 2704 vandag. Elkeen van hulle kry elke oggend 'n
+ * FCM-oproep wat gewaarborg is om te misluk, plus twee herhalings se
+ * uitfilter. Dit is 2704 nuttelose reise na Google in 'n lopie wat 132 van
+ * sy 300 sekondes klaar gebruik.
+ *
+ * Om hulle uit te vee het 'n mens die dokument se NAAM nodig, nie net die
+ * token nie. Die lys word in elk geval gelees; ons hou net die naam by.
+ *
+ * Twee kaarte, nie een nie: dieselfde token kan in albei versamelings staan
+ * (Samsung se web-push endpoint dra 'n FCM-token), en een kaart sou die een
+ * naam bo-oor die ander skryf en dan die verkeerde dokument uitvee. */
+let dokFcm = new Map()
+let dokWeb = new Map()
+
 // ── Fetch FCM tokens ───────────────────────────────────────────────────────
 async function getFcmTokens(accessToken) {
   const tokens = []
@@ -119,7 +142,9 @@ async function getFcmTokens(accessToken) {
     const data = await r.json()
     ;(data.documents || []).forEach(d => {
       const t = d.fields?.token?.stringValue
-      if (t) tokens.push(t)
+      if (!t) return
+      tokens.push(t)
+      if (d.name) dokFcm.set(sleutelVir(t), d.name)
     })
     pageToken = data.nextPageToken || null
   } while (pageToken)
@@ -144,6 +169,7 @@ async function getWebPushSubscriptions(accessToken) {
             auth:   subField.keys?.mapValue?.fields?.auth?.stringValue,
           }
         })
+        if (d.name) dokWeb.set(sleutelVir(subField.endpoint.stringValue), d.name)
       }
     })
     pageToken = data.nextPageToken || null
@@ -382,6 +408,69 @@ function isDood(x) {
   return dooies.has(sleutelVir(x))
 }
 
+/* ── Vee die fone uit wat die app verwyder het ──
+ *
+ * Wat 'n mens hier moet weet, is nie hoe dit werk nie — dit is 'n
+ * batchWrite met deletes in — maar WANNEER dit mag loop. 'n Fout hier vee
+ * die intekenaarslys uit, en daar is geen pad terug nie: 'n token kan nie
+ * herskep word nie, net die foon self kan 'n nuwe een gee. Dus:
+ *
+ * · Net kodes wat oor die FOON gaan. `dooies` kry net UNREGISTERED,
+ *   NOT_FOUND en INVALID_ARGUMENT — sien `sendFcm`. 'n 429 of 'n 503 is
+ *   Google wat sê "nie nou nie" en het nog nooit 'n token hier ingesit nie.
+ *   Daardie onderskeid is die hele veiligheid van hierdie funksie.
+ *
+ * · 'n NOODREM by 90%. Is byna die HELE lys skielik dood, is dit nie
+ *   vyfduisend mense wat oornag die app verwyder het nie — dit is 'n
+ *   verkeerde PROJECT_ID, 'n diensrekening by die verkeerde projek, of 'n
+ *   boodskap wat FCM as ongeldig lees. Elkeen van daardie foute lyk vir
+ *   hierdie kode PRESIES soos 'n dooie foon. Dan vee ons niks uit nie en
+ *   rapporteer dit, want 'n lys wat te lank is, is môre nog reg te maak en
+ *   een wat weg is nie. Vandag se 51% loop deur; 90% nie.
+ *
+ * · Nooit by 'n repetisie nie. Daar is die lys één token en die kaarte is
+ *   leeg — daar is niks om te besluit nie.
+ *
+ * Dit mag NOOIT die lopie laat misluk nie. Die kennisgewings is klaar uit;
+ * 'n opruiming wat omval, is 'n opruiming wat môre weer loop. */
+const VEILIG_DOOD = 0.9
+
+async function veeDooiesUit({ accessToken, totaal }) {
+  const name = []
+  for (const sleutel of dooies) {
+    const a = dokFcm.get(sleutel)
+    const b = dokWeb.get(sleutel)
+    if (a) name.push(a)
+    if (b) name.push(b)
+  }
+  if (!name.length) return { uitgevee: 0 }
+  if (totaal > 0 && dooies.size >= totaal * VEILIG_DOOD) {
+    console.warn(`[kennisgewings] opruiming oorgeslaan — ${dooies.size} van ${totaal} lyk dood`)
+    return { uitgevee: 0, oorgeslaan: 'te veel dood' }
+  }
+
+  let uitgevee = 0
+  /* Firestore vat 500 skryfwerke per batchWrite. Vyfduisend dooies is dus
+     tien oproepe, nie vyfduisend nie. */
+  for (let i = 0; i < name.length; i += 500) {
+    const groep = name.slice(i, i + 500)
+    const r = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:batchWrite`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ writes: groep.map(n => ({ delete: n })) }),
+      }
+    )
+    if (!r.ok) {
+      console.warn('[kennisgewings] opruiming misluk:', r.status)
+      break
+    }
+    uitgevee += groep.length
+  }
+  return { uitgevee }
+}
+
 // ── Send one standard Web Push or FCM if endpoint is Google's ─────────────
 async function sendWebPush(subscription, title, body, accessToken, includeImage = true) {
   // Samsung Internet on Android uses FCM as its push backend.
@@ -572,6 +661,13 @@ module.exports = async function handler(req, res) {
   let uitGestuur = 0
 
   try {
+    /* Skoon kaarte VOOR die lyste gelees word — hulle word tydens die lees
+       gevul, dus is dit die enigste oomblik waarop dit veilig is. Bly 'n
+       vorige lopie s'n staan, wys 'n naam na 'n dokument wat nie meer in
+       hierdie lys is nie. */
+    dokFcm = new Map()
+    dokWeb = new Map()
+
     const [todayTitle, fcmTokens, webPushSubs] = await Promise.all([
       customTitle ? Promise.resolve(customTitle) : getTodayTitle(accessToken),
       /* By 'n repetisie word die lyste glad nie gehaal nie. Dit is nie 'n
@@ -594,12 +690,31 @@ module.exports = async function handler(req, res) {
     const w = await inGroepe(webPushSubs,
       s => { uitGestuur++; return sendWebPush(s, notifTitle, notifBody, accessToken, includeImage) })
 
+    /* Ruim op NA die stuur, nooit voor nie: eers wanneer die boodskappe uit
+       is, weet ons wie werklik dood is. En dit mag die lopie nooit laat
+       misluk nie — die mense het hulle kennisgewing klaar. */
+    let opruiming = { uitgevee: 0 }
+    if (!netEen && soek.skoonmaak !== '0') {
+      try {
+        opruiming = await veeDooiesUit({
+          accessToken,
+          totaal: fcmTokens.length + webPushSubs.length,
+        })
+      } catch (e) {
+        console.warn('[kennisgewings] opruiming gegooi:', e.message)
+      }
+    }
+
     const result = {
       fcm:     { sent: f.geslaag, misluk: f.misluk, herhaal: f.herhaal, total: fcmTokens.length },
       webpush: { sent: w.geslaag, misluk: w.misluk, herhaal: w.herhaal, total: webPushSubs.length },
       /* Tokens van fone wat die app verwyder het. Hulle gaan nooit weer werk
          nie; dit is nie 'n fout wat oorgaan nie. */
       dood,
+      /* En hoeveel van hulle uit die lys uit is. Sien `veeDooiesUit`: is dit
+         0 terwyl `dood` groot is, het die noodrem getrek. */
+      uitgevee: opruiming.uitgevee,
+      ...(opruiming.oorgeslaan ? { opruimingOorgeslaan: opruiming.oorgeslaan } : {}),
       /* Sonder VAPID gaan egte web-push (Firefox) nie deur nie. FCM werk
          steeds, en dit is die oorgrote meerderheid. */
       vapid: vapidGereed,
@@ -634,6 +749,7 @@ module.exports = async function handler(req, res) {
              verwyder het en of daar iets stukkend is nie. Dit is die verskil
              tussen "die lys is oud" en "dit werk nie". */
           dood:     dood,
+          uitgevee: opruiming.uitgevee,
           redes:    redesOpsomming(),
           sekondes: result.sekondes,
         },

@@ -207,6 +207,10 @@ export default function Admin({ onClose }) {
         const dele = [`✅ Gestuur aan ${gestuur} van ${totaal}`]
         if (misluk) dele.push(`${misluk} misluk`)
         if (data.dood) dele.push(`${data.dood} fone het die app verwyder`)
+        /* Hulle is nou UIT die lys uit. Sonder hierdie woord lyk 'n lys wat
+           môre kleiner is soos mense wat weggeloop het. */
+        if (data.uitgevee) dele.push(`${data.uitgevee} uit die lys uit`)
+        if (data.opruimingOorgeslaan) dele.push(`⚠️ opruiming oorgeslaan (${data.opruimingOorgeslaan})`)
         if (data.vapid === false) dele.push('VAPID ontbreek — Firefox kry niks')
         /* Die getal wat waarsku voordat dit weer breek. Vercel kap by 300s
            af; sien jy dit opkruip, kom dit weer. */
@@ -1244,6 +1248,7 @@ export default function Admin({ onClose }) {
                               <>
                                 ✅ <b>{l.gestuur}</b> van {l.totaal}
                                 {l.dood > 0 && <> · <b>{l.dood}</b> fone het die app verwyder</>}
+                                {l.uitgevee > 0 && <> · <b>{l.uitgevee}</b> uit die lys uit</>}
                                 {l.misluk - l.dood > 0 && <> · {l.misluk - l.dood} ander mislukkings</>}
                                 {l.sekondes > 0 && <> · {l.sekondes}s van 300</>}
                                 {/* Wat Google GESE het. Sonder dit is die

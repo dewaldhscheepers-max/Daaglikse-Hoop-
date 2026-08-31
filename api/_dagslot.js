@@ -105,7 +105,7 @@ async function geeDagTerug({ projectId, accessToken, dag, haal = fetch }) {
    ses duisend mense te vra. */
 async function merkKlaar({ projectId, accessToken, dag, uitslag, haal = fetch }) {
   try {
-    const velde = ['klaar', 'gestuur', 'totaal', 'misluk', 'dood', 'redes', 'sekondes', 'einde']
+    const velde = ['klaar', 'gestuur', 'totaal', 'misluk', 'dood', 'uitgevee', 'redes', 'sekondes', 'einde']
     const soek = velde.map(v => `updateMask.fieldPaths=${v}`).join('&')
     await haal(url(projectId, `${VERSAMELING}/${dag}`, soek), {
       method: 'PATCH',
@@ -117,6 +117,9 @@ async function merkKlaar({ projectId, accessToken, dag, uitslag, haal = fetch })
           totaal:   { integerValue: String(uitslag.totaal  || 0) },
           misluk:   { integerValue: String(uitslag.misluk  || 0) },
           dood:     { integerValue: String(uitslag.dood    || 0) },
+          /* Hoeveel dooies uit die lys uit is. Sonder hierdie getal lyk 'n
+             lys wat krimp soos 'n lys wat mense verloor. */
+          uitgevee: { integerValue: String(uitslag.uitgevee || 0) },
           /* Wat Google gese het. Net die foutkodes en hoe dikwels — nooit
              'n token nie. */
           redes:    { stringValue: String(uitslag.redes || '').slice(0, 300) },
@@ -147,6 +150,7 @@ async function lopieVir({ projectId, accessToken, dag, haal = fetch }) {
       totaal:   Number(f.totaal?.integerValue  || 0),
       misluk:   Number(f.misluk?.integerValue  || 0),
       dood:     Number(f.dood?.integerValue    || 0),
+      uitgevee: Number(f.uitgevee?.integerValue || 0),
       redes:    f.redes?.stringValue || '',
       sekondes: Number(f.sekondes?.doubleValue || 0),
     }
