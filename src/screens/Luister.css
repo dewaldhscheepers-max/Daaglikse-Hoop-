@@ -124,10 +124,25 @@
   line-height: 1.2;
 }
 
+/* ── Die Skrifverwysing MOET leesbaar wees ──
+ *
+ * Dit was 12px wit teen `opacity: 0.82` met GEEN skaduwee nie, bo-op die
+ * wallpaper-foto. Die titel net daarbo het 'n skaduwee; hierdie een het
+ * niks geërf nie, want die skaduwee sit op die titel en nie op die ouer
+ * `.hero-song-info` nie.
+ *
+ * Op 'n ligte deel van die prent — 'n sonsopkoms, 'n wolk — het dit
+ * heeltemal verdwyn. Van 162 notas dra twee 'n vers, en die een van
+ * 14 April 2026 ("1 Konings 19") was al die tyd daar sonder dat Dewald hom
+ * kon sien. Hy het gedink die veld werk nie.
+ *
+ * Dieselfde skaduwee as die titel, en die deursigtigheid uit — 'n bietjie
+ * kleiner en 'n bietjie ligter as die titel is genoeg hiërargie. */
 .hero-song-ref {
-  font-size: 12px;
-  opacity: 0.82;
-  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+  margin-top: 3px;
 }
 
 /* ─── Listen count ─── */
