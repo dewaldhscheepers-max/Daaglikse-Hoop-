@@ -3,35 +3,142 @@
  * Die skerm moet STIL wees. Dit is die enigste plek in die app waar niks
  * anders om aandag meeding nie: geen nav, geen kaarte, geen teller.
  *
+ * ── Die vorm: nag, dan lig ──
+ *
+ * Die eerste weergawe was ses keer dieselfde sjabloon — titel, grys reëltjie,
+ * wit kaart, pers knoppie. Dit het gelees soos 'n vorm om te voltooi.
+ *
+ * Nou dra die vloei 'n boog:
+ *
+ *   1 LUISTER   nag. Jy gaan sit in die donker en jy hoor.
+ *   2 DIE WOORD lig breek. Die vers self is die grootste ding op die bladsy.
+ *   3 4 5       stil papier. Niks pronk waar iemand se seer staan nie.
+ *   6 KLAAR     vandag se eie wallpaper as die grond, gedemp.
+ *
+ * Twee bakens en stilte tussenin. Die laaste een is die belangrikste: die
+ * ding wat hy pas ontvang het, word die grond waarop hy bedank word.
+ *
+ * Elke skerm sit sy kleure deur TOKENS (`--grond`, `--op`, `--sag`, `--kaart`,
+ * `--aksent`) wat op `.tmg[data-grond]` wissel. Niks hieronder skryf 'n kleur
+ * regstreeks nie — anders het 'n mens wit teks op wit die dag wanneer 'n skerm
+ * van grond verwissel.
+ *
  * ── Die reëls uit CLAUDE.md wat hier geld ──
  *
  *   · `100svh`, nooit `100dvh`. `dvh` verander saam met Chrome se adresbalk
- *     en dan word die hele omhulsel by elke raam van daardie animasie
- *     hervorm — dit is een van die oorsake van die gekleurde strepe op
- *     Android;
- *   · geen `transform` of `opacity` op `:active` nie. Net kleur. Dieselfde
- *     `transform: scale()` het Bou die Ark dae gekos;
- *   · die wallpaper is 'n `background-image` op 'n ONDEURSIGTIGE houer, nie
- *     'n volskerm `<img>` nie. 'n Groot beeldtekstuur kry maklik sy eie
- *     saamgestelde laag, en 'n ongeverfde teel wys dan rou GPU-geheue.
+ *     en hervorm die hele omhulsel by elke raam van daardie animasie;
+ *   · geen `transform` of `opacity` op `:active` nie. Net kleur;
+ *   · elke element wat 'n saamgestelde laag kan kry, dra 'n ONDEURSIGTIGE
+ *     agtergrondkleur, sodat 'n ongeverfde teel die grond wys en nie rou
+ *     GPU-geheue nie.
  *
- * z-index 238: BO die blad en die nav, ONDER die Bybel (250). Die "Maak in
- * die Bybel oop"-knoppie moet werk.
+ * z-index 238: BO die blad en die nav, ONDER die Bybel (250).
  */
 
 .tmg {
+  --grond:  #FAF8F5;
+  --op:     #2D2040;
+  --sag:    #8A7E9A;
+  --kaart:  #FFFFFF;
+  --rand:   #EFEAE2;
+  --aksent: #7C6FAF;
+  --knop-agter: #7C6FAF;
+  --knop-op:    #FFFFFF;
+  --knop-druk:  #5C4E8E;
+
   position: fixed;
   inset: 0;
   z-index: 238;
-  background: var(--cream);
+  background: var(--grond);
+  color: var(--op);
   display: flex;
   flex-direction: column;
   height: 100svh;
+  isolation: isolate;
+}
+
+/* ── Nag: skerm 1 ── */
+.tmg[data-grond='nag'] {
+  --grond:  #17122A;
+  --op:     #F3EFFA;
+  --sag:    #A79ECA;
+  --kaart:  #221B3C;
+  --rand:   #322A52;
+  --aksent: #C9B8F0;
+  --knop-agter: #F3EFFA;
+  --knop-op:    #241C40;
+  --knop-druk:  #D6CEEA;
+  background: radial-gradient(120% 70% at 50% 0%, #241C40 0%, #17122A 62%, #120E22 100%);
+}
+
+/* ── Lig breek: skerm 2 ── */
+.tmg[data-grond='dagbreek'] {
+  --grond:  #FBF5EC;
+  --kaart:  #FFFFFF;
+  --rand:   #F0E4D2;
+  background: radial-gradient(130% 62% at 50% 0%, #FFF3DF 0%, #FBF5EC 58%, #F7F2EA 100%);
+}
+
+/* ── Die beeld: skerm 6 ── */
+.tmg[data-grond='beeld'] {
+  --grond:  #16121F;
+  --op:     #FFFFFF;
+  --sag:    rgba(255, 255, 255, 0.80);
+  --kaart:  rgba(255, 255, 255, 0.10);
+  --rand:   rgba(255, 255, 255, 0.20);
+  --aksent: #F0DCB4;
+  --knop-agter: #FFFFFF;
+  --knop-op:    #241C40;
+  --knop-druk:  #E4DCF0;
+  background: var(--grond);
+}
+
+/* Die wallpaper agter die klaar-skerm.
+ *
+ * Dit was 'n skerp prent onder 'n sluier, en dit het NIE gewerk nie: Dewald
+ * se wallpapers dra groot woorde ("DAAGLIKSE HOOP", "OM TE LUISTER"), en
+ * daardie letters het deur die sluier geskyn en met die teks bo-op geveg. Op
+ * 'n skermkiekie was dit dadelik sigbaar.
+ *
+ * 'n Swaar vervaag maak van enige prent 'n KLEUR en 'n stemming in plaas van
+ * 'n boodskap. Die skaal van 1.12 keer dat die vervaagde rande as 'n ligte
+ * raam om die skerm wys.
+ *
+ * Die houer is ondeursigtig (#16121F) onder alles: word 'n teel nie betyds
+ * geverf nie, wys dit hierdie kleur en nie rou GPU-geheue nie — en dit is
+ * die enigste ding in hierdie lêer wat 'n filter en 'n transform dra, albei
+ * op 'n element wat EEN keer verskyn en nooit op ':active' verander nie. */
+.tmg-agtergrond {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-color: #16121F;
+}
+.tmg-agtergrond::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #16121F;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(26px) saturate(1.15);
+  transform: scale(1.12);
+}
+.tmg-agtergrond::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 10, 22, 0.70) 0%, rgba(14, 10, 22, 0.82) 50%, rgba(14, 10, 22, 0.92) 100%);
 }
 
 /* ── Die kop tree terug ── */
 
 .tmg-kop {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -39,40 +146,42 @@
   gap: 12px;
   padding: 14px 16px 10px;
   padding-top: calc(14px + env(safe-area-inset-top, 0px));
-  background: var(--cream);
 }
 
 .tmg-kop-naam {
-  font-family: var(--font-serif);
-  font-size: 15px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
   font-weight: 600;
-  color: var(--purple-dark);
-  letter-spacing: 0.01em;
-  min-height: 20px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sag);
+  min-height: 16px;
 }
 
 .tmg-toe {
   flex: 0 0 auto;
   width: 34px;
   height: 34px;
-  border: 0;
+  border: 1px solid var(--rand);
   border-radius: 50%;
-  background: var(--cream-dark);
-  color: var(--text-muted);
-  font-size: 15px;
+  background: var(--kaart);
+  color: var(--sag);
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
 }
-.tmg-toe:active { background: #E2DACE; }
+.tmg-toe:active { background: var(--rand); }
 
 /* ── Die lyf ── */
 
 .tmg-lyf {
+  position: relative;
+  z-index: 1;
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 20px 40px;
-  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  padding: 0 22px 44px;
+  padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px));
 }
 
 .tmg-skerm {
@@ -80,224 +189,295 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  /* Die spasie kom uit die uitleg, nie uit marges op elke element nie —
-     marges val in mekaar en dan raak die ritme stil stukkend. */
-  gap: 14px;
-  padding-top: 18px;
+  gap: 16px;
+  padding-top: 24px;
+  /* Een keer, wanneer die skerm verskyn — nooit op `:active` nie. Die laag
+     wat hierdie animasie maak, word EEN slag gemaak en weer laat gaan; die
+     duur fout in hierdie projek was 'n laag wat by ELKE druk gemaak en
+     gebreek is. Sien CLAUDE.md.
+
+     Duik daar ooit gekleurde strepe in hierdie vloei op, is dit die EERSTE
+     plek om te kyk — haal die animasie uit en die skerm werk presies soos hy
+     is. Kom die strepe nie hier vandaan nie, sit die grond se ondeursigtige
+     kleur reeds hieronder as vangnet. */
+  animation: tmg-in 300ms ease-out both;
+}
+
+@keyframes tmg-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .tmg-titel {
   font-family: var(--font-serif);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.14;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--op);
   margin: 0;
   text-wrap: balance;
 }
 
 .tmg-lei {
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--text-muted);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--sag);
   margin: 0;
+  max-width: 34ch;
 }
 
 .tmg-merk {
-  font-size: 13.5px;
-  color: var(--purple);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--aksent);
   font-weight: 500;
   margin: 0;
 }
 
-/* ── Knoppies ──
+/* ── Die merke ──
  *
- * Die primêre een is groot en sag; die stil een is 'n uitgang en moet soos
- * een lyk. Nooit twee knoppies wat ewe hard skree nie. */
+ * Geteken, nie geplak nie. Daar was ❤️ en 🙏 op die twee belangrikste
+ * oomblikke; 'n emoji is die foon se lettertipe en nie hierdie app se stem
+ * nie. Almal dieselfde dun lyn. */
+
+.tmg-teken { display: block; color: var(--aksent); }
+.tmg-teken-groot { width: 44px; height: 44px; margin: 2px auto 2px; }
+.tmg-teken-klein { width: 22px; height: 22px; flex: 0 0 auto; }
+
+/* ── Knoppies ── */
 
 .tmg-knop {
   display: block;
   width: 100%;
   border: 0;
-  border-radius: 16px;
-  padding: 17px 18px;
+  border-radius: 999px;
+  padding: 18px 20px;
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;
-  color: var(--white);
-  background: var(--purple);
+  letter-spacing: 0.01em;
+  color: var(--knop-op);
+  background: var(--knop-agter);
   cursor: pointer;
   text-align: center;
-  /* Net kleur op :active. Sien die kop van hierdie lêer. */
   transition: background 0.12s;
 }
-.tmg-knop:active { background: var(--purple-dark); }
-.tmg-knop:disabled { background: #C9C2D8; cursor: default; }
+.tmg-knop:active { background: var(--knop-druk); }
+.tmg-knop:disabled { background: var(--rand); color: var(--sag); cursor: default; }
 
 .tmg-knop-stil {
   background: transparent;
-  color: var(--text-muted);
+  color: var(--sag);
   font-weight: 500;
   font-size: 14.5px;
-  padding: 12px;
+  padding: 13px;
 }
-.tmg-knop-stil:active { background: var(--cream-dark); }
-.tmg-knop-stil:disabled { background: transparent; color: #C9C2D8; }
+.tmg-knop-stil:active { background: var(--rand); color: var(--op); }
+.tmg-knop-stil:disabled { background: transparent; color: var(--sag); }
 
-/* ── 2 · Die Skrifgedeelte ── */
+/* ── 1 · Luister ──
+ *
+ * Stemboodskap.css bring sy eie kleure. Op die nagskerm maak ons hom
+ * deursigtig sodat die nag deurkom, en die kontroles neem die tokens oor. */
+
+.tmg .stem {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.tmg .stem-kop   { color: var(--sag); letter-spacing: 0.16em; }
+.tmg .stem-titel { color: var(--op); }
+.tmg .stem-geen,
+.tmg .stem-duur,
+.tmg .stem-tyd   { color: var(--sag); }
+.tmg .stem-balk  { background: var(--rand); }
+.tmg .stem-vul   { background: var(--aksent); }
+.tmg .stem-speel {
+  background: var(--knop-agter);
+  color: var(--knop-op);
+  border: 0;
+}
+.tmg .stem-speel:active { background: var(--knop-druk); }
+.tmg .stem-spring,
+.tmg .stem-spoed,
+.tmg .stem-nooi  { color: var(--sag); border-color: var(--rand); }
+.tmg .stem-teks-knop { color: var(--aksent); }
+.tmg .stem-teks-lyf  { color: var(--op); }
+.tmg .stem-fout      { color: var(--aksent); }
+
+/* ── 2 · Die Woord ──
+ *
+ * Die vers is die held van hierdie skerm. Dit was 18px kursief ONDER 'n
+ * opskrif van 30px — die mooiste sin op die bladsy was die kleinste ding
+ * daarop. Nou staan die verwysing klein bo-aan en die vers self is groot,
+ * met ruim reëlspasie, soos Skrif geset hoort te wees. */
 
 .tmg-skrif {
-  background: var(--white);
-  border-radius: 18px;
-  padding: 22px 20px;
-  box-shadow: 0 1px 3px var(--shadow);
+  background: var(--kaart);
+  border: 1px solid var(--rand);
+  border-radius: 22px;
+  padding: 30px 24px 32px;
+  text-align: center;
 }
 
 .tmg-skrif-ref {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--purple-dark);
-  line-height: 1.2;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--aksent);
 }
 
-.tmg-skrif-teks {
-  margin: 12px 0 0;
-  font-family: var(--font-serif);
-  font-size: 18px;
-  line-height: 1.55;
-  color: var(--text);
-  font-style: italic;
+.tmg-skrif-streep {
+  width: 34px;
+  height: 1px;
+  margin: 15px auto 19px;
+  background: var(--rand);
 }
+
+.tmg-skrif-vers {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 27px;
+  line-height: 1.44;
+  letter-spacing: -0.005em;
+  color: var(--op);
+  text-wrap: balance;
+}
+
+/* Is daar geen teksvers by die nota nie, dra die verwysing die skerm alleen
+   en moet dit groot wees — nie 'n etiket bo niks nie. */
+.tmg-skrif-alleen .tmg-skrif-ref {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--op);
+}
+.tmg-skrif-alleen .tmg-skrif-streep { display: none; }
 
 /* ── 3 · Die wallpaper ──
  *
- * ONDEURSIGTIG, met die prent as agtergrond. Word 'n teel nie betyds geverf
- * nie, wys dit hierdie kleur en nie rou geheue nie. */
+ * Die HELE prent moet wys. Dit was 'n `background-size: cover` in 'n
+ * 9:16-houer, en 'n wallpaper van 'n ander vorm is aan albei kante afgesny —
+ * 'n mens kon nie sien wat hy op die punt was om te stoor nie. */
 
-/* Die HELE prent moet wys. Dit was 'n `background-size: cover` in 'n 9:16
-   houer, en 'n wallpaper wat nie presies daardie vorm is nie, is aan albei
-   kante afgesny — 'n mens kon nie sien wat hy op die punt was om te stoor
-   nie. Nou pas dit altyd in, wat ook al die vorm is.
-
-   Die HOUER is ondeursigtig en dra die afronding; die prent sit binne-in.
-   Dieselfde vorm as die wallpaper-kaart op Luister, wat al lank so werk. */
 .tmg-wp {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  background-color: var(--cream-dark);
-  border-radius: 18px;
+  background-color: var(--rand);
+  border-radius: 22px;
   overflow: hidden;
 }
 
 .tmg-wp img {
   display: block;
   max-width: 100%;
-  max-height: 58svh;
+  max-height: 54svh;
   width: auto;
   height: auto;
   object-fit: contain;
 }
 
-/* ── 4 · Die versoek ── */
+/* ── 4 · Die versoek ──
+ *
+ * Stil en leeg rondom iemand anders se seer. Die etiket was "ANONIEME
+ * VERSOEK" — administratiewe taal bo 'n mens se nood. */
 
 .tmg-versoek {
   margin: 0;
-  background: var(--white);
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 1px 3px var(--shadow);
+  background: var(--kaart);
+  border: 1px solid var(--rand);
+  border-radius: 22px;
+  padding: 26px 22px;
 }
 
 .tmg-versoek-kop {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--sag);
+  margin-bottom: 15px;
 }
 
 .tmg-versoek-teks {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: 21px;
   line-height: 1.5;
-  color: var(--text);
-  /* 'n Lang versoek moet lees, nie oorloop nie. */
+  color: var(--op);
   overflow-wrap: anywhere;
 }
 
 .tmg-versoek-saam {
-  margin-top: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rand);
   font-size: 13px;
-  color: var(--purple);
+  color: var(--sag);
 }
 
 /* Die dankie kom EERS ná die daad. */
 .tmg-dankie {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--lavender-soft);
-  border-radius: 18px;
-  padding: 22px 18px;
+  gap: 14px;
+  background: var(--kaart);
+  border: 1px solid var(--rand);
+  border-radius: 22px;
+  padding: 26px 20px;
   text-align: center;
-}
-
-.tmg-dankie-merk {
-  width: 42px;
-  height: 42px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: var(--purple);
-  color: var(--white);
-  font-size: 20px;
-  line-height: 42px;
+  animation: tmg-in 320ms ease-out both;
 }
 
 .tmg-dankie-teks {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.4;
-  color: var(--text);
+  color: var(--op);
+  text-wrap: balance;
 }
 
 /* ── 5 · Die kassie ── */
 
 .tmg-kassie {
   width: 100%;
-  border: 1.5px solid var(--cream-dark);
-  border-radius: 16px;
-  padding: 16px;
+  border: 1.5px solid var(--rand);
+  border-radius: 20px;
+  padding: 18px;
   font-family: var(--font-body);
   font-size: 16px;   /* nooit kleiner as 16px — iOS zoem anders in */
-  line-height: 1.5;
-  color: var(--text);
-  background: var(--white);
+  line-height: 1.55;
+  color: var(--op);
+  background: var(--kaart);
   resize: none;
 }
-.tmg-kassie:focus {
-  outline: none;
-  border-color: var(--lavender);
-}
+.tmg-kassie::placeholder { color: var(--sag); }
+.tmg-kassie:focus { outline: none; border-color: var(--aksent); }
 
 .tmg-tel {
-  margin-top: -8px;
+  margin-top: -10px;
   text-align: right;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--sag);
   font-variant-numeric: tabular-nums;
 }
 
 .tmg-fyn {
-  margin: -6px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 0;
   font-size: 12.5px;
-  color: var(--text-muted);
+  color: var(--sag);
 }
 
 .tmg-fout {
@@ -308,10 +488,10 @@
 
 .tmg-krisis {
   background: #FBEFEC;
-  border-radius: 16px;
-  padding: 16px 18px;
+  border-radius: 18px;
+  padding: 18px 20px;
   font-size: 14.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: #7A332C;
 }
 .tmg-krisis p { margin: 0 0 6px; }
@@ -319,68 +499,56 @@
 
 /* ── 6 · Klaar ── */
 
-.tmg-slot { text-align: center; gap: 16px; }
-.tmg-slot .tmg-lei { text-align: center; }
-
-.tmg-slot-merk {
-  font-size: 34px;
-  line-height: 1;
-  margin-top: 8px;
-}
+.tmg-slot { text-align: center; gap: 18px; padding-top: 30px; }
+.tmg-slot .tmg-lei { text-align: center; margin: 0 auto; }
 
 /* Die kwitansie. Eers wat hy gedoen het, dan eers 'n vraag. */
 .tmg-lys {
   list-style: none;
-  margin: 0;
-  padding: 18px 18px;
-  background: var(--white);
-  border-radius: 18px;
-  box-shadow: 0 1px 3px var(--shadow);
+  margin: 4px 0 0;
+  padding: 20px;
+  background: var(--kaart);
+  border: 1px solid var(--rand);
+  border-radius: 22px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
   text-align: left;
 }
 
 .tmg-lys li {
-  position: relative;
-  padding-left: 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   font-size: 15px;
   line-height: 1.45;
-  color: var(--text);
-}
-.tmg-lys li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--purple);
-  font-weight: 700;
+  color: var(--op);
 }
 
 .tmg-maand {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 17px;
-  color: var(--purple-dark);
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--aksent);
 }
 
 /* Die EEN vraag, met 'n reël wat dit van die kwitansie skei. */
 .tmg-vraag {
-  margin-top: 12px;
-  padding-top: 22px;
-  border-top: 1px solid var(--cream-dark);
+  margin-top: 14px;
+  padding-top: 26px;
+  border-top: 1px solid var(--rand);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .tmg-vraag-kop {
   font-family: var(--font-serif);
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--text);
+  color: var(--op);
   margin: 0;
   text-wrap: balance;
 }
@@ -393,13 +561,24 @@
   padding: 12px 4px;
   font-family: var(--font-body);
   font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--text-muted);
+  line-height: 1.55;
+  color: var(--sag);
   text-align: center;
   cursor: pointer;
 }
-.tmg-uit:active { color: var(--purple); }
+.tmg-uit:active { color: var(--op); }
 
 @media (prefers-reduced-motion: reduce) {
   .tmg-knop { transition: none; }
+  .tmg-skerm, .tmg-dankie { animation: none; }
 }
+
+/* 'n Knoppie met 'n merk daarin. Die merk erf die knoppie se kleur, sodat hy
+   op die nag-, papier- en beeldgrond ewe reg lyk. */
+.tmg-knop-met-teken {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.tmg-knop-met-teken .tmg-teken { color: currentColor; }

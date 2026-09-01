@@ -44,7 +44,7 @@ import { db } from '../firebase'
 import Stemboodskap from '../components/Stemboodskap'
 import EftBesonderhede from '../components/EftBesonderhede'
 import { toestelId } from '../data/sorgStuur'
-import { magDeel, saamSin } from '../data/gebedDeel'
+import { magDeel, saamSinVirOntvanger } from '../data/gebedDeel'
 import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
 import { prentPad } from '../data/prentPad'
 import {
@@ -68,6 +68,84 @@ const SEWE_DAE = 7 * 24 * 60 * 60 * 1000
 function leesStel(sleutel) {
   try { return new Set(JSON.parse(localStorage.getItem(sleutel) || '[]')) }
   catch { return new Set() }
+}
+
+/* ── Die merke ──
+ *
+ * Daar was ❤️ en 🙏 op die twee belangrikste oomblikke van die vloei. 'n
+ * Emoji is die FOON se lettertipe: dit lyk anders op elke toestel, dit is
+ * niemand se ontwerp nie, en op die kroon van 'n daaglikse ritueel lees dit
+ * soos 'n plakker.
+ *
+ * Almal dieselfde dun lyn, dieselfde vierkant, en almal erf `currentColor`
+ * sodat hulle op die nagskerm en op papier ewe reg lyk. */
+
+function TekenDagbreek({ klas = 'tmg-teken tmg-teken-groot' }) {
+  /* Die son wat oor die rand kom. Die vloei se hele vorm in een merk. */
+  return (
+    <svg className={klas} viewBox="0 0 40 40" fill="none" stroke="currentColor"
+         strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 29h32" />
+      <path d="M11 29a9 9 0 0 1 18 0" />
+      <path d="M20 8v4M8.6 12.6l2.5 2.5M31.4 12.6l-2.5 2.5" />
+    </svg>
+  )
+}
+
+function TekenMens({ klas = 'tmg-teken tmg-teken-klein' }) {
+  /* Vir "Iemand het gevra". Stil en neutraal — dit is 'n mens, nie 'n
+     kategorie nie. */
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="8.4" r="3.1" />
+      <path d="M5.6 19.4a6.4 6.4 0 0 1 12.8 0" />
+    </svg>
+  )
+}
+
+function TekenHande({ klas = 'tmg-teken tmg-teken-klein' }) {
+  /* Twee hande wat 'n vlam DRA. Die eerste weergawe het soos 'n beker gelyk;
+     die kom uit die skermkiekie. Nou is die bak duidelik twee hande — die
+     duime staan op — en die vlam sit bo-op. */
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3.4c1.7 2 2.6 3.5 2.6 4.8a2.6 2.6 0 1 1-5.2 0c0-1.3.9-2.8 2.6-4.8Z" />
+      <path d="M3.6 13.4c0 4.1 3.8 7.2 8.4 7.2s8.4-3.1 8.4-7.2" />
+      <path d="M3.6 13.4v-1.9a1.7 1.7 0 0 1 3.4 0v1.6M20.4 13.4v-1.9a1.7 1.7 0 0 0-3.4 0v1.6" />
+    </svg>
+  )
+}
+
+function TekenBoek({ klas = 'tmg-teken tmg-teken-klein' }) {
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 6.4C10.4 5.2 8.4 4.6 6 4.6H3.5v13H6c2.4 0 4.4.6 6 1.8 1.6-1.2 3.6-1.8 6-1.8h2.5v-13H18c-2.4 0-4.4.6-6 1.8Z" />
+      <path d="M12 6.4v13" />
+    </svg>
+  )
+}
+
+function TekenMerk({ klas = 'tmg-teken tmg-teken-klein' }) {
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4.5 12.6 9.4 17.5 19.5 6.9" />
+    </svg>
+  )
+}
+
+function TekenSlot({ klas = 'tmg-teken tmg-teken-groot' }) {
+  /* Dieselfde son, nou heel bo. Die dag het gebreek. */
+  return (
+    <svg className={klas} viewBox="0 0 40 40" fill="none" stroke="currentColor"
+         strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+      <circle cx="20" cy="20" r="7.5" />
+      <path d="M20 4.5v3.6M20 31.9v3.6M4.5 20h3.6M31.9 20h3.6M9.1 9.1l2.6 2.6M28.3 28.3l2.6 2.6M30.9 9.1l-2.6 2.6M11.7 28.3l-2.6 2.6" />
+    </svg>
+  )
 }
 
 export default function TydMetGod({
@@ -108,8 +186,23 @@ export default function TydMetGod({
   const skrif   = ontleedSkrif(nota && nota.scripture)
   const opskrif = skrif ? skrifOpskrif(nota.scripture) : ''
 
+  /* Die boog: nag → lig → stil papier → die dag se eie beeld. Sien die kop
+     van TydMetGod.css. */
+  const grond = stap === 'luister' ? 'nag'
+              : stap === 'woord'   ? 'dagbreek'
+              : stap === 'klaar'   ? 'beeld'
+              : 'papier'
+
   return (
-    <div className="tmg">
+    <div className="tmg" data-grond={grond}>
+      {/* Die klaar-skerm staan op vandag se eie wallpaper. Die houer is
+          ONDEURSIGTIG en dra 'n donker sluier, sodat wit teks leesbaar bly wat
+          ook al daardie dag opgelaai is. */}
+      {grond === 'beeld' && nota.wallpaperUrl && (
+        <div className="tmg-agtergrond"
+             style={{ backgroundImage: `url(${prentPad(nota.wallpaperUrl)})` }} />
+      )}
+
       <header className="tmg-kop">
         {/* Die kop tree ná die eerste skerm terug. Op "dra iemand" dra 'n mens
             'n vreemdeling se seer; 'n handelsmerk hoort nie daar nie. */}
@@ -120,6 +213,7 @@ export default function TydMetGod({
       </header>
 
       <div className="tmg-lyf" ref={lyfRef}>
+        <div key={stap} className="tmg-skerm-omhulsel">
         {stap === 'luister' && (
           <Luister nota={nota} staat={staat} stel={stel} verder={verder} />
         )}
@@ -142,6 +236,7 @@ export default function TydMetGod({
                  onSluit={onSluit} onKlaarGemaak={onKlaarGemaak}
                  onDraMekaar={onDraMekaar} merkGevra={merkGevra} />
         )}
+        </div>
       </div>
     </div>
   )
@@ -154,8 +249,9 @@ function Luister({ nota, staat, stel, verder }) {
 
   return (
     <section className="tmg-skerm">
+      <TekenDagbreek />
       <h1 className="tmg-titel">Begin deur te luister</h1>
-      <p className="tmg-lei">Sit vir 'n paar minute alles neer.</p>
+      <p className="tmg-lei tmg-nag-lei">Sit vir 'n paar minute alles neer.</p>
 
       {/* Het hy vandag reeds bo-aan Luister gespeel, sê ons dit en vra dit nie
           weer nie. Iemand twee keer dieselfde boodskap laat speel, is die
@@ -197,15 +293,25 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
         Vandag se boodskap kom uit hierdie gedeelte. Neem 'n oomblik en lees dit self.
       </p>
 
-      <div className="tmg-skrif">
+      {/* Die VERS is die held van hierdie skerm. Dit was 18px kursief onder 'n
+          opskrif van 30px — die mooiste sin op die bladsy was die kleinste
+          ding daarop. Nou staan die verwysing klein bo-aan en die vers groot
+          daaronder.
+
+          Het die nota geen teksvers nie, dra die verwysing die skerm alleen
+          en word sy dus groot — nooit 'n etiket bo niks nie. */}
+      <div className={`tmg-skrif${teks ? '' : ' tmg-skrif-alleen'}`}>
         <div className="tmg-skrif-ref">{opskrif}</div>
-        {/* Die teksvers self, as Dewald hom by die nota ingevul het. Dit is nie
-            'n plaasvervanger vir die Bybel nie — dit is die rede om hom oop te
-            maak. */}
-        {teks && <p className="tmg-skrif-teks">{teks}</p>}
+        {teks && <>
+          <div className="tmg-skrif-streep" />
+          <p className="tmg-skrif-vers">{teks}</p>
+        </>}
       </div>
 
-      <button className="tmg-knop" onClick={maakOop}>📖 Maak in die Bybel oop</button>
+      <button className="tmg-knop tmg-knop-met-teken" onClick={maakOop}>
+        <TekenBoek />
+        <span>Maak in die Bybel oop</span>
+      </button>
 
       {/* Ná die Bybel kom 'n mens hierheen terug. Die knoppie moet dan die
           natuurlike volgende ding wees, nie 'n tweede uitnodiging nie. */}
@@ -378,10 +484,20 @@ function Dra({ staat, stel, verder }) {
       <p className="tmg-lei">Neem 'n oomblik en bid vir iemand anders se behoefte.</p>
 
       <figure className="tmg-versoek">
-        <div className="tmg-versoek-kop">Anonieme versoek</div>
+        {/* Dit was "ANONIEME VERSOEK" — administratiewe taal bo 'n mens se
+            nood. */}
+        <div className="tmg-versoek-kop">
+          <TekenMens />
+          <span>Iemand het gevra</span>
+        </div>
         <blockquote className="tmg-versoek-teks">{versoek.text}</blockquote>
-        {versoek.prayedCount > 0 && (
-          <figcaption className="tmg-versoek-saam">{saamSin(versoek.prayedCount)}</figcaption>
+        {/* `saamSinVirOntvanger`, NIE `saamSin` nie. Die eerste sê "7 mense
+            bid reeds saam"; die tweede sê "…saam met JOU" en is geskryf vir
+            die mens wat gevra het. Hier lees 'n vreemdeling dit. */}
+        {saamSinVirOntvanger(versoek.prayedCount) && (
+          <figcaption className="tmg-versoek-saam">
+            {saamSinVirOntvanger(versoek.prayedCount)}
+          </figcaption>
         )}
       </figure>
 
@@ -392,7 +508,7 @@ function Dra({ staat, stel, verder }) {
         <button className="tmg-knop" onClick={ekHetGebid}>🙏 Ek het vir hulle gebid</button>
       ) : (
         <div className="tmg-dankie">
-          <div className="tmg-dankie-merk">✓</div>
+          <TekenHande klas="tmg-teken tmg-teken-groot" />
           <p className="tmg-dankie-teks">Dankie. Jy het vandag iemand in gebed gedra.</p>
           <button className="tmg-knop" onClick={nogIemand}>Bid vir nog iemand</button>
           <button className="tmg-knop tmg-knop-stil" onClick={verder}>Gaan verder</button>
@@ -488,7 +604,10 @@ function Hart({ staat, stel, verder, onGeplaas }) {
         rows={6}
       />
       <div className="tmg-tel">{teks.length}/500</div>
-      <p className="tmg-fyn">Anoniem — geen name word gestoor nie.</p>
+      <p className="tmg-fyn">
+        <TekenMerk />
+        <span>Anoniem — geen name word gestoor nie.</span>
+      </p>
 
       {fout && <p className="tmg-fout">{fout}</p>}
 
@@ -534,14 +653,16 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
 
   return (
     <section className="tmg-skerm tmg-slot">
-      <div className="tmg-slot-merk">❤️</div>
+      <TekenSlot />
       <h1 className="tmg-titel">Jy het vandag tyd met God gemaak</h1>
 
       {/* Eers die kwitansie, dan eers 'n vraag. 'n Eindskerm wat met 'n vraag
           begin, is 'n tolhek. Elke reël is iets wat WERKLIK gebeur het. */}
       {reels.length > 0 && (
         <ul className="tmg-lys">
-          {reels.map((r, n) => <li key={n}>{r}</li>)}
+          {reels.map((r, n) => (
+            <li key={n}><TekenMerk /><span>{r}</span></li>
+          ))}
         </ul>
       )}
       {maandR && <p className="tmg-maand">{maandR}</p>}

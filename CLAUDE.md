@@ -544,6 +544,37 @@ is 'n straf.
 **Wie net die speelknoppie op Luister druk, sien geen verandering nie.**
 Daardie pad is nie aangeraak nie.
 
+### Die vorm: nag, dan lig
+
+Die eerste weergawe was ses keer dieselfde sjabloon — titel, grys reeltjie,
+wit kaart, pers knoppie. Dit het gelees soos 'n vorm om te voltooi.
+
+Nou dra die vloei 'n boog, en elke skerm sit sy kleure deur TOKENS op
+`.tmg[data-grond]`:
+
+    1 LUISTER    nag. Jy gaan sit in die donker en jy hoor.
+    2 DIE WOORD  lig breek. Die VERS is die grootste ding op die bladsy —
+                 dit was 18px kursief onder 'n opskrif van 30px.
+    3 4 5        stil papier. Niks pronk waar iemand se seer staan nie.
+    6 KLAAR      vandag se eie wallpaper as die grond, SWAAR vervaag.
+
+Die laaste een is die belangrikste: die ding wat hy pas ontvang het, word die
+grond waarop hy bedank word. **Die vervaag is nie versiering nie** — Dewald se
+wallpapers dra groot woorde ("DAAGLIKSE HOOP"), en 'n skerp prent onder 'n
+sluier het met die teks bo-op geveg. 'n Swaar vervaag maak van enige prent 'n
+kleur en 'n stemming.
+
+**Geen emoji nie.** Daar was ❤️ en 🙏 op die twee belangrikste oomblikke. 'n
+Emoji is die FOON se lettertipe: dit lyk anders op elke toestel en dit is
+niemand se ontwerp nie. Die merke word geteken (`TekenDagbreek`, `TekenHande`,
+`TekenMens`, `TekenMerk`, `TekenBoek`) en erf almal `currentColor`.
+
+**Die enigste animasie is 'n verskyn-vervaag van 300ms**, EEN keer per skerm,
+nooit op `:active` nie. Duik daar ooit gekleurde strepe in hierdie vloei op,
+is `animation: tmg-in` in `TydMetGod.css` die eerste plek om te kyk — haal dit
+uit en die skerm werk presies soos hy is. Dieselfde geld vir die `filter:
+blur()` op `.tmg-agtergrond::before`.
+
 ### Die res van die reels
 
 * **Geen stap-teller.** Daar was 'n "STAP 3 VAN 5". 'n Vorderingsbalk maak van
