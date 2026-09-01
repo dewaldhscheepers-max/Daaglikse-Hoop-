@@ -1048,19 +1048,45 @@ export default function App() {
     try { localStorage.setItem('lastPopupDate', new Date().toISOString().slice(0, 10)) } catch {}
   }
 
+  /* Het hy die vloei VOLTOOI? Dan het die klaar-skerm reeds die vraag van
+     vandag gevra — deel, skenk of dankie — en niks anders mag vandag weer
+     vra nie. Dit is die reël "een vraag per dag", en dit hang aan hierdie
+     vlag en nie aan of hy 'n knoppie gedruk het nie. */
+  const tmgVoltooiRef = useRef(false)
+
+  function tmgKlaarGemaak() {
+    tmgVoltooiRef.current = true
+    tmgVergeetPopup(true)
+  }
+
   function tmgSluit() {
     setTmgOop(false)
     tmgOopRef.current = false
+    tmgTerugRef.current = null
+
     let staat = tmgLeeg()
     try { staat = tmgRol(JSON.parse(localStorage.getItem(TMG_SLEUTEL) || 'null') || tmgLeeg(), tmgDag()) } catch {}
-    /* Het hy sy hart oopgemaak, kry hy vandag geen geldvraag nie — ook nie
-       een wat gewag het nie. */
-    if (!magVraGeld(staat)) tmgVergeetPopup(true)
+
+    /* Klaar gemaak → die dag is gevra (hierbo reeds gemerk).
+       Halfpad uitgeklim → NIKS. 'n Popup op pad uit is 'n straf, en die dag
+       word nie gemerk nie — môre is daar weer 'n kans.
+       Het hy sy hart oopgemaak, kry hy in ALBEI gevalle geen geldvraag nie. */
+    if (tmgVoltooiRef.current || !magVraGeld(staat)) tmgVergeetPopup(true)
     else tmgVergeetPopup(false)
+    tmgVoltooiRef.current = false
   }
 
   /* Die skenk-knoppie op die klaar-skerm IS die vraag van vandag. */
   function tmgMerkGevra() { tmgVergeetPopup(true) }
+
+  /* Die vloei plaas 'n terug-hanteerder hierin. Die foon se terug-knoppie
+     stap dan BINNE die vloei en maak eers toe by die eerste skerm — presies
+     wat 'n mens van 'n oorlegblad met stappe verwag. */
+  const tmgTerugRef = useRef(null)
+  function tmgTerugOfSluit() {
+    if (tmgTerugRef.current && tmgTerugRef.current()) return
+    tmgSluit()
+  }
 
   const tmgVenster = getSkenkWindow()
   const tmgSkenkDue = !!(tmgVenster && localStorage.getItem('skenkPaid') !== tmgVenster.cycleId)
@@ -1291,7 +1317,7 @@ export default function App() {
     { oop: showAdmin,               toe: () => setShowAdmin(false) },
     /* Onder die Bybel: die "Maak in die Bybel oop"-knoppie op skerm 2 moet
        werk, en 'n terug-druk moet EERS die Bybel toemaak. */
-    { oop: tmgOop,                  toe: tmgSluit },
+    { oop: tmgOop,                  toe: tmgTerugOfSluit },
     { oop: showVolgJesus,           toe: () => setShowVolgJesus(false) },
     { oop: showBybel,               toe: () => setShowBybel(false) },
     { oop: showArk,                 toe: () => setShowArk(false) },
@@ -1597,7 +1623,8 @@ export default function App() {
           skenkDue={tmgSkenkDue}
           reedsGegee={tmgReedsGegee}
           onSluit={tmgSluit}
-          onKlaarGemaak={() => {}}
+          onKlaarGemaak={tmgKlaarGemaak}
+          terugRef={tmgTerugRef}
           merkGevra={tmgMerkGevra}
           onDraMekaar={() => { tmgSluit(); setTab('sorg') }}
         />

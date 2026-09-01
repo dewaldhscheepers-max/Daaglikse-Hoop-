@@ -582,3 +582,23 @@
   gap: 10px;
 }
 .tmg-knop-met-teken .tmg-teken { color: currentColor; }
+
+/* 'n Pad terug. Dit verskyn eers ná die eerste skerm — daar is die uitgang
+   die ✕, nie 'n pyl nie. */
+.tmg-terug {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--rand);
+  border-radius: 50%;
+  background: var(--kaart);
+  color: var(--sag);
+  cursor: pointer;
+  padding: 0;
+}
+.tmg-terug:active { background: var(--rand); }
+
+/* 'n Reël wat op sy eie staan, nie onder 'n kassie nie. */
+.tmg-fyn-alleen { margin-top: 0; }

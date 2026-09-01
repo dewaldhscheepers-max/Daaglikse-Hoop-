@@ -594,6 +594,17 @@ blur()` op `.tmg-agtergrond::before`.
   dit reeds het nie.
 * **`prayedFor` is dieselfde sleutel as die muur s'n.** Wie op die muur reeds
   vir 'n versoek gebid het, word hier nie weer getel nie.
+* **Elke skerm het 'n egte pad verby.** Op "dra iemand" was die ENIGSTE
+  knoppie "ek het vir hulle gebid" — iemand wat nie wil of kan nie, moes of
+  lieg of die vloei toemaak. Nou staan "Nie vandag nie" daaronder.
+* **Die dag word as GEVRA gemerk sodra die klaar-skerm wys**, nie wanneer 'n
+  mens die skenk-knoppie druk nie. Anders het wie die vraag gesien en
+  verbygegaan het, die teruggehoue popup alsnog gekry — twee vrae op een dag.
+* **Die foon se terug-knoppie stap BINNE die vloei** en maak eers toe by skerm
+  1 (`terugRef` in App.jsx). Op die klaar-skerm is daar geen terug nie: die
+  dag is getel.
+* **`getDocs` kry 'n tydgrens van 10s.** Sonder dit bly "Een oomblik..." vir
+  altyd staan wanneer Android die oortjie opgeskort het.
 
 ### Die Skrifverwysing
 

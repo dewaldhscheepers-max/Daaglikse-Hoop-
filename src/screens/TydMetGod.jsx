@@ -61,6 +61,11 @@ import './TydMetGod.css'
 const HAAL = 25
 const SEWE_DAE = 7 * 24 * 60 * 60 * 1000
 
+/* Firestore se `getDocs` het geen eie tydgrens nie en kan VIR ALTYD hang —
+   sien CLAUDE.md. Tien sekondes is ruim vir 'n slegte lyn en kort genoeg dat
+   niemand dink die app is dood nie. */
+const HAAL_TYDGRENS = 10000
+
 /* Die versoeke wat hierdie mens nog nie gedra het nie. Dieselfde merkies as
    die muur s'n — `prayedFor` en `reportedPrayers` — sodat 'n mens nooit twee
    keer vir dieselfde versoek tel bloot omdat hy langs 'n ander pad ingekom
@@ -128,6 +133,16 @@ function TekenBoek({ klas = 'tmg-teken tmg-teken-klein' }) {
   )
 }
 
+function TekenAf({ klas = 'tmg-teken tmg-teken-klein' }) {
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 4v11M7.6 10.8 12 15.2l4.4-4.4" />
+      <path d="M4.5 18.5h15" />
+    </svg>
+  )
+}
+
 function TekenMerk({ klas = 'tmg-teken tmg-teken-klein' }) {
   return (
     <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -149,8 +164,8 @@ function TekenSlot({ klas = 'tmg-teken tmg-teken-groot' }) {
 }
 
 export default function TydMetGod({
-  nota, onSluit, onKlaarGemaak, onDeel, onDraMekaar, merkGevra = () => {},
-  daeOop = 0, skenkDue = false, reedsGegee = false,
+  nota, onSluit, onKlaarGemaak, onDraMekaar, merkGevra = () => {},
+  terugRef = null, daeOop = 0, skenkDue = false, reedsGegee = false,
 }) {
   const dag = dagSleutel()
 
@@ -167,6 +182,11 @@ export default function TydMetGod({
   function stel(fn) {
     setStaat(vorige => {
       const nuut = fn(vorige)
+      /* Die merk-funksies gee DIESELFDE voorwerp terug wanneer niks verander
+         nie (merkStap doen dit by elke skerm). Dan skryf ons nie na die foon
+         nie en waai ook nie 'n gebeurtenis wat die kaart op Luister laat
+         herteken nie. */
+      if (nuut === vorige) return vorige
       skryfStaat(nuut)
       return nuut
     })
@@ -182,6 +202,31 @@ export default function TydMetGod({
   function verder() {
     setI(n => Math.min(n + 1, stappe.length - 1))
   }
+
+  /* ── 'n Pad terug ──
+   *
+   * Iemand wat per ongeluk "Gaan verder" druk, moes die hele vloei toemaak en
+   * weer begin. Die terug-pyl staan links in die kop en verskyn eers ná die
+   * eerste skerm — op skerm 1 is die uitgang die ✕, nie 'n pyl nie.
+   *
+   * Nie op die KLAAR-skerm nie. Die dag is dan afgehandel en getel; om terug
+   * te stap sou beteken die kwitansie kan twee keer verskyn.
+   */
+  const kanTerug = i > 0 && stap !== 'klaar'
+  function terug() { setI(n => Math.max(0, n - 1)) }
+
+  /* Die foon se eie terug-knoppie stap BINNE die vloei, en maak eers toe as
+     'n mens by die eerste skerm is. App.jsx roep dit deur `terugRef`; gee dit
+     `false` terug, pel App die hele laag af. */
+  useEffect(() => {
+    if (!terugRef) return
+    terugRef.current = () => {
+      if (!kanTerug) return false
+      terug()
+      return true
+    }
+    return () => { if (terugRef) terugRef.current = null }
+  }, [terugRef, kanTerug])   // eslint-disable-line react-hooks/exhaustive-deps
 
   const skrif   = ontleedSkrif(nota && nota.scripture)
   const opskrif = skrif ? skrifOpskrif(nota.scripture) : ''
@@ -206,9 +251,18 @@ export default function TydMetGod({
       <header className="tmg-kop">
         {/* Die kop tree ná die eerste skerm terug. Op "dra iemand" dra 'n mens
             'n vreemdeling se seer; 'n handelsmerk hoort nie daar nie. */}
-        <span className="tmg-kop-naam">
-          {stap === 'luister' ? 'Vandag se tyd met God' : ''}
-        </span>
+        {kanTerug ? (
+          <button className="tmg-terug" onClick={terug} aria-label="Een skerm terug">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        ) : (
+          <span className="tmg-kop-naam">
+            {stap === 'luister' ? 'Vandag se tyd met God' : ''}
+          </span>
+        )}
         <button className="tmg-toe" onClick={onSluit} aria-label="Maak toe">✕</button>
       </header>
 
@@ -228,7 +282,7 @@ export default function TydMetGod({
           <Dra staat={staat} stel={stel} verder={verder} />
         )}
         {stap === 'hart' && (
-          <Hart staat={staat} stel={stel} verder={verder} onGeplaas={onDeel} />
+          <Hart staat={staat} stel={stel} verder={verder} />
         )}
         {stap === 'klaar' && (
           <Klaar nota={nota} staat={staat} stel={stel} dag={dag} opskrif={opskrif}
@@ -326,27 +380,65 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
 
 function Wallpaper({ nota, verder }) {
   const [besig, setBesig] = useState(false)
+  const [nota2, setNota2] = useState('')   // wat gebeur het, in woorde
 
-  /* Dieselfde pad as Luister se wallpaper-deel: die prent kom deur
-     /api/wallpaper sodat 'n vreemde domein nie 'n gebreekte prentjie word nie.
-     Sien prentPad.js. */
+  /* ── Stoor, met Luister se beproefde meganika ──
+   *
+   * Die eerste weergawe hiervan was naïef en sou op 'n foon gelieg het. Drie
+   * dinge kom uit `deelWallpaper` in Luister.jsx en elkeen het 'n rede:
+   *
+   *   · 'n antwoord van die bediener is nie noodwendig 'n PRENT nie. 'n
+   *     Foutbladsy kom ook met status 200 terug. Ons keur die tipe en die
+   *     grootte;
+   *   · `navigator.share` bestaan op baie blaaiers wat NIE lêers kan deel nie
+   *     en gooi eers wanneer 'n mens dit roep. `canShare({ files })` is die
+   *     enigste eerlike toets;
+   *   · 'n mens wat die deelvenster toemaak, gee 'n `AbortError`. Dit is nie
+   *     'n fout nie en mag nie soos een lyk nie.
+   *
+   * En as niks werk nie, sê ons wat hy self kan doen. 'n Knoppie wat stilweg
+   * niks doen nie, is die ergste van die drie uitkomste. */
   async function stoor() {
     if (besig) return
     setBesig(true)
+    setNota2('')
+
+    let blob = null
     try {
       const r = await fetch(prentPad(nota.wallpaperUrl))
-      const blob = await r.blob()
-      const lêer = new File([blob], 'daaglikse-hoop.jpg', { type: blob.type || 'image/jpeg' })
-      if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
-        await navigator.share({ files: [lêer] })
-      } else {
+      if (r.ok) {
+        const b = await r.blob()
+        if (/^image\//.test(b.type) && b.size > 1024) blob = b
+      }
+    } catch {}
+
+    if (blob) {
+      const lêer = new File([blob], 'daaglikse-hoop.jpg', { type: blob.type })
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [lêer] })) {
+          await navigator.share({ files: [lêer] })
+          setBesig(false)
+          return
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') { setBesig(false); return }
+      }
+      try {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
-        a.href = url; a.download = 'daaglikse-hoop.jpg'
-        document.body.appendChild(a); a.click(); a.remove()
+        a.href = url
+        a.download = 'daaglikse-hoop.jpg'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
         setTimeout(() => URL.revokeObjectURL(url), 4000)
-      }
-    } catch { /* die prent wys nog steeds; hy kan dit vashou en stoor */ }
+        setNota2('Die prent is na jou Aflaaie toe.')
+        setBesig(false)
+        return
+      } catch {}
+    }
+
+    setNota2('Die prent kon nie gestoor word nie. Hou jou vinger op die foto en kies "Save image".')
     setBesig(false)
   }
 
@@ -366,9 +458,11 @@ function Wallpaper({ nota, verder }) {
              loading="lazy" decoding="async" />
       </div>
 
-      <button className="tmg-knop" onClick={stoor} disabled={besig}>
-        {besig ? 'Besig…' : '⬇ Stoor op my foon'}
+      <button className="tmg-knop tmg-knop-met-teken" onClick={stoor} disabled={besig}>
+        <TekenAf />
+        <span>{besig ? 'Besig…' : 'Stoor op my foon'}</span>
       </button>
+      {nota2 && <p className="tmg-fyn tmg-fyn-alleen">{nota2}</p>}
       <button className="tmg-knop tmg-knop-stil" onClick={verder}>Gaan verder</button>
     </section>
   )
@@ -386,6 +480,7 @@ function Dra({ staat, stel, verder }) {
   const [ry, setRy]       = useState(null)   // null = nog besig
   const [k, setK]         = useState(0)
   const [gebid, setGebid] = useState(false)
+  const klokRef = useRef(null)
 
   useEffect(() => {
     let dood = false
@@ -405,12 +500,28 @@ function Dra({ staat, stel, verder }) {
     if (uitKas.length) setRy(uitKas)
 
     const grens = Timestamp.fromDate(new Date(Date.now() - SEWE_DAE))
-    getDocs(query(
+
+    /* ── 'n Tydgrens, want `getDocs` het nie een nie ──
+     *
+     * Dit is die fout wat Luister twee keer stilweg gebreek het. Wanneer
+     * Android die oortjie opskort, sterf die SDK se verbinding, en op 'n slegte
+     * terugkeer los die belofte NIE op en verwerp dit ook nie. Sonder hierdie
+     * wedloop bly `ry === null` vir altyd en die mens sit met "Een oomblik…"
+     * op die skerm, sonder pad vorentoe. Sien CLAUDE.md.
+     *
+     * Val dit uit, wys ons wat op die foon is — dit is beter as 'n skerm wat
+     * hang. */
+    const haal = getDocs(query(
       collection(db, 'prayers'),
       where('createdAt', '>=', grens),
       orderBy('createdAt', 'desc'),
       limit(HAAL),
     ))
+    const tyd = new Promise((_, weier) => {
+      klokRef.current = setTimeout(() => weier(new Error('tydgrens')), HAAL_TYDGRENS)
+    })
+
+    Promise.race([haal, tyd])
       .then(snap => {
         if (dood) return
         const vars = skoon(snap.docs.map(d => ({ id: d.id, ...d.data() })))
@@ -419,9 +530,10 @@ function Dra({ staat, stel, verder }) {
            kas en dit kan 'n halwe antwoord wees. */
         setRy(vars.length >= uitKas.length ? vars : uitKas)
       })
-      .catch(() => { if (!dood && !uitKas.length) setRy([]) })
+      .catch(() => { if (!dood) setRy(uitKas) })
+      .finally(() => { if (klokRef.current) clearTimeout(klokRef.current) })
 
-    return () => { dood = true }
+    return () => { dood = true; if (klokRef.current) clearTimeout(klokRef.current) }
   }, [])
 
   const versoek = ry && ry[k]
@@ -505,7 +617,17 @@ function Dra({ staat, stel, verder }) {
           saam met die versoek, is die beloning daar voor die ding gedoen is,
           en dan is die daad niks werd nie. */}
       {!gebid ? (
-        <button className="tmg-knop" onClick={ekHetGebid}>🙏 Ek het vir hulle gebid</button>
+        <>
+          <button className="tmg-knop tmg-knop-met-teken" onClick={ekHetGebid}>
+            <TekenHande />
+            <span>Ek het vir hulle gebid</span>
+          </button>
+          {/* 'n EGTE pad verby. Sonder dit is die enigste knoppie op hierdie
+              skerm "ek het gebid", en dan moet iemand wat nie wil of kan nie,
+              óf lieg óf die hele vloei toemaak. Die opsomming vink net af wat
+              werklik gebeur het — dus mag dit ook niks wees nie. */}
+          <button className="tmg-knop tmg-knop-stil" onClick={verder}>Nie vandag nie</button>
+        </>
       ) : (
         <div className="tmg-dankie">
           <TekenHande klas="tmg-teken tmg-teken-groot" />
@@ -520,7 +642,7 @@ function Dra({ staat, stel, verder }) {
 
 /* ── 5 · Wat lê op jou hart ─────────────────────────────────────────────── */
 
-function Hart({ staat, stel, verder, onGeplaas }) {
+function Hart({ staat, stel, verder }) {
   const [teks, setTeks]   = useState('')
   const [besig, setBesig] = useState(false)
   const [klaar, setKlaar] = useState(false)
@@ -556,7 +678,6 @@ function Hart({ staat, stel, verder, onGeplaas }) {
       stel(merkGetik)
       setKrisis(keuring.rede === 'krisis')
       setKlaar(true)
-      if (onGeplaas) { try { onGeplaas() } catch {} }
     } catch {
       setFout('Kon nie stuur nie. Probeer asseblief weer.')
     }
@@ -632,6 +753,16 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
     if (gemerk.current) return
     gemerk.current = true
     stel(s => merkKlaar(s, dag))
+    /* ── Die dag is GEVRA ──
+     *
+     * Hier was 'n fout. Die dag is net gemerk as die mens die skenk-knoppie
+     * gedruk het. Wie die vraag gesien en verbygegaan het, het die
+     * teruggehoue opspringer alsnog gekry sodra hy die vloei toemaak — twee
+     * geldvrae op een dag, wat presies die reël is wat hierdie hele skerm
+     * moet beskerm.
+     *
+     * Die vraag is GEVRA op die oomblik dat sy skerm wys. Of hy hom gedruk
+     * het, is 'n ander ding. */
     if (onKlaarGemaak) { try { onKlaarGemaak() } catch {} }
   }, [])   // eslint-disable-line react-hooks/exhaustive-deps
 
