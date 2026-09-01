@@ -8,6 +8,8 @@ import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
+import TydMetGod from './screens/TydMetGod'
+import { SLEUTEL as TMG_SLEUTEL, dagSleutel as tmgDag, leegStaat as tmgLeeg, rolDag as tmgRol, magVraGeld } from './data/tydMetGod'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
@@ -110,6 +112,19 @@ export default function App() {
   const [activePopup, setActivePopup] = useState(null)
   const [pendingPopup, setPendingPopup] = useState(null)
   const isPlayingRef = useRef(false)
+
+  /* ── Vandag se Tyd met God ──
+   *
+   * Solank dit oop is, word die donasie- en e-boekopspringers TERUGGEHOU —
+   * dieselfde meganisme as die een wat hulle terughou terwyl klank speel.
+   * 'n Geldvraag tussen "luister" en "bid" is presies die tolhek wat van Dra
+   * Mekaar afgehaal is.
+   *
+   * 'n Ref EN 'n toestand: die ref is wat die popup-bestuurder lees (hy loop
+   * uit 'n timer en sien nie 'n toestand wat intussen verander het nie), die
+   * toestand is wat teken. */
+  const [tmgOop, setTmgOop] = useState(false)
+  const tmgOopRef = useRef(false)
   const [showAdmin, setShowAdmin]       = useState(false)
   const [targetBookId, setTargetBookId] = useState(null)
   const [showJourney, setShowJourney]   = useState(false)
@@ -161,7 +176,7 @@ export default function App() {
     isPlayingRef.current = playing
     /* Klaar geluister — as 'n nuwe weergawe gewag het, kom dit nou. */
     if (!playing && weegRef.current) { try { weegRef.current() } catch {} }
-    if (!playing && pendingPopup) {
+    if (!playing && pendingPopup && !tmgOopRef.current) {
       setActivePopup(pendingPopup)
       setPendingPopup(null)
     }
@@ -278,7 +293,10 @@ export default function App() {
 
       if (!popup) return
 
-      if (isPlayingRef.current) {
+      /* Terwyl klank speel OF die vloei oop is, wag die popup. Die vloei se
+         eie klaar-skerm vra dan die een vraag van die dag — sien
+         `tmgKlaarGemaak` en `tmgSluit`. */
+      if (isPlayingRef.current || tmgOopRef.current) {
         setPendingPopup(popup)
       } else {
         setActivePopup(popup)
@@ -993,6 +1011,61 @@ export default function App() {
     return () => window.removeEventListener('open-donation', onOpen)
   }, [])
 
+  /* ── Vandag se Tyd met God ──
+   *
+   * Die nota kom SAAM met die gebeurtenis, uit Luister, wat hom reeds gelaai
+   * het. App haal hom nie self nie — dit sou 'n tweede lees wees op die blad
+   * waar duisende fone om 06:30 tegelyk oopmaak.
+   */
+  const [tmgNota, setTmgNota] = useState(null)
+
+  function tmgMaakOop(nota) {
+    if (!nota || !nota.id) return
+    setTmgNota(nota)
+    setTmgOop(true)
+    tmgOopRef.current = true
+  }
+
+  useEffect(() => {
+    function onOpen(e) { tmgMaakOop(e && e.detail && e.detail.nota) }
+    window.addEventListener('open-tyd-met-god', onOpen)
+    return () => window.removeEventListener('open-tyd-met-god', onOpen)
+  }, [])
+
+  /* ── Wat met die teruggehoue popup gebeur ──
+   *
+   * Klaargemaak → die vloei se eie klaar-skerm HET die vraag van vandag
+   * gevra, dus word die dag gemerk en die popup val weg. Een vraag per dag.
+   *
+   * Halfpad uitgeklim → ook weg, en die dag word NIE gemerk nie. 'n Popup op
+   * pad uit is 'n straf; môre is daar weer 'n kans.
+   *
+   * En in albei gevalle: het hy vandag iets in die gebedskassie getik, mag
+   * daar hoegenaamd nie oor geld gepraat word nie. Sien magVraGeld(). */
+  function tmgVergeetPopup(merkDagAsGevra) {
+    setPendingPopup(null)
+    if (!merkDagAsGevra) return
+    try { localStorage.setItem('lastPopupDate', new Date().toISOString().slice(0, 10)) } catch {}
+  }
+
+  function tmgSluit() {
+    setTmgOop(false)
+    tmgOopRef.current = false
+    let staat = tmgLeeg()
+    try { staat = tmgRol(JSON.parse(localStorage.getItem(TMG_SLEUTEL) || 'null') || tmgLeeg(), tmgDag()) } catch {}
+    /* Het hy sy hart oopgemaak, kry hy vandag geen geldvraag nie — ook nie
+       een wat gewag het nie. */
+    if (!magVraGeld(staat)) tmgVergeetPopup(true)
+    else tmgVergeetPopup(false)
+  }
+
+  /* Die skenk-knoppie op die klaar-skerm IS die vraag van vandag. */
+  function tmgMerkGevra() { tmgVergeetPopup(true) }
+
+  const tmgVenster = getSkenkWindow()
+  const tmgSkenkDue = !!(tmgVenster && localStorage.getItem('skenkPaid') !== tmgVenster.cycleId)
+  const tmgReedsGegee = !!(tmgVenster && localStorage.getItem('skenkPaid') === tmgVenster.cycleId)
+
   // ── Maandelikse Hoop-Vennoot CTA ──
   useEffect(() => {
     function onOpen(e) { setSteunBedrag(e?.detail?.bedrag ?? null); setShowHoopVennoot(true) }
@@ -1216,6 +1289,9 @@ export default function App() {
      laaste een toe — die modale sit bo-op die skerms. */
   const oorlegLae = [
     { oop: showAdmin,               toe: () => setShowAdmin(false) },
+    /* Onder die Bybel: die "Maak in die Bybel oop"-knoppie op skerm 2 moet
+       werk, en 'n terug-druk moet EERS die Bybel toemaak. */
+    { oop: tmgOop,                  toe: tmgSluit },
     { oop: showVolgJesus,           toe: () => setShowVolgJesus(false) },
     { oop: showBybel,               toe: () => setShowBybel(false) },
     { oop: showArk,                 toe: () => setShowArk(false) },
@@ -1512,6 +1588,19 @@ export default function App() {
 
       {showVredepad && (
         <Vredepad onClose={() => setShowVredepad(false)} />
+      )}
+
+      {tmgOop && tmgNota && (
+        <TydMetGod
+          nota={tmgNota}
+          daeOop={(() => { try { return JSON.parse(localStorage.getItem('appOpenDays') || '[]').length } catch { return 0 } })()}
+          skenkDue={tmgSkenkDue}
+          reedsGegee={tmgReedsGegee}
+          onSluit={tmgSluit}
+          onKlaarGemaak={() => {}}
+          merkGevra={tmgMerkGevra}
+          onDraMekaar={() => { tmgSluit(); setTab('sorg') }}
+        />
       )}
 
       {showHoopVennoot && (

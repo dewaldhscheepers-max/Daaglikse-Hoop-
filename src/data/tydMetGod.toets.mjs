@@ -1,0 +1,214 @@
+/* Loop met:  node src/data/tydMetGod.toets.mjs
+ *
+ * Vandag se Tyd met God se reëls, sonder 'n skerm.
+ *
+ * Die twee wat die meeste saak maak, staan onder:
+ *
+ *   · 'n skerm sonder inhoud BESTAAN nie — daar is nooit 'n leë skerm nie;
+ *   · het iemand vandag iets in die gebedskassie getik, word daar VANDAG nie
+ *     vir geld gevra nie.
+ *
+ * Albei is die soort reël wat oor ses maande terugsluip sodra iemand "net
+ * hierdie een keer" 'n uitsondering maak.
+ */
+
+import {
+  dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
+  slotVraag, magVraGeld, opsomming, maandSin,
+  merkGeluister, merkGelees, merkGebid, merkGetik, merkStap, merkKlaar,
+} from './tydMetGod.js'
+
+let reg = 0, val = 0
+function is(naam, kry, wag) {
+  const gelyk = JSON.stringify(kry) === JSON.stringify(wag)
+  if (gelyk) reg++
+  else { val++; console.log(`  VAL  ${naam}\n         kry: ${JSON.stringify(kry)}\n         wag: ${JSON.stringify(wag)}`) }
+}
+
+const VOL = {
+  id: 'n1', title: 'Nie my wil nie',
+  scripture: 'Lukas 22:42',
+  wallpaperUrl: 'https://x/wp.jpg',
+}
+
+console.log('\n── Die dag is PLAASLIK, nie UTC nie ──')
+/* SA is UTC+2. Met toISOString() sou 'n mens van middernag tot tweeuur die
+   oggend nog gister se dag kry, en dan plak vandag se werk aan gister. */
+{
+  const eenUurNag = new Date(2026, 8, 2, 1, 30, 0)   // 2 Sept 01:30 plaaslik
+  is('01:30 is reeds die nuwe dag', dagSleutel(eenUurNag.getTime()), '2026-09-02')
+  is('en die maand daarby',         maandSleutel(eenUurNag.getTime()), '2026-09')
+  const laatAand = new Date(2026, 8, 1, 23, 45, 0)
+  is('23:45 is nog dieselfde dag',  dagSleutel(laatAand.getTime()), '2026-09-01')
+  is('syfers word opgevul',         dagSleutel(new Date(2026, 0, 5, 12).getTime()), '2026-01-05')
+}
+
+console.log('\n── \'n Nuwe dag maak die dag skoon, nie die maand nie ──')
+{
+  const gister = { ...leegStaat(), dag: '2026-09-01', stap: 3, gebid: 2, getik: true,
+                   geluister: 'n1', gelees: true, klaarOp: '2026-09-01',
+                   maand: '2026-09', gebidMaand: 14, daeMaand: 6 }
+  const vandag = rolDag(gister, '2026-09-02')
+  is('die stap begin oor',      vandag.stap, 0)
+  is('gister se gebede is weg', vandag.gebid, 0)
+  is('en die kassie ook',       vandag.getik, false)
+  is('en die luister',          vandag.geluister, '')
+  is('en die lees',             vandag.gelees, false)
+  /* Dit is die veld wat NOOIT hier gewis word nie — daaraan hang "het hy
+     vandag reeds klaargemaak". */
+  is('klaarOp bly staan',       vandag.klaarOp, '2026-09-01')
+  is('die maand se gebede bly', vandag.gebidMaand, 14)
+  is('en die dae ook',          vandag.daeMaand, 6)
+}
+{
+  const augustus = { ...leegStaat(), dag: '2026-08-31', maand: '2026-08', gebidMaand: 40, daeMaand: 20 }
+  const september = rolDag(augustus, '2026-09-01')
+  is('\'n nuwe maand stel die maand terug', september.gebidMaand, 0)
+  is('en die dae ook',                      september.daeMaand, 0)
+}
+
+console.log('\n── \'n Skerm sonder inhoud BESTAAN nie ──')
+is('alles daar → ses skerms', bouStappe(VOL),
+   ['luister', 'woord', 'wallpaper', 'dra', 'hart', 'klaar'])
+is('geen Skrifverwysing → geen "Lees die Woord"',
+   bouStappe({ ...VOL, scripture: '' }),
+   ['luister', 'wallpaper', 'dra', 'hart', 'klaar'])
+is('geen wallpaper → geen "Vat dit saam"',
+   bouStappe({ ...VOL, wallpaperUrl: '' }),
+   ['luister', 'woord', 'dra', 'hart', 'klaar'])
+is('nie een van die twee nie',
+   bouStappe({ id: 'n1' }),
+   ['luister', 'dra', 'hart', 'klaar'])
+/* Die veld is ingevul, maar met iets wat die Bybel nie kan oopmaak nie. 'n
+   Knoppie wat niks doen nie is erger as geen knoppie — dus geen skerm. */
+is('onleesbare verwysing → geen skerm',
+   bouStappe({ ...VOL, scripture: 'Boek van Elvis 3' }),
+   ['luister', 'wallpaper', 'dra', 'hart', 'klaar'])
+is('\'n reeks tel wel',
+   bouStappe({ ...VOL, scripture: 'Matteus 6:25–34' }),
+   ['luister', 'woord', 'wallpaper', 'dra', 'hart', 'klaar'])
+is('geen nota → steeds nooit \'n stukkende lys nie',
+   bouStappe(null), ['luister', 'dra', 'hart', 'klaar'])
+/* 'luister' staan altyd daar, ook wanneer hy reeds geluister het — anders
+   maak die vloei op "Lees die Woord" oop en niemand weet waar hy is nie. */
+is('luister staan altyd eerste', bouStappe(VOL)[0], 'luister')
+
+console.log('\n── Die kaart op Luister: vier toestande ──')
+const DAG = '2026-09-01'
+is('geen nota → geen kaart',
+   kaartToestand({ nota: null, staat: leegStaat(), dag: DAG }), 'geen')
+is('nog nie begin nie',
+   kaartToestand({ nota: VOL, staat: leegStaat(), dag: DAG }), 'begin')
+is('halfpad → GAAN VOORT',
+   kaartToestand({ nota: VOL, staat: { ...leegStaat(), dag: DAG, stap: 2 }, dag: DAG }), 'voort')
+is('klaar vandag',
+   kaartToestand({ nota: VOL, staat: { ...leegStaat(), dag: DAG, klaarOp: DAG }, dag: DAG }), 'klaar')
+/* Die fout wat volgJesusBegin.js laat bestaan het: gister se vordering mag
+   nie vandag as "GAAN VOORT" wys nie. */
+is('gister se stap tel nie vandag nie',
+   kaartToestand({ nota: VOL, staat: { ...leegStaat(), dag: '2026-08-31', stap: 4 }, dag: DAG }), 'begin')
+is('gister se klaar tel nie vandag nie',
+   kaartToestand({ nota: VOL, staat: { ...leegStaat(), dag: '2026-08-31', klaarOp: '2026-08-31' }, dag: DAG }), 'begin')
+
+console.log('\n── Die een vraag aan die einde ──')
+const OOP = { staat: leegStaat(), daeOop: 30 }
+is('die meeste dae: deel',   slotVraag({ ...OOP }), 'deel')
+is('skenk-venster oop',      slotVraag({ ...OOP, skenkDue: true }), 'skenk')
+is('wie reeds gee, word bedank', slotVraag({ ...OOP, skenkDue: true, reedsGegee: true }), 'dankie')
+is('en nie gevra nie, ook sonder venster', slotVraag({ ...OOP, reedsGegee: true }), 'dankie')
+
+console.log('\n── Nooit geld op \'n dag wat iemand sy hart oopgemaak het nie ──')
+/* Die belangrikste reël in hierdie lêer. Iemand wat pas geskryf het dat sy
+   huwelik in stukke lê, is nie die mens vir 'n R50-vraag drie skerms later
+   nie. Dit geld ONGEAG die venster. */
+{
+  const getik = { ...leegStaat(), getik: true }
+  is('getik → deel, nie skenk nie',
+     slotVraag({ staat: getik, skenkDue: true, daeOop: 300 }), 'deel')
+  is('getik → ook nie "dankie" nie, net deel',
+     slotVraag({ staat: getik, skenkDue: true, reedsGegee: true, daeOop: 300 }), 'deel')
+  is('en die popup word ook gekeer', magVraGeld(getik), false)
+  is('op \'n gewone dag mag die popup', magVraGeld(leegStaat()), true)
+  is('geen staat → mag',               magVraGeld(null), true)
+}
+
+console.log('\n── \'n Nuwe mens word nooit vir geld gevra nie ──')
+is('dag 1',  slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 1 }), 'deel')
+is('dag 0',  slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 0 }), 'deel')
+is('dag 2 mag', slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 2 }), 'skenk')
+
+console.log('\n── Die kwitansie lieg nooit ──')
+{
+  const s = merkGetik(merkGebid(merkGebid(merkGelees(merkGeluister(leegStaat(), 'n1')))))
+  is('alles wat hy gedoen het',
+     opsomming({ staat: s, nota: VOL, skrifOpskrif: 'Lukas 22:42' }),
+     ['Jy het na vandag se boodskap geluister',
+      'Jy het Lukas 22:42 gelees',
+      'Jy het vir 2 mense gebid',
+      'Jy het jou hart voor God gebring'])
+
+  /* Wie niks getik het nie, mag NIE lees dat hy sy hart voor God gebring
+     het nie. Een vals reël maak die hele skerm 'n leuen. */
+  const sonder = merkGebid(merkGeluister(leegStaat(), 'n1'))
+  is('niks getik → daardie reël bestaan nie',
+     opsomming({ staat: sonder, nota: VOL, skrifOpskrif: 'Lukas 22:42' }),
+     ['Jy het na vandag se boodskap geluister', 'Jy het vir iemand anders gebid'])
+
+  is('niks gedoen → geen reëls', opsomming({ staat: leegStaat(), nota: VOL }), [])
+
+  /* Het hy na 'n ANDER nota geluister (die vorige dag s'n in die lys), tel
+     dit nie as vandag se boodskap nie. */
+  is('\'n ander nota tel nie',
+     opsomming({ staat: merkGeluister(leegStaat(), 'ander'), nota: VOL }), [])
+
+  /* Gelees sonder 'n opskrif om te noem, sê niks — beter as "jy het  gelees". */
+  is('gelees sonder opskrif sê niks',
+     opsomming({ staat: merkGelees(leegStaat()), nota: VOL, skrifOpskrif: '' }), [])
+
+  is('een gebed is enkelvoud',
+     opsomming({ staat: merkGebid(leegStaat()), nota: VOL }), ['Jy het vir iemand anders gebid'])
+}
+
+console.log('\n── Die maandreël wys nooit \'n nul nie ──')
+/* "Jy het hierdie maand vir 0 mense gebid" is die teenoorgestelde van wat
+   hierdie skerm moet doen. */
+is('nul sê niks',   maandSin({ ...leegStaat(), gebidMaand: 0 }), '')
+is('een',           maandSin({ ...leegStaat(), gebidMaand: 1 }), 'Hierdie maand het jy vir iemand gebid.')
+is('sestien',       maandSin({ ...leegStaat(), gebidMaand: 16 }), 'Hierdie maand het jy vir 16 mense gebid.')
+is('geen staat',    maandSin(null), '')
+
+console.log('\n── Die merke ──')
+{
+  is('geluister hou die nota-id', merkGeluister(leegStaat(), 'n7').geluister, 'n7')
+  is('leë id doen niks',          merkGeluister(leegStaat(), '').geluister, '')
+  is('twee keer tel een keer',    merkGeluister(merkGeluister(leegStaat(), 'n7'), 'n7').geluister, 'n7')
+
+  const twee = merkGebid(merkGebid(leegStaat()))
+  is('twee gebede, dag',   twee.gebid, 2)
+  is('twee gebede, maand', twee.gebidMaand, 2)
+
+  /* Die stap gaan net vorentoe. Gaan iemand terug na skerm 2, mag die kaart
+     op Luister nie skielik weer "BEGIN" sê nie. */
+  is('stap gaan vorentoe',       merkStap(leegStaat(), 3).stap, 3)
+  is('en nooit terug nie',       merkStap(merkStap(leegStaat(), 4), 2).stap, 4)
+  is('gemors verander niks',     merkStap(merkStap(leegStaat(), 4), NaN).stap, 4)
+  is('en \'n string ook nie',    merkStap(merkStap(leegStaat(), 4), 'x').stap, 4)
+
+  /* Twee keer klaarmaak op een dag is EEN dag. Anders tel iemand wat drie
+     keer deurgaan as drie dae, en dan is die getal 'n leuen. */
+  const een = merkKlaar(leegStaat(), DAG)
+  is('klaar merk die dag',   een.klaarOp, DAG)
+  is('en tel een dag',       een.daeMaand, 1)
+  is('weer klaar tel nie weer', merkKlaar(een, DAG).daeMaand, 1)
+  is('môre tel wel weer',    merkKlaar(een, '2026-09-02').daeMaand, 2)
+}
+
+console.log('\n── Niks gooi op gemors nie ──')
+for (const gemors of [null, undefined, {}, { dag: 5 }, 'x']) {
+  const s = rolDag(gemors, DAG)
+  is(`rolDag(${JSON.stringify(gemors)}) gee 'n volledige staat`,
+     Object.keys(leegStaat()).every(k => k in s), true)
+}
+
+console.log(`\n${reg} reg, ${val} vals\n`)
+process.exit(val ? 1 : 0)

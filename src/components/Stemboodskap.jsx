@@ -40,7 +40,16 @@ const fmt = s => {
   return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 }
 
-export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkripsie }) {
+/* `kop` en `opSpeel` is bygekom toe Vandag se Tyd met God hierdie speler
+   begin gebruik het. Die punt was om NIE 'n tweede speler te skryf nie: die
+   foutherstel, die `Number.isFinite`-keuring en die onthou-waar-jy-was het
+   elkeen 'n dag gekos om reg te kry, en 'n kopie daarvan sou stil uitmekaar
+   dryf. Die verstek is presies wat VOLG JESUS altyd gehad het. */
+export default function Stemboodskap({
+  bron, titel, duurTeks, sleutel, transkripsie,
+  kop = 'DIE WEEK SE STEMBOODSKAP',
+  opSpeel,
+}) {
   const audioRef = useRef(null)
   const [speel, setSpeel]   = useState(false)
   const [nou, setNou]       = useState(0)
@@ -48,6 +57,11 @@ export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkrip
   const [spoed, setSpoed]   = useState(1)
   const [fout, setFout]     = useState(false)
   const [wysTeks, setWysTeks] = useState(false)   /* by verstek TOEGEVOU */
+
+  /* Deur 'n ref, sodat 'n nuwe callback by elke render nie die hele
+     luisteraar-effek afbreek en herbou nie — dit sou die klank onderbreek. */
+  const opSpeelRef = useRef(opSpeel)
+  opSpeelRef.current = opSpeel
 
   const berg = sleutel ? `vj_stem_${sleutel}` : ''
 
@@ -82,17 +96,30 @@ export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkrip
       try { localStorage.removeItem(berg) } catch {}
     }
 
+    /* `play` en `pause` was anonieme funksies en is dus NOOIT afgehaal nie.
+       Elke keer as `bron` verander, het die effek weer geloop en nog 'n paar
+       bygesit — op die derde bron was daar drie van elk. Dit het niks
+       sigbaars gebreek nie (hulle doen almal dieselfde ding), maar dit is 'n
+       lek, en `opSpeel` sou daardeur drie keer per druk gevuur het. */
+    function opBegin() {
+      setSpeel(true)
+      if (opSpeelRef.current) { try { opSpeelRef.current() } catch {} }
+    }
+    function opPouse() { setSpeel(false) }
+
     a.addEventListener('loadedmetadata', opMeta)
     a.addEventListener('timeupdate', opTyd)
     a.addEventListener('error', opFout)
     a.addEventListener('ended', opEinde)
-    a.addEventListener('play', () => setSpeel(true))
-    a.addEventListener('pause', () => setSpeel(false))
+    a.addEventListener('play', opBegin)
+    a.addEventListener('pause', opPouse)
     return () => {
       a.removeEventListener('loadedmetadata', opMeta)
       a.removeEventListener('timeupdate', opTyd)
       a.removeEventListener('error', opFout)
       a.removeEventListener('ended', opEinde)
+      a.removeEventListener('play', opBegin)
+      a.removeEventListener('pause', opPouse)
     }
   }, [bron, berg])
 
@@ -127,7 +154,7 @@ export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkrip
   if (!bron) {
     return (
       <div className="stem">
-        <div className="stem-kop">DIE WEEK SE STEMBOODSKAP</div>
+        <div className="stem-kop">{kop}</div>
         <p className="stem-geen">Die stemboodskap kom binnekort.</p>
         {transkripsie && <Transkripsie teks={transkripsie} oop={wysTeks} stel={setWysTeks} />}
       </div>
@@ -140,7 +167,7 @@ export default function Stemboodskap({ bron, titel, duurTeks, sleutel, transkrip
     <div className="stem">
       <audio ref={audioRef} src={bron} preload="metadata" />
 
-      <div className="stem-kop">DIE WEEK SE STEMBOODSKAP</div>
+      <div className="stem-kop">{kop}</div>
       {titel && <div className="stem-titel">{titel}</div>}
       {duurTeks && <div className="stem-duur">{duurTeks}</div>}
 

@@ -57,6 +57,8 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die kaart, 31 toetse
+node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 68 toetse
+node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
@@ -480,6 +482,108 @@ bediener aankom.
 Blaaiertoetse in die scratchpad: `kykVjLewe.mjs` (die hele lewende pad, met
 die boodskap wat skuif wanneer week 2 publiseer), `kykPubliseer.mjs` en
 `kykTellers.mjs`.
+
+---
+
+## Vandag se Tyd met God
+
+Die daaglikse ritueel op Luister, onder vandag se boodskap:
+
+    LUISTER -> LEES DIE WOORD -> VAT DIT SAAM -> DRA IEMAND -> WAT LE OP JOU
+    HART -> KLAAR
+
+Dewald, 1 September 2026: *"een aksie, een databron, oral dieselfde
+resultaat."*
+
+**Dit skep NIKS.** Geen versameling, geen nuwe soort plasing, geen tweede
+telling. Elke aksie loop na presies dieselfde plek as die knoppie wat reeds
+daarvoor bestaan: die stemboodskap is die nota (met dieselfde
+`Stemboodskap.jsx`), die Skrifgedeelte maak die app se eie Bybel oop, "ek het
+vir hulle gebid" verhoog dieselfde `prayedCount` deur dieselfde
+`/api/gebed-deel`, en 'n versoek beland op die Bid Saam-muur deur dieselfde
+`magDeel()`-keuring. Dit is 'n LAAG bo wat bestaan, nie 'n mini-app binne die
+app nie. Word dit ooit sy eie data, is die hele punt weg.
+
+**Bid Saam en Dra Mekaar is nie dieselfde muur nie.** Die vloei gebruik Bid
+Saam (`prayers`, direk vanaf die kliënt). Dra Mekaar is `sorg_*`, deur
+bediener-eindpunte, met krisiskeuring — 'n storie oor selfmoordgedagtes moet
+deur 'n mens gaan en kan nooit 'n een-tik-stap wees nie. Dra Mekaar is 'n
+REEL op die klaar-skerm, nie 'n sesde skerm nie.
+
+**'n Skerm sonder inhoud BESTAAN nie.** Geen Skrifverwysing op vandag se nota
+-> geen "Lees die Woord". Geen wallpaper -> geen "Vat dit saam". Dan is die
+vloei vier skerms in plaas van ses, en niks verduidelik homself nie. Sien
+`bouStappe()`.
+
+**"Dra iemand" staan VOOR "wat le op jou hart", en dit is die belangrikste
+besluit hierin.** 'n Nuwe mens het op dag 1 nog niks om te vra nie, maar kan
+altyd iemand dra. En so het elke mens wat op die muur plaas, eers iemand
+anders s'n gelees — dit is wat keer dat die muur net nood word.
+
+**Die dankie kom NA die daad.** Die eerste ontwerp het die dankie-kaart saam
+met die versoek op die skerm gehad. Die beloning voor die daad maak die daad
+niks werd nie.
+
+**Nooit geld op 'n dag wat iemand iets in die gebedskassie getik het nie.**
+Nie donasie nie, nie e-boek nie — ook nie een wat gewag het nie. Iemand wat
+pas geskryf het dat sy huwelik in stukke le, is nie die mens vir 'n R50-vraag
+drie skerms later nie. Dit is dieselfde les as die geldknoppie wat tussen die
+stories op Dra Mekaar uitgehaal is. `slotVraag()` en `magVraGeld()` dwing dit
+af, en `App.jsx` merk die dag as gevra.
+
+**Die opsomming lieg nooit.** Dit vink net af wat werklik gebeur het. "Jy het
+jou hart voor God gebring" onder iemand wat niks getik het nie, maak die hele
+skerm 'n leuen.
+
+**Die popups word TERUGGEHOU terwyl die vloei oop is** — dieselfde meganisme
+as die een wat hulle terughou terwyl klank speel (`pendingPopup`). Klaar
+gemaak: die vloei se eie vraag IS die dag s'n en `lastPopupDate` word gemerk.
+Halfpad uitgeklim: niks, en die dag word NIE gemerk nie. 'n Popup op pad uit
+is 'n straf.
+
+**Wie net die speelknoppie op Luister druk, sien geen verandering nie.**
+Daardie pad is nie aangeraak nie.
+
+### Die res van die reels
+
+* **Geen stap-teller.** Daar was 'n "STAP 3 VAN 5". 'n Vorderingsbalk maak van
+  tyd met God 'n vorm om te voltooi.
+* **Die kop tree terug na skerm 1**, en daar is geen onderste nav binne die
+  vloei nie — dit sou vyf uitgange uit 'n stil oomblik wees.
+* **z-index 238**: BO die blad, ONDER die Bybel se 250. VolgJesusLewe het
+  presies hier geval en sy LEES-knoppie het niks gedoen nie.
+* **Die wallpaper word nooit gesny nie.** Dit was 'n `background-size: cover`
+  in 'n 9:16-houer en 'n prent van 'n ander vorm is aan albei kante afgesny —
+  'n mens kon nie sien wat hy stoor nie. Nou 'n `<img>` met `object-fit:
+  contain` in 'n ONDEURSIGTIGE houer.
+* **Die vloei lees Firestore EEN keer** (`getDocs`, `limit(25)`), nooit 'n
+  `onSnapshot` nie. Om 06:30 maak duisende fone binne minute oop; 'n lewendige
+  luisteraar per mens is presies hoe die kwota verlede week opgeraak het. Dit
+  verf eers uit `cachedPrayers` en aanvaar nooit 'n antwoord kleiner as wat
+  dit reeds het nie.
+* **`prayedFor` is dieselfde sleutel as die muur s'n.** Wie op die muur reeds
+  vir 'n versoek gebid het, word hier nie weer getel nie.
+
+### Die Skrifverwysing
+
+Skerm 2 hang aan `note.scripture` — die veld wat reeds in die admin bestaan
+("Skrifverwysing", met "Skrifteks" daaronder).
+
+**Van 162 notas het TWEE een gehad.** Dewald het gedink die veld werk nie; dit
+het gewerk, dit was net 12px teen 82% deursigtigheid sonder skaduwee op die
+hero-foto. Vul hy dit nie in nie, verdwyn skerm 2 stilweg — en dan is die
+vloei net 'n mooier speelknoppie.
+
+`Bybel.jsx` se eie `ontleedVerwysing` kan NIE 'n reeks lees nie. Gee 'n mens
+hom "Matteus 6:25-34", kry hy `null` en die knoppie doen niks. Daarom staan
+`src/data/skrifVerwysing.js` apart: dit lees reekse, aandagstrepe, afkortings
+en al 66 boeke, en dit weier om te RAAI — "Jo" pas op vyf boeke en gee dus
+niks, want om die eerste te kies is hoe 'n mens iemand na die verkeerde boek
+stuur en dit nooit agterkom nie.
+
+Blaaiertoets: `kykTmg.mjs` in die scratchpad loop die hele vloei deur, saai
+`cachedNotes` en `cachedPrayers` (die houer kan nie by Firestore uitkom nie),
+en tel die KLIKKE — die hele dag moet met sowat tien druk klaar wees.
 
 ---
 

@@ -6,6 +6,8 @@ import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
 import VolgJesusKaart from '../components/VolgJesusKaart'
+import TydMetGodKaart from '../components/TydMetGodKaart'
+import { merkGeluisterNou as tmgGeluister } from '../data/tydMetGodBerging'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -814,6 +816,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   async function countTodayPlay() {
     if (playedRef.current || !today) return
     playedRef.current = true
+    /* Vandag se Tyd met God vink skerm 1 af as hy hier reeds geluister het.
+       Een reël; die besluit staan in tydMetGod.js. */
+    try { tmgGeluister(today.id) } catch {}
     setPlayCounts(prev => ({ ...prev, [today.id]: (prev[today.id] || 0) + 1 }))
     try { await setDoc(doc(db, 'plays', today.id), { count: increment(1) }, { merge: true }) } catch {}
   }
@@ -1186,7 +1191,21 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           Die kaart WYS NIE as daar niks gepubliseer is nie. Sien
           VolgJesusKaart.jsx — die hele besluit staan daar sodat hierdie skerm
           se navigasie onaangeraak bly. */}
+      {/* ── Vandag se Tyd met God ──
+          Direk onder die speler, BO die VOLG JESUS-kaart: dit is die ding wat
+          'n mens vandag doen; VOLG JESUS is die program vir wie meer wil hê.
+
+          Een reël hier, soos VolgJesusKaart. Die drie toestande — begin,
+          gaan voort, klaar — staan in TydMetGodKaart.jsx met toetse, en die
+          nota gaan SAAM met die gebeurtenis sodat App hom nie weer hoef te
+          laai nie. Hierdie skerm se navigasie bly onaangeraak. */}
       <div className="vj-kaart-plek">
+        {today && (
+          <TydMetGodKaart
+            nota={today}
+            opBegin={() => window.dispatchEvent(new CustomEvent('open-tyd-met-god', { detail: { nota: today } }))}
+          />
+        )}
         <VolgJesusKaart />
       </div>
 

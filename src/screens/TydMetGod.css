@@ -1,0 +1,405 @@
+/* ── Vandag se Tyd met God ──
+ *
+ * Die skerm moet STIL wees. Dit is die enigste plek in die app waar niks
+ * anders om aandag meeding nie: geen nav, geen kaarte, geen teller.
+ *
+ * ── Die reëls uit CLAUDE.md wat hier geld ──
+ *
+ *   · `100svh`, nooit `100dvh`. `dvh` verander saam met Chrome se adresbalk
+ *     en dan word die hele omhulsel by elke raam van daardie animasie
+ *     hervorm — dit is een van die oorsake van die gekleurde strepe op
+ *     Android;
+ *   · geen `transform` of `opacity` op `:active` nie. Net kleur. Dieselfde
+ *     `transform: scale()` het Bou die Ark dae gekos;
+ *   · die wallpaper is 'n `background-image` op 'n ONDEURSIGTIGE houer, nie
+ *     'n volskerm `<img>` nie. 'n Groot beeldtekstuur kry maklik sy eie
+ *     saamgestelde laag, en 'n ongeverfde teel wys dan rou GPU-geheue.
+ *
+ * z-index 238: BO die blad en die nav, ONDER die Bybel (250). Die "Maak in
+ * die Bybel oop"-knoppie moet werk.
+ */
+
+.tmg {
+  position: fixed;
+  inset: 0;
+  z-index: 238;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+}
+
+/* ── Die kop tree terug ── */
+
+.tmg-kop {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px;
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  background: var(--cream);
+}
+
+.tmg-kop-naam {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--purple-dark);
+  letter-spacing: 0.01em;
+  min-height: 20px;
+}
+
+.tmg-toe {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tmg-toe:active { background: #E2DACE; }
+
+/* ── Die lyf ── */
+
+.tmg-lyf {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px 40px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+}
+
+.tmg-skerm {
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  /* Die spasie kom uit die uitleg, nie uit marges op elke element nie —
+     marges val in mekaar en dan raak die ritme stil stukkend. */
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.tmg-titel {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.tmg-lei {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.tmg-merk {
+  font-size: 13.5px;
+  color: var(--purple);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Knoppies ──
+ *
+ * Die primêre een is groot en sag; die stil een is 'n uitgang en moet soos
+ * een lyk. Nooit twee knoppies wat ewe hard skree nie. */
+
+.tmg-knop {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 17px 18px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--purple);
+  cursor: pointer;
+  text-align: center;
+  /* Net kleur op :active. Sien die kop van hierdie lêer. */
+  transition: background 0.12s;
+}
+.tmg-knop:active { background: var(--purple-dark); }
+.tmg-knop:disabled { background: #C9C2D8; cursor: default; }
+
+.tmg-knop-stil {
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 14.5px;
+  padding: 12px;
+}
+.tmg-knop-stil:active { background: var(--cream-dark); }
+.tmg-knop-stil:disabled { background: transparent; color: #C9C2D8; }
+
+/* ── 2 · Die Skrifgedeelte ── */
+
+.tmg-skrif {
+  background: var(--white);
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.tmg-skrif-ref {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--purple-dark);
+  line-height: 1.2;
+}
+
+.tmg-skrif-teks {
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* ── 3 · Die wallpaper ──
+ *
+ * ONDEURSIGTIG, met die prent as agtergrond. Word 'n teel nie betyds geverf
+ * nie, wys dit hierdie kleur en nie rou geheue nie. */
+
+/* Die HELE prent moet wys. Dit was 'n `background-size: cover` in 'n 9:16
+   houer, en 'n wallpaper wat nie presies daardie vorm is nie, is aan albei
+   kante afgesny — 'n mens kon nie sien wat hy op die punt was om te stoor
+   nie. Nou pas dit altyd in, wat ook al die vorm is.
+
+   Die HOUER is ondeursigtig en dra die afronding; die prent sit binne-in.
+   Dieselfde vorm as die wallpaper-kaart op Luister, wat al lank so werk. */
+.tmg-wp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: var(--cream-dark);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.tmg-wp img {
+  display: block;
+  max-width: 100%;
+  max-height: 58svh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ── 4 · Die versoek ── */
+
+.tmg-versoek {
+  margin: 0;
+  background: var(--white);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.tmg-versoek-kop {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.tmg-versoek-teks {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--text);
+  /* 'n Lang versoek moet lees, nie oorloop nie. */
+  overflow-wrap: anywhere;
+}
+
+.tmg-versoek-saam {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--purple);
+}
+
+/* Die dankie kom EERS ná die daad. */
+.tmg-dankie {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--lavender-soft);
+  border-radius: 18px;
+  padding: 22px 18px;
+  text-align: center;
+}
+
+.tmg-dankie-merk {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--purple);
+  color: var(--white);
+  font-size: 20px;
+  line-height: 42px;
+}
+
+.tmg-dankie-teks {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* ── 5 · Die kassie ── */
+
+.tmg-kassie {
+  width: 100%;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 16px;
+  padding: 16px;
+  font-family: var(--font-body);
+  font-size: 16px;   /* nooit kleiner as 16px — iOS zoem anders in */
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--white);
+  resize: none;
+}
+.tmg-kassie:focus {
+  outline: none;
+  border-color: var(--lavender);
+}
+
+.tmg-tel {
+  margin-top: -8px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tmg-fyn {
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.tmg-fout {
+  margin: 0;
+  font-size: 14px;
+  color: #A8443C;
+}
+
+.tmg-krisis {
+  background: #FBEFEC;
+  border-radius: 16px;
+  padding: 16px 18px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #7A332C;
+}
+.tmg-krisis p { margin: 0 0 6px; }
+.tmg-krisis p:last-child { margin-bottom: 0; }
+
+/* ── 6 · Klaar ── */
+
+.tmg-slot { text-align: center; gap: 16px; }
+.tmg-slot .tmg-lei { text-align: center; }
+
+.tmg-slot-merk {
+  font-size: 34px;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+/* Die kwitansie. Eers wat hy gedoen het, dan eers 'n vraag. */
+.tmg-lys {
+  list-style: none;
+  margin: 0;
+  padding: 18px 18px;
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  text-align: left;
+}
+
+.tmg-lys li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.tmg-lys li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.tmg-maand {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--purple-dark);
+}
+
+/* Die EEN vraag, met 'n reël wat dit van die kwitansie skei. */
+.tmg-vraag {
+  margin-top: 12px;
+  padding-top: 22px;
+  border-top: 1px solid var(--cream-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tmg-vraag-kop {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Dra Mekaar is 'n uitgang, nie 'n stasie nie. */
+.tmg-uit {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px 4px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+  cursor: pointer;
+}
+.tmg-uit:active { color: var(--purple); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tmg-knop { transition: none; }
+}

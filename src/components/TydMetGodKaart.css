@@ -1,0 +1,90 @@
+/* Die ingang na Vandag se Tyd met God, op Luister.
+ *
+ * Apart van TydMetGod.css sodat Luister — die blad waar duisende mense elke
+ * oggend land — nie die hele vloei se style dra vir 'n kaart van vier reëls
+ * nie.
+ *
+ * Geen `transform` op `:active` nie, net kleur. Dit is presies wat op
+ * `.nav-bybel` gestaan het toe die gekleurde strepe op Android teruggekom
+ * het, en hierdie kaart sit op dieselfde blad. Sien CLAUDE.md.
+ */
+
+.tmg-kaart {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 20px;
+  padding: 20px 20px 22px;
+  margin: 0 0 18px;
+  background: linear-gradient(160deg, #6D5CA8 0%, #8E77C0 55%, #B294D4 100%);
+  color: var(--white);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(92, 78, 142, 0.22);
+}
+/* Net kleur, nooit skaal. */
+.tmg-kaart:active { background: linear-gradient(160deg, #5E4F93 0%, #7C68AB 55%, #9E81C0 100%); }
+
+.tmg-kaart-oog {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tmg-kaart-titel {
+  margin-top: 6px;
+  font-family: var(--font-serif);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+.tmg-kaart-lei {
+  margin-top: 7px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.tmg-kaart-knop {
+  display: inline-block;
+  margin-top: 15px;
+  border-radius: 999px;
+  padding: 11px 20px;
+  background: var(--white);
+  color: var(--purple-dark);
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+/* Klaar vandag: geen knoppie, net 'n stil reël. Dit is nie 'n kaart nie. */
+.tmg-klaar-reel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--lavender-soft);
+  font-size: 14px;
+  color: var(--purple-dark);
+  text-align: center;
+}
+
+.tmg-klaar-weer {
+  border: 0;
+  background: transparent;
+  padding: 2px 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tmg-klaar-weer:active { color: var(--purple-dark); }
