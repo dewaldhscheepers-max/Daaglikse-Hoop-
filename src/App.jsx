@@ -9,6 +9,8 @@ import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
 import BottomNav from './components/BottomNav'
 import TydMetGod from './screens/TydMetGod'
+import HoopOntvang from './screens/HoopOntvang'
+import { idUitPad as hoopIdUitPad } from './data/hoopSkakel'
 import { SLEUTEL as TMG_SLEUTEL, dagSleutel as tmgDag, leegStaat as tmgLeeg, rolDag as tmgRol, magVraGeld } from './data/tydMetGod'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
@@ -171,6 +173,13 @@ export default function App() {
      hele app om met "Cannot access before initialization". */
   const [gebedId, setGebedId] = useState(null)
   const [gebedGebid, setGebedGebid] = useState(false)
+  /* Die nota-id van 'n gedeelde HOOP-skakel — /hoop/<id>. Dit staan hier om
+     PRESIES dieselfde rede as `gebedId` hierbo: die installasie-uitklap se
+     effek noem dit in sy afhanklikheidslys, en daardie lys word tydens die
+     render gelees. Die ref daarby is vir die popup-bestuurder, wat uit 'n
+     `setTimeout` loop en nie 'n toestand sien wat intussen verander het nie. */
+  const [hoopId, setHoopId] = useState(null)
+  const hoopOopRef = useRef(false)
 
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
@@ -246,6 +255,16 @@ export default function App() {
      * Dan is hy 'n mens wat by iemand gaan sit het, en dan is die vraag
      * verdien. Sien `sorgGedraHanteer()`. */
     if (sorgGesprek && !sorgGedra) return
+    /* ── Dieselfde uitstel vir 'n gedeelde HOOP-skakel ──
+     *
+     * Iemand het aan hierdie mens gedink en 'n boodskap gestuur. 'n
+     * installasie-uitklap drie sekondes later maak van daardie geskenk 'n
+     * advertensie, en dit is presies die muur wat HoopOntvang.jsx bestaan om
+     * te vermy.
+     *
+     * Die skerm vra self, NA die ervaring, met sy eie knoppie na /go. Dit is
+     * dus nie uitgestel nie — dit is oorbodig. */
+    if (hoopId) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
     const t = setTimeout(() => {
@@ -255,7 +274,7 @@ export default function App() {
       }
     }, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra])
+  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -296,6 +315,9 @@ export default function App() {
       /* Terwyl klank speel OF die vloei oop is, wag die popup. Die vloei se
          eie klaar-skerm vra dan die een vraag van die dag — sien
          `tmgKlaarGemaak` en `tmgSluit`. */
+      /* 'n Vreemdeling wat pas 'n geskenk oopgemaak het, word nie vir geld
+         gevra nie. Sy het nog niks van hierdie plek ontvang nie. */
+      if (hoopOopRef.current) return
       if (isPlayingRef.current || tmgOopRef.current) {
         setPendingPopup(popup)
       } else {
@@ -1011,6 +1033,37 @@ export default function App() {
     return () => window.removeEventListener('open-donation', onOpen)
   }, [])
 
+  /* ── 'n Gedeelde skakel: /hoop/<nota-id> ──
+   *
+   * Iemand het aan die einde van Vandag se Tyd met God "Stuur vandag se hoop
+   * vir iemand" gedruk, en hierdie mens het daardie skakel oopgemaak. Sy moet
+   * DADELIK by die boodskap land — geen installasie, geen registrasie.
+   *
+   * Dieselfde sessionStorage-patroon as /bid/<id> hierbo, en om dieselfde
+   * rede: die diensketter herlaai die bladsy by 'n eerste besoek wanneer daar
+   * 'n nuwe weergawe is, en dan is die pad weg. Sonder die vlag land 'n
+   * splinternuwe mens op Luister en die geskenk is verlore.
+   *
+   * Die pad word uit die adresbalk gevee sodra ons hom het — anders sit dit
+   * in die geskiedenis en 'n mens deel per ongeluk sy eie blaaierblad. */
+  useEffect(() => {
+    try {
+      const uitPad = hoopIdUitPad(window.location.pathname || '')
+      if (uitPad) {
+        sessionStorage.setItem('hoop_nota', uitPad)
+        window.history.replaceState({}, '', '/')
+      }
+      const onthou = sessionStorage.getItem('hoop_nota')
+      if (onthou) { setHoopId(onthou); hoopOopRef.current = true }
+    } catch {}
+  }, [])
+
+  function hoopKlaar() {
+    setHoopId(null)
+    hoopOopRef.current = false
+    try { sessionStorage.removeItem('hoop_nota') } catch {}
+  }
+
   /* ── Vandag se Tyd met God ──
    *
    * Die nota kom SAAM met die gebeurtenis, uit Luister, wat hom reeds gelaai
@@ -1317,6 +1370,7 @@ export default function App() {
     { oop: showAdmin,               toe: () => setShowAdmin(false) },
     /* Onder die Bybel: die "Maak in die Bybel oop"-knoppie op skerm 2 moet
        werk, en 'n terug-druk moet EERS die Bybel toemaak. */
+    { oop: hoopId,                  toe: hoopKlaar },
     { oop: tmgOop,                  toe: tmgTerugOfSluit },
     { oop: showVolgJesus,           toe: () => setShowVolgJesus(false) },
     { oop: showBybel,               toe: () => setShowBybel(false) },
@@ -1615,6 +1669,8 @@ export default function App() {
       {showVredepad && (
         <Vredepad onClose={() => setShowVredepad(false)} />
       )}
+
+      {hoopId && <HoopOntvang notaId={hoopId} onKlaar={hoopKlaar} />}
 
       {tmgOop && tmgNota && (
         <TydMetGod

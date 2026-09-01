@@ -47,6 +47,7 @@ import { toestelId } from '../data/sorgStuur'
 import { magDeel, saamSinVirOntvanger } from '../data/gebedDeel'
 import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
 import { prentPad } from '../data/prentPad'
+import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
 import {
   dagSleutel, bouStappe, slotVraag, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkStap, merkKlaar,
@@ -770,8 +771,27 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
   const vraag  = slotVraag({ staat, skenkDue, reedsGegee, daeOop })
   const maandR = maandSin(staat)
 
+  /* ── Stuur die BOODSKAP, nie die app nie ──
+   *
+   * Die skakel dra vandag se nota-id. Die ontvanger hoor PRESIES wat hy
+   * gehoor het, dadelik, in haar blaaier — sien hoopSkakel.js en
+   * HoopOntvang.jsx. Hier het 'n gewone skakel na die tuisblad gestaan, en
+   * dan was die woorde daarby 'n leuen. */
   async function stuurVirIemand() {
-    const teks = 'Ek het vandag hierdie geluister en aan jou gedink. ❤️ Dalk het jy dit vandag ook nodig.\n\nhttps://dewaldscheepers.com/'
+    const skakel = hoopSkakel(nota && nota.id, window.location.origin)
+    const teks   = deelBoodskap(skakel)
+
+    /* Tel dit VOOR die deelvenster oopmaak: `navigator.share` los eers op
+       wanneer die mens klaar gekies het, en op iOS kom dit soms glad nie
+       terug nie. */
+    try {
+      fetch('/api/hoop-tel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wat: 'gedeel' }),
+      }).catch(() => {})
+    } catch {}
+
     if (navigator.share) {
       try { await navigator.share({ text: teks }) } catch {}
       return

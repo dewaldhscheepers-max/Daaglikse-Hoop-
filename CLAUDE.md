@@ -59,6 +59,7 @@ node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-bo
 node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die kaart, 31 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 68 toetse
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
+node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
@@ -605,6 +606,34 @@ blur()` op `.tmg-agtergrond::before`.
   dag is getel.
 * **`getDocs` kry 'n tydgrens van 10s.** Sonder dit bly "Een oomblik..." vir
   altyd staan wanneer Android die oortjie opgeskort het.
+
+### Die gedeelde skakel
+
+Die knoppie aan die einde stuur `/hoop/<nota-id>`, nie die tuisblad nie. Die
+woorde daarby maak 'n belofte — *"ek het vandag hierdie geluister en aan jou
+gedink"* — en "hierdie" is 'n SPESIFIEKE boodskap. 'n Skakel na die tuisblad
+maak daardie sin 'n leuen, en dan word hy nooit weer gestuur nie.
+
+Die ontvanger land op `HoopOntvang.jsx` en hoor die boodskap DADELIK in haar
+blaaier. **Geen installasiemuur voor die ervaring nie.** Die vraag oor more
+kom eers nadat sy begin luister het, en gaan dan deur `/go` — die bestaande
+installeerpad wat elke blaaier ken.
+
+**Die skakel dra geen sender-id nie.** Nie 'n naam, nie 'n merker, niks wat
+twee mense aan mekaar koppel nie. Dit se WAT gedeel is, nooit deur wie nie.
+
+**Is die nota weg, wys ons vandag s'n** met 'n eerlike sinnetjie. 'n
+Doodloopstraat is die ergste ding wat daardie skerm kan wees — dit is 'n
+vreemdeling se eerste en dalk enigste oomblik met hierdie app.
+
+Elke opspringer word teruggehou terwyl daardie skerm oop is: die installasie-
+uitklap, die donasie en die e-boek. Dit is dieselfde uitstel as die een vir 'n
+gedeelde Bid Nou- of Sorg-skakel, en om dieselfde rede.
+
+Gemeet word EEN ding, op `tellers/hoopDeel`: `gedeel` en `oopgemaak`. Geen
+naam, geen toestel-id, en NIE watter nota gedeel is nie — 'n telling per nota
+is die eerste tree na "watter boodskap het Sarel gedeel", en hierdie app moet
+daardie vraag nie kan beantwoord nie. Blaaiertoets: `kykHoop.mjs`.
 
 ### Die Skrifverwysing
 
