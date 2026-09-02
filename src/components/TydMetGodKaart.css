@@ -23,59 +23,91 @@
   position: relative;
   display: block;
   width: 100%;
-  border: 1px solid rgba(217, 177, 131, 0.28);
+  border: 1px solid rgba(217, 177, 131, 0.24);
   border-radius: 24px;
-  padding: 24px 22px 22px;
+  padding: 0;
   margin: 0 0 18px;
   /* ONDEURSIGTIG onder alles: word 'n teel nie betyds geverf nie, wys dit
      houtskool en nie rou GPU-geheue nie. */
   background-color: #1A1A1D;
-  background-image:
-    radial-gradient(110% 62% at 50% -18%, rgba(217, 177, 131, 0.30) 0%, rgba(217, 177, 131, 0) 64%),
-    radial-gradient(70% 46% at 6% 108%, rgba(217, 177, 131, 0.12) 0%, rgba(217, 177, 131, 0) 70%);
   color: #F3EEE4;
   text-align: left;
   cursor: pointer;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
 }
-/* Net kleur, nooit skaal. */
+/* Net kleur, nooit skaal. Sien CLAUDE.md — 'n `transform` op `:active` is
+   presies waar die gekleurde strepe op Android vandaan gekom het. */
 .tmg-kaart:active { background-color: #232327; }
+
+/* Die geskilderde toneel, regs. Dit staan agter alles en dra self geen
+   woorde nie, dus kan dit nooit met die teks veg nie. */
+.tmg-kaart-toneel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 74%;
+  height: 100%;
+  display: block;
+}
+
+/* Die sluier hou die LINKERKANT donker sodat die teks altyd leesbaar bly, wat
+   ook al agter hom staan. Sonder dit is die kaart mooi en die woorde stukkend
+   — presies wat op die klaar-skerm se wallpaper gebeur het. */
+.tmg-kaart-sluier {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #1A1A1D 0%, rgba(26, 26, 29, 0.94) 34%, rgba(26, 26, 29, 0.55) 62%, rgba(26, 26, 29, 0.10) 100%),
+    linear-gradient(0deg, rgba(26, 26, 29, 0.30) 0%, rgba(26, 26, 29, 0) 38%);
+}
+
+.tmg-kaart-inhoud {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px 20px 22px;
+  /* Die KAP sit op die teks, nie op die houer nie — anders breek die knoppie
+     oor twee reels omdat hy by dieselfde 68% moet inpas. */
+  max-width: 100%;
+}
 
 .tmg-kaart-son {
   display: block;
-  width: 34px;
-  height: 34px;
-  color: #D9B183;
+  width: 32px;
+  height: 32px;
+  color: #E2B87F;
 }
 
 .tmg-kaart-oog {
-  margin-top: 12px;
+  margin-top: 11px;
   font-family: var(--font-body);
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #D9B183;
+  color: #E2B87F;
 }
 
 .tmg-kaart-titel {
-  margin-top: 8px;
+  margin-top: 7px;
   font-family: var(--font-serif);
   font-size: 27px;
   font-weight: 600;
-  line-height: 1.14;
+  line-height: 1.12;
   letter-spacing: -0.01em;
-  color: #F3EEE4;
+  color: #F7F3EA;
+  max-width: 66%;
   text-wrap: balance;
 }
 
 .tmg-kaart-lei {
   margin-top: 8px;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #9B958B;
-  max-width: 30ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #A9A296;
+  max-width: 62%;
 }
 
 .tmg-kaart-knop {
@@ -84,12 +116,21 @@
   gap: 8px;
   margin-top: 18px;
   border-radius: 999px;
-  padding: 12px 22px;
-  background: linear-gradient(180deg, #E9CDA6 0%, #D6AC7C 100%);
-  color: #241B12;
+  padding: 13px 22px;
+  background: linear-gradient(180deg, #F5D08A 0%, #E0AC5C 100%);
+  color: #2A1E10;
   font-size: 14.5px;
   font-weight: 700;
-  box-shadow: 0 8px 24px rgba(217, 177, 131, 0.18);
+  white-space: nowrap;
+  box-shadow: 0 8px 26px rgba(224, 172, 92, 0.26);
+}
+
+/* Op 'n smal foon vat die teks die hele breedte en die toneel staan agter
+   hom — anders word die titel 'n kolom van drie letters. */
+@media (max-width: 22rem) {
+  .tmg-kaart-titel { font-size: 23px; max-width: 78%; }
+  .tmg-kaart-lei   { max-width: 74%; }
+  .tmg-kaart-knop  { font-size: 13.5px; padding: 12px 18px; }
 }
 
 /* Klaar vandag: geen knoppie, net 'n stil reël. 'n Knoppie wat 'n mens

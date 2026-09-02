@@ -16,6 +16,7 @@ import {
   dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
   slotVraag, magVraGeld, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
+  DAG_BEGIN_UUR,
 } from './tydMetGod.js'
 
 let reg = 0, val = 0
@@ -31,16 +32,36 @@ const VOL = {
   wallpaperUrl: 'https://x/wp.jpg',
 }
 
-console.log('\n── Die dag is PLAASLIK, nie UTC nie ──')
-/* SA is UTC+2. Met toISOString() sou 'n mens van middernag tot tweeuur die
-   oggend nog gister se dag kry, en dan plak vandag se werk aan gister. */
+console.log('\n-- Die dag begin VYFUUR, nie middernag nie --')
+/* Dewald: "ek sien dis al reg van middernag al het ek nog nie die nuwe
+   boodskap opgelaai nie."
+
+   Om middernag het die vloei teruggestel en die kaart het "Jou tyd met God is
+   gereed" gese terwyl die nuutste nota nog GISTER s'n was. */
 {
-  const eenUurNag = new Date(2026, 8, 2, 1, 30, 0)   // 2 Sept 01:30 plaaslik
-  is('01:30 is reeds die nuwe dag', dagSleutel(eenUurNag.getTime()), '2026-09-02')
-  is('en die maand daarby',         maandSleutel(eenUurNag.getTime()), '2026-09')
-  const laatAand = new Date(2026, 8, 1, 23, 45, 0)
-  is('23:45 is nog dieselfde dag',  dagSleutel(laatAand.getTime()), '2026-09-01')
-  is('syfers word opgevul',         dagSleutel(new Date(2026, 0, 5, 12).getTime()), '2026-01-05')
+  const op = (d, u, m = 0) => dagSleutel(new Date(2026, 8, d, u, m).getTime())
+
+  is('23:45 is nog dieselfde dag',    op(1, 23, 45), '2026-09-01')
+  is('00:30 is NIE al more nie',      op(2, 0, 30),  '2026-09-01')
+  is('04:59 ook nog nie',             op(2, 4, 59),  '2026-09-01')
+  is('05:00 begin die nuwe dag',      op(2, 5, 0),   '2026-09-02')
+  is('en 06:30, die kennisgewing',    op(2, 6, 30),  '2026-09-02')
+
+  /* Die belangrikste hek. Die oggendkennisgewing gaan 06:30 uit; begin die
+     dag NA daardie tyd, sien elkeen wat die kennisgewing druk 'n uur lank
+     GISTER se toestand, en wie gister klaargemaak het lees "Jy het vandag tyd
+     met God gemaak" terwyl hy nog nie begin het nie. */
+  is('die begin-uur is voor die 06:30-kennisgewing', DAG_BEGIN_UUR < 6, true)
+  is('en na middernag',                              DAG_BEGIN_UUR > 0, true)
+
+  /* Die klok word teruggeskuif en dan word die datum gelees: dit hanteer
+     maandeinde en skrikkeljaar sonder dat ons self daaraan hoef te dink. */
+  is('maandeinde loop reg', dagSleutel(new Date(2026, 9, 1, 2, 0).getTime()), '2026-09-30')
+  is('jaareinde ook',       dagSleutel(new Date(2027, 0, 1, 3, 0).getTime()), '2026-12-31')
+  is('skrikkeljaar ook',    dagSleutel(new Date(2028, 2, 1, 1, 0).getTime()), '2028-02-29')
+
+  is('en die maand daarby', maandSleutel(new Date(2026, 8, 2, 9, 30).getTime()), '2026-09')
+  is('syfers word opgevul', dagSleutel(new Date(2026, 0, 5, 12).getTime()), '2026-01-05')
 }
 
 console.log('\n── \'n Nuwe dag maak die dag skoon, nie die maand nie ──')

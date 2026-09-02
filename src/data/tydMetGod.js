@@ -36,15 +36,39 @@ import { kanOopmaak } from './skrifVerwysing.js'
    makliker om te lees, en 'n mens kan dit in een keer skoonmaak. */
 export const SLEUTEL = 'tmg_staat'
 
-/* ── Watter dag is dit vir HIERDIE mens ──
+/* ── Wanneer 'n nuwe dag BEGIN ──
  *
- * Plaaslike tyd, nie UTC nie. `new Date().toISOString()` gee die UTC-datum,
- * en Suid-Afrika is UTC+2: van middernag tot tweeuur die oggend sou die app
- * dan nog GISTER wys. Iemand wat om eenuur die oggend stil word voor God,
- * moet nie more se werk aan gister sien plak nie.
+ * Nie middernag nie. Dewald, 2 September 2026: *"ek sien dis al reg van
+ * middernag al het ek nog nie die nuwe boodskap opgelaai nie."*
+ *
+ * Hy is reg, en dit was 'n egte fout. Om middernag het die vloei teruggestel
+ * en die kaart het gese "Jou tyd met God is gereed" — terwyl die nuutste nota
+ * nog GISTER s'n was. 'n Mens wat toe begin, het gister se boodskap gekry met
+ * vandag se etiket daarop.
+ *
+ * Die dag begin dus VYFUUR. Dit is:
+ *
+ *   · ná die nag, sodat niemand 'n vals "gereed" om half een sien nie;
+ *   · VOOR die oggendkennisgewing van 06:30, en dit is die belangrike helfte.
+ *     Dewald het 07:30 gevra, maar dan sou elkeen wat die kennisgewing om
+ *     06:30 druk 'n uur lank GISTER se toestand sien — wie gister klaar
+ *     gemaak het, sou "Jy het vandag tyd met God gemaak" lees terwyl hy nog
+ *     nie begin het nie. Vyf is die laaste uur wat albei kante red.
+ *
+ * Dit is EEN getal. Wil hy dit skuif, skuif dit hier, en die toetse hou vas
+ * dat dit voor 06:30 bly.
  */
+export const DAG_BEGIN_UUR = 5
+
+/* Plaaslike tyd, nie UTC nie. `new Date().toISOString()` gee die UTC-datum,
+   en Suid-Afrika is UTC+2: van middernag tot tweeuur die oggend sou die app
+   dan die verkeerde dag wys. */
 export function dagSleutel(nou = Date.now()) {
   const d = new Date(nou)
+  /* Voor die begin-uur hoort hierdie oomblik nog by GISTER. Ons skuif die
+     klok terug en lees dan die datum af — dit hanteer maandeinde, skrikkeljaar
+     en somertyd sonder dat ons self aan hulle hoef te dink. */
+  d.setHours(d.getHours() - DAG_BEGIN_UUR)
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const g = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${m}-${g}`

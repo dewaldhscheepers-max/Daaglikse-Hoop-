@@ -607,6 +607,47 @@ Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het: nooit op
 'n dag wat hy woorde getik het nie, nooit vir 'n mens wat die app pas gekry
 het nie, en nooit vir iemand wat reeds gee nie.
 
+### Die dag begin VYFUUR, nie middernag nie
+
+Dewald, 2 September 2026: *"ek sien dis al reg van middernag al het ek nog nie
+die nuwe boodskap opgelaai nie."*
+
+Hy was reg. Om middernag het die vloei teruggestel en die kaart het "Jou tyd
+met God is gereed" gese terwyl die nuutste nota nog GISTER s'n was — 'n mens
+wat toe begin, het gister se boodskap gekry met vandag se etiket daarop.
+
+`DAG_BEGIN_UUR = 5` in `tydMetGod.js`. Vyf, want dit is die laaste uur wat
+albei kante red: ná die nag, en VOOR die 06:30-kennisgewing. Dewald het 07:30
+gevra, maar dan sou elkeen wat die kennisgewing druk 'n uur lank GISTER se
+toestand sien — wie gister klaargemaak het, sou "Jy het vandag tyd met God
+gemaak" lees terwyl hy nog nie begin het nie. Die toetse hou vas dat die getal
+tussen middernag en 06:00 bly.
+
+Die klok word teruggeskuif en dan word die datum gelees, sodat maandeinde,
+jaareinde en skrikkeljaar vanself reg loop.
+
+### Die kaart op Luister
+
+Dewald: *"the button on home doesn't look beautiful enough... it should look
+beautiful and premium so they click it"*, en later *"I don't like it to just be
+plain black."*
+
+Die kaart dra 'n geskilderde sonsopkoms regs (`TydMetGodSon.jsx`), met die
+teks links oor 'n sluier wat daardie kant donker hou. Dit is 'n **SVG en nie
+'n prent nie**, en dit is 'n besluit:
+
+* dit is 'n paar honderd grepe in die bondel, nie 'n aflaai nie — hierdie
+  kaart staan op die blad waar die oggendkennisgewing duisende fone laat land;
+* 'n groot `<img>` is die grootste tekstuur op 'n blad en Chrome gee dit maklik
+  sy eie saamgestelde laag. Dit is presies waar die gekleurde strepe op Android
+  vandaan gekom het;
+* dit dra geen woorde nie en kan dus nooit met die teks langsaan veg soos die
+  wallpaper op die klaar-skerm gedoen het.
+
+Die SVG se verloop-id's dra 'n vaste voorvoegsel (`tmgk-`). 'n Kaal id soos
+"son" bots met enige ander SVG op dieselfde bladsy, en dan verf die verkeerde
+een — 'n fout wat baie stil is.
+
 ### Die res van die reels
 
 * **Geen stap-teller.** Daar was 'n "STAP 3 VAN 5". 'n Vorderingsbalk maak van

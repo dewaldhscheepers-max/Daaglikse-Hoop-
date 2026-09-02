@@ -25,6 +25,7 @@
 import { useEffect, useState } from 'react'
 import { dagSleutel, kaartToestand } from '../data/tydMetGod'
 import { leesStaat } from '../data/tydMetGodBerging'
+import TydMetGodSon from './TydMetGodSon'
 import './TydMetGodKaart.css'
 
 export default function TydMetGodKaart({ nota, opBegin }) {
@@ -64,22 +65,29 @@ export default function TydMetGodKaart({ nota, opBegin }) {
 
   return (
     <button className="tmg-kaart" onClick={opBegin}>
-      <Son klas="tmg-kaart-son" />
-      <div className="tmg-kaart-oog">Vandag</div>
-      <div className="tmg-kaart-titel">
-        {voort ? 'Jou tyd met God wag nog' : 'Jou tyd met God is gereed'}
-      </div>
-      <div className="tmg-kaart-lei">
-        {voort
-          ? 'Jy is halfpad. Gaan voort waar jy opgehou het.'
-          : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
-      </div>
-      <span className="tmg-kaart-knop">
-        {voort ? 'Gaan voort' : 'Begin my tyd met God'}
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
-             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="9 6 15 12 9 18" />
-        </svg>
+      {/* Die geskilderde sonsopkoms, regs, wat in die houtskool inloop. Dit
+          is 'n SVG en nie 'n prent nie — sien TydMetGodSon.jsx. */}
+      <TydMetGodSon />
+      <span className="tmg-kaart-sluier" />
+
+      <span className="tmg-kaart-inhoud">
+        <Son klas="tmg-kaart-son" />
+        <span className="tmg-kaart-oog">Vandag</span>
+        <span className="tmg-kaart-titel">
+          {voort ? 'Jou tyd met God wag nog' : 'Jou tyd met God is gereed'}
+        </span>
+        <span className="tmg-kaart-lei">
+          {voort
+            ? 'Jy is halfpad. Gaan voort waar jy opgehou het.'
+            : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
+        </span>
+        <span className="tmg-kaart-knop">
+          {voort ? 'Gaan voort' : 'Begin jou tyd met God'}
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </span>
       </span>
     </button>
   )
