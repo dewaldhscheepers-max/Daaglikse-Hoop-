@@ -8,6 +8,7 @@ import DonationCard from '../components/DonationCard'
 import VolgJesusKaart from '../components/VolgJesusKaart'
 import TydMetGodKaart from '../components/TydMetGodKaart'
 import { merkGeluisterNou as tmgGeluister } from '../data/tydMetGodBerging'
+import { like as likeNota, leesGelike, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -867,18 +868,35 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     setPlaying(true); onPlayingChange?.(true)
   }
 
-  async function handleLike(noteId) {
-    if (liked.includes(noteId)) return
-    const newLiked = [...liked, noteId]
-    setLiked(newLiked)
-    localStorage.setItem('likedNotes', JSON.stringify(newLiked))
+  /* Die logika staan in notaLike.js sodat die hart in Vandag se Tyd met God
+     en die hart hier nie twee harte is nie. Sien daardie lêer. */
+  function handleLike(noteId) {
+    /* Die nuwe telling word ABSOLUUT gestel, nie plaaslik opgetel nie —
+       `likeNota` waai ook 'n sein waarna hierdie skerm luister, en twee
+       optellings vir een druk laat die hart 2 wys waar die berging 1 sê. */
+    const nuut = likeNota(noteId)
+    if (!nuut) return
+    setLiked(leesGelike())
     setLikes(prev => {
-      const next = { ...prev, [noteId]: (prev[noteId] || 0) + 1 }
+      const next = { ...prev, [noteId]: Math.max(prev[noteId] || 0, nuut) }
       writeLikesCache(next)
       return next
     })
-    try { await setDoc(doc(db, 'likes', noteId), { count: increment(1) }, { merge: true }) } catch {}
   }
+
+  /* Word 'n nota ERENS anders gelike — in die vloei, wat bo-op hierdie blad
+     sit — moet die hero se hart dadelik volmaak. `storage` vuur nie in
+     dieselfde oortjie nie, dus luister ons na ons eie sein. */
+  useEffect(() => {
+    function opGelike(e) {
+      const id = e && e.detail && e.detail.notaId
+      if (!id) return
+      setLiked(leesGelike())
+      setLikes(prev => ({ ...prev, [id]: Math.max(prev[id] || 0, e.detail.telling || 0) }))
+    }
+    window.addEventListener(LIKE_GEBEURTENIS, opGelike)
+    return () => window.removeEventListener(LIKE_GEBEURTENIS, opGelike)
+  }, [])
 
   const BOOKMARK_LIMIT = 10
 

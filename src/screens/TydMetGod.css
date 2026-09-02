@@ -602,3 +602,45 @@
 
 /* 'n Reël wat op sy eie staan, nie onder 'n kassie nie. */
 .tmg-fyn-alleen { margin-top: 0; }
+
+/* ── Die hart ──
+ *
+ * Dieselfde hart as die een op Luister se hero — sien notaLike.js. Dit staan
+ * onder die speler en bo "Gaan verder": 'n mens like NA hy geluister het.
+ *
+ * Geen `transform` op `:active` nie, net kleur. */
+.tmg-hart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  align-self: center;
+  border: 1px solid var(--rand);
+  border-radius: 999px;
+  padding: 11px 20px;
+  background: var(--kaart);
+  color: var(--sag);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.tmg-hart:active { background: var(--rand); color: var(--op); }
+
+/* Gelike: die hart word vol en kry die skerm se aksentkleur. Die knoppie is
+   dan gesper — 'n hart kan nie afgehaal word nie — en dit mag NIE soos 'n
+   dooie knoppie lyk nie. */
+.tmg-hart-aan,
+.tmg-hart-aan:disabled {
+  color: var(--aksent);
+  border-color: var(--aksent);
+  background: var(--kaart);
+  cursor: default;
+}
+
+.tmg-hart-tel {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--op);
+}

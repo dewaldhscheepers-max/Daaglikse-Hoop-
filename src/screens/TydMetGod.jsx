@@ -48,6 +48,7 @@ import { magDeel, saamSinVirOntvanger } from '../data/gebedDeel'
 import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
 import { prentPad } from '../data/prentPad'
 import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
+import { like as likeNota, hetGelike, telling as likeTelling, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import {
   dagSleutel, bouStappe, slotVraag, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkStap, merkKlaar,
@@ -140,6 +141,18 @@ function TekenAf({ klas = 'tmg-teken tmg-teken-klein' }) {
          strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 4v11M7.6 10.8 12 15.2l4.4-4.4" />
       <path d="M4.5 18.5h15" />
+    </svg>
+  )
+}
+
+function TekenHart({ vol = false, klas = 'tmg-teken tmg-teken-klein' }) {
+  /* Geteken, nie 'n emoji. Dieselfde vorm as die HeartIcon op Luister se
+     hero, sodat die twee harte soos EEN hart lyk. */
+  return (
+    <svg className={klas} viewBox="0 0 24 24"
+         fill={vol ? 'currentColor' : 'none'} stroke="currentColor"
+         strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20.4s-7.6-4.8-7.6-10a4.4 4.4 0 0 1 7.6-3 4.4 4.4 0 0 1 7.6 3c0 5.2-7.6 10-7.6 10Z" />
     </svg>
   )
 }
@@ -302,6 +315,38 @@ export default function TydMetGod({
 function Luister({ nota, staat, stel, verder }) {
   const reedsGeluister = staat.geluister === nota.id
 
+  /* ── Die hart ──
+   *
+   * Dieselfde hart as die een op Luister se hero, nie 'n tweede een nie.
+   * `notaLike.js` skryf `likedNotes` en `likes/<id>` en waai 'n sein; die
+   * hero luister daarna en maak dadelik vol. Een aksie, een databron.
+   *
+   * Dit kan nie afgehaal word nie — 'n hart op 'n boodskap wat gehelp het, is
+   * nie 'n skakelaar nie. Daardie besluit staan in notaLike.js. */
+  const [gelike, setGelike] = useState(() => hetGelike(nota.id))
+  const [tel, setTel]       = useState(() => likeTelling(nota.id))
+
+  useEffect(() => {
+    function opGelike(e) {
+      const d = e && e.detail
+      if (!d || d.notaId !== nota.id) return
+      setGelike(true)
+      setTel(t => Math.max(t, d.telling || 0))
+    }
+    window.addEventListener(LIKE_GEBEURTENIS, opGelike)
+    return () => window.removeEventListener(LIKE_GEBEURTENIS, opGelike)
+  }, [nota.id])
+
+  function druk() {
+    /* Die NUWE telling kom uit `like()` self en word absoluut gestel. Tel ons
+       hier plaaslik op, tel die sein hierbo dieselfde druk 'n tweede keer en
+       die hart wys 2 waar die berging 1 sê. Sien notaLike.js. */
+    const nuut = likeNota(nota.id)
+    if (!nuut) return
+    setGelike(true)
+    setTel(nuut)
+  }
+
   return (
     <section className="tmg-skerm">
       <TekenDagbreek />
@@ -323,6 +368,17 @@ function Luister({ nota, staat, stel, verder }) {
         kop="VANDAG SE BOODSKAP"
         opSpeel={() => stel(s => merkGeluister(s, nota.id))}
       />
+
+      <button
+        className={`tmg-hart${gelike ? ' tmg-hart-aan' : ''}`}
+        onClick={druk}
+        disabled={gelike}
+        aria-label={gelike ? 'Jy het hierdie boodskap gelike' : 'Like hierdie boodskap'}
+      >
+        <TekenHart vol={gelike} />
+        <span>{gelike ? 'Jy het dit gelike' : 'Hierdie het my gehelp'}</span>
+        {tel > 0 && <span className="tmg-hart-tel">{tel}</span>}
+      </button>
 
       {/* Nooit gesper nie. Val die klank om op iemand se eerste dag, kom hy
           nooit weer nie — en die res van die ritueel werk sonder klank. */}

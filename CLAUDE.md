@@ -595,6 +595,13 @@ blur()` op `.tmg-agtergrond::before`.
   dit reeds het nie.
 * **`prayedFor` is dieselfde sleutel as die muur s'n.** Wie op die muur reeds
   vir 'n versoek gebid het, word hier nie weer getel nie.
+* **Die hart is EEN hart.** Skerm 1 se ❤️ en die hero se ❤️ skryf dieselfde
+  `likedNotes` en dieselfde `likes/<id>`, deur `src/data/notaLike.js`. Dit
+  waai 'n `nota-gelike`-sein sodat die hero — wat agter die oorleg sit —
+  dadelik volmaak; `storage` vuur nie in dieselfde oortjie nie. `like()` gee
+  die NUWE telling terug en albei skerms stel die getal ABSOLUUT daaruit: tel
+  'n skerm plaaslik op EN luister na die sein, wys die hart 2 waar die berging
+  1 se. 'n Hart kan nie afgehaal word nie.
 * **Elke skerm het 'n egte pad verby.** Op "dra iemand" was die ENIGSTE
   knoppie "ek het vir hulle gebid" — iemand wat nie wil of kan nie, moes of
   lieg of die vloei toemaak. Nou staan "Nie vandag nie" daaronder.
