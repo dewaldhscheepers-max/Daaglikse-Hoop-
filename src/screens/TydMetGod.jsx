@@ -201,7 +201,7 @@ function TekenSlot({ klas = 'tmg-teken tmg-teken-groot' }) {
 
 export default function TydMetGod({
   nota, onSluit, onKlaarGemaak, onDraMekaar, merkGevra = () => {},
-  terugRef = null, daeOop = 0, skenkDue = false, reedsGegee = false,
+  terugRef = null, daeOop = 0, reedsGegee = false,
 }) {
   const dag = dagSleutel()
 
@@ -341,7 +341,7 @@ export default function TydMetGod({
         )}
         {stap === 'klaar' && (
           <Klaar nota={nota} staat={staat} stel={stel} dag={dag} opskrif={opskrif}
-                 daeOop={daeOop} skenkDue={skenkDue} reedsGegee={reedsGegee}
+                 daeOop={daeOop} reedsGegee={reedsGegee}
                  onSluit={onSluit} onKlaarGemaak={onKlaarGemaak}
                  onDraMekaar={onDraMekaar} merkGevra={merkGevra} />
         )}
@@ -853,7 +853,7 @@ function Hart({ staat, stel, verder }) {
 
 /* ── 6 · Klaar ──────────────────────────────────────────────────────────── */
 
-function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, onSluit, onKlaarGemaak, onDraMekaar, merkGevra }) {
+function Klaar({ nota, staat, stel, dag, opskrif, daeOop, reedsGegee, onSluit, onKlaarGemaak, onDraMekaar, merkGevra }) {
   const gemerk = useRef(false)
 
   useEffect(() => {
@@ -874,12 +874,12 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
   }, [])   // eslint-disable-line react-hooks/exhaustive-deps
 
   const reels  = opsomming({ staat, nota, skrifOpskrif: opskrif })
-  const vraag  = slotVraag({ staat, skenkDue, reedsGegee, daeOop })
+  const vraag  = slotVraag({ staat, reedsGegee })
   const maandR = maandSin(staat)
 
   /* Die reël staan in tydMetGod.js sodat dit sonder 'n blaaier getoets kan
      word — sien `wysKleinSteun`. */
-  const wysSteun = wysKleinSteun({ staat, skenkDue, reedsGegee, daeOop })
+  const wysSteun = wysKleinSteun({ staat, reedsGegee, daeOop })
 
   /* ── Stuur die BOODSKAP, nie die app nie ──
    *
@@ -944,24 +944,6 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
             </p>
             <button className="tmg-knop" onClick={stuurVirIemand}>
               Stuur vandag se hoop vir iemand
-            </button>
-          </>
-        )}
-
-        {vraag === 'skenk' && (
-          <>
-            <h2 className="tmg-vraag-kop">Help my om dit gratis te hou</h2>
-            <p className="tmg-lei">
-              Alles wat jy vandag gebruik het, is gratis. Ek wil hê Daaglikse
-              Hoop moet gratis bly vir die mens wat dit môre die nodigste het.
-            </p>
-            <button className="tmg-knop"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
-              Word 'n maandelikse Hoop-Vennoot
-            </button>
-            <button className="tmg-knop tmg-knop-stil"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
-              Gee 'n eenmalige bydrae
             </button>
           </>
         )}

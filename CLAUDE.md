@@ -599,27 +599,42 @@ niks getik het nie. Die twee klein skenk-knoppies op die klaar-skerm sou dus
 NOOIT gewys het nie, nie een dag nie. Die geldvraag word deur WOORDE gekeer,
 want dit is die woorde wat sê dat iemand swaarkry.
 
-### Die klein skenk-ry heel onder
+### Een vraag aan die einde, en die geld staan KLEIN
 
-Dewald: *"Hou die knoppies klein, modern en premium. Hulle moet nie die skerm
-oorheers of soos harde donation CTA's voel nie — net 'n sagte uitnodiging heel
-onder."*
+Die klaar-skerm het drie gesigte gehad. Die derde was 'n VOLSKERM-geldvraag —
+*"Help my om dit gratis te hou"* met 'n groot goue knoppie — op die 2de, 3de
+en van die 25ste af.
 
-Dit staan HEEL ONDER: ná die deel-vraag, ná Dra Mekaar, geskei deur 'n
-haarlyn. Twee sagte blokkies met 'n haarlyn en goue teks — geen goue pil nie,
-want die deel-knoppie hierbo bly die enigste ding op die skerm wat soos 'n
-knoppie skree.
+Dit is weg, en Dewald se eie woorde is die rede: die skenk-knoppies moet *"nie
+soos harde donation CTA's voel nie — net 'n sagte uitnodiging heel onder."* 'n
+Volskerm-vraag MET 'n goue knoppie is 'n harde CTA. Erger: sy het die klein ry
+verdring, want twee geldvrae op een skerm mag nooit — op presies daardie dae
+kon die klein ry dus glad nie wys nie.
 
-Die reël staan in `wysKleinSteun()` met toetse, en die EERSTE hek is die een
-wat amper gemis is:
+`slotVraag()` gee nou net twee antwoorde: **'deel'** (elke dag) en
+**'dankie'** (wie reeds hierdie maand gee, word bedank en nooit gevra nie).
+Die klaar-skerm het dus elke dag dieselfde gesig.
 
-* **net wanneer die hoofvraag "deel" is.** Is die hoofvraag self 'n geldvraag
-  ("Help my om dit gratis te hou") of 'n dankie, sou die klein ry 'n TWEEDE
-  geldvraag op dieselfde skerm wees. Dit was op 'n skermkiekie sigbaar voordat
-  dit gestuur is;
-* nooit op 'n dag wat hy WOORDE in die gebedskassie getik het nie;
-* nooit vir 'n mens wat die app pas gekry het nie;
-* nooit vir iemand wat reeds gee nie — hy word bedank, nie gevra nie.
+Die geld staan heel onder, in `wysKleinSteun()`:
+
+    As vandag se boodskap jou gehelp het en jy my wil help om meer mense
+    met hoop te bereik:
+
+    [ Eenmalige skenking ]   [ Maandelikse skenking ]
+
+Ná die deel-vraag, ná Dra Mekaar, geskei deur 'n haarlyn. Twee sagte blokkies
+met 'n haarlyn en goue teks — geen goue pil nie, want die deel-knoppie bly die
+enigste ding op die skerm wat soos 'n knoppie skree. Die toets meet dit: 38px
+teen 53px.
+
+Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het:
+
+* nooit op 'n dag wat hy **WOORDE** in die gebedskassie getik het nie;
+* nooit vir 'n mens wat die app pas gekry het nie (`daeOop < 2`);
+* nooit vir iemand wat reeds gee nie — hy sien 'n dankie.
+
+Die skenk-VENSTER (`getSkenkWindow`) speel geen rol meer in die vloei nie. Dit
+bly waar dit is vir die opspringer.
 
 ### Die dag begin VYFUUR, nie middernag nie
 

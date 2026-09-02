@@ -167,44 +167,48 @@ export function kaartToestand({ nota, staat, dag }) {
 
 /* ── Die een vraag aan die einde ──
  *
- * Vier antwoorde, in hierdie volgorde. Die volgorde IS die reël.
+ * TWEE antwoorde, en dit was drie.
  *
- *   'deel'   → stuur vandag se hoop vir iemand (die meeste dae)
- *   'skenk'  → help om dit gratis te hou
- *   'dankie' → hy gee reeds; hy word bedank en nooit weer gevra nie
+ *   'deel'   → stuur vandag se hoop vir iemand
+ *   'dankie' → hy gee reeds; hy word bedank en nooit gevra nie
  *
- * Twee hekke staan VOOR die geldvraag en albei kom uit 'n fout wat hierdie
- * app al gemaak het:
+ * Die derde was 'skenk': 'n volskerm-geldvraag ("Help my om dit gratis te
+ * hou") met 'n groot goue knoppie, op die 2de, 3de en van die 25ste af.
  *
- *   · het hy vandag iets in die gebedskassie getik, vra ons niks. Dit is
- *     dieselfde les as die geldknoppie wat tussen die stories op Dra Mekaar
- *     uitgehaal is — dit lees soos 'n tolhek voor iemand se seer.
- *   · 'n mens wat die app pas gekry het, word nooit gevra nie. Hy moet eers
- *     baie kere ontvang. Dit is dieselfde hek as die bestaande popup s'n
- *     (`appOpenDays.length < 2`).
+ * Dit is weg, en Dewald se eie woorde is die rede: die skenk-knoppies moet
+ * *"nie soos harde donation CTA's voel nie — net 'n sagte uitnodiging heel
+ * onder."* 'n Volskerm-vraag met 'n goue knoppie IS 'n harde CTA, en dit het
+ * die klein ry boonop verdring: op presies daardie dae kon sy nie wys nie,
+ * want twee geldvrae op een skerm mag nooit.
+ *
+ * Nou het die klaar-skerm elke dag dieselfde gesig, en die geld staan altyd
+ * klein en stil heel onder. Daar is nooit 'n dag waarop die app skielik oor
+ * geld praat nie.
  */
-export function slotVraag({ staat, skenkDue = false, reedsGegee = false, daeOop = 0 }) {
+export function slotVraag({ staat, reedsGegee = false }) {
   const s = { ...leegStaat(), ...(staat || {}) }
-  if (s.getik)      return 'deel'
-  if (reedsGegee)   return 'dankie'
-  if (daeOop < 2)   return 'deel'
-  return skenkDue ? 'skenk' : 'deel'
+  /* Wie reeds gee, word BEDANK. Nie gevra nie — hy is 'n vennoot, nie 'n
+     beursie nie. Dit geld ook wanneer hy vandag iets getik het. */
+  if (reedsGegee && !s.getik) return 'dankie'
+  return 'deel'
 }
 
 /* ── Mag die KLEIN skenk-ry heel onder wys? ──
  *
  * Dewald: *"net 'n sagte uitnodiging heel onder."*
  *
- * Vier hekke, en die eerste is die een wat amper gemis is: dit wys NET
- * wanneer die hoofvraag "deel" is. Is die hoofvraag self reeds 'n geldvraag
- * ("Help my om dit gratis te hou") of 'n dankie, sou die klein ry 'n TWEEDE
- * geldvraag op dieselfde skerm wees — presies die reël wat hierdie hele skerm
- * moet beskerm. Dit was op 'n skermkiekie sigbaar voordat dit gestuur is.
+ * Sy wys ELKE dag, want sy is klein en sag genoeg om nie 'n vraag te wees
+ * nie. Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het:
  *
- * Die ander drie volg uit `slotVraag` self, maar staan hier uitgeskryf sodat
- * 'n mens die reël op een plek kan lees. */
-export function wysKleinSteun({ staat, skenkDue = false, reedsGegee = false, daeOop = 0 }) {
-  if (slotVraag({ staat, skenkDue, reedsGegee, daeOop }) !== 'deel') return false
+ *   · nooit op 'n dag wat hy WOORDE in die gebedskassie getik het nie. Iemand
+ *     wat pas geskryf het dat sy huwelik in stukke lê, is nie die mens vir 'n
+ *     geldvraag drie skerms later nie. Dit is dieselfde les as die
+ *     geldknoppie wat tussen die stories op Dra Mekaar uitgehaal is;
+ *   · nooit vir 'n mens wat die app pas gekry het nie. Hy moet eers baie kere
+ *     ontvang — dieselfde hek as die bestaande popup s'n;
+ *   · nooit vir iemand wat reeds gee nie. Hy sien 'n dankie.
+ */
+export function wysKleinSteun({ staat, reedsGegee = false, daeOop = 0 }) {
   if (!magVraGeld(staat)) return false
   if (reedsGegee) return false
   return daeOop >= 2

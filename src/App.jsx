@@ -1141,8 +1141,11 @@ export default function App() {
     tmgSluit()
   }
 
+  /* Gee hierdie mens reeds hierdie maand? Dan word hy BEDANK en nooit gevra
+     nie. Die skenk-VENSTER speel nie meer 'n rol in die vloei nie — die
+     klaar-skerm se geldvraag is nou 'n klein, stil ry heel onder wat elke dag
+     daar is. Sien slotVraag() en wysKleinSteun(). */
   const tmgVenster = getSkenkWindow()
-  const tmgSkenkDue = !!(tmgVenster && localStorage.getItem('skenkPaid') !== tmgVenster.cycleId)
   const tmgReedsGegee = !!(tmgVenster && localStorage.getItem('skenkPaid') === tmgVenster.cycleId)
 
   // ── Maandelikse Hoop-Vennoot CTA ──
@@ -1676,7 +1679,6 @@ export default function App() {
         <TydMetGod
           nota={tmgNota}
           daeOop={(() => { try { return JSON.parse(localStorage.getItem('appOpenDays') || '[]').length } catch { return 0 } })()}
-          skenkDue={tmgSkenkDue}
           reedsGegee={tmgReedsGegee}
           onSluit={tmgSluit}
           onKlaarGemaak={tmgKlaarGemaak}

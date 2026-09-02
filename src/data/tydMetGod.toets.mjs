@@ -132,32 +132,61 @@ is('gister se stap tel nie vandag nie',
 is('gister se klaar tel nie vandag nie',
    kaartToestand({ nota: VOL, staat: { ...leegStaat(), dag: '2026-08-31', klaarOp: '2026-08-31' }, dag: DAG }), 'begin')
 
-console.log('\n── Die een vraag aan die einde ──')
-const OOP = { staat: leegStaat(), daeOop: 30 }
-is('die meeste dae: deel',   slotVraag({ ...OOP }), 'deel')
-is('skenk-venster oop',      slotVraag({ ...OOP, skenkDue: true }), 'skenk')
-is('wie reeds gee, word bedank', slotVraag({ ...OOP, skenkDue: true, reedsGegee: true }), 'dankie')
-is('en nie gevra nie, ook sonder venster', slotVraag({ ...OOP, reedsGegee: true }), 'dankie')
-
-console.log('\n── Nooit geld op \'n dag wat iemand sy hart oopgemaak het nie ──')
-/* Die belangrikste reël in hierdie lêer. Iemand wat pas geskryf het dat sy
-   huwelik in stukke lê, is nie die mens vir 'n R50-vraag drie skerms later
-   nie. Dit geld ONGEAG die venster. */
+console.log('\n-- Die een vraag aan die einde --')
+/* Twee antwoorde, en dit was drie. Die derde was 'n VOLSKERM-geldvraag ("Help
+   my om dit gratis te hou") met 'n groot goue knoppie. Dewald: die
+   skenk-knoppies moet "nie soos harde donation CTA's voel nie -- net 'n sagte
+   uitnodiging heel onder." 'n Volskerm-vraag IS 'n harde CTA, en sy het die
+   klein ry boonop verdring: op presies daardie dae kon sy nie wys nie, want
+   twee geldvrae op een skerm mag nooit. */
 {
-  const getik = { ...leegStaat(), getik: true }
-  is('getik → deel, nie skenk nie',
-     slotVraag({ staat: getik, skenkDue: true, daeOop: 300 }), 'deel')
-  is('getik → ook nie "dankie" nie, net deel',
-     slotVraag({ staat: getik, skenkDue: true, reedsGegee: true, daeOop: 300 }), 'deel')
-  is('en die popup word ook gekeer', magVraGeld(getik), false)
-  is('op \'n gewone dag mag die popup', magVraGeld(leegStaat()), true)
-  is('geen staat → mag',               magVraGeld(null), true)
+  const skoon = leegStaat()
+  is('elke gewone dag: deel', slotVraag({ staat: skoon }), 'deel')
+  is('wie reeds gee, word BEDANK', slotVraag({ staat: skoon, reedsGegee: true }), 'dankie')
+  /* Maar het hy vandag woorde getik, kry hy die gewone skerm -- 'n dankie oor
+     geld op 'n dag wat hy swaarkry, is ook 'n gesprek oor geld. */
+  is('getik wen bo dankie', slotVraag({ staat: merkGetik(skoon), reedsGegee: true }), 'deel')
+  is('geen staat: veilig', slotVraag({ staat: null }), 'deel')
 }
 
-console.log('\n── \'n Nuwe mens word nooit vir geld gevra nie ──')
-is('dag 1',  slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 1 }), 'deel')
-is('dag 0',  slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 0 }), 'deel')
-is('dag 2 mag', slotVraag({ staat: leegStaat(), skenkDue: true, daeOop: 2 }), 'skenk')
+console.log('\n-- Die klein skenk-ry heel onder --')
+/* Sy wys ELKE dag, want sy is klein en sag genoeg om nie 'n vraag te wees
+   nie. Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het. */
+{
+  const skoon = leegStaat()
+
+  is('gewone dag: sy wys', wysKleinSteun({ staat: skoon, daeOop: 30 }), true)
+
+  /* Woorde in die kassie skakel elke geldvraag af. Iemand wat pas geskryf het
+     dat sy huwelik in stukke le, is nie die mens vir 'n geldvraag drie skerms
+     later nie. */
+  is('hy het woorde getik: sy wys nie',
+     wysKleinSteun({ staat: merkGetik(skoon), daeOop: 30 }), false)
+  /* Maar "ek hou dit tussen my en God" sonder woorde is nie dieselfde ding. */
+  is('privaat sonder woorde: sy wys wel',
+     wysKleinSteun({ staat: merkHart(skoon), daeOop: 30 }), true)
+
+  is('wie reeds gee: sy wys nie',
+     wysKleinSteun({ staat: skoon, reedsGegee: true, daeOop: 30 }), false)
+
+  /* 'n Nuwe mens moet eers baie kere ontvang. */
+  is('dag 1: sy wys nie',  wysKleinSteun({ staat: skoon, daeOop: 1 }), false)
+  is('dag 2: sy wys wel',  wysKleinSteun({ staat: skoon, daeOop: 2 }), true)
+  is('geen staat: veilig', wysKleinSteun({ staat: null, daeOop: 0 }), false)
+
+  /* En die invariant: is die hoofvraag NIE "deel" nie, mag die klein ry nooit
+     ook wys nie -- dit sou twee geldvrae op een skerm wees. */
+  const gevalle = [
+    { staat: skoon,             reedsGegee: false, daeOop: 30 },
+    { staat: skoon,             reedsGegee: true,  daeOop: 30 },
+    { staat: merkGetik(skoon),  reedsGegee: false, daeOop: 30 },
+    { staat: merkGetik(skoon),  reedsGegee: true,  daeOop: 30 },
+    { staat: merkHart(skoon),   reedsGegee: false, daeOop: 1  },
+  ]
+  const stukkend = gevalle.filter(g =>
+    wysKleinSteun(g) && slotVraag(g) !== 'deel')
+  is('nooit twee geldvrae op een skerm nie', stukkend, [])
+}
 
 console.log('\n── Die kwitansie lieg nooit ──')
 {
@@ -246,57 +275,21 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   is('privaat sonder woorde: die kwitansie eis dit wel',
      opsomming({ staat: netHart, nota: VOL }), ['Jy het jou hart voor God gebring'])
   is('maar die geldvraag word NIE gekeer nie', magVraGeld(netHart), true)
-  is('en die slotvraag mag skenk',
-     slotVraag({ staat: netHart, skenkDue: true, daeOop: 30 }), 'skenk')
+  is('en die klein skenk-ry mag wys',
+     wysKleinSteun({ staat: netHart, daeOop: 30 }), true)
 
   const metWoorde = merkGetik(leegStaat())
   is('woorde getik: die kwitansie eis dit ook',
      opsomming({ staat: metWoorde, nota: VOL }), ['Jy het jou hart voor God gebring'])
   is('en NOU word die geldvraag gekeer', magVraGeld(metWoorde), false)
-  is('en die slotvraag word deel',
-     slotVraag({ staat: metWoorde, skenkDue: true, daeOop: 30 }), 'deel')
+  is('en die klein skenk-ry wys NIE',
+     wysKleinSteun({ staat: metWoorde, daeOop: 30 }), false)
 
   /* getik impliseer altyd hart -- die twee mag nooit uitmekaar dryf nie. */
   is('getik merk die hart ook', metWoorde.hart, true)
   is('hart alleen merk nie getik nie', netHart.getik, false)
 }
 
-
-console.log('\n-- Die klein skenk-ry heel onder --')
-/* Dewald: "net 'n sagte uitnodiging heel onder."
-
-   Die eerste hek is die een wat amper gemis is: sy wys NET wanneer die
-   HOOFvraag "deel" is. Is die hoofvraag self reeds 'n geldvraag, sou hierdie
-   ry 'n TWEEDE geldvraag op dieselfde skerm wees -- presies die reel wat die
-   hele skerm moet beskerm. Dit was op 'n skermkiekie sigbaar. */
-{
-  const skoon = leegStaat()
-
-  is('gewone dag: sy wys',
-     wysKleinSteun({ staat: skoon, daeOop: 30 }), true)
-
-  /* Die hoofvraag is self "Help my om dit gratis te hou". */
-  is('skenk-venster oop: sy wys NIE (dan is dit twee geldvrae)',
-     wysKleinSteun({ staat: skoon, skenkDue: true, daeOop: 30 }), false)
-
-  /* Die hoofvraag is "Dankie". */
-  is('wie reeds gee: sy wys nie',
-     wysKleinSteun({ staat: skoon, reedsGegee: true, daeOop: 30 }), false)
-  is('ook nie met die venster oop nie',
-     wysKleinSteun({ staat: skoon, skenkDue: true, reedsGegee: true, daeOop: 30 }), false)
-
-  /* Woorde in die kassie skakel elke geldvraag af. */
-  is('hy het woorde getik: sy wys nie',
-     wysKleinSteun({ staat: merkGetik(skoon), daeOop: 30 }), false)
-  /* Maar "ek hou dit tussen my en God" sonder woorde is nie dieselfde ding. */
-  is('privaat sonder woorde: sy wys wel',
-     wysKleinSteun({ staat: merkHart(skoon), daeOop: 30 }), true)
-
-  /* 'n Nuwe mens moet eers baie kere ontvang. */
-  is('dag 1: sy wys nie',  wysKleinSteun({ staat: skoon, daeOop: 1 }), false)
-  is('dag 2: sy wys wel',  wysKleinSteun({ staat: skoon, daeOop: 2 }), true)
-  is('geen staat: veilig', wysKleinSteun({ staat: null, daeOop: 0 }), false)
-}
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)
