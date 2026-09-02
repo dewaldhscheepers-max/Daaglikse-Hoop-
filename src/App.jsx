@@ -1678,12 +1678,10 @@ export default function App() {
       {tmgOop && tmgNota && (
         <TydMetGod
           nota={tmgNota}
-          daeOop={(() => { try { return JSON.parse(localStorage.getItem('appOpenDays') || '[]').length } catch { return 0 } })()}
           reedsGegee={tmgReedsGegee}
           onSluit={tmgSluit}
           onKlaarGemaak={tmgKlaarGemaak}
           terugRef={tmgTerugRef}
-          merkGevra={tmgMerkGevra}
           onDraMekaar={() => { tmgSluit(); setTab('sorg') }}
         />
       )}

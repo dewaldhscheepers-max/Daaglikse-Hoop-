@@ -49,7 +49,7 @@ import { prentPad } from '../data/prentPad'
 import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
 import { like as likeNota, hetGelike, telling as likeTelling, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import {
-  dagSleutel, bouStappe, slotVraag, magVraGeld, wysKleinSteun, opsomming, maandSin,
+  dagSleutel, bouStappe, slotVraag, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
 } from '../data/tydMetGod'
 import { leesStaat, skryfStaat } from '../data/tydMetGodBerging'
@@ -200,8 +200,8 @@ function TekenSlot({ klas = 'tmg-teken tmg-teken-groot' }) {
 }
 
 export default function TydMetGod({
-  nota, onSluit, onKlaarGemaak, onDraMekaar, merkGevra = () => {},
-  terugRef = null, daeOop = 0, reedsGegee = false,
+  nota, onSluit, onKlaarGemaak, onDraMekaar,
+  terugRef = null, reedsGegee = false,
 }) {
   const dag = dagSleutel()
 
@@ -341,9 +341,9 @@ export default function TydMetGod({
         )}
         {stap === 'klaar' && (
           <Klaar nota={nota} staat={staat} stel={stel} dag={dag} opskrif={opskrif}
-                 daeOop={daeOop} reedsGegee={reedsGegee}
+                 reedsGegee={reedsGegee}
                  onSluit={onSluit} onKlaarGemaak={onKlaarGemaak}
-                 onDraMekaar={onDraMekaar} merkGevra={merkGevra} />
+                 onDraMekaar={onDraMekaar} />
         )}
         </div>
       </div>
@@ -853,7 +853,7 @@ function Hart({ staat, stel, verder }) {
 
 /* ── 6 · Klaar ──────────────────────────────────────────────────────────── */
 
-function Klaar({ nota, staat, stel, dag, opskrif, daeOop, reedsGegee, onSluit, onKlaarGemaak, onDraMekaar, merkGevra }) {
+function Klaar({ nota, staat, stel, dag, opskrif, reedsGegee, onSluit, onKlaarGemaak, onDraMekaar }) {
   const gemerk = useRef(false)
 
   useEffect(() => {
@@ -877,9 +877,6 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, reedsGegee, onSluit, o
   const vraag  = slotVraag({ staat, reedsGegee })
   const maandR = maandSin(staat)
 
-  /* Die reël staan in tydMetGod.js sodat dit sonder 'n blaaier getoets kan
-     word — sien `wysKleinSteun`. */
-  const wysSteun = wysKleinSteun({ staat, reedsGegee, daeOop })
 
   /* ── Stuur die BOODSKAP, nie die app nie ──
    *
@@ -969,37 +966,35 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, reedsGegee, onSluit, o
         Daar is plek vir jou op <b>Dra Mekaar →</b>
       </button>
 
-      {/* ── Die stil uitnodiging, heel onder ──
+      {/* ── Die skenk-knoppies ──
        *
-       * Dewald: "Hou die knoppies klein, modern en premium. Hulle moet nie
-       * die skerm oorheers of soos harde donation CTA's voel nie — net 'n
-       * sagte uitnodiging heel onder."
+       * Dewald: "on the last screen, the donation button should always show
+       * very small at the bottom... this is not part of the pop up donations.
+       * This is not the same thing."
        *
-       * Dit staan dus NA die deel-vraag en na Dra Mekaar, geskei deur 'n
-       * haarlyn, en die knoppies is sagte blokkies en nie goue pille nie.
+       * Hulle staan ALTYD hier. Hulle het niks met die maandelikse
+       * opspringer-stelsel te doen nie: geen venster, geen dag-merk, geen
+       * hek. Twee knoppies op 'n skerm wat die bestaande skenk-vorms
+       * oopmaak, meer niks.
        *
-       * Dit wys NOOIT op 'n dag wat iemand woorde in die gebedskassie getik
-       * het nie, en ook nie vir 'n nuwe mens of vir iemand wat reeds gee nie.
-       * Daardie reël staan bo hierdie een en mag nooit verval nie — sien
-       * `magVraGeld()` en `wysSteun`. */}
-      {wysSteun && (
-        <div className="tmg-steun">
-          <p className="tmg-steun-lei">
-            As vandag se boodskap jou gehelp het en jy my wil help om meer
-            mense met hoop te bereik:
-          </p>
-          <div className="tmg-steun-ry">
-            <button className="tmg-steun-knop"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
-              Eenmalige skenking
-            </button>
-            <button className="tmg-steun-knop"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
-              Maandelikse skenking
-            </button>
-          </div>
+       * Klein en stil bly die punt: die deel-knoppie hierbo is die enigste
+       * ding op die skerm wat soos 'n knoppie skree. */}
+      <div className="tmg-steun">
+        <p className="tmg-steun-lei">
+          As vandag se boodskap jou gehelp het en jy my wil help om meer
+          mense met hoop te bereik:
+        </p>
+        <div className="tmg-steun-ry">
+          <button className="tmg-steun-knop"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-donation'))}>
+            Eenmalige skenking
+          </button>
+          <button className="tmg-steun-knop"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-hoop-vennoot'))}>
+            Maandelikse skenking
+          </button>
         </div>
-      )}
+      </div>
 
       <button className="tmg-knop tmg-knop-stil" onClick={onSluit}>Gaan my dag binne</button>
     </section>

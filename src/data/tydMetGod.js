@@ -193,27 +193,6 @@ export function slotVraag({ staat, reedsGegee = false }) {
   return 'deel'
 }
 
-/* ── Mag die KLEIN skenk-ry heel onder wys? ──
- *
- * Dewald: *"net 'n sagte uitnodiging heel onder."*
- *
- * Sy wys ELKE dag, want sy is klein en sag genoeg om nie 'n vraag te wees
- * nie. Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het:
- *
- *   · nooit op 'n dag wat hy WOORDE in die gebedskassie getik het nie. Iemand
- *     wat pas geskryf het dat sy huwelik in stukke lê, is nie die mens vir 'n
- *     geldvraag drie skerms later nie. Dit is dieselfde les as die
- *     geldknoppie wat tussen die stories op Dra Mekaar uitgehaal is;
- *   · nooit vir 'n mens wat die app pas gekry het nie. Hy moet eers baie kere
- *     ontvang — dieselfde hek as die bestaande popup s'n;
- *   · nooit vir iemand wat reeds gee nie. Hy sien 'n dankie.
- */
-export function wysKleinSteun({ staat, reedsGegee = false, daeOop = 0 }) {
-  if (!magVraGeld(staat)) return false
-  if (reedsGegee) return false
-  return daeOop >= 2
-}
-
 /* Mag daar vandag hoegenaamd oor geld gepraat word? Die App se popup vra dit
    ook, want die popup wat teruggehou is, mag nie ná die vloei alsnog opduik
    op 'n dag wat iemand sy hart oopgemaak het nie. */

@@ -14,7 +14,7 @@
 
 import {
   dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
-  slotVraag, magVraGeld, wysKleinSteun, opsomming, maandSin,
+  slotVraag, magVraGeld, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
   DAG_BEGIN_UUR,
 } from './tydMetGod.js'
@@ -149,45 +149,6 @@ console.log('\n-- Die een vraag aan die einde --')
   is('geen staat: veilig', slotVraag({ staat: null }), 'deel')
 }
 
-console.log('\n-- Die klein skenk-ry heel onder --')
-/* Sy wys ELKE dag, want sy is klein en sag genoeg om nie 'n vraag te wees
-   nie. Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het. */
-{
-  const skoon = leegStaat()
-
-  is('gewone dag: sy wys', wysKleinSteun({ staat: skoon, daeOop: 30 }), true)
-
-  /* Woorde in die kassie skakel elke geldvraag af. Iemand wat pas geskryf het
-     dat sy huwelik in stukke le, is nie die mens vir 'n geldvraag drie skerms
-     later nie. */
-  is('hy het woorde getik: sy wys nie',
-     wysKleinSteun({ staat: merkGetik(skoon), daeOop: 30 }), false)
-  /* Maar "ek hou dit tussen my en God" sonder woorde is nie dieselfde ding. */
-  is('privaat sonder woorde: sy wys wel',
-     wysKleinSteun({ staat: merkHart(skoon), daeOop: 30 }), true)
-
-  is('wie reeds gee: sy wys nie',
-     wysKleinSteun({ staat: skoon, reedsGegee: true, daeOop: 30 }), false)
-
-  /* 'n Nuwe mens moet eers baie kere ontvang. */
-  is('dag 1: sy wys nie',  wysKleinSteun({ staat: skoon, daeOop: 1 }), false)
-  is('dag 2: sy wys wel',  wysKleinSteun({ staat: skoon, daeOop: 2 }), true)
-  is('geen staat: veilig', wysKleinSteun({ staat: null, daeOop: 0 }), false)
-
-  /* En die invariant: is die hoofvraag NIE "deel" nie, mag die klein ry nooit
-     ook wys nie -- dit sou twee geldvrae op een skerm wees. */
-  const gevalle = [
-    { staat: skoon,             reedsGegee: false, daeOop: 30 },
-    { staat: skoon,             reedsGegee: true,  daeOop: 30 },
-    { staat: merkGetik(skoon),  reedsGegee: false, daeOop: 30 },
-    { staat: merkGetik(skoon),  reedsGegee: true,  daeOop: 30 },
-    { staat: merkHart(skoon),   reedsGegee: false, daeOop: 1  },
-  ]
-  const stukkend = gevalle.filter(g =>
-    wysKleinSteun(g) && slotVraag(g) !== 'deel')
-  is('nooit twee geldvrae op een skerm nie', stukkend, [])
-}
-
 console.log('\n── Die kwitansie lieg nooit ──')
 {
   const s = merkGetik(merkGebid(merkGebid(merkGelees(merkGeluister(leegStaat(), 'n1')))))
@@ -275,15 +236,13 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   is('privaat sonder woorde: die kwitansie eis dit wel',
      opsomming({ staat: netHart, nota: VOL }), ['Jy het jou hart voor God gebring'])
   is('maar die geldvraag word NIE gekeer nie', magVraGeld(netHart), true)
-  is('en die klein skenk-ry mag wys',
-     wysKleinSteun({ staat: netHart, daeOop: 30 }), true)
+  is('privaat sonder woorde keer nie die geldvraag nie', magVraGeld(netHart), true)
 
   const metWoorde = merkGetik(leegStaat())
   is('woorde getik: die kwitansie eis dit ook',
      opsomming({ staat: metWoorde, nota: VOL }), ['Jy het jou hart voor God gebring'])
   is('en NOU word die geldvraag gekeer', magVraGeld(metWoorde), false)
-  is('en die klein skenk-ry wys NIE',
-     wysKleinSteun({ staat: metWoorde, daeOop: 30 }), false)
+  is('woorde keer die geldvraag wel', magVraGeld(metWoorde), false)
 
   /* getik impliseer altyd hart -- die twee mag nooit uitmekaar dryf nie. */
   is('getik merk die hart ook', metWoorde.hart, true)
