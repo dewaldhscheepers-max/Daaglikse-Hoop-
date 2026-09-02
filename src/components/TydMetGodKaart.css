@@ -1,7 +1,17 @@
 /* Die ingang na Vandag se Tyd met God, op Luister.
  *
+ * Dewald: "the button on home doesn't look beautiful enough... it should look
+ * beautiful and premium so they click it."
+ *
+ * Dit was 'n pers verloopkaart met 'n wit pil daarin. Dit het gelyk soos elke
+ * ander kaart in elke ander app.
+ *
+ * Nou dra dit die vloei se eie taal: houtskool, 'n warm son wat oor die
+ * boonste rand deurbreek, 'n dun goue lyn, en een goue pil. Wanneer 'n mens
+ * dit druk, herken hy die skerm wat oopmaak — dit is dieselfde plek.
+ *
  * Apart van TydMetGod.css sodat Luister — die blad waar duisende mense elke
- * oggend land — nie die hele vloei se style dra vir 'n kaart van vier reëls
+ * oggend land — nie die hele vloei se style dra vir 'n kaart van vier reels
  * nie.
  *
  * Geen `transform` op `:active` nie, net kleur. Dit is presies wat op
@@ -10,57 +20,81 @@
  */
 
 .tmg-kaart {
+  position: relative;
   display: block;
   width: 100%;
-  border: 0;
-  border-radius: 20px;
-  padding: 20px 20px 22px;
+  border: 1px solid rgba(217, 177, 131, 0.28);
+  border-radius: 24px;
+  padding: 24px 22px 22px;
   margin: 0 0 18px;
-  background: linear-gradient(160deg, #6D5CA8 0%, #8E77C0 55%, #B294D4 100%);
-  color: var(--white);
+  /* ONDEURSIGTIG onder alles: word 'n teel nie betyds geverf nie, wys dit
+     houtskool en nie rou GPU-geheue nie. */
+  background-color: #1A1A1D;
+  background-image:
+    radial-gradient(110% 62% at 50% -18%, rgba(217, 177, 131, 0.30) 0%, rgba(217, 177, 131, 0) 64%),
+    radial-gradient(70% 46% at 6% 108%, rgba(217, 177, 131, 0.12) 0%, rgba(217, 177, 131, 0) 70%);
+  color: #F3EEE4;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 3px 14px rgba(92, 78, 142, 0.22);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
 }
 /* Net kleur, nooit skaal. */
-.tmg-kaart:active { background: linear-gradient(160deg, #5E4F93 0%, #7C68AB 55%, #9E81C0 100%); }
+.tmg-kaart:active { background-color: #232327; }
+
+.tmg-kaart-son {
+  display: block;
+  width: 34px;
+  height: 34px;
+  color: #D9B183;
+}
 
 .tmg-kaart-oog {
-  font-size: 11px;
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.78);
+  color: #D9B183;
 }
 
 .tmg-kaart-titel {
-  margin-top: 6px;
+  margin-top: 8px;
   font-family: var(--font-serif);
-  font-size: 25px;
-  font-weight: 700;
+  font-size: 27px;
+  font-weight: 600;
   line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: #F3EEE4;
   text-wrap: balance;
 }
 
 .tmg-kaart-lei {
-  margin-top: 7px;
+  margin-top: 8px;
   font-size: 13.5px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.86);
+  line-height: 1.55;
+  color: #9B958B;
+  max-width: 30ch;
 }
 
 .tmg-kaart-knop {
-  display: inline-block;
-  margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
   border-radius: 999px;
-  padding: 11px 20px;
-  background: var(--white);
-  color: var(--purple-dark);
+  padding: 12px 22px;
+  background: linear-gradient(180deg, #E9CDA6 0%, #D6AC7C 100%);
+  color: #241B12;
   font-size: 14.5px;
   font-weight: 700;
+  box-shadow: 0 8px 24px rgba(217, 177, 131, 0.18);
 }
 
-/* Klaar vandag: geen knoppie, net 'n stil reël. Dit is nie 'n kaart nie. */
+/* Klaar vandag: geen knoppie, net 'n stil reël. 'n Knoppie wat 'n mens
+   uitnooi om iets te doen wat hy klaar gedoen het, maak van 'n gewoonte 'n
+   eis. */
 .tmg-klaar-reel {
   display: flex;
   align-items: center;
@@ -68,13 +102,15 @@
   gap: 10px;
   flex-wrap: wrap;
   margin: 0 0 18px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--lavender-soft);
+  padding: 15px 16px;
+  border: 1px solid rgba(217, 177, 131, 0.22);
+  border-radius: 18px;
+  background-color: #1A1A1D;
   font-size: 14px;
-  color: var(--purple-dark);
+  color: #F3EEE4;
   text-align: center;
 }
+.tmg-klaar-reel .tmg-kaart-son { width: 20px; height: 20px; }
 
 .tmg-klaar-weer {
   border: 0;
@@ -83,8 +119,8 @@
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
-  color: var(--purple);
+  color: #D9B183;
   text-decoration: underline;
   cursor: pointer;
 }
-.tmg-klaar-weer:active { color: var(--purple-dark); }
+.tmg-klaar-weer:active { color: #E8CBA4; }

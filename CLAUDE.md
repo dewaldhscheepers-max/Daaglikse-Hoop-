@@ -545,36 +545,67 @@ is 'n straf.
 **Wie net die speelknoppie op Luister druk, sien geen verandering nie.**
 Daardie pad is nie aangeraak nie.
 
-### Die vorm: nag, dan lig
+### Die vorm: EEN tema, en die son breek deur
 
-Die eerste weergawe was ses keer dieselfde sjabloon — titel, grys reeltjie,
-wit kaart, pers knoppie. Dit het gelees soos 'n vorm om te voltooi.
+Die eerste weergawe was ses keer dieselfde sjabloon. Die tweede het per skerm
+van GROND verwissel: nag, dan room, dan die wallpaper. Dewald, 2 September
+2026: *"I actually don't like that all of the screens are different colors...
+I like this charcoal color theme."*
 
-Nou dra die vloei 'n boog, en elke skerm sit sy kleure deur TOKENS op
-`.tmg[data-grond]`:
+Hy was reg. Drie gronde in een vloei lees soos drie verskillende apps.
 
-    1 LUISTER    nag. Jy gaan sit in die donker en jy hoor.
-    2 DIE WOORD  lig breek. Die VERS is die grootste ding op die bladsy —
-                 dit was 18px kursief onder 'n opskrif van 30px.
-    3 4 5        stil papier. Niks pronk waar iemand se seer staan nie.
-    6 KLAAR      vandag se eie wallpaper as die grond, SWAAR vervaag.
+Nou is daar EEN grond — houtskool met warm goud — en die beweging kom uit die
+LIG. Skerm 1 is 'n dun gloed heel bo; met elke skerm breek die son verder
+deur; op die klaar-skerm het hy gewen. Die enigste ding wat skuif, is
+`--lig` op `.tmg[data-lig]`, en die vlak kom uit die STAP se plek — 'n dag
+sonder wallpaper het vier skerms en die lig moet steeds vol uitkom.
 
-Die laaste een is die belangrikste: die ding wat hy pas ontvang het, word die
-grond waarop hy bedank word. **Die vervaag is nie versiering nie** — Dewald se
-wallpapers dra groot woorde ("DAAGLIKSE HOOP"), en 'n skerp prent onder 'n
-sluier het met die teks bo-op geveg. 'n Swaar vervaag maak van enige prent 'n
-kleur en 'n stemming.
+**Die gloed is 'n `radial-gradient`, nie 'n `filter: blur()` nie.** Dit verf
+in die ouer se laag en maak geen saamgestelde laag nie. Dit is ook hoekom die
+wallpaper NIE meer agter die klaar-skerm staan nie: Dewald se wallpapers dra
+groot woorde ("JOU DAAGLIKSE HOOP IS GEREED") en daardie letters het deur elke
+sluier geskyn en met die teks bo-op geveg. Een houtskool werk met elke prent
+wat hy ooit gaan oplaai, want daar is nie een agter nie.
 
 **Geen emoji nie.** Daar was ❤️ en 🙏 op die twee belangrikste oomblikke. 'n
 Emoji is die FOON se lettertipe: dit lyk anders op elke toestel en dit is
 niemand se ontwerp nie. Die merke word geteken (`TekenDagbreek`, `TekenHande`,
-`TekenMens`, `TekenMerk`, `TekenBoek`) en erf almal `currentColor`.
+`TekenMens`, `TekenMense`, `TekenMerk`, `TekenBoek`, `TekenHart`, `TekenAf`)
+en erf almal `currentColor`.
 
-**Die enigste animasie is 'n verskyn-vervaag van 300ms**, EEN keer per skerm,
+**Die vordering-balk is nie die ou stap-teller nie.** Daar was 'n "STAP 3 VAN
+5" wat van tyd met God 'n vorm gemaak het. Nou is dit dun segmente en 'n klein
+byskrif ("2 van 5 · Lees die Woord"), en dit verdwyn HEELTEMAL op die
+klaar-skerm — die dag is dan klaar, en 'n teller daar sou van 'n dankie 'n
+vorm maak.
+
+**Die enigste animasie is 'n verskyn-vervaag van 320ms**, EEN keer per skerm,
 nooit op `:active` nie. Duik daar ooit gekleurde strepe in hierdie vloei op,
 is `animation: tmg-in` in `TydMetGod.css` die eerste plek om te kyk — haal dit
-uit en die skerm werk presies soos hy is. Dieselfde geld vir die `filter:
-blur()` op `.tmg-agtergrond::before`.
+uit en die skerm werk presies soos hy is.
+
+### "Hy het sy hart gebring" is NIE "hy het getik" nie
+
+Twee velde wat maklik EEN veld lyk, en hulle was dit ook — 'n fout wat amper
+gestuur is:
+
+* **`hart`** — hy het sy hart voor God gebring. Dit geld OOK wanneer hy sê
+  "ek hou dit tussen my en God". Dit voed die kwitansie.
+* **`getik`** — hy het WOORDE in die kassie geskryf. Dit is die enigste ding
+  wat die geldvraag afskakel.
+
+Toe hulle een veld was, het elke pad deur skerm 5 dit gemerk — ook 'n mens wat
+niks getik het nie. Die twee klein skenk-knoppies op die klaar-skerm sou dus
+NOOIT gewys het nie, nie een dag nie. Die geldvraag word deur WOORDE gekeer,
+want dit is die woorde wat sê dat iemand swaarkry.
+
+### Die twee klein skenk-knoppies
+
+Dewald: *"on the last page you can just put maybe two donate buttons very
+small, very small."* Klein IS die punt — die deel-knoppie bly die groot een.
+Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het: nooit op
+'n dag wat hy woorde getik het nie, nooit vir 'n mens wat die app pas gekry
+het nie, en nooit vir iemand wat reeds gee nie.
 
 ### Die res van die reels
 

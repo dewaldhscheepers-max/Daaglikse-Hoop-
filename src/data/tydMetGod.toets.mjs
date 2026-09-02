@@ -15,7 +15,7 @@
 import {
   dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
   slotVraag, magVraGeld, opsomming, maandSin,
-  merkGeluister, merkGelees, merkGebid, merkGetik, merkStap, merkKlaar,
+  merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
 } from './tydMetGod.js'
 
 let reg = 0, val = 0
@@ -45,13 +45,14 @@ console.log('\n── Die dag is PLAASLIK, nie UTC nie ──')
 
 console.log('\n── \'n Nuwe dag maak die dag skoon, nie die maand nie ──')
 {
-  const gister = { ...leegStaat(), dag: '2026-09-01', stap: 3, gebid: 2, getik: true,
+  const gister = { ...leegStaat(), dag: '2026-09-01', stap: 3, gebid: 2, getik: true, hart: true,
                    geluister: 'n1', gelees: true, klaarOp: '2026-09-01',
                    maand: '2026-09', gebidMaand: 14, daeMaand: 6 }
   const vandag = rolDag(gister, '2026-09-02')
   is('die stap begin oor',      vandag.stap, 0)
   is('gister se gebede is weg', vandag.gebid, 0)
   is('en die kassie ook',       vandag.getik, false)
+  is('en die hart',             vandag.hart, false)
   is('en die luister',          vandag.geluister, '')
   is('en die lees',             vandag.gelees, false)
   /* Dit is die veld wat NOOIT hier gewis word nie — daaraan hang "het hy
@@ -208,6 +209,35 @@ for (const gemors of [null, undefined, {}, { dag: 5 }, 'x']) {
   const s = rolDag(gemors, DAG)
   is(`rolDag(${JSON.stringify(gemors)}) gee 'n volledige staat`,
      Object.keys(leegStaat()).every(k => k in s), true)
+}
+
+
+console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" nie --')
+/* Dit is 'n fout wat ek amper gestuur het. Albei was EEN veld, en elke pad
+   deur skerm 5 het dit gemerk -- ook 'n mens wat niks getik het nie. Die klein
+   skenk-knoppies op die klaar-skerm sou dus NOOIT gewys het nie, nie een dag
+   nie.
+
+   Die reel wat hulle skei is die regte een: die geldvraag word deur WOORDE
+   gekeer, want dit is die woorde wat se dat iemand swaarkry. */
+{
+  const netHart = merkHart(leegStaat())
+  is('privaat sonder woorde: die kwitansie eis dit wel',
+     opsomming({ staat: netHart, nota: VOL }), ['Jy het jou hart voor God gebring'])
+  is('maar die geldvraag word NIE gekeer nie', magVraGeld(netHart), true)
+  is('en die slotvraag mag skenk',
+     slotVraag({ staat: netHart, skenkDue: true, daeOop: 30 }), 'skenk')
+
+  const metWoorde = merkGetik(leegStaat())
+  is('woorde getik: die kwitansie eis dit ook',
+     opsomming({ staat: metWoorde, nota: VOL }), ['Jy het jou hart voor God gebring'])
+  is('en NOU word die geldvraag gekeer', magVraGeld(metWoorde), false)
+  is('en die slotvraag word deel',
+     slotVraag({ staat: metWoorde, skenkDue: true, daeOop: 30 }), 'deel')
+
+  /* getik impliseer altyd hart -- die twee mag nooit uitmekaar dryf nie. */
+  is('getik merk die hart ook', metWoorde.hart, true)
+  is('hart alleen merk nie getik nie', netHart.getik, false)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

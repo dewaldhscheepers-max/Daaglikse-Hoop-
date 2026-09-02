@@ -62,7 +62,8 @@ export function leegStaat() {
     geluister:  '',    // die nota-id waarna hy vandag geluister het
     gelees:     false, // het hy vandag die Skrifgedeelte oopgemaak
     gebid:      0,     // hoeveel mense hy vandag gedra het
-    getik:      false, // het hy vandag iets in die gebedskassie getik
+    getik:      false, // het hy vandag WOORDE in die gebedskassie getik
+    hart:       false, // het hy sy hart voor God gebring (getik OF privaat)
     maand:      '',    // die maand waarvoor die onderstaande tellings geld
     gebidMaand: 0,
     daeMaand:   0,
@@ -95,6 +96,7 @@ export function rolDag(staat, dag, maand = String(dag || '').slice(0, 7)) {
     s.gelees    = false
     s.gebid     = 0
     s.getik     = false
+    s.hart      = false
   }
   return s
 }
@@ -193,7 +195,10 @@ export function opsomming({ staat, nota, skrifOpskrif = '' }) {
   }
   if (s.gebid === 1) uit.push('Jy het vir iemand anders gebid')
   if (s.gebid > 1)   uit.push(`Jy het vir ${s.gebid} mense gebid`)
-  if (s.getik)       uit.push('Jy het jou hart voor God gebring')
+  /* `hart`, nie `getik` nie. Wie sê "ek hou dit tussen my en God" het sy hart
+     voor God gebring — die stelsel weet nie wat hy gebid het nie en hoef nie.
+     `getik` is 'n enger ding en dien 'n ander doel; sien hieronder. */
+  if (s.hart)        uit.push('Jy het jou hart voor God gebring')
 
   return uit
 }
@@ -233,8 +238,27 @@ export function merkGebid(staat) {
   return { ...s, gebid: s.gebid + 1, gebidMaand: s.gebidMaand + 1 }
 }
 
+/* ── Twee dinge wat maklik EEN ding lyk ──
+ *
+ * `hart`  — hy het sy hart voor God gebring. Dit geld ook wanneer hy sê "ek
+ *           hou dit tussen my en God", want dan hét hy. Dit voed die
+ *           kwitansie.
+ * `getik` — hy het WOORDE in die kassie geskryf. Dit is die enigste ding wat
+ *           die geldvraag afskakel.
+ *
+ * Hulle was een veld, en dit was 'n fout wat ek amper gestuur het: elke pad
+ * deur skerm 5 het `getik` gemerk, ook 'n mens wat niks getik het nie en net
+ * "nie vandag nie" gedruk het. Die klein skenk-knoppies op die klaar-skerm
+ * sou dus NOOIT gewys het nie — nie een dag nie.
+ *
+ * Die reël wat hulle skei is presies die regte een: die geldvraag word gekeer
+ * deur WOORDE, want dit is die woorde wat sê dat iemand swaarkry. */
+export function merkHart(staat) {
+  return { ...leegStaat(), ...(staat || {}), hart: true }
+}
+
 export function merkGetik(staat) {
-  return { ...leegStaat(), ...(staat || {}), getik: true }
+  return { ...leegStaat(), ...(staat || {}), getik: true, hart: true }
 }
 
 /* Hoe ver hy is. Dit gaan net vorentoe: gaan iemand terug na 'n vorige skerm,

@@ -42,7 +42,6 @@ import { useEffect, useRef, useState } from 'react'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import Stemboodskap from '../components/Stemboodskap'
-import EftBesonderhede from '../components/EftBesonderhede'
 import { toestelId } from '../data/sorgStuur'
 import { magDeel, saamSinVirOntvanger } from '../data/gebedDeel'
 import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
@@ -50,8 +49,8 @@ import { prentPad } from '../data/prentPad'
 import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
 import { like as likeNota, hetGelike, telling as likeTelling, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import {
-  dagSleutel, bouStappe, slotVraag, opsomming, maandSin,
-  merkGeluister, merkGelees, merkGebid, merkGetik, merkStap, merkKlaar,
+  dagSleutel, bouStappe, slotVraag, magVraGeld, opsomming, maandSin,
+  merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
 } from '../data/tydMetGod'
 import { leesStaat, skryfStaat } from '../data/tydMetGodBerging'
 import './TydMetGod.css'
@@ -67,6 +66,17 @@ const SEWE_DAE = 7 * 24 * 60 * 60 * 1000
    sien CLAUDE.md. Tien sekondes is ruim vir 'n slegte lyn en kort genoeg dat
    niemand dink die app is dood nie. */
 const HAAL_TYDGRENS = 10000
+
+/* Wat elke stap in die vordering-byskrif heet. Kort, want dit staan langs
+   "2 van 5" in 'n reël wat nie mag oorloop nie. */
+const STAP_NAAM = {
+  luister:   'Luister',
+  woord:     'Lees die Woord',
+  wallpaper: 'Vat dit saam',
+  dra:       'Bid vir iemand',
+  hart:      'Wat lê op jou hart',
+  klaar:     '',
+}
 
 /* Die versoeke wat hierdie mens nog nie gedra het nie. Dieselfde merkies as
    die muur s'n — `prayedFor` en `reportedPrayers` — sodat 'n mens nooit twee
@@ -153,6 +163,18 @@ function TekenHart({ vol = false, klas = 'tmg-teken tmg-teken-klein' }) {
          fill={vol ? 'currentColor' : 'none'} stroke="currentColor"
          strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 20.4s-7.6-4.8-7.6-10a4.4 4.4 0 0 1 7.6-3 4.4 4.4 0 0 1 7.6 3c0 5.2-7.6 10-7.6 10Z" />
+    </svg>
+  )
+}
+
+function TekenMense({ klas = 'tmg-teken tmg-teken-klein' }) {
+  /* Twee mense — vir die maandreël, wat oor ander gaan. */
+  return (
+    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9.2" cy="8.6" r="2.9" />
+      <path d="M3.8 19a5.4 5.4 0 0 1 10.8 0" />
+      <path d="M16 6.1a2.9 2.9 0 0 1 0 5.6M17.2 14.3a5.4 5.4 0 0 1 3 4.7" />
     </svg>
   )
 }
@@ -245,39 +267,58 @@ export default function TydMetGod({
   const skrif   = ontleedSkrif(nota && nota.scripture)
   const opskrif = skrif ? skrifOpskrif(nota.scripture) : ''
 
-  /* Die boog: nag → lig → stil papier → die dag se eie beeld. Sien die kop
-     van TydMetGod.css. */
-  const grond = stap === 'luister' ? 'nag'
-              : stap === 'woord'   ? 'dagbreek'
-              : stap === 'klaar'   ? 'beeld'
-              : 'papier'
+  /* ── Die son wat deurbreek ──
+   *
+   * EEN grond deur die hele vloei — houtskool — en die beweging kom uit die
+   * LIG. Skerm 1 is 'n dun gloed; met elke skerm breek dit verder deur; die
+   * klaar-skerm is warm. Sien die kop van TydMetGod.css.
+   *
+   * Die vlak kom uit die STAP se plek en nie uit sy naam nie: 'n dag sonder
+   * wallpaper het vier skerms, en die lig moet steeds vol uitkom. */
+  const ligVlak = Math.min(6, Math.round(1 + (i / Math.max(1, stappe.length - 1)) * 5))
+
+  /* Die klaar-skerm tel nie in die vordering nie — die dag is dan klaar, en
+     'n teller daar sou van 'n dankie 'n vorm maak. */
+  const totaal = stappe.length - 1
+  const wysVorder = stap !== 'klaar' && totaal > 1
 
   return (
-    <div className="tmg" data-grond={grond}>
-      {/* Die klaar-skerm staan op vandag se eie wallpaper. Die houer is
-          ONDEURSIGTIG en dra 'n donker sluier, sodat wit teks leesbaar bly wat
-          ook al daardie dag opgelaai is. */}
-      {grond === 'beeld' && nota.wallpaperUrl && (
-        <div className="tmg-agtergrond"
-             style={{ backgroundImage: `url(${prentPad(nota.wallpaperUrl)})` }} />
-      )}
+    <div className="tmg" data-lig={String(ligVlak)}>
+      {/* EEN grond deur die hele vloei. Die klaar-skerm het 'n tyd lank
+          vandag se wallpaper agter hom gedra, en dit het NIE gewerk nie:
+          Dewald se wallpapers dra groot woorde ("JOU DAAGLIKSE HOOP IS
+          GEREED") en daardie letters het deur elke sluier geskyn en met die
+          teks bo-op geveg. Dit was dadelik op 'n skermkiekie sigbaar.
+
+          Nou is dit dieselfde houtskool as elke ander skerm, met die son wat
+          heeltemal deurgebreek het. Dit werk met ELKE wallpaper wat hy ooit
+          gaan oplaai, want daar is nie een agter nie. */}
+      <div className="tmg-lig" />
 
       <header className="tmg-kop">
-        {/* Die kop tree ná die eerste skerm terug. Op "dra iemand" dra 'n mens
-            'n vreemdeling se seer; 'n handelsmerk hoort nie daar nie. */}
         {kanTerug ? (
-          <button className="tmg-terug" onClick={terug} aria-label="Een skerm terug">
+          <button className="tmg-rond" onClick={terug} aria-label="Een skerm terug">
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                 strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-        ) : (
-          <span className="tmg-kop-naam">
-            {stap === 'luister' ? 'Vandag se tyd met God' : ''}
-          </span>
-        )}
-        <button className="tmg-toe" onClick={onSluit} aria-label="Maak toe">✕</button>
+        ) : <span className="tmg-kop-leeg" />}
+
+        {wysVorder ? (
+          <div className="tmg-vorder">
+            <div className="tmg-vorder-balk">
+              {stappe.slice(0, totaal).map((_, n) => (
+                <span key={n} className={`tmg-vorder-seg${n <= i ? ' tmg-vorder-seg-aan' : ''}`} />
+              ))}
+            </div>
+            <div className="tmg-vorder-teks">
+              <b>{i + 1} van {totaal}</b> &middot; {STAP_NAAM[stap]}
+            </div>
+          </div>
+        ) : <span />}
+
+        <button className="tmg-rond" onClick={onSluit} aria-label="Maak toe">&#10005;</button>
       </header>
 
       <div className="tmg-lyf" ref={lyfRef}>
@@ -358,16 +399,18 @@ function Luister({ nota, staat, stel, verder }) {
           eerste oomblik waarop dit soos huiswerk voel. Die speler bly staan —
           hy mag dit weer wil hoor. */}
       {reedsGeluister && (
-        <p className="tmg-merk">✓ Jy het vandag reeds geluister</p>
+        <p className="tmg-merk"><TekenMerk /><span>Jy het vandag reeds geluister</span></p>
       )}
 
-      <Stemboodskap
-        bron={nota.audioUrl}
-        titel={nota.title}
-        sleutel={`tmg_${nota.id}`}
-        kop="VANDAG SE BOODSKAP"
-        opSpeel={() => stel(s => merkGeluister(s, nota.id))}
-      />
+      <div className="tmg-speler">
+        <Stemboodskap
+          bron={nota.audioUrl}
+          titel={nota.title}
+          sleutel={`tmg_${nota.id}`}
+          kop="VANDAG SE BOODSKAP"
+          opSpeel={() => stel(s => merkGeluister(s, nota.id))}
+        />
+      </div>
 
       <button
         className={`tmg-hart${gelike ? ' tmg-hart-aan' : ''}`}
@@ -416,6 +459,9 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
         {teks && <>
           <div className="tmg-skrif-streep" />
           <p className="tmg-skrif-vers">{teks}</p>
+          <div className="tmg-skrif-slot">
+            <span /><TekenDagbreek klas="tmg-teken" /><span />
+          </div>
         </>}
       </div>
 
@@ -656,7 +702,7 @@ function Dra({ staat, stel, verder }) {
         {/* Dit was "ANONIEME VERSOEK" — administratiewe taal bo 'n mens se
             nood. */}
         <div className="tmg-versoek-kop">
-          <TekenMens />
+          <span className="tmg-teken-rond"><TekenMens /></span>
           <span>Iemand het gevra</span>
         </div>
         <blockquote className="tmg-versoek-teks">{versoek.text}</blockquote>
@@ -742,10 +788,14 @@ function Hart({ staat, stel, verder }) {
   }
 
   /* Hy hou dit vir homself. Dit tel STEEDS as "hy het sy hart voor God
-     gebring" — die stelsel weet nie wat hy gebid het nie, en dit hoef nie. En
-     dit keer die geldvraag aan die einde net so. */
+     gebring" — die stelsel weet nie wat hy gebid het nie en hoef nie.
+     
+     Maar dit merk `getik` NET as hy werklik woorde geskryf het. Die
+     geldvraag word deur WOORDE gekeer, want dit is die woorde wat sê dat
+     iemand swaarkry; 'n mens wat die kassie leeg los en aanstap, het niks
+     oopgemaak nie. Sien merkHart/merkGetik in tydMetGod.js. */
   function privaat() {
-    stel(merkGetik)
+    stel(teks.trim() ? merkGetik : merkHart)
     verder()
   }
 
@@ -827,6 +877,13 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
   const vraag  = slotVraag({ staat, skenkDue, reedsGegee, daeOop })
   const maandR = maandSin(staat)
 
+  /* Die klein skenk-ry. Drie hekke, en al drie kom uit 'n fout wat hierdie
+     app al gemaak het:
+       · nooit op 'n dag wat hy sy hart oopgemaak het nie;
+       · nooit vir 'n mens wat die app pas gekry het nie;
+       · nooit vir iemand wat reeds gee nie — hy word bedank, nie gevra nie. */
+  const wysSteun = magVraGeld(staat) && !reedsGegee && daeOop >= 2
+
   /* ── Stuur die BOODSKAP, nie die app nie ──
    *
    * Die skakel dra vandag se nota-id. Die ontvanger hoor PRESIES wat hy
@@ -868,11 +925,17 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
       {reels.length > 0 && (
         <ul className="tmg-lys">
           {reels.map((r, n) => (
-            <li key={n}><TekenMerk /><span>{r}</span></li>
+            <li key={n}><span className="tmg-teken-rond"><TekenMerk /></span><span>{r}</span></li>
           ))}
         </ul>
       )}
-      {maandR && <p className="tmg-maand">{maandR}</p>}
+      {maandR && (
+        <p className="tmg-maand">
+          <span className="tmg-teken-rond"><TekenMense /></span>
+          <span>{maandR}</span>
+        </p>
+      )}
+      <div className="tmg-skei"><i /></div>
 
       <div className="tmg-vraag">
         {vraag === 'deel' && (
@@ -893,10 +956,8 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
             <h2 className="tmg-vraag-kop">Help my om dit gratis te hou</h2>
             <p className="tmg-lei">
               Alles wat jy vandag gebruik het, is gratis. Ek wil hê Daaglikse
-              Hoop moet gratis bly vir die persoon wat dit môre die nodigste het.
+              Hoop moet gratis bly vir die mens wat dit môre die nodigste het.
             </p>
-            {/* Dieselfde twee gebeurtenisse as elke ander skenk-knoppie in
-                die app. Geen tweede betaalpad nie. */}
             <button className="tmg-knop"
                     onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
               Word 'n maandelikse Hoop-Vennoot
@@ -905,7 +966,6 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
                     onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
               Gee 'n eenmalige bydrae
             </button>
-            <EftBesonderhede />
           </>
         )}
 
@@ -923,10 +983,40 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
         )}
       </div>
 
+      {/* ── Twee klein knoppies ──
+       *
+       * Dewald: "on the last page you can just put maybe two donate buttons
+       * very small, very small... if you want to help me spread Daily Hope."
+       *
+       * Klein IS die punt. Die deel-knoppie hierbo bly die groot een; hierdie
+       * twee staan stil daaronder vir wie wil.
+       *
+       * Hulle wys NOOIT op 'n dag wat iemand iets in die gebedskassie getik
+       * het nie, en ook nie vir iemand wat reeds gee nie. Daardie reël staan
+       * bo hierdie een en mag nooit verval nie — sien `magVraGeld()`. */}
+      {wysSteun && (
+        <div className="tmg-steun">
+          <p className="tmg-steun-lei">
+            Wil jy help om Daaglikse Hoop te versprei?
+          </p>
+          <div className="tmg-steun-ry">
+            <button className="tmg-steun-knop"
+                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
+              Maandeliks
+            </button>
+            <button className="tmg-steun-knop"
+                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
+              Eenmalig
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Dra Mekaar is 'n uitgang, nie 'n stasie nie. Iemand met niks swaars
           nie moet nie 'n skerm wegklik nie. */}
       <button className="tmg-uit" onClick={() => onDraMekaar && onDraMekaar()}>
-        Iets wat swaarder is as een dag? Daar is plek vir jou op Dra Mekaar →
+        Is wat jy dra swaarder as een dag?<br />
+        Daar is plek vir jou op <b>Dra Mekaar →</b>
       </button>
 
       <button className="tmg-knop tmg-knop-stil" onClick={onSluit}>Gaan my dag binne</button>

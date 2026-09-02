@@ -53,7 +53,8 @@ export default function TydMetGodKaart({ nota, opBegin }) {
   if (toestand === 'klaar') {
     return (
       <div className="tmg-klaar-reel">
-        <span>Jy het vandag tyd met God gemaak ❤️</span>
+        <Son klas="tmg-kaart-son" />
+        <span>Jy het vandag tyd met God gemaak</span>
         <button className="tmg-klaar-weer" onClick={opBegin}>doen dit weer</button>
       </div>
     )
@@ -63,6 +64,7 @@ export default function TydMetGodKaart({ nota, opBegin }) {
 
   return (
     <button className="tmg-kaart" onClick={opBegin}>
+      <Son klas="tmg-kaart-son" />
       <div className="tmg-kaart-oog">Vandag</div>
       <div className="tmg-kaart-titel">
         {voort ? 'Jou tyd met God wag nog' : 'Jou tyd met God is gereed'}
@@ -73,8 +75,25 @@ export default function TydMetGodKaart({ nota, opBegin }) {
           : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
       </div>
       <span className="tmg-kaart-knop">
-        {voort ? 'Gaan voort →' : 'Begin my tyd met God'}
+        {voort ? 'Gaan voort' : 'Begin my tyd met God'}
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="9 6 15 12 9 18" />
+        </svg>
       </span>
     </button>
+  )
+}
+
+/* Dieselfde son as die vloei se eerste skerm. Wanneer 'n mens die kaart druk,
+   moet hy die skerm wat oopmaak HERKEN — dit is dieselfde plek. */
+function Son({ klas }) {
+  return (
+    <svg className={klas} viewBox="0 0 40 40" fill="none" stroke="currentColor"
+         strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 29h32" />
+      <path d="M11 29a9 9 0 0 1 18 0" />
+      <path d="M20 8v4M8.6 12.6l2.5 2.5M31.4 12.6l-2.5 2.5" />
+    </svg>
   )
 }
