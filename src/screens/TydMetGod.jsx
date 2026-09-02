@@ -49,7 +49,7 @@ import { prentPad } from '../data/prentPad'
 import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
 import { like as likeNota, hetGelike, telling as likeTelling, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import {
-  dagSleutel, bouStappe, slotVraag, magVraGeld, opsomming, maandSin,
+  dagSleutel, bouStappe, slotVraag, magVraGeld, wysKleinSteun, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
 } from '../data/tydMetGod'
 import { leesStaat, skryfStaat } from '../data/tydMetGodBerging'
@@ -877,12 +877,9 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
   const vraag  = slotVraag({ staat, skenkDue, reedsGegee, daeOop })
   const maandR = maandSin(staat)
 
-  /* Die klein skenk-ry. Drie hekke, en al drie kom uit 'n fout wat hierdie
-     app al gemaak het:
-       · nooit op 'n dag wat hy sy hart oopgemaak het nie;
-       · nooit vir 'n mens wat die app pas gekry het nie;
-       · nooit vir iemand wat reeds gee nie — hy word bedank, nie gevra nie. */
-  const wysSteun = magVraGeld(staat) && !reedsGegee && daeOop >= 2
+  /* Die reël staan in tydMetGod.js sodat dit sonder 'n blaaier getoets kan
+     word — sien `wysKleinSteun`. */
+  const wysSteun = wysKleinSteun({ staat, skenkDue, reedsGegee, daeOop })
 
   /* ── Stuur die BOODSKAP, nie die app nie ──
    *
@@ -983,41 +980,44 @@ function Klaar({ nota, staat, stel, dag, opskrif, daeOop, skenkDue, reedsGegee, 
         )}
       </div>
 
-      {/* ── Twee klein knoppies ──
-       *
-       * Dewald: "on the last page you can just put maybe two donate buttons
-       * very small, very small... if you want to help me spread Daily Hope."
-       *
-       * Klein IS die punt. Die deel-knoppie hierbo bly die groot een; hierdie
-       * twee staan stil daaronder vir wie wil.
-       *
-       * Hulle wys NOOIT op 'n dag wat iemand iets in die gebedskassie getik
-       * het nie, en ook nie vir iemand wat reeds gee nie. Daardie reël staan
-       * bo hierdie een en mag nooit verval nie — sien `magVraGeld()`. */}
-      {wysSteun && (
-        <div className="tmg-steun">
-          <p className="tmg-steun-lei">
-            Wil jy help om Daaglikse Hoop te versprei?
-          </p>
-          <div className="tmg-steun-ry">
-            <button className="tmg-steun-knop"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
-              Maandeliks
-            </button>
-            <button className="tmg-steun-knop"
-                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
-              Eenmalig
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Dra Mekaar is 'n uitgang, nie 'n stasie nie. Iemand met niks swaars
           nie moet nie 'n skerm wegklik nie. */}
       <button className="tmg-uit" onClick={() => onDraMekaar && onDraMekaar()}>
         Is wat jy dra swaarder as een dag?<br />
         Daar is plek vir jou op <b>Dra Mekaar →</b>
       </button>
+
+      {/* ── Die stil uitnodiging, heel onder ──
+       *
+       * Dewald: "Hou die knoppies klein, modern en premium. Hulle moet nie
+       * die skerm oorheers of soos harde donation CTA's voel nie — net 'n
+       * sagte uitnodiging heel onder."
+       *
+       * Dit staan dus NA die deel-vraag en na Dra Mekaar, geskei deur 'n
+       * haarlyn, en die knoppies is sagte blokkies en nie goue pille nie.
+       *
+       * Dit wys NOOIT op 'n dag wat iemand woorde in die gebedskassie getik
+       * het nie, en ook nie vir 'n nuwe mens of vir iemand wat reeds gee nie.
+       * Daardie reël staan bo hierdie een en mag nooit verval nie — sien
+       * `magVraGeld()` en `wysSteun`. */}
+      {wysSteun && (
+        <div className="tmg-steun">
+          <p className="tmg-steun-lei">
+            As vandag se boodskap jou gehelp het en jy my wil help om meer
+            mense met hoop te bereik:
+          </p>
+          <div className="tmg-steun-ry">
+            <button className="tmg-steun-knop"
+                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-donation')) }}>
+              Eenmalige skenking
+            </button>
+            <button className="tmg-steun-knop"
+                    onClick={() => { merkGevra(); window.dispatchEvent(new CustomEvent('open-hoop-vennoot')) }}>
+              Maandelikse skenking
+            </button>
+          </div>
+        </div>
+      )}
 
       <button className="tmg-knop tmg-knop-stil" onClick={onSluit}>Gaan my dag binne</button>
     </section>

@@ -626,47 +626,63 @@
   text-wrap: balance;
 }
 
-/* ── Die twee klein skenk-knoppies ──
+/* ── Die stil uitnodiging, heel onder ──
  *
- * Dewald: "on the last page you can just put maybe two donate buttons very
- * small, very small." Klein IS die punt: die deel-knoppie bly die groot een
- * en hierdie twee staan stil daaronder.
+ * Dewald: "Hou die knoppies klein, modern en premium. Hulle moet nie die
+ * skerm oorheers of soos harde donation CTA's voel nie — net 'n sagte
+ * uitnodiging heel onder."
  *
- * Hulle wys NOOIT op 'n dag wat iemand iets in die gebedskassie getik het
+ * Dus: geen goue pil nie. Twee sagte blokkies met 'n haarlyn, goue teks, en
+ * 'n reël bo hulle wat vra sonder om te druk. Die deel-knoppie hierbo bly die
+ * enigste ding op hierdie skerm wat soos 'n knoppie skree.
+ *
+ * Hulle wys NOOIT op 'n dag wat iemand woorde in die gebedskassie getik het
  * nie — sien `magVraGeld()`. Daardie reël staan bo hierdie een. */
 .tmg-steun {
-  margin-top: 6px;
-  padding-top: 20px;
+  margin-top: 10px;
+  padding-top: 22px;
   border-top: 1px solid var(--rand);
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 12px;
 }
 
 .tmg-steun-lei {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 34ch;
+  font-size: 12.5px;
+  line-height: 1.6;
   color: var(--sag);
   text-align: center;
 }
 
-.tmg-steun-ry { display: flex; gap: 10px; }
+.tmg-steun-ry {
+  display: flex;
+  gap: 9px;
+}
 
 .tmg-steun-knop {
   flex: 1 1 0;
-  border: 1px solid var(--rand-op);
-  border-radius: 999px;
-  padding: 11px 10px;
-  background: transparent;
+  min-width: 0;
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  /* Klein genoeg dat dit nie soos 'n CTA lees nie. Die toets meet dit teen die
+     deel-knoppie: hierdie een moet duidelik korter wees. */
+  padding: 10px 8px;
+  background: rgba(243, 238, 228, 0.035);
   color: var(--goud);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1.3;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.12s, border-color 0.12s;
 }
-.tmg-steun-knop:active { background: var(--kaart); color: var(--goud-op); }
+.tmg-steun-knop:active {
+  background: rgba(243, 238, 228, 0.09);
+  border-color: var(--rand-op);
+}
 
 /* Dra Mekaar is 'n uitgang, nie 'n stasie nie. */
 .tmg-uit {

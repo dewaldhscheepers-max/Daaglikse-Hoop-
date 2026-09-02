@@ -191,6 +191,25 @@ export function slotVraag({ staat, skenkDue = false, reedsGegee = false, daeOop 
   return skenkDue ? 'skenk' : 'deel'
 }
 
+/* ── Mag die KLEIN skenk-ry heel onder wys? ──
+ *
+ * Dewald: *"net 'n sagte uitnodiging heel onder."*
+ *
+ * Vier hekke, en die eerste is die een wat amper gemis is: dit wys NET
+ * wanneer die hoofvraag "deel" is. Is die hoofvraag self reeds 'n geldvraag
+ * ("Help my om dit gratis te hou") of 'n dankie, sou die klein ry 'n TWEEDE
+ * geldvraag op dieselfde skerm wees — presies die reël wat hierdie hele skerm
+ * moet beskerm. Dit was op 'n skermkiekie sigbaar voordat dit gestuur is.
+ *
+ * Die ander drie volg uit `slotVraag` self, maar staan hier uitgeskryf sodat
+ * 'n mens die reël op een plek kan lees. */
+export function wysKleinSteun({ staat, skenkDue = false, reedsGegee = false, daeOop = 0 }) {
+  if (slotVraag({ staat, skenkDue, reedsGegee, daeOop }) !== 'deel') return false
+  if (!magVraGeld(staat)) return false
+  if (reedsGegee) return false
+  return daeOop >= 2
+}
+
 /* Mag daar vandag hoegenaamd oor geld gepraat word? Die App se popup vra dit
    ook, want die popup wat teruggehou is, mag nie ná die vloei alsnog opduik
    op 'n dag wat iemand sy hart oopgemaak het nie. */

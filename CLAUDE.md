@@ -599,13 +599,27 @@ niks getik het nie. Die twee klein skenk-knoppies op die klaar-skerm sou dus
 NOOIT gewys het nie, nie een dag nie. Die geldvraag word deur WOORDE gekeer,
 want dit is die woorde wat sê dat iemand swaarkry.
 
-### Die twee klein skenk-knoppies
+### Die klein skenk-ry heel onder
 
-Dewald: *"on the last page you can just put maybe two donate buttons very
-small, very small."* Klein IS die punt — die deel-knoppie bly die groot een.
-Drie hekke, en al drie kom uit 'n fout wat hierdie app al gemaak het: nooit op
-'n dag wat hy woorde getik het nie, nooit vir 'n mens wat die app pas gekry
-het nie, en nooit vir iemand wat reeds gee nie.
+Dewald: *"Hou die knoppies klein, modern en premium. Hulle moet nie die skerm
+oorheers of soos harde donation CTA's voel nie — net 'n sagte uitnodiging heel
+onder."*
+
+Dit staan HEEL ONDER: ná die deel-vraag, ná Dra Mekaar, geskei deur 'n
+haarlyn. Twee sagte blokkies met 'n haarlyn en goue teks — geen goue pil nie,
+want die deel-knoppie hierbo bly die enigste ding op die skerm wat soos 'n
+knoppie skree.
+
+Die reël staan in `wysKleinSteun()` met toetse, en die EERSTE hek is die een
+wat amper gemis is:
+
+* **net wanneer die hoofvraag "deel" is.** Is die hoofvraag self 'n geldvraag
+  ("Help my om dit gratis te hou") of 'n dankie, sou die klein ry 'n TWEEDE
+  geldvraag op dieselfde skerm wees. Dit was op 'n skermkiekie sigbaar voordat
+  dit gestuur is;
+* nooit op 'n dag wat hy WOORDE in die gebedskassie getik het nie;
+* nooit vir 'n mens wat die app pas gekry het nie;
+* nooit vir iemand wat reeds gee nie — hy word bedank, nie gevra nie.
 
 ### Die dag begin VYFUUR, nie middernag nie
 

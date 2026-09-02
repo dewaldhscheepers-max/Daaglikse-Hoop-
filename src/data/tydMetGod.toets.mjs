@@ -14,7 +14,7 @@
 
 import {
   dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
-  slotVraag, magVraGeld, opsomming, maandSin,
+  slotVraag, magVraGeld, wysKleinSteun, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
   DAG_BEGIN_UUR,
 } from './tydMetGod.js'
@@ -259,6 +259,43 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   /* getik impliseer altyd hart -- die twee mag nooit uitmekaar dryf nie. */
   is('getik merk die hart ook', metWoorde.hart, true)
   is('hart alleen merk nie getik nie', netHart.getik, false)
+}
+
+
+console.log('\n-- Die klein skenk-ry heel onder --')
+/* Dewald: "net 'n sagte uitnodiging heel onder."
+
+   Die eerste hek is die een wat amper gemis is: sy wys NET wanneer die
+   HOOFvraag "deel" is. Is die hoofvraag self reeds 'n geldvraag, sou hierdie
+   ry 'n TWEEDE geldvraag op dieselfde skerm wees -- presies die reel wat die
+   hele skerm moet beskerm. Dit was op 'n skermkiekie sigbaar. */
+{
+  const skoon = leegStaat()
+
+  is('gewone dag: sy wys',
+     wysKleinSteun({ staat: skoon, daeOop: 30 }), true)
+
+  /* Die hoofvraag is self "Help my om dit gratis te hou". */
+  is('skenk-venster oop: sy wys NIE (dan is dit twee geldvrae)',
+     wysKleinSteun({ staat: skoon, skenkDue: true, daeOop: 30 }), false)
+
+  /* Die hoofvraag is "Dankie". */
+  is('wie reeds gee: sy wys nie',
+     wysKleinSteun({ staat: skoon, reedsGegee: true, daeOop: 30 }), false)
+  is('ook nie met die venster oop nie',
+     wysKleinSteun({ staat: skoon, skenkDue: true, reedsGegee: true, daeOop: 30 }), false)
+
+  /* Woorde in die kassie skakel elke geldvraag af. */
+  is('hy het woorde getik: sy wys nie',
+     wysKleinSteun({ staat: merkGetik(skoon), daeOop: 30 }), false)
+  /* Maar "ek hou dit tussen my en God" sonder woorde is nie dieselfde ding. */
+  is('privaat sonder woorde: sy wys wel',
+     wysKleinSteun({ staat: merkHart(skoon), daeOop: 30 }), true)
+
+  /* 'n Nuwe mens moet eers baie kere ontvang. */
+  is('dag 1: sy wys nie',  wysKleinSteun({ staat: skoon, daeOop: 1 }), false)
+  is('dag 2: sy wys wel',  wysKleinSteun({ staat: skoon, daeOop: 2 }), true)
+  is('geen staat: veilig', wysKleinSteun({ staat: null, daeOop: 0 }), false)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)
