@@ -753,6 +753,31 @@ het gewerk, dit was net 12px teen 82% deursigtigheid sonder skaduwee op die
 hero-foto. Vul hy dit nie in nie, verdwyn skerm 2 stilweg — en dan is die
 vloei net 'n mooier speelknoppie.
 
+Drie goed het dit reggemaak, en al drie kom uit dieselfde oggend:
+
+**Die vers staan op die KAART op Luister.** Hy was net BINNE die vloei, dus
+moes 'n mens eers 'n knoppie druk om te sien waaroor vandag gaan. Nou dra die
+kaart die verwysing en die vers self, met 'n dun goue lyn links en die teks by
+twee reels afgesny — die kaart is 'n uitnodiging, nie die skerm waar 'n mens
+LEES nie. Die vers loop oor die son se rand, vandaar die `text-shadow`: dit is
+teks en nie 'n laag nie, dus raak dit nie aan die Android-reels nie.
+
+**Die skerm bestaan sodra daar 'n VERS is** (`hetWoord`), nie eers wanneer ons
+die verwysing kan ONTLEED nie. Dit was `kanOopmaak(n.scripture)`, en dit was
+stil verkeerd: tik hy 'n boek wat ons nie ken nie, of vul hy net die TEKS in
+sonder 'n verwysing, dan was die vers heeltemal weg en die vloei 'n skerm
+korter sonder dat iets se hoekom. Die VERS is die inhoud; die Bybel-knoppie is
+die ekstra, en die knoppie hang aan `skrif` — kan ons nie oopmaak nie, staan
+die vers steeds daar sonder 'n knoppie wat niks sou doen nie.
+
+**Die vers kan by 'n nota gevoeg word wat REEDS lewendig is.** `handleSave` in
+die admin skep 'n nota en eis 'n oudiolêer; word die Skrifverwysing by die
+oplaai vergeet — en dit gebeur, want dit is die veld ONDER die knoppie wat 'n
+mens die nodigste het — was daar geen manier om hom by te sit nie. Die
+📖-knoppie langs elke nota vou 'n vorm oop en skryf net daardie twee velde met
+`merge`, presies soos die wallpaper. Dit vee ook `cachedNotesTime` uit, anders
+sien hy sy eie nuwe vers eers wanneer die kas verval.
+
 `Bybel.jsx` se eie `ontleedVerwysing` kan NIE 'n reeks lees nie. Gee 'n mens
 hom "Matteus 6:25-34", kry hy `null` en die knoppie doen niks. Daarom staan
 `src/data/skrifVerwysing.js` apart: dit lees reekse, aandagstrepe, afkortings
@@ -760,7 +785,8 @@ en al 66 boeke, en dit weier om te RAAI — "Jo" pas op vyf boeke en gee dus
 niks, want om die eerste te kies is hoe 'n mens iemand na die verkeerde boek
 stuur en dit nooit agterkom nie.
 
-Blaaiertoets: `kykTmg.mjs` in die scratchpad loop die hele vloei deur, saai
+Blaaiertoetse: `kykVers.mjs` (die vers op die kaart en op die skerm, oor al
+drie gevalle) en `kykTmg.mjs`, wat die hele vloei deurloop, saai
 `cachedNotes` en `cachedPrayers` (die houer kan nie by Firestore uitkom nie),
 en tel die KLIKKE — die hele dag moet met sowat tien druk klaar wees.
 

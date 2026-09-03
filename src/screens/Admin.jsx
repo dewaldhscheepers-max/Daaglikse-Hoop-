@@ -89,6 +89,14 @@ export default function Admin({ onClose }) {
   const [wpTarget,    setWpTarget]    = useState(null)
   const wpInputRef = useRef(null)
 
+  /* Die vers by 'n BESTAANDE nota — sien beginVers/stoorVers. */
+  const [versTarget, setVersTarget] = useState(null)
+  const [versRef,    setVersRef]    = useState('')
+  const [versTeks,   setVersTeks]   = useState('')
+  const [versBesig,  setVersBesig]  = useState(false)
+  const [versKlaar,  setVersKlaar]  = useState(null)
+  const [versFout,   setVersFout]   = useState('')
+
   // ── Recording state ──
   const [recording,    setRecording]    = useState(false)
   const [recordedUrl,  setRecordedUrl]  = useState(null)
@@ -690,6 +698,42 @@ export default function Admin({ onClose }) {
     } catch (e) { alert('Fout: ' + e.message) }
   }
 
+  /* ── Die vers by 'n nota wat reeds lewendig is ──
+   *
+   * `handleSave` skep 'n nota en eis 'n oudiolêer. Word die Skrifverwysing by
+   * die oplaai vergeet — en dit gebeur, want dit is die veld ONDER die knoppie
+   * wat 'n mens die nodigste het — was daar geen manier om hom by te sit nie.
+   * Die gevolg was stil: Tyd met God se "Lees die Woord"-skerm bestaan net as
+   * daar 'n vers is, dus was die vloei daardie dag een skerm korter en niks
+   * het gesê hoekom.
+   *
+   * Dieselfde `merge`-skryf as die wallpaper: net hierdie twee velde word
+   * aangeraak, die oudio en die datum bly presies soos hulle is. */
+  function beginVers(note) {
+    setVersFout('')
+    setVersTarget(note.id)
+    setVersRef(note.scripture || '')
+    setVersTeks(note.scriptureText || '')
+  }
+
+  async function stoorVers() {
+    if (!versTarget) return
+    setVersBesig(true); setVersFout('')
+    try {
+      await setDoc(doc(db, 'notes', versTarget), {
+        scripture: versRef.trim(), scriptureText: versTeks.trim(),
+      }, { merge: true })
+      /* Die app hou notas in localStorage. Sonder hierdie reël sien hy sy eie
+         nuwe vers eers wanneer daardie kas verval. */
+      try { localStorage.removeItem('cachedNotesTime') } catch {}
+      const klaar = versTarget
+      setVersKlaar(klaar); setVersTarget(null)
+      await loadNotes()
+      setTimeout(() => setVersKlaar(k => (k === klaar ? null : k)), 3000)
+    } catch (e) { setVersFout('Kon nie stoor nie: ' + e.message) }
+    setVersBesig(false)
+  }
+
   // ── Upload wallpaper for a voice note ──
   function triggerWpUpload(note) { setWpTarget(note); wpInputRef.current?.click() }
 
@@ -874,7 +918,8 @@ export default function Admin({ onClose }) {
                 <input ref={wpInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleWpUpload} />
                 {notesLoading ? <div className="admin-loading">Laai notas...</div>
                   : notes.map(note => (
-                    <div key={note.id} className="admin-note-row">
+                    <div key={note.id}>
+                    <div className="admin-note-row">
                       <div className="admin-note-info">
                         <div className="admin-note-title">{note.title}</div>
                         <div className="admin-note-meta">
@@ -890,6 +935,18 @@ export default function Admin({ onClose }) {
                         </div>
                       ) : (
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          {/* Die vers BY 'n nota wat reeds opgelaai is. Dit was
+                              nie moontlik nie: `handleSave` eis 'n oudiolêer,
+                              dus was 'n vers wat by die oplaai vergeet is, vir
+                              altyd weg — en sonder vers bestaan "Lees die
+                              Woord" in Tyd met God nie. */}
+                          <button
+                            className="admin-pdf-btn"
+                            onClick={() => beginVers(note)}
+                            title="Skrifverwysing en teksvers"
+                          >
+                            {versKlaar === note.id ? '✅' : note.scripture ? '📖 ✎' : '📖 +'}
+                          </button>
                           <button
                             className="admin-pdf-btn"
                             onClick={() => triggerWpUpload(note)}
@@ -903,6 +960,29 @@ export default function Admin({ onClose }) {
                           <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
                         </div>
                       )}
+                    </div>
+
+                    {versTarget === note.id && (
+                      <div className="admin-vers-blok">
+                        <div className="admin-field">
+                          <label>Skrifverwysing</label>
+                          <input value={versRef} onChange={e => setVersRef(e.target.value)}
+                                 placeholder="bv. Lukas 22:42" autoFocus />
+                        </div>
+                        <div className="admin-field">
+                          <label>Skrifteks</label>
+                          <textarea value={versTeks} onChange={e => setVersTeks(e.target.value)}
+                                    rows={3} placeholder="Die vers self (opsioneel)" />
+                        </div>
+                        {versFout && <div className="admin-error">{versFout}</div>}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button className="admin-save-btn" onClick={stoorVers} disabled={versBesig}>
+                            {versBesig ? 'Stoor...' : 'Stoor vers'}
+                          </button>
+                          <button className="admin-delete-no" onClick={() => setVersTarget(null)}>Kanselleer</button>
+                        </div>
+                      </div>
+                    )}
                     </div>
                   ))}
               </div>

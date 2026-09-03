@@ -30,8 +30,6 @@
       moet die laaste wees.
    ──────────────────────────────────────────────────────────── */
 
-import { kanOopmaak } from './skrifVerwysing.js'
-
 /* Waar die hele toestand op die foon lê. Een sleutel, een voorwerp —
    makliker om te lees, en 'n mens kan dit in een keer skoonmaak. */
 export const SLEUTEL = 'tmg_staat'
@@ -137,11 +135,27 @@ export function rolDag(staat, dag, maand = String(dag || '').slice(0, 7)) {
  */
 export const STAPPE = ['luister', 'woord', 'wallpaper', 'dra', 'hart', 'klaar']
 
+/* ── Wanneer "Lees die Woord" bestaan ──
+ *
+ * Dit was `kanOopmaak(n.scripture)` — die skerm het net bestaan as die
+ * verwysing ONTLEED kon word. Dit was verkeerd, en dit is stil verkeerd:
+ * tik Dewald "Psalm 23" met 'n ekstra spasie, 'n Bybelboek wat ons nie ken
+ * nie, of vul hy net die TEKS in sonder 'n verwysing, dan verdwyn die vers
+ * heeltemal en die vloei is een skerm korter sonder dat iets sê hoekom.
+ *
+ * Die vers is die inhoud; die Bybel-knoppie is die ekstra. Is daar 'n vers,
+ * bestaan die skerm — kan ons dit ook oopmaak, kry hy 'n knoppie by.
+ */
+export function hetWoord(nota) {
+  const n = nota || {}
+  return !!(String(n.scripture || '').trim() || String(n.scriptureText || '').trim())
+}
+
 export function bouStappe(nota) {
   const n = nota || {}
   const uit = ['luister']
-  if (kanOopmaak(n.scripture)) uit.push('woord')
-  if (n.wallpaperUrl)          uit.push('wallpaper')
+  if (hetWoord(n))    uit.push('woord')
+  if (n.wallpaperUrl) uit.push('wallpaper')
   uit.push('dra', 'hart', 'klaar')
   return uit
 }

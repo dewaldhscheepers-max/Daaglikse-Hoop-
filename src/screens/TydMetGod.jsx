@@ -264,8 +264,13 @@ export default function TydMetGod({
     return () => { if (terugRef) terugRef.current = null }
   }, [terugRef, kanTerug])   // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* Kan ons die verwysing ontleed, gebruik ons die NETJIESE vorm ("Matteus
+     6:25-34"). Kan ons nie, wys ons wat Dewald getik het, presies soos hy dit
+     getik het — 'n vers wat verdwyn omdat ons hom nie kon ontleed nie, is die
+     fout wat hierdie skerm 'n dag lank onsigbaar gehou het. */
   const skrif   = ontleedSkrif(nota && nota.scripture)
-  const opskrif = skrif ? skrifOpskrif(nota.scripture) : ''
+  const opskrif = skrif ? skrifOpskrif(nota.scripture)
+                        : String((nota && nota.scripture) || '').trim()
 
   /* ── Die son wat deurbreek ──
    *
@@ -455,9 +460,9 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
           Het die nota geen teksvers nie, dra die verwysing die skerm alleen
           en word sy dus groot — nooit 'n etiket bo niks nie. */}
       <div className={`tmg-skrif${teks ? '' : ' tmg-skrif-alleen'}`}>
-        <div className="tmg-skrif-ref">{opskrif}</div>
+        {opskrif && <div className="tmg-skrif-ref">{opskrif}</div>}
         {teks && <>
-          <div className="tmg-skrif-streep" />
+          {opskrif && <div className="tmg-skrif-streep" />}
           <p className="tmg-skrif-vers">{teks}</p>
           <div className="tmg-skrif-slot">
             <span /><TekenDagbreek klas="tmg-teken" /><span />
@@ -465,15 +470,22 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
         </>}
       </div>
 
-      <button className="tmg-knop tmg-knop-met-teken" onClick={maakOop}>
-        <TekenBoek />
-        <span>Maak in die Bybel oop</span>
-      </button>
+      {/* Die knoppie hang aan `skrif`, nie aan die skerm nie. Kan ons die
+          verwysing nie ontleed nie ("Psalm 23 en 24", 'n boek wat ons nie
+          ken nie), staan die vers steeds hier — net sonder 'n knoppie wat
+          niks sou doen nie. */}
+      {skrif && (
+        <button className="tmg-knop tmg-knop-met-teken" onClick={maakOop}>
+          <TekenBoek />
+          <span>Maak in die Bybel oop</span>
+        </button>
+      )}
 
       {/* Ná die Bybel kom 'n mens hierheen terug. Die knoppie moet dan die
           natuurlike volgende ding wees, nie 'n tweede uitnodiging nie. */}
-      <button className="tmg-knop tmg-knop-stil" onClick={verder}>
-        {staat.gelees ? 'Gaan verder' : 'Later — gaan verder'}
+      <button className={`tmg-knop${skrif ? ' tmg-knop-stil' : ''}`}
+              onClick={() => { if (!skrif) stel(merkGelees); verder() }}>
+        {!skrif || staat.gelees ? 'Gaan verder' : 'Later — gaan verder'}
       </button>
     </section>
   )

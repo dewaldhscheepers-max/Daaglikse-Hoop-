@@ -77,7 +77,7 @@ import { magKas } from './data/kasBesluit.js'
  *     bestaan NOU OOK by die maandelikse vorm, en 'n mens kan die
  *     rekeningnommer met een tik kopieer.
  * 25: nuwe leesplan: GRENSE (5 dae). */
-const SPOEL = 25
+const SPOEL = 26
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])

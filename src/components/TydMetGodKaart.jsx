@@ -24,6 +24,7 @@
  */
 import { useEffect, useState } from 'react'
 import { dagSleutel, kaartToestand } from '../data/tydMetGod'
+import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
 import { leesStaat } from '../data/tydMetGodBerging'
 import TydMetGodSon from './TydMetGodSon'
 import './TydMetGodKaart.css'
@@ -63,6 +64,11 @@ export default function TydMetGodKaart({ nota, opBegin }) {
 
   const voort = toestand === 'voort'
 
+  const skrif   = ontleedSkrif(nota && nota.scripture)
+  const opskrif = skrif ? skrifOpskrif(nota.scripture)
+                        : String((nota && nota.scripture) || '').trim()
+  const vers    = String((nota && nota.scriptureText) || '').trim()
+
   return (
     <button className="tmg-kaart" onClick={opBegin}>
       {/* Die geskilderde sonsopkoms, regs, wat in die houtskool inloop. Dit
@@ -81,6 +87,17 @@ export default function TydMetGodKaart({ nota, opBegin }) {
             ? 'Jy is halfpad. Gaan voort waar jy opgehou het.'
             : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
         </span>
+
+        {/* Vandag se vers, op die kaart self. Dit was net binne die vloei, en
+            'n mens moes eers 'n knoppie druk om te sien waaroor vandag gaan.
+            Die verwysing is die netjiese vorm as ons dit kon ontleed; kon ons
+            nie, staan presies wat Dewald getik het — nooit niks. */}
+        {(vers || opskrif) && (
+          <span className="tmg-kaart-vers">
+            {opskrif && <span className="tmg-kaart-vers-ref">{opskrif}</span>}
+            {vers && <span className="tmg-kaart-vers-teks">{vers}</span>}
+          </span>
+        )}
         <span className="tmg-kaart-knop">
           {voort ? 'Gaan voort' : 'Begin jou tyd met God'}
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"

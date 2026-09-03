@@ -101,10 +101,21 @@ is('geen wallpaper → geen "Vat dit saam"',
 is('nie een van die twee nie',
    bouStappe({ id: 'n1' }),
    ['luister', 'dra', 'hart', 'klaar'])
-/* Die veld is ingevul, maar met iets wat die Bybel nie kan oopmaak nie. 'n
-   Knoppie wat niks doen nie is erger as geen knoppie — dus geen skerm. */
-is('onleesbare verwysing → geen skerm',
+/* Die veld is ingevul, maar met iets wat die Bybel nie kan oopmaak nie.
+   Vroeër het die skerm dan glad nie bestaan nie — en dit was verkeerd op die
+   stilste moontlike manier: die vers wat Dewald getik het, was net weg. Die
+   VERS is die inhoud; die Bybel-knoppie is die ekstra. Die skerm bestaan, en
+   TydMetGod.jsx los die knoppie uit wanneer ons nie kan oopmaak nie. */
+is('onleesbare verwysing → die skerm bestaan STEEDS',
    bouStappe({ ...VOL, scripture: 'Boek van Elvis 3' }),
+   ['luister', 'woord', 'wallpaper', 'dra', 'hart', 'klaar'])
+/* Net die teks, sonder 'n verwysing. Dit is 'n vers om te lees. */
+is('net \'n teksvers → die skerm bestaan',
+   bouStappe({ ...VOL, scripture: '', scriptureText: 'Nogtans nie my wil nie.' }),
+   ['luister', 'woord', 'wallpaper', 'dra', 'hart', 'klaar'])
+/* En spasies is niks. */
+is('net spasies is geen vers',
+   bouStappe({ ...VOL, scripture: '   ', scriptureText: '  ' }),
    ['luister', 'wallpaper', 'dra', 'hart', 'klaar'])
 is('\'n reeks tel wel',
    bouStappe({ ...VOL, scripture: 'Matteus 6:25–34' }),
