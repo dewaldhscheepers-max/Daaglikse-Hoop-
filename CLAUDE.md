@@ -47,7 +47,8 @@ node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toet
 node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
 node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 58 toetse
 node src/data/volgJesusWeek2.toets.mjs        # Week 2 se pad, teen dieselfde perke, 69 toetse
-node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde perke, 81 toetse
+node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde perke, 84 toetse
+node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra Dag 4 alleen, 109
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -429,6 +430,49 @@ nooit `undefined`, nooit 'n leë aanhaling.
 
 `kykWeek1.mjs` in die scratchpad loop die hele week deur en tel die KLIKKE:
 elke dag moet met een druk klaar wees.
+
+### Om 'n WEEK by te voeg
+
+Dewald skryf die week en stuur dit; die inhoud staan in KODE, nie in die admin
+nie. 'n Dag is 'n RY BLOKKE (`lees`, `stem`, `teks`, `groot`, `vraag`, `kies`,
+`gebed`, `terugblik`, `wallpaper`, `groepbrug`) en 'n admin wat dit kan bou, is
+'n bladsybouer — 'n projek op sy eie. Wat hy WEL self doen, is die drie dinge
+wat hy moet kan oplaai: die stemboodskap, die twee wallpapers, en die vyf
+kontroles.
+
+Vyf plekke verander, en nie een mag agterbly nie:
+
+1. `src/data/volgJesusWeek<N>.js` — die dae, die opening, die reis, die
+   deelsin, die transkripsie, die groepsessie.
+2. `src/data/volgJesusDae.js` — die REGISTER. Sonder hierdie inskrywing val die
+   week terug op die ou huiswerk-skerm; sien die kop van daardie lêer.
+3. `src/data/volgJesusWeke.js` — die plat rekord vir die publiseer-hek en die
+   admin se "↓ Laai die geskrewe teks".
+4. `WEEK<N-1>_VOLGENDE` — die BRUG. Dit is `null` solank die volgende week nie
+   bestaan nie, en dan eindig die vorige week op 'n doodloopstraat. Week 3 het
+   'n dag lank so gestaan.
+5. Die twee toetse wat op "die volgende week bestaan nog nie" staan:
+   `volgJesusWeek<N-1>.toets.mjs` en `vjChatOnderwerp.toets.mjs`.
+
+**Die stemboodskap se dag dra GEEN teksblok nie.** Die perk is vyf blokke, en
+lees + stem + teks + groot + vraag + gebed is ses. Die geskrewe weergawe is in
+albei gevalle waar dit tot dusver gebeur het (Week 3 se Dag 3, Week 4 se Dag 4)
+'n verkorting van presies wat die opname voluit dra — dit word dus gehoor in
+plaas van gelees. Die GROOT lyn bly staan; dit is die week se eie sin.
+
+**Die klaar-skerm praat oor die week wat pas klaar is.** Dit was vir ELKE week
+Week 1 s'n — "JY HET BEGIN KYK", hardgekodeer in `VolgJesusStap.jsx` — sodat
+iemand wat Week 4 klaargemaak het, Week 1 se slot gelees het. 'n Week kan nou
+`WEEK<N>_KLAAR` saambring; bring hy niks, staan Week 1 s'n steeds daar en die
+eerste drie weke lyk presies soos altyd.
+
+**Elke vers word teen die GAB gekeur** in `volgJesus.toets.mjs` se
+VERWYSINGS-lys. `ontleedVerwysing` sê net of die VORM reg is; daardie lus vra
+of die hoofstuk en die verse werklik bestaan. Sit 'n nuwe week se verse daar
+by. Dit vervang nie Dewald se eie nagaan nie.
+
+Blaaiertoets: `kykWeek4.mjs` in die scratchpad loop die hele week deur teen 'n
+onderskepte `/api/volg-jesus-openbaar`, en tel die KLIKKE — tien vir vyf dae.
 
 ### Groepe en die groepchat
 

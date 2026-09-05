@@ -142,16 +142,22 @@ for (const s of WEEK3_SESSIE.skrifte) {
 console.log('\n── Die register ken Week 3 ──\n')
 is('hetDae(3)', hetDae(3), true)
 is('hetDae(1) en hetDae(2) ook', [hetDae(1), hetDae(2)], [true, true])
-is('maar nie week 4 nie', hetDae(4), false)
+is('en week 4 intussen ook', hetDae(4), true)
+is('maar nie week 5 nie', hetDae(5), false)
 is('weekDae(3) gee vyf dae', weekDae(3).length, 5)
 is('blokkeVir(3, 1) gee Dag 1 se blokke', blokkeVir(3, 1).length, blokkeVirDag3(1).length)
 is('n onbekende week gee niks', blokkeVir(9, 1), [])
 is('en die deelsin is die week s\'n', weekDeelsin(3), WEEK3_DEELSIN)
 waar('Week 2 en Week 3 se deelsinne verskil', weekDeelsin(2) !== weekDeelsin(3))
 
-console.log('\n── Nog geen Week 4 nie — die skerm moet dit kan verduur ──\n')
-is('WEEK3_VOLGENDE is null', WEEK3_VOLGENDE, null)
-is('weekVolgende(3) gee ook null', weekVolgende(3), null)
+console.log('\n── Die brug na Week 4 ──\n')
+/* Dit was `null` solank Week 4 nie bestaan het nie — 'n geraaide titel is
+   erger as stilte. Week 4 bestaan nou, en Week 3 mag nie op 'n doodloopstraat
+   eindig nie. */
+waar('WEEK3_VOLGENDE wys na n week', !!WEEK3_VOLGENDE)
+is('en dit is week 4', WEEK3_VOLGENDE.nommer, 4)
+is('weekVolgende(3) gee dieselfde', weekVolgende(3), WEEK3_VOLGENDE)
+waar('met woorde wat n rede gee om terug te kom', WEEK3_VOLGENDE.lyf.length > 40)
 
 console.log('\n── Die week se rekord kan PUBLISEER ──\n')
 {

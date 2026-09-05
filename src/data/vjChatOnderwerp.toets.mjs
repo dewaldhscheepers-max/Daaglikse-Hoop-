@@ -31,16 +31,16 @@ console.log('\n── Die vrae kom uit die week se groepsessie ──\n')
 
 console.log('\n── Geen kaart wanneer daar niks is nie ──\n')
 {
-  /* Week 3 het intussen bygekom (sien volgJesusWeek3.js) — hierdie toets
+  /* Week 4 het intussen bygekom (sien volgJesusWeek4.js) — hierdie toets
      gebruik nou 'n week wat werklik nog nie bestaan nie. */
-  is('week 4 bestaan nog nie', onderwerp(4, 0), null)
+  is('week 5 bestaan nog nie', onderwerp(5, 0), null)
   is('week 52 ook nie', onderwerp(52, 0), null)
   is('geen weeknommer', onderwerp(undefined, 0), null)
   is('null', onderwerp(null, 0), null)
   is('rommel', onderwerp('appelkoos', 0), null)
   is('nul', onderwerp(0, 0), null)
   is('negatief', onderwerp(-1, 0), null)
-  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(4), [])
+  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(5), [])
   is('weekVrae van rommel', weekVrae({}), [])
 }
 

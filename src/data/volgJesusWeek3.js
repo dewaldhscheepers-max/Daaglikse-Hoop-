@@ -44,9 +44,8 @@
  * WEEK3_TRANSKRIPSIE is nou Dewald se eie leë-boot-teks, woord vir woord —
  * ek het niks daaraan verander nie, ook nie die slotgebed nie.
  *
- * WEEK3_VOLGENDE bestaan nie. Ek weet nog nie wat Week 4 is nie, en 'n
- * geraaide titel is erger as niks — `weekVolgende()` gee dan eenvoudig niks
- * terug, en die skerm wys net Week 3 se eie klaar-skerm.
+ * WEEK3_VOLGENDE was leeg totdat Week 4 bestaan het. Dit wys nou na Week 4,
+ * met Dewald se eie woorde — sien onder aan hierdie leer.
  */
 
 /* ── Die openingsblad ── */
@@ -327,10 +326,15 @@ export const WEEK3_DEELSIN =
   'Jesus roep jou nie net op die dag waarop jy begin nie. Hy roep jou elke dag '
   + 'weer: “Volg My.”'
 
-/* Nog geen Week 4 nie. `weekVolgende(3)` val terug op `null` en die skerm wys
-   dan eenvoudig niks — sien VolgJesusStap.jsx se `{volgende && (...)}`. 'n
-   Geraaide titel vir 'n week wat nog nie bestaan nie, is erger as stilte. */
-export const WEEK3_VOLGENDE = null
+/* Die brug na Week 4. Dit was `null` solank Week 4 nie bestaan het nie — 'n
+   geraaide titel is erger as stilte. Dewald het Week 4 gestuur en hierdie
+   woorde saam met dit gegee. */
+export const WEEK3_VOLGENDE = {
+  nommer: 4,
+  titel: 'Laat Jesus dit omkeer',
+  lyf: 'Om Jesus te volg, beteken nie net dat Hy jou troos en seën nie. Wat '
+     + 'gebeur wanneer Hy begin wys wat in jou lewe moet verander?',
+}
 
 export function blokkeVirDag3(n) {
   const dag = WEEK3_DAE.find(d => d.n === n)

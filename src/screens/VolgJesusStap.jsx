@@ -29,7 +29,7 @@ import { boekNaam } from '../data/bybelBoeke'
    aan week 1 vasgemaak; nou bedien dit elke week wat 'n dag-pad het. Sien
    volgJesusDae.js. */
 import {
-  weekDae, weekReis, weekOpening, weekDeelsin, weekVolgende,
+  weekDae, weekReis, weekOpening, weekDeelsin, weekVolgende, weekKlaar,
   weekTranskripsie, blokkeVir,
 } from '../data/volgJesusDae'
 import Stemboodskap from '../components/Stemboodskap'
@@ -276,12 +276,17 @@ export default function VolgJesusStap({
 
     return (
       <div className="vs" ref={bladRef}>
+        {/* Die woorde hier was vir ELKE week Week 1 s'n — "JY HET BEGIN
+            KYK", oor Jesus wat 'n mens weer moet raaksien. Iemand wat Week 4
+            klaargemaak het, het dus Week 1 se slot gelees. 'n Week bring nou
+            sy eie woorde saam; bring hy niks, staan Week 1 s'n steeds hier en
+            die eerste drie weke lyk presies soos altyd. */}
         <div className="vs-klaar">
           <div className="vs-klaar-merk">✓</div>
-          <h2>JY HET BEGIN KYK.</h2>
+          <h2>{(weekKlaar(w) || {}).kop || 'JY HET BEGIN KYK.'}</h2>
           <p className="vs-klaar-lyf">
-            Nie alles hoef vandag opgelos te wees nie. Maar jy het begin doen wat
-            ’n dissipel nooit moet ophou doen nie: weer na Jesus kyk.
+            {(weekKlaar(w) || {}).lyf
+              || 'Nie alles hoef vandag opgelos te wees nie. Maar jy het begin doen wat ’n dissipel nooit moet ophou doen nie: weer na Jesus kyk.'}
           </p>
         </div>
 

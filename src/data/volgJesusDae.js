@@ -34,6 +34,10 @@ import {
   WEEK3_DAE, WEEK3_REIS, WEEK3_OPENING, WEEK3_DEELSIN, WEEK3_VOLGENDE,
   WEEK3_TRANSKRIPSIE, WEEK3_SESSIE,
 } from './volgJesusWeek3.js'
+import {
+  WEEK4_DAE, WEEK4_REIS, WEEK4_OPENING, WEEK4_DEELSIN, WEEK4_VOLGENDE,
+  WEEK4_TRANSKRIPSIE, WEEK4_SESSIE, WEEK4_KLAAR,
+} from './volgJesusWeek4.js'
 
 const WEKE = {
   1: {
@@ -63,6 +67,16 @@ const WEKE = {
     transkripsie: WEEK3_TRANSKRIPSIE,
     sessie: WEEK3_SESSIE,
   },
+  4: {
+    dae: WEEK4_DAE,
+    reis: WEEK4_REIS,
+    opening: WEEK4_OPENING,
+    deelsin: WEEK4_DEELSIN,
+    volgende: WEEK4_VOLGENDE,
+    transkripsie: WEEK4_TRANSKRIPSIE,
+    sessie: WEEK4_SESSIE,
+    klaar: WEEK4_KLAAR,
+  },
 }
 
 /* Het hierdie week 'n dag-pad? VolgJesusLewe vra dit voordat dit kies watter
@@ -75,6 +89,7 @@ export function hetDae(w) {
    die skerm wys dan niks eerder as om om te val. */
 const LEEG = {
   dae: [], reis: [], opening: '', deelsin: '', volgende: null, transkripsie: '',
+  klaar: null,
   /* 'n Sessie sonder inhoud, nie `null` nie: die skerm hoef nie te toets of dit
      bestaan voor dit kan teken nie. */
   sessie: { titel: '', skrifte: [], vrae: [], gebed: '' },
@@ -89,6 +104,13 @@ export function weekTranskripsie(w){ return (WEKE[Number(w)] || LEEG).transkrips
 /* Die groepsessie volg die OOP week. Dit het op die skerm hardgekodeer gestaan
    en het Week 1 se Skrif en vrae gewys nadat Week 2 lewendig geword het. */
 export function weekSessie(w)      { return (WEKE[Number(w)] || LEEG).sessie }
+
+/* Die klaar-skerm se eie woorde. Dit was vir ELKE week Week 1 s'n — "JY HET
+   BEGIN KYK", hardgekodeer in VolgJesusStap.jsx — sodat iemand wat Week 4
+   klaarmaak, Week 1 se sin gelees het. 'n Week wat niks gee nie, kry `null` en
+   die skerm val terug op daardie ou woorde; weke 1 tot 3 lyk dus presies soos
+   hulle altyd gelyk het. */
+export function weekKlaar(w)       { return (WEKE[Number(w)] || LEEG).klaar || null }
 
 /* Die blokke vir een dag van een week. */
 export function blokkeVir(w, n) {

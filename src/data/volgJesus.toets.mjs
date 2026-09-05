@@ -195,6 +195,13 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                    'Jakobus 2:19', 'Johannes 1:1–5', 'Johannes 1:14–18',
                    'Johannes 8:58', 'Johannes 10:30–38',
                    'Johannes 14:6–11', 'Johannes 17:1–5', 'Johannes 20:28–31',
+      /* Week 4 — elke dag se LEES-blok, plus die admin se twee velde en die
+         groepsessie se kern-Skrifte. `ontleedVerwysing` sê net of die VORM reg
+         is; hierdie lus vra of die hoofstuk en die verse WERKLIK bestaan. */
+      /* Week 4 */ 'Lukas 6:43–46', 'Matteus 6:19–24', 'Lukas 18:15–17',
+                   'Markus 11:11–21', 'Hebreërs 10:19–25',
+                   'Markus 11:15–17', 'Hebreërs 10:19–22',
+                   'Matteus 21:12–17', 'Johannes 2:13–22',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

@@ -200,4 +200,58 @@ export const WEKE = {
     fasiliteerderGrens: '',
     pastoraleRisiko: 'laag',
   },
+
+  /* ── Week 4 ──
+   *
+   * Dewald het die hele week geskryf en gestuur — die dae staan in
+   * src/data/volgJesusWeek4.js. Hierdie rekord is net die plat velde vir die
+   * publiseer-hek, sodat hy hulle met "↓ Laai die geskrewe teks" in een
+   * knoppie in die vorm kan laai in plaas van dit oor te tik. */
+  4: {
+    weeknommer: 4,
+    titel: 'Laat Jesus dit omkeer',
+    doel:
+      'Om die gebruiker te help ontdek dat om Jesus te volg nie net beteken dat ons Hom vra om ons te troos en te seën nie. Dit beteken ook dat ons Hom toelaat om te wys wat verkeerd staan, dit te konfronteer en ons lewe terug te bring na wat God bedoel het.',
+    weekKern:
+      'Om Jesus te volg, beteken dat jy Hom nie net vra om te seën wat reg is nie, maar Hom ook toelaat om om te keer wat verkeerd staan.',
+    openingskerm:
+      'Ons vra maklik vir Jesus om ons lewe te seën.\n\n'
+      + 'Maar wat as iets eers moet verander?\n\n'
+      + 'Hierdie week kyk ons na die Jesus wat vrug soek, verkeerde dinge konfronteer en plek maak vir wat God bedoel het.\n\n'
+      + 'Om Hom te volg, beteken ook: “Here, U mag omkeer wat verkeerd staan.”',
+    primereSkrif: 'Markus 11:11–21',
+    ondersteunendeSkrif: 'Hebreërs 10:19–25',
+    videoId: '',
+    stemboodskapUrl: '',
+    kernwaarheid:
+      'Om Jesus te volg, beteken dat jy Hom nie net vra om te seën wat reg is nie, maar Hom ook toelaat om om te keer wat verkeerd staan.',
+    eenSin:
+      'Moenie net vir Jesus vra om alles in jou lewe gemaklik te maak nie. Gee Hom ook toestemming om dit wat verkeerd staan, om te keer.',
+    privaatRefleksie:
+      'Wat in my lewe hoop ek Jesus sal seën, terwyl ek diep binne weet dit moet eintlik verander?',
+    gehoorsaamheidStap:
+      'Kies hierdie week een ding wat verkeerd staan en neem een konkrete stap om dit terug te bring onder Jesus se heerskappy. Nie tien dinge nie. Een.',
+    gebed:
+      'Here Jesus, ek wil U nie net volg wanneer U my troos en seën nie. Gee my die nederigheid om U ook toe te laat om te wys wat verkeerd staan. Keer om wat tussen my en U staan, en laat my lewe die vrug dra wat U soek. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: ons kyk na wat stadig ’n plek ingeneem het wat net God behoort te hê.',
+    dag1Titel: 'Nie net blare nie',
+    dag2Titel: 'Wat het te groot geword?',
+    dag3Titel: 'Wat staan in die pad?',
+    dag4Titel: 'Jesus het die tafels omgekeer',
+    dag5Titel: 'Wat bly nou anders?',
+    groepVraag1:
+      'Jesus het reeds die vorige dag na die tempel gekyk voordat Hy teruggekom en opgetree het. Wat leer dit vir jou oor die verskil tussen impulsiewe woede en doelbewuste konfrontasie?',
+    groepVraag2:
+      'Hoe kan iemand baie godsdienstige “blare” hê, maar min werklike vrug? En hoe kan ons dit in onsself raaksien sonder om ander mense te veroordeel?',
+    groepVraag3:
+      'Nadat Jesus in die tempel opgetree het, kom gebroke mense na Hom toe. Wat leer dit ons oor waarom Jesus soms dinge uit die pad verwyder?',
+    groepVraag4:
+      'Wat verander wanneer ’n dissipel ophou bid “Here, seën wat ek doen” en begin bid “Here, wys my wat moet verander”?',
+    fasiliteerderHoofpunt: '',
+    fasiliteerderGrens: '',
+    pastoraleRisiko: 'medium',
+  },
 }
