@@ -1682,7 +1682,6 @@ export default function App() {
           onSluit={tmgSluit}
           onKlaarGemaak={tmgKlaarGemaak}
           terugRef={tmgTerugRef}
-          onDraMekaar={() => { tmgSluit(); setTab('sorg') }}
         />
       )}
 

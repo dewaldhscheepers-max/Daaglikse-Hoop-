@@ -684,22 +684,6 @@
   border-color: var(--rand-op);
 }
 
-/* Dra Mekaar is 'n uitgang, nie 'n stasie nie. */
-.tmg-uit {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  padding: 12px 4px;
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--sag);
-  text-align: center;
-  cursor: pointer;
-}
-.tmg-uit b { color: var(--goud); font-weight: 600; }
-.tmg-uit:active { color: var(--op); }
-
 @media (prefers-reduced-motion: reduce) {
   .tmg-knop, .tmg-hart, .tmg-steun-knop { transition: none; }
   .tmg-skerm, .tmg-dankie { animation: none; }

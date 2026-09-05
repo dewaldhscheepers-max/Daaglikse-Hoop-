@@ -57,7 +57,8 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die kaart, 31 toetse
-node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 68 toetse
+node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
+node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
@@ -508,8 +509,12 @@ app nie. Word dit ooit sy eie data, is die hele punt weg.
 **Bid Saam en Dra Mekaar is nie dieselfde muur nie.** Die vloei gebruik Bid
 Saam (`prayers`, direk vanaf die kliënt). Dra Mekaar is `sorg_*`, deur
 bediener-eindpunte, met krisiskeuring — 'n storie oor selfmoordgedagtes moet
-deur 'n mens gaan en kan nooit 'n een-tik-stap wees nie. Dra Mekaar is 'n
-REEL op die klaar-skerm, nie 'n sesde skerm nie.
+deur 'n mens gaan en kan nooit 'n een-tik-stap wees nie.
+
+Daar was 'n Dra Mekaar-REEL onderaan die klaar-skerm ("Is wat jy dra swaarder
+as een dag?"). Dewald het dit op 5 September 2026 laat verwyder. Dit was 'n
+uitgang uit 'n stil oomblik, en die knoppie staan reeds in die onderste nav —
+die skerm het niks verloor nie. Moet dit nie terugsit nie.
 
 **'n Skerm sonder inhoud BESTAAN nie.** Geen Skrifverwysing op vandag se nota
 -> geen "Lees die Woord". Geen wallpaper -> geen "Vat dit saam". Dan is die
@@ -696,6 +701,19 @@ een — 'n fout wat baie stil is.
   dit reeds het nie.
 * **`prayedFor` is dieselfde sleutel as die muur s'n.** Wie op die muur reeds
   vir 'n versoek gebid het, word hier nie weer getel nie.
+* **'n Gebed op die MUUR tel in dieselfde getal.** "Hierdie maand het jy vir 5
+  mense gebid" het net getel wat BINNE die vloei gebeur het. Wie op Bid Saam
+  vir tien mense gebid het en die vloei se een stap oorgeslaan het, het 'n nul
+  gesien — en dan lieg die reel oor die enigste ding wat hy die maand gedoen
+  het. `togglePrayed` in `BidSaam.jsx` roep nou `merkGebidNou()`. Dit kan nie
+  DUBBEL tel nie, en dit is nie toeval nie: albei paaie skryf `prayedFor` en
+  albei weier 'n versoek wat reeds daarin staan, dus tel elke versoek presies
+  een keer — op watter skerm dit ook al gebeur het.
+* **`leesStaat` se `catch` gaan DEUR `rolDag`.** `leegStaat()` het 'n lee `dag`
+  en `maand`; word dit teruggeskryf, wis die volgende lees dit weer uit, want
+  die dag verskil. 'n Gebed op die muur — op 'n foon met stukkende berging, of
+  by die heel eerste skryf — was dus weg voor die klaar-skerm dit kon wys.
+  `tydMetGodBerging.toets.mjs` hou dit vas.
 * **Die hart is EEN hart.** Skerm 1 se ❤️ en die hero se ❤️ skryf dieselfde
   `likedNotes` en dieselfde `likes/<id>`, deur `src/data/notaLike.js`. Dit
   waai 'n `nota-gelike`-sein sodat die hero — wat agter die oorleg sit —

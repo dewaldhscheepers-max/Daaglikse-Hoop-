@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore'
 import { magDeel, gebedSkakel, deelBoodskap } from '../data/gebedDeel'
 import { toestelId } from '../data/sorgStuur'
+import { merkGebidNou } from '../data/tydMetGodBerging'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
 import SaturdayVideoCard from '../components/SaturdayVideoCard'
@@ -468,6 +469,10 @@ export default function BidSaam() {
     setPrayed(next)
     localStorage.setItem('prayedFor', JSON.stringify([...next]))
     setPrayers(ps => ps.map(p => p.id === id ? { ...p, prayedCount: (p.prayedCount || 0) + 1 } : p))
+    /* Dieselfde gebed, dieselfde getal: die klaar-skerm van Vandag se Tyd met
+       God tel hierdie een saam. Sien merkGebidNou — dit kan nie dubbel tel nie,
+       want albei paaie weier 'n versoek wat reeds in `prayedFor` staan. */
+    merkGebidNou()
     setPrayedToast(true)
     setTimeout(() => setPrayedToast(false), 3500)
     try {

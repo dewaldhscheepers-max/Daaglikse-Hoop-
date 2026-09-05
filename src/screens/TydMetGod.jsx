@@ -200,7 +200,7 @@ function TekenSlot({ klas = 'tmg-teken tmg-teken-groot' }) {
 }
 
 export default function TydMetGod({
-  nota, onSluit, onKlaarGemaak, onDraMekaar,
+  nota, onSluit, onKlaarGemaak,
   terugRef = null, reedsGegee = false,
 }) {
   const dag = dagSleutel()
@@ -347,8 +347,7 @@ export default function TydMetGod({
         {stap === 'klaar' && (
           <Klaar nota={nota} staat={staat} stel={stel} dag={dag} opskrif={opskrif}
                  reedsGegee={reedsGegee}
-                 onSluit={onSluit} onKlaarGemaak={onKlaarGemaak}
-                 onDraMekaar={onDraMekaar} />
+                 onSluit={onSluit} onKlaarGemaak={onKlaarGemaak} />
         )}
         </div>
       </div>
@@ -865,7 +864,7 @@ function Hart({ staat, stel, verder }) {
 
 /* ── 6 · Klaar ──────────────────────────────────────────────────────────── */
 
-function Klaar({ nota, staat, stel, dag, opskrif, reedsGegee, onSluit, onKlaarGemaak, onDraMekaar }) {
+function Klaar({ nota, staat, stel, dag, opskrif, reedsGegee, onSluit, onKlaarGemaak }) {
   const gemerk = useRef(false)
 
   useEffect(() => {
@@ -970,13 +969,6 @@ function Klaar({ nota, staat, stel, dag, opskrif, reedsGegee, onSluit, onKlaarGe
           </>
         )}
       </div>
-
-      {/* Dra Mekaar is 'n uitgang, nie 'n stasie nie. Iemand met niks swaars
-          nie moet nie 'n skerm wegklik nie. */}
-      <button className="tmg-uit" onClick={() => onDraMekaar && onDraMekaar()}>
-        Is wat jy dra swaarder as een dag?<br />
-        Daar is plek vir jou op <b>Dra Mekaar →</b>
-      </button>
 
       {/* ── Die skenk-knoppies ──
        *
