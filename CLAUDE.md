@@ -933,6 +933,22 @@ Sy antwoord bly presies soos dit was — die stemgreep, die teks, die
 "waarop antwoord jy"-titel. Net die BETEKENIS het verander: dit is 'n
 toevoeging, nie die voltooiing nie.
 
+**Die opmerking-kassie is TWEE keer te laag geraam**, albei kere omdat ek 'n
+kort bemoediging veronderstel het waar Dewald 'n pastorale antwoord skryf.
+200 was 'n sin; toe 2 000, en op 7 September 2026 het 'n antwoord met twee
+Skrifgedeeltes daarin oorgeloop — die teller het op "2000 / 2000" gaan staan
+met sy woorde halfpad. Dit is nou **5 000** (`MAKS_WOORD` in
+`src/data/sorgSaamstaan.js`), sowat 800 woorde.
+
+Daardie een getal dra ALBEI kante: die vorm keer daarby, en die bediener kap
+daarby af — `api/sorg-saamstaan.mjs` het geen eie perk nie en loop deur
+`woordStatus` → `skoonWoord`. Sit nooit 'n tweede getal langs hierdie een nie;
+dan is daar 'n vorm wat 5 000 toelaat en 'n bediener wat by 2 000 afkap, en
+niemand sien dit nie.
+
+Die VRA-vorm (`SorgVorm.jsx`, `MAKS_LENGTE = 4000`) is 'n ander kassie en 'n
+ander getal. Dit is nie aangeraak nie.
+
 Wat NIE mag terugkom nie: 'n geldknoppie tussen die stories. "Stuur vir Dewald
 'n dankie" het onder elke antwoord gestaan; noudat die ry onder ELKE plasing
 sit, ook onder 'n rou storie, lees dit soos 'n tolhek voor iemand se seer. Die

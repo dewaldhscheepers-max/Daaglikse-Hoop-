@@ -109,10 +109,19 @@ afdeling('n Eie woord word skoongemaak')
       skoonWoord('een\n\n\n\ntwee') === 'een\n\ntwee', skoonWoord('een\n\n\n\ntwee'))
   kyk('spasies aan die einde van n reel val weg',
       skoonWoord('een   \ntwee') === 'een\ntwee', skoonWoord('een   \ntwee'))
-  kyk(`dit word afgekap op ${MAKS_WOORD}`, skoonWoord('a'.repeat(4000)).length === MAKS_WOORD)
+  /* Die invoer moet ALTYD langer wees as die perk, anders toets hierdie reel
+     niks sodra die perk styg. Dit het presies dit gedoen toe 2 000 na 5 000
+     geskuif het: 4 000 was skielik binne die perk. */
+  kyk(`dit word afgekap op ${MAKS_WOORD}`,
+      skoonWoord('a'.repeat(MAKS_WOORD + 1000)).length === MAKS_WOORD)
   /* Dewald se egte boodskap is sowat 1 200 karakters. Dit moet HEEL deurkom. */
   kyk('n boodskap van 1 200 karakters kom heel deur',
       skoonWoord('a'.repeat(1200)).length === 1200)
+  /* En die een wat op 7 September oorgeloop het: 'n antwoord met twee
+     Skrifgedeeltes daarin. Dit is die REDE vir 5 000. */
+  kyk('n pastorale antwoord van 3 000 karakters kom heel deur',
+      skoonWoord('a'.repeat(3000)).length === 3000)
+  kyk('die perk is minstens 5 000', MAKS_WOORD >= 5000)
   kyk('leeg bly leeg', skoonWoord('') === '')
   kyk('null breek nie', skoonWoord(null) === '')
 
@@ -188,9 +197,14 @@ afdeling('n Gewone woord WYS DADELIK')
   kyk('die skoongemaakte teks kom saam terug',
       woordStatus({ teks: '  Ek   bid  ', sensitief: false }).teks === 'Ek bid')
   kyk(`dit word afgekap op ${MAKS_WOORD}`,
-      woordStatus({ teks: 'a'.repeat(4000), sensitief: false }).teks.length === MAKS_WOORD)
+      woordStatus({ teks: 'a'.repeat(MAKS_WOORD + 1000), sensitief: false }).teks.length === MAKS_WOORD)
   kyk('en n lang pastorale antwoord kom heel deur',
       woordStatus({ teks: 'a'.repeat(1200), sensitief: false }).teks.length === 1200)
+  /* Die BEDIENER loop deur hierdie funksie en het geen eie perk nie — sien
+     api/sorg-saamstaan.mjs. Wat die vorm toelaat, moet dus ook hier deurkom,
+     anders skryf iemand 5 000 en die muur wys 2 000. */
+  kyk('en 3 000 karakters oorleef die bediener se pad',
+      woordStatus({ teks: 'a'.repeat(3000), sensitief: false }).teks.length === 3000)
 }
 
 

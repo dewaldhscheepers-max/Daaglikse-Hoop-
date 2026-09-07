@@ -700,7 +700,7 @@ export default function SorgOpmerkings({ plasing, soort = 'muur', oop, onSluit, 
                    *
                    * Dewald het 'n hele pastorale antwoord getik — Skrif, gebed,
                    * 'n seën — en die app het dit afgekap. Die perk was 200
-                   * karakters; dit is nou 2 000 (sien MAKS_WOORD).
+                   * karakters; dit is nou 5 000 (sien MAKS_WOORD).
                    *
                    * En 'n veld wat een reel wys, is in elk geval onbruikbaar vir
                    * so 'n boodskap: 'n mens sien nie wat hy geskryf het nie. Dit

@@ -150,14 +150,24 @@ export function klaarWoordTeks(sleutel) {
 
 /* ── Hoe lank 'n opmerking mag wees ──
  *
- * 200 was 'n SIN. Dewald het 'n hele pastorale antwoord getik — Skrif,
- * gebed, 'n seën — en die app het dit in die middel van 'n woord afgekap.
+ * Dit is TWEE keer te laag geraam, en albei kere op dieselfde manier: ek het
+ * 'n kort bemoediging veronderstel waar Dewald 'n pastorale antwoord skryf.
  *
- * Dit was nooit 'n tegniese perk nie; ek het 'n kort bemoediging veronderstel.
- * Mense wat mekaar dra, skryf gebede. 2 000 is ruim genoeg vir wat hy geskryf
- * het, en klein genoeg dat vyftig van hulle op een muur nog steeds niks weeg
- * nie. */
-export const MAKS_WOORD = 2000
+ * 200 was 'n SIN. Hy het Skrif, 'n gebed en 'n seën getik en die app het dit
+ * in die middel van 'n woord afgekap. Toe 2 000 — en op 7 September 2026 het
+ * hy 'n antwoord op 'n vraag oor sonde geskryf met twee Skrifgedeeltes daarin,
+ * en die teller het op "2000 / 2000" gaan staan met sy antwoord nog halfpad.
+ *
+ * 5 000 is sowat 800 woorde. Dit is ruim vir die langste ding wat op hierdie
+ * muur hoort, en klein genoeg dat vyftig van hulle op een blad nog steeds niks
+ * weeg nie.
+ *
+ * Hierdie een getal dra ALBEI kante: die vorm keer daarby, en die bediener
+ * kap daarby af — `woordStatus` in hierdie leer loop deur `skoonWoord`, en
+ * `api/sorg-saamstaan.mjs` het geen eie perk nie. Sit nooit 'n tweede getal
+ * langs hierdie een nie; dan is daar 'n vorm wat 5 000 toelaat en 'n bediener
+ * wat by 2 000 afkap, en niemand sien dit nie. */
+export const MAKS_WOORD = 5000
 
 /* ── Wat 'n eie woord mag wees ──
 
