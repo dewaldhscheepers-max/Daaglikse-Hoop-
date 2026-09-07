@@ -4,7 +4,7 @@
  * ongeluk, kry niemand 'n fout nie — die boodskap stop net voor die einde, en
  * dit doen dit weer môre. Die enigste manier om dit vas te hou, is hier.
  */
-import { magKas, isKlank, padUit } from './kasBesluit.js'
+import { magKas, isKlank, isAflaai, padUit } from './kasBesluit.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -44,7 +44,8 @@ console.log('\n── Prente is nie klank nie ──\n')
 for (const uit of ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'svg']) {
   is(`.${uit} is nie klank nie`, isKlank(`${B}/wallpapers%2Fa.${uit}${T}`), false)
 }
-is('n pdf ook nie', isKlank(`${B}/boeke%2Fhoop.pdf${T}`), false)
+/* 'n PDF is nie KLANK nie — maar hy word ook nie gekas nie; sien onder. */
+is('n pdf is nie klank nie', isKlank(`${B}/boeke%2Fhoop.pdf${T}`), false)
 is('n json ook nie', isKlank(`${B}/data%2Fx.json${T}`), false)
 is('geen punt in die pad nie', isKlank(`${B}/wallpapers%2Fsonderpunt${T}`), false)
 
@@ -96,6 +97,42 @@ is('n ander googleapis-gasheer',
 /* En iemand wat ons oorsprong as 'n PAD gebruik, mag nie deurglip nie. */
 is('die oorsprong as n pad op n ander domein',
    magKas('https://boos.example/https://firebasestorage.googleapis.com/a.jpg', 'image'), false)
+
+console.log('\n── n PDF word NOOIT gekas nie ──\n')
+/* Dewald, 7 September 2026: "why does it keep saying can't open PDF file...
+   i did re upload the pdf because i think maybe first pdf was faulty."
+
+   Die PDF was nie stukkend nie, die KAS was. 'n PDF word op Android in STUKKE
+   gehaal, presies soos klank, en 'n kas antwoord op die URL sonder om van die
+   Range te weet. Die eerste aflaai werk; elke een daarna is stukkend, dertig
+   dae lank. 'n Nuwe oplaai help nie, want die fout sit op die foon. */
+is('die e-boek se pad',      magKas(`${B}/pdfs%2Fgejaagdheid-druk.pdf${T}`), false)
+is('n kinderboek',           magKas(`${B}/kinderboeke%2Fnoag.pdf${T}`), false)
+is('n pdf in n ander vouer', magKas(`${B}/boeke%2Fhoop.pdf${T}`), false)
+is('HOOFLETTERS ook',        magKas(`${B}/boeke%2FHOOP.PDF${T}`), false)
+/* Die vouer moet dit alleen dra, presies soos by klank: die uitbreiding kom
+   van die mens se leernaam af en kan enigiets wees. */
+is('n leer in pdfs/ sonder uitbreiding', magKas(`${B}/pdfs%2Fsonderpunt${T}`), false)
+is('en met n vreemde uitbreiding',       magKas(`${B}/pdfs%2Fboek.bin${T}`), false)
+is('destination document',   magKas(`${B}/iets%2Fx${T}`, 'document'), false)
+is('destination embed',      magKas(`${B}/iets%2Fx${T}`, 'embed'), false)
+is('n epub ook',             magKas(`${B}/boeke%2Fhoop.epub${T}`), false)
+
+console.log('\n── Maar PRENTE bly gekas ──\n')
+/* Dit is die hele punt van hierdie kas. Verdwyn dit ook, kos elke oopmaak
+   van die blad die mens data. */
+for (const uit of ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']) {
+  is(`.${uit} word gekas`, magKas(`${B}/covers%2Fa.${uit}${T}`), true)
+}
+is('n wallpaper ook', magKas(`${B}/covers%2Fwp_nota.jpg${T}`), true)
+is('destination image', magKas(`${B}/covers%2Fa.jpg${T}`, 'image'), true)
+
+console.log('\n── isAflaai op sy eie ──\n')
+is('n pdf',            isAflaai(`${B}/boeke%2Fa.pdf${T}`), true)
+is('n prent nie',      isAflaai(`${B}/covers%2Fa.jpg${T}`), false)
+is('klank nie',        isAflaai(`${B}/audio%2Fa.mp3${T}`), false)
+is('geen punt nie',    isAflaai(`${B}/covers%2Fsonderpunt${T}`), false)
+is('n punt in n vouer', isAflaai(`${B}/a.b%2Fnaam${T}`), false)
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

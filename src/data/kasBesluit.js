@@ -37,6 +37,29 @@
  *   3. Die uitbreiding in die pad, vir alles wat nie in `audio/` sit nie.
  *
  * Enigeen van die drie is genoeg om dit uit die kas te hou.
+ *
+ * ── Die PDF is dieselfde fout, net later gevind ──
+ *
+ * Op 7 September 2026: "why does it keep saying can't open PDF file... i did
+ * re upload the pdf because i think maybe first pdf was faulty."
+ *
+ * Die PDF was nie stukkend nie. Die KAS was.
+ *
+ * Hierdie leer het net na KLANK gevra, dus is 'n PDF uit Storage gekas —
+ * `CacheFirst`, dertig dae. En 'n PDF word op Android presies soos klank
+ * gehaal: Chrome se aflaaier en die ingeboude leser vra STUKKE met 'n
+ * `Range`-kop. 'n Kas antwoord op die URL en weet niks van Ranges nie, dus
+ * kry die leser die hele liggaam waar hy 'n stuk gevra het. Die leer wat op
+ * die skyf beland, is stukkend, en die foon se enigste woorde daarvoor is
+ * "Can't open PDF file".
+ *
+ * Die eerste aflaai werk (kas-mis, die netwerk se 206 gaan reguit deur en
+ * word nie gekas nie). Elke aflaai daarna kom uit die kas en is stukkend —
+ * en dit bly so vir dertig dae. Dit is hoekom 'n nuwe oplaai nie gehelp het
+ * nie: die probleem sit op die FOON, nie in die leer nie.
+ *
+ * 'n PDF kos ook niks om oor te haal wat die moeite werd is nie. Iemand laai
+ * 'n e-boek een keer af en dit lê daarna in sy aflaaie, nie in ons kas nie.
  */
 
 /* Alles wat 'n mediaspeler kan oopmaak. Wees ruim: 'n tipe wat hier ontbreek
@@ -63,6 +86,28 @@ export function padUit(url) {
    sonder 'n uitbreiding of met 'n vreemde een. */
 const KLANKVOUERS = ['audio/', 'notes/', 'sorg/']
 
+/* Leers wat 'n blaaier in STUKKE haal, of wat 'n mens aflaai in plaas van
+   bekyk. Hulle het presies die Range-probleem wat klank het.
+
+   Die vouer tel saam met die uitbreiding, om dieselfde rede as by klank: die
+   uitbreiding kom van die mens se leernaam af, die vouer nie. */
+const AFLAAITIPES = ['pdf', 'epub', 'zip']
+const AFLAAIVOUERS = ['pdfs/', 'boeke/', 'kinderboeke/']
+
+export function isAflaai(url, destination) {
+  if (destination === 'document' || destination === 'embed'
+      || destination === 'object') return true
+
+  const pad = padUit(url)
+  if (AFLAAIVOUERS.some(v => pad.startsWith(v))) return true
+
+  const punt = pad.lastIndexOf('.')
+  if (punt === -1) return false
+  const uit = pad.slice(punt + 1).toLowerCase()
+  if (uit === '' || uit.includes('/')) return false
+  return AFLAAITIPES.includes(uit)
+}
+
 export function isKlank(url, destination) {
   if (destination === 'audio' || destination === 'video') return true
 
@@ -77,10 +122,16 @@ export function isKlank(url, destination) {
   return KLANKTIPES.includes(uit)
 }
 
-/* Die enigste vraag wat die diensketter vra. */
+/* Die enigste vraag wat die diensketter vra.
+ *
+ * Net PRENTE bly oor, en dit is met opset: hulle vra nooit Ranges nie, hulle
+ * verander nooit, en hulle kos data by elke oopmaak. Alles wat in stukke
+ * gehaal word — klank en PDF's — gaan reguit na die netwerk. */
 export function magKas(url, destination) {
   let u
   try { u = new URL(url) } catch { return false }
   if (u.origin !== STORAGE_OORSPRONG) return false
-  return !isKlank(url, destination)
+  if (isKlank(url, destination)) return false
+  if (isAflaai(url, destination)) return false
+  return true
 }

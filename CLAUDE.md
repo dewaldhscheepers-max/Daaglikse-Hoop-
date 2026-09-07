@@ -86,7 +86,7 @@ node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uit
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
-node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 49 toetse
+node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 ```
@@ -216,6 +216,21 @@ Die besluit staan op een plek en is suiwer: `magKas()` in
 hekke hou klank uit, want een is te min: `request.destination`, die vouer
 (`audio/`, wat elke oplaai in hierdie app gebruik), en die uitbreiding.
 Moenie daardie voorwaarde in `sw.js` inlyn herskryf nie.
+
+**'n PDF is dieselfde fout, en dit is later gevind.** Op 7 September 2026:
+*"why does it keep saying can't open PDF file... i did re upload the pdf
+because i think maybe first pdf was faulty."* Die PDF was nie stukkend nie —
+die KAS was. `magKas()` het net na KLANK gevra, dus is 'n PDF uit Storage
+gekas, `CacheFirst`, dertig dae. En Android haal 'n PDF presies soos klank:
+Chrome se aflaaier en die ingeboude leser vra STUKKE met 'n `Range`-kop.
+
+Die EERSTE aflaai werk (kas-mis, die 206 gaan deur en word nie gekas nie).
+Elke een daarna kom uit die kas as 'n volledige 200 waar 'n stuk gevra is, en
+die leer op die skyf is stukkend. Daarom help 'n nuwe oplaai nie: die fout sit
+op die FOON. `isAflaai()` hou nou PDF's, epubs en die `pdfs/`-vouer uit die
+kas; net PRENTE bly oor. `kykPdfKas.mjs` in die scratchpad haal 'n egte PDF
+drie keer met Range-koppe deur 'n egte diensketter en meet die INHOUD van elke
+stuk — nie net die status nie.
 
 Verander jy iets aan wat gekas word, **verhoog `SPOEL` in `src/sw.js`**. Dit
 is die enigste hefboom wat 'n foon bereik wat ons nie kan raak nie; sonder dit

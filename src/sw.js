@@ -76,8 +76,16 @@ import { magKas } from './data/kasBesluit.js'
  * 24: die EFT-opsie is nou 'n regte knoppie in plaas van 'n skakeltjie, dit
  *     bestaan NOU OOK by die maandelikse vorm, en 'n mens kan die
  *     rekeningnommer met een tik kopieer.
- * 25: nuwe leesplan: GRENSE (5 dae). */
-const SPOEL = 26
+ * 25: nuwe leesplan: GRENSE (5 dae).
+ * 26: die vers staan op die Tyd met God-kaart, en die reeks kan by 'n nota
+ *     gevoeg word wat reeds lewendig is.
+ * 27: 'n PDF word nooit weer gekas nie. Dit was dieselfde fout as klank s'n:
+ *     Android haal 'n PDF in STUKKE met 'n Range-kop, en 'n kas antwoord op
+ *     die URL. Die eerste aflaai werk, elke een daarna is stukkend, en dit
+ *     bly so vir dertig dae — "Can't open PDF file", ook ná 'n nuwe oplaai,
+ *     want die fout sit op die FOON. Hierdie nommer is die enigste ding wat
+ *     daardie stukkende inskrywing van elke foon af haal. */
+const SPOEL = 27
 
 async function spoelLooptyd() {
   const hou = new Set([cacheNames.precache, cacheNames.googleAnalytics, 'dh-spoel'])
