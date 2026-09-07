@@ -969,6 +969,26 @@ Wat NIE mag terugkom nie: 'n geldknoppie tussen die stories. "Stuur vir Dewald
 sit, ook onder 'n rou storie, lees dit soos 'n tolhek voor iemand se seer. Die
 versoek staan heel onder in dieselfde `DonationCard` as oral elders.
 
+## E-boeke: 'n boek skrap
+
+Daar was net 'n skrap-knoppie vir NOTAS. 'n Boek wat verkeerd opgelaai is, kon
+nie weg nie — Dewald, 7 September 2026: *"delete net die eboek GEJAAGDHEID,
+DRUK EN UITBRANDING. dit werk nie. ek sal vanvooraf oplaai."*
+
+Die knoppie geld **net vir 'n boek wat hy self bygevoeg het**, en dit is die
+belangrike helfte. Die vaste boeke staan in `src/data/books.js`; hul
+Firestore-dokument is net hul BYVOEGSEL — die PDF en die cover. Skrap 'n mens
+daardie dokument, verdwyn die boek nie: hy kom KAAL terug, sonder sy PDF. Dit
+is erger as om niks te doen nie, en daarom kry 'n vaste boek glad nie die
+knoppie nie (`staticIds.has(book.id)`).
+
+Die leer in Storage bly staan, met opset: die app lees die DOKUMENT, 'n
+weesleer kos niks, en 'n nuwe oplaai kry in elk geval 'n nuwe pad — `id` dra 'n
+tydstempel.
+
+Blaaiertoets: `kykBoekSkrap.mjs` in die scratchpad maak die admin oop en eis
+dat 'n vaste boek presies drie knoppies het en NIE 'n 🗑 nie.
+
 ## Ranglyste
 
 Albei speletjies se ranglyste loop deur 'n Vercel-funksie met die

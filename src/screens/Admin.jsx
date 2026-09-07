@@ -352,6 +352,9 @@ export default function Admin({ onClose }) {
   const [newEmoji, setNewEmoji]   = useState('📚')
   const [addingBook, setAddingBook] = useState(false)
   const [bookAdded, setBookAdded] = useState(false)
+  /* Watter boek se skrap-vraag oop is, en of die skryf loop. Sien skrapBoek. */
+  const [boekSkrap, setBoekSkrap] = useState(null)
+  const [boekBesig, setBoekBesig] = useState(false)
 
   function getAdminTodaySAST() {
     return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10)
@@ -586,6 +589,32 @@ export default function Admin({ onClose }) {
     } catch (e) { alert('PDF upload misluk: ' + e.message) }
 
     setPdfUploading(null); setPdfUploadTarget(null)
+  }
+
+  /* ── 'n Boek skrap ──
+   *
+   * Daar was net 'n skrap-knoppie vir NOTAS. 'n Boek wat verkeerd opgelaai is,
+   * kon nie weg nie — Dewald: "delete net die eboek GEJAAGDHEID, DRUK EN
+   * UITBRANDING. dit werk nie. ek sal vanvooraf oplaai."
+   *
+   * Dit geld NET vir 'n boek wat hy self bygevoeg het. Die vaste boeke staan
+   * in `src/data/books.js` en die Firestore-dokument is net hul BYVOEGSEL (die
+   * PDF, die cover). Skrap 'n mens daardie dokument, verdwyn die boek nie —
+   * hy kom kaal terug, sonder sy PDF. Dit is erger as om niks te doen nie, en
+   * daarom kry 'n vaste boek glad nie hierdie knoppie nie.
+   *
+   * Die leer in Storage bly staan. Dit is met opset: die app lees die
+   * DOKUMENT, en 'n weesleer kos niks. 'n Nuwe oplaai kry in elk geval 'n nuwe
+   * pad, want `handleAddBook` maak 'n nuwe id met 'n tydstempel. */
+  async function skrapBoek(id) {
+    setBoekBesig(true)
+    try {
+      await deleteDoc(doc(db, 'books', id))
+      /* Die lys kom uit 'n onSnapshot en werk homself by; ons maak net die
+         vraag toe. */
+      setBoekSkrap(null)
+    } catch (e) { alert('Kon nie skrap nie: ' + e.message) }
+    setBoekBesig(false)
   }
 
   // ── Add a new book ──
@@ -1128,6 +1157,23 @@ export default function Admin({ onClose }) {
                       >
                         {book.featured ? '★ Uitgelig' : '☆ Lyn'}
                       </button>
+                      {/* NET 'n boek wat hy self bygevoeg het. 'n Vaste boek se
+                          dokument is sy byvoegsel, nie sy bestaan nie — sien
+                          skrapBoek. */}
+                      {!staticIds.has(book.id) && (
+                        boekSkrap === book.id ? (
+                          <>
+                            <button className="admin-delete-yes" disabled={boekBesig}
+                                    onClick={() => skrapBoek(book.id)}>
+                              {boekBesig ? '…' : 'Ja, skrap'}
+                            </button>
+                            <button className="admin-delete-no" onClick={() => setBoekSkrap(null)}>Nee</button>
+                          </>
+                        ) : (
+                          <button className="admin-delete-btn" title="Skrap hierdie boek"
+                                  onClick={() => setBoekSkrap(book.id)}>🗑</button>
+                        )
+                      )}
                     </div>
                   </div>
                 )
