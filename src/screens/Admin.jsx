@@ -9,6 +9,7 @@ import { videoIdUit } from '../data/youtubeId'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
+import { reekseUit, stelReeksGelyk } from '../data/reekse'
 
 /* ── Die wagwoord ──
 
@@ -93,9 +94,16 @@ export default function Admin({ onClose }) {
   const [versTarget, setVersTarget] = useState(null)
   const [versRef,    setVersRef]    = useState('')
   const [versTeks,   setVersTeks]   = useState('')
+  const [versReeks,  setVersReeks]  = useState('')
   const [versBesig,  setVersBesig]  = useState(false)
   const [versKlaar,  setVersKlaar]  = useState(null)
   const [versFout,   setVersFout]   = useState('')
+
+  /* Die reekse wat REEDS bestaan, uit die notas self. Dit voed 'n `datalist`
+     by albei plekke waar 'n reeks getik word. Die besluit is suiwer en staan
+     in src/data/reekse.js — sien daardie leer se kop vir waarom dit 'n hek is
+     en nie 'n gerief nie. */
+  const reekse = reekseUit(notes)
 
   // ── Recording state ──
   const [recording,    setRecording]    = useState(false)
@@ -525,7 +533,7 @@ export default function Admin({ onClose }) {
         title: title.trim(), audioUrl, fileId,
         publishedAt: new Date(publishedAt + 'T06:00:00'),
         scripture: scripture.trim(), scriptureText: scriptureText.trim(),
-        series: series.trim(), color: '', lengthSeconds: 0
+        series: stelReeksGelyk(series, reekse), color: '', lengthSeconds: 0
       })
       try { localStorage.removeItem('cachedNotesTime') } catch {}
       setSaved(true)
@@ -698,22 +706,30 @@ export default function Admin({ onClose }) {
     } catch (e) { alert('Fout: ' + e.message) }
   }
 
-  /* ── Die vers by 'n nota wat reeds lewendig is ──
+  /* ── Die vers EN die reeks by 'n nota wat reeds lewendig is ──
    *
-   * `handleSave` skep 'n nota en eis 'n oudiolêer. Word die Skrifverwysing by
-   * die oplaai vergeet — en dit gebeur, want dit is die veld ONDER die knoppie
-   * wat 'n mens die nodigste het — was daar geen manier om hom by te sit nie.
-   * Die gevolg was stil: Tyd met God se "Lees die Woord"-skerm bestaan net as
-   * daar 'n vers is, dus was die vloei daardie dag een skerm korter en niks
-   * het gesê hoekom.
+   * `handleSave` skep 'n nota en eis 'n oudiolêer. Word die Skrifverwysing of
+   * die Reeks by die oplaai vergeet — en dit gebeur, want hulle staan ONDER
+   * die knoppie wat 'n mens die nodigste het — was daar geen manier om hulle
+   * by te sit nie. Net die wallpaper kon agterna kom.
    *
-   * Dieselfde `merge`-skryf as die wallpaper: net hierdie twee velde word
-   * aangeraak, die oudio en die datum bly presies soos hulle is. */
+   * By die vers was die gevolg stil: Tyd met God se "Lees die Woord"-skerm
+   * bestaan net as daar 'n vers is, dus was die vloei daardie dag een skerm
+   * korter en niks het gesê hoekom.
+   *
+   * By die REEKS is die gevolg 'n ander een, en dit tref altyd terugwerkend:
+   * 'n reeks begin wanneer die TWEEDE boodskap oor daardie ding kom, en dan
+   * moet die eerste een ook onder daardie naam staan. Sonder hierdie veld sou
+   * 'n mens die ou nota moes uitvee en die oudio weer oplaai.
+   *
+   * Dieselfde `merge`-skryf as die wallpaper: net hierdie drie velde word
+   * aangeraak, die oudio, die titel en die datum bly presies soos hulle is. */
   function beginVers(note) {
     setVersFout('')
     setVersTarget(note.id)
     setVersRef(note.scripture || '')
     setVersTeks(note.scriptureText || '')
+    setVersReeks(note.series || '')
   }
 
   async function stoorVers() {
@@ -722,9 +738,14 @@ export default function Admin({ onClose }) {
     try {
       await setDoc(doc(db, 'notes', versTarget), {
         scripture: versRef.trim(), scriptureText: versTeks.trim(),
+        /* Nie `versReeks.trim()` nie. Tik hy die naam met die hand oor en die
+           kas verskil met een letter, is dit vir Firestore 'n TWEEDE reeks —
+           en dan staan hierdie boodskap alleen onder 'n naam wat amper reg is.
+           `stelReeksGelyk` gee die bestaande spelling terug. */
+        series: stelReeksGelyk(versReeks, reekse),
       }, { merge: true })
       /* Die app hou notas in localStorage. Sonder hierdie reël sien hy sy eie
-         nuwe vers eers wanneer daardie kas verval. */
+         verandering eers wanneer daardie kas verval. */
       try { localStorage.removeItem('cachedNotesTime') } catch {}
       const klaar = versTarget
       setVersKlaar(klaar); setVersTarget(null)
@@ -898,7 +919,14 @@ export default function Admin({ onClose }) {
                 </div>
                 <div className="admin-field">
                   <label>Reeks / Series</label>
-                  <input value={series} onChange={e => setSeries(e.target.value)} placeholder="bv. Vergifnis" />
+                  <input value={series} onChange={e => setSeries(e.target.value)}
+                         list="admin-reekse" placeholder="bv. Vergifnis" />
+                  {/* EEN keer op die blad. Twee `datalist`-elemente met
+                      dieselfde id is 'n dubbele id, en die blaaier gebruik
+                      dan net die eerste — albei velde wys hierheen. */}
+                  <datalist id="admin-reekse">
+                    {reekse.map(r => <option key={r} value={r} />)}
+                  </datalist>
                 </div>
                 <div className="admin-field">
                   <label>Datum</label>
@@ -943,9 +971,10 @@ export default function Admin({ onClose }) {
                           <button
                             className="admin-pdf-btn"
                             onClick={() => beginVers(note)}
-                            title="Skrifverwysing en teksvers"
+                            title="Skrifverwysing, teksvers en reeks"
                           >
-                            {versKlaar === note.id ? '✅' : note.scripture ? '📖 ✎' : '📖 +'}
+                            {versKlaar === note.id ? '✅'
+                             : (note.scripture || note.series) ? '📖 ✎' : '📖 +'}
                           </button>
                           <button
                             className="admin-pdf-btn"
@@ -973,6 +1002,17 @@ export default function Admin({ onClose }) {
                           <label>Skrifteks</label>
                           <textarea value={versTeks} onChange={e => setVersTeks(e.target.value)}
                                     rows={3} placeholder="Die vers self (opsioneel)" />
+                        </div>
+                        {/* 'n Reeks begin wanneer die TWEEDE boodskap daaroor
+                            kom. Die eerste een moet dan terugwerkend onder
+                            dieselfde naam kan staan. */}
+                        <div className="admin-field">
+                          <label>Reeks</label>
+                          <input value={versReeks} onChange={e => setVersReeks(e.target.value)}
+                                 list="admin-reekse" placeholder="bv. Gejaagdheid, druk en uitbranding" />
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
+                            Kies een wat reeds bestaan, of tik 'n nuwe naam.
+                          </span>
                         </div>
                         {versFout && <div className="admin-error">{versFout}</div>}
                         <div style={{ display: 'flex', gap: 8 }}>

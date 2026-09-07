@@ -61,6 +61,7 @@ node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die 
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
+node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie, 24 toetse
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
@@ -836,9 +837,22 @@ die vers steeds daar sonder 'n knoppie wat niks sou doen nie.
 die admin skep 'n nota en eis 'n oudiolêer; word die Skrifverwysing by die
 oplaai vergeet — en dit gebeur, want dit is die veld ONDER die knoppie wat 'n
 mens die nodigste het — was daar geen manier om hom by te sit nie. Die
-📖-knoppie langs elke nota vou 'n vorm oop en skryf net daardie twee velde met
+📖-knoppie langs elke nota vou 'n vorm oop en skryf net daardie velde met
 `merge`, presies soos die wallpaper. Dit vee ook `cachedNotesTime` uit, anders
 sien hy sy eie nuwe vers eers wanneer die kas verval.
+
+**Dieselfde vorm dra die REEKS**, en om 'n rede wat altyd terugwerkend is: 'n
+reeks begin wanneer die TWEEDE boodskap daaroor kom, en dan moet die eerste een
+ook onder daardie naam staan. Sonder hierdie veld sou 'n mens die ou nota moes
+uitvee en die oudio weer oplaai.
+
+**Twee spellings van een reeks is 'n stil fout.** "Gejaagdheid, druk en
+uitbranding" en "GEJAAGDHEID, DRUK EN UITBRANDING" is vir Firestore twee
+reekse, en dan staan een boodskap alleen onder 'n naam wat amper reg is —
+niemand sien dit nie. `src/data/reekse.js` is suiwer en doen twee dinge:
+`reekseUit()` voed 'n `datalist` by ALBEI plekke waar 'n reeks getik word, en
+`stelReeksGelyk()` loop VOOR die skryf, sodat 'n naam wat net in kas of spasies
+verskil, by die bestaande een aansluit. Dit is nie gerief nie — dit is die hek.
 
 `Bybel.jsx` se eie `ontleedVerwysing` kan NIE 'n reeks lees nie. Gee 'n mens
 hom "Matteus 6:25-34", kry hy `null` en die knoppie doen niks. Daarom staan
