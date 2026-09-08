@@ -227,6 +227,21 @@
 .tmg-teken-groot { width: 46px; height: 46px; margin: 4px auto 0; }
 .tmg-teken-klein { width: 20px; height: 20px; flex: 0 0 auto; }
 
+/* ── Die enigste emoji in die vloei ──
+ *
+ * Sien TekenHande in TydMetGod.jsx. 'n `<span>` kry sy grootte uit die
+ * LETTERTIPE, nie uit `width`/`height` nie, dus stel ons `font-size` en laat
+ * die boks self meet — 'n vaste breedte sou die glief plat druk.
+ *
+ * Geen `color`: 'n emoji dra sy eie kleure. */
+.tmg-emoji {
+  line-height: 1;
+  text-align: center;
+  font-style: normal;
+}
+.tmg-teken-groot.tmg-emoji { width: auto; height: auto; font-size: 40px; }
+.tmg-teken-klein.tmg-emoji { width: auto; height: auto; font-size: 17px; }
+
 /* 'n Merk in 'n dun sirkel — die vorm uit die ontwerp. */
 .tmg-teken-rond {
   display: flex;

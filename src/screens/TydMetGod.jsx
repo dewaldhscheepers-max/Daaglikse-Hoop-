@@ -121,18 +121,27 @@ function TekenMens({ klas = 'tmg-teken tmg-teken-klein' }) {
   )
 }
 
+/* ── Die enigste emoji in hierdie vloei, en dit is Dewald se keuse ──
+ *
+ * Elke ander merk hier is geteken. Hierdie een nie.
+ *
+ * Die geteken de weergawe was twee hande wat 'n vlam dra, en op 8 September
+ * 2026 het Dewald gesien wat dit werklik wys: *"die icon lyk soos ek wys vir
+ * hulle middelvinger... nee sies. die moet eerder bidhandjies wees."* Hy was
+ * reg — die vlam bo daardie bak lees presies so.
+ *
+ * Ek het ses ander weergawes geteken en na almal gekyk. Nie een lees soos
+ * hande nie: twee simmetriese druppels wat by 'n middellyn ontmoet, word 'n
+ * BLAAR of 'n pen-punt, en die kantelings en duime het dit net besiger
+ * gemaak. Dewald: *"gebruik net die emoji."*
+ *
+ * Die prys is bekend en aanvaar: 'n emoji is die FOON se lettertipe en lyk op
+ * elke toestel anders. Dit is beter as 'n merk wat op EEN manier lyk en
+ * daardie manier is verkeerd.
+ *
+ * `aria-hidden` bly, want die woorde langsaan sê reeds wat dit is. */
 function TekenHande({ klas = 'tmg-teken tmg-teken-klein' }) {
-  /* Twee hande wat 'n vlam DRA. Die eerste weergawe het soos 'n beker gelyk;
-     die kom uit die skermkiekie. Nou is die bak duidelik twee hande — die
-     duime staan op — en die vlam sit bo-op. */
-  return (
-    <svg className={klas} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 3.4c1.7 2 2.6 3.5 2.6 4.8a2.6 2.6 0 1 1-5.2 0c0-1.3.9-2.8 2.6-4.8Z" />
-      <path d="M3.6 13.4c0 4.1 3.8 7.2 8.4 7.2s8.4-3.1 8.4-7.2" />
-      <path d="M3.6 13.4v-1.9a1.7 1.7 0 0 1 3.4 0v1.6M20.4 13.4v-1.9a1.7 1.7 0 0 0-3.4 0v1.6" />
-    </svg>
-  )
+  return <span className={`${klas} tmg-emoji`} aria-hidden="true">🙏🏻</span>
 }
 
 function TekenBoek({ klas = 'tmg-teken tmg-teken-klein' }) {

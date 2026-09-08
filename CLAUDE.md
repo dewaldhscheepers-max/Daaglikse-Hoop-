@@ -632,11 +632,27 @@ groot woorde ("JOU DAAGLIKSE HOOP IS GEREED") en daardie letters het deur elke
 sluier geskyn en met die teks bo-op geveg. Een houtskool werk met elke prent
 wat hy ooit gaan oplaai, want daar is nie een agter nie.
 
-**Geen emoji nie.** Daar was ❤️ en 🙏 op die twee belangrikste oomblikke. 'n
-Emoji is die FOON se lettertipe: dit lyk anders op elke toestel en dit is
-niemand se ontwerp nie. Die merke word geteken (`TekenDagbreek`, `TekenHande`,
-`TekenMens`, `TekenMense`, `TekenMerk`, `TekenBoek`, `TekenHart`, `TekenAf`)
-en erf almal `currentColor`.
+**Geen emoji nie — met EEN uitsondering, en dit is Dewald se keuse.** Daar
+was ❤️ en 🙏 op die twee belangrikste oomblikke. 'n Emoji is die FOON se
+lettertipe: dit lyk anders op elke toestel en dit is niemand se ontwerp nie.
+Die merke word geteken (`TekenDagbreek`, `TekenMens`, `TekenMense`,
+`TekenMerk`, `TekenBoek`, `TekenHart`, `TekenAf`) en erf almal `currentColor`.
+
+`TekenHande` is die uitsondering. Die geteken de weergawe was twee hande wat 'n
+vlam dra, en op 8 September 2026 het Dewald gesien wat dit werklik wys: *"die
+icon lyk soos ek wys vir hulle middelvinger... nee sies. die moet eerder
+bidhandjies wees."* Hy was reg.
+
+Ek het ses ander weergawes geteken en na almal gekyk. Nie een lees soos hande
+nie: twee simmetriese druppels wat by 'n middellyn ontmoet, word 'n BLAAR of 'n
+pen-punt, en kantelings, duime en moue het dit net besiger gemaak. Dewald:
+*"gebruik net die emoji."* Dit is nou 🙏🏻, met `.tmg-emoji` wat sy grootte uit
+`font-size` kry — 'n `<span>` meet nie soos 'n SVG nie, en 'n vaste breedte sou
+die glief plat druk.
+
+Die prys is bekend en aanvaar: dit lyk op elke foon anders. Dit is beter as 'n
+merk wat op EEN manier lyk en daardie manier is verkeerd. **Moenie dit
+terugdraai na 'n geteken de merk nie.** Blaaiertoets: `kykHande.mjs`.
 
 **Die vordering-balk is nie die ou stap-teller nie.** Daar was 'n "STAP 3 VAN
 5" wat van tyd met God 'n vorm gemaak het. Nou is dit dun segmente en 'n klein
