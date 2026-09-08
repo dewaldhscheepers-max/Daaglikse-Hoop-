@@ -45,6 +45,30 @@ const ICONS = {
    staan bo — dieselfde reel as die e-boeke. */
 const PLANS = [
   {
+    /* ── Die enigste plan wat die APP se Bybel oopmaak ──
+     *
+     * Elke ander plan hier wys sy teks inlyn uit 'n JSON. Hierdie een stuur
+     * mense na die Bybel self, en dit is met opset: 'n plan om die HELE Bybel
+     * te lees mag nie sy eie kopie van die teks dra nie.
+     *
+     * `total` is 365 en `completedKey` bestaan nie — die vordering word per
+     * HOOFSTUK gehou (`b365_gelees`), nie per dag nie, sodat iemand wat twee
+     * van die drie gelees het, nie môre van voor af begin nie. Sien
+     * src/data/bybel365.js. */
+    id:           'bybel-365',
+    countKey:     'rp_counted_b365',
+    bookId:       'bybel-365',
+    event:        'open-bybel-365',
+    icon:         'book',
+    tint:         '#EEF2EA',
+    stroke:       '#5F7355',
+    title:        'DIE HELE BYBEL IN 365 DAE',
+    desc:         "Al 66 boeke in een jaar. Elke dag drie kort stukke — die verhaal, die wysheid en profete, en Jesus — in die app se eie Bybel. Dit onthou waar jy is.",
+    meta:         '365 dae · gratis',
+    standKey:     'b365_stand',
+    total:        365,
+  },
+  {
     id:           'grense',
     countKey:     'rp_counted_grense',
     bookId:       'grense',
@@ -242,17 +266,47 @@ const PLANS = [
 ]
 
 function readProgress(plan) {
+  /* ── Die 365-dae-plan tel ANDERS ──
+   *
+   * Elke ander plan hou 'n lys VOLTOOIDE DAE. Hierdie een hou gelese
+   * HOOFSTUKKE (sien src/data/bybel365.js), en `parseInt` op daardie lys gee
+   * NaN — die kaart sou dus vir altyd "Begin die plan" gesê het vir iemand
+   * wat op dag 47 is. 'n Kaart wat lieg is erger as een wat swyg.
+   *
+   * Die skerm skryf 'n klein opsomming saam met elke verandering; hier lees
+   * ons dit. Is dit weg, val ons terug op "nog nie begin nie" — wat waar is
+   * vir elke mens wat die plan nog nooit oopgemaak het nie.
+   *
+   * `klaarDae` is die getal wat die balkie en die "47 / 365" teken. Elke ander
+   * plan lei dit uit `completed.length` af; hierdie een kry dit reguit, want
+   * daar is geen lys dae om te tel nie. */
+  if (plan.standKey) {
+    try {
+      const s = JSON.parse(localStorage.getItem(plan.standKey) || 'null')
+      if (!s || !s.dag) return LEEG
+      return {
+        completed: [],
+        klaarDae:  s.dae || 0,
+        lastDay:   s.dag,
+        done:      (s.dae || 0) >= plan.total,
+      }
+    } catch {
+      return LEEG
+    }
+  }
   try {
     const completed = JSON.parse(localStorage.getItem(plan.completedKey) || '[]')
     const lastDay   = parseInt(localStorage.getItem(plan.lastDayKey) || '0') || null
-    return { completed, lastDay, done: completed.length >= plan.total }
+    return { completed, klaarDae: completed.length, lastDay, done: completed.length >= plan.total }
   } catch {
-    return { completed: [], lastDay: null, done: false }
+    return LEEG
   }
 }
 
+const LEEG = { completed: [], klaarDae: 0, lastDay: null, done: false }
+
 function ctaLabel(plan, p) {
-  if (!p.lastDay && p.completed.length === 0) return 'Begin die plan'
+  if (!p.lastDay && p.klaarDae === 0) return 'Begin die plan'
   if (p.done) return 'Lees weer'
   const nextDay = p.completed.includes(p.lastDay) ? p.lastDay + 1 : p.lastDay
   return `Gaan voort — dag ${nextDay}`
@@ -332,8 +386,8 @@ export default function LeesplanneLys({ onClose }) {
         <div className="lpl-body">
           {PLANS.map(plan => {
             const p = progress[plan.id]
-            const pct = Math.min(100, (p.completed.length / plan.total) * 100)
-            const inProgress = p.completed.length > 0 && !p.done
+            const pct = Math.min(100, (p.klaarDae / plan.total) * 100)
+            const inProgress = p.klaarDae > 0 && !p.done
 
             return (
               <button key={plan.id} className="lpl-card" onClick={() => openPlan(plan)}>
@@ -355,7 +409,7 @@ export default function LeesplanneLys({ onClose }) {
                       <div className="lpl-prog-track">
                         <div className="lpl-prog-fill" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="lpl-prog-pct">{p.completed.length} / {plan.total}</span>
+                      <span className="lpl-prog-pct">{p.klaarDae} / {plan.total}</span>
                     </div>
                   )}
                 </div>

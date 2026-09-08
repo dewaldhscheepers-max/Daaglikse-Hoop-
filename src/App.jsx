@@ -44,6 +44,7 @@ import DinkNuutLeefNuut from './screens/DinkNuutLeefNuut'
 import DeursoekBreekStuur from './screens/DeursoekBreekStuur'
 import Toksies from './screens/Toksies'
 import Grense from './screens/Grense'
+import Bybel365 from './screens/Bybel365'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
 import Speel from './screens/Speel'
@@ -146,6 +147,7 @@ export default function App() {
   const [showDeursoekBreekStuur, setShowDeursoekBreekStuur] = useState(false)
   const [showToksies,            setShowToksies]            = useState(false)
   const [showGrense,             setShowGrense]             = useState(false)
+  const [showBybel365,           setShowBybel365]           = useState(false)
   const [showHuise, setShowHuise]                 = useState(false)
   const [showBybel, setShowBybel]                 = useState(false)
   const [bybelBeginBy, setBybelBeginBy]           = useState(null)
@@ -837,6 +839,18 @@ export default function App() {
     return () => window.removeEventListener('open-grense', onOpen)
   }, [])
 
+  /* ── Die hele Bybel in 365 dae ──
+   *
+   * Anders as die ander leesplanne maak hierdie een die APP se Bybel oop
+   * (z-index 250) en sit self op 239. Dit bly dus OOP agter die Bybel, en 'n
+   * mens kom by die Bybel se eie terug-knoppie weer hier uit — presies waar
+   * hy was. */
+  useEffect(() => {
+    function onOpen() { setShowBybel365(true) }
+    window.addEventListener('open-bybel-365', onOpen)
+    return () => window.removeEventListener('open-bybel-365', onOpen)
+  }, [])
+
   // ── Dinge Wat Jou Lewe Kan Verander journey ──
   useEffect(() => {
     function onOpen() { setShowDingeVerander(true) }
@@ -1395,6 +1409,7 @@ export default function App() {
     { oop: showDeursoekBreekStuur,  toe: () => setShowDeursoekBreekStuur(false) },
     { oop: showToksies,             toe: () => setShowToksies(false) },
     { oop: showGrense,              toe: () => setShowGrense(false) },
+    { oop: showBybel365,            toe: () => setShowBybel365(false) },
     { oop: wysSteun,                toe: () => { setWysSteun(false); try { sessionStorage.removeItem('steun_versoek') } catch {} } },
     { oop: showNooimy,              toe: () => setNooimy(false) },
     { oop: showLeesplanNotice,      toe: () => setShowLeesplanNotice(false) },
@@ -1715,6 +1730,10 @@ export default function App() {
       )}
       {showGrense && (
         <Grense onClose={() => setShowGrense(false)} />
+      )}
+
+      {showBybel365 && (
+        <Bybel365 onClose={() => setShowBybel365(false)} />
       )}
 
       {showToksies && (

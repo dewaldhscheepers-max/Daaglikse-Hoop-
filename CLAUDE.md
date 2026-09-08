@@ -61,6 +61,7 @@ node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die 
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
+node src/data/bybel365.toets.mjs              # die 365-dae-plan, teen die egte GAB, 67 toetse
 node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie, 24 toetse
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
@@ -329,6 +330,67 @@ verse tussenin word gemerk. Die teks self word met geen karakter verander nie
 en die erkenning bly — dit is 'n klas op verse wat reeds bestaan.
 
 Volledig in `docs/afrikaanse-bybel.md`. Lees dit voor jy aan die Bybel raak.
+
+---
+
+## Die hele Bybel in 365 dae
+
+Die enigste leesplan wat die APP se Bybel oopmaak. Elke ander plan onder
+`Leesplanne` dra sy eie teks in 'n JSON en wys dit inlyn; hierdie een stuur 'n
+mens na die GAB self, met die kruisverwysings en die soek wat reeds daar is.
+'n Plan om die HELE Bybel te lees mag nie sy eie kopie van die Bybel dra nie.
+
+Daarom sit `Bybel365.css` op **z-index 239** en nie op 400 soos die ander
+(`DaeVanVrede.css`) nie. Die Bybel is 250. Op 400 sou die Bybel AGTER hierdie
+skerm oopmaak en die LEES-knoppie sou niks doen nie — presies waar VolgJesusLewe
+geval het. Die skerm bly OOP agter die Bybel, en die Bybel se eie sluit-knoppie
+sit die mens terug by dieselfde dag.
+
+**Vordering is per HOOFSTUK, nie per dag nie.** 'n Mens lees twee van die drie,
+haar foon lui, en sy kom vanaand terug. Tel ons per dag, is daardie twee weg en
+sy begin oor — die vinnigste manier om iemand op dag drie te verloor.
+`b365_gelees` in localStorage is die waarheid; alles anders word daaruit
+afgelei.
+
+**Die huidige dag is die EERSTE onvoltooide dag, nooit 'n datum nie.** 'n Plan
+wat aan die kalender vasgemaak is, straf wie 'n naweek mis: sy maak die app oop
+en is "vier dae agter", en dan hou sy op. Hier skuif die dag wanneer SY
+klaarmaak. Dit is 365 dae se LEES, nie 365 kalenderdae nie.
+
+**Die kaart op die leesplan-lys lees 'n APARTE opsomming** (`b365_stand`:
+`{dag, hoofstukke, dae}`), en dit is nie gerief nie. Om die dag te weet moet 'n
+mens die plan hê, en die plan is 'n 29 KB-aflaai — te veel om te haal net om 'n
+kaart te teken wat dalk nooit gedruk word nie. Die skerm skryf dit by ELKE
+verandering, op een plek (`stel()`). Twee skrywers hier en die kaart dryf van
+die plan af weg.
+
+`readProgress` in `LeesplanneLys.jsx` het 'n eie tak hiervoor. Die verstek-tak
+doen `parseInt` op 'n lys DAE; op 'n lys hoofstukke gee dit `NaN` en die kaart
+sou vir altyd "Begin die plan" gesê het vir iemand wat op dag 47 is. Dieselfde
+rede vir `klaarDae`: elke ander plan lei die balkie se getal uit
+`completed.length` af, en daardie lys bestaan hier nie.
+
+**Die plan word GEHAAL, nie gebundel nie.** `public/bybel365.json`, 29 KB,
+gebou deur `skrifte/bou-bybel365.mjs` uit Dewald se bronpakket. `globPatterns`
+in `vite.config.js` sluit JSON uit, dus laai wie die plan nooit oopmaak nie,
+hom ook nooit af — dieselfde besluit as die GAB se 66 boeke. Daar is ook geen
+looptyd-kasreël vir hierdie lêer nie, dus hoef `SPOEL` nie te beweeg wanneer
+die plan verander nie.
+
+Die bouskrif **weier om te skryf** as een verwysing nie ontleed nie of as een
+GAB-hoofstuk ongedek bly. `bybel365.toets.mjs` doen dieselfde keuring weer teen
+die egte `public/gab/`: al 1 189 hoofstukke word presies een keer gelees, en
+geen dag noem 'n hoofstuk wat nie bestaan nie. 'n Verwysing wat nie bestaan nie,
+is 'n knoppie wat niks doen nie.
+
+**Elke dag lees uit DRIE kante tegelyk** — die verhaal, die wysheid en profete,
+en Jesus. Dit is die enigste ding wat hierdie plan van "lees van voor af"
+onderskei, en dit is waarom niemand negentig dae lank net Levitikus kry nie.
+
+Blaaiertoets: `kykB365.mjs` in die scratchpad. Dit meet die een ding wat geen
+eenheidstoets kan sien: watter element werklik BO-OP is nadat die
+LEES-knoppie gedruk is. Die opspringers word eers weggeklik — sonder dit slaag
+daardie toets om die verkeerde rede.
 
 ---
 
