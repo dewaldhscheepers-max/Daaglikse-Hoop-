@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { db } from '../firebase'
 import VolgJesusKaart from '../components/VolgJesusKaart'
+import Bybel365Kaart from '../components/Bybel365Kaart'
 import { eboekTotale } from '../data/eboekTotale'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
@@ -303,6 +304,18 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             die hele besluit staan in VolgJesusKaart.jsx. */}
         <div className="vj-kaart-meer">
           <VolgJesusKaart />
+        </div>
+
+        {/* ── Die hele Bybel in 365 dae ──
+            Dewald: "sit ook die lees die Bybel in 365 dae op die e-boekblad
+            net onderkant volg Jesus se kaart."
+
+            Dit gaan na presies dieselfde skerm as die inskrywing onder
+            Leesplanne — een gebeurtenis, een plan, een vordering. Anders as
+            VOLG JESUS s'n wys hierdie kaart ALTYD: die plan het niks om te
+            publiseer nie, hy is klaar en hy is 365 dae lank daar. */}
+        <div className="b365-kaart-meer">
+          <Bybel365Kaart />
         </div>
 
         {/* ── Kinder promo card ── */}

@@ -46,6 +46,36 @@ export function standUit(plan, gelees) {
   return { dag: huidigeDag(plan, gelees), hoofstukke: v.gelees, dae: v.dae }
 }
 
+/* ── Wat op die KAART staan ──
+ *
+ * Die kaart staan op die e-boekblad, direk onder VOLG JESUS s'n, en Dewald het
+ * die reël self gevra: *"dan kan jy net self skryf bo op hierdie kaart elke
+ * dag, soos dag 1 van dit, dag 2 van dit, dag 3 van dit."*
+ *
+ * Dit lees NET die klein opsomming (`b365_stand`), nooit die plan nie — die
+ * plan is 'n 29 KB-aflaai en hierdie kaart word op 'n blad geteken wat dalk
+ * nooit oopgemaak word nie.
+ *
+ * Die REËL bly altyd dieselfde vorm ("DAG n VAN 365"); net die KNOPPIE praat
+ * oor waar 'n mens staan. Dieselfde woorde as VOLG JESUS se kaart, want dit is
+ * die kaart wat direk daarbo staan en twee stelle woorde vir een ding lees
+ * soos twee verskillende apps. */
+export function kaartStand(stand, totaalDae = 365) {
+  const s = stand && typeof stand === 'object' ? stand : null
+  const dae = Math.max(0, Number(s && s.dae) || 0)
+  const rou = Number(s && s.dag) || 0
+  const totaal = Number(totaalDae) || 365
+
+  /* Nog nooit oopgemaak nie. Dag 1 is waar so 'n mens staan — die kaart lieg
+     dus nie deur dit te sê; net die knoppie weet dat hy nog nie begin het. */
+  if (!s || rou < 1) return { begin: true, klaar: false, dag: 1, dae: 0, lyn: `Dag 1 van ${totaal}`, knop: 'BEGIN HIER' }
+
+  if (dae >= totaal) return { begin: false, klaar: true, dag: totaal, dae, lyn: `Al ${totaal} dae klaar`, knop: 'LEES WEER' }
+
+  const dag = Math.min(Math.max(1, Math.floor(rou)), totaal)
+  return { begin: false, klaar: false, dag, dae, lyn: `Dag ${dag} van ${totaal}`, knop: 'GAAN VOORT' }
+}
+
 /* Hoe 'n hoofstuk in daardie lys lyk. Die boekkode kom uit die GAB, dieselfde
    kode wat `open-bybel` verwag — daar word niks ontleed op 'n foon nie. */
 export function sleutelVir(boek, hoofstuk) {

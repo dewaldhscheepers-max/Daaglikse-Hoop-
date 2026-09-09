@@ -61,7 +61,7 @@ node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die 
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
-node src/data/bybel365.toets.mjs              # die 365-dae-plan, teen die egte GAB, 67 toetse
+node src/data/bybel365.toets.mjs              # die 365-dae-plan, teen die egte GAB, 85 toetse
 node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie, 24 toetse
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
@@ -387,10 +387,51 @@ is 'n knoppie wat niks doen nie.
 en Jesus. Dit is die enigste ding wat hierdie plan van "lees van voor af"
 onderskei, en dit is waarom niemand negentig dae lank net Levitikus kry nie.
 
-Blaaiertoets: `kykB365.mjs` in die scratchpad. Dit meet die een ding wat geen
-eenheidstoets kan sien: watter element werklik BO-OP is nadat die
-LEES-knoppie gedruk is. Die opspringers word eers weggeklik — sonder dit slaag
-daardie toets om die verkeerde rede.
+### Die kaart op die e-boekblad
+
+Dewald, 9 September 2026, met sy eie kunswerk aangeheg: *"sit ook die lees die
+Bybel in 365 dae op die e-boekblad net onderkant volg Jesus se kaart... en dan
+kan jy net self skryf bo op hierdie kaart elke dag, soos dag 1 van dit, dag 2
+van dit, dag 3 van dit."*
+
+`Bybel365Kaart.jsx` staan in `Meer.jsx` direk onder `VolgJesusKaart`. Dieselfde
+vorm as daardie kaart (16:9, dieselfde afronding, dieselfde goue pil) en
+dieselfde woorde — BEGIN HIER / GAAN VOORT — want twee kaarte wat amper eenders
+lyk, lees soos 'n fout. **Anders as VOLG JESUS s'n wys hierdie kaart altyd**:
+daar is niks om te publiseer nie.
+
+**Die prent dra sy eie woorde, en dit maak hom anders as VOLG JESUS s'n.**
+Daardie kunswerk dra doelbewus GEEN teks nie, sodat die knoppie "Week 17 van 52"
+kan word. Hierdie een het "LEES DIE HELE BYBEL IN 365 DAE" ingebak, dus lê die
+sluier **net oor die onderste strook** en die enigste woorde wat ons byvoeg —
+"DAG n VAN 365" — staan heel onder. 'n Sluier oor die hele kaart sou Dewald se
+eie opskrif dof maak, en dit is dieselfde les as die wallpaper agter Tyd met God
+se klaar-skerm: moenie twee stelle woorde oor mekaar laat veg nie.
+
+Die reël is ALTYD dieselfde vorm; net die knoppie weet waar 'n mens staan
+(`kaartStand()` in `bybel365.js`, suiwer, met toetse). 'n Mens wat nog nooit
+begin het nie sien "DAG 1 VAN 365 · BEGIN HIER" — dit is waar hy staan, en die
+kaart lieg dus nie.
+
+**Die kaart luister na 'n sein.** Die e-boekblad bly agter die plan STAAN, en
+`storage` vuur nie in dieselfde oortjie nie — dieselfde probleem as die hart op
+Luister. `stel()` in `Bybel365.jsx` waai `b365-stand`, en sonder daardie reël
+wys die kaart nog gister se dag wanneer 'n mens uit die plan klim.
+
+Die prent is `public/beelde/bybel-365.webp` (85 KB), 'n
+CSS-`background-image` op 'n ONDEURSIGTIGE houer in die prent se eie gemiddelde
+kleur — nooit 'n `<img>` nie. Sien VolgJesusKnoppie.jsx se kop vir die volle
+rede; dit is waar die gekleurde strepe op Android vandaan gekom het.
+
+Blaaiertoetse: `kykB365.mjs` (die plan self) en `kykB365Kaart.mjs` (die kaart:
+staan hy DIREK onder VOLG JESUS s'n, maak hy die plan oop, en weet hy van die
+nuwe dag wanneer 'n mens terugkom). Meet die kaart binne `.meer` — Luister bly
+agter die e-boekblad gemonteer en dra sy EIE VOLG JESUS-kaart, en 'n toets wat
+`document.querySelector('.vjk')` gebruik, meet die verkeerde een.
+
+`kykB365.mjs` meet die een ding wat geen eenheidstoets kan sien: watter element
+werklik BO-OP is nadat die LEES-knoppie gedruk is. Die opspringers word eers
+weggeklik — sonder dit slaag daardie toets om die verkeerde rede.
 
 ---
 

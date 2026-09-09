@@ -86,6 +86,11 @@ export default function Bybel365({ onClose }) {
     if (plan) {
       try { localStorage.setItem(STAND_SLEUTEL, JSON.stringify(standUit(plan, lys))) }
       catch { /* privaat modus */ }
+      /* Die e-boekblad se kaart bly agter hierdie skerm STAAN, en `storage`
+         vuur nie in dieselfde oortjie nie — dieselfde probleem as die hart op
+         Luister. Sonder hierdie sein wys daardie kaart nog gister se dag
+         wanneer 'n mens hier uitklim. */
+      window.dispatchEvent(new CustomEvent('b365-stand'))
     }
   }, [plan])
 

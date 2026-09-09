@@ -10,7 +10,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import {
   sleutelVir, leesteVan, dagVan, dagKlaar, huidigeDag, allesKlaar,
-  vordering, merk, merkDag, spoorNaam, SPORE,
+  vordering, merk, merkDag, spoorNaam, SPORE, kaartStand, standUit,
 } from './bybel365.js'
 
 let reg = 0, val = 0
@@ -114,6 +114,35 @@ is('en die hele dag terug', merkDag(ALLES, PLAN.dae[0], false).sort(),
   is('die oorspronklike lys bly heel', voor, ['GEN 1'])
 }
 
+console.log('\n── Die kaart op die e-boekblad ──')
+/* Die REËL bly altyd dieselfde vorm; net die KNOPPIE praat oor waar 'n mens
+   staan. Dieselfde woorde as VOLG JESUS se kaart, wat direk daarbo sit. */
+{
+  const nuut = kaartStand(null)
+  is('n mens wat nog nooit oopgemaak het', [nuut.lyn, nuut.knop], ['Dag 1 van 365', 'BEGIN HIER'])
+  is('en die kaart weet dit', [nuut.begin, nuut.klaar], [true, false])
+  is('n stukkende opsomming lyk dieselfde', kaartStand('gemors').knop, 'BEGIN HIER')
+  is('en een sonder n dag ook', kaartStand({ dae: 3 }).knop, 'BEGIN HIER')
+}
+{
+  const besig = kaartStand({ dag: 47, dae: 46 })
+  is('halfpad',        [besig.lyn, besig.knop], ['Dag 47 van 365', 'GAAN VOORT'])
+  is('en nie klaar nie', [besig.begin, besig.klaar], [false, false])
+}
+{
+  const klaar = kaartStand({ dag: 365, dae: 365 })
+  is('die hele Bybel gelees', [klaar.lyn, klaar.knop], ['Al 365 dae klaar', 'LEES WEER'])
+  is('en dit weet dit',       klaar.klaar, true)
+}
+/* Die kaart mag NOOIT 'n dag noem wat nie bestaan nie — 'n ou opsomming, 'n
+   plan wat korter word, 'n handgeskrewe sleutel. */
+is('dag 900 word by 365 gekeer', kaartStand({ dag: 900, dae: 2 }).lyn, 'Dag 365 van 365')
+is('dag 0 begin by 1',           kaartStand({ dag: 0, dae: 0 }).lyn, 'Dag 1 van 365')
+is('n negatiewe dag ook',        kaartStand({ dag: -5, dae: 0 }).knop, 'BEGIN HIER')
+is('n dag met kommas word heel', kaartStand({ dag: 12.7, dae: 11 }).lyn, 'Dag 12 van 365')
+is('meer dae as die plan is klaar', kaartStand({ dag: 300, dae: 999 }).knop, 'LEES WEER')
+is('n korter plan tel korter',   kaartStand({ dag: 3, dae: 2 }, 5).lyn, 'Dag 3 van 5')
+
 console.log('\n── Die spore ──')
 is('drie spore', Object.keys(SPORE).length, 3)
 is('die verhaal', spoorNaam('verhaal'), 'DIE VERHAAL')
@@ -199,6 +228,21 @@ if (!existsSync(PAD)) {
   {
     const naDag1 = merkDag([], egte.dae[0])
     is('dag 1 klaar → dag 2', huidigeDag(egte, naDag1), 2)
+  }
+  /* Die skerm SKRYF `standUit`; die kaart LEES dit. Loop hulle uitmekaar, wys
+     die e-boekblad 'n ander dag as die plan self — en dit is die soort fout
+     wat niemand raaksien nie. */
+  console.log('\n── Wat die skerm skryf, is wat die kaart lees ──')
+  {
+    is('nog niks gelees nie', kaartStand(standUit(egte, [])).lyn, 'Dag 1 van 365')
+    const naDag1 = merkDag([], egte.dae[0])
+    is('ná dag 1',            kaartStand(standUit(egte, naDag1)).lyn, 'Dag 2 van 365')
+    is('en die knoppie skuif', kaartStand(standUit(egte, naDag1)).knop, 'GAAN VOORT')
+  }
+  {
+    let alles = []
+    for (const d of egte.dae) alles = merkDag(alles, d)
+    is('alles gelees → LEES WEER', kaartStand(standUit(egte, alles)).knop, 'LEES WEER')
   }
   {
     let alles = []
