@@ -24,6 +24,8 @@ import './VolgJesusKnoppie.css'
 
 export default function VolgJesusKnoppie({ week = null, opKlik }) {
   const begin = !week || !week.nommer
+  /* Klaar met alles wat gepubliseer is, en wag vir die volgende week. */
+  const wag = !begin && week.wag === true
 
   return (
     <button className="vjk" onClick={opKlik}>
@@ -36,12 +38,34 @@ export default function VolgJesusKnoppie({ week = null, opKlik }) {
       <span className="vjk-binne">
         <span className="vjk-titel">VOLG JESUS</span>
         <span className="vjk-streep" />
+
+        {/* ── Drie gesigte, nie twee nie ──
+
+            "GAAN VOORT" op 'n week wat 'n mens KLAAR het, is 'n kaart wat lieg.
+            Dewald, 10 September 2026, met 'n skermkiekie: "week 4 klaar maar
+            kaart wys nog week 4."
+
+            Is hy by die laaste gepubliseerde week en het hy dit klaar, dan sê
+            die kaart wat werklik waar is: die volgende week kom. Die knoppie
+            bly — sy antwoorde, die groepsessie en die wallpapers is almal nog
+            daarbinne. */}
         <span className="vjk-sub">
-          {begin ? '52 weke saam met Jesus' : `Week ${week.nommer} van 52`}
+          {begin
+            ? '52 weke saam met Jesus'
+            : wag
+              ? `Week ${week.volgende || week.nommer + 1} kom binnekort`
+              : `Week ${week.nommer} van 52`}
         </span>
-        {!begin && week.titel && <span className="vjk-week">{week.titel}</span>}
+
+        {!begin && (
+          wag
+            ? <span className="vjk-week">Jy het Week {week.nommer} klaargemaak.</span>
+            : week.titel && <span className="vjk-week">{week.titel}</span>
+        )}
+
         <span className="vjk-knop">
-          {begin ? 'BEGIN HIER' : 'GAAN VOORT'} <span aria-hidden="true">›</span>
+          {begin ? 'BEGIN HIER' : wag ? 'SIEN DIT WEER' : 'GAAN VOORT'}
+          {' '}<span aria-hidden="true">›</span>
         </span>
       </span>
     </button>

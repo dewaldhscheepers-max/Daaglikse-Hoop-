@@ -58,7 +58,7 @@ node src/data/prentPad.toets.mjs              # waar 'n prent gehaal word om te 
 node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 toetse
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
-node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die kaart, 31 toetse
+node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
@@ -472,6 +472,29 @@ later wys.
 **Die kaart wys nie as niks gepubliseer is nie.** 'n Knoppie wat op 'n leë
 skerm uitkom, is erger as geen knoppie nie. Die hele besluit staan in
 `src/components/VolgJesusKaart.jsx`.
+
+**Die kaart het DRIE gesigte, nie twee nie**, en die derde het gekom uit 'n
+skermkiekie van 10 September 2026: *"week 4 klaar maar kaart wys nog week 4."*
+Die kaart het "WEEK 4 VAN 52 — GAAN VOORT" gewys aan iemand wat Week 4 klaar
+gehad het.
+
+`kaartKeuse()` in `volgJesusBegin.js` is nou die hele besluit, suiwer en met
+toetse. Twee dinge wat dit moes regmaak:
+
+* **`vj_my_week` is nie die waarheid nie.** Daardie teller skuif net wanneer
+  Dag 5 IN DIE APP klaargemaak word. Bly hy agter — 'n ou weergawe, 'n foon wat
+  halfpad toegemaak het — dan wys die kaart vir altyd 'n week wat die mens klaar
+  het. Die merkies per week (`vj_klaar_w<n>`) is die waarheid, en die kaart loop
+  nou VORENTOE deur elke week wat werklik voltooi is. Dit stel homself reg.
+* **Is hy by die laaste gepubliseerde week en het hy dit klaar, is daar niks om
+  "voort te gaan" met nie.** Die kaart sê dan wat waar is — *"WEEK 5 KOM
+  BINNEKORT · Jy het Week 4 klaargemaak"* — en die knoppie word "SIEN DIT WEER".
+  Hy bly 'n knoppie: sy antwoorde, die groepsessie en die wallpapers is almal
+  nog daarbinne.
+
+Blaaiertoets: `kykVjKaart.mjs` loop al drie gevalle en LEES wat werklik op die
+kaart staan. 'n Eenheidstoets kan dit nie sien nie — die vorige weergawe se
+toetse was almal groen terwyl die kaart gelieg het.
 
 ### Die kaart staan NET op die e-boekblad
 
