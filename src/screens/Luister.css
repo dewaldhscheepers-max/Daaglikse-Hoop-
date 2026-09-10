@@ -1013,3 +1013,7 @@
    versoek op die blad wat aan die volgende blok geraak het, en twee versoeke
    wat mekaar aanraak, lyk soos een. */
 .vj-kaart-plek { margin: 16px 16px 20px; }
+/* Die kaart binne dra sy eie onderste marge — dit was die gaping na die VOLG
+   JESUS-kaart wat hier onder gestaan het. Noudat sy weg is (sien Luister.jsx),
+   sou daardie 18px 'n gat na niks wees. */
+.vj-kaart-plek > *:last-child { margin-bottom: 0; }

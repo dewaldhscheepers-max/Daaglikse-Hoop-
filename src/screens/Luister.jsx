@@ -5,7 +5,6 @@ import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
 import DonationCard from '../components/DonationCard'
-import VolgJesusKaart from '../components/VolgJesusKaart'
 import TydMetGodKaart from '../components/TydMetGodKaart'
 import { merkGeluisterNou as tmgGeluister } from '../data/tydMetGodBerging'
 import { like as likeNota, leesGelike, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
@@ -1200,23 +1199,19 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         </div>
       </div>
 
-      {/* ── VOLG JESUS ──
-
-          Direk onder die speler, want dit is wat Dewald gevra het en dit is
-          reg: die stemboodskap bly die app, en die program is die volgende
-          tree vir wie meer wil hê as vandag se boodskap.
-
-          Die kaart WYS NIE as daar niks gepubliseer is nie. Sien
-          VolgJesusKaart.jsx — die hele besluit staan daar sodat hierdie skerm
-          se navigasie onaangeraak bly. */}
       {/* ── Vandag se Tyd met God ──
-          Direk onder die speler, BO die VOLG JESUS-kaart: dit is die ding wat
-          'n mens vandag doen; VOLG JESUS is die program vir wie meer wil hê.
+          Direk onder die speler: dit is die ding wat 'n mens VANDAG doen.
 
-          Een reël hier, soos VolgJesusKaart. Die drie toestande — begin,
-          gaan voort, klaar — staan in TydMetGodKaart.jsx met toetse, en die
-          nota gaan SAAM met die gebeurtenis sodat App hom nie weer hoef te
-          laai nie. Hierdie skerm se navigasie bly onaangeraak. */}
+          VOLG JESUS het hier gestaan en is op 10 September 2026 weg. Dewald:
+          "I want to remove it from the Luister Now page. It should only be on
+          the e-books page." Luister Nou is stemboodskappe; E-boeke is boeke en
+          langer programme. Die kaart leef nou net in Meer.jsx — moenie hom
+          hier terugsit nie.
+
+          Een reël hier. Die drie toestande — begin, gaan voort, klaar — staan
+          in TydMetGodKaart.jsx met toetse, en die nota gaan SAAM met die
+          gebeurtenis sodat App hom nie weer hoef te laai nie. Hierdie skerm se
+          navigasie bly onaangeraak. */}
       <div className="vj-kaart-plek">
         {today && (
           <TydMetGodKaart
@@ -1224,7 +1219,6 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             opBegin={() => window.dispatchEvent(new CustomEvent('open-tyd-met-god', { detail: { nota: today } }))}
           />
         )}
-        <VolgJesusKaart />
       </div>
 
 

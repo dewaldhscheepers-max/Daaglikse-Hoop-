@@ -167,6 +167,20 @@
   margin-top: 8px;
 }
 
+/* ── Die "VOLG JESUS het geskuif"-knoppie ──
+   Dit is die skerm se enigste aksie en moet soos een lyk; die gedeelde
+   .payment-popup-btn erf net die blaaier se grys. Geen `opacity` en geen
+   `transform` op `:active` nie — sien CLAUDE.md se Android-reels; net kleur. */
+.vj-skuif-btn {
+  background: var(--purple-dark);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.vj-skuif-btn:active { background: #4A3E75; }
+
 .payment-popup-cancel {
   font-size: 14px;
   color: var(--text-muted);

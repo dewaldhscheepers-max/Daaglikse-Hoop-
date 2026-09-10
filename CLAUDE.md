@@ -58,6 +58,7 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/volgJesusBegin.toets.mjs        # BEGIN HIER of GAAN VOORT op die kaart, 31 toetse
+node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
@@ -467,11 +468,55 @@ week 2 gepubliseer, spring die app nie daarheen nie — sien `tot()`. 'n Mens
 wat by week 2 vasval sonder om te weet hoekom, is erger as 'n week wat 'n dag
 later wys.
 
-**Die kaart op Luister wys nie as niks gepubliseer is nie.** 'n Knoppie wat
-op 'n leë skerm uitkom, is erger as geen knoppie — en hierdie blad is waar die
-oggendkennisgewing elke dag duisende mense laat land. Die hele besluit staan
-in `src/components/VolgJesusKaart.jsx` sodat `Luister.jsx` een reël bykry en
-sy navigasie onaangeraak bly.
+**Die kaart wys nie as niks gepubliseer is nie.** 'n Knoppie wat op 'n leë
+skerm uitkom, is erger as geen knoppie nie. Die hele besluit staan in
+`src/components/VolgJesusKaart.jsx`.
+
+### Die kaart staan NET op die e-boekblad
+
+Sy het onder die speler op Luister gestaan. Op 10 September 2026 is sy weg —
+Dewald: *"I want to remove it from the Luister Now page. It should only be on
+the e-books page."* Die struktuur is nou skoon: **Luister Nou is
+stemboodskappe; E-boeke is boeke en langer programme.** Moenie haar op Luister
+terugsit nie.
+
+**Die skuif self was die maklike helfte.** Die mens wat gister by Dag 3 was,
+maak die app oop, die knoppie is weg, en niks sê hoekom nie — sy dink haar
+vordering is weg en sy kom nie terug nie. Ons het geen kanaal na daardie foon
+nie; die oomblik waarop sy oopmaak, is die enigste een wat ons het.
+
+Daarom kom daar EEN boodskap ("VOLG JESUS HET GESKUIF"), en die reëls staan in
+`src/data/volgJesusSkuif.js`:
+
+* **net vir wie reeds begin het** — dieselfde `hetBegin()` as die kaart s'n,
+  maar oor ALLE weke, want iemand wat Week 2 klaargemaak het en Week 3 nog nie
+  oopgemaak het nie, is net so seer besig;
+* **een keer** (`vj_skuif_gesien`), en elke uitgang merk dit — die knoppie,
+  "Ek verstaan", en die agtergrond;
+* **net op die Luister-oortjie.** Op die e-boekblad staan die kaart reg voor
+  jou en dan sê die boodskap niks;
+* **nooit bo-op iets anders nie** — nie oor klank, nie oor 'n ander skerm nie.
+
+**Die knoppie vat 'n mens na die PROGRAM, by sy eie dag** (dieselfde
+`open-volg-jesus` as die kaart), en stel die oortjie op E-boeke. Maak hy die
+program toe, land hy op die blad waar dit nou woon. Dit is die halwe punt van
+die boodskap; "gaan soek dit self" is hoe 'n mens iemand verloor.
+
+Twee dinge wat die eerste weergawe verkeerd gehad het, en albei kom uit die
+blaaiertoets:
+
+* dit het EEN keer gekyk en dan opgegee. Dit klink veilig en dit is nie: wie
+  nie geïnstalleer het nie, sien die installasie-uitklap by byna elke oopmaak,
+  en dan kom hierdie boodskap NOOIT — vir juis die mens wat hom nodig het. Dit
+  kyk nou elke 2,5s vir sowat 'n halfminuut en gee dan op tot die volgende
+  oopmaak;
+* die installasie-uitklap het DRIE sekondes later bo-op hom kom staan en die
+  knoppie doodgedruk. Daardie uitklap het nou 'n hek (`vjSkuifRef`). En
+  `oorlegLae` is nie genoeg om "is iets oop" te beantwoord nie — die
+  opspringer-bestuurder se eie vensters leef in `activePopup` en staan glad
+  nie in daardie lys nie.
+
+Blaaiertoets: `kykVjSkuif.mjs`.
 
 `VolgJesusLewe.css` sit op `z-index: 240`, **onder** die Bybel se 250. Die
 LEES-kaart stuur 'n mens na die app se Bybel, en 'n Bybel wat agter hierdie
