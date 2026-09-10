@@ -202,6 +202,13 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                    'Markus 11:11–21', 'Hebreërs 10:19–25',
                    'Markus 11:15–17', 'Hebreërs 10:19–22',
                    'Matteus 21:12–17', 'Johannes 2:13–22',
+      /* Week 5 — elke dag se LEES-blok, die admin se twee velde, die
+         groepsessie se kern-Skrifte, en die verse wat die geskrewe
+         hoofboodskap op Dag 1 self aanhaal. */
+      /* Week 5 */ 'Matteus 3:13–17', 'Efesiërs 2:8–10', 'Romeine 6:3–4',
+                   'Matteus 28:18–20', 'Handelinge 8:26–39',
+                   'Galasiërs 3:27', 'Handelinge 8:36', 'Handelinge 10:47',
+                   '1 Petrus 3:21', 'Johannes 2:19',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

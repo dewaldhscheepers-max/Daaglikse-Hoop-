@@ -377,6 +377,28 @@ function Blok({ blok: b, week, w, antwoorde, stel, opPraatMetGroep }) {
     )
   }
 
+  /* ── Die GESKREWE hoofboodskap ──
+   *
+   * Week 5 het geen opname nie. Dewald: "Week 5 het geen stemboodskap nie.
+   * Dag 1 se hoofboodskap is die lang leesstuk hierbo."
+   *
+   * Dit staan op presies dieselfde plek in die dag as waar die `stem`-blok in
+   * Week 1 tot 4 staan, en dit dra dieselfde gewig — daardie dag het dus ook
+   * geen gewone teksblok nie.
+   *
+   * Dit is OOP, nie toegevou nie. Die transkripsie onder die speler is
+   * toegevou omdat 'n mens die opname LUISTER en die teks net soms nodig het.
+   * Hier is die teks die boodskap self, en 'n hoofboodskap agter 'n knoppie is
+   * 'n boodskap wat niemand lees nie. */
+  if (b.soort === 'boodskap') {
+    return (
+      <div className="vs-kaart vs-boodskap">
+        {b.kop && <div className="vs-kop">{b.kop}</div>}
+        <p className="vs-lyf">{b.lyf}</p>
+      </div>
+    )
+  }
+
   /* 'n Teksblok mag 'n Skrifgedeelte dra. Week 2 se Dag 5 het "JAKOBUS 4:7–8"
      as opskrif gehad met NIKS om dit oop te maak nie — 'n verwysing sonder 'n
      knoppie lees soos 'n stukkende LEES-kaart, en dit is presies hoe dit vir

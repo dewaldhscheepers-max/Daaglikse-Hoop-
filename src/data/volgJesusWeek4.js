@@ -345,10 +345,15 @@ export const WEEK4_DEELSIN =
   + 'besluit het om te gaan nie. Dit beteken dat Hy Here genoeg is om jou '
   + 'rigting te verander.'
 
-/* Nog geen Week 5 nie. `weekVolgende(4)` val terug op `null` en die skerm wys
-   dan eenvoudig niks — 'n geraaide titel vir 'n week wat nog nie bestaan nie,
-   is erger as stilte. */
-export const WEEK4_VOLGENDE = null
+/* Die brug na Week 5 — Dewald se eie woorde. Dit was `null` totdat Week 5
+   bestaan het, en Week 4 het toe op 'n doodloopstraat geëindig. */
+export const WEEK4_VOLGENDE = {
+  nommer: 5,
+  titel: 'Hoekom doop?',
+  lyf: 'Jesus het doop nie as iets onbelangriks behandel nie. Volgende week '
+     + 'kyk ons na wat dit beteken, wat dit vir ons wys, en waarom dit ’n '
+     + 'belangrike stap van gehoorsaamheid is.',
+}
 
 export function blokkeVirDag4(n) {
   const dag = WEEK4_DAE.find(d => d.n === n)

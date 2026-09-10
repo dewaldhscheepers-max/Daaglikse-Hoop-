@@ -113,6 +113,10 @@
 .vj-kontrole input { margin-top: 2px; width: 18px; height: 18px; flex-shrink: 0; }
 .vj-kontrole strong { text-transform: uppercase; font-size: 11px; letter-spacing: .4px; }
 
+/* Die "hoofboodskap is geskrewe"-merkie. Dieselfde vorm as die vyf kontroles —
+   dit hoort by hulle, want dit is ook 'n hek. */
+.vj-geskrewe { border-bottom: 0; margin-top: 4px; }
+
 .vj-status { margin: 18px 0; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; }
 .vj-status.goed { background: #EAF6EC; color: #1F5B2C; }
 .vj-status.sleg { background: #FFF6E8; color: #7A5210; }

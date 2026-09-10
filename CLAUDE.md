@@ -44,11 +44,12 @@ node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 
 node src/data/sorgSaamDra.toets.mjs           # die pad terug na 'n gesprek, 42 toetse
 node api/_sorgFirestore.toets.mjs             # blaai deur al die bladsye, 41 toetse
 node api/_kennisgewings.toets.mjs             # die oggend-kennisgewing, 74 toetse
-node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 70 toetse
+node src/data/volgJesus.toets.mjs             # VOLG JESUS se hekke + elke vers teen die GAB, 78 toetse
 node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 58 toetse
 node src/data/volgJesusWeek2.toets.mjs        # Week 2 se pad, teen dieselfde perke, 69 toetse
 node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde perke, 84 toetse
-node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra Dag 4 alleen, 109
+node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra Dag 4 alleen, 111
+node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n GESKREWE boodskap, 130
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -71,7 +72,7 @@ node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
 node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
 node api/_telSkerwe.toets.mjs                 # die tellers oor tien dokumente, 42 toetse
 node api/_volgJesusTellingSkerwe.toets.mjs    # en die draad daarheen, vals Firestore, 19 toetse
-node src/data/vjChatOnderwerp.toets.mjs       # waaroor die groepchat praat, 91 toetse
+node src/data/vjChatOnderwerp.toets.mjs       # waaroor die groepchat praat, 93 toetse
 node api/_volgJesusBerging.toets.mjs          # hoe 'n week gestoor word, 42 toetse
 node src/data/volgJesusMylpale.toets.mjs      # die mylpale + wat die kerk mag sien, 42 toetse
 node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde oorleef, 53 toetse
@@ -615,14 +616,55 @@ Vyf plekke verander, en nie een mag agterbly nie:
 4. `WEEK<N-1>_VOLGENDE` — die BRUG. Dit is `null` solank die volgende week nie
    bestaan nie, en dan eindig die vorige week op 'n doodloopstraat. Week 3 het
    'n dag lank so gestaan.
-5. Die twee toetse wat op "die volgende week bestaan nog nie" staan:
-   `volgJesusWeek<N-1>.toets.mjs` en `vjChatOnderwerp.toets.mjs`.
+5. Die toetse wat op "die volgende week bestaan nog nie" staan. Dit is meer as
+   een: `volgJesusWeek<N-1>.toets.mjs`, `vjChatOnderwerp.toets.mjs` **en**
+   `volgJesusWeek<N-2>.toets.mjs` — elke week se toets het sy eie
+   `hetDae(N+1) === false`, en hulle skuif almal saam.
 
-**Die stemboodskap se dag dra GEEN teksblok nie.** Die perk is vyf blokke, en
+Plus twee wat maklik agterbly:
+
+* die nuwe week se verse by `volgJesus.toets.mjs` se VERWYSINGS-lys, sodat elke
+  hoofstuk en vers teen die GAB gekeur word;
+* die vorige week se blaaierlopie, wat dalk aanvaar het daar is nog GEEN
+  volgende-week-kaart nie.
+
+**Die hoofboodskap se dag dra GEEN teksblok nie.** Die perk is vyf blokke, en
 lees + stem + teks + groot + vraag + gebed is ses. Die geskrewe weergawe is in
 albei gevalle waar dit tot dusver gebeur het (Week 3 se Dag 3, Week 4 se Dag 4)
 'n verkorting van presies wat die opname voluit dra — dit word dus gehoor in
 plaas van gelees. Die GROOT lyn bly staan; dit is die week se eie sin.
+
+Dieselfde geld vir 'n week wat sy boodskap LAAT LEES — sien hieronder.
+
+### 'n Week SONDER 'n stemboodskap
+
+Week 5 is die eerste een. Dewald: *"Week 5 het geen stemboodskap nie. Dag 1 se
+hoofboodskap is die lang leesstuk."*
+
+Dit het twee dinge gekos, en albei sou die week stilweg doodgemaak het:
+
+**Die skerm kon 'n geskrewe hoofboodskap nie WYS nie.** Die transkripsie leef
+binne die speler-blok; geen speler, geen teks. Daar is nou 'n `boodskap`-blok
+wat op presies dieselfde plek in die dag staan as waar `stem` in Week 1 tot 4
+staan. Dit is OOP, nie toegevou soos die transkripsie nie: 'n mens LUISTER na
+'n opname en soek die teks net soms, maar hier IS die teks die boodskap, en 'n
+hoofboodskap agter 'n knoppie is een wat niemand lees nie.
+
+Daardie blok is van die 180 woorde vrygestel, en dit is nie 'n gaatjie nie —
+dit dra presies wat die opname elke ander week dra. Die dag dra dan ook geen
+gewone teksblok nie.
+
+**En die week kon nie PUBLISEER nie.** `HOOFBOODSKAP_VELDE` het net `videoId`
+en `stemboodskapUrl` geken. Dit is woord vir woord dieselfde fout as toe die
+hek `videoId` geëis het van 'n week met 'n stemboodskap: 'n hek wat vra vir 'n
+ding wat daardie week doelbewus nie het nie.
+
+`geskreweBoodskap` is 'n derde vorm. Dit is 'n VLAGGIE en nie 'n adres nie,
+want die geskrewe boodskap leef in KODE — die hek kan dus nie self sien of dit
+daar is nie, en 'n mens moet dit sê. Dit is die punt: dit bly 'n bewuste daad,
+soos 'n oplaai. `false` tel nie (`String(false)` is nie leeg nie en sou stilweg
+deur die hek geglip het), en daar is 'n merkie in die admin langs die
+stemoplaai — anders is dit weer 'n hek waarby 'n mens nie kan uitkom nie.
 
 **Die klaar-skerm praat oor die week wat pas klaar is.** Dit was vir ELKE week
 Week 1 s'n — "JY HET BEGIN KYK", hardgekodeer in `VolgJesusStap.jsx` — sodat
@@ -635,8 +677,14 @@ VERWYSINGS-lys. `ontleedVerwysing` sê net of die VORM reg is; daardie lus vra
 of die hoofstuk en die verse werklik bestaan. Sit 'n nuwe week se verse daar
 by. Dit vervang nie Dewald se eie nagaan nie.
 
-Blaaiertoets: `kykWeek4.mjs` in die scratchpad loop die hele week deur teen 'n
-onderskepte `/api/volg-jesus-openbaar`, en tel die KLIKKE — tien vir vyf dae.
+Blaaiertoetse: `kykWeek4.mjs` en `kykWeek5.mjs` in die scratchpad loop die hele
+week deur teen 'n onderskepte `/api/volg-jesus-openbaar`, en tel die KLIKKE —
+tien tot elf vir vyf dae. Week 5 s'n gee doelbewus 'n LEË `stemboodskapUrl`,
+presies soos die bediener sal, en eis dat daar nêrens 'n speler is nie.
+
+Albei moet die "VOLG JESUS het geskuif"-opspringer kan wegklik: hulle saai 'n
+mens wat die program reeds begin het, en dit is presies wie daardie boodskap
+kry.
 
 ### Groepe en die groepchat
 

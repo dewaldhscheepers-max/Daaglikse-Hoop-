@@ -586,6 +586,27 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         Onthou om daarna <strong>Stoor</strong> te druk.
       </p>
 
+      {/* ── Of die week se boodskap GESKREWE is ──
+
+          Week 5 het geen opname nie — die hoofboodskap is die lang leesstuk op
+          Dag 1, en dit leef in kode. Die publiseer-hek kan dus nie self sien of
+          dit daar is nie, en sonder hierdie merkie sou daardie week vir altyd
+          gesper gebly het.
+
+          Dit is presies dieselfde fout as die Publiseer-knoppie wat 'n dag lank
+          nie bestaan het nie: 'n hek waarby 'n mens nie kan uitkom nie. */}
+      <label className="vj-kontrole vj-geskrewe">
+        <input
+          type="checkbox"
+          checked={week.geskreweBoodskap === true}
+          onChange={e => stel('geskreweBoodskap', e.target.checked)}
+        />
+        <span>
+          Hierdie week se hoofboodskap is <strong>geskrewe</strong> (geen opname
+          of video nie)
+        </span>
+      </label>
+
       {/* TWEE wallpapers. Die een sluit Dag 1 af, die ander sluit die week af.
           Albei bly staan — die een vervang nie die ander nie. */}
       <PrentOplaai week={week.weeknommer} sleutel="dag1"

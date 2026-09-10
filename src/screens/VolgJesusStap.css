@@ -107,6 +107,15 @@
   color: var(--purple-dark); margin-bottom: 10px;
 }
 .vs-lyf { font-size: 16px; line-height: 1.8; white-space: pre-line; color: var(--text); margin: 0; }
+/* ── Die geskrewe hoofboodskap (Week 5) ──
+   Dit dra die dag, soos die opname in ander weke. 'n Dun goue lyn links merk
+   dit as die week se boodskap sonder om 'n tweede kleur op die blad te bring,
+   en die reëls staan effens wyer uitmekaar omdat dit 'n LANG leesstuk is. */
+.vs-boodskap {
+  border-left: 3px solid var(--gold, #E0B872);
+}
+.vs-boodskap .vs-lyf { line-height: 1.85; }
+
 .vs-inlei {
   font-size: 15px; line-height: 1.7; font-style: italic;
   color: var(--purple-dark); margin: 0 0 14px;

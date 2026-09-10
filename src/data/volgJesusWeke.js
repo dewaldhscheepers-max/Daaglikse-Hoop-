@@ -254,4 +254,58 @@ export const WEKE = {
     fasiliteerderGrens: '',
     pastoraleRisiko: 'medium',
   },
+  5: {
+    weeknommer: 5,
+    titel: 'Hoekom doop?',
+    doel:
+      'Om te verstaan dat doop jou nie red nie, maar dat dit ’n belangrike stap van geloof en gehoorsaamheid aan Jesus is.',
+    weekKern:
+      'Jesus red. Doop wys: Ek vertrou Hom, ek behoort aan Hom en ek wil Hom volg.',
+    openingskerm:
+      'Jesus het doop nie as iets onbelangriks behandel nie.\n\n'
+      + 'Hierdie week kyk ons na wat doop beteken, wat dit vir ons wys en waarom dit ’n belangrike stap van gehoorsaamheid aan Jesus is.\n\n'
+      + 'Die vraag is nie “Is ek goed genoeg?” nie.\n\n'
+      + 'Die vraag is: “As Jesus my Here is, wat is my volgende stap?”',
+    primereSkrif: 'Matteus 3:13–17',
+    ondersteunendeSkrif: 'Matteus 28:18–20',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* HIERDIE WEEK SE HOOFBOODSKAP IS GESKREWE — daar is geen opname nie.
+       Sonder hierdie vlaggie sou die publiseer-hek se "geen hoofboodskap"
+       die week vir altyd gesper hou. Sien HOOFBOODSKAP_VELDE in volgJesus.js
+       en die kop van volgJesusWeek5.js. */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'Jesus red. Doop wys: Ek vertrou Hom, ek behoort aan Hom en ek wil Hom volg.',
+    eenSin:
+      'Ek word nie gedoop om God se liefde te verdien nie. Ek reageer in gehoorsaamheid omdat Hy my reeds liefhet.',
+    privaatRefleksie:
+      'As Jesus werklik my Here is, is daar iets wat my terughou om Hom ook hierin te gehoorsaam?',
+    gehoorsaamheidStap:
+      'Is jy reeds gedoop: kies een deel van jou lewe waarin jy hierdie week meer doelbewus wil leef soos iemand wat aan Jesus behoort. Is jy nog nie gedoop nie: praat hierdie week met ’n pastoor of kerkleier wat jy vertrou oor jou volgende stap.',
+    gebed:
+      'Here Jesus, dankie dat ons redding nie iets is wat ons kan verdien nie. Dankie vir die kruis en die opstanding. Help ons om op U genade te reageer met geloof en gehoorsaamheid. Wys elkeen van ons wat ons volgende stap is en gee ons die moed om dit te neem. Laat hierdie waarheid diep in ons harte vasstaan: Ons behoort aan Jesus. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: waar ons redding werkelik vandaan kom — en waarom die water self niemand red nie.',
+    dag1Titel: 'Hoekom doop?',
+    dag2Titel: 'Jesus red — nie die water nie',
+    dag3Titel: 'Wat wys doop vir ons?',
+    dag4Titel: 'Geloof begin wys in gehoorsaamheid',
+    dag5Titel: 'Wat verhinder my?',
+    groepVraag1:
+      'Wat het jou hierdie week die meeste gehelp om doop beter te verstaan?',
+    groepVraag2:
+      'Waarom is dit belangrik om te verstaan dat ons uit genade gered word, maar ook geroep word om Jesus te gehoorsaam?',
+    groepVraag3:
+      'Wat dink julle wys iemand wanneer hy of sy gedoop word?',
+    groepVraag4:
+      'Wat sou julle sê vir iemand wat in Jesus glo, maar dink: “Ek is nog nie goed genoeg om gedoop te word nie”?',
+    fasiliteerderHoofpunt:
+      'Jesus red ons uit genade. Doop is ’n belangrike stap van geloof en gehoorsaamheid vir iemand wat Hom volg.',
+    fasiliteerderGrens:
+      'Moenie mense druk om onmiddellik gedoop te word nie. Moenie sê die water self red nie. Moenie sê iemand is nie gered bloot omdat hy of sy nog nie gedoop is nie. Moenie sommer vir iemand sê ’n vorige doop tel nie. Moenie die week in ’n stryery oor verskillende kerke se sienings verander nie. Hou die gesprek by Jesus, die evangelie, geloof en gehoorsaamheid.',
+    pastoraleRisiko: 'medium',
+  },
 }

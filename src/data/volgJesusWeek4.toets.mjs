@@ -151,7 +151,7 @@ for (const s of WEEK4_SESSIE.skrifte) {
 console.log('\n── Die register ken Week 4 ──\n')
 is('hetDae(4)', hetDae(4), true)
 is('die eerste drie ook', [hetDae(1), hetDae(2), hetDae(3)], [true, true, true])
-is('maar nie week 5 nie', hetDae(5), false)
+is('maar nie week 6 nie', hetDae(6), false)
 is('weekDae(4) gee vyf dae', weekDae(4).length, 5)
 is('blokkeVir(4, 1) gee Dag 1 se blokke', blokkeVir(4, 1).length, blokkeVirDag4(1).length)
 is('n onbekende week gee niks', blokkeVir(9, 1), [])
@@ -179,9 +179,15 @@ console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')
   is('n onbekende week ook', weekKlaar(9), null)
 }
 
-console.log('\n── Nog geen Week 5 nie — die skerm moet dit kan verduur ──\n')
-is('WEEK4_VOLGENDE is null', WEEK4_VOLGENDE, null)
-is('weekVolgende(4) gee ook null', weekVolgende(4), null)
+console.log('\n── Week 4 wys nou NA Week 5 ──\n')
+/* Dit was `null`, en Week 4 het op n doodloopstraat geëindig — presies soos
+   Week 3 n dag lank gestaan het. */
+{
+  waar('daar is n brug', !!WEEK4_VOLGENDE)
+  is('en dit wys na week 5', WEEK4_VOLGENDE && WEEK4_VOLGENDE.nommer, 5)
+  is('met Week 5 se titel', WEEK4_VOLGENDE && WEEK4_VOLGENDE.titel, WEKE[5].titel)
+  is('die register gee dieselfde', weekVolgende(4), WEEK4_VOLGENDE)
+}
 
 console.log('\n── Die week se rekord kan PUBLISEER ──\n')
 {

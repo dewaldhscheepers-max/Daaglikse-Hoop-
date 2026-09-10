@@ -152,8 +152,19 @@ export const OPSIONELE_VELDE = [
  * geeis, en toe kon die week nie publiseer nie al was alles anders reg —
  * 'n hek wat vra vir 'n ding wat hierdie week doelbewus nie het nie.
  *
- * Een van die twee is genoeg. Albei is ook goed. */
-export const HOOFBOODSKAP_VELDE = ['videoId', 'stemboodskapUrl']
+ * Week 5 se hoofboodskap is GESKREWE — daar is geen opname nie, net die lang
+ * leesstuk op Dag 1. Dit is presies dieselfde fout weer: die hek het gevra vir
+ * 'n ding wat daardie week doelbewus nie het nie, en die week kon nooit
+ * publiseer nie al was alles anders reg.
+ *
+ * `geskreweBoodskap` is dus 'n derde vorm. Dit is 'n VLAGGIE en nie 'n adres
+ * nie, want die geskrewe boodskap leef in KODE (die `boodskap`-blok in die
+ * week se dae) en nie in die plat rekord nie. Die hek kan dus nie self sien of
+ * dit daar is nie — 'n mens moet dit sê, en dit is die punt: dit bly 'n bewuste
+ * daad, net soos 'n oplaai.
+ *
+ * Een van die drie is genoeg. Meer as een is ook goed. */
+export const HOOFBOODSKAP_VELDE = ['videoId', 'stemboodskapUrl', 'geskreweBoodskap']
 
 export const RISIKO_VLAKKE = ['laag', 'medium', 'hoog']
 
@@ -178,12 +189,18 @@ export function publiseerFoute(week = {}) {
   }
 
   /* Geen hoofboodskap, geen week. Die hele enjin hang aan die verduideliking —
-     maar dit mag 'n video OF 'n stemboodskap wees. */
-  const hetHoofboodskap = HOOFBOODSKAP_VELDE.some(
-    v => week[v] !== undefined && week[v] !== null && String(week[v]).trim() !== '',
-  )
+     maar dit mag 'n video, 'n stemboodskap OF 'n geskrewe boodskap wees.
+
+     `false` tel nie. 'n Vlaggie wat afgeskakel is, is 'n mens wat gesê het
+     "nee, dit is nie hierdie week se boodskap nie" — en `String(false)` is
+     "false", wat nie leeg is nie en dus stilweg deur die hek sou glip. */
+  const hetHoofboodskap = HOOFBOODSKAP_VELDE.some(v => {
+    const w = week[v]
+    if (w === undefined || w === null || w === false) return false
+    return String(w).trim() !== ''
+  })
   if (!hetHoofboodskap) {
-    foute.push('Ontbreek: die week se hoofboodskap — laai ’n stemboodskap op, of gee ’n video-ID')
+    foute.push('Ontbreek: die week se hoofboodskap — laai ’n stemboodskap op, gee ’n video-ID, of merk dat die boodskap geskrewe is')
   }
 
   if (week.videoId && !geldigeVideoId(week.videoId)) {

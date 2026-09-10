@@ -38,6 +38,10 @@ import {
   WEEK4_DAE, WEEK4_REIS, WEEK4_OPENING, WEEK4_DEELSIN, WEEK4_VOLGENDE,
   WEEK4_TRANSKRIPSIE, WEEK4_SESSIE, WEEK4_KLAAR,
 } from './volgJesusWeek4.js'
+import {
+  WEEK5_DAE, WEEK5_REIS, WEEK5_OPENING, WEEK5_DEELSIN, WEEK5_VOLGENDE,
+  WEEK5_TRANSKRIPSIE, WEEK5_SESSIE, WEEK5_KLAAR,
+} from './volgJesusWeek5.js'
 
 const WEKE = {
   1: {
@@ -76,6 +80,17 @@ const WEKE = {
     transkripsie: WEEK4_TRANSKRIPSIE,
     sessie: WEEK4_SESSIE,
     klaar: WEEK4_KLAAR,
+  },
+  5: {
+    dae: WEEK5_DAE,
+    reis: WEEK5_REIS,
+    opening: WEEK5_OPENING,
+    deelsin: WEEK5_DEELSIN,
+    volgende: WEEK5_VOLGENDE,
+    /* Leeg: hierdie week het geen opname nie. Sien volgJesusWeek5.js se kop. */
+    transkripsie: WEEK5_TRANSKRIPSIE,
+    sessie: WEEK5_SESSIE,
+    klaar: WEEK5_KLAAR,
   },
 }
 
