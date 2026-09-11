@@ -13,6 +13,7 @@ import HoopOntvang from './screens/HoopOntvang'
 import { idUitPad as hoopIdUitPad } from './data/hoopSkakel'
 import { SLEUTEL as TMG_SLEUTEL, dagSleutel as tmgDag, leegStaat as tmgLeeg, rolDag as tmgRol, magVraGeld } from './data/tydMetGod'
 import { magWysSkuif, hetProgramBegin, isGesien, merkGesien, leesModus, leesKlaarPerWeek } from './data/volgJesusSkuif'
+import { naTydMetGod } from './data/tmgPopup'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
@@ -533,6 +534,20 @@ export default function App() {
   function vraKennisgewingsDalk() {
     const toestemming = huidigeToestemming()
     if (!toestemming) return false
+
+    /* ── Nooit bo-op iets anders nie ──
+     *
+     * Dit het bo-op Vandag se Tyd met God kom staan — 'n blaaiertoets het dit
+     * gevang terwyl dit die opspringers gemeet het. En dit is duurder as dit
+     * lyk: 'n mens word HOOGSTENS DRIE KEER in sy leeftyd gevra, en die
+     * vraag wat weggedruk word omdat dit in die pad staan, brand een van
+     * daardie drie.
+     *
+     * Dit word nie uitgestel nie — dit word net nie NOU gevra nie. `merkGevra`
+     * loop eers wanneer die vraag werklik gewys is, dus bly die kans staan en
+     * die volgende oopmaak vra weer. */
+    if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current) return false
+
     const mag = magVra({
       toestemming,
       kere: parseInt(localStorage.getItem('vraKennisgewingKere') || '0', 10),
@@ -1130,15 +1145,19 @@ export default function App() {
     try { localStorage.setItem('lastPopupDate', new Date().toISOString().slice(0, 10)) } catch {}
   }
 
-  /* Het hy die vloei VOLTOOI? Dan het die klaar-skerm reeds die vraag van
-     vandag gevra — deel, skenk of dankie — en niks anders mag vandag weer
-     vra nie. Dit is die reël "een vraag per dag", en dit hang aan hierdie
-     vlag en nie aan of hy 'n knoppie gedruk het nie. */
+  /* Het hy die vloei VOLTOOI? Dit is wat bepaal of die teruggehoue opspringer
+     deurgaan wanneer hy toemaak. */
   const tmgVoltooiRef = useRef(false)
 
+  /* Die klaar-skerm wys. Dit merk NIE meer die dag as gevra nie.
+   *
+   * Dit het — en die gevolg was stil en duur: Tyd met God is die DAAGLIKSE
+   * ritueel, dus het wie dit elke dag doen, nooit weer 'n nuwe e-boek of 'n
+   * donasievraag gesien nie. Die trouste mense in die app was presies dié wat
+   * niks meer gewys is nie. Dewald het dit op 11 September 2026 laat verander;
+   * sien src/data/tmgPopup.js. */
   function tmgKlaarGemaak() {
     tmgVoltooiRef.current = true
-    tmgVergeetPopup(true)
   }
 
   function tmgSluit() {
@@ -1149,13 +1168,25 @@ export default function App() {
     let staat = tmgLeeg()
     try { staat = tmgRol(JSON.parse(localStorage.getItem(TMG_SLEUTEL) || 'null') || tmgLeeg(), tmgDag()) } catch {}
 
-    /* Klaar gemaak → die dag is gevra (hierbo reeds gemerk).
-       Halfpad uitgeklim → NIKS. 'n Popup op pad uit is 'n straf, en die dag
-       word nie gemerk nie — môre is daar weer 'n kans.
-       Het hy sy hart oopgemaak, kry hy in ALBEI gevalle geen geldvraag nie. */
-    if (tmgVoltooiRef.current || !magVraGeld(staat)) tmgVergeetPopup(true)
-    else tmgVergeetPopup(false)
+    let reedsGevra = false
+    try { reedsGevra = localStorage.getItem('lastPopupDate') === new Date().toISOString().slice(0, 10) } catch {}
+
+    /* Die hele besluit staan in naTydMetGod(), suiwer en met toetse. */
+    const besluit = naTydMetGod({
+      voltooi: tmgVoltooiRef.current,
+      magGeld: magVraGeld(staat),
+      reedsGevra,
+    })
     tmgVoltooiRef.current = false
+
+    if (besluit === 'wys') {
+      /* Presies soos wanneer 'n nota klaar gespeel het — sien
+         `onAudioPlayingChange`. Wag daar niks, gebeur daar niks. */
+      setPendingPopup(null)
+      if (pendingPopup && !hoopOopRef.current) setActivePopup(pendingPopup)
+      return
+    }
+    tmgVergeetPopup(besluit === 'stil')
   }
 
   /* Die skenk-knoppie op die klaar-skerm IS die vraag van vandag. */

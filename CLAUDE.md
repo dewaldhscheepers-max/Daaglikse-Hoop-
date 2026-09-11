@@ -62,6 +62,7 @@ node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
+node src/data/tmgPopup.toets.mjs              # die opspringer NA die vloei, 23 toetse
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
 node src/data/bybel365.toets.mjs              # die 365-dae-plan, teen die egte GAB, 85 toetse
 node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie, 24 toetse
@@ -821,10 +822,38 @@ jou hart voor God gebring" onder iemand wat niks getik het nie, maak die hele
 skerm 'n leuen.
 
 **Die popups word TERUGGEHOU terwyl die vloei oop is** — dieselfde meganisme
-as die een wat hulle terughou terwyl klank speel (`pendingPopup`). Klaar
-gemaak: die vloei se eie vraag IS die dag s'n en `lastPopupDate` word gemerk.
-Halfpad uitgeklim: niks, en die dag word NIE gemerk nie. 'n Popup op pad uit
-is 'n straf.
+as die een wat hulle terughou terwyl klank speel (`pendingPopup`). Wat DAARNA
+met hulle gebeur, staan in `src/data/tmgPopup.js` (`naTydMetGod`), suiwer en
+met toetse:
+
+* **Klaar gemaak → die opspringer gaan DEUR**, presies soos wanneer 'n nota
+  klaar gespeel het.
+* **Halfpad uitgeklim → niks**, en die dag word NIE gemerk nie. 'n Popup op
+  pad uit is 'n straf; môre is daar weer 'n kans.
+* **Woorde in die gebedskassie getik → niks, en die dag is klaar gevra.** Dit
+  is die een reël wat nie skuif nie.
+
+Dit was anders: klaarmaak het die dag as GEVRA gemerk, want "die vloei se eie
+vraag IS die dag s'n". Dit klink reg en die gevolg was stil en duur — Tyd met
+God is die DAAGLIKSE ritueel, dus het wie dit elke dag doen, NOOIT weer 'n nuwe
+e-boek of 'n donasievraag gesien nie. Die trouste mense in die app was presies
+dié wat niks meer gewys is nie. Dewald, 11 September 2026: *"As hulle al die
+skerms op daai kaart klaargemaak het moet daai selfde popups wys... en maak
+seker dat die nuwe e-boeke nog wys en die donasie popups."*
+
+**Die kennisgewing-vraag staan ook terug.** Sy het 2,5s ná die blad oopmaak
+gekom en bo-op die vloei gaan staan — 'n blaaiertoets het dit gevang. Dit is
+duurder as dit lyk: 'n mens word HOOGSTENS DRIE KEER in sy leeftyd gevra, en 'n
+vraag wat weggedruk word omdat sy in die pad staan, brand een van daardie drie.
+`vraKennisgewingsDalk()` gee nou `false` terwyl die vloei oop is, klank speel,
+of 'n gedeelde HOOP-skakel oop is. Sy word nie uitgestel nie — sy word net nie
+NOU gevra nie, en `merkGevra` loop eers wanneer sy werklik gewys is.
+
+Blaaiertoets: `kykTmgPopup.mjs` maak die vloei oop, wag totdat die
+opspringer-bestuurder gevuur het, en meet al vyf gevalle — die e-boek, die
+donasie (met 'n VASTE klok, sodat die skenk-venster nie van die werklike datum
+afhang nie), die mens wat getik het, die mens wat halfpad uitklim, en die
+kennisgewing-vraag.
 
 **Wie net die speelknoppie op Luister druk, sien geen verandering nie.**
 Daardie pad is nie aangeraak nie.
