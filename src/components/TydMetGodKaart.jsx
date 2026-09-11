@@ -14,9 +14,17 @@
  *
  *   begin → hy het vandag nog nie begin nie
  *   voort → hy is halfpad
- *   klaar → klaar vandag; GEEN knoppie, net 'n stil reël met 'n klein
- *           "doen dit weer". 'n Knoppie wat 'n mens uitnooi om iets te doen
- *           wat hy klaar gedoen het, maak van 'n gewoonte 'n eis.
+ *   klaar → klaar vandag. Die KAART BLY STAAN; net die woorde verander.
+ *
+ * Daardie laaste een was 'n dun reël wat die kaart vervang het, en Dewald het
+ * dit op 11 September 2026 laat verander: *"even after somebody did this and
+ * they finish all of the screens, don't make this card disappear. Just tell
+ * them Jy het vandag tyd met God gemaak / doen dit weer."*
+ *
+ * Die kaart verdwyn dus nie meer nie — maar hy SKREE ook nie. Daar is geen
+ * goue pil op daardie toestand nie, net 'n stil "doen dit weer": 'n knoppie
+ * wat 'n mens uitnooi om iets te doen wat hy klaar gedoen het, maak van 'n
+ * gewoonte 'n eis.
  *
  * Is daar vandag geen nota nie, wys die kaart glad nie — 'n knoppie wat op 'n
  * leë skerm uitkom, is erger as geen knoppie, en hierdie blad is waar die
@@ -26,7 +34,6 @@ import { useEffect, useState } from 'react'
 import { dagSleutel, kaartToestand } from '../data/tydMetGod'
 import { ontleedSkrif, skrifOpskrif } from '../data/skrifVerwysing'
 import { leesStaat } from '../data/tydMetGodBerging'
-import TydMetGodSon from './TydMetGodSon'
 import './TydMetGodKaart.css'
 
 export default function TydMetGodKaart({ nota, opBegin }) {
@@ -52,16 +59,7 @@ export default function TydMetGodKaart({ nota, opBegin }) {
   const toestand = kaartToestand({ nota, staat, dag })
   if (toestand === 'geen') return null
 
-  if (toestand === 'klaar') {
-    return (
-      <div className="tmg-klaar-reel">
-        <Son klas="tmg-kaart-son" />
-        <span>Jy het vandag tyd met God gemaak</span>
-        <button className="tmg-klaar-weer" onClick={opBegin}>doen dit weer</button>
-      </div>
-    )
-  }
-
+  const klaar = toestand === 'klaar'
   const voort = toestand === 'voort'
 
   const skrif   = ontleedSkrif(nota && nota.scripture)
@@ -70,41 +68,54 @@ export default function TydMetGodKaart({ nota, opBegin }) {
   const vers    = String((nota && nota.scriptureText) || '').trim()
 
   return (
-    <button className="tmg-kaart" onClick={opBegin}>
-      {/* Die geskilderde sonsopkoms, regs, wat in die houtskool inloop. Dit
-          is 'n SVG en nie 'n prent nie — sien TydMetGodSon.jsx. */}
-      <TydMetGodSon />
+    <button className={`tmg-kaart${klaar ? ' tmg-kaart-gedaan' : ''}`} onClick={opBegin}>
+      {/* Die sluier hou die LINKERKANT leesbaar. Hy is baie ligter as vroeër —
+          Dewald: "the card you used is too dark." Die prent se eie linkerkant
+          is reeds donker, dus hoef die sluier net te help, nie te oorheers
+          nie. */}
       <span className="tmg-kaart-sluier" />
 
       <span className="tmg-kaart-inhoud">
         <Son klas="tmg-kaart-son" />
         <span className="tmg-kaart-oog">Vandag</span>
         <span className="tmg-kaart-titel">
-          {voort ? 'Jou tyd met God wag nog' : 'Jou tyd met God is gereed'}
-        </span>
-        <span className="tmg-kaart-lei">
-          {voort
-            ? 'Jy is halfpad. Gaan voort waar jy opgehou het.'
-            : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
+          {klaar ? 'Jy het vandag tyd met God gemaak'
+                 : voort ? 'Jou tyd met God wag nog'
+                         : 'Jou tyd met God is gereed'}
         </span>
 
-        {/* Vandag se vers, op die kaart self. Dit was net binne die vloei, en
-            'n mens moes eers 'n knoppie druk om te sien waaroor vandag gaan.
-            Die verwysing is die netjiese vorm as ons dit kon ontleed; kon ons
-            nie, staan presies wat Dewald getik het — nooit niks. */}
-        {(vers || opskrif) && (
-          <span className="tmg-kaart-vers">
-            {opskrif && <span className="tmg-kaart-vers-ref">{opskrif}</span>}
-            {vers && <span className="tmg-kaart-vers-teks">{vers}</span>}
-          </span>
+        {/* Op die klaar-kaart staan niks anders nie: geen vers, geen goue pil.
+            Net die sin, en 'n stil uitnodiging om dit weer te doen. */}
+        {klaar ? (
+          <span className="tmg-kaart-weer">doen dit weer</span>
+        ) : (
+          <>
+            <span className="tmg-kaart-lei">
+              {voort
+                ? 'Jy is halfpad. Gaan voort waar jy opgehou het.'
+                : "'n Paar minute om te luister, te bid en iemand vandag te dra."}
+            </span>
+
+            {/* Vandag se vers, op die kaart self. Dit was net binne die vloei,
+                en 'n mens moes eers 'n knoppie druk om te sien waaroor vandag
+                gaan. Die verwysing is die netjiese vorm as ons dit kon
+                ontleed; kon ons nie, staan presies wat Dewald getik het —
+                nooit niks. */}
+            {(vers || opskrif) && (
+              <span className="tmg-kaart-vers">
+                {opskrif && <span className="tmg-kaart-vers-ref">{opskrif}</span>}
+                {vers && <span className="tmg-kaart-vers-teks">{vers}</span>}
+              </span>
+            )}
+            <span className="tmg-kaart-knop">
+              {voort ? 'Gaan voort' : 'Begin jou tyd met God'}
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </span>
+          </>
         )}
-        <span className="tmg-kaart-knop">
-          {voort ? 'Gaan voort' : 'Begin jou tyd met God'}
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
-               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <polyline points="9 6 15 12 9 18" />
-          </svg>
-        </span>
       </span>
     </button>
   )

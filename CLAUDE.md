@@ -990,21 +990,41 @@ Dewald: *"the button on home doesn't look beautiful enough... it should look
 beautiful and premium so they click it"*, en later *"I don't like it to just be
 plain black."*
 
-Die kaart dra 'n geskilderde sonsopkoms regs (`TydMetGodSon.jsx`), met die
-teks links oor 'n sluier wat daardie kant donker hou. Dit is 'n **SVG en nie
-'n prent nie**, en dit is 'n besluit:
+Die kaart het 'n GETEKENDE sonsopkoms gedra (`TydMetGodSon.jsx`), en die rede
+was goed: 'n paar honderd grepe in die bondel in plaas van 'n aflaai, op die
+blad waar die oggendkennisgewing duisende fone laat land.
 
-* dit is 'n paar honderd grepe in die bondel, nie 'n aflaai nie — hierdie
-  kaart staan op die blad waar die oggendkennisgewing duisende fone laat land;
-* 'n groot `<img>` is die grootste tekstuur op 'n blad en Chrome gee dit maklik
-  sy eie saamgestelde laag. Dit is presies waar die gekleurde strepe op Android
-  vandaan gekom het;
-* dit dra geen woorde nie en kan dus nooit met die teks langsaan veg soos die
-  wallpaper op die klaar-skerm gedoen het.
+Op 11 September 2026 het Dewald sy eie foto gestuur met een oordeel: *"the card
+you used is too dark."* Hy was reg — die sluier was 94% houtskool tot by 68%
+van die kaart, en die hele ding het soos 'n swart blok gelyk. Die prent is nou
+`public/beelde/tyd-met-god.webp` (36 KB), en daardie 36 KB is die moeite werd.
 
-Die SVG se verloop-id's dra 'n vaste voorvoegsel (`tmgk-`). 'n Kaal id soos
-"son" bots met enige ander SVG op dieselfde bladsy, en dan verf die verkeerde
-een — 'n fout wat baie stil is.
+**Dit is 'n `background-image` op 'n ONDEURSIGTIGE houer, nooit 'n `<img>`
+nie.** 'n Groot `<img>` is die grootste tekstuur op 'n blad en Chrome gee dit
+maklik sy eie saamgestelde laag; dit is presies waar die gekleurde strepe op
+Android vandaan gekom het. Die grondkleur is die prent se eie linkerkant, sodat
+'n teel wat nog nie geverf is nie soos die prent lyk en nie soos 'n gat nie.
+
+**Die sluier lê net oor die LINKERkant, en hy is lig.** Die prent se eie
+linkerkant is reeds donker; die sluier hoef net genoeg te doen om die woorde te
+dra. Die prent dra geen woorde nie, dus kan dit nooit met die teks veg soos die
+wallpaper op die klaar-skerm gedoen het.
+
+**Die blink goue raam is CSS, nie in die prent ingebak nie.** Dewald het dit
+self om sy prent gesit — *"ek het juis di blink border om die prent laat sit dat
+dit uitstaan"* — en ek het dit die eerste keer afgesny. Dit staan nou as 'n
+`border` plus 'n `box-shadow`-gloed, en dít is 'n besluit: die kaart se HOOGTE
+wissel met sy teks (die vers is twee reëls of geen), en 'n ingeboude raam sou
+saam uitrek — die boonste en onderste lyn dikker as die sye, en wasig op 'n
+foon met 3x pixels. Die gloed is 'n `box-shadow` en nie 'n `filter` nie: dit
+word in die ouer se laag geverf.
+
+**Die kaart verdwyn NIE wanneer die dag klaar is nie.** Dit was 'n dun reël wat
+die kaart vervang het; Dewald: *"don't make this card disappear. Just tell them
+Jy het vandag tyd met God gemaak / doen dit weer."* Dieselfde kaart bly dus
+staan, net stiller: die sin, en 'n stil "doen dit weer". Daar is GEEN goue pil
+op daardie toestand nie — 'n knoppie wat 'n mens uitnooi om iets te doen wat hy
+klaar gedoen het, maak van 'n gewoonte 'n eis.
 
 ### Die res van die reels
 

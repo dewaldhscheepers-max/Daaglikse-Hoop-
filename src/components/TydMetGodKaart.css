@@ -23,33 +23,58 @@
   position: relative;
   display: block;
   width: 100%;
-  border: 1px solid rgba(217, 177, 131, 0.24);
+  /* ── Die blink goue raam ──
+   *
+   * Dewald het dit self om sy prent gesit: *"ek het juis di blink border om
+   * die prent laat sit dat dit uitstaan."*
+   *
+   * Dit is CSS en nie in die prent ingebak nie, en dit is 'n besluit: hierdie
+   * kaart se HOOGTE wissel met sy teks (die vers is twee reels of geen), en 'n
+   * ingeboude raam sou saam uitrek — die boonste en onderste lyn dikker as die
+   * sye, en wasig op 'n foon met 3x pixels. So bly die lyn haarskerp by elke
+   * hoogte.
+   *
+   * Die gloed is 'n `box-shadow`, nie 'n `filter` nie: dit word in die ouer se
+   * laag geverf en maak geen saamgestelde laag nie. Sien CLAUDE.md. */
+  border: 1.5px solid rgba(233, 184, 106, 0.85);
   border-radius: 24px;
+  box-shadow:
+    0 0 0 1px rgba(233, 184, 106, 0.18),
+    0 0 18px rgba(233, 184, 106, 0.30),
+    0 0 42px rgba(233, 184, 106, 0.14),
+    0 10px 30px rgba(0, 0, 0, 0.34);
   padding: 0;
   margin: 0 0 18px;
-  /* ONDEURSIGTIG onder alles: word 'n teel nie betyds geverf nie, wys dit
-     houtskool en nie rou GPU-geheue nie. */
-  background-color: #1A1A1D;
+  /* ── Dewald se eie sonsopkoms ──
+   *
+   * Dit was 'n GETEKENDE SVG (TydMetGodSon.jsx), en die rede was goed: 'n paar
+   * honderd grepe in plaas van 'n aflaai, op die blad waar die oggend-
+   * kennisgewing duisende fone laat land. Op 11 September 2026 het Dewald sy
+   * eie foto gestuur met een oordeel: *"the card you used is too dark."*
+   *
+   * Hy was reg. Die prys is 36 KB, en dit is die moeite werd.
+   *
+   * Dit is 'n `background-image` op 'n ONDEURSIGTIGE houer — NOOIT 'n <img>
+   * nie. 'n Groot <img> is die grootste tekstuur op 'n blad en Chrome gee dit
+   * maklik sy eie saamgestelde laag; dit is presies waar die gekleurde strepe
+   * op Android vandaan gekom het. Sien CLAUDE.md.
+   *
+   * Die kleur is die prent se eie linkerkant, sodat 'n teel wat nog nie geverf
+   * is nie soos die prent lyk en nie soos 'n gat nie. */
+  background-color: #151415;
+  background-image: url('/beelde/tyd-met-god.webp');
+  background-size: cover;
+  /* REGS: die son moet bly staan wanneer 'n smal foon die prent sny. */
+  background-position: right center;
+  background-repeat: no-repeat;
   color: #F3EEE4;
   text-align: left;
   cursor: pointer;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
 }
 /* Net kleur, nooit skaal. Sien CLAUDE.md — 'n `transform` op `:active` is
    presies waar die gekleurde strepe op Android vandaan gekom het. */
-.tmg-kaart:active { background-color: #232327; }
-
-/* Die geskilderde toneel, regs. Dit staan agter alles en dra self geen
-   woorde nie, dus kan dit nooit met die teks veg nie. */
-.tmg-kaart-toneel {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 74%;
-  height: 100%;
-  display: block;
-}
+.tmg-kaart:active { background-color: #24201C; }
 
 /* Die sluier hou die LINKERKANT donker sodat die teks altyd leesbaar bly, wat
    ook al agter hom staan. Sonder dit is die kaart mooi en die woorde stukkend
@@ -57,9 +82,12 @@
 .tmg-kaart-sluier {
   position: absolute;
   inset: 0;
+  /* BAIE ligter as vroeër. Dit was 0.94 tot 68% van die kaart, en die hele
+     ding het soos 'n swart blok gelyk — Dewald: "the card you used is too
+     dark." Die prent se eie linkerkant is reeds donker, dus hoef die sluier
+     net genoeg te doen om die woorde te dra. */
   background:
-    linear-gradient(90deg, #1A1A1D 0%, rgba(26, 26, 29, 0.94) 40%, rgba(26, 26, 29, 0.62) 68%, rgba(26, 26, 29, 0.10) 100%),
-    linear-gradient(0deg, rgba(26, 26, 29, 0.30) 0%, rgba(26, 26, 29, 0) 38%);
+    linear-gradient(90deg, rgba(14, 13, 14, 0.86) 0%, rgba(14, 13, 14, 0.66) 38%, rgba(14, 13, 14, 0.24) 66%, rgba(14, 13, 14, 0) 100%);
 }
 
 .tmg-kaart-inhoud {
@@ -175,32 +203,23 @@
 /* Klaar vandag: geen knoppie, net 'n stil reël. 'n Knoppie wat 'n mens
    uitnooi om iets te doen wat hy klaar gedoen het, maak van 'n gewoonte 'n
    eis. */
-.tmg-klaar-reel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 0 0 18px;
-  padding: 15px 16px;
-  border: 1px solid rgba(217, 177, 131, 0.22);
-  border-radius: 18px;
-  background-color: #1A1A1D;
-  font-size: 14px;
-  color: #F3EEE4;
-  text-align: center;
-}
-.tmg-klaar-reel .tmg-kaart-son { width: 20px; height: 20px; }
+/* ── Die klaar-kaart ──
+ *
+ * Dieselfde kaart, net stiller. Dewald: "don't make this card disappear."
+ * Hy het minder om te sê, dus is hy korter — en daar is geen goue pil nie,
+ * want 'n knoppie wat 'n mens uitnooi om iets te doen wat hy klaar gedoen
+ * het, maak van 'n gewoonte 'n eis. */
+.tmg-kaart-gedaan .tmg-kaart-inhoud { padding: 20px 20px 20px; }
+.tmg-kaart-gedaan .tmg-kaart-titel  { font-size: 23px; max-width: 72%; }
 
-.tmg-klaar-weer {
-  border: 0;
-  background: transparent;
-  padding: 2px 4px;
+.tmg-kaart-weer {
+  margin-top: 10px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: #D9B183;
-  text-decoration: underline;
-  cursor: pointer;
+  letter-spacing: 0.01em;
+  color: #E2B87F;
+  border-bottom: 1px solid rgba(226, 184, 127, 0.45);
+  padding-bottom: 2px;
 }
-.tmg-klaar-weer:active { color: #E8CBA4; }
+.tmg-kaart:active .tmg-kaart-weer { color: #F0D6AE; }
