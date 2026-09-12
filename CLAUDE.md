@@ -1358,7 +1358,23 @@ Firestore weier by verstek — die kliënt se `getDocs` het stil misluk en die v
 het vir altyd die saai gewys. Die reël staan nou in `firestore.rules`: LEES oop
 (die vreemdeling op 'n gedeelde skakel is nie aangemeld nie), SKRYF toe (wie 'n
 clip kan skryf, kan enige video voor ses duisend mense sit). Dit werk nie voordat
-`firebase deploy --only firestore:rules` geloop het nie.
+die reëls gepubliseer is nie.
+
+**En moenie die konsole se datum vertrou om te weet wat lewendig is nie.** Die
+weergawe-lys het "19 Aug 2026" as die laaste publikasie gewys, en
+`firestore.rules` is op 20 Augustus geskep — ek het daaruit afgelei dat die
+VOLG JESUS-groepreëls nooit ontplooi is nie en vir Dewald gesê die groepchat is
+drie weke lank stil stukkend. **Dit was verkeerd.** Toe hy die lewende teks
+gekopieer en gestuur het, was `vjGroepe` wel daar.
+
+Wat WEL gekort het, was `reels` en `magChat()` — en `magChat()` is die een wat
+saak maak: die "verwyder iemand uit die groepchat"-knoppie werk in die app, maar
+sonder daardie reël steek net die SKERM die gesprek weg en wie uitgehaal is, kon
+dit steeds met die SDK lees.
+
+Die enigste manier om te weet wat lewendig is, is om die lewende TEKS te lees en
+te vergelyk. Sien die kop van `firestore.rules` vir die volle vergelyking van
+12 September 2026.
 
 **Die vreemdeling op 'n gedeelde skakel word GLAD NIE gevra nie** — nie oor geld
 nie, en nie oor installasie in die eerste drie sekondes nie. `if (reelId) return`

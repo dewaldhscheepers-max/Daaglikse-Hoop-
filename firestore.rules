@@ -21,6 +21,28 @@ rules_version = '2';
  * terug. 'n Leer wat lyk soos die waarheid en dit nie is nie, is erger as geen
  * leer nie.
  *
+ * ── 12 September 2026: weer vergelyk, met die egte lewende teks ──
+ *
+ * Dewald het die lewende reels uit die konsole gekopieer en dit is reel vir reel
+ * teen hierdie leer vergelyk. Die uitslag:
+ *
+ *   · die verskil loop net EEN rigting. Daar is NIKS lewendig wat nie in hierdie
+ *     leer staan nie, dus voeg 'n ontplooiing net by en vat niks weg;
+ *   · die `vjGroepe`-blok IS lewendig. Die groepchat werk.
+ *   · twee dinge was in hierdie leer en NIE lewendig nie: die `reels`-blok, en
+ *     `magChat()` — die funksie wat 'n mens uit die GROEPCHAT hou sonder om hom
+ *     uit die groep te haal. Daardie knoppie werk in die app, maar sonder die
+ *     reel is dit net die SKERM wat die gesprek wegsteek: wie uitgehaal is, kon
+ *     dit steeds met die SDK lees.
+ *
+ * ── Die les, en dit het my mislei ──
+ *
+ * Die konsole se weergawe-lys se datum se NIE wat lewendig is nie. Die laaste
+ * publikasie het "19 Aug 2026" gewys en hierdie leer is op 20 Augustus geskep;
+ * ek het daaruit AFGELEI dat die groepreels nooit ontplooi is nie, en dit was
+ * verkeerd. Die enigste manier om te weet, is om die lewende TEKS te lees en te
+ * vergelyk. Doen dit; moenie 'n datum vertrou nie.
+ *
  * Die blokke wat net `if false` se, verander niks: Firestore weier klaar waar
  * geen reel pas nie. Hulle staan hier sodat die bedoeling swart op wit is en
  * niemand hulle later per ongeluk oopmaak nie.
