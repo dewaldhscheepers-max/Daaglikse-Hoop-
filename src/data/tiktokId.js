@@ -138,9 +138,14 @@ export function spelerAdres(id, opsies) {
     rel: '0',
     native_context_menu: '0',
     closed_caption: '0',
-    /* Die speler se EIE klankknoppie. Dit is die enigste pad na klank wat
-       werklik bestaan wanneer die video in hulle iframe speel. */
-    volume_control: '1',
+    /* `volume_control=1` het HIER gestaan. Dit doen niks — TikTok ignoreer dit,
+       en op 'n regte foon was daar geen klankknoppie nie. Dewald: *"dit sê klik
+       die klank knoppie maar daar is geen klank knoppie nie."* 'n Wenk wat na 'n
+       knoppie wys wat nie bestaan nie, is erger as stilte.
+
+       Moenie weer parameters byvoeg wat nie hier getoets kan word nie. TikTok
+       is in hierdie houer geblokkeer; elke param wat nie in hulle dokumentasie
+       staan nie, is 'n raaiskoot wat op Dewald se foon uitkom. */
     autoplay: o.speel ? '1' : '0',
     loop: '1',
   })

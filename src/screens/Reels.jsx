@@ -40,20 +40,20 @@
  * Daar is niks om te onthou om te stop nie, en dit is ook waarom niks agter die
  * mylpaal-kaart aanspeel nie: daardie kaart is nie 'n clip nie.
  *
- * **Die klank begin STIL, en wie dit aanskakel, hang van die BRON af.** 'n Foon
- * weier om klank te speel voordat 'n mens getik het — "hardop" is nie 'n keuse
- * wat bestaan nie, dit is net 'n speler wat stilweg misluk.
+ * **Die klank is AAN sodra die blaaier dit toelaat.** Dewald: *"hoekom hou jy
+ * nie die klank aan nie... hoekom moet mens dit aansit."* Dit is nie 'n keuse
+ * nie: 'n blaaier weier om klank te speel voordat die mens iets aangeraak het,
+ * en speel ons hardop voordat dit gebeur, speel die video GLAD NIE.
  *
- * By YOUTUBE is dit ons s'n: die `key` van die raam dra `stil`, dus word die
- * raam met `mute=0` herbou, en omdat dit 'n MENS se tik was, laat die blaaier
- * die klank deur. Een reël in plaas van YouTube se JS-API.
+ * Maar sy het meestal wél al aangeraak — sy het die oortjie gedruk om hier te
+ * kom. `navigator.userActivation.hasBeenActive` sê dit, en dan begin die klank
+ * aan. Die enigste geval wat nog stil begin, is 'n vreemdeling op 'n gedeelde
+ * skakel; daar is die eerste swiep genoeg (`pointerdown`).
  *
- * By TIKTOK is dit HULLE s'n, en dit was 'n fout wat op 'n regte foon uitgekom
- * het. Die adres het nie `stil` gedra nie, dus het my "Tik vir klank" die raam
- * herbou met PRESIES dieselfde bladsy — 'n knoppie wat niks doen nie. 'n Mens
- * kan nie van buite in 'n ander party se iframe ontdemp nie. Die speler se eie
- * klankknoppie is nou aan (`volume_control=1`), en die wenk WYS daarheen in
- * plaas daarvan om 'n knoppie voor te gee.
+ * Dit geld net waar ONS die speler besit: YouTube en ons eie lêers. By TIKTOK is
+ * die klank binne hulle iframe en ons kan dit nie raak nie. `volume_control=1`
+ * was 'n raaiskoot — TikTok ignoreer dit, daar was geen knoppie op 'n regte foon
+ * nie, en my wenk het na niks gewys. Albei is weg.
  *
  * ── TikTok teken sy EIE oorleg, en ons moet plek maak ──
  *
@@ -224,7 +224,32 @@ function spelerVir(klip, stil) {
 export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, klankSpeelNou }) {
   const [rou, setRou]       = useState(() => leesKas().lys)
   const [aktief, setAktief] = useState(0)
-  const [stil, setStil]     = useState(true)
+  /* ── Hoekom die klank nie net AAN is nie ──
+   *
+   * Dewald: *"hoekom hou jy nie die klank aan nie... hoekom moet mens dit
+   * aansit."*
+   *
+   * Dit is nie 'n keuse nie: 'n blaaier WEIER om klank te speel voordat die mens
+   * iets op die bladsy aangeraak het. Speel ons hardop voordat dit gebeur het,
+   * speel die video glad nie — dan is daar nie klank nie EN nie 'n video nie.
+   *
+   * Maar sy het meestal wél al aangeraak: sy het die Reels-oortjie gedruk om
+   * hier te kom. `navigator.userActivation.hasBeenActive` sê dit, en dan begin
+   * die klank AAN — geen tik, geen wenk, niks.
+   *
+   * Die een geval waar dit nog stil begin, is 'n VREEMDELING op 'n gedeelde
+   * skakel: sy land direk hier sonder om iets te druk. Dan is die eerste tik
+   * genoeg, en die "Tik vir klank" staan daar.
+   *
+   * Dit geld net waar ONS die speler besit — YouTube en ons eie lêers. Binne
+   * TikTok se iframe is die klank hulle s'n en ons kan dit nie raak nie. */
+  const [stil, setStil]     = useState(() => {
+    try {
+      const a = navigator.userActivation
+      if (a && typeof a.hasBeenActive === 'boolean') return !a.hasBeenActive
+    } catch { /* ou blaaier */ }
+    return true
+  })
   const [passe, setPasse]   = useState(() => (
     isAllesGesien() ? PASSE_BEGIN : Math.min(PASSE_BEGIN, MAKS_PASSE_VOOR_ALLES)
   ))
@@ -402,6 +427,23 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     return () => kyker.disconnect()
   }, [items, isInstalled, onInstalleer])
 
+  /* ── Die eerste aanraking maak die klank oop ──
+   *
+   * Sodra sy iets aangeraak het, laat die blaaier klank deur, en dan hoef sy nie
+   * 'n knoppie te soek nie. Dit vang die geval wat `hasBeenActive` nie kon sien
+   * nie: 'n vreemdeling wat op 'n gedeelde skakel geland het en toe geswiep het.
+   *
+   * `pointerdown` en nie `click` nie — 'n swiep is nie 'n klik nie, en 'n swiep
+   * is presies wat sy hier doen. */
+  useEffect(() => {
+    if (!stil) return
+    const voer = voerRef.current
+    if (!voer) return
+    function opRaak() { setStil(false); setWenk(false) }
+    voer.addEventListener('pointerdown', opRaak, { once: true, passive: true })
+    return () => voer.removeEventListener('pointerdown', opRaak)
+  }, [stil])
+
   /* Die wenk gaan vanself weg. */
   useEffect(() => {
     if (!wenk) return
@@ -492,27 +534,51 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 <div className="reel-wag" aria-hidden="true" />
               )}
 
-              {/* By YOUTUBE skakel ONS die klank aan; by TIKTOK kan ons nie, en
-                  dan wys die wenk na hulle eie knoppie in plaas daarvan om 'n
-                  knoppie voor te gee wat niks doen nie. */}
-              {wenk && i === aktief && stil && (
-                klip.bron === 'tiktok' ? (
-                  <p className="reel-wenk reel-wenk-stil">Tik die klankknoppie in die video</p>
-                ) : (
-                  <button className="reel-wenk" onClick={() => { setStil(false); setWenk(false) }}>
-                    Tik vir klank
-                  </button>
-                )
+              {/* Die wenk staan NET waar hy werk: by YouTube en by ons eie
+                  lêers, waar ons die speler besit.
+
+                  By TikTok het hier 'n wenk gestaan wat na hulle klankknoppie
+                  gewys het — en daardie knoppie bestaan nie. Dewald: *"dit sê
+                  klik die klank knoppie maar daar is geen klank knoppie nie."*
+                  Liewer niks as 'n wenk wat 'n mens laat soek na iets wat nie
+                  daar is nie. */}
+              {wenk && i === aktief && stil && klip.bron !== 'tiktok' && (
+                <button className="reel-wenk" onClick={() => { setStil(false); setWenk(false) }}>
+                  Tik vir klank
+                </button>
               )}
 
-              <div className="reel-onder">
-                <button className="reel-deel" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
+              {/* ── Die strook oor TikTok se eie rail ──
+                  Hulle hartjie, kommentaar en deel-knoppie vat 'n mens UIT
+                  hierdie app na TikTok. Dewald: *"die like comment share dit vat
+                  die gebruiker uit my app na tiktok so jy moet dit versteek deur
+                  my eie deel knopie bo oor te sit."*
+
+                  Dit is die teenoorgestelde van waarvoor die voer bestaan — die
+                  hele punt is 'n skakel wat MENSE HIERHEEN bring. Die strook
+                  vang die tikke (`pointer-events`), dus is dit nie net 'n
+                  sluier nie: dit is die ding wat die lek toemaak.
+
+                  Geen `backdrop-filter` nie. Dit maak 'n saamgestelde laag oor 'n
+                  bewegende video, en dit is presies waar die gekleurde strepe op
+                  Android vandaan kom — sien CLAUDE.md. 'n Gradiënt word in die
+                  ouer se laag geverf. */}
+              {klip.bron === 'tiktok' && <div className="reel-skerm" />}
+
+              {/* Ons eie Deel-knoppie staan BO-OP die strook, op presies die plek
+                  waar hulle rail was. Dit is wat Dewald gevra het, en dit is ook
+                  waar 'n mens se duim al soek. */}
+              <div className="reel-rail">
+                <button className="reel-knop" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 3v13" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" />
                     <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
                   </svg>
                   <span>Deel</span>
                 </button>
+              </div>
+
+              <div className="reel-onder">
 
                 {/* TikTok se speler wys die handvatsel self — twee name lees
                     soos 'n fout. Sien die kop. */}

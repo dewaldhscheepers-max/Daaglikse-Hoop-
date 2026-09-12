@@ -1266,26 +1266,53 @@ is hoekom niks agter hom aanspeel nie; sonder daardie een attribuut bly `aktief`
 op die laaste clip staan en speel hy voort agter 'n toe skerm. Die blaaierlopie
 het dit gevang.
 
-**Die klank begin STIL, en WIE dit aanskakel hang van die bron af.** 'n Foon
-weier om klank te speel voordat 'n mens getik het, dus is "hardop" nie 'n keuse
-wat bestaan nie — dit is 'n speler wat stilweg misluk.
+**Die klank is AAN sodra die blaaier dit toelaat.** Dewald: *"hoekom hou jy nie
+die klank aan nie... hoekom moet mens dit aansit."* Dit is nie 'n keuse nie: 'n
+blaaier weier om klank te speel voordat die mens iets aangeraak het, en speel ons
+hardop voordat dit gebeur, speel die video **glad nie** — dan is daar nie klank
+nie EN nie 'n video nie.
 
-By **YouTube** is dit ons s'n: die `key` van die raam dra `stil`, dus word die
-raam met `mute=0` herbou, en omdat dit 'n MENS se tik was, laat die blaaier die
-klank deur. Een reël in plaas van YouTube se JS-API.
+Maar sy het meestal wél al aangeraak: sy het die Reels-oortjie gedruk om hier te
+kom. `navigator.userActivation.hasBeenActive` sê dit, en dan begin die klank aan
+— geen tik, geen wenk. Die enigste geval wat nog stil begin, is 'n vreemdeling op
+'n gedeelde skakel; daar maak die eerste **swiep** dit oop (`pointerdown`, nie
+`click` nie — 'n swiep is nie 'n klik nie).
 
-By **TikTok is dit hulle s'n**, en dit was 'n fout wat net op 'n regte foon
-uitgekom het. `spelerAdres()` het nie `stil` gedra nie, dus het "Tik vir klank"
-die raam herbou met PRESIES dieselfde bladsy — 'n knoppie wat niks doen nie, en
-dié is erger as stilte. 'n Mens kan nie van buite in 'n ander party se iframe
-ontdemp nie. `volume_control=1` maak hulle EIE klankknoppie sigbaar, en die wenk
-wys daarheen in plaas daarvan om 'n knoppie voor te gee.
+Dit geld net waar ONS die speler besit: YouTube en ons eie lêers.
 
-**En TikTok se speler teken sy eie oorleg.** Op 'n regte foon staan die
-handvatsel TWEE keer en hulle hartjie met sy telling sit agter ons Deel-knoppie.
-Daarom: by 'n TikTok-clip wys ons NIE ons eie maker-lyn nie, en die Deel-knoppie
-sit in die onderste stapel LINKS. Regs is hulle rail én die sweefende
-BYBEL-knoppie; links is die enigste kant wat aan ons behoort.
+**Binne TikTok se iframe is die klank hulle s'n en ons kan dit nie raak nie.**
+Hier het `volume_control=1` gestaan met 'n wenk wat daarheen wys. TikTok ignoreer
+daardie param; op 'n regte foon was daar **geen** klankknoppie, en die wenk het
+'n mens laat soek na iets wat nie bestaan nie. Albei is weg. **Moenie weer 'n
+speler-param byvoeg wat nie hier getoets kan word nie** — TikTok is in hierdie
+houer geblokkeer, en elke raaiskoot kom op Dewald se foon uit.
+
+**TikTok se rail vat mense UIT die app, en dit word toegemaak.** Dewald: *"die
+like comment share dit vat die gebruiker uit my app na tiktok so jy moet dit
+versteek deur my eie deel knopie bo oor te sit."* Hy is reg — dit is die
+teenoorgestelde van waarvoor die voer bestaan.
+
+`.reel-skerm` is 'n ONDEURSIGTIGE strook oor die regterkant wat die **tikke
+vang** (`pointer-events: auto`): dit is nie 'n sluier nie, dit is die ding wat
+die lek toemaak. 'n Halwe sluier het hulle telling steeds laat deurskyn.
+
+Drie dinge daaraan is met opset:
+
+* dit begin op **34%** en nie bo nie — TikTok se LOGO regs bo is hulle erkenning
+  en word nie toegemaak nie;
+* **geen `backdrop-filter`** nie. Dit maak 'n saamgestelde laag oor 'n bewegende
+  video, en dit is presies waar die gekleurde strepe op Android vandaan kom. 'n
+  Gradiënt word in die ouer se laag geverf;
+* ons eie Deel-knoppie staan **bo-op** die strook, op presies die plek waar hulle
+  rail was — waar 'n mens se duim al soek.
+
+**En by 'n TikTok-clip wys ons nie ons eie maker-lyn nie.** Hulle speler teken
+die handvatsel self; op 'n regte foon het dit twee keer gestaan.
+
+**Die egte oplossing vir albei hierdie dinge is `bron: 'eie'`.** Lê die video in
+ons eie Storage, is dit 'n gewone `<video>`: ons besit die klank, daar is geen
+vreemde rail om toe te maak nie, en niks lek na 'n ander app nie. TikTok se
+speler is 'n lener se huis, en ons pas net die meubels aan.
 
 **Die installasievraag kom NÁ die tweede swiep** (`magVraInstalleer()`). Sy het
 op 'n skakel gedruk om iets te SIEN; vra ons voordat sy iets gesien het, is die
@@ -1458,7 +1485,7 @@ twee-en-dertig, en 'n Vercel-funksie sterf by tien — dieselfde fout as die
 oggendkennisgewing se `for`-lus. Agt sekondes vir die HELE ketting, en
 `maxDuration: 20` in `vercel.json` as vangnet.
 
-Blaaiertoets: `kykReels.mjs` in die scratchpad (105 metings). Dit meet die ding wat geen
+Blaaiertoets: `kykReels.mjs` in die scratchpad (115 metings). Dit meet die ding wat geen
 eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die

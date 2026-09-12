@@ -143,34 +143,85 @@
 /* Net kleur. Geen transform. */
 .reel-brug:active { background: rgba(217, 177, 131, 0.18); }
 
-/* ── Die DEEL-knoppie, links onder ──
-   Hy het regs gestaan, op 'n eie rail — en op 'n regte foon het TikTok se eie
-   hartjie met sy telling daaragter gesit, plus die sweefende BYBEL-knoppie.
-   Regs behoort aan hulle speler; links behoort aan ons.
+/* ── Die strook oor TikTok se eie rail ──
+   Hulle hartjie, kommentaar en deel-knoppie vat 'n mens UIT hierdie app na
+   TikTok. Dewald: "die like comment share dit vat die gebruiker uit my app na
+   tiktok so jy moet dit versteek deur my eie deel knopie bo oor te sit."
+
+   Dit is die teenoorgestelde van waarvoor die voer bestaan.
+
+   Die strook vang die TIKKE (`pointer-events: auto`) — dit is nie 'n sluier nie,
+   dit is die ding wat die lek toemaak. Rol werk steeds: 'n gewone div keer nie
+   'n ouer se rol nie.
+
+   Dit is ONDEURSIGTIG oor die regterkant en verdwyn na links. 'n Halwe sluier
+   het hulle telling ("2068") steeds laat deurskyn — en "versteek" beteken
+   versteek.
+
+   GEEN `backdrop-filter` nie. Dit maak 'n saamgestelde laag oor 'n bewegende
+   video, en dit is presies waar die gekleurde strepe op Android vandaan kom.
+   'n Gradient word in die ouer se laag geverf. Sien CLAUDE.md.
+
+   Dit begin op 34% en nie bo nie: TikTok se LOGO staan regs bo, en dit is hulle
+   erkenning. Dit word nie toegemaak nie. */
+.reel-skerm {
+  position: absolute;
+  right: 0;
+  top: 34%;
+  bottom: var(--reels-onder);
+  width: 84px;
+  z-index: 4;
+  pointer-events: auto;
+  background: linear-gradient(
+    to left,
+    #0D0C0D 0%,
+    #0D0C0D 64%,
+    rgba(13, 12, 13, 0.72) 84%,
+    rgba(13, 12, 13, 0) 100%
+  );
+}
+
+/* ── Ons eie Deel-knoppie, BO-OP die strook ──
+   Op presies die plek waar hulle rail was, want dit is waar 'n mens se duim al
+   soek.
+
+   Hy sit hoog genoeg om die sweefende BYBEL-knoppie te mis. Die knoppie hang oor
+   ELKE skerm in die app en het die Deel-knoppie een keer letterlik doodgedruk —
+   `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
+   blaaierlopie meet dit nou.
 
    Net Deel. Dewald: "net deel." 'n Hart beteken 'n telling, en 'n telling
    beteken dat 'n mens sy eie getal begin dophou. */
-.reel-deel {
-  pointer-events: auto;
-  align-self: flex-start;
-  display: inline-flex;
+.reel-rail {
+  position: absolute;
+  right: 8px;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 70px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  background: rgba(13, 12, 13, 0.72);
-  border: 1px solid rgba(244, 239, 231, 0.22);
-  color: var(--reels-wit);
-  border-radius: 999px;
-  padding: 9px 16px 9px 13px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  backdrop-filter: blur(6px);
+  gap: 18px;
 }
+
+.reel-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--reels-wit);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7));
+  -webkit-tap-highlight-color: transparent;
+}
+.reel-knop svg { width: 27px; height: 27px; display: block; }
 /* Net kleur. Geen transform. */
-.reel-deel:active { background: rgba(217, 177, 131, 0.24); }
-.reel-deel svg { width: 19px; height: 19px; flex: none; display: block; }
+.reel-knop:active { color: #E8CBA4; }
 
 /* ── Die klank-wenk ── */
 .reel-wenk {
@@ -192,19 +243,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 .reel-wenk:active { background: rgba(13, 12, 13, 0.92); }
-
-/* By TikTok is dit 'n WENK en nie 'n knoppie nie — die klank is hulle speler
-   s'n en ons kan dit nie van buite raak nie. Dit lyk dus ook nie soos iets wat
-   'n mens kan druk nie. */
-.reel-wenk-stil {
-  margin: 0;
-  cursor: default;
-  pointer-events: none;
-  font-weight: 400;
-  max-width: 17ch;
-  text-align: center;
-  line-height: 1.4;
-}
 
 /* ── Die mylpaal ──
    EEN kaart, ná die eerste volle pas, en 'n mens swiep daaraan verby. Dit was
