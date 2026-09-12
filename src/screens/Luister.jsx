@@ -128,13 +128,24 @@ function MiniPlayer({ note, playing, progress, onToggle }) {
   if (!note) return null
   return (
     <div className="mini-player">
+      {/* ── Die knoppie staan LINKS ──
+          Hy het REGS gestaan, en die sweefende BYBEL-knoppie hang presies daar
+          oor die balkie. Dewald: *"die onderste play bar se play knoppie moet
+          links op die pers wys... nie onder die bybel versteek."*
+
+          Hy is reg, en dit is dieselfde fout as die Deel-knoppie in Reels: die
+          BYBEL-knoppie hang oor ELKE skerm in hierdie app en dit is die eerste
+          ding om te onthou wanneer iets in 'n onderste hoek beland. Daar was 'n
+          68px LINKER-opvulling om hom te mis — uit die tyd toe hy links gestaan
+          het. Hy staan nou `right: 10px`, dus was daardie opvulling nie net
+          nutteloos nie, dit het die knoppie in sy pad gestoot. */}
+      <button className="mini-play" onClick={onToggle}>
+        {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+      </button>
       <div className="mini-info">
         <span className="mini-title">{note.title}</span>
         <span className="mini-series">{note.series}</span>
       </div>
-      <button className="mini-play" onClick={onToggle}>
-        {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
-      </button>
       <div className="mini-bar">
         <div className="mini-fill" style={{ width: `${progress * 100}%` }} />
       </div>
@@ -1414,7 +1425,19 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       </div>
 
-      {activeNote && activeId !== today.id && (
+      {/* ── Die balkie verdwyn sodra die nota KLAAR is ──
+          Dewald: *"maak seker as die voicenote klaar gespeel het dat dit dadelik
+          verdwyn."*
+
+          Dit het bly staan — gepouseer, op nul — en dan is dit 'n balk wat vir
+          niks in die pad staan en soos 'n haper lyk.
+
+          `playing || elapsed > 0` is die hele besluit, en dit het geen nuwe
+          toestand nodig nie: `klaar()` stel albei terug, dus verdwyn die balkie
+          op dieselfde oomblik. En 'n mens wat MIDDEL-IN gepouseer het, hou sy
+          balkie — `elapsed` is dan bo nul, en dit is juis die mens wat hom
+          nodig het om weer te begin. */}
+      {activeNote && activeId !== today.id && (playing || elapsed > 0) && (
         <MiniPlayer note={activeNote} playing={playing} progress={progress} onToggle={() => toggle(activeNote)} />
       )}
 

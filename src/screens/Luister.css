@@ -698,22 +698,31 @@
 /* ─── Mini player ─── */
 /* ── Die speelbalkie ──
 
-   Hy sit reg bo die onderste nav, en die BYBEL-knoppie steek 46px bo daardie
-   nav uit — presies hier. Die nota se titel het dus agter die Bybel-knoppie
-   verdwyn en 'n mens kon nie sien waarna hy luister nie.
+   Hy sit reg bo die onderste nav, en die sweefende BYBEL-knoppie hang presies
+   daar oor hom. Dit is dieselfde ding wat die Deel-knoppie in Reels doodgedruk
+   het: daardie knoppie hang oor ELKE skerm in hierdie app, en hy is die eerste
+   ding om te onthou wanneer iets in 'n onderste hoek beland.
 
-   Die balk word NIE regs geskuif nie — dit sou skeef lyk. Sy WOORDE begin
-   net verder in.
+   Hier het 'n LINKER-opvulling van 68px gestaan, met 'n hele berekening daarby
+   oor waar die Bybel-knoppie op 10% van die nav se breedte staan. Daardie
+   berekening is verouderd — hy staan nou `right: 10px`. Die opvulling het dus
+   niks gemis nie en die speelknoppie regs in sy pad gestoot, waar Dewald hom op
+   sy foon gekry het: *"die onderste play bar se play knoppie moet links op die
+   pers wys... nie onder die bybel versteek."*
 
-   Waar kom 68px vandaan: die Bybel-knoppie staan op 10% van die nav se
-   breedte, min 24px, en is 48px wyd. Sy regterkant binne hierdie balkie is
-   dus 0,10 x skermbreedte + 12 op 'n gewone foon, en presies 60 op 'n skerm
-   wyer as 480px waar albei hul maksimum haal. 68 gee oral 'n bietjie lug.
+   Die opvulling is dus omgeruil: LINKS is dun (die knoppie staan daar) en REGS
+   hou die Bybel-knoppie vry.
 
-   En die sentrering is nou met marges, nie met 'n transform nie: 'n
-   permanente transform op 'n position:fixed element maak dit vir altyd 'n
-   eie saamgestelde laag. Sien CLAUDE.md se afdeling oor gekleurde strepe —
-   die onderste nav is presies hierom verander. */
+   Waar 90px vandaan kom: die nav is 480px wyd op sy breedste en die balkie 456,
+   albei gesentreer, en die Bybel-knoppie staan 10px van die nav se regterkant
+   met sowat 85px breedte. Sy linkerkant val dus sowat 83px binne die balkie se
+   regterkant — dieselfde 83 op 'n 412px-foon as op 'n breë skerm, want albei
+   skaal saam. 90 gee lug.
+
+   Die balk word NIE geskuif nie; net sy inhoud begin verder in. En die
+   sentrering is met marges, nie met 'n transform nie: 'n permanente transform op
+   'n position:fixed element maak dit vir altyd 'n eie saamgestelde laag. Sien
+   CLAUDE.md se afdeling oor gekleurde strepe. */
 .mini-player {
   position: fixed;
   bottom: calc(var(--nav-height) + var(--safe-bottom));
@@ -724,7 +733,7 @@
   max-width: 456px;
   background: var(--purple-dark);
   border-radius: 16px 16px 0 0;
-  padding: 10px 14px 6px 68px;
+  padding: 10px 90px 6px 12px;
   display: flex;
   align-items: center;
   gap: 10px;

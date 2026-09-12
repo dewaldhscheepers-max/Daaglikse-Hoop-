@@ -255,6 +255,42 @@ dood, bly `playing` waar, wys die knoppie 'n pouse-ikoon, vries die balkie, en
 niks probeer ooit weer nie. Die enigste pad uit was om die skerm te verlaat en
 terug te kom. Vandaar "ek moet in en uit gaan".
 
+### Die speelbalkie onderaan
+
+Die pers balkie wat opkom wanneer 'n mens 'n OUER nota speel (vandag se een
+speel in die hero self). Twee dinge daaraan kom van Dewald se foon af, 12
+September 2026: *"die onderste play bar se play knoppie moet links op die pers
+wys... nie onder die bybel versteek. en maak seker as die voicenote klaar gespeel
+het dat dit dadelik verdwyn."*
+
+**Die speelknoppie staan LINKS, en dit is nie 'n smaakkeuse nie.** Hy het REGS
+gestaan, en die sweefende BYBEL-knoppie hang presies daar oor die balkie. Dit is
+woord vir woord dieselfde fout as die Deel-knoppie in Reels: **daardie knoppie
+hang oor ELKE skerm in hierdie app, en hy is die eerste ding om te onthou wanneer
+iets in 'n onderste hoek beland.**
+
+Erger: daar was 'n LINKER-opvulling van 68px om hom te mis, met 'n hele
+berekening daarby oor waar hy op 10% van die nav se breedte staan. Daardie
+berekening was VEROUDERD — hy staan nou `right: 10px`. Die opvulling het dus niks
+gemis nie en die knoppie regs in sy pad gestoot. Die opvulling is omgeruil: links
+dun, en 90px regs om die Bybel-knoppie vry te hou (die nav is 480px op sy
+breedste en die balkie 456, albei gesentreer, en die knoppie is sowat 85px wyd —
+sy linkerkant val dus sowat 83px binne die balkie, dieselfde op 'n 412px-foon as
+op 'n breë skerm).
+
+**Die balkie verdwyn sodra die nota klaar is.** Hy het bly staan — gepouseer, op
+nul — en dan is dit 'n balk wat vir niks in die pad staan en soos 'n haper lyk.
+Die hele besluit is `playing || elapsed > 0` by die render, en dit het geen nuwe
+toestand nodig nie: `klaar()` stel albei terug, dus verdwyn die balkie op
+dieselfde oomblik. 'n Mens wat MIDDEL-IN gepouseer het, hou sy balkie — `elapsed`
+is dan bo nul, en dit is juis die mens wat hom nodig het.
+
+Blaaiertoets: `kykMiniSpeler.mjs`. Dit meet die twee dinge wat geen eenheidstoets
+kan sien nie — `elementFromPoint` op die knoppie se middel (die enigste eerlike
+toets vir "is hy bereikbaar"), en of die balkie werklik verdwyn nadat 'n EGTE
+lêer klaar gespeel het. Dit bedien 'n stil WAV van twee sekondes, want `ended`
+moet werklik vuur.
+
 `Luister.jsx` moet dus altyd:
 
 * op `error` dadelik herstel, by dieselfde sekonde;
