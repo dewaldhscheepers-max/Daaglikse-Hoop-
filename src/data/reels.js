@@ -447,6 +447,65 @@ export function eenPas(klips, rnd, vorigeNaam, opsies) {
  * nie dieselfde clip twee keer agter mekaar sien nie. Die belofte in die
  * gedeelde boodskap bly dus staan.
  */
+/* ── Wat sy REEDS GESIEN het ──
+ *
+ * Dewald, 12 September 2026: *"as ek uit die app gaan en weer terug gaan wys
+ * dit dieselfde videos alweer. die kyker mag dit net 2 keer sien as hulle deur
+ * al die videos gegaan het en nuwe videos altyd eerste.... bo. moet nooit video
+ * 2 keer wys as daar ander videos is wat hul nog nie gekyk het nie."*
+ *
+ * Hy is reg, en die ou ontwerp kon dit nie doen nie. Dit het onthou WAAR sy was
+ * (`reels_laaste`, 'n plek in die ry) en die ry is by elke oopmaak met 'n nuwe
+ * saad herskommel. 'n Plek in 'n ry wat verander, is niks — sy het dieselfde
+ * clips weer bo gekry terwyl daar clips was wat sy nog nooit gesien het nie.
+ *
+ * Die waarheid is nie 'n PLEK nie, dit is 'n LYS: watter clips, en hoeveel keer.
+ * `reels_gesien` in localStorage, `{ id: telling }`.
+ *
+ * Daaruit volg alles wat hy gevra het, sonder 'n enkele ekstra reël:
+ *
+ *   · die voer bou RONDES. Rondte 0 is elke clip met telling 0, rondte 1 elke
+ *     clip met telling 1, en so aan. 'n Clip kan dus nooit 'n tweede keer wys
+ *     terwyl daar een is wat sy nog nie gesien het nie — dit is nie 'n toets
+ *     wat ons doen nie, dit is die vorm van die lys;
+ *   · "hoogstens twee keer" is die perk op die aantal rondes;
+ *   · en 'n NUWE clip wat hy vandag inplak, het telling 0 en staan dus in die
+ *     eerste rondte — bo, saam met die ander wat sy nog nie gesien het nie.
+ */
+
+/* Hoeveel keer het sy hierdie clip gesien? 'n Onbekende id is 0.
+   Dit aanvaar 'n gewone voorwerp, 'n Map, of niks — die berging kan enigiets
+   teruggee en 'n stukkende sleutel mag nie die voer omkantel nie. */
+export function gesienTel(gesien, id) {
+  const sleutel = String((id === 0 ? '0' : id) || '')
+  if (!sleutel || !gesien) return 0
+  let rou
+  if (typeof gesien.get === 'function') rou = gesien.get(sleutel)
+  else if (typeof gesien === 'object') rou = gesien[sleutel]
+  const n = Math.floor(Number(rou))
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
+/* Die LAAGSTE telling onder hierdie clips — die rondte waarin sy tans is.
+   Is daar een wat sy nog nie gesien het nie, is dit 0, en dan bestaan die
+   volgende rondte nie eers nie. */
+export function laagsteTel(klips, gesien) {
+  const lys = skoonLys(klips)
+  if (!lys.length) return 0
+  let min = Infinity
+  for (const k of lys) min = Math.min(min, gesienTel(gesien, k.id))
+  return Number.isFinite(min) ? min : 0
+}
+
+/* Die clips van die HUIDIGE rondte: dié met die laagste telling.
+   Dit is die hele "moet nooit video 2 keer wys as daar ander videos is wat hul
+   nog nie gekyk het nie" — en dit is 'n filter, nie 'n reël nie. */
+export function huidigeRondte(klips, gesien) {
+  const lys = skoonLys(klips)
+  const min = laagsteTel(lys, gesien)
+  return lys.filter(k => gesienTel(gesien, k.id) === min)
+}
+
 export function bouVoer(klips, opsies) {
   const o = opsies || {}
   const alles = skoonLys(klips)
@@ -457,19 +516,37 @@ export function bouVoer(klips, opsies) {
 
   /* ── Waar sy EERSTE moet land ──
    *
-   * Twee dinge kan 'n clip vorentoe bring, en hulle is nie dieselfde ding nie:
+   * Net `deepId`: 'n GEDEELDE skakel. Sy is 'n spesifieke video belowe, en 'n
+   * voer wat by clip 1 begin, maak van daardie belofte 'n leuen.
    *
-   *   `deepId` — 'n GEDEELDE skakel. Sy is 'n spesifieke video belowe, en 'n
-   *              voer wat by clip 1 begin, maak van daardie belofte 'n leuen.
-   *   `begin`  — waar sy LAAS OPGEHOU het. Dewald: "as iemand stop kyk moet dit
-   *              volgende keer daar aangaan." Sy kom terug en gaan voort in
-   *              plaas van om weer van voor af te begin.
+   * Hier het OOK 'n `begin` gestaan — die clip waar sy laas opgehou het. Dit is
+   * weg, en Dewald se klag is die rede: *"as ek uit die app gaan en weer terug
+   * gaan wys dit dieselfde videos alweer."* Daardie clip is een wat sy KLAAR
+   * gesien het, en om hom bo te sit was om haar dieselfde video weer te gee.
    *
-   * Die belofte wen oor die geheue: kom sy deur 'n skakel, is daardie clip die
-   * rede waarom sy hier is. */
-  const eerste = o.deepId || o.begin || null
-  const deep = eerste ? alles.find(k => k.id === eerste) : null
+   * "Gaan voort waar sy opgehou het" is nie weg nie — dit is BETER gedoen. Die
+   * rondtes hieronder gee haar die clips wat sy nog NIE gesien het nie, en dit
+   * is presies wat "voortgaan" beteken. */
+  const deep = o.deepId ? alles.find(k => k.id === o.deepId) : null
   const res = deep ? alles.filter(k => k.id !== deep.id) : alles
+
+  /* ── Die tellings, en hoekom hier 'n KOPIE gemaak word ──
+   *
+   * Elke rondte wat gebou word, laat die tellings een op skuif — anders sou
+   * elke rondte dieselfde clips bevat. Dit is 'n plaaslike kopie: die egte
+   * tellings in localStorage skuif wanneer sy WERKLIK kyk, nie wanneer ons die
+   * lys bou nie.
+   *
+   * 'n Gedeelde clip tel dadelik saam. Sy is besig om hom te kyk, en sonder dit
+   * sou hy 'n paar plekke later weer opkom. */
+  const telle = Object.create(null)
+  for (const k of alles) telle[k.id] = gesienTel(o.gesien, k.id)
+  if (deep) telle[deep.id] += 1
+
+  /* Was daar iets wat sy nog NIE gesien het nie toe ons begin het? Net dan is
+     die mylpaal waar. Het sy alles klaar gesien, sê "jy het alles gesien" niks
+     nuuts en dan is dit 'n kaart wat elke oopmaak in die pad staan. */
+  const hetOngesien = alles.some(k => telle[k.id] === 0)
 
   const items = []
   if (deep) items.push({ tipe: 'klip', klip: deep })
@@ -481,13 +558,26 @@ export function bouVoer(klips, opsies) {
   let laaste = deep || null
 
   for (let p = 0; p < passe; p++) {
-    /* Die eerste pas laat die gedeelde clip uit; daarna is alles weer in.
-       Die naat word IN die skikking hanteer, nie met 'n ruil agterna nie. */
-    /* Net die EERSTE pas kry die nuwe-kyker-orde. Het sy alles een keer gesien,
-       is sy nie meer nuut nie, en dan is "wat is nuut" die nuttiger vraag. */
-    const pas = eenPas(p === 0 ? res : alles, rnd, laaste ? naamVanKlip(laaste) : '',
+    /* ── Elke pas is die RONDTE van die minste-gesien clips ──
+       Dit is die hele antwoord op *"moet nooit video 2 keer wys as daar ander
+       videos is wat hul nog nie gekyk het nie."* Rondte 0 is alles met telling
+       0; is dit leeg, is alles een keer gesien en dan kom rondte 1. 'n Clip kan
+       dus nie voorspring nie — die vorm van die lys keer dit, nie 'n toets.
+
+       Die eerste pas laat die gedeelde clip uit; hy staan reeds bo. */
+    const bron = (p === 0 ? res : alles)
+    const min = bron.length ? Math.min(...bron.map(k => telle[k.id])) : 0
+    const rondte = bron.filter(k => telle[k.id] === min)
+
+    /* Net die EERSTE pas kry die nuwe-kyker-orde, en `nuut` beteken sy het nog
+       NIKS gesien nie. Binne 'n rondte staan die nuutstes bo — dit is Dewald se
+       *"nuwe videos altyd eerste.... bo"*, en 'n clip wat hy vandag inplak, het
+       telling 0 en staan dus in hierdie rondte. */
+    const pas = eenPas(rondte, rnd, laaste ? naamVanKlip(laaste) : '',
                        { nuut: !!o.nuut && p === 0 })
     if (!pas.length) continue
+    /* Die rondte is nou gekyk, sover hierdie lys gaan. */
+    for (const k of pas) telle[k.id] += 1
     /* Dieselfde CLIP twee keer agter mekaar bly moontlik wanneer daar net een
        mens is; dan help niks. Is daar meer, skuif hy een plek af. */
     if (laaste && pas.length > 1 && pas[0].id === laaste.id) {
@@ -496,8 +586,10 @@ export function bouVoer(klips, opsies) {
     }
     for (const k of pas) items.push({ tipe: 'klip', klip: k })
     laaste = pas[pas.length - 1]
-    /* Die mylpaal, een keer, ná die eerste volle pas. */
-    if (p === 0 && passe > 1) items.push({ tipe: 'mylpaal' })
+    /* Die mylpaal, een keer, ná die eerste volle pas — en NET as daar iets was
+       wat sy nog nie gesien het nie. Anders sê "jy het alles gesien" niks nuuts
+       en staan die kaart by elke oopmaak in die pad. */
+    if (p === 0 && passe > 1 && hetOngesien) items.push({ tipe: 'mylpaal' })
   }
 
   return items

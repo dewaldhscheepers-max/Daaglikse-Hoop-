@@ -97,7 +97,7 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskap wat hulle speler ontdemp, 35
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 182
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 201
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1259,13 +1259,33 @@ eie localStorage-sleutels), een keer, net op Luister, nooit oor klank of 'n ande
 skerm nie. Kom 'n nuwe speletjie by, kom sy sleutel by `SPEEL_SLEUTELS` — staan
 hy nêrens, hoor sy spelers nooit waar hulle nou is nie.
 
-**Net die AKTIEWE clip se speler is gemonteer.** Dit is nie 'n optimalisasie nie,
-dit is die hele datarekening: drie ingebedde spelers langs mekaar laai drie
-videos. Dit doen ook die werk van 'n pouse-knoppie — swiep sy weg, word die
-speler afgehaal en die klank hou op. Die einde-blad dra `data-reel="-1"` en dít
-is hoekom niks agter hom aanspeel nie; sonder daardie een attribuut bly `aktief`
+**Die aktiewe clip se speler EN die volgende een is gemonteer — nooit drie.**
+Dewald: *"die volgende video laai telank.... dit moet basies dadelik wys as ek
+opswipe."* Net die aktiewe een was gemonteer, dus het die volgende van NULS begin
+laai op die oomblik dat hy geswiep het: die raam, hulle speler se JS, die omslag,
+alles.
+
+Die vooruit-een **SPEEL NIE** (`autoplay=0`, en by ons eie lêers
+`autoPlay={false}` met `preload="auto"`). Dit is die hele afweging: 'n speler wat
+laai maar nie speel nie, kos die raam en sy omslag — nie 'n hele video nie. En
+niks kan agter haar hoorbaar wees nie.
+
+EEN vooruit, nooit twee. Die oorspronklike reël staan nog en dit is nie 'n
+optimalisasie nie, dit is die datarekening: drie ingebedde spelers langs mekaar
+laai drie videos. Een vooruit is die prys vir 'n voer wat nie hakkel nie; twee is
+'n rekening.
+
+Dit doen ook steeds die werk van 'n pouse-knoppie — swiep sy VERBY 'n clip, word
+sy speler afgehaal en die klank hou op. Die einde-blad dra `data-reel="-1"` en
+dít is hoekom niks agter hom SPEEL nie; sonder daardie een attribuut bly `aktief`
 op die laaste clip staan en speel hy voort agter 'n toe skerm. Die blaaierlopie
-het dit gevang.
+het dit gevang, en hy meet nou ook dat presies EEN speler `autoplay=1` dra.
+
+By ons eie lêers is die wins die grootste: `autoPlay` op 'n element wat al
+gemonteer is, doen niks (dit geld net by die eerste laai), dus roep 'n effek
+`play()` wanneer hy aktief word. Geen herlaai, geen adres wat verander, net
+`play()` op 'n lêer wat reeds gebuffer is — die soort "dadelik" wat 'n mens net
+kry as jy die speler besit.
 
 **Die klank is AAN sodra die blaaier dit toelaat.** Dewald: *"hoekom hou jy nie
 die klank aan nie... hoekom moet mens dit aansit."* Dit is nie 'n keuse nie: 'n
@@ -1507,15 +1527,52 @@ skommel nie die urls gi3d genoeg nie."* Hy was reg, en `ontklont` alleen was die
 fout: dit keer net wat LANGS mekaar staan, en met 'n derde van die clips van een
 mens gee dit presies "elke tweede of derde".
 
-**Sy gaan VOORT waar sy opgehou het.** `reels_laaste` word by ELKE clip geskryf,
-nie by uitgang nie — 'n mens maak 'n app toe deur hom toe te maak, nie deur 'n
-knoppie te druk nie, en dan loop daar geen opruiming nie. 'n GEDEELDE skakel wen
-hieroor: kom sy deur 'n skakel, is daardie clip die rede waarom sy hier is.
+**Sy sien NOOIT dieselfde video weer terwyl daar een is wat sy nog nie gesien
+het nie.** Dewald, 12 September 2026: *"as ek uit die app gaan en weer terug gaan
+wys dit dieselfde videos alweer. die kyker mag dit net 2 keer sien as hulle deur
+al die videos gegaan het en nuwe videos altyd eerste.... bo. moet nooit video 2
+keer wys as daar ander videos is wat hul nog nie gekyk het nie."*
 
-**Hoogstens TWEE keer dieselfde video** totdat sy alles gesien het
-(`MAKS_PASSE_VOOR_ALLES`). Elke pas wys elke clip een keer, dus is twee passe
-presies twee keer. Ná die mylpaal lig die perk — dan is 'n derde keer nie 'n
-herhaling nie, dit is 'n voer wat aangaan.
+Hier het `reels_laaste` gestaan — die PLEK waar sy opgehou het, 'n indeks in die
+ry. **Dit kon nooit werk nie**, en dit is die les: die ry word by elke oopmaak
+met 'n NUWE saad herskommel, dus is 'n plek in daardie ry niks. Sy het dieselfde
+clips weer bo gekry terwyl daar clips was wat sy nog nooit gesien het nie.
+
+Die waarheid is nie 'n plek nie, dit is 'n LYS: `reels_gesien` in localStorage,
+`{ id: telling }`. Daaruit volg alles wat hy gevra het, sonder 'n enkele ekstra
+reël:
+
+* die voer bou **RONDTES** (`huidigeRondte()`). Rondte 0 is elke clip met
+  telling 0, rondte 1 elke clip met telling 1, en so aan. 'n Clip kan dus nooit
+  'n tweede keer wys terwyl daar een is wat sy nog nie gesien het nie — dit is
+  nie 'n toets wat ons doen nie, dit is die VORM van die lys;
+* **"hoogstens twee keer"** is die perk op die aantal rondes
+  (`MAKS_PASSE_VOOR_ALLES`), en dit lig ná die mylpaal;
+* en 'n **NUWE clip** wat hy vandag inplak, het telling 0 en staan dus in die
+  eerste rondte — bo, saam met die ander wat sy nog nie gesien het nie. Dit is
+  sy *"nuwe videos altyd eerste.... bo"*, en dit kos niks ekstra.
+
+"Gaan voort waar sy opgehou het" is nie weg nie — dit is BETER gedoen. Die
+rondtes gee haar die clips wat sy nog nie gesien het nie, en dit is presies wat
+voortgaan beteken.
+
+Twee dinge daaraan wat 'n mens nie uit die kode aflei nie:
+
+* **Die tellings word EEN KEER gelees, by die eerste render** (`gesienRefLys`).
+  Bou die voer op die LEWENDE tellings, herbou hy by elke clip en herskommel
+  onder haar vingers — presies wat die saad moes keer. Die egte tellings skuif in
+  localStorage soos sy kyk, en die VOLGENDE oopmaak lees hulle;
+* **'n plek word presies EEN keer getel** (`getelPlekRef`). Die blaaierlopie het
+  dit gevang: een clip het op telling 2 gestaan ná een enkele kyk, want die
+  waarnemer vuur meer as een keer vir dieselfde plek (die rol kom tot rus, en die
+  waarnemer word oorgebou elke keer as 'n pas bygesit word). Dit is nie 'n
+  skoonheidsfout nie: 'n clip op 2 val uit die eerste rondte en sy sien hom
+  NOOIT. Die PLEK en nie die id nie — dieselfde clip kan wettig twee keer in een
+  voer staan (rondte 0 en rondte 1), en dan is dit twee kyke.
+
+**En die mylpaal-kaart kom net as daar werklik iets ongesien WAS.** "Jy het alles
+gesien" sê niks nuuts vir iemand wat dit reeds weet, en dan staan die kaart by
+elke oopmaak in die pad.
 
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
@@ -1528,10 +1585,11 @@ dan is dit met clips opgevul wat nog nooit gedeel is nie — presies die
 teenoorgestelde van wat gevra is. Is daar nog niks gedeel nie, val dit terug op
 die nuutste bo: daar is dan niks om voorkeur aan te gee.
 
-"Nuut" beteken **nog nie alles gesien nie** (`reels_alles_gesien` in
-localStorage, gemerk wanneer sy die mylpaal bereik). Dit word EEN keer per
-oopmaak gelees — verander dit midde-in 'n sessie, herskommel die voer onder haar
-vingers op die oomblik dat sy die mylpaal bereik.
+"Nuut" beteken **sy het nog NIKS gesien nie** — `reels_gesien` is leeg. Dit was
+`!isAllesGesien()`, en dit was te breed: iemand wat honderd clips gesien het maar
+nie almal nie, het die "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat
+NUUT is. Dit word EEN keer per oopmaak gelees — verander dit midde-in 'n sessie,
+herskommel die voer onder haar vingers.
 
 Die saad is nie 'n toets-gerief nie. Die voer word HERBOU elke keer as 'n pas
 bykom; met 'n saad bly wat sy reeds gesien het presies dieselfde en kom daar net

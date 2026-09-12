@@ -19,6 +19,9 @@ import {
   deelBoodskap, magVraInstalleer, brugVir,
   saaiRnd, meng, ontklont, nuutsteEerste, eenPas, bouVoer,
   BESTE_BO, meesteGedeelEerste, tydVan, versprei, nuutsteVanElkeMaker,
+  gesienTel,
+  laagsteTel,
+  huidigeRondte,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -323,24 +326,90 @@ console.log('\n── Versprei: elke maker kry n steek eweredig aan sy aandeel �
   is('niks in',             versprei(null, saaiRnd(1)), [])
 }
 
-console.log('\n── Waar sy LAAS opgehou het ──')
-/* Dewald: "onthou as iemand stop kyk moet dit volgende keer daar aangaan." */
+console.log('\n── Wat sy REEDS GESIEN het ──')
+/* Dewald, 12 September 2026: "as ek uit die app gaan en weer terug gaan wys dit
+   dieselfde videos alweer. die kyker mag dit net 2 keer sien as hulle deur al
+   die videos gegaan het en nuwe videos altyd eerste.... bo. moet nooit video 2
+   keer wys as daar ander videos is wat hul nog nie gekyk het nie."
+
+   Dit was 'n PLEK in die ry (`begin`, uit `reels_laaste`), en dit kon nooit
+   werk nie: die ry word by elke oopmaak met 'n nuwe saad herskommel, dus is 'n
+   plek in daardie ry niks. Dit is nou 'n LYS van tellings. */
 {
   const lys = Array.from({ length: 6 }, (_, i) => mk('k' + i, 'M' + (i % 3)))
-  is('sy begin waar sy opgehou het',
-     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4' })[0].klip.id, 'k4')
-  is('en nie twee keer agter mekaar nie',
-     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4' })[1].klip.id !== 'k4', true)
-  is('niks gaan verlore nie',
-     new Set(bouVoer(lys, { saad: 5, passe: 1, begin: 'k4' }).map(i => i.klip.id)).size, 6)
-  /* 'n GEDEELDE skakel wen oor die geheue: daardie clip is die rede waarom sy
-     hier is. */
-  is('n gedeelde skakel wen oor die geheue',
-     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4', deepId: 'k1' })[0].klip.id, 'k1')
-  is('n onbekende plek verander niks',
-     bouVoer(lys, { saad: 5, passe: 1, begin: 'weg' }).length, 6)
-  is('geen plek',
-     bouVoer(lys, { saad: 5, passe: 1, begin: null }).length, 6)
+  const ids = o => bouVoer(lys, o).filter(i => i.tipe === 'klip').map(i => i.klip.id)
+
+  /* Die hele reël, in een meting: drie is gesien, dus moet die ANDER DRIE
+     eerste kom — in watter orde ook al — voordat enigiets herhaal. */
+  {
+    const ry = ids({ saad: 5, passe: 3, gesien: { k0: 1, k1: 1, k2: 1 } })
+    is('die ONGESIENE kom eerste', new Set(ry.slice(0, 3)), new Set(['k3', 'k4', 'k5']))
+    is('en niks herhaal voor hulle almal was nie', new Set(ry.slice(0, 3)).size, 3)
+  }
+
+  /* Tellings hoef nie almal 1 te wees nie: die LAAGSTE telling is die rondte. */
+  {
+    const ry = ids({ saad: 8, passe: 2, gesien: { k0: 3, k1: 2, k2: 2, k3: 2, k4: 2, k5: 2 } })
+    is('die minste-gesien kom eerste', ry[0] !== 'k0', true)
+  }
+
+  /* Alles een keer gesien: dan MAG dit herhaal, en dan net herhaal. */
+  {
+    const alles = { k0: 1, k1: 1, k2: 1, k3: 1, k4: 1, k5: 1 }
+    is('alles gesien: die volle lys kom weer', new Set(ids({ saad: 5, passe: 1, gesien: alles })).size, 6)
+    /* En die mylpaal-kaart kom NIE weer nie — "jy het alles gesien" se niks
+       nuuts vir iemand wat dit reeds weet, en dan staan die kaart by elke
+       oopmaak in die pad. */
+    is('en GEEN mylpaal meer nie',
+       bouVoer(lys, { saad: 5, passe: 3, gesien: alles }).some(i => i.tipe === 'mylpaal'), false)
+  }
+
+  /* 'n Vars kyker: die mylpaal hoort WEL daar, want dit is waar. */
+  is('n vars kyker kry die mylpaal',
+     bouVoer(lys, { saad: 5, passe: 3, gesien: {} }).some(i => i.tipe === 'mylpaal'), true)
+
+  /* 'n NUWE clip wat hy vandag inplak, het telling 0 — hy staan dus in die
+     eerste rondte, by die ongesiene. Dewald: "nuwe videos altyd eerste.... bo." */
+  {
+    const met = [...lys, mk('nuweklip', 'M9', '2026-09-12')]
+    const ry = bouVoer(met, { saad: 4, passe: 2, gesien: { k0: 1, k1: 1, k2: 1, k3: 1, k4: 1, k5: 1 } })
+      .filter(i => i.tipe === 'klip').map(i => i.klip.id)
+    is('n nuwe clip staan heel bo', ry[0], 'nuweklip')
+  }
+
+  /* 'n GEDEELDE skakel wen oor die tellings: daardie clip is die rede waarom sy
+     hier is, ook al het sy hom gesien. */
+  is('n gedeelde skakel wen oor die tellings',
+     ids({ saad: 5, passe: 2, gesien: { k1: 4 }, deepId: 'k1' })[0], 'k1')
+  is('en hy kom nie dadelik weer nie',
+     ids({ saad: 5, passe: 2, gesien: {}, deepId: 'k1' })[1] !== 'k1', true)
+
+  is('niks gaan verlore nie', new Set(ids({ saad: 5, passe: 1, gesien: {} })).size, 6)
+  is('geen tellings',  ids({ saad: 5, passe: 1, gesien: null }).length, 6)
+  is('stukkende tellings', ids({ saad: 5, passe: 1, gesien: { k0: 'x', k1: -3 } }).length, 6)
+}
+
+console.log('\n── gesienTel, laagsteTel en huidigeRondte ──')
+{
+  const lys = Array.from({ length: 4 }, (_, i) => mk('k' + i, 'M' + i))
+  is('n onbekende id is 0',   gesienTel({}, 'k0'), 0)
+  is('n telling kom deur',    gesienTel({ k0: 3 }, 'k0'), 3)
+  is('n Map werk ook',        gesienTel(new Map([['k0', 2]]), 'k0'), 2)
+  is('niks in',               gesienTel(null, 'k0'), 0)
+  is('geen id',               gesienTel({ k0: 1 }, ''), 0)
+  /* 'n Stukkende waarde mag nooit 'n clip vorentoe of agtertoe stoot nie. */
+  is('n string is 0',         gesienTel({ k0: 'baie' }, 'k0'), 0)
+  is('n negatiewe is 0',      gesienTel({ k0: -5 }, 'k0'), 0)
+  is('n breuk word afgerond', gesienTel({ k0: 2.9 }, 'k0'), 2)
+
+  is('die laagste telling',   laagsteTel(lys, { k0: 2, k1: 1, k2: 5 }), 0)
+  is('almal gesien',          laagsteTel(lys, { k0: 2, k1: 2, k2: 2, k3: 2 }), 2)
+  is('n lee lys',             laagsteTel([], { k0: 1 }), 0)
+
+  is('die rondte is die ongesiene',
+     huidigeRondte(lys, { k0: 1, k1: 1 }).map(k => k.id), ['k2', 'k3'])
+  is('almal gelyk: almal in die rondte',
+     huidigeRondte(lys, {}).length, 4)
 }
 
 console.log('\n── Die nuutstes staan BO ──')

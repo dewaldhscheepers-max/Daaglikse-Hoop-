@@ -126,7 +126,26 @@ const ALLES = 'reels_alles_gesien'
 /* Waar sy laas opgehou het. Dewald: *"onthou as iemand stop kyk moet dit
    volgende keer daar aangaan."* Sy kom terug en gaan VOORT in plaas van om weer
    van voor af te begin. */
-const LAASTE = 'reels_laaste'
+/* ── WATTER clips sy gesien het, en hoeveel keer ──
+ *
+ * Dewald: *"as ek uit die app gaan en weer terug gaan wys dit dieselfde videos
+ * alweer... moet nooit video 2 keer wys as daar ander videos is wat hul nog nie
+ * gekyk het nie."*
+ *
+ * Hier het `reels_laaste` gestaan — die PLEK waar sy opgehou het. Dit kon nooit
+ * werk nie: die ry word by elke oopmaak met 'n nuwe saad herskommel, dus is 'n
+ * plek in daardie ry niks. Sy het dieselfde clips weer bo gekry.
+ *
+ * Dit is nou 'n LYS: `{ id: telling }`. Sien `gesienTel()` en die rondtes in
+ * `reels.js` — daar staan die hele rede. */
+const GESIEN = 'reels_gesien'
+
+/* Hoeveel clips se tellings mag ons hou? 124 clips vandag, en die lys groei
+   net met wat hy inplak. 'n Perk is nogtans nodig: localStorage is klein, en 'n
+   voorwerp wat net groei, is 'n foon wat op 'n dag niks meer kan stoor nie.
+   Word dit oorskry, val die OUDSTE inskrywings uit (die eerste sleutels), want
+   die onlangse is dié wat die rondtes bepaal. */
+const MAKS_GESIEN = 2000
 
 /* ── Hoogstens TWEE keer dieselfde video ──
  *
@@ -168,12 +187,29 @@ function merkAllesGesien() {
   try { localStorage.setItem(ALLES, '1') } catch { /* privaat modus */ }
 }
 
-function leesLaaste() {
-  try { return localStorage.getItem(LAASTE) || '' } catch { return '' }
+function leesGesien() {
+  try {
+    const w = JSON.parse(localStorage.getItem(GESIEN) || '{}')
+    return w && typeof w === 'object' && !Array.isArray(w) ? w : {}
+  } catch { return {} }
 }
 
-function skryfLaaste(id) {
-  try { localStorage.setItem(LAASTE, String(id || '')) } catch { /* privaat modus */ }
+/* Merk een clip as gesien. Dit skryf DADELIK — 'n mens maak 'n app toe deur hom
+   toe te maak, nie deur 'n knoppie te druk nie, en dan loop daar geen opruiming
+   nie. Dieselfde les as `reels_laaste` s'n was. */
+function merkGesien(id) {
+  const sleutel = String(id || '')
+  if (!sleutel) return {}
+  try {
+    const w = leesGesien()
+    w[sleutel] = (Number(w[sleutel]) || 0) + 1
+    const sleutels = Object.keys(w)
+    if (sleutels.length > MAKS_GESIEN) {
+      for (const oud of sleutels.slice(0, sleutels.length - MAKS_GESIEN)) delete w[oud]
+    }
+    localStorage.setItem(GESIEN, JSON.stringify(w))
+    return w
+  } catch { return {} }
 }
 
 /* ── Een deel per clip per TOESTEL ──
@@ -214,12 +250,12 @@ function tel(wat, klip) {
  * Die enigste plek waar 'n bron 'n URL word. Dit is met opset inprop-baar:
  * TikTok se speler is nie 'n ding waarop hierdie app sy hele voer moet bou nie,
  * en die dag wanneer dit verander, verander dit HIER. */
-function spelerVir(klip, stil) {
+function spelerVir(klip, stil, speel) {
   if (!klip) return ''
   if (klip.bron === 'youtube') {
     const v = new URLSearchParams({
-      autoplay: '1',
-      mute: stil ? '1' : '0',
+      autoplay: speel ? '1' : '0',
+      mute: speel && !stil ? '0' : '1',
       playsinline: '1',
       rel: '0',
       modestbranding: '1',
@@ -228,7 +264,7 @@ function spelerVir(klip, stil) {
     })
     return `https://www.youtube.com/embed/${klip.bronId}?${v.toString()}`
   }
-  if (klip.bron === 'tiktok') return spelerAdres(klip.bronId, { speel: true })
+  if (klip.bron === 'tiktok') return spelerAdres(klip.bronId, { speel: !!speel })
   /* 'eie' — 'n lêer wat ons self bedien. */
   return String(klip.bronId || '')
 }
@@ -299,23 +335,47 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   const [laai, setLaai]     = useState(true)
 
   const voerRef    = useRef(null)
+  /* Die AKTIEWE `<video>` (net vir ons eie lêers). Die vooruit-een is gemonteer
+     maar speel nie, en `autoPlay` op 'n element wat al gemonteer is, doen niks —
+     dus moet `play()` met die hand kom wanneer hy aktief word. */
+  const videoRef   = useRef(null)
   const gesienRef  = useRef(1)
   const gevraRef   = useRef(false)
   const getelRef   = useRef(false)
   /* Die saad word EEN keer per oopmaak gekies. Sien die kop. */
   const saadRef    = useRef(0)
   if (!saadRef.current) saadRef.current = Math.floor(Math.random() * 2147483647) + 1
-  /* Nuwe kyker of nie — EEN keer gelees, by die eerste render. Dit mag nie
-     midde-in 'n sessie verander nie: die voer sou onder haar vingers herskommel
-     op die oomblik dat sy die mylpaal bereik. */
+  /* ── Wat sy gesien het, EEN keer gelees ──
+   *
+   * Dit is die belangrikste `useRef` in hierdie lêer. Die tellings verander
+   * terwyl sy kyk, en as die voer op die LEWENDE tellings gebou was, sou hy by
+   * elke clip herbou en onder haar vingers herskommel — presies wat die saad
+   * moes keer.
+   *
+   * Dus: 'n foto van die tellings by die eerste render. Die egte tellings skuif
+   * in localStorage soos sy kyk, en die VOLGENDE oopmaak lees hulle. */
+  const gesienRefLys = useRef(null)
+  if (gesienRefLys.current === null) gesienRefLys.current = leesGesien()
+  /* Nuwe kyker = sy het nog NIKS gesien nie. Dit was `!isAllesGesien()`, wat te
+     breed was: iemand wat honderd clips gesien het maar nie almal nie, het die
+     "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat NUUT is. */
   const nuutRef    = useRef(null)
-  if (nuutRef.current === null) nuutRef.current = !isAllesGesien()
+  if (nuutRef.current === null) nuutRef.current = !Object.keys(gesienRefLys.current).length
   /* Die laaste EGTE clip wat sy gesien het — die mylpaal-kaart is nie een nie. */
   const laasteRef  = useRef(null)
-  /* Waar sy laas opgehou het, EEN keer gelees. 'n Gedeelde skakel wen hieroor:
-     kom sy deur 'n skakel, is daardie clip die rede waarom sy hier is. */
-  const beginRef   = useRef(null)
-  if (beginRef.current === null) beginRef.current = deepId ? '' : leesLaaste()
+  /* ── Watter PLEKKE in hierdie voer al getel is ──
+   *
+   * Die blaaierlopie het dit gevang: een clip het op telling 2 gestaan ná een
+   * enkele kyk. Die waarnemer vuur meer as een keer vir dieselfde plek — die rol
+   * kom tot rus, en die waarnemer word oorgebou elke keer as 'n pas bygesit word
+   * — en elke keer het dit weer getel.
+   *
+   * Dit is nie 'n skoonheidsfout nie: 'n clip wat op 2 staan sonder dat sy hom
+   * twee keer gesien het, val uit die eerste rondte en sy sien hom NOOIT.
+   *
+   * Die PLEK en nie die id nie: dieselfde clip kan wettig twee keer in een voer
+   * staan (rondte 0 en rondte 1), en dan is dit twee kyke. */
+  const getelPlekRef = useRef(new Set())
   /* Mag die voer nog groei? Die perk lig sodra sy alles gesien het. */
   const maksRef    = useRef(0)
   maksRef.current = isAllesGesien() ? Infinity : MAKS_PASSE_VOOR_ALLES
@@ -329,9 +389,10 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
     return bouVoer(lys, {
       deepId: deepId || null,
-      /* Waar sy laas opgehou het. Sien `bouVoer` se kop vir waarom dit 'n ANDER
-         ding as `deepId` is. */
-      begin: beginRef.current || null,
+      /* Wat sy REEDS gesien het. Hieruit kom die rondtes: eers alles wat sy nog
+         nie gesien het nie, en 'n tweede keer eers wanneer daar niks ongesien
+         oor is nie. Sien `bouVoer` se kop. */
+      gesien: gesienRefLys.current,
       saad: saadRef.current,
       passe,
       /* 'n Vreemdeling sien die BESTE eerste, nie die nuutste nie. Dewald:
@@ -427,8 +488,18 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
           laasteRef.current = it.klip
           /* By ELKE clip, nie net by uitgang nie: 'n mens maak 'n app toe deur
              hom toe te maak, nie deur 'n knoppie te druk nie, en dan loop daar
-             geen opruiming nie. */
-          skryfLaaste(it.klip.id)
+             geen opruiming nie.
+
+             Dit skryf na localStorage maar NIE na `gesienRefLys` nie — die voer
+             se orde mag nie onder haar vingers verander nie. Die volgende
+             oopmaak lees hierdie tellings, en dan is die clips wat sy nou kyk,
+             uit die eerste rondte.
+
+             En PRESIES EEN keer per plek — sien `getelPlekRef`. */
+          if (!getelPlekRef.current.has(i)) {
+            getelPlekRef.current.add(i)
+            merkGesien(it.klip.id)
+          }
         }
         /* Sy is by die mylpaal — sy het ALLES gesien. Van die volgende oopmaak
            af is sy nie meer 'n nuwe kyker nie, en dan is "wat is nuut" die
@@ -458,6 +529,25 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     dele.forEach(d => kyker.observe(d))
     return () => kyker.disconnect()
   }, [items, isInstalled, onInstalleer])
+
+  /* ── Ons eie lêer: die vooruit-een word AANGESIT wanneer hy aktief word ──
+   *
+   * Die vooruit-`<video>` is gemonteer met `autoPlay={false}`: hy laai sy begin
+   * en staan stil. Word hy aktief, verander daardie prop — en dit doen NIKS,
+   * want `autoplay` geld net by die eerste laai van 'n element. Sonder hierdie
+   * effek sou die tweede clip vir altyd op sy eerste raam staan.
+   *
+   * Dit is die hele wins van ons eie lêer: geen herlaai, geen adres wat
+   * verander, net `play()` op 'n lêer wat reeds gebuffer is. Dit is die soort
+   * "dadelik" wat 'n mens net kry as jy die speler besit. */
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v) return
+    /* `catch` en nie 'n `if` nie: 'n blaaier mag `play()` weier (sy het nog niks
+       aangeraak nie) en dan is dit 'n verwerping, nie 'n fout in die voer nie. */
+    const p = v.play()
+    if (p && typeof p.catch === 'function') p.catch(() => {})
+  }, [items, aktief, stil])
 
   /* ── TikTok: die klank, deur hulle EIE kanaal ──
    *
@@ -494,7 +584,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const it = items[aktief]
     if (!it || it.tipe !== 'klip' || it.klip.bron !== 'tiktok') { setKanaal(false); return }
 
-    const raam = voerRef.current && voerRef.current.querySelector('iframe.reel-speler')
+    /* Daar is nou TWEE rame gemonteer — die aktiewe een en die vooruit-een — dus
+       moet dit die AKTIEWE een wees. `querySelector('iframe.reel-speler')` sou
+       die eerste in die DOM gee, en dit is nie altyd hierdie een nie. */
+    const raam = voerRef.current
+      && voerRef.current.querySelector(`[data-reel="${aktief}"] iframe.reel-speler`)
     if (!raam) return
 
     /* `tiktokStil` en nie `stil` nie — sien die kop by die toestand. Hulle speler
@@ -631,8 +725,23 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
           const brug = brugVir(klip)
           return (
             <section className="reel" key={`${klip.id}-${i}`} data-reel={i}>
-              {/* Net die AKTIEWE speler is gemonteer. Sien die kop. */}
-              {i === aktief && klip.bron === 'eie' ? (
+              {/* ── Die aktiewe speler EN die volgende een ──
+                  Dewald: *"die volgende video laai telank.... dit moet basies
+                  dadelik wys as ek opswipe."* Hy is reg, en die oorsaak was hier:
+                  net die AKTIEWE speler was gemonteer, dus het die volgende een
+                  van nuuts af begin laai op die oomblik dat hy geswiep het — die
+                  raam, hulle speler se JS, die omslag, alles.
+
+                  Nou word die VOLGENDE een ook gemonteer, maar hy SPEEL NIE
+                  (`autoplay=0`, en by ons eie lêers `autoPlay={false}`). Dit is
+                  die hele afweging: 'n speler wat laai maar nie speel nie, kos
+                  die raam en sy omslag — nie 'n hele video nie.
+
+                  EEN vooruit, nooit twee. Die oorspronklike reël staan nog: drie
+                  ingebedde spelers langs mekaar is die hele datarekening, en dit
+                  is nie 'n optimalisasie nie. Een vooruit is die prys vir 'n voer
+                  wat nie hakkel nie; twee is 'n datarekening. */}
+              {(i === aktief || i === aktief + 1) && klip.bron === 'eie' ? (
                 /* ── ONS EIE lêer: 'n regte <video>, en dus ons eie klank ──
                  *
                  * Dit was 'n `<iframe src="…mp4">`, en dit is 'n stille fout:
@@ -650,16 +759,22 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 <video
                   className="reel-speler"
                   key={`${klip.id}-video`}
-                  src={spelerVir(klip, stil)}
-                  muted={stil}
-                  autoPlay
+                  ref={el => { if (i === aktief) videoRef.current = el }}
+                  src={spelerVir(klip, stil, true)}
+                  muted={i !== aktief || stil}
+                  /* Die VOORUIT-een speel nie. Hy laai net, en dit is presies
+                     wat 'n mens wil: `preload="auto"` haal die begin van die
+                     lêer sodat die eerste raam daar is voor sy swiep. Dit is
+                     die pad waar hierdie heeltemal ons s'n is — geen herlaai,
+                     geen ander party. */
+                  autoPlay={i === aktief}
                   loop
                   playsInline
                   preload="auto"
                   disablePictureInPicture
                   controls={false}
                 />
-              ) : i === aktief ? (
+              ) : (i === aktief || i === aktief + 1) ? (
                 <iframe
                   className="reel-speler"
                   /* Die sleutel dra `stil` sodat "Tik vir klank" die raam
@@ -672,7 +787,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                      video begin van voor af en word weer afgelaai. Dieselfde
                      rede as waarom net die aktiewe speler gemonteer is. */
                   key={klip.bron === 'tiktok' ? klip.id : `${klip.id}-${stil ? 'stil' : 'klank'}`}
-                  src={spelerVir(klip, stil)}
+                  src={spelerVir(klip, stil, i === aktief)}
                   title={klip.naam}
                   allow="autoplay; encrypted-media; picture-in-picture; clipboard-write"
                   allowFullScreen
