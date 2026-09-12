@@ -50,10 +50,14 @@
  * aan. Die enigste geval wat nog stil begin, is 'n vreemdeling op 'n gedeelde
  * skakel; daar is die eerste swiep genoeg (`pointerdown`).
  *
- * Dit geld net waar ONS die speler besit: YouTube en ons eie lêers. By TIKTOK is
- * die klank binne hulle iframe en ons kan dit nie raak nie. `volume_control=1`
- * was 'n raaiskoot — TikTok ignoreer dit, daar was geen knoppie op 'n regte foon
- * nie, en my wenk het na niks gewys. Albei is weg.
+ * By YOUTUBE en by ons eie lêers sit die klank in ONS hande: die een in die
+ * adres (`mute=0`), die ander op 'n regte `<video>` (`muted={stil}`).
+ *
+ * By TIKTOK loop dit deur hulle eie boodskap-kanaal — sien
+ * `src/data/tiktokKlank.js`. `volume_control=1` was 'n raaiskoot en is weg; die
+ * kanaal is nie. Die klank-knoppie op 'n TikTok-clip bestaan NET wanneer hulle
+ * speler werklik met ons gepraat het, sodat daar nooit weer 'n knoppie is wat
+ * na 'n vermoë wys wat nie bestaan nie.
  *
  * ── TikTok teken sy EIE oorleg, en ons moet plek maak ──
  *
@@ -65,9 +69,16 @@
  *
  *   · by 'n TikTok-clip wys ons NIE ons eie maker-lyn nie. Hulle s'n staan
  *     reeds daar, en twee name is 'n fout wat soos 'n fout lyk;
- *   · die Deel-knoppie staan nie meer regs nie. Hy sit in die onderste stapel
- *     LINKS, saam met die woorde. Regs is hulle rail én die sweefende
- *     BYBEL-knoppie; links is die enigste kant wat aan ons behoort.
+ *   · ons eie knoppies staan REGS, presies waar hulle rail is, en die ronde
+ *     ONDEURSIGTIGE skyf (`.reel-knop-skyf`) dek hulle deel-ikoon. Hier het 'n
+ *     swart STROOK oor die hele regterkant gestaan; Dewald: *"verwyder die swart
+ *     streep dis lelik."* Hy was reg — 'n band oor 'n video word die ding wat 'n
+ *     mens sien. Die knoppie doen nou self die werk.
+ *
+ *     Hulle hartjie en kommentaar bly dus sigbaar. Dit is die prys, en dit is 'n
+ *     beter prys as 'n band oor elke video. Die rail sit ook hoog genoeg om die
+ *     sweefende BYBEL-knoppie te mis — hy het die Deel-knoppie een keer
+ *     letterlik doodgedruk.
  *
  * ── Waar die clips vandaan kom ──
  *
@@ -95,6 +106,7 @@ import {
   skoonLys, bouVoer, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
 } from '../data/reels'
 import { spelerAdres } from '../data/tiktokId'
+import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
 import './Reels.css'
 
 /* 'n Haal sonder tydgrens bly vir altyd staan wanneer Android die oortjie
@@ -264,6 +276,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    * 'n Getter en nie 'n prop-waarde nie: 'n toestand hiervoor sou App by elke
    * speel en pouse laat hervorm, en dit is die app se warmste pad. */
   const [wenk, setWenk]     = useState(() => !(klankSpeelNou && klankSpeelNou()))
+  /* Het TikTok se speler ooit met ONS gepraat? Net dan mag daar 'n klank-knoppie
+     op 'n TikTok-clip wees. Sien `src/data/tiktokKlank.js`. */
+  const [kanaal, setKanaal] = useState(false)
   const [laai, setLaai]     = useState(true)
 
   const voerRef    = useRef(null)
@@ -427,39 +442,76 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     return () => kyker.disconnect()
   }, [items, isInstalled, onInstalleer])
 
-  /* ── TikTok: 'n STILLE poging om te ontdemp ──
+  /* ── TikTok: die klank, deur hulle EIE kanaal ──
    *
-   * Dewald, derde keer: *"di klank werk steeds nie."*
+   * Dewald, vier keer: *"we need sound!!!!!!!!!!!!"*
    *
-   * Die video speel binne TikTok se iframe en ons het geen beheer oor sy volume
-   * nie. Hulle speler het 'n postMessage-protokol, en `unMute` daarop is die
-   * enigste ding wat oorbly om te probeer.
+   * Die eerste poging het 'n JSON-STRING gestuur sonder hulle merker, en so 'n
+   * boodskap word weggegooi voordat iets na die tipe kyk. Die gedokumenteerde
+   * vorm staan nou in `src/data/tiktokKlank.js`, met die hele rede daarby.
    *
-   * ── Waarom dit hier mag staan en die vorige raaiskoot nie ──
+   * ── Wanneer dit gestuur word ──
    *
-   * `volume_control=1` was 'n raaiskoot MET 'n belofte op die skerm: 'n wenk wat
-   * na 'n knoppie wys wat nie bestaan nie. Dit was 'n leuen.
+   * DRIE keer, want die oomblik waarop hulle speler gereed is, is nie iets wat
+   * ons kan sien:
    *
-   * Dit is 'n raaiskoot SONDER 'n belofte. Werk dit, is daar klank; werk dit
-   * nie, is daar presies niks anders nie — geen knoppie wat niks doen nie, geen
-   * wenk wat 'n mens laat soek nie. Ek kan dit nie hier toets nie (TikTok is in
-   * hierdie houer geblokkeer), en daarom is dit stil.
+   *   1. wanneer die raam klaar laai (`load`);
+   *   2. wanneer hulle vir die EERSTE keer met ons praat — dít is die enigste
+   *      eerlike "gereed", en dit is hoekom ons luister;
+   *   3. en 'n keer op 'n tydhouer, want 'n speler wat nooit praat nie, kan nog
+   *      steeds luister.
    *
-   * Dit loop op die eerste aanraking, want dit is die oomblik waarop 'n blaaier
-   * klank hoegenaamd toelaat. */
+   * ── Die knoppie hang aan 'n ANTWOORD ──
+   *
+   * `kanaal` word net waar wanneer hulle speler werklik met ons gepraat het.
+   * Dan — en net dan — wys die klank-knoppie. Dit is die les van
+   * `volume_control=1`: 'n knoppie wat na 'n vermoë wys wat nie bestaan nie, is
+   * erger as stilte. Hier kan dit nie gebeur nie. */
   useEffect(() => {
     const it = items[aktief]
-    if (!it || it.tipe !== 'klip' || it.klip.bron !== 'tiktok') return
-    if (stil) return
-    const raam = voerRef.current && voerRef.current.querySelector('.reel-speler')
-    if (!raam || !raam.contentWindow) return
-    const t = setTimeout(() => {
-      for (const boodskap of [{ type: 'unMute' }, { type: 'setVolume', value: 1 }]) {
-        try { raam.contentWindow.postMessage(JSON.stringify(boodskap), 'https://www.tiktok.com') }
-        catch { /* hulle speler antwoord nie; dan bly dit stil */ }
-      }
-    }, 900)   /* die speler moet eers gereed wees */
-    return () => clearTimeout(t)
+    if (!it || it.tipe !== 'klip' || it.klip.bron !== 'tiktok') { setKanaal(false); return }
+
+    const raam = voerRef.current && voerRef.current.querySelector('iframe.reel-speler')
+    if (!raam) return
+
+    const stuur = () => stelKlank(raam.contentWindow, !stil)
+
+    /* ── Die PINGPONG, en hoekom hierdie vlaggie moet bly ──
+     *
+     * Die eerste weergawe het by ELKE boodskap van hulle weer gestuur. Hulle
+     * speler antwoord op 'n opdrag, en toe was daar 'n lus: ons stuur vier,
+     * hulle antwoord vier, ons stuur weer vier. Die blaaiertoets het gehang en
+     * die stomp se lys het honderde inskrywings gehad.
+     *
+     * Op 'n regte foon sou dit nie gehang het nie — dit sou net vir altyd
+     * boodskappe heen en weer gestuur het, en dit is 'n foon se battery.
+     *
+     * Ons stuur dus PRESIES EEN keer ná hulle eerste antwoord. Verander `stil`
+     * of die aktiewe clip, loop hierdie effek van nuuts af en die vlaggie is
+     * weer af — wat reg is, want dan is daar 'n nuwe opdrag om te stuur. */
+    let geantwoord = false
+
+    function opBoodskap(e) {
+      if (!isTiktokBoodskap(e)) return
+      /* Hulle praat met ons. Die kanaal leef, en die knoppie mag nou bestaan. */
+      setKanaal(true)
+      if (geantwoord) return
+      geantwoord = true
+      /* Hulle eerste woord is die enigste eerlike "ek is gereed" wat ons kan
+         kry, dus is dit die beste oomblik om die opdrag te herhaal. */
+      stuur()
+    }
+
+    window.addEventListener('message', opBoodskap)
+    raam.addEventListener('load', stuur)
+    stuur()
+    const t = setTimeout(stuur, 1200)
+
+    return () => {
+      window.removeEventListener('message', opBoodskap)
+      raam.removeEventListener('load', stuur)
+      clearTimeout(t)
+    }
   }, [items, aktief, stil])
 
   /* ── Die eerste aanraking maak die klank oop ──
@@ -584,8 +636,14 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                   className="reel-speler"
                   /* Die sleutel dra `stil` sodat "Tik vir klank" die raam
                      HERBOU. 'n Blote src-verandering laat YouTube se speler
-                     soms stil bly. */
-                  key={`${klip.id}-${stil ? 'stil' : 'klank'}`}
+                     soms stil bly.
+
+                     By TIKTOK mag dit NIE gebeur nie. Hulle adres dra geen
+                     mute-param nie — die klank loop deur 'n boodskap — dus sou
+                     'n herbou niks aan die klank verander en alles kos: die
+                     video begin van voor af en word weer afgelaai. Dieselfde
+                     rede as waarom net die aktiewe speler gemonteer is. */
+                  key={klip.bron === 'tiktok' ? klip.id : `${klip.id}-${stil ? 'stil' : 'klank'}`}
                   src={spelerVir(klip, stil)}
                   title={klip.naam}
                   allow="autoplay; encrypted-media; picture-in-picture; clipboard-write"
@@ -622,6 +680,36 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                   Dit dek wat dit moet dek en dit lyk soos 'n knoppie, nie soos
                   'n fout nie. */}
               <div className="reel-rail">
+                {/* ── Die klank-knoppie op 'n TikTok-clip ──
+                    Hy bestaan NET wanneer `kanaal` waar is, en `kanaal` word
+                    net waar wanneer hulle speler werklik met ons gepraat het.
+                    Dit is die hek wat `volume_control=1` se fout onmoontlik
+                    maak: daardie wenk het na 'n vermoë gewys wat nie bestaan
+                    het nie. 'n Knoppie wat aan 'n ONTVANGDE antwoord hang, kan
+                    nie so lieg nie. */}
+                {klip.bron === 'tiktok' && i === aktief && kanaal && (
+                  <button
+                    className="reel-knop"
+                    onClick={() => setStil(s => !s)}
+                    aria-label={stil ? 'Sit die klank aan' : 'Sit die klank af'}
+                  >
+                    <span className="reel-knop-skyf">
+                      {stil ? (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                          <path d="m16 9 5 6" /><path d="m21 9-5 6" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                          <path d="M16 8.5a5 5 0 0 1 0 7" /><path d="M19 6a9 9 0 0 1 0 12" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="reel-knop-woord">{stil ? 'Klank' : 'Stil'}</span>
+                  </button>
+                )}
+
                 <button className="reel-knop" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
                   <span className="reel-knop-skyf">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">

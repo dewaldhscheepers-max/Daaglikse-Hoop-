@@ -93,7 +93,8 @@ node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getall
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
-node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 100 toetse
+node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
+node src/data/tiktokKlank.toets.mjs           # die boodskap wat hulle speler ontdemp, 35
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 182
@@ -1289,20 +1290,71 @@ houer geblokkeer (`www.tiktok.com` gee 'n 403 op die CONNECT, ook vir hulle
 `embed.js`, dus kan hulle protokol nie eens GELEES word nie), en elke raaiskoot
 kom op Dewald se foon uit.
 
-Daar staan nog **een** poging: 'n `postMessage({type:'unMute'})` na hulle raam,
-900ms ná die clip aktief word. Dit is ook 'n raaiskoot, en dit mag bly om een
-rede — dit maak **geen belofte op die skerm nie**. Werk dit, is daar klank; werk
-dit nie, is daar presies niks anders nie: geen knoppie wat niks doen nie, geen
-wenk wat 'n mens laat soek. Dit is die grens: 'n onbewysbare poging mag stil
-wees, nooit sigbaar nie.
+**Maar hulle speler HET 'n kanaal, en my eerste poging het dit verkeerd
+gebruik.** Dewald het vier keer gevra (*"we need sound!!!!!!!!!!!!"*), en die
+antwoord was nie "dit kan nie" nie — dit was dat die BOODSKAP verkeerd was.
 
-Dewald het dit DRIE keer gevra (*"sit die fokken klank nou aan. daar moet i
-maklike manier wees"*), en die eerlike antwoord is dat daar nie een is nie. Die
-klank binne 'n kruis-oorsprong iframe behoort aan die bediener wat hom bedien.
-Die app se kant is reeds reg: `allow="autoplay; …"` delegeer ons gebruiker se
-aanraking na die raam, en `stil` is `false` sodra sy iets aangeraak het. Wat
-oorbly, is TikTok se eie speler wat sy video gedemp begin. **Die enigste pad met
-'n waarborg is om die lêer te besit** — sien `bron: 'eie'` hieronder.
+Dit het dit gestuur:
+
+```js
+raam.contentWindow.postMessage(JSON.stringify({ type: 'unMute' }), '…')
+```
+
+Dit is op twee maniere verkeerd, en elkeen alleen is genoeg om die boodskap in
+die niet te laat verdwyn:
+
+1. dit is 'n **STRING**. Hulle speler verwag 'n voorwerp en lees `data.type`; op
+   'n string is dit `undefined`;
+2. dit dra nie **`'x-tiktok-player': true`** nie. Dít is die merker waarmee hulle
+    'n boodskap van hulle eie uitken, en sonder hom word dit weggegooi voordat
+   iets na die tipe kyk.
+
+Die gedokumenteerde vorm (TikTok se "Embed Player"-blad) is:
+
+```js
+interface EmbeddedPlayerMessage<T> { 'x-tiktok-player': boolean; value: T; type: string }
+```
+
+Dit staan nou in `src/data/tiktokKlank.js`, suiwer en met toetse. Wat NOG 'n
+aanname bly, is die presiese SPELLING van die werkwoord — hulle blad is in
+hierdie houer geblokkeer, dus kon net die vorm en 'n voorbeeld gekry word.
+Daarom word 'n paar spellings gestuur (`unMute`, `unmute`, `mute: false`,
+`setVolume: 1`). Dit is nie skrootskoot nie: 'n tipe wat hulle nie ken nie, word
+stilweg geïgnoreer, en die alternatief is een spelling raai en weer op sy foon
+uitkom.
+
+Dit word DRIE keer gestuur, want "wanneer is hulle speler gereed" is nie iets
+wat ons kan sien nie: by die raam se `load`, by hulle EERSTE boodskap aan ons
+(die enigste eerlike "gereed"), en een keer op 'n tydhouer.
+
+**En die klank-knoppie hang aan 'n ANTWOORD.** `kanaal` word net waar wanneer
+hulle speler werklik met ons gepraat het, en die knoppie bestaan net dan. Dit is
+die les van `volume_control=1` omgedraai: daardie wenk het na 'n vermoë gewys wat
+nie bestaan het nie, en 'n knoppie wat aan 'n ontvangde antwoord hang, kan nie so
+lieg nie. Antwoord hulle speler nooit, is daar geen knoppie — presies soos
+vandag.
+
+`isTiktokBoodskap()` toets die **OORSPRONG** en nie net die merker nie. Sonder
+daardie helfte kon enige raam op die bladsy die knoppie laat opkom deur net
+daardie sleutel te stuur. Die gasheer word met 'n suffiks getoets, nooit met
+`includes` — dieselfde reël as die kort-skakel-oplosser.
+
+**Die raam word NIE herbou wanneer die klank skuif nie.** Die `key` dra `stil`
+vir YouTube, want daar sit die klank in die adres. TikTok se adres dra geen
+mute-param nie, dus sou 'n herbou niks aan die klank verander en alles kos: die
+video begin van voor af en word weer afgelaai.
+
+Wat hierdie hele pad nie verander nie: die app se kant was altyd reg
+(`allow="autoplay; …"` delegeer die aanraking, en `stil` is `false` sodra sy
+geraak het). En **die enigste pad met 'n waarborg bly om die lêer te besit** —
+sien `bron: 'eie'` hieronder.
+
+Blaaiertoets: `kykReels.mjs` sit 'n STOMP agter `www.tiktok.com` wat presies
+hulle hek naboots — dit antwoord NET op 'n voorwerp met die merker — en lees dan
+uit die raam watter tipes werklik AANGEKOM het. 'n Eenheidstoets kan die vorm
+keur; net 'n blaaier kan vra of die boodskap oor 'n oorsprong-grens kom en of die
+antwoord terugkom. Daar is 'n tweede blok wat 'n VREEMDE raam met dieselfde
+sleutel stuur en eis dat die knoppie nie verskyn nie.
 
 **TikTok se rail vat mense UIT die app, en dit word toegemaak.** Dewald: *"die
 like comment share dit vat die gebruiker uit my app na tiktok so jy moet dit
