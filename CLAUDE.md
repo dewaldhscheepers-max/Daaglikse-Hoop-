@@ -1285,26 +1285,57 @@ Hier het `volume_control=1` gestaan met 'n wenk wat daarheen wys. TikTok ignoree
 daardie param; op 'n regte foon was daar **geen** klankknoppie, en die wenk het
 'n mens laat soek na iets wat nie bestaan nie. Albei is weg. **Moenie weer 'n
 speler-param byvoeg wat nie hier getoets kan word nie** — TikTok is in hierdie
-houer geblokkeer, en elke raaiskoot kom op Dewald se foon uit.
+houer geblokkeer (`www.tiktok.com` gee 'n 403 op die CONNECT, ook vir hulle
+`embed.js`, dus kan hulle protokol nie eens GELEES word nie), en elke raaiskoot
+kom op Dewald se foon uit.
+
+Daar staan nog **een** poging: 'n `postMessage({type:'unMute'})` na hulle raam,
+900ms ná die clip aktief word. Dit is ook 'n raaiskoot, en dit mag bly om een
+rede — dit maak **geen belofte op die skerm nie**. Werk dit, is daar klank; werk
+dit nie, is daar presies niks anders nie: geen knoppie wat niks doen nie, geen
+wenk wat 'n mens laat soek. Dit is die grens: 'n onbewysbare poging mag stil
+wees, nooit sigbaar nie.
+
+Dewald het dit DRIE keer gevra (*"sit die fokken klank nou aan. daar moet i
+maklike manier wees"*), en die eerlike antwoord is dat daar nie een is nie. Die
+klank binne 'n kruis-oorsprong iframe behoort aan die bediener wat hom bedien.
+Die app se kant is reeds reg: `allow="autoplay; …"` delegeer ons gebruiker se
+aanraking na die raam, en `stil` is `false` sodra sy iets aangeraak het. Wat
+oorbly, is TikTok se eie speler wat sy video gedemp begin. **Die enigste pad met
+'n waarborg is om die lêer te besit** — sien `bron: 'eie'` hieronder.
 
 **TikTok se rail vat mense UIT die app, en dit word toegemaak.** Dewald: *"die
 like comment share dit vat die gebruiker uit my app na tiktok so jy moet dit
 versteek deur my eie deel knopie bo oor te sit."* Hy is reg — dit is die
 teenoorgestelde van waarvoor die voer bestaan.
 
-`.reel-skerm` is 'n ONDEURSIGTIGE strook oor die regterkant wat die **tikke
-vang** (`pointer-events: auto`): dit is nie 'n sluier nie, dit is die ding wat
-die lek toemaak. 'n Halwe sluier het hulle telling steeds laat deurskyn.
+Die eerste weergawe was 'n ONDEURSIGTIGE STROOK (`.reel-skerm`) oor die hele
+regterkant. Dit het gewerk en dit was lelik, en Dewald het dit binne 'n uur op sy
+foon gesien: *"verwyder die swart streep dis lelik en sit net my deel icon groot
+oor dit. die bybel is klaar oor een icon"*, en toe *"haal al daai kak stepe
+uit... dis lelik."*
+
+Hy was reg, en die les is breër as hierdie een strook: **'n band oor 'n video
+word die ding wat 'n mens sien.** Dit is dieselfde fout as die sluier wat die
+Tyd met God-kaart 'n swart blok gemaak het.
+
+Die **KNOPPIE self** doen nou die werk. `.reel-knop-skyf` is 'n ronde,
+ondeursigtige skyf van 58px presies waar hulle deel-ikoon sit: dit dek wat dit
+moet dek, dit vang die tik, en dit lyk soos 'n knoppie in plaas van soos 'n fout.
+Hulle hartjie en kommentaar bly sigbaar — dit is die prys, en dit is 'n beter
+prys as 'n band oor elke video.
 
 Drie dinge daaraan is met opset:
 
-* dit begin op **34%** en nie bo nie — TikTok se LOGO regs bo is hulle erkenning
-  en word nie toegemaak nie;
+* die skyf is **ONDEURSIGTIG** (`#0D0C0D`). 'n Halwe sluier het hulle ikoon
+  steeds laat deurskyn, en "dek" beteken dek;
 * **geen `backdrop-filter`** nie. Dit maak 'n saamgestelde laag oor 'n bewegende
-  video, en dit is presies waar die gekleurde strepe op Android vandaan kom. 'n
-  Gradiënt word in die ouer se laag geverf;
-* ons eie Deel-knoppie staan **bo-op** die strook, op presies die plek waar hulle
-  rail was — waar 'n mens se duim al soek.
+  video, en dit is presies waar die gekleurde strepe op Android vandaan kom;
+* **geen `transform` op `:active`** nie — net kleur. Dieselfde reël as oral.
+
+`kykReels.mjs` meet nou die AFWESIGHEID: geen `.reel-skerm`, en geen kind van 'n
+clip wat wyer as 40px en hoër as 120px is met 'n ondeursigtige of gradiënt-grond.
+Dit is die hek wat keer dat 'n strook terugsluip.
 
 **En by 'n TikTok-clip wys ons nie ons eie maker-lyn nie.** Hulle speler teken
 die handvatsel self; op 'n regte foon het dit twee keer gestaan.
@@ -1313,6 +1344,15 @@ die handvatsel self; op 'n regte foon het dit twee keer gestaan.
 ons eie Storage, is dit 'n gewone `<video>`: ons besit die klank, daar is geen
 vreemde rail om toe te maak nie, en niks lek na 'n ander app nie. TikTok se
 speler is 'n lener se huis, en ons pas net die meubels aan.
+
+Daardie pad was tot dusver 'n **stille leuen**: `bron: 'eie'` het sy `bronId` in
+'n `<iframe>` gesit. 'n mp4 in 'n iframe is die BLAAIER se eie leser — dit loop
+nie, dit begin nie vanself nie, en die klank is nie ons s'n nie. Dit is presies
+dieselfde probleem as TikTok se speler, met ons eie lêer. Dit is nou 'n regte
+`<video>` met `muted={stil}`, `autoPlay`, `loop` en `playsInline` (sonder die
+laaste vat iOS die video volskerm oor en die voer is verby), en `object-fit:
+cover` op 'n ONDEURSIGTIGE grond. Daar IS die klank ons s'n — geen raaiskoot,
+geen ander party. Wat nog kort, is 'n manier om 'n lêer op te laai.
 
 **Die installasievraag kom NÁ die tweede swiep** (`magVraInstalleer()`). Sy het
 op 'n skakel gedruk om iets te SIEN; vra ons voordat sy iets gesien het, is die

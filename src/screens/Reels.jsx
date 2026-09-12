@@ -427,6 +427,41 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     return () => kyker.disconnect()
   }, [items, isInstalled, onInstalleer])
 
+  /* ── TikTok: 'n STILLE poging om te ontdemp ──
+   *
+   * Dewald, derde keer: *"di klank werk steeds nie."*
+   *
+   * Die video speel binne TikTok se iframe en ons het geen beheer oor sy volume
+   * nie. Hulle speler het 'n postMessage-protokol, en `unMute` daarop is die
+   * enigste ding wat oorbly om te probeer.
+   *
+   * ── Waarom dit hier mag staan en die vorige raaiskoot nie ──
+   *
+   * `volume_control=1` was 'n raaiskoot MET 'n belofte op die skerm: 'n wenk wat
+   * na 'n knoppie wys wat nie bestaan nie. Dit was 'n leuen.
+   *
+   * Dit is 'n raaiskoot SONDER 'n belofte. Werk dit, is daar klank; werk dit
+   * nie, is daar presies niks anders nie — geen knoppie wat niks doen nie, geen
+   * wenk wat 'n mens laat soek nie. Ek kan dit nie hier toets nie (TikTok is in
+   * hierdie houer geblokkeer), en daarom is dit stil.
+   *
+   * Dit loop op die eerste aanraking, want dit is die oomblik waarop 'n blaaier
+   * klank hoegenaamd toelaat. */
+  useEffect(() => {
+    const it = items[aktief]
+    if (!it || it.tipe !== 'klip' || it.klip.bron !== 'tiktok') return
+    if (stil) return
+    const raam = voerRef.current && voerRef.current.querySelector('.reel-speler')
+    if (!raam || !raam.contentWindow) return
+    const t = setTimeout(() => {
+      for (const boodskap of [{ type: 'unMute' }, { type: 'setVolume', value: 1 }]) {
+        try { raam.contentWindow.postMessage(JSON.stringify(boodskap), 'https://www.tiktok.com') }
+        catch { /* hulle speler antwoord nie; dan bly dit stil */ }
+      }
+    }, 900)   /* die speler moet eers gereed wees */
+    return () => clearTimeout(t)
+  }, [items, aktief, stil])
+
   /* ── Die eerste aanraking maak die klank oop ──
    *
    * Sodra sy iets aangeraak het, laat die blaaier klank deur, en dan hoef sy nie
@@ -517,7 +552,34 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
           return (
             <section className="reel" key={`${klip.id}-${i}`} data-reel={i}>
               {/* Net die AKTIEWE speler is gemonteer. Sien die kop. */}
-              {i === aktief ? (
+              {i === aktief && klip.bron === 'eie' ? (
+                /* ── ONS EIE lêer: 'n regte <video>, en dus ons eie klank ──
+                 *
+                 * Dit was 'n `<iframe src="…mp4">`, en dit is 'n stille fout:
+                 * dan speel die BLAAIER se eie leser die lêer. Dit loop nie, dit
+                 * begin nie vanself nie, en die klank is nie ons s'n nie — dit
+                 * is presies dieselfde probleem as TikTok se speler, met ons eie
+                 * lêer.
+                 *
+                 * Hier IS die klank ons s'n: `muted={stil}`, en `stil` is
+                 * `false` sodra die mens iets aangeraak het. Geen raaiskoot,
+                 * geen ander party.
+                 *
+                 * `playsInline` is nie 'n netjiese ekstra nie — sonder dit vat
+                 * iOS die video volskerm oor en die voer is verby. */
+                <video
+                  className="reel-speler"
+                  key={`${klip.id}-video`}
+                  src={spelerVir(klip, stil)}
+                  muted={stil}
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="auto"
+                  disablePictureInPicture
+                  controls={false}
+                />
+              ) : i === aktief ? (
                 <iframe
                   className="reel-speler"
                   /* Die sleutel dra `stil` sodat "Tik vir klank" die raam
@@ -548,33 +610,26 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 </button>
               )}
 
-              {/* ── Die strook oor TikTok se eie rail ──
-                  Hulle hartjie, kommentaar en deel-knoppie vat 'n mens UIT
-                  hierdie app na TikTok. Dewald: *"die like comment share dit vat
-                  die gebruiker uit my app na tiktok so jy moet dit versteek deur
-                  my eie deel knopie bo oor te sit."*
+              {/* ── Die Deel-knoppie dek TikTok se eie deel-ikoon ──
+                  Hier het 'n swart strook oor die hele regterkant gestaan om
+                  hulle rail toe te maak. Dewald: *"verwyder die swart streep dis
+                  lelik en sit net my deel icon groot oor dit. die bybel is klaar
+                  oor een icon."*
 
-                  Dit is die teenoorgestelde van waarvoor die voer bestaan — die
-                  hele punt is 'n skakel wat MENSE HIERHEEN bring. Die strook
-                  vang die tikke (`pointer-events`), dus is dit nie net 'n
-                  sluier nie: dit is die ding wat die lek toemaak.
-
-                  Geen `backdrop-filter` nie. Dit maak 'n saamgestelde laag oor 'n
-                  bewegende video, en dit is presies waar die gekleurde strepe op
-                  Android vandaan kom — sien CLAUDE.md. 'n Gradiënt word in die
-                  ouer se laag geverf. */}
-              {klip.bron === 'tiktok' && <div className="reel-skerm" />}
-
-              {/* Ons eie Deel-knoppie staan BO-OP die strook, op presies die plek
-                  waar hulle rail was. Dit is wat Dewald gevra het, en dit is ook
-                  waar 'n mens se duim al soek. */}
+                  Hy is reg — dit was 'n band oor 'n video, en 'n mens sien dit
+                  eerder as die video. Die knoppie self doen nou die werk: 'n
+                  ronde, ondeursigtige skyf presies waar hulle deel-ikoon sit.
+                  Dit dek wat dit moet dek en dit lyk soos 'n knoppie, nie soos
+                  'n fout nie. */}
               <div className="reel-rail">
                 <button className="reel-knop" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 3v13" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" />
-                    <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
-                  </svg>
-                  <span>Deel</span>
+                  <span className="reel-knop-skyf">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3v13" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" />
+                      <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+                    </svg>
+                  </span>
+                  <span className="reel-knop-woord">Deel</span>
                 </button>
               </div>
 

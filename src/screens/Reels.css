@@ -72,6 +72,12 @@
 
 .reel-wag { background: #151314; }
 
+/* Ons eie lêer is 'n <video>, en 'n video se verstek is `contain` — dan staan
+   daar swart bande bo en onder. `cover` vul die skerm, soos elke ander voer.
+   Die AGTERGROND is ondeursigtig sodat 'n raam wat nog nie geverf is nie soos
+   die app lyk en nie soos 'n gat nie. */
+video.reel-speler { object-fit: cover; background: #151314; }
+
 /* Die skrifstrook onder. Dieselfde sluier as op die Tyd met God-kaart: net
    genoeg om die woorde te dra, nooit genoeg om die video dood te maak nie.
 
@@ -143,47 +149,16 @@
 /* Net kleur. Geen transform. */
 .reel-brug:active { background: rgba(217, 177, 131, 0.18); }
 
-/* ── Die strook oor TikTok se eie rail ──
-   Hulle hartjie, kommentaar en deel-knoppie vat 'n mens UIT hierdie app na
-   TikTok. Dewald: "die like comment share dit vat die gebruiker uit my app na
-   tiktok so jy moet dit versteek deur my eie deel knopie bo oor te sit."
+/* ── Ons eie Deel-knoppie, GROOT en ondeursigtig ──
+   Op presies die plek waar TikTok se deel-ikoon sit, en groot genoeg om hom te
+   DEK. Hier het 'n swart strook oor die hele regterkant gestaan; Dewald:
+   "verwyder die swart streep dis lelik en sit net my deel icon groot oor dit."
+   Hy is reg — dit was 'n band oor 'n video en 'n mens sien dit eerder as die
+   video.
 
-   Dit is die teenoorgestelde van waarvoor die voer bestaan.
-
-   Die strook vang die TIKKE (`pointer-events: auto`) — dit is nie 'n sluier nie,
-   dit is die ding wat die lek toemaak. Rol werk steeds: 'n gewone div keer nie
-   'n ouer se rol nie.
-
-   Dit is ONDEURSIGTIG oor die regterkant en verdwyn na links. 'n Halwe sluier
-   het hulle telling ("2068") steeds laat deurskyn — en "versteek" beteken
-   versteek.
-
-   GEEN `backdrop-filter` nie. Dit maak 'n saamgestelde laag oor 'n bewegende
-   video, en dit is presies waar die gekleurde strepe op Android vandaan kom.
-   'n Gradient word in die ouer se laag geverf. Sien CLAUDE.md.
-
-   Dit begin op 34% en nie bo nie: TikTok se LOGO staan regs bo, en dit is hulle
-   erkenning. Dit word nie toegemaak nie. */
-.reel-skerm {
-  position: absolute;
-  right: 0;
-  top: 34%;
-  bottom: var(--reels-onder);
-  width: 84px;
-  z-index: 4;
-  pointer-events: auto;
-  background: linear-gradient(
-    to left,
-    #0D0C0D 0%,
-    #0D0C0D 64%,
-    rgba(13, 12, 13, 0.72) 84%,
-    rgba(13, 12, 13, 0) 100%
-  );
-}
-
-/* ── Ons eie Deel-knoppie, BO-OP die strook ──
-   Op presies die plek waar hulle rail was, want dit is waar 'n mens se duim al
-   soek.
+   Die ronde skyf is die hele truuk: hy dek wat hy moet dek en hy lyk soos 'n
+   knoppie. Geen `backdrop-filter` nie — dit maak 'n saamgestelde laag oor 'n
+   bewegende video, en dit is waar die gekleurde strepe op Android vandaan kom.
 
    Hy sit hoog genoeg om die sweefende BYBEL-knoppie te mis. Die knoppie hang oor
    ELKE skerm in die app en het die Deel-knoppie een keer letterlik doodgedruk —
@@ -207,20 +182,36 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   background: none;
   border: 0;
-  padding: 4px;
+  padding: 0;
   color: var(--reels-wit);
   font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7));
   -webkit-tap-highlight-color: transparent;
 }
-.reel-knop svg { width: 27px; height: 27px; display: block; }
+
+/* Die skyf wat dek. ONDEURSIGTIG: 'n halwe sluier het hulle ikoon steeds laat
+   deurskyn, en "dek" beteken dek. */
+.reel-knop-skyf {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #0D0C0D;
+  border: 1px solid rgba(244, 239, 231, 0.2);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+.reel-knop-skyf svg { width: 30px; height: 30px; display: block; }
+
+.reel-knop-woord { text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85); }
+
 /* Net kleur. Geen transform. */
+.reel-knop:active .reel-knop-skyf { background: #1E1A16; border-color: rgba(217, 177, 131, 0.6); }
 .reel-knop:active { color: #E8CBA4; }
 
 /* ── Die klank-wenk ── */
