@@ -18,6 +18,7 @@ import {
   magWys, skoonLys, volgordeVanaf,
   deelBoodskap, magVraInstalleer, brugVir,
   saaiRnd, meng, ontklont, nuutsteEerste, eenPas, bouVoer,
+  BESTE_BO, meesteGedeelEerste,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -327,6 +328,91 @@ console.log('\n── Geen klonte in die egte geval ──')
     for (let i = 1; i < k.length; i++) if (k[i].id === k[i - 1].id) herhaal++
   }
   is('en geen clip twee keer agter mekaar', herhaal, 0)
+}
+
+console.log('\n── n NUWE kyker sien die BESTE eerste ──')
+/* Dewald: "die wat die meeste ge deel is kry voorkeer by nuwe kykers."
+   'n Vreemdeling het nog geen rede om te bly nie; die eerlikste ding wat ons
+   vir haar kan wys, is wat ander mense goed genoeg gevind het om te STUUR. */
+{
+  const met = (id, naam, gedeel) => ({ ...mk(id, naam), gedeel })
+  const lys = [
+    met('stil', 'A', 0), met('ok', 'B', 30), met('gunsteling', 'C', 900),
+    met('goed', 'D', 400), met('swak', 'E', 2), met('niks', 'F', 0),
+    met('mid', 'G', 100), met('laag', 'H', 5),
+  ]
+
+  is('meeste eerste', meesteGedeelEerste(lys).map(k => k.id).slice(0, 4),
+     ['gunsteling', 'goed', 'mid', 'ok'])
+  is('n ontbrekende telling is nul',
+     meesteGedeelEerste([mk('a', 'A'), met('b', 'B', 5)]).map(k => k.id), ['b', 'a'])
+  is('die inset word nie aangeraak nie', lys[0].id, 'stil')
+  is('n lee lys', meesteGedeelEerste([]), [])
+  is('niks in',   meesteGedeelEerste(null), [])
+  is('vyf staan bo', BESTE_BO, 5)
+
+  /* Net die BEWESE clips staan in die voorkeur-blok. Vyf van die agt is gedeel;
+     die drie met nul mag NIE in die boonste vyf wees nie. */
+  const bewys = meesteGedeelEerste(lys).filter(k => Number(k.gedeel || 0) > 0)
+  is('ses clips is werklik gedeel', bewys.length, 6)
+  /* Die blok is hoogstens BESTE_BO groot, dus die TOP VYF daarvan. Die sesde
+     (die swakste van die gedeeldes) val onder saam met die nulle. */
+  const beste = bewys.slice(0, BESTE_BO).map(k => k.id)
+  let altyd = true
+  for (let saad = 1; saad <= 80; saad++) {
+    const eerste = bouVoer(lys, { saad, passe: 2, nuut: true })
+      .filter(i => i.tipe === 'klip').slice(0, BESTE_BO).map(i => i.klip.id)
+    if (!eerste.every(id => beste.includes(id))) altyd = false
+  }
+  is('die boonste vyf is ALTYD die top vyf gedeeldes', altyd, true)
+  /* En 'n clip met NUL dele kom nooit in daardie blok nie. */
+  is('geen ongedeelde clip in die blok', beste.includes('stil') || beste.includes('niks'), false)
+
+  /* Is daar NIKS gedeel nie, val dit terug op die nuutste bo — daar is dan
+     niks om voorkeur aan te gee. */
+  {
+    const geen = [mk('p', 'A'), mk('q', 'B'), mk('r', 'C')]
+    const a = bouVoer(geen, { saad: 4, passe: 1, nuut: true }).map(i => i.klip.id)
+    const b = bouVoer(geen, { saad: 4, passe: 1 }).map(i => i.klip.id)
+    is('sonder enige dele is die orde dieselfde as n bekende kyker s\'n', a, b)
+  }
+
+  /* En hulle is nie in dieselfde orde elke keer nie — dit bly geskommel. */
+  const a = bouVoer(lys, { saad: 3, passe: 1, nuut: true }).map(i => i.klip.id).join()
+  const b = bouVoer(lys, { saad: 44, passe: 1, nuut: true }).map(i => i.klip.id).join()
+  is('dit bly geskommel', a !== b, true)
+
+  /* 'n BEKENDE kyker kry die nuutste bo, nie die beste nie. */
+  let bekendeKryOokDieBeste = true
+  for (let saad = 1; saad <= 80; saad++) {
+    const eerste = bouVoer(lys, { saad, passe: 2 })
+      .filter(i => i.tipe === 'klip').slice(0, BESTE_BO).map(i => i.klip.id)
+    if (!eerste.every(id => beste.includes(id))) bekendeKryOokDieBeste = false
+  }
+  is('n bekende kyker se orde is ANDERS', bekendeKryOokDieBeste, false)
+
+  /* Die tweede pas is nie meer "nuut" nie: sy het alles een keer gesien. */
+  {
+    const items = bouVoer(lys, { saad: 9, passe: 3, nuut: true })
+    const klips = items.filter(i => i.tipe === 'klip')
+    const grens = items.findIndex(i => i.tipe === 'mylpaal')
+    const naMylpaal = items.slice(grens + 1).filter(i => i.tipe === 'klip')
+      .slice(0, BESTE_BO).map(i => i.klip.id)
+    is('en niks gaan verlore nie', new Set(klips.map(k => k.klip.id)).size, lys.length)
+    is('die tweede pas is nie weer die top vyf nie',
+       naMylpaal.every(id => beste.includes(id)), false)
+  }
+
+  /* Die gedeelde clip staan STEEDS eerste — die belofte wen oor die rangorde. */
+  is('n gedeelde skakel wen oor die rangorde',
+     bouVoer(lys, { saad: 3, passe: 2, nuut: true, deepId: 'niks' })[0].klip.id, 'niks')
+
+  /* Geen klonte nie, ook met die nuwe orde. */
+  let slegste = 0
+  for (let saad = 1; saad <= 80; saad++) {
+    slegste = Math.max(slegste, klonte(bouVoer(lys, { saad, passe: 3, nuut: true })))
+  }
+  is('steeds geen klonte', slegste, 0)
 }
 
 console.log('\n── Niks gooi nie ──')

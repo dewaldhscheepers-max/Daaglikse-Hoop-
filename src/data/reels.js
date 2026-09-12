@@ -48,6 +48,19 @@
    staan bo (geskommel onder mekaar), en geen twee clips van dieselfde mens volg
    op mekaar nie. Sonder die tweede reël lyk 'n voer soos 'n kanaal.
 
+   ── 'n NUWE kyker sien die BESTE eerste, nie die nuutste nie ──
+
+   Dewald: *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."*
+
+   Dit is die regte onderskeid, en dit is nie dieselfde vraag nie. 'n Mens wat
+   die app al ken, kom terug om te sien wat NUUT is — vir haar is die nuutste bo
+   reg. 'n Vreemdeling wat vir die eerste keer hier land, het nog geen rede om te
+   bly nie, en die eerlikste ding wat ons vir haar kan wys, is wat ander mense
+   werklik goed genoeg gevind het om te STUUR.
+
+   `nuut: true` skakel dus die boonste blok van "nuutste" na "meeste gedeel" om.
+   Die res van die pas bly dieselfde, en die ontklonting geld steeds.
+
    ── Erkenning is 'n HEK, nie 'n versiering nie ──
 
    'n Clip sonder 'n naam wys glad nie. Ander bedienings se werk dra hul naam,
@@ -63,10 +76,28 @@ export const BASIS = 'https://dewaldscheepers.com'
    moet bou nie. */
 export const BRONNE = ['tiktok', 'youtube', 'eie']
 
-/* Wat gemeet word, en niks meer nie. Geen naam, geen toestel-id, en NIE watter
-   clip gedeel is nie — 'n telling per clip is die eerste tree na "watter video
-   het Sarel gedeel", en hierdie app moet daardie vraag nie kan beantwoord nie.
-   Dieselfde besluit as `tellers/hoopDeel`. */
+/* Wat gemeet word. Geen naam, geen e-pos, geen toestel-id, geen IP, en geen
+   tydstempel per mens.
+
+   ── Waarom daar NOU 'n telling per clip is ──
+
+   Hier het gestaan: "NIE watter clip gedeel is nie — 'n telling per clip is die
+   eerste tree na 'watter video het Sarel gedeel'." Dewald het daarna gevra dat
+   die MEES GEDEELDE clips voorkeur kry by nuwe kykers, en dan moet daardie getal
+   bestaan.
+
+   Ek het die reël nagegaan en my eie formulering was te breed. Wat die vraag
+   "wat het Sarel gedeel" moontlik maak, is 'n telling per clip PLUS 'n mens of
+   'n tyd daarby. 'n Kaal heelgetal op die clip self sê net "hierdie een is 400
+   keer gestuur" en kan aan niemand gekoppel word nie — presies dieselfde vorm as
+   `likes/<id>` per nota en `prayedCount` per gebed, wat albei lankal in hierdie
+   app staan.
+
+   Die grens bly dus waar hy was, net skerper gestel: 'n AGGREGAAT per clip mag;
+   enigiets per MENS nooit.
+
+   `tellers/reels` hou steeds die twee totale (`gedeel`, `oopgemaak`), en die
+   clip se eie dokument hou sy eie `gedeel`. */
 export const GEBEURE = ['gedeel', 'oopgemaak']
 
 /* ── Die id in die pad ──────────────────────────────────────
@@ -239,8 +270,10 @@ export function ontklont(lys, vorigeNaam) {
   return uit
 }
 
-/* Hoeveel clips as "nuut" tel en dus bo staan. */
+/* Hoeveel clips bo staan — die nuutstes vir 'n bekende kyker, die mees gedeelde
+   vir 'n nuwe een. */
 export const NUUT_BO = 5
+export const BESTE_BO = 5
 
 /* Die nuutste eerste. `datum` is opsioneel; is dit nêrens nie, is die LAASTE
    inskrywing in die lys die nuutste, want dit is hoe 'n mens byvoeg. */
@@ -251,18 +284,52 @@ export function nuutsteEerste(klips) {
   return lys.sort((a, b) => String((b && b.datum) || '').localeCompare(String((a && a.datum) || '')))
 }
 
+/* ── Die mees gedeelde eerste ──
+ *
+ * `gedeel` is 'n kaal heelgetal op die clip — sien GEBEURE se kop. Ontbreek dit,
+ * is dit nul; 'n nuwe clip is dus onder, en dit is reg: hy het nog niks bewys
+ * nie. Gelykes hou hul plek (die sortering is stabiel), en die blok word in elk
+ * geval geskommel.
+ */
+export function meesteGedeelEerste(klips) {
+  const lys = Array.isArray(klips) ? [...klips] : []
+  return lys.sort((a, b) => Number((b && b.gedeel) || 0) - Number((a && a.gedeel) || 0))
+}
+
 /* ── Een pas deur al die clips ──
  *
  * Die nuutstes bo, onder mekaar geskommel; die res daarna, ook geskommel; en
  * dan word dieselfde-naam-langs-mekaar uitgehaal.
  */
-export function eenPas(klips, rnd, vorigeNaam) {
+export function eenPas(klips, rnd, vorigeNaam, opsies) {
   const lys = skoonLys(klips)
   if (lys.length <= 1) return lys
+  const o = opsies || {}
+
+  /* ── 'n NUWE kyker sien die BEWESE clips eerste ──
+   *
+   * En net die BEWESE. Die blok was eers 'n vaste vyf, en dan is hy met clips
+   * opgevul wat nog nooit gedeel is nie — presies die teenoorgestelde van wat
+   * gevra is. 'n Clip met nul dele het niks bewys nie en hoort nie in die
+   * voorkeur-blok nie.
+   *
+   * Is daar NIKS gedeel nie (dag een, of 'n vars versameling), val dit terug op
+   * die nuutste bo. Daar is dan niks om voorkeur aan te gee. */
+  if (o.nuut) {
+    const bewys = meesteGedeelEerste(lys).filter(k => Number((k && k.gedeel) || 0) > 0)
+    if (bewys.length) {
+      const bo = bewys.slice(0, BESTE_BO)
+      const boIds = new Set(bo.map(k => k.id))
+      const res = lys.filter(k => !boIds.has(k.id))
+      return ontklont([...meng(bo, rnd), ...meng(res, rnd)], vorigeNaam)
+    }
+  }
+
+  /* Die gewone orde: die nuutstes bo. */
   const gesorteer = nuutsteEerste(lys)
-  const nuwe = gesorteer.slice(0, NUUT_BO)
-  const res  = gesorteer.slice(NUUT_BO)
-  return ontklont([...meng(nuwe, rnd), ...meng(res, rnd)], vorigeNaam)
+  const bo  = gesorteer.slice(0, NUUT_BO)
+  const res = gesorteer.slice(NUUT_BO)
+  return ontklont([...meng(bo, rnd), ...meng(res, rnd)], vorigeNaam)
 }
 
 /* ── Die hele voer, as 'n lys ITEMS ──
@@ -298,7 +365,10 @@ export function bouVoer(klips, opsies) {
   for (let p = 0; p < passe; p++) {
     /* Die eerste pas laat die gedeelde clip uit; daarna is alles weer in.
        Die naat word IN die skikking hanteer, nie met 'n ruil agterna nie. */
-    const pas = eenPas(p === 0 ? res : alles, rnd, laaste ? naamVanKlip(laaste) : '')
+    /* Net die EERSTE pas kry die nuwe-kyker-orde. Het sy alles een keer gesien,
+       is sy nie meer nuut nie, en dan is "wat is nuut" die nuttiger vraag. */
+    const pas = eenPas(p === 0 ? res : alles, rnd, laaste ? naamVanKlip(laaste) : '',
+                       { nuut: !!o.nuut && p === 0 })
     if (!pas.length) continue
     /* Dieselfde CLIP twee keer agter mekaar bly moontlik wanneer daar net een
        mens is; dan help niks. Is daar meer, skuif hy een plek af. */

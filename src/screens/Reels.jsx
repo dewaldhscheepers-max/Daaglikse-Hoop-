@@ -68,6 +68,11 @@ const KAS = 'cachedReels'
 const KAS_TYD = 'cachedReelsTime'
 const KAS_OUD = 6 * 60 * 60 * 1000
 
+/* Het hierdie foon al ALLES gesien? Dit is die enigste ding wat 'n "nuwe kyker"
+   van 'n bekende een skei. Sien `eenPas()` in reels.js: 'n nuwe kyker kry die
+   MEES GEDEELDE clips bo, 'n bekende een die NUUTSTE. */
+const ALLES = 'reels_alles_gesien'
+
 /* Hoeveel passe vooruit gebou word, en hoeveel clips voor die einde 'n nuwe pas
    bygesit word. Drie is genoeg dat 'n mens nooit die onderkant sien nie. */
 const PASSE_BEGIN = 3
@@ -89,13 +94,42 @@ function skryfKas(lys) {
   } catch { /* privaat modus, of die berging is vol */ }
 }
 
+function isAllesGesien() {
+  try { return localStorage.getItem(ALLES) === '1' } catch { return false }
+}
+
+function merkAllesGesien() {
+  try { localStorage.setItem(ALLES, '1') } catch { /* privaat modus */ }
+}
+
+/* ── Een deel per clip per TOESTEL ──
+ *
+ * Die clip se eie `gedeel` rangskik 'n nuwe kyker se voer, en dan is die
+ * nuttige getal hoeveel VERSKILLENDE mense dit gestuur het — nie hoeveel keer
+ * een mens die knoppie gedruk het nie. Stuur sy dieselfde clip aan vyf
+ * vriendinne, is dit steeds een mens wat gesê het "hierdie een is goed".
+ *
+ * Die merkie word geskryf VOOR ons stuur — anders tel 'n swak lyn elke mislukte
+ * versoek weer. Dieselfde besluit as `volgJesusTel.js` s'n.
+ *
+ * Die TOTAAL op `tellers/reels` tel wél elke druk: dit meet aktiwiteit, nie
+ * gehalte nie. Daarom gaan albei in EEN versoek. */
+function eersteDeelVan(id) {
+  const sleutel = `reels_d_${id}`
+  try {
+    if (localStorage.getItem(sleutel) === '1') return false
+    localStorage.setItem(sleutel, '1')
+    return true
+  } catch { return false }
+}
+
 /* 'n Telling wat misluk, mag NIKS vir die mens breek nie. */
-function tel(wat) {
+function tel(wat, klip) {
   try {
     fetch('/api/reels-tel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wat }),
+      body: JSON.stringify(klip ? { wat, klip } : { wat }),
       keepalive: true,
     }).catch(() => {})
   } catch { /* niks */ }
@@ -150,6 +184,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   /* Die saad word EEN keer per oopmaak gekies. Sien die kop. */
   const saadRef    = useRef(0)
   if (!saadRef.current) saadRef.current = Math.floor(Math.random() * 2147483647) + 1
+  /* Nuwe kyker of nie — EEN keer gelees, by die eerste render. Dit mag nie
+     midde-in 'n sessie verander nie: die voer sou onder haar vingers herskommel
+     op die oomblik dat sy die mylpaal bereik. */
+  const nuutRef    = useRef(null)
+  if (nuutRef.current === null) nuutRef.current = !isAllesGesien()
   /* Die laaste EGTE clip wat sy gesien het — die mylpaal-kaart is nie een nie. */
   const laasteRef  = useRef(null)
 
@@ -160,7 +199,14 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   const items = useMemo(() => {
     const gehaal = skoonLys(rou)
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
-    return bouVoer(lys, { deepId: deepId || null, saad: saadRef.current, passe })
+    return bouVoer(lys, {
+      deepId: deepId || null,
+      saad: saadRef.current,
+      passe,
+      /* 'n Vreemdeling sien die BESTE eerste, nie die nuutste nie. Dewald:
+         "die wat die meeste ge deel is kry voorkeer by nuwe kykers." */
+      nuut: nuutRef.current,
+    })
   }, [rou, deepId, passe])
 
   /* ── Is die belowede clip werklik hier? ──
@@ -237,6 +283,10 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
         const it = items[i]
         if (it && it.tipe === 'klip') laasteRef.current = it.klip
+        /* Sy is by die mylpaal — sy het ALLES gesien. Van die volgende oopmaak
+           af is sy nie meer 'n nuwe kyker nie, en dan is "wat is nuut" die
+           nuttiger vraag as "wat is die beste". */
+        if (it && it.tipe === 'mylpaal') merkAllesGesien()
 
         /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
            volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
@@ -272,7 +322,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const skakel = reelSkakel(klip.id)
     if (!skakel) return
     const teks = deelBoodskap(klip, skakel)
-    tel('gedeel')
+    /* Die TOTAAL tel elke druk; die CLIP tel een keer per toestel. Sien
+       `eersteDeelVan()`. */
+    tel('gedeel', eersteDeelVan(klip.id) ? klip.id : '')
     try {
       if (navigator.share) { await navigator.share({ text: teks }); return }
       await navigator.clipboard.writeText(teks)
@@ -317,7 +369,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                     Stuur dit aan iemand
                   </button>
                 )}
-                <p className="reel-mylpaal-aan">Swiep aan — daar is nog.</p>
+                {/* Dit is die reël wat sê dit is nie 'n einde nie. Dewald: "dit
+                    moet aangaan... dit moet verkieslik nooit stop nie" en
+                    "wanneer iemand al die videos gekyk het moet dit oor begin."
+                    Dit begin oor — in 'n NUWE orde, nie dieselfde ry nie. */}
+                <p className="reel-mylpaal-aan">Swiep aan — dit begin weer, in 'n nuwe orde.</p>
               </section>
             )
           }

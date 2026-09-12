@@ -94,9 +94,10 @@ node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 75 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 136
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 152
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
+node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -1182,8 +1183,29 @@ gedeelde clip is een vreemdeling wat binne twee sekondes 'n boodskap sien sonder
 'n muur voor haar; dieselfde masjien as `/bid/<id>` en `/hoop/<id>`. Daarom meet
 `tellers/reels` net **gedeel** en **oopgemaak**, en nooit "gekyk" nie: die dag
 wanneer 'n mens kyktyd begin tel, begin hy 'n voer optimeer vir die verkeerde
-ding. Geen naam, geen toestel-id, en NIE watter clip nie — 'n telling per clip
-is die eerste tree na "watter video het Sarel gedeel".
+ding.
+
+**Daar is nou ook 'n telling PER CLIP, en dit was eers verbied.** Hier het
+gestaan: *"NIE watter clip nie — 'n telling per clip is die eerste tree na
+'watter video het Sarel gedeel'."* Dewald het gevra dat die mees gedeelde clips
+voorkeur kry by nuwe kykers, en dan moet daardie getal bestaan.
+
+Ek het my eie reël nagegaan en hy was te breed gestel. Wat daardie vraag
+moontlik maak, is 'n telling per clip **plus 'n mens of 'n tyd daarby**. 'n Kaal
+heelgetal op die clip sê net "hierdie een is 400 keer gestuur" en kan aan
+niemand gekoppel word nie — dieselfde vorm as `likes/<id>` per nota en
+`prayedCount` per gebed, wat albei lankal in hierdie app staan. Die grens bly
+dus waar hy was, net skerper gestel: **'n aggregaat per clip mag; enigiets per
+MENS nooit.** Geen naam, geen e-pos, geen toestel-id, geen IP, geen tydstempel
+per mens.
+
+Die clip se `gedeel` tel **een keer per toestel** (`eersteDeelVan()` in
+Reels.jsx, 'n merkie wat VOOR die stuur geskryf word — dieselfde les as
+`volgJesusTel.js`). Dit is die nuttiger getal: stuur een mens dieselfde clip aan
+vyf vriendinne, is dit steeds een mens wat gesê het "hierdie een is goed". Die
+TOTAAL op `tellers/reels` tel wél elke druk, want dit meet aktiwiteit. Albei
+gaan in EEN commit. En `oopgemaak` word NOOIT per clip getel nie — dít sou begin
+lyk soos 'n profiel van wat rondgestuur word.
 
 **Reels het Speel se oortjie gevat; daar bly vyf.** Dewald, 12 September 2026:
 *"Ek wil nie 'n sesde oortjie byvoeg nie... Speel skuif na binne die E-boeke-blad
@@ -1272,6 +1294,22 @@ almal van dieselfde persoon na mekaar."* Twee reëls volg daaruit, albei in
   geskommel onder mekaar;
 * **geen twee clips van dieselfde mens volg op mekaar nie** (`ontklont()`).
 
+**'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
+*"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
+dieselfde vraag nie: 'n mens wat die app ken, kom terug om te sien wat NUUT is,
+maar 'n vreemdeling het nog geen rede om te bly nie, en die eerlikste ding wat
+ons vir haar kan wys, is wat ander mense goed genoeg gevind het om te STUUR.
+
+Net die **bewese** clips staan in daardie blok. Dit was eers 'n vaste vyf, en
+dan is dit met clips opgevul wat nog nooit gedeel is nie — presies die
+teenoorgestelde van wat gevra is. Is daar nog niks gedeel nie, val dit terug op
+die nuutste bo: daar is dan niks om voorkeur aan te gee.
+
+"Nuut" beteken **nog nie alles gesien nie** (`reels_alles_gesien` in
+localStorage, gemerk wanneer sy die mylpaal bereik). Dit word EEN keer per
+oopmaak gelees — verander dit midde-in 'n sessie, herskommel die voer onder haar
+vingers op die oomblik dat sy die mylpaal bereik.
+
 Die saad is nie 'n toets-gerief nie. Die voer word HERBOU elke keer as 'n pas
 bykom; met 'n saad bly wat sy reeds gesien het presies dieselfde en kom daar net
 iets by, en met `Math.random()` sou die voer onder haar vingers herskommel.
@@ -1322,7 +1360,7 @@ twee-en-dertig, en 'n Vercel-funksie sterf by tien — dieselfde fout as die
 oggendkennisgewing se `for`-lus. Agt sekondes vir die HELE ketting, en
 `maxDuration: 20` in `vercel.json` as vangnet.
 
-Blaaiertoets: `kykReels.mjs` in die scratchpad (74 metings). Dit meet die ding wat geen
+Blaaiertoets: `kykReels.mjs` in die scratchpad (82 metings). Dit meet die ding wat geen
 eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
