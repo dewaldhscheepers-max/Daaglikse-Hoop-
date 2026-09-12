@@ -15,7 +15,6 @@ import KinderBibloteek from './KinderBibloteek'
 import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
-import { boekeWatWys } from '../data/kinderBoekeWys'
 import { ToetsKnoppie } from '../components/KennisgewingKnoppie'
 import { huidigeToken } from '../data/kennisgewingLees'
 
@@ -146,23 +145,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     return unsub
   }, [])
 
-  /* ── Hoeveel kinderboeke daar WERKLIK is ──
+  /* ── Die kinderboek-telling is weg ──
 
-     Die banier het `KINDER_BOEKE.length` gewys — die ingeboude lys. Dit staan
-     vir altyd op sewe, ook nadat 'n agtste boek opgelaai is. Die banier het
-     dus 'n ander getal gewys as die blad waarheen hy lei.
+     Hier het 'n haal gestaan wat by ELKE oopmaak van die e-boekblad die egte
+     aantal kinderboeke gaan vra het. Dit het net een ding gevoed: die reël
+     "16 gratis kinderboeke beskikbaar" op die banier.
 
-     Dieselfde reel as die biblioteek self, uit dieselfde lêer, sodat die twee
-     nie weer kan verskil nie. */
-  const [kinderBoeke, setKinderBoeke] = useState(KINDER_BOEKE)
-  useEffect(() => {
-    let lewendig = true
-    fetch('/api/kinder-boeke-list', { headers: { accept: 'application/json' } })
-      .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
-      .then(d => { if (lewendig) setKinderBoeke(boekeWatWys(d.books, KINDER_BOEKE)) })
-      .catch(() => {})
-    return () => { lewendig = false }
-  }, [])
+     Dewald, 12 September 2026: *"maak die kinder eboeke kaart kleiner...
+     verwyder die woorde."* Met daardie reël weg, het die versoek niks meer om
+     te doen gehad — en die biblioteek haal in elk geval sy eie lys wanneer 'n
+     mens hom oopmaak (`KinderBibloteek.jsx`), dus verloor niks.
+
+     Sit die telling ooit terug, moet dit uit `boekeWatWys()` kom en nie uit
+     `KINDER_BOEKE.length` nie: daardie ingeboude lys staan vir altyd stil en
+     die banier het toe 'n ander getal gewys as die blad waarheen hy lei. */
 
   /* Kom die API nie deur nie, val ons terug op die ou plekhouer. Sonder
      hierdie terugval bly `rgCount` vir altyd null en die twee getalle wys
@@ -334,9 +330,13 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             <div className="kinder-promo-text">
               <span className="kinder-promo-badge">NUUT</span>
               <h2 className="kinder-promo-title">Klein Hartjies, Groot Waarhede</h2>
+              {/* Die slagreël ("Lees saam. Beweeg saam...") en die telling is op
+                  12 September 2026 uitgehaal — Dewald: *"maak die kinder eboeke
+                  kaart kleiner... verwyder die woorde."* Die kaart het vier
+                  stukke teks gedra en soos die hoofsaak van die blad gelyk. Die
+                  naam, een sin en die knoppie sê alles wat 'n mens moet weet om
+                  te besluit of sy wil kyk. */}
               <p className="kinder-promo-subtitle">Interaktiewe Bybelse prenteboeke vir kinders van 2–5 jaar.</p>
-              <p className="kinder-promo-tagline">Lees saam. Beweeg saam. Plant God se waarheid in klein hartjies.</p>
-              <div className="kinder-promo-count">{kinderBoeke.length} gratis kinderboeke beskikbaar</div>
             </div>
             <div className="kinder-promo-covers" aria-hidden="true">
               {[KINDER_BOEKE[0], KINDER_BOEKE[3], KINDER_BOEKE[4]].map((b, i) => (
