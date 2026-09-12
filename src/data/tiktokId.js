@@ -88,6 +88,31 @@ export function keurTiktokInset(inset) {
   return { id: '', kort: false, leeg: false, geldig: false }
 }
 
+/* ── Die HANDVATSEL uit 'n volle adres ──
+ *
+ * Dit is nie 'n ekstra nie — dit is die ERKENNING. `magWys()` in reels.js laat
+ * 'n clip sonder 'n naam glad nie wys nie, en by 'n clip wat uit 'n geplakte
+ * skakel kom, is die enigste naam wat ons het, die maker se handvatsel:
+ *
+ *     https://www.tiktok.com/@iemand/video/7412345678901234567
+ *                             ▲▲▲▲▲▲▲
+ *
+ * Dit is presies waarom die oplosser die VOLLE adres teruggee en nie net die
+ * id nie: die id maak die speler, die handvatsel maak die erkenning, en 'n clip
+ * sonder die tweede mag nie bestaan nie.
+ *
+ * Gee 'n LEË string as daar niks is nie. 'n Clip sonder 'n naam word dan deur
+ * `magWys()` gekeer in plaas van om met 'n leë naam te wys.
+ */
+export function handvatselUit(inset) {
+  const s = String(inset == null ? '' : inset).trim()
+  if (!s) return ''
+  const m = s.match(/tiktok\.com\/@([A-Za-z0-9._-]{1,60})(?:[/?#]|$)/)
+  if (!m) return ''
+  const h = m[1].replace(/\.+$/, '')   /* 'n punt aan die einde is nie deel van 'n naam nie */
+  return h ? `@${h}` : ''
+}
+
 /* TikTok se amptelike speler. Hy dra sy eie kontroles; ons vra vir so min as
    moontlik chroom, want die voer se eie knoppies staan reeds daar. */
 export function spelerAdres(id, opsies) {

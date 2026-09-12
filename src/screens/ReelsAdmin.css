@@ -1,0 +1,90 @@
+/* ── Die Reels-admin ──
+   Die app se admin-styl; net wat hierdie skerm bysit. Geen `transform` op
+   `:active` nie — sien CLAUDE.md se afdeling oor die gekleurde strepe. */
+
+.ra-kassie {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 10px 11px;
+  border: 1px solid rgba(124, 111, 175, 0.28);
+  border-radius: 10px;
+  resize: vertical;
+  /* 'n Plaksel van 124 skakels is 5 000 karakters lank; laat dit wikkel in
+     plaas van om een reël van 5 000 te maak. */
+  word-break: break-all;
+}
+
+.ra-tel {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted, #8A7E9A);
+}
+
+.ra-invoer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cream-dark, #F0EBE3);
+}
+
+.ra-invoer-kop {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8A7E9A);
+  margin-bottom: 6px;
+}
+
+.ra-invoer-knop {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--purple, #7C6FAF);
+  color: var(--purple, #7C6FAF);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ra-invoer-knop:active { background: var(--cream-dark, #F0EBE3); }
+.ra-invoer-knop:disabled { opacity: 0.55; cursor: default; }
+
+.ra-verslag {
+  margin-top: 20px;
+  padding: 14px 15px;
+  background: var(--cream, #FAF8F5);
+  border: 1px solid var(--cream-dark, #F0EBE3);
+  border-radius: 12px;
+  font-family: var(--font-body);
+}
+
+.ra-verslag-kop {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #2D2040);
+  margin-bottom: 10px;
+}
+
+.ra-ry {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--text-muted, #8A7E9A);
+}
+.ra-ry b { color: var(--text, #2D2040); font-variant-numeric: tabular-nums; }
+.ra-ry-fout b { color: #B3261E; }
+
+.ra-lys { margin-top: 10px; font-size: 12.5px; }
+.ra-lys summary { cursor: pointer; color: var(--purple, #7C6FAF); }
+.ra-lys ul { margin: 8px 0 0; padding-left: 18px; color: var(--text-muted, #8A7E9A); }
+.ra-lys li { margin-bottom: 4px; line-height: 1.5; }
+.ra-lys code { font-size: 11.5px; word-break: break-all; }
+.ra-lys-fout summary { color: #B3261E; }

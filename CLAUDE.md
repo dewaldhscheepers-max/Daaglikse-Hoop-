@@ -93,11 +93,13 @@ node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getall
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
-node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 75 toetse
+node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 100 toetse
+node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 152
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
+node api/_reelsVoegBy.toets.mjs               # die klomp-oplosser, vals TikTok + Firestore, 47
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -1366,8 +1368,51 @@ in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
 knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
 
-Wat NOG nie bestaan nie: 'n admin om clips by te voeg (hulle staan in
-`reelsLys.js` of in Firestore), en 'n tapbare makerprofiel.
+### Skakels inplak
+
+Dewald, 12 September 2026: *"hier is die eerste klomp videos add hulle
+solank."* — **124 kort skakels, aanmekaar geplak**, sonder 'n enkele spasie:
+
+    https://vt.tiktok.com/ZSqmNv24S/https://vt.tiktok.com/ZSqmN3j62/https://…
+
+Dit is hoe 'n foon dit gee wanneer 'n mens die een ná die ander deel. 'n
+Splitser wat op `\n` of `,` staatmaak, kry EEN string van 5 000 karakters en
+gooi al 124 weg. `splitsSkakels()` in `src/data/reelsPlak.js` **soek** dus die
+skakels in plaas daarvan om te splits, en dieselfde funksie loop in die admin EN
+op die bediener — twee splitsers en die admin wys 124 waar die bediener 1 sien.
+
+`gelykeSkakel()` opgradeer `http://` na `https://` met opset: TikTok bedien niks
+oor http nie, dus is dit 'n mens se kopie van 'n egte skakel, en om dit te weier
+sou beteken dat een skakel uit 124 stilweg wegval. Die gasheer moet steeds
+tiktok.com wees. Die ENKEL-eindpunt is strenger en weier http reguit — daar plak
+'n mens een skakel en 'n duidelike "nee" is beter as 'n stille regmaak.
+
+**Die oplos gebeur in HAPPE** (`api/reels-voeg-by.mjs`, `MAKS_PER_HAP = 24`, agt
+gelyk). Elke kort skakel moet oopgemaak word en dit is 'n netwerk-versoek;
+124 daarvan in een funksie is die oggendkennisgewing se fout, weer. Die bediener
+gee die RES terug en die admin stuur dit weer — en die admin hou op sodra die
+bediener nie meer vorder nie, anders is dit 'n lus wat 124 keer dieselfde hap
+stuur.
+
+**Die maker se handvatsel kom uit die OPGELOSTE adres** en word die clip se
+naam. Dit is waarom die oplosser die volle adres teruggee en nie net die id nie:
+`https://www.tiktok.com/@iemand/video/<id>` dra albei. Kry ons die handvatsel
+nie, word die clip **nie geskryf nie** en dit word as 'n mislukking gerapporteer
+— erkenning is 'n hek, en 'n naamlose clip sou in elk geval nooit wys nie.
+
+**Die skryf is 'n `update` met 'n `updateMask`.** 'n Clip wat al bestaan, hou sy
+`gedeel`-telling; sonder die masker sou 'n tweede lopie elke telling op nul sit
+en die "mees gedeelde bo"-rangorde was stil weg. Die `datum` word net by 'n NUWE
+clip geskryf, anders keer 'n herhaalde lopie die hele voer se orde om.
+
+Die 124 skakels self staan in `src/data/reelsInvoer.js` met 'n knoppie in die
+admin, want hy het hulle EEN keer gestuur en moet dit nie weer doen nie. Nuwe
+skakels gaan deur die plakkassie.
+
+Blaaiertoets: `kykReelsAdmin.mjs` (28 metings) gebruik sy EGTE plaksel.
+
+Wat NOG nie bestaan nie: 'n manier om Dewald se eie woorde by 'n clip te sit
+(die voer werk sonder dit), en 'n tapbare makerprofiel.
 
 ## Sorg & Ondersteuning dra mekaar — Dewald is nie die enjin nie
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import KinderAdmin from './KinderAdmin'
+import ReelsAdmin from './ReelsAdmin'
 import SorgAdmin from './SorgAdmin'
 import VolgJesusAdmin from './VolgJesusAdmin'
 import { db, storage } from '../firebase'
@@ -878,6 +879,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'volgjesus' ? 'active' : ''}`} onClick={() => setActiveTab('volgjesus')}>
             ✝️ Volg Jesus
           </button>
+          <button className={`admin-tab ${activeTab === 'reels' ? 'active' : ''}`} onClick={() => setActiveTab('reels')}>
+            🎞️ Reels
+          </button>
           <button className={`admin-tab ${activeTab === 'sorg' ? 'active' : ''}`} onClick={() => setActiveTab('sorg')}>
             🤍 Sorg
           </button>
@@ -1576,6 +1580,7 @@ export default function Admin({ onClose }) {
           {/* ── KINDERS TAB ── */}
           {activeTab === 'kinders' && <KinderAdmin geheim={geheim} />}
           {activeTab === 'volgjesus' && <VolgJesusAdmin geheim={geheim} />}
+          {activeTab === 'reels'   && <ReelsAdmin geheim={geheim} />}
           {activeTab === 'sorg'    && <SorgAdmin geheim={geheim} />}
 
           {activeTab === 'video' && (

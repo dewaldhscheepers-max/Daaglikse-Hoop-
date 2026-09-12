@@ -10,7 +10,7 @@
  *
  * Loop met:  node src/data/tiktokId.toets.mjs
  */
-import { tiktokIdUit, isKortSkakel, keurTiktokInset, spelerAdres } from './tiktokId.js'
+import { tiktokIdUit, isKortSkakel, keurTiktokInset, spelerAdres, handvatselUit } from './tiktokId.js'
 
 let reg = 0, val = 0
 function is(naam, kry, wag) {
@@ -99,10 +99,29 @@ console.log('\n── Die speler se adres ──')
   is('null gee niks',        spelerAdres(null), '')
 }
 
+console.log('\n── Die handvatsel: die ERKENNING ──')
+/* `magWys()` laat 'n clip sonder 'n naam glad nie wys nie, en by 'n geplakte
+   skakel is die handvatsel die enigste naam wat ons het. */
+is('uit n volle adres',   handvatselUit(`https://www.tiktok.com/@iemand/video/${ID}`), '@iemand')
+is('met punte en strepe', handvatselUit(`https://www.tiktok.com/@ds.jan_smit/video/${ID}`), '@ds.jan_smit')
+is('sonder www',          handvatselUit(`https://tiktok.com/@iemand/video/${ID}`), '@iemand')
+is('net die profiel',     handvatselUit('https://www.tiktok.com/@iemand'), '@iemand')
+is('met n navraag',       handvatselUit(`https://www.tiktok.com/@iemand/video/${ID}?x=1`), '@iemand')
+is('n punt aan die einde word afgehaal', handvatselUit('https://www.tiktok.com/@iemand./video/1'), '@iemand')
+is('n kort skakel dra dit nie', handvatselUit('https://vt.tiktok.com/ZSqa9Knhv/'), '')
+is('n YouTube-skakel',    handvatselUit('https://youtu.be/jACGS5QkLkQ'), '')
+is('leeg',                handvatselUit(''), '')
+is('null',                handvatselUit(null), '')
+is('undefined',           handvatselUit(undefined), '')
+is('n getal',             handvatselUit(12345), '')
+is('net n apestert',      handvatselUit('https://www.tiktok.com/@'), '')
+is('n absurd lang naam',  handvatselUit(`https://www.tiktok.com/@${'x'.repeat(80)}/video/1`), '')
+
 console.log('\n── Niks gooi nie ──')
 for (const x of [null, undefined, 0, 1, '', '   ', [], {}, true, false, NaN]) {
   is(`tiktokIdUit(${JSON.stringify(x)}) gee n string`, typeof tiktokIdUit(x), 'string')
   is(`isKortSkakel(${JSON.stringify(x)}) gee n boolean`, typeof isKortSkakel(x), 'boolean')
+  is(`handvatselUit(${JSON.stringify(x)}) gee n string`, typeof handvatselUit(x), 'string')
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

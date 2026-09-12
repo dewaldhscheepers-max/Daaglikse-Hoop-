@@ -25,6 +25,9 @@
     },
     "api/reels-skakel.mjs": {
       "maxDuration": 20
+    },
+    "api/reels-voeg-by.mjs": {
+      "maxDuration": 60
     }
   },
   "routes": [
