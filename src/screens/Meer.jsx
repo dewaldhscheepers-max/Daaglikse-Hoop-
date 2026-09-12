@@ -381,16 +381,35 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
         {/* ── Speletjies ──
 
-            EEN klein kaart, en die speletjies sit daaragter. Dewald,
-            12 September 2026: *"die speletjies moet onder 'n kaart wees op eboek
-            blad en as hulle die kaart kliek moet hulle die speletjies sien...
-            net bokant al die eboeke. klein kaart baie mooi."*
+            Dewald het hierdie kaart TWEE keer laat verander, en albei kere was
+            hy reg oor iets anders.
 
-            Dit staan dus DIREK bo die e-boeklys: laag genoeg dat die boeke die
-            blad se hoofsaak bly, hoog genoeg dat 'n mens dit sien sonder om deur
-            dertig boeke te rol. 'n Uitgestalde lys van drie speletjies hier sou
-            hulle laat lyk soos die helfte van waarvoor hierdie blad bestaan; een
-            kaart sê presies wat daar is.
+            Eers, 12 September 2026: *"die speletjies moet onder 'n kaart wees op
+            eboek blad en as hulle die kaart kliek moet hulle die speletjies
+            sien... net bokant al die eboeke. klein kaart baie mooi."* Dit het 'n
+            KLEIN, stil kaart geword — 'n dun wassing, een ry, geen knoppie.
+
+            Toe, met 'n skermkiekie van sy foon: *"speletjies se kaart moet soos
+            die ander kaarte lyk.. met kleur en knopie wat sê, sien al die
+            speletjies."*
+
+            Hy is reg, en dit is nie 'n omkeer van die eerste besluit nie. Op sy
+            foon, TUSSEN die Kinderboeke-kaart en die Leesplanne-kaart — albei
+            vol kleur met 'n wit knoppie — het die stil weergawe nie soos 'n
+            beskeie kaart gelyk nie. Dit het gelyk soos 'n kaart wat nog nie klaar
+            is nie. Een vorm wat van al sy maats verskil, lees soos 'n fout, nie
+            soos 'n keuse.
+
+            Dieselfde vorm as `.lp-promo` dus: kleur, serif-titel, 'n reël wat sê
+            wat dit is, en 'n volbreedte wit knoppie. Die PLEK bly waar dit was
+            (direk bo die e-boeklys, laag genoeg dat die boeke die hoofsaak bly),
+            en dit bly EEN kaart in plaas van 'n uitgestalde lys — dit is waar
+            die "bysaak" werklik lê.
+
+            Die kleur is GROEN, nie pers of oranje nie. Kinderboeke is warm en
+            Leesplanne is pers; 'n derde kaart in een van daardie twee kleure sou
+            soos 'n herhaling lees. Groen is ook Vredepad se eie kleur, en dit is
+            die speletjie wat die meeste mense hier al gespeel het.
 
             Die drie teëls kom uit `SPELETJIES` in Speel.jsx — dieselfde ikone en
             dieselfde kleure as die speletjies self. Dit is nie net mooi nie: 'n
@@ -400,27 +419,39 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             Die `id` is die anker waarheen die "die speletjies het geskuif"-
             boodskap rol — sonder dit land 'n mens bo-aan 'n lang blad en sien
             niks. */}
-        <button
-          className="speletjie-kaart"
+        <div
+          className="speel-promo"
           id="speletjies"
+          role="button"
+          tabIndex={0}
           onClick={() => setShowSpeletjies(true)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowSpeletjies(true) }}
         >
-          <span className="speletjie-kaart-teks">
-            <span className="speletjie-kaart-titel">Speletjies</span>
-            {/* Die NAME, nie "drie gratis speletjies" nie. 'n Mens herken
-                Vredepad; sy herken nie 'n telling nie. */}
-            <span className="speletjie-kaart-sub">Vredepad · Bou die Ark · Vrugtefees</span>
-          </span>
-          <span className="speletjie-kaart-teels" aria-hidden="true">
-            {SPELETJIES.map(s => (
-              <span key={s.id} className="speletjie-teel" style={{ background: s.tint }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke={s.stroke} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  {s.ikoon}
-                </svg>
-              </span>
-            ))}
-          </span>
-        </button>
+          <div className="speel-promo-row">
+            <div className="speel-promo-left">
+              <h2 className="speel-promo-title">Speletjies</h2>
+              {/* Die NAME, nie "drie gratis speletjies" nie. 'n Mens herken
+                  Vredepad; sy herken nie 'n telling nie. */}
+              {/* "werk sonder data" het hier gestaan en dit is uit. Die speletjies
+                  SPEEL wel aflyn, maar die ranglyste kort netwerk — en 'n kaart
+                  wat 'n belofte maak wat nie heeltemal waar is nie, is presies
+                  die soort reël wat hierdie app nie mag dra nie. */}
+              <p className="speel-promo-sub">Vredepad, Bou die Ark en Vrugtefees. Almal gratis.</p>
+            </div>
+            <div className="speel-promo-teels" aria-hidden="true">
+              {SPELETJIES.map(s => (
+                <span key={s.id} className="speletjie-teel" style={{ background: s.tint }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke={s.stroke} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    {s.ikoon}
+                  </svg>
+                </span>
+              ))}
+            </div>
+          </div>
+          <button className="speel-promo-btn" onClick={e => { e.stopPropagation(); setShowSpeletjies(true) }}>
+            SIEN AL DIE SPELETJIES →
+          </button>
+        </div>
 
         {/* All books */}
         <div className="meer-section">

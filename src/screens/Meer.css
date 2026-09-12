@@ -503,6 +503,107 @@
   font-family: var(--font-serif);
 }
 
+/* ─── Speletjies-kaart ───
+   Dieselfde VORM as die Leesplanne-kaart hieronder, en dit is 'n besluit wat uit
+   'n skermkiekie kom. Dewald: *"speletjies se kaart moet soos die ander kaarte
+   lyk.. met kleur en knopie wat sê, sien al die speletjies."*
+
+   Hy is reg. Die vorige weergawe was 'n klein, stil kaart met 'n dun wassing en
+   geen knoppie — en op sy foon staan dit TUSSEN die Kinderboeke-kaart en die
+   Leesplanne-kaart, albei vol kleur met 'n wit knoppie. Die stil weergawe het
+   nie soos 'n beskeie kaart gelyk nie; dit het gelyk soos een wat nog nie klaar
+   is nie. Een vorm wat van al sy maats verskil, lees soos 'n fout.
+
+   GROEN, nie pers of oranje nie: Kinderboeke is warm en Leesplanne is pers, en
+   'n derde kaart in een van daardie kleure sou soos 'n herhaling lees. Groen is
+   ook Vredepad se eie kleur.
+
+   Geen `transform` op `:active` nie — net kleur. Die Leesplanne-kaart het nog
+   een, en dit is een van die plekke om eerste te kyk as daar ooit gekleurde
+   strepe op hierdie blad opduik. Sien CLAUDE.md. */
+.speel-promo {
+  background: linear-gradient(145deg, #1E4433 0%, #2F6B4F 55%, #4E9B74 100%);
+  border-radius: 20px;
+  padding: 20px 18px 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 22px rgba(47, 107, 79, 0.32);
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+.speel-promo:active {
+  background: linear-gradient(145deg, #173628 0%, #275A42 55%, #438965 100%);
+}
+
+.speel-promo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+}
+
+.speel-promo-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.speel-promo-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  margin: 0;
+}
+
+.speel-promo-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Die drie teëls, oorvleuelend — dieselfde beweging as die kinderboeke se
+   omslae. Hulle eie pale tinte staan teen die groen uit, en die wit rand om elke
+   teël is wat hulle laat lyk soos iets wat BO-OP die kaart lê. */
+.speel-promo-teels {
+  flex: none;
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.speel-promo-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: white;
+  color: #1E4433;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+/* Net kleur. */
+.speel-promo-btn:active { background: rgba(255, 255, 255, 0.88); }
+
 /* ─── Leesplanne promo card ─── */
 .lp-promo {
   background: linear-gradient(145deg, #3B2068 0%, #6B3FA0 55%, #9B6ED0 100%);

@@ -1233,16 +1233,42 @@ omdat Luister spesifiek vir die Daaglikse Hoop-stemboodskappe moet bly."* Hy was
 reg, en ek was verkeerd — ek het aangeneem dit is 'n sesde oortjie en met "ses
 knyp op 'n klein foon" geantwoord op 'n vraag wat niemand gevra het nie.
 
-**Die speletjies sit agter EEN klein kaart, direk bo die e-boeklys.** Dewald:
-*"die eboeke is die hoof ding nie die speletjies nie. dis by saak. dit moet
-gladnie soos hoof goed lyk... net bokant al die eboeke. klein kaart baie mooi."*
-Die kaart (`#speletjies` in `Meer.jsx`) maak `<Speel onClose={...} />` as 'n
-oorleg oop — dieselfde vorm as LeesplanneLys en KinderBibloteek. Die drie teëls
-op die kaart kom uit `SPELETJIES` in Speel.jsx, dus dieselfde ikone en kleure as
-die speletjies self; 'n kaart met sy eie versinde ikone dryf weg die dag wanneer
-'n speletjie bykom. Binne die oorleg val die `DonationCard` weg — die e-boekblad
-waarvandaan 'n mens kom, dra reeds een, en twee skenkkaarte op een pad lees soos
-'n tolhek.
+**Die speletjies sit agter EEN kaart, direk bo die e-boeklys.** Dewald:
+*"die eboeke is die hoof ding nie die speletjies nie. dis by saak... net bokant
+al die eboeke."* Die kaart (`#speletjies` in `Meer.jsx`) maak
+`<Speel onClose={...} />` as 'n oorleg oop — dieselfde vorm as LeesplanneLys en
+KinderBibloteek. Die drie teëls kom uit `SPELETJIES` in Speel.jsx, dus dieselfde
+ikone en kleure as die speletjies self; 'n kaart met sy eie versinde ikone dryf
+weg die dag wanneer 'n speletjie bykom. Binne die oorleg val die `DonationCard`
+weg — die e-boekblad waarvandaan 'n mens kom, dra reeds een, en twee skenkkaarte
+op een pad lees soos 'n tolhek.
+
+**Die kaart lyk soos die ANDER kaarte, en dit was 'n omkeer wat 'n skermkiekie
+nodig gehad het.** Die eerste weergawe was klein en stil — 'n dun wassing, een
+ry, geen knoppie — presies soos *"klein kaart baie mooi"* gelees het. Toe stuur
+Dewald 'n kiekie: *"speletjies se kaart moet soos die ander kaarte lyk.. met
+kleur en knopie wat sê, sien al die speletjies."*
+
+Hy was reg, en die les is nie "hy het van plan verander" nie. Op 'n regte foon
+staan daardie kaart TUSSEN die Kinderboeke-kaart en die Leesplanne-kaart, albei
+vol kleur met 'n wit knoppie. Die stil weergawe het nie soos 'n beskeie kaart
+gelyk nie — dit het gelyk soos een wat nog nie klaar is nie. **Een vorm wat van
+al sy maats verskil, lees soos 'n fout, nie soos 'n keuse.** Dieselfde vorm as
+`.lp-promo` dus (`.speel-promo` in `Meer.css`): kleur, serif-titel, en 'n
+volbreedte wit knoppie wat sê wat hy doen.
+
+"Bysaak" lê steeds waar dit hoort — in EEN kaart in plaas van 'n uitgestalde lys,
+en in die PLEK (onder die ander twee, direk bo die boeke) — nie in 'n kaart wat
+kleiner is as sy maats.
+
+Die kleur is GROEN. Kinderboeke is warm en Leesplanne is pers; 'n derde kaart in
+een van daardie kleure lees soos 'n herhaling. Groen is ook Vredepad se eie
+kleur. Die KAART se CSS woon in `Meer.css` (dit is 'n kaart op die e-boekblad)
+en die TEËLS in `Speel.css` (hulle kom uit `SPELETJIES`).
+
+Die blaaierlopie meet nou die vorm en nie die grootte nie: 'n kleurgradiënt, 'n
+volbreedte-knoppie wat *"SIEN AL DIE SPELETJIES"* sê, 'n hoogte naby die
+Leesplanne-kaart s'n, en 'n kleur wat van hom VERSKIL.
 
 **Die kennisgewing-toets staan heel onder, en stil.** Dewald: *"dit lyk stupid.
 dit pas nie... sit dit eder onderaan."* Dit is diagnosties, nie inhoud nie, en
