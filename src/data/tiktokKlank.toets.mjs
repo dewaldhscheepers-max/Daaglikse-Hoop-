@@ -9,6 +9,7 @@
  */
 import {
   klankBoodskappe, isTiktokBoodskap, stelKlank, MERKER, TIKTOK_OORSPRONG,
+  wagBoodskappe, beginBoodskappe, stelWag, beginVanVoor,
 } from './tiktokKlank.js'
 
 let reg = 0, vals = 0
@@ -119,6 +120,51 @@ console.log('\n── Die stuur self ──')
   is('n raam wat gooi, kantel niks om', stelKlank(stukkend, true), false)
   is('en geen raam is nie n fout nie', stelKlank(null, true), false)
   is('en n raam sonder postMessage ook nie', stelKlank({}, true), false)
+}
+
+console.log('\n── Die VOORUIT-raam: stil en gepouseer ──')
+{
+  const bs = wagBoodskappe()
+  is('elkeen dra die merker', bs.every(b => b[MERKER] === true), true)
+  is('elkeen is n voorwerp', bs.every(b => b && typeof b === 'object'), true)
+  /* `mute` is VERPLIGTEND: twee klanke tegelyk is 'n stukkende app. */
+  is('mute is daar', bs.some(b => b.type === 'mute'), true)
+  /* `pause` spaar data. Word dit geignoreer, speel hy stil aan — en dit is
+     hoekom dit veilig is. */
+  is('pause is daar', bs.some(b => b.type === 'pause'), true)
+  /* En NIKS wat hom hoorbaar maak. Dit is die een ding wat hier nooit mag wees. */
+  is('en NIKS wat ontdemp', bs.some(b => /^unmute$/i.test(b.type)), false)
+  is('en geen volume op', bs.some(b => b.type === 'setVolume' && Number(b.value) > 0), false)
+
+  const gestuur = []
+  is('dit stuur', stelWag({ postMessage: b => gestuur.push(b) }), true)
+  is('en al die boodskappe', gestuur.length, bs.length)
+}
+
+console.log('\n── Die aktiewe raam begin van VOOR af ──')
+{
+  const bs = beginBoodskappe()
+  is('elkeen dra die merker', bs.every(b => b[MERKER] === true), true)
+  /* Die vooruit-een kon stil aangespeel het; sonder hierdie een land sy in die
+     middel van 'n video. `seekTo` staan WOORD VIR WOORD in hulle voorbeeld. */
+  is('seekTo 0 is daar', bs.some(b => b.type === 'seekTo' && b.value === 0), true)
+  is('en die waarde is n GETAL, nie n voorwerp nie',
+    typeof bs.find(b => b.type === 'seekTo').value, 'number')
+  /* `play` is onskadelik op 'n raam wat reeds speel, en dit is die vangnet as
+     `pause` wel gewerk het. */
+  is('play is daar', bs.some(b => b.type === 'play'), true)
+  is('play kom VOOR seekTo',
+    bs.findIndex(b => b.type === 'play') < bs.findIndex(b => b.type === 'seekTo'), true)
+  /* Dit raak NIE aan die klank nie. Die klank is 'n aparte besluit en moet dit
+     bly: hierdie ry loop ook vir 'n mens wat die klank AF gesit het. */
+  is('dit sit NIE die klank aan nie',
+    bs.some(b => /mute|volume/i.test(b.type)), false)
+
+  const gestuur = []
+  is('dit stuur', beginVanVoor({ postMessage: b => gestuur.push(b) }), true)
+  is('en al die boodskappe', gestuur.length, bs.length)
+  is('n raam wat gooi, kantel niks om',
+    beginVanVoor({ postMessage: () => { throw new Error('weg') } }), false)
 }
 
 console.log(`\n${reg} reg, ${vals} vals\n`)

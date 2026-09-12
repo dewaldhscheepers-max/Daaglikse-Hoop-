@@ -94,7 +94,7 @@ node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
-node src/data/tiktokKlank.toets.mjs           # die boodskap wat hulle speler ontdemp, 35
+node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 54
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 201
@@ -1265,10 +1265,45 @@ opswipe."* Net die aktiewe een was gemonteer, dus het die volgende van NULS begi
 laai op die oomblik dat hy geswiep het: die raam, hulle speler se JS, die omslag,
 alles.
 
-Die vooruit-een **SPEEL NIE** (`autoplay=0`, en by ons eie lêers
-`autoPlay={false}` met `preload="auto"`). Dit is die hele afweging: 'n speler wat
-laai maar nie speel nie, kos die raam en sy omslag — nie 'n hele video nie. En
-niks kan agter haar hoorbaar wees nie.
+**Die vooruit-raam se adres moet PRESIES dieselfde wees as wanneer hy aktief is.**
+Dit was `autoplay=0` op die vooruit-een, en dit het die laai-tyd **langer**
+gemaak. Dewald: *"dit vat nou nog langer om te laai.... dit wys nou eers i play
+button en dan laai dit. die volgende video."*
+
+Hy het die twee simptome presies beskryf, en albei kom uit daardie een param:
+
+* met `autoplay=0` wys TikTok se speler sy omslag **met 'n SPEEL-KNOPPIE** — dit
+  is wat hy gesien het;
+* en wanneer die clip aktief word, verander die adres na `autoplay=1`. **'n Nuwe
+  adres is 'n nuwe bladsy**, dus herlaai die raam van nuuts af. Die vooruit-laai
+  het dus niks gespaar nie en 'n ekstra stap bygesit.
+
+Die reël wat hieruit kom: **verander een karakter van die adres en die hele wins
+is weg.** By TIKTOK is dit haalbaar omdat hulle adres geen klank dra nie — die
+klank loop deur die boodskap-kanaal — en al 124 clips is TikTok s'n. By YouTube
+sit die klank IN die adres (`mute=`), dus is die vooruit-een `mute=1` en 'n
+hoorbare aktiewe een herlaai een keer; dit is een saai-clip en nie die pad wat
+saak maak nie.
+
+Die vooruit-raam speel dus, en twee boodskappe hou hom in toom
+(`wagBoodskappe()`):
+
+* **`mute`** — verpligtend. Twee klanke tegelyk is 'n stukkende app. Dit is in
+  elk geval 'n gordel-en-kruisbande: hulle speler begin ALTYD gedemp, wat juis
+  is waarom `unMute` bestaan;
+* **`pause`** — dit spaar data. Word dit geïgnoreer, speel hy stil aan en die
+  enigste koste is data. **Dit is waarom die ontwerp veilig is**: geen enkele
+  onbewysde werkwoord kan iets breek.
+
+En die aktiewe raam kry **`seekTo 0`** (`beginBoodskappe()`), want die
+vooruit-een kon stil aangespeel het en dan is hy halfpad wanneer sy daar aankom.
+`seekTo` is die werkwoord wat WOORD VIR WOORD in hulle dokumentasie se voorbeeld
+staan. Dit loop **presies een keer** — die klank-boodskappe is onskadelik om te
+herhaal, maar 'n `seekTo 0` op 'n herhaal-tydhouer sou die video TERUGSPOEL
+terwyl sy kyk, en dit sou soos 'n haper lyk wat niemand ooit sou verklaar nie.
+
+By ons eie lêers is daar niks van hierdie nodig: `autoPlay={false}` met
+`preload="auto"`, en `play()` wanneer hy aktief word.
 
 EEN vooruit, nooit twee. Die oorspronklike reël staan nog en dit is nie 'n
 optimalisasie nie, dit is die datarekening: drie ingebedde spelers langs mekaar
@@ -1277,15 +1312,17 @@ laai drie videos. Een vooruit is die prys vir 'n voer wat nie hakkel nie; twee i
 
 Dit doen ook steeds die werk van 'n pouse-knoppie — swiep sy VERBY 'n clip, word
 sy speler afgehaal en die klank hou op. Die einde-blad dra `data-reel="-1"` en
-dít is hoekom niks agter hom SPEEL nie; sonder daardie een attribuut bly `aktief`
-op die laaste clip staan en speel hy voort agter 'n toe skerm. Die blaaierlopie
-het dit gevang, en hy meet nou ook dat presies EEN speler `autoplay=1` dra.
+dít is hoekom niks agter hom hoorbaar is nie; sonder daardie een attribuut bly
+`aktief` op die laaste clip staan en speel hy voort agter 'n toe skerm. Die
+blaaierlopie het dit gevang, en hy meet nou dat **geen** speler `autoplay=0` dra
+en dat presies EEN hoorbaar is.
 
 By ons eie lêers is die wins die grootste: `autoPlay` op 'n element wat al
 gemonteer is, doen niks (dit geld net by die eerste laai), dus roep 'n effek
-`play()` wanneer hy aktief word. Geen herlaai, geen adres wat verander, net
-`play()` op 'n lêer wat reeds gebuffer is — die soort "dadelik" wat 'n mens net
-kry as jy die speler besit.
+`play()` wanneer hy aktief word. Geen herlaai, geen adres wat verander, geen
+boodskap aan 'n ander party, net `play()` op 'n lêer wat reeds gebuffer is — die
+soort "dadelik" wat 'n mens net kry as jy die speler besit. Dit is die sterkste
+argument vir `bron: 'eie'` wat daar is.
 
 **Die klank is AAN sodra die blaaier dit toelaat.** Dewald: *"hoekom hou jy nie
 die klank aan nie... hoekom moet mens dit aansit."* Dit is nie 'n keuse nie: 'n

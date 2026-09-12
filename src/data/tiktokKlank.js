@@ -133,15 +133,69 @@ export function isTiktokBoodskap(gebeurtenis) {
   return d[MERKER] === true
 }
 
-/* Stuur die hele ry na een raam. Onsuiwer, en daarom klein: die `try` is nie
-   luiheid nie — 'n raam wat besig is om te ontlaai, gooi by `postMessage`, en
-   dit mag nooit die voer omkantel nie. */
-export function stelKlank(raam, aan) {
+/* ── Die VOORUIT-raam: stil en gepouseer ──
+ *
+ * Die volgende clip se raam is gemonteer voordat sy swiep, sodat hy nie eers
+ * dan begin laai nie. Hy het PRESIES dieselfde adres as wanneer hy aktief is —
+ * anders herlaai die raam op die oomblik dat sy swiep, en dan is die hele
+ * vooruit-laai weg. Dewald: *"dit vat nou nog langer om te laai.... dit wys nou
+ * eers i play button en dan laai dit."*
+ *
+ * Daardie adres dra `autoplay=1`, dus speel hy. Twee boodskappe hou hom stil:
+ *
+ *   · `mute` — verpligtend. Twee klanke tegelyk is 'n stukkende app.
+ *   · `pause` — spaar data. Werk dit nie, speel hy stil aan en die enigste
+ *     koste is data; `beginVanVoor()` maak die posisie in elk geval reg.
+ *
+ * Dit is waarom dit veilig is: werk `pause` nie, is niks stukkend nie. */
+export function wagBoodskappe() {
+  return [
+    { [MERKER]: true, type: 'mute',  value: {} },
+    { [MERKER]: true, type: 'pause', value: {} },
+  ]
+}
+
+/* ── Die aktiewe raam: speel, van VOOR af ──
+ *
+ * Die vooruit-raam kon stil aangespeel het (as `pause` geïgnoreer is), en dan
+ * is hy halfpad wanneer sy daar aankom. `seekTo 0` maak dit reg, en dit is die
+ * werkwoord wat WOORD VIR WOORD in hulle dokumentasie se voorbeeld staan —
+ * `{ type: 'seekTo', value: Number(...), 'x-tiktok-player': true }`.
+ *
+ * `play` gaan saam en is onskadelik op 'n raam wat reeds speel. Die kombinasie
+ * is met opset veilig: ken hulle speler nie `pause`/`play` nie, dan het die
+ * vooruit-een stil aangespeel en `play` is 'n niks-doener — en `seekTo` sit hom
+ * steeds aan die begin. */
+export function beginBoodskappe() {
+  return [
+    { [MERKER]: true, type: 'play',   value: {} },
+    { [MERKER]: true, type: 'seekTo', value: 0 },
+  ]
+}
+
+/* Stuur 'n ry boodskappe na een raam. Onsuiwer, en daarom klein: die `try` is
+   nie luiheid nie — 'n raam wat besig is om te ontlaai, gooi by `postMessage`,
+   en dit mag nooit die voer omkantel nie. */
+export function stuurAlles(raam, boodskappe) {
   if (!raam || typeof raam.postMessage !== 'function') return false
   let een = false
-  for (const boodskap of klankBoodskappe(aan)) {
+  for (const boodskap of boodskappe) {
     try { raam.postMessage(boodskap, TIKTOK_OORSPRONG); een = true }
     catch { /* hulle raam antwoord nie; dan bly dit soos dit is */ }
   }
   return een
+}
+
+export function stelKlank(raam, aan) {
+  return stuurAlles(raam, klankBoodskappe(aan))
+}
+
+/* Die vooruit-raam: stil en gepouseer. */
+export function stelWag(raam) {
+  return stuurAlles(raam, wagBoodskappe())
+}
+
+/* Die aktiewe raam: speel, van voor af. */
+export function beginVanVoor(raam) {
+  return stuurAlles(raam, beginBoodskappe())
 }

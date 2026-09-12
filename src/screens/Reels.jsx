@@ -106,7 +106,7 @@ import {
   skoonLys, bouVoer, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
 } from '../data/reels'
 import { spelerAdres } from '../data/tiktokId'
-import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
+import { stelKlank, stelWag, beginVanVoor, isTiktokBoodskap } from '../data/tiktokKlank'
 import './Reels.css'
 
 /* 'n Haal sonder tydgrens bly vir altyd staan wanneer Android die oortjie
@@ -254,7 +254,22 @@ function spelerVir(klip, stil, speel) {
   if (!klip) return ''
   if (klip.bron === 'youtube') {
     const v = new URLSearchParams({
-      autoplay: speel ? '1' : '0',
+      /* ── ALTYD autoplay=1, ook vir die vooruit-een ──
+       *
+       * Dit was `speel ? '1' : '0'`, en dit het die laai-tyd LANGER gemaak in
+       * plaas van korter. Dewald: *"dit vat nou nog langer om te laai.... dit
+       * wys nou eers i play button en dan laai dit."*
+       *
+       * Hy het presies die twee simptome beskryf. Met `autoplay=0` wys die
+       * speler sy omslag met 'n SPEEL-KNOPPIE, en wanneer hy aktief word,
+       * verander die adres na `autoplay=1` — 'n nuwe adres is 'n nuwe bladsy,
+       * dus HERLAAI die raam van nuuts af. Die vooruit-laai het dus niks
+       * gespaar nie en 'n ekstra stap bygesit.
+       *
+       * Die reël wat hieruit kom: **die vooruit-raam moet PRESIES dieselfde
+       * adres hê as wanneer hy aktief is.** Verander een karakter en die hele
+       * wins is weg. */
+      autoplay: '1',
       mute: speel && !stil ? '0' : '1',
       playsinline: '1',
       rel: '0',
@@ -264,7 +279,12 @@ function spelerVir(klip, stil, speel) {
     })
     return `https://www.youtube.com/embed/${klip.bronId}?${v.toString()}`
   }
-  if (klip.bron === 'tiktok') return spelerAdres(klip.bronId, { speel: !!speel })
+  /* TikTok se adres dra GEEN klank nie — dit loop deur hulle boodskap-kanaal —
+     dus is die adres vir die vooruit-een en die aktiewe een identies. Dit is die
+     enigste bron waar die raam NOOIT herlaai nie, en dit is ook die bron waarvan
+     al 124 clips kom. Die vooruit-een word stilgemaak en gepouseer met 'n
+     boodskap; sien die klank-effek. */
+  if (klip.bron === 'tiktok') return spelerAdres(klip.bronId, { speel: true })
   /* 'eie' — 'n lêer wat ons self bedien. */
   return String(klip.bronId || '')
 }
@@ -591,6 +611,34 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
       && voerRef.current.querySelector(`[data-reel="${aktief}"] iframe.reel-speler`)
     if (!raam) return
 
+    /* ── Die VOORUIT-raam word stilgehou ──
+     *
+     * Hy dra PRESIES dieselfde adres as die aktiewe een — anders herlaai hy op
+     * die oomblik dat sy swiep en is die hele vooruit-laai weg. Daardie adres
+     * dra `autoplay=1`, dus moet 'n boodskap hom stil en gepouseer hou. `mute`
+     * is verpligtend (twee klanke tegelyk is 'n stukkende app); `pause` spaar
+     * data en is veilig as dit geïgnoreer word. */
+    const wag = voerRef.current.querySelector(`[data-reel="${aktief + 1}"] iframe.reel-speler`)
+    const stilWag = () => { if (wag) stelWag(wag.contentWindow) }
+    stilWag()
+    /* Die vooruit-raam is dalk nog nie gereed nie; 'n boodskap na 'n speler wat
+       nog laai, is weg. Dit is nie ernstig nie — hulle speler begin in elk geval
+       GEDEMP (dit is juis waarom `unMute` nodig is), dus kan daar nooit twee
+       klanke wees nie. Die `pause` is wat hier wen of verloor, en dit kos net
+       data. */
+    if (wag) wag.addEventListener('load', stilWag)
+
+    /* ── `seekTo 0` loop PRESIES EEN KEER ──
+     *
+     * Die vooruit-raam kon stil aangespeel het (as `pause` geïgnoreer is), en
+     * dan is hy halfpad wanneer sy hier aankom. `seekTo 0` maak dit reg.
+     *
+     * Maar dit mag NIE op die herhaal-tydhouers loop nie. Die klank-boodskappe
+     * is onskadelik om te herhaal — 'n raam wat al ontdemp is, word weer ontdemp
+     * — maar 'n `seekTo 0` op 2 000ms SPOEL DIE VIDEO TERUG terwyl sy kyk. Dit
+     * sou soos 'n haper lyk wat 'n mens nooit sou verklaar nie. */
+    beginVanVoor(raam.contentWindow)
+
     /* `tiktokStil` en nie `stil` nie — sien die kop by die toestand. Hulle speler
        begin altyd gedemp, en `stil` weet niks daarvan nie. */
     const stuur = () => stelKlank(raam.contentWindow, !tiktokStil)
@@ -632,6 +680,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     return () => {
       window.removeEventListener('message', opBoodskap)
       raam.removeEventListener('load', stuur)
+      if (wag) wag.removeEventListener('load', stilWag)
       for (const t of ts) clearTimeout(t)
     }
   }, [items, aktief, tiktokStil])
