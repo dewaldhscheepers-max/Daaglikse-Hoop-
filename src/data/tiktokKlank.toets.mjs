@@ -38,9 +38,18 @@ console.log('\n── Die boodskap se VORM ──')
      die eerste wat hulle ken. */
   is('unMute staan eerste', bs[0].type, 'unMute')
 
-  /* 'n Speler wat ontdemp het maar op volume 0 staan, is steeds stil. */
-  is('setVolume 1 is ook daar',
-    bs.some(b => b.type === 'setVolume' && b.value === 1), true)
+  /* ── Die volume se SKAAL ──
+     Dit het NET `setVolume: 1` gestuur, en Dewald se antwoord was *"dis baie
+     sag."* Die ontdemping het gewerk; die volgende boodskap het dit op 1%
+     gesit, want hulle skaal is nie 0-1 nie.
+
+     Albei skale word nou gestuur, en die ORDE is die hele truuk: klein eerste,
+     groot laas. Andersom om sou 'n 0-100-speler op 1% eindig — presies die fout
+     wat ons pas gehad het. */
+  const volumes = bs.filter(b => b.type === 'setVolume').map(b => b.value)
+  is('altwee volume-skale word gestuur', volumes, [1, 100])
+  is('en die GROOT een kom LAAS', volumes[volumes.length - 1], 100)
+  is('setVolume kom na unMute', bs.findIndex(b => b.type === 'setVolume') > 0, true)
 
   /* Geen JSON nêrens nie. */
   is('geen boodskap is JSON-gekodeer',

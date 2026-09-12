@@ -149,33 +149,47 @@ video.reel-speler { object-fit: cover; background: #151314; }
 /* Net kleur. Geen transform. */
 .reel-brug:active { background: rgba(217, 177, 131, 0.18); }
 
-/* ── Ons eie Deel-knoppie, GROOT en ondeursigtig ──
-   Op presies die plek waar TikTok se deel-ikoon sit, en groot genoeg om hom te
-   DEK. Hier het 'n swart strook oor die hele regterkant gestaan; Dewald:
-   "verwyder die swart streep dis lelik en sit net my deel icon groot oor dit."
-   Hy is reg — dit was 'n band oor 'n video en 'n mens sien dit eerder as die
-   video.
+/* ── Die rail is EEN ondeursigtige KAPSULE ──
+   Dit was twee los skywe, en Dewald het op 'n regte foon gesien wat daarmee
+   verkeerd is: *"maak seker my icons deel en klank bedek tiktok se ikons
+   mooi. skyf dit reg."* Op die skermkiekie loop hulle hartjie met sy telling
+   (204) TUSSEN my twee skywe deur, en die 6 onder hulle deel-ikoon loer onder
+   Deel uit.
 
-   Die ronde skyf is die hele truuk: hy dek wat hy moet dek en hy lyk soos 'n
-   knoppie. Geen `backdrop-filter` nie — dit maak 'n saamgestelde laag oor 'n
-   bewegende video, en dit is waar die gekleurde strepe op Android vandaan kom.
+   Twee los skywe laat GATE, en hulle rail loop presies deur die gate. Een
+   deurlopende kapsule laat geen gat nie — en dit lyk soos 'n rail wat iemand
+   ontwerp het, nie soos twee kolle nie.
 
-   Hy sit hoog genoeg om die sweefende BYBEL-knoppie te mis. Die knoppie hang oor
-   ELKE skerm in die app en het die Deel-knoppie een keer letterlik doodgedruk —
-   `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
-   blaaierlopie meet dit nou.
+   Dit is NIE die ou swart strook nie. Daardie een was 'n band van 34% tot
+   onder oor die HELE regterkant, en Dewald: *"verwyder die swart streep dis
+   lelik."* Hierdie een is presies so groot as my twee knoppies, met dieselfde
+   ronding as die res van die app.
 
-   Net Deel. Dewald: "net deel." 'n Hart beteken 'n telling, en 'n telling
-   beteken dat 'n mens sy eie getal begin dophou. */
+   Ondeursigtig, en geen `backdrop-filter` nie: 'n saamgestelde laag oor 'n
+   bewegende video is waar die gekleurde strepe op Android vandaan kom.
+
+   `right: 2px` en nie 8px nie — hulle rail sit nader aan die rand as myne, en
+   hulle tellings (breër as die ikone self) het regs uitgeloer.
+
+   Net Deel en Klank. Dewald: *"net deel."* 'n Hart beteken 'n telling, en 'n
+   telling beteken dat 'n mens sy eie getal begin dophou. */
 .reel-rail {
   position: absolute;
-  right: 8px;
+  right: 2px;
+  /* 70px hou die sweefende BYBEL-knoppie vry. Hy hang oor ELKE skerm in die
+     app en het die Deel-knoppie een keer letterlik doodgedruk. */
   bottom: calc(var(--nav-height) + var(--safe-bottom) + 70px);
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
+  min-width: 70px;
+  padding: 14px 6px 16px;
+  background: #0D0C0D;
+  border-radius: 40px;
+  border: 1px solid rgba(244, 239, 231, 0.14);
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
 }
 
 .reel-knop {
@@ -194,24 +208,27 @@ video.reel-speler { object-fit: cover; background: #151314; }
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Die skyf wat dek. ONDEURSIGTIG: 'n halwe sluier het hulle ikoon steeds laat
-   deurskyn, en "dek" beteken dek. */
+/* Die KAPSULE dek nou, dus hoef die skyf dit nie ook te doen nie. 'n Ring
+   binne 'n kapsule lyk besig; die ikoon staan reguit op die kapsule, soos 'n
+   rail hoort. */
+/* Die KAPSULE dek nou, dus hoef die skyf dit nie ook te doen nie. 'n Ring
+   binne 'n kapsule lyk besig; die ikoon staan reguit op die kapsule, soos 'n
+   rail hoort. */
 .reel-knop-skyf {
-  width: 58px;
-  height: 58px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #0D0C0D;
-  border: 1px solid rgba(244, 239, 231, 0.2);
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  background: none;
+  border: 0;
 }
 .reel-knop-skyf svg { width: 30px; height: 30px; display: block; }
 
 .reel-knop-woord { text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85); }
 
 /* Net kleur. Geen transform. */
-.reel-knop:active .reel-knop-skyf { background: #1E1A16; border-color: rgba(217, 177, 131, 0.6); }
+.reel-knop:active .reel-knop-skyf { background: #2A2420; }
 .reel-knop:active { color: #E8CBA4; }
 
 /* ── Die klank-wenk ── */

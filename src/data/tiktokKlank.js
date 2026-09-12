@@ -56,15 +56,43 @@ export const TIKTOK_OORSPRONG = 'https://www.tiktok.com'
    sonder hierdie sleutel word die boodskap weggegooi. */
 export const MERKER = 'x-tiktok-player'
 
+/* ── Die volume se SKAAL, en die duurste klein fout hierin ──
+ *
+ * Dit het `['setVolume', 1]` gestuur, en toe was Dewald se antwoord: *"dis baie
+ * sag."* Die klank was AAN — die ontdemping het gewerk — en toe het die volgende
+ * boodskap hom op **een persent** gesit.
+ *
+ * 'n `<video>` se `volume` loop van 0 tot 1. Baie spelers stel hulle eie API op
+ * 0 tot 100, soos 'n mens dit aan 'n mens sou wys. Ons weet nie watter een hulle
+ * gebruik nie en ons kan dit nie hier gaan kyk nie.
+ *
+ * Dus word ALBEI gestuur, en die ORDE is die hele truuk:
+ *
+ *   · eers `1` — vol op 'n 0-1-skaal;
+ *   · dan `100` — vol op 'n 0-100-skaal.
+ *
+ * Is die skaal 0-100, land die tweede een en dit is vol. Is die skaal 0-1, dan
+ * kap 'n speler wat afkap dit na 1 (steeds vol), en 'n speler wat NIE afkap nie
+ * gooi 'n fout by `video.volume = 100` en laat die vorige waarde staan — wat 1
+ * is, dus steeds vol.
+ *
+ * Andersom om sou albei gevalle verkeerd wees: op 'n 0-100-skaal sou die laaste
+ * boodskap die volume op 1% sit, en dit is presies die fout wat ons pas gehad
+ * het. **Moet nooit hierdie twee omruil nie.**
+ */
+const VOL_KLEIN = 1
+const VOL_GROOT = 100
+
 /* Die werkwoorde, in die orde waarin hulle gestuur word. `unMute` staan eerste
    omdat dit die een is wat die voorbeeld in hulle dokumentasie gebruik; die res
-   is spellings van dieselfde bedoeling. `setVolume` laas, want 'n speler wat
-   ontdemp het maar op volume 0 staan, is steeds stil. */
+   is spellings van dieselfde bedoeling. Die volume kom LAAS, want 'n speler wat
+   ontdemp het maar op nul staan, is steeds stil. */
 const AAN = [
   ['unMute',    {}],
   ['unmute',    {}],
   ['mute',      false],
-  ['setVolume', 1],
+  ['setVolume', VOL_KLEIN],
+  ['setVolume', VOL_GROOT],
 ]
 
 const AF = [

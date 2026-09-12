@@ -1327,6 +1327,35 @@ Dit word DRIE keer gestuur, want "wanneer is hulle speler gereed" is nie iets
 wat ons kan sien nie: by die raam se `load`, by hulle EERSTE boodskap aan ons
 (die enigste eerlike "gereed"), en een keer op 'n tydhouer.
 
+**Die VOLUME se skaal was die volgende fout, en dit het soos 'n halwe sukses
+gelyk.** Dewald: *"dis baie sag... daar is klank as ek ingaan."* Die ontdemping
+het gewerk; die boodskap DAARNA het dit op **een persent** gesit. 'n `<video>` se
+`volume` loop van 0 tot 1, maar baie spelers stel hulle API op 0 tot 100 — soos
+'n mens dit aan 'n mens sou wys — en `setVolume: 1` is dan 1%.
+
+Albei skale word nou gestuur, en die ORDE is die hele truuk: **eers `1`, dan
+`100`.** Is die skaal 0-100, land die tweede een op vol. Is dit 0-1, kap 'n
+speler wat afkap dit terug na 1 (steeds vol), en een wat NIE afkap nie, gooi 'n
+fout by `volume = 100` en laat die vorige waarde staan — wat 1 is, dus steeds
+vol. Andersom om is albei gevalle verkeerd. **Moet nooit hierdie twee omruil
+nie.**
+
+**Die knoppie moet die WAARHEID sê, en `stil` is by TikTok nie die waarheid nie.**
+Dewald: *"ek moet die knoppie inhou voor dit werk."* Die knoppie het `stil`
+gelees, en `stil` is `false` sodra sy die oortjie gedruk het — wat by YouTube en
+by ons eie lêers korrek is, want daar stel ONS die klank. TikTok se speler begin
+egter ALTYD gedemp. Die knoppie het dus "Stil" gewys (met ander woorde "druk om
+af te sit") terwyl dit reeds stil was: haar eerste druk het niks verander en net
+die TWEEDE het klank gegee. Dit voel presies soos 'n knoppie wat 'n mens moet
+inhou.
+
+`tiktokStil` is nou 'n APARTE toestand wat by `true` begin, want dit is wat hulle
+speler werklik doen. Een druk, en die etiket lieg nie. En die opdrag word op 'n
+kort ry tydhouers herhaal (200, 600, 1200, 2000ms): 'n speler wat op daardie
+oomblik laai, gooi die boodskap weg, en dan lyk een druk soos 'n druk wat niks
+doen. Vier tydhouers en nie 'n interval nie — 'n interval wat iemand vergeet
+skoon te maak, is 'n voer wat vir altyd boodskappe stuur.
+
 **En die klank-knoppie hang aan 'n ANTWOORD.** `kanaal` word net waar wanneer
 hulle speler werklik met ons gepraat het, en die knoppie bestaan net dan. Dit is
 die les van `volume_control=1` omgedraai: daardie wenk het na 'n vermoë gewys wat
@@ -1371,23 +1400,39 @@ Hy was reg, en die les is breër as hierdie een strook: **'n band oor 'n video
 word die ding wat 'n mens sien.** Dit is dieselfde fout as die sluier wat die
 Tyd met God-kaart 'n swart blok gemaak het.
 
-Die **KNOPPIE self** doen nou die werk. `.reel-knop-skyf` is 'n ronde,
-ondeursigtige skyf van 58px presies waar hulle deel-ikoon sit: dit dek wat dit
-moet dek, dit vang die tik, en dit lyk soos 'n knoppie in plaas van soos 'n fout.
-Hulle hartjie en kommentaar bly sigbaar — dit is die prys, en dit is 'n beter
-prys as 'n band oor elke video.
+Die **RAIL self** doen nou die werk. Dit was eers twee los ronde skywe, en
+Dewald het op 'n regte foon gesien wat daarmee verkeerd is: *"maak seker my icons
+deel en klank bedek tiktok se ikons mooi. skyf dit reg."* Op sy skermkiekie loop
+hulle hartjie met sy telling (204) TUSSEN die twee skywe deur, en die 6 onder
+hulle deel-ikoon loer onder Deel uit.
 
-Drie dinge daaraan is met opset:
+**Twee los skywe laat GATE, en hulle rail loop presies deur die gate.**
+`.reel-rail` is nou EEN deurlopende, ondeursigtige kapsule om albei knoppies —
+geen gat nie, en dit lyk soos 'n rail wat iemand ontwerp het in plaas van twee
+kolle. Die ikone staan reguit op die kapsule; 'n ring binne 'n kapsule lyk besig.
 
-* die skyf is **ONDEURSIGTIG** (`#0D0C0D`). 'n Halwe sluier het hulle ikoon
-  steeds laat deurskyn, en "dek" beteken dek;
+Dit is nie die ou strook nie: daardie een was 'n band van 34% tot onder oor die
+HELE regterkant, en hierdie een is presies so groot as die twee knoppies.
+
+Vier dinge daaraan is met opset:
+
+* **ONDEURSIGTIG** (`#0D0C0D`). 'n Halwe sluier het hulle telling steeds laat
+  deurskyn, en "dek" beteken dek;
+* **`right: 2px`** en nie 8px nie — hulle rail sit nader aan die rand as ons s'n,
+  en die tellings (breër as die ikone) het regs uitgeloer;
 * **geen `backdrop-filter`** nie. Dit maak 'n saamgestelde laag oor 'n bewegende
   video, en dit is presies waar die gekleurde strepe op Android vandaan kom;
 * **geen `transform` op `:active`** nie — net kleur. Dieselfde reël as oral.
 
-`kykReels.mjs` meet nou die AFWESIGHEID: geen `.reel-skerm`, en geen kind van 'n
-clip wat wyer as 40px en hoër as 120px is met 'n ondeursigtige of gradiënt-grond.
-Dit is die hek wat keer dat 'n strook terugsluip.
+Hulle hartjie bly wel sigbaar waar die kapsule NIE is nie, en dit is die prys.
+Dit is 'n beter prys as 'n band oor elke video.
+
+`kykReels.mjs` meet twee dinge wat geen eenheidstoets kan sien: dat die kapsule
+DEURLOPEND van die boonste knoppie tot die onderste loop (`elementFromPoint` in
+die gaping tussen hulle — dit is waar die 204 was), en die AFWESIGHEID van 'n
+band: geen `.reel-skerm`, en geen kind van 'n clip wat wyer as 40px en **hoër as
+260px** is met 'n ondeursigtige grond. Die kapsule self mag, en daar is 'n meting
+dat hy nooit bo 240px groei nie.
 
 **En by 'n TikTok-clip wys ons nie ons eie maker-lyn nie.** Hulle speler teken
 die handvatsel self; op 'n regte foon het dit twee keer gestaan.

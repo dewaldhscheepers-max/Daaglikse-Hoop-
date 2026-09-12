@@ -279,6 +279,23 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   /* Het TikTok se speler ooit met ONS gepraat? Net dan mag daar 'n klank-knoppie
      op 'n TikTok-clip wees. Sien `src/data/tiktokKlank.js`. */
   const [kanaal, setKanaal] = useState(false)
+  /* ── Waarom TikTok sy EIE klank-toestand het en nie `stil` gebruik nie ──
+   *
+   * Dewald: *"ek moet die knoppie inhou voor dit werk."*
+   *
+   * Die knoppie het `stil` gebruik, en `stil` is `false` sodra sy die oortjie
+   * gedruk het — want by YouTube en by ons eie lêers is dit die waarheid: ons
+   * stel die klank self en dit is aan.
+   *
+   * By TIKTOK is dit NIE die waarheid nie. Hulle speler begin altyd gedemp, wat
+   * hulle keuse is en nie ons s'n. Die knoppie het dus "Stil" gewys — met ander
+   * woorde "druk om af te sit" — terwyl dit reeds stil was. Haar eerste druk het
+   * dit "afgesit" (niks verander), en net die TWEEDE het klank gegee. Dit voel
+   * presies soos 'n knoppie wat 'n mens moet inhou.
+   *
+   * `tiktokStil` begin dus WAAR, want dit is wat hulle speler werklik doen. Een
+   * druk, en die etiket is eerlik. */
+  const [tiktokStil, setTiktokStil] = useState(true)
   const [laai, setLaai]     = useState(true)
 
   const voerRef    = useRef(null)
@@ -452,14 +469,20 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    *
    * ── Wanneer dit gestuur word ──
    *
-   * DRIE keer, want die oomblik waarop hulle speler gereed is, is nie iets wat
-   * ons kan sien:
+   * MEER as een keer, want die oomblik waarop hulle speler gereed is, is nie
+   * iets wat ons kan sien nie:
    *
    *   1. wanneer die raam klaar laai (`load`);
    *   2. wanneer hulle vir die EERSTE keer met ons praat — dít is die enigste
    *      eerlike "gereed", en dit is hoekom ons luister;
-   *   3. en 'n keer op 'n tydhouer, want 'n speler wat nooit praat nie, kan nog
+   *   3. en op 'n paar tydhouers, want 'n speler wat nooit praat nie, kan nog
    *      steeds luister.
+   *
+   * Die tydhouers is nie oorversigtigheid nie. Dewald: *"ek moet die knoppie
+   * inhou voor dit werk."* 'n Speler wat op daardie oomblik besig is om te laai,
+   * gooi die boodskap weg, en dan lyk 'n enkele druk soos 'n druk wat niks doen.
+   * 'n Paar herhalings oor die eerste sekonde-en-'n-half maak van een druk een
+   * druk.
    *
    * ── Die knoppie hang aan 'n ANTWOORD ──
    *
@@ -474,7 +497,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const raam = voerRef.current && voerRef.current.querySelector('iframe.reel-speler')
     if (!raam) return
 
-    const stuur = () => stelKlank(raam.contentWindow, !stil)
+    /* `tiktokStil` en nie `stil` nie — sien die kop by die toestand. Hulle speler
+       begin altyd gedemp, en `stil` weet niks daarvan nie. */
+    const stuur = () => stelKlank(raam.contentWindow, !tiktokStil)
 
     /* ── Die PINGPONG, en hoekom hierdie vlaggie moet bly ──
      *
@@ -505,14 +530,17 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     window.addEventListener('message', opBoodskap)
     raam.addEventListener('load', stuur)
     stuur()
-    const t = setTimeout(stuur, 1200)
+    /* 'n Kort ry herhalings. Bewus BEGRENS: vier tydhouers, nie 'n interval nie
+       — 'n interval wat iemand vergeet skoon te maak, is 'n voer wat vir altyd
+       boodskappe stuur. */
+    const ts = [200, 600, 1200, 2000].map(ms => setTimeout(stuur, ms))
 
     return () => {
       window.removeEventListener('message', opBoodskap)
       raam.removeEventListener('load', stuur)
-      clearTimeout(t)
+      for (const t of ts) clearTimeout(t)
     }
-  }, [items, aktief, stil])
+  }, [items, aktief, tiktokStil])
 
   /* ── Die eerste aanraking maak die klank oop ──
    *
@@ -690,11 +718,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 {klip.bron === 'tiktok' && i === aktief && kanaal && (
                   <button
                     className="reel-knop"
-                    onClick={() => setStil(s => !s)}
-                    aria-label={stil ? 'Sit die klank aan' : 'Sit die klank af'}
+                    onClick={() => setTiktokStil(s => !s)}
+                    aria-label={tiktokStil ? 'Sit die klank aan' : 'Sit die klank af'}
                   >
                     <span className="reel-knop-skyf">
-                      {stil ? (
+                      {tiktokStil ? (
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 5 6 9H3v6h3l5 4V5Z" />
                           <path d="m16 9 5 6" /><path d="m21 9-5 6" />
@@ -706,7 +734,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                         </svg>
                       )}
                     </span>
-                    <span className="reel-knop-woord">{stil ? 'Klank' : 'Stil'}</span>
+                    <span className="reel-knop-woord">{tiktokStil ? 'Klank' : 'Stil'}</span>
                   </button>
                 )}
 
