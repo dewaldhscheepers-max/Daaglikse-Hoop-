@@ -862,6 +862,21 @@ donasie (met 'n VASTE klok, sodat die skenk-venster nie van die werklike datum
 afhang nie), die mens wat getik het, die mens wat halfpad uitklim, en die
 kennisgewing-vraag.
 
+**Twee dinge in daardie lopie het stilweg gelieg**, en albei is die soort fout
+wat 'n blaaiertoets nutteloos maak sonder dat iemand dit sien:
+
+* dit het `.tmg-klaar-reel` gebruik om te sien of die vloei klaar is. Daardie
+  klas het aan die KAART op Luister behoort — die dun reël wat die kaart vervang
+  het wanneer die dag klaar was — en toe Dewald gevra het dat die kaart NIE
+  verdwyn nie, is hy weg. Drie metings het van toe af geval terwyl die gedrag
+  heeltemal reg was. Die merker is nou `.tmg-slot`, die klaar-skerm se EIE
+  wortel. **Meet die ding self, nie 'n newe-effek op 'n ander skerm nie.**
+* die laaste blok moet die vloei oopmaak VOORDAT die kennisgewing-vraag se
+  2,5s-tydhouer vuur — en die opstel het self 2 500ms gewag. Die wedloop was
+  klaar verloor: die vraag het bo-op die kaart gestaan en die klik daarop is
+  onderskep. Die opstel se wag is nou 'n parameter, en daardie blok gebruik
+  600ms.
+
 **Wie net die speelknoppie op Luister druk, sien geen verandering nie.**
 Daardie pad is nie aangeraak nie.
 
