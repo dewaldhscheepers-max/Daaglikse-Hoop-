@@ -104,9 +104,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { REELS_SAAI } from '../data/reelsLys'
 import {
   skoonLys, bouVoer, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
+  vraByEinde,
 } from '../data/reels'
 import { spelerAdres } from '../data/tiktokId'
-import { stelKlank, stelWag, beginVanVoor, isTiktokBoodskap } from '../data/tiktokKlank'
+import {
+  stelKlank, stelWag, beginVanVoor, isTiktokBoodskap, tydUitBoodskap,
+} from '../data/tiktokKlank'
 import './Reels.css'
 
 /* 'n Haal sonder tydgrens bly vir altyd staan wanneer Android die oortjie
@@ -160,6 +163,20 @@ const MAKS_PASSE_VOOR_ALLES = 2
 
 /* Hoeveel passe vooruit gebou word, en hoeveel clips voor die einde 'n nuwe pas
    bygesit word. Drie is genoeg dat 'n mens nooit die onderkant sien nie. */
+/* ── Wanneer die gedeelde-skakel-vraag kom as hulle speler stil bly ──
+ *
+ * 'n Vreemdeling op 'n gedeelde skakel word gevra 3s voor die video eindig
+ * (sien `vraByEinde()`), en dit hang daarvan af dat TikTok se speler oor tyd
+ * praat. Doen hy dit nie, is dit die terugval.
+ *
+ * Dertig sekondes is 'n GUESS met 'n rede: 'n prediker se clip loop sowat 'n
+ * halfminuut tot 'n minuut, en teen dertig het sy of klaar gekyk of besluit om
+ * aan te hou. Sonder hierdie getal sou 'n mens wat land, kyk en nooit swiep nie,
+ * GLAD NIE gevra word nie — en dit is juis die pad wat die app laat groei.
+ *
+ * Dit is een getal en dit is maklik om te verander. */
+const WAG_TERUGVAL = 30000
+
 const PASSE_BEGIN = 3
 const BOU_VOORUIT = 4
 
@@ -533,12 +550,14 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
           setPasse(p => Math.min(p + 2, maksRef.current))
         }
 
-        /* Ná die TWEEDE swiep, en nie 'n oomblik vroeër nie. Die hele besluit
-           staan in `magVraInstalleer()`. */
+        /* Ná die TWEEDE swiep — of ná die EERSTE, as sy op 'n gedeelde skakel
+           gekom het. Die hele besluit staan in `magVraInstalleer()`; sien sy kop
+           vir waarom 'n vreemdeling op 'n skakel 'n ander mens is. */
         if (magVraInstalleer({
           gesien: gesienRef.current,
           reedsGevra: gevraRef.current,
           geinstalleer: isInstalled,
+          gedeel: !!deepId,
         })) {
           gevraRef.current = true
           if (onInstalleer) onInstalleer()
@@ -548,7 +567,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
     dele.forEach(d => kyker.observe(d))
     return () => kyker.disconnect()
-  }, [items, isInstalled, onInstalleer])
+  }, [items, isInstalled, onInstalleer, deepId])
 
   /* ── Ons eie lêer: die vooruit-een word AANGESIT wanneer hy aktief word ──
    *
@@ -568,6 +587,57 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const p = v.play()
     if (p && typeof p.catch === 'function') p.catch(() => {})
   }, [items, aktief, stil])
+
+  /* ── Die vraag DRIE SEKONDES voor die gedeelde video eindig ──
+   *
+   * Dewald: *"wanneer iemand die video share en hulle kyk moet die popup opkom
+   * so 3 sekondes voor die video eindig...... nie na hul paar videos gekyk het
+   * nie... of as hul op scroll die eerste keer moet popup dadelik wys."*
+   *
+   * Die swiep-helfte staan in `magVraInstalleer()` by die waarnemer hierbo. Dit
+   * is die ANDER helfte: sy kyk die een video wat belowe is, klaar, en dan vra
+   * ons — op die oomblik waar sy gekry het wat sy kom haal het en nog daar is.
+   *
+   * ── Hoe ons weet waar die video is ──
+   *
+   * `tydUitBoodskap()` SOEK die twee getalle in hulle gebeurtenisse. Dit raai
+   * geen veldnaam nie: kry dit nie 'n posisie EN 'n lengte nie, gee dit `null`
+   * en hierdie pad doen niks. Sien sy kop.
+   *
+   * ── En as hulle speler NOOIT oor tyd praat nie ──
+   *
+   * Dan bly `WAG_TERUGVAL`. Dit is 'n GUESS en dit staan hier as 'n getal wat 'n
+   * mens kan verander: 'n TikTok-clip van 'n prediker loop sowat 'n halfminuut
+   * tot 'n minuut, en dertig sekondes is die punt waar sy of klaar gekyk het of
+   * besluit het om aan te hou. Albei is oomblikke waar die vraag eerlik is.
+   *
+   * Sonder hierdie terugval sou 'n mens wat op 'n skakel land, die video kyk en
+   * NOOIT swiep nie, glad nie gevra word nie — en dít is juis die pad wat die
+   * app moet laat groei. 'n Geraaide oomblik is hier beter as geen oomblik. */
+  useEffect(() => {
+    if (!deepId) return                 /* net die mens op 'n gedeelde skakel */
+    if (isInstalled || gevraRef.current) return
+
+    const vra = () => {
+      if (gevraRef.current) return
+      gevraRef.current = true
+      if (onInstalleer) onInstalleer()
+    }
+
+    function opTyd(e) {
+      if (gevraRef.current) return
+      const t = tydUitBoodskap(e)
+      if (!t) return
+      if (vraByEinde(t)) vra()
+    }
+
+    window.addEventListener('message', opTyd)
+    const terugval = setTimeout(vra, WAG_TERUGVAL)
+    return () => {
+      window.removeEventListener('message', opTyd)
+      clearTimeout(terugval)
+    }
+  }, [deepId, isInstalled, onInstalleer])
 
   /* ── TikTok: die klank, deur hulle EIE kanaal ──
    *

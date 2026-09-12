@@ -9,7 +9,7 @@
  */
 import {
   klankBoodskappe, isTiktokBoodskap, stelKlank, MERKER, TIKTOK_OORSPRONG,
-  wagBoodskappe, beginBoodskappe, stelWag, beginVanVoor,
+  wagBoodskappe, beginBoodskappe, stelWag, beginVanVoor, tydUitBoodskap,
 } from './tiktokKlank.js'
 
 let reg = 0, vals = 0
@@ -165,6 +165,48 @@ console.log('\n── Die aktiewe raam begin van VOOR af ──')
   is('en al die boodskappe', gestuur.length, bs.length)
   is('n raam wat gooi, kantel niks om',
     beginVanVoor({ postMessage: () => { throw new Error('weg') } }), false)
+}
+
+console.log('\n── Die video se TYD uit hulle boodskappe ──')
+/* Dewald: "die popup moet opkom so 3 sekondes voor die video eindig." Om dit te
+   weet moet ons weet waar die video is. Ek ken nie hulle veldname nie, dus RAAI
+   dit niks — dit SOEK. Kry dit nie albei getalle nie, gee dit null en die hele
+   pad doen niks. */
+{
+  const bs = d => ({ origin: 'https://www.tiktok.com', data: { [MERKER]: true, ...d } })
+
+  is('currentTime + duration',
+    tydUitBoodskap(bs({ type: 'onCurrentTime', value: { currentTime: 27.1, duration: 30 } })),
+    { nou: 27.1, duur: 30 })
+  /* Ander name, en dieper genes — want ek weet nie hoe hulle liggaam lyk nie. */
+  is('ander name, dieper genes',
+    tydUitBoodskap(bs({ value: { info: { played: 5, totalLength: 12 } } })),
+    { nou: 5, duur: 12 })
+  is('op die boodskap self',
+    tydUitBoodskap(bs({ currentTime: 2, duration: 8 })), { nou: 2, duur: 8 })
+
+  /* ── Wat dit MOET weier ──
+     'n Verkeerde paar getalle sou die opspringer op die verkeerde oomblik laat
+     opkom, en 'n mens word HOOGSTENS DRIE KEER in sy leeftyd gevra. */
+  is('niks bruikbaar',   tydUitBoodskap(bs({ type: 'onPlayerReady', value: {} })), null)
+  is('net n posisie',    tydUitBoodskap(bs({ value: { currentTime: 5 } })), null)
+  is('net n lengte',     tydUitBoodskap(bs({ value: { duration: 30 } })), null)
+  /* Millisekondes lees soos 'n lengte en is dit nie. Twintig minute is die hek. */
+  is('millisekondes',    tydUitBoodskap(bs({ value: { currentTime: 27000, duration: 30000 } })), null)
+  is('n tydstempel',     tydUitBoodskap(bs({ value: { currentTime: 1, duration: 1757700000 } })), null)
+  is('posisie verby die lengte',
+    tydUitBoodskap(bs({ value: { currentTime: 90, duration: 30 } })), null)
+  is('n lengte van nul', tydUitBoodskap(bs({ value: { currentTime: 0, duration: 0 } })), null)
+  is('n negatiewe posisie',
+    tydUitBoodskap(bs({ value: { currentTime: -3, duration: 30 } })), null)
+  is('Infinity',         tydUitBoodskap(bs({ value: { currentTime: Infinity, duration: 30 } })), null)
+
+  /* En die oorsprong-hek geld ook hier: enige raam kan getalle stuur. */
+  is('n VREEMDE raam se getalle',
+    tydUitBoodskap({ origin: 'https://boos.example', data: { [MERKER]: true, value: { currentTime: 27, duration: 30 } } }), null)
+  is('sonder die merker',
+    tydUitBoodskap({ origin: 'https://www.tiktok.com', data: { value: { currentTime: 27, duration: 30 } } }), null)
+  is('niks in', tydUitBoodskap(null), null)
 }
 
 console.log(`\n${reg} reg, ${vals} vals\n`)

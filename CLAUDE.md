@@ -94,10 +94,10 @@ node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
-node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 54
+node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 201
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 227
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1538,6 +1538,47 @@ geen ander party. Wat nog kort, is 'n manier om 'n lêer op te laai.
 op 'n skakel gedruk om iets te SIEN; vra ons voordat sy iets gesien het, is die
 antwoord nee en sy kom nie terug nie. Ná twee swiepe het sy self besluit om aan
 te hou — dít is die mens wat ja sê.
+
+**Maar die mens op 'n GEDEELDE skakel is 'n ander mens.** Dewald, 12 September
+2026: *"wanneer iemand die video share en hulle kyk moet die popup opkom so 3
+sekondes voor die video eindig...... nie na hul paar videos gekyk het nie... of
+as hul op scroll die eerste keer moet popup dadelik wys."*
+
+Hy is reg, en die twee gevalle is werklik verskillend. 'n Mens IN die app rol
+deur 'n voer; 'n vreemdeling op 'n skakel het op ÉÉN ding gedruk om ÉÉN video te
+sien, en sy gaan nie noodwendig 'n tweede en 'n derde kyk nie. Wag ons vir drie
+clips, is sy weg en die hele skakel was verniet.
+
+Vir haar is daar dus twee oomblikke, en die EERSTE wat kom, wen:
+
+* **haar eerste swiep** (`SWIEPE_VOOR_VRA_GEDEEL = 1`) — dan het sy meer gevra
+  as die een video wat belowe is;
+* **drie sekondes voor die video eindig** (`vraByEinde()`,
+  `SEKONDES_VOOR_EINDE = 3`). Sy het gekry wat belowe is en sy is nog daar. Die
+  getal is klein met opset: vra vroeër en jy onderbreek juis die ding waarvoor sy
+  gekom het; vra ná die einde en die video het klaar weer begin (`loop=1`).
+
+**Om die tyd te weet, word niks geraai.** `tydUitBoodskap()` in `tiktokKlank.js`
+**SOEK** die twee getalle in hulle gebeurtenisse — enige sleutel wat soos 'n
+posisie lees, teen enige wat soos 'n lengte lees. Ek ken hulle veldname nie
+(hulle blad is geblokkeer), en 'n geraaide veldnaam is presies wat
+`volume_control=1` was. Kry dit nie albei getalle nie, gee dit `null` en hierdie
+pad doen NIKS. Die keuring is streng, want 'n verkeerde paar getalle sou die
+vraag op die verkeerde oomblik laat opkom — en 'n mens word hoogstens DRIE KEER
+in sy leeftyd gevra: albei moet eindige getalle wees, die lengte bo nul en onder
+twintig minute (die hek teen millisekondes en tydstempels), en die posisie nie
+verby die lengte nie.
+
+**Praat hulle speler nooit oor tyd nie, bly `WAG_TERUGVAL` (30s) in
+`Reels.jsx`.** Dít is 'n GUESS en dit staan as een getal wat 'n mens kan
+verander: 'n prediker se clip loop sowat 'n halfminuut tot 'n minuut, en teen
+dertig het sy of klaar gekyk of besluit om aan te hou. Sonder daardie terugval
+sou 'n mens wat land, kyk en NOOIT swiep nie, glad nie gevra word nie — en dit is
+juis die pad wat die app moet laat groei.
+
+**'n Mens IN die app word NIE by elke video se einde gevra nie** — dit sou van
+die voer 'n tolhek maak. Die hele einde-pad hang aan `deepId`. Daar is 'n
+blaaierblok wat dit afdwing.
 
 **Erkenning is 'n HEK, nie 'n versiering nie.** `magWys()` is 'n witlys en 'n
 clip sonder 'n `naam` wys glad nie. 'n Ander bediening se clip kry ook GEEN brug

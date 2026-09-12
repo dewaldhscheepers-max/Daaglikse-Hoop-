@@ -22,6 +22,9 @@ import {
   gesienTel,
   laagsteTel,
   huidigeRondte,
+  SWIEPE_VOOR_VRA_GEDEEL,
+  vraByEinde,
+  SEKONDES_VOOR_EINDE,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -131,6 +134,55 @@ is('by clip 2 nog nie',   magVraInstalleer({ gesien: 2 }), false)
 is('by clip 3 WEL',       magVraInstalleer({ gesien: 3 }), true)
 is('en daarna ook',       magVraInstalleer({ gesien: 7 }), true)
 is('twee swiepe is die grens', SWIEPE_VOOR_VRA, 2)
+
+console.log('\n── Maar n mens op n GEDEELDE skakel word na EEN swiep gevra ──')
+/* Dewald, 12 September 2026: "wanneer iemand die video share en hulle kyk moet
+   die popup opkom so 3 sekondes voor die video eindig...... nie na hul paar
+   videos gekyk het nie... of as hul op scroll die eerste keer moet popup dadelik
+   wys."
+
+   'n Vreemdeling op 'n skakel het op EEN ding gedruk om EEN video te sien. Wag
+   ons vir drie clips, is sy weg en die hele skakel was verniet. */
+is('gedeel, by clip 1 nog nie',  magVraInstalleer({ gesien: 1, gedeel: true }), false)
+is('gedeel, NA die eerste swiep WEL', magVraInstalleer({ gesien: 2, gedeel: true }), true)
+is('en daarna ook',              magVraInstalleer({ gesien: 5, gedeel: true }), true)
+is('een swiep is die grens',     SWIEPE_VOOR_VRA_GEDEEL, 1)
+/* Die drie hekke geld PRESIES dieselfde vir haar. */
+is('gedeel: sy het dit reeds',   magVraInstalleer({ gesien: 5, gedeel: true, geinstalleer: true }), false)
+is('gedeel: sy is reeds gevra',  magVraInstalleer({ gesien: 5, gedeel: true, reedsGevra: true }), false)
+is('gedeel: iets anders is oop', magVraInstalleer({ gesien: 5, gedeel: true, ietsOop: true }), false)
+/* En dit mag NIE die gewone kyker se drempel raak nie. */
+is('n gewone kyker bly by twee swiepe', magVraInstalleer({ gesien: 2 }), false)
+
+console.log('\n── Drie sekondes voor die einde ──')
+/* Die getal is klein met opset: vra te vroeg en jy onderbreek juis die ding
+   waarvoor sy gekom het; vra na die einde en die video het klaar weer begin
+   (loop=1) en die oomblik is verby. */
+is('drie sekondes',        SEKONDES_VOOR_EINDE, 3)
+is('by die begin nie',     vraByEinde({ nou: 0, duur: 30 }), false)
+is('by die helfte nie',    vraByEinde({ nou: 15, duur: 30 }), false)
+is('by 26 van 30 nie',     vraByEinde({ nou: 26, duur: 30 }), false)
+is('by 27 van 30 WEL',     vraByEinde({ nou: 27, duur: 30 }), true)
+is('by 29 van 30 WEL',     vraByEinde({ nou: 29, duur: 30 }), true)
+is('by die einde WEL',     vraByEinde({ nou: 30, duur: 30 }), true)
+/* 'n Speler rapporteer soms 30.02 van 30. Dit is nog steeds die einde. */
+is('n bietjie oor die einde', vraByEinde({ nou: 30.2, duur: 30 }), true)
+
+/* 'n Video KORTER as die venster self: daar is dan geen "drie sekondes voor die
+   einde" nie, en die veiligste oomblik is sodra hy loop. */
+is('n video van 2s, by 0',  vraByEinde({ nou: 0, duur: 2 }), false)
+is('n video van 2s, by 0.5', vraByEinde({ nou: 0.5, duur: 2 }), true)
+
+/* Gemors mag NOOIT die opspringer laat opkom nie — dit is een van drie kere in
+   'n leeftyd. */
+is('geen getalle',      vraByEinde({}), false)
+is('niks in',           vraByEinde(null), false)
+is('n string',          vraByEinde({ nou: 'x', duur: 30 }), false)
+is('n lengte van nul',  vraByEinde({ nou: 0, duur: 0 }), false)
+is('n negatiewe lengte', vraByEinde({ nou: 1, duur: -5 }), false)
+is('n negatiewe posisie', vraByEinde({ nou: -2, duur: 30 }), false)
+is('Infinity',          vraByEinde({ nou: Infinity, duur: 30 }), false)
+is('NaN',               vraByEinde({ nou: NaN, duur: 30 }), false)
 
 console.log('\n── En die drie dinge wat hom stilhou ──')
 is('sy het dit reeds',        magVraInstalleer({ gesien: 5, geinstalleer: true }), false)

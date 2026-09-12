@@ -634,12 +634,61 @@ export function deelBoodskap(klip, skakel) {
  */
 export const SWIEPE_VOOR_VRA = 2
 
+/* ── Die mens op 'n GEDEELDE skakel is 'n ander mens ──
+ *
+ * Dewald, 12 September 2026: *"wanneer iemand die video share en hulle kyk moet
+ * die popup opkom so 3 sekondes voor die video eindig...... nie na hul paar
+ * videos gekyk het nie... of as hul op scroll die eerste keer moet popup dadelik
+ * wys."*
+ *
+ * Hy is reg, en die twee gevalle is werklik verskillend:
+ *
+ *   · 'n mens IN die app rol deur 'n voer. Twee swiepe beteken sy het self
+ *     besluit om aan te hou, en dít is die mens wat ja sê;
+ *   · 'n VREEMDELING op 'n gedeelde skakel het op één ding gedruk om één video
+ *     te sien. Sy gaan nie noodwendig 'n tweede en 'n derde kyk nie. Wag ons vir
+ *     drie, is sy weg en die hele skakel was verniet.
+ *
+ * Vir haar is daar dus twee oomblikke, en die EERSTE wat kom, wen:
+ *
+ *   1. sy swiep — dan het sy meer gevra as die een video wat belowe is;
+ *   2. of die video is byna klaar. Sy het gekry wat belowe is en sy kyk nog.
+ *
+ * Dit is die pad wat die app moet laat groei, en dit is hoekom die drempel hier
+ * EEN swiep is en nie twee nie.
+ *
+ * Die getal is die aantal SWIEPE, net soos `SWIEPE_VOOR_VRA`. `gesien` tel die
+ * clips wat sy gesien het en begin by 1, dus is "een swiep" `gesien > 1`. */
+export const SWIEPE_VOOR_VRA_GEDEEL = 1
+
 export function magVraInstalleer(f) {
   const d = f || {}
   if (d.geinstalleer) return false      /* dit is reeds op haar foon */
   if (d.reedsGevra) return false        /* een keer per besoek, nie by elke clip */
   if (d.ietsOop) return false           /* nooit bo-op iets anders nie */
-  return Number(d.gesien || 0) > SWIEPE_VOOR_VRA
+  const drempel = d.gedeel ? SWIEPE_VOOR_VRA_GEDEEL : SWIEPE_VOOR_VRA
+  return Number(d.gesien || 0) > drempel
+}
+
+/* ── Drie sekondes voor die einde ──
+ *
+ * Dewald se woorde presies. Die getal is klein met opset: vra te vroeg en jy
+ * onderbreek die ding waarvoor sy gekom het; vra ná die einde en die video het
+ * klaar weer begin (`loop=1`) en die oomblik is verby.
+ *
+ * Suiwer, want dit moet toetsbaar wees: twee getalle in, 'n boolean uit. */
+export const SEKONDES_VOOR_EINDE = 3
+
+export function vraByEinde(f) {
+  const d = f || {}
+  const nou = Number(d.nou)
+  const duur = Number(d.duur)
+  if (!Number.isFinite(nou) || !Number.isFinite(duur)) return false
+  if (nou < 0 || duur <= 0) return false
+  /* 'n Video wat KORTER is as die venster self: dan is daar geen "drie sekondes
+     voor die einde" nie, en die veiligste oomblik is die einde toe. */
+  if (duur <= SEKONDES_VOOR_EINDE) return nou > 0
+  return duur - nou <= SEKONDES_VOOR_EINDE
 }
 
 /* ── Die brug terug na die app se eie inhoud ────────────────

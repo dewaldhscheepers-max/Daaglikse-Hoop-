@@ -133,6 +133,66 @@ export function isTiktokBoodskap(gebeurtenis) {
   return d[MERKER] === true
 }
 
+/* ── Die video se TYD uit hulle boodskappe, sonder om te raai ──
+ *
+ * Dewald: *"wanneer iemand die video share en hulle kyk moet die popup opkom so
+ * 3 sekondes voor die video eindig."*
+ *
+ * Om dit te weet moet ons twee getalle hê: waar die video is, en hoe lank hy is.
+ * Hulle speler stuur wel gebeurtenisse, maar ek ken nie die veldname nie —
+ * hulle blad is in hierdie houer geblokkeer, en 'n geraaide veldnaam is presies
+ * die fout wat `volume_control=1` was.
+ *
+ * Dus word daar nie geraai nie: dit SOEK. Elke boodskap se liggaam word
+ * deurgeloop, en enige sleutel wat soos 'n POSISIE lees, word teen enige sleutel
+ * wat soos 'n LENGTE lees, opgeweeg. Kry ons albei as geldige getalle, gebruik
+ * ons hulle; kry ons hulle nie, gee dit `null` en niks gebeur.
+ *
+ * Dit kan dus nie lieg nie. Praat hulle speler nooit oor tyd nie, is daar geen
+ * knoppie, geen wenk en geen halwe gedrag — net die ander pad (haar eerste
+ * swiep), wat heeltemal ons eie is.
+ *
+ * Die keuring is streng, want 'n verkeerde paar getalle sou die opspringer op
+ * die verkeerde oomblik laat opkom:
+ *
+ *   · albei moet eindige getalle wees;
+ *   · die lengte moet bo nul wees;
+ *   · die posisie mag nie verby die lengte wees nie (met 'n halwe sekonde se
+ *     toegee, want 'n speler rapporteer soms 30.02 van 30);
+ *   · en die lengte moet SINVOL wees vir 'n kort video. Meer as twintig minute
+ *     is nie 'n TikTok-clip nie — dan lees ons eerder iets anders (millisekondes,
+ *     of 'n tydstempel) en dan word dit weggegooi.
+ */
+const POSISIE = /^(current|cur|now|played|position|pos|tyd|time|progress|seek)/i
+const LENGTE  = /^(duration|dur|duur|length|len|total|totaal)/i
+
+/* Twintig minute. Sien hierbo — dit is die hek teen millisekondes en
+   tydstempels wat toevallig soos 'n lengte lees. */
+const MAKS_DUUR = 20 * 60
+
+function getalleUit(w, uit, diep) {
+  if (!w || typeof w !== 'object' || diep > 3) return
+  for (const sleutel of Object.keys(w)) {
+    const waarde = w[sleutel]
+    if (waarde && typeof waarde === 'object') { getalleUit(waarde, uit, diep + 1); continue }
+    const n = Number(waarde)
+    if (!Number.isFinite(n)) continue
+    if (uit.nou === null && POSISIE.test(sleutel)) uit.nou = n
+    else if (uit.duur === null && LENGTE.test(sleutel)) uit.duur = n
+  }
+}
+
+export function tydUitBoodskap(gebeurtenis) {
+  if (!isTiktokBoodskap(gebeurtenis)) return null
+  const uit = { nou: null, duur: null }
+  getalleUit(gebeurtenis.data, uit, 0)
+  const { nou, duur } = uit
+  if (!Number.isFinite(nou) || !Number.isFinite(duur)) return null
+  if (nou < 0 || duur <= 0 || duur > MAKS_DUUR) return null
+  if (nou > duur + 0.5) return null
+  return { nou, duur }
+}
+
 /* ── Die VOORUIT-raam: stil en gepouseer ──
  *
  * Die volgende clip se raam is gemonteer voordat sy swiep, sodat hy nie eers
