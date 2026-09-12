@@ -3,7 +3,7 @@ import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { db } from '../firebase'
 import VolgJesusKaart from '../components/VolgJesusKaart'
 import Bybel365Kaart from '../components/Bybel365Kaart'
-import Speel from './Speel'
+import Speel, { SPELETJIES } from './Speel'
 import { eboekTotale } from '../data/eboekTotale'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
@@ -119,6 +119,9 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
   const [showLeesplanne,     setShowLeesplanne]     = useState(false)
+  /* Die speletjies sit agter een stil kaart — hulle is bysaak op hierdie blad.
+     Sien die kaart self vir Dewald se eie woorde. */
+  const [showSpeletjies,     setShowSpeletjies]     = useState(false)
 
   // Scroll to target book
   useEffect(() => {
@@ -378,40 +381,46 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
         {/* ── Speletjies ──
 
-            Reels het Speel se oortjie gevat, en die speletjies woon nou hier.
-            Dewald, 12 September 2026: "Speel skuif na binne die E-boeke-blad as
-            'n aparte Speletjies-afdeling."
+            EEN klein kaart, en die speletjies sit daaragter. Dewald,
+            12 September 2026: *"die speletjies moet onder 'n kaart wees op eboek
+            blad en as hulle die kaart kliek moet hulle die speletjies sien...
+            net bokant al die eboeke. klein kaart baie mooi."*
 
-            Dit staan ONDER die leesplanne en BO die utiliteite: dit is inhoud
-            wat 'n mens kom haal, nie 'n instelling nie. Die `id` is die anker
-            waarheen die "die speletjies het geskuif"-boodskap rol — sonder dit
-            land 'n mens bo-aan 'n lang blad en sien niks. */}
-        <div className="meer-section" id="speletjies">
-          <div className="section-header">
-            <h3 className="section-title">🎮 Speletjies</h3>
-            <span className="section-count">3 gratis</span>
-          </div>
-          <Speel ingebed />
-        </div>
+            Dit staan dus DIREK bo die e-boeklys: laag genoeg dat die boeke die
+            blad se hoofsaak bly, hoog genoeg dat 'n mens dit sien sonder om deur
+            dertig boeke te rol. 'n Uitgestalde lys van drie speletjies hier sou
+            hulle laat lyk soos die helfte van waarvoor hierdie blad bestaan; een
+            kaart sê presies wat daar is.
 
-        {/* ── "Kry ek kennisgewings?" ──
+            Die drie teëls kom uit `SPELETJIES` in Speel.jsx — dieselfde ikone en
+            dieselfde kleure as die speletjies self. Dit is nie net mooi nie: 'n
+            kaart met sy eie versinde ikone sou van die speletjies af wegdryf die
+            dag wanneer een bykom.
 
-            Vir die mense vir wie ALLES reg lyk en wat steeds niks kry nie.
-            Hulle sien geen merkie op Luister nie, want toestemming is daar
-            en die intekening is daar — maar hulle token is by FCM dood en
-            net die bediener weet dit.
-
-            'n Groen merkie op 'n skerm bewys niks. Een egte boodskap wel. */}
-        <div className="meer-section">
-          <div className="section-header">
-            <h3 className="section-title">🔔 Kennisgewings</h3>
-          </div>
-          <p className="kg-toets-lyf">
-            Kry jy nie elke oggend jou boodskap nie? Stuur vir jouself een nou,
-            dan weet ons of hierdie foon ons kan hoor.
-          </p>
-          <ToetsKnoppie opToets={toetsKennisgewing} />
-        </div>
+            Die `id` is die anker waarheen die "die speletjies het geskuif"-
+            boodskap rol — sonder dit land 'n mens bo-aan 'n lang blad en sien
+            niks. */}
+        <button
+          className="speletjie-kaart"
+          id="speletjies"
+          onClick={() => setShowSpeletjies(true)}
+        >
+          <span className="speletjie-kaart-teks">
+            <span className="speletjie-kaart-titel">Speletjies</span>
+            {/* Die NAME, nie "drie gratis speletjies" nie. 'n Mens herken
+                Vredepad; sy herken nie 'n telling nie. */}
+            <span className="speletjie-kaart-sub">Vredepad · Bou die Ark · Vrugtefees</span>
+          </span>
+          <span className="speletjie-kaart-teels" aria-hidden="true">
+            {SPELETJIES.map(s => (
+              <span key={s.id} className="speletjie-teel" style={{ background: s.tint }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke={s.stroke} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  {s.ikoon}
+                </svg>
+              </span>
+            ))}
+          </span>
+        </button>
 
         {/* All books */}
         <div className="meer-section">
@@ -431,6 +440,31 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ── "Kry ek kennisgewings?" ──
+
+            Vir die mense vir wie ALLES reg lyk en wat steeds niks kry nie.
+            Hulle sien geen merkie op Luister nie, want toestemming is daar en
+            die intekening is daar — maar hulle token is by FCM dood en net die
+            bediener weet dit. 'n Groen merkie op 'n skerm bewys niks; een egte
+            boodskap wel.
+
+            Dit staan HEEL ONDER, saam met die privaatheidsbeleid. Dewald:
+            *"dit lyk stupid. dit pas nie... sit dit eder onder aan."* Hy is reg
+            — dit is 'n diagnostiese ding tussen gratis boeke, en dit het soos 'n
+            foutboodskap gelees op 'n blad wat oor geskenke gaan. Dit is nie
+            versteek nie: wie dit nodig het, soek dit, en hierdie is die enigste
+            skerm waar 'n mens tot heel onder rol. */}
+        <div className="meer-section meer-onderaan">
+          <div className="section-header">
+            <h3 className="section-title">🔔 Kennisgewings</h3>
+          </div>
+          <p className="kg-toets-lyf">
+            Kry jy nie elke oggend jou boodskap nie? Stuur vir jouself een nou,
+            dan weet ons of hierdie foon ons kan hoor.
+          </p>
+          <ToetsKnoppie opToets={toetsKennisgewing} />
         </div>
 
         {/* ── Die privaatheidsbeleid ──
@@ -454,6 +488,10 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
 
       {showLeesplanne && (
         <LeesplanneLys onClose={() => setShowLeesplanne(false)} />
+      )}
+
+      {showSpeletjies && (
+        <Speel onClose={() => setShowSpeletjies(false)} />
       )}
 
       {activeBook && (

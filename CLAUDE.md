@@ -1192,9 +1192,23 @@ omdat Luister spesifiek vir die Daaglikse Hoop-stemboodskappe moet bly."* Hy was
 reg, en ek was verkeerd — ek het aangeneem dit is 'n sesde oortjie en met "ses
 knyp op 'n klein foon" geantwoord op 'n vraag wat niemand gevra het nie.
 
-Die speletjies staan nou in `Meer.jsx` onder `#speletjies`, met `<Speel ingebed />`
-— dieselfde skerm, sonder sy eie kop en sonder sy `DonationCard`, want die blad
-dra reeds een. Twee skenkkaarte op een blad lees soos 'n tolhek.
+**Die speletjies sit agter EEN klein kaart, direk bo die e-boeklys.** Dewald:
+*"die eboeke is die hoof ding nie die speletjies nie. dis by saak. dit moet
+gladnie soos hoof goed lyk... net bokant al die eboeke. klein kaart baie mooi."*
+Die kaart (`#speletjies` in `Meer.jsx`) maak `<Speel onClose={...} />` as 'n
+oorleg oop — dieselfde vorm as LeesplanneLys en KinderBibloteek. Die drie teëls
+op die kaart kom uit `SPELETJIES` in Speel.jsx, dus dieselfde ikone en kleure as
+die speletjies self; 'n kaart met sy eie versinde ikone dryf weg die dag wanneer
+'n speletjie bykom. Binne die oorleg val die `DonationCard` weg — die e-boekblad
+waarvandaan 'n mens kom, dra reeds een, en twee skenkkaarte op een pad lees soos
+'n tolhek.
+
+**Die kennisgewing-toets staan heel onder, en stil.** Dewald: *"dit lyk stupid.
+dit pas nie... sit dit eder onderaan."* Dit is diagnosties, nie inhoud nie, en
+met die gewone groot serif-kop tussen die gratis boeke het dit soos 'n
+foutboodskap gelees op 'n blad wat oor geskenke gaan. `.meer-onderaan` maak dit
+'n voetnoot. Dit is nie versteek nie: wie dit nodig het, soek dit, en dit is die
+enigste skerm waar 'n mens tot heel onder rol.
 
 **Die skuif kos 'n boodskap, en dit is nie opsioneel nie.** `src/data/speelSkuif.js`
 is woord vir woord dieselfde patroon as `volgJesusSkuif.js`, en om dieselfde

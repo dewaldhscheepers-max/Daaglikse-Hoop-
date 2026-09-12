@@ -16,7 +16,7 @@ async function deelSpel(spel) {
 
 // Speletjies wat vrede help bou. Vredepad staan boaan.
 // Om een by te voeg: nog 'n inskrywing hier, en 'n luisteraar in App.jsx.
-const SPELETJIES = [
+export const SPELETJIES = [
   {
     id:      'vredepad',
     event:   'open-vredepad',
@@ -66,29 +66,31 @@ const SPELETJIES = [
   },
 ]
 
-/* `ingebed` — die speletjies woon nou BINNE die e-boekblad (Reels het hulle
-   oortjie gevat). Ingebed val die groot kop weg, want Meer dra reeds sy eie
-   kop, en die DonationCard val weg omdat daar reeds een bo-aan daardie blad
-   staan. Twee skenkkaarte op een blad lees soos 'n tolhek.
+/* Reels het Speel se oortjie gevat, en die speletjies woon nou agter EEN stil
+   kaart op die e-boekblad.
+ *
+ * Dewald, 12 September 2026: *"die eboeke is die hoof ding nie die speletjies
+ * nie. dis by saak. dit moet gladnie soos hoof goed lyk."*
+ *
+ * `onClose` maak hierdie skerm 'n oorleg — dieselfde vorm as LeesplanneLys en
+ * KinderBibloteek, sodat dit voel soos die res van die app. Sonder `onClose`
+ * bly dit die gewone skerm wat dit altyd was.
+ *
+ * Die DonationCard val binne die oorleg weg: die e-boekblad waarvandaan 'n mens
+ * kom, dra reeds een, en twee skenkkaarte op een pad lees soos 'n tolhek. */
+export default function Speel({ onClose }) {
+  const oorleg = typeof onClose === 'function'
 
-   Die skerm bly bestaan sodat die speletjies en hul deel-knoppies op EEN plek
-   staan; net die omhulsel verskil. */
-export default function Speel({ ingebed = false }) {
   function open(spel) {
+    /* Maak die oorleg toe voor die speletjie oopgaan — anders staan hierdie
+       blad agter 'n volskerm-speletjie en wag die mens se terug-knoppie op 'n
+       skerm wat sy nie meer wou hê nie. */
+    if (oorleg) onClose()
     window.dispatchEvent(new CustomEvent(spel.event))
   }
 
-  return (
-    <div className={ingebed ? 'speel speel-ingebed' : 'speel'}>
-      {!ingebed && (
-        <div className="screen-header speel-header">
-          <h1 className="speel-title">Speel</h1>
-          <p className="speel-sub">
-            Speletjies wat jou help om te ontspan en vrede te vind. Almal gratis.
-          </p>
-        </div>
-      )}
-
+  const lyf = (
+    <>
       <div className="speel-body">
         {SPELETJIES.map(spel => (
           /* Die kaart was een groot <button>. 'n Deel-knoppie kan nie binne
@@ -123,7 +125,41 @@ export default function Speel({ ingebed = false }) {
 
         <p className="speel-binnekort">Meer speletjies is op pad.</p>
 
-        {!ingebed && <DonationCard />}
+        {!oorleg && <DonationCard />}
+      </div>
+    </>
+  )
+
+  if (!oorleg) {
+    return (
+      <div className="speel">
+        <div className="screen-header speel-header">
+          <h1 className="speel-title">Speel</h1>
+          <p className="speel-sub">
+            Speletjies wat jou help om te ontspan en vrede te vind. Almal gratis.
+          </p>
+        </div>
+        {lyf}
+      </div>
+    )
+  }
+
+  return (
+    <div className="speel-oorleg">
+      <div className="speel-oorleg-binne">
+        <div className="speel-oorleg-kop">
+          <button className="speel-terug" onClick={onClose}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Terug
+          </button>
+          <h1 className="speel-oorleg-titel">Speletjies</h1>
+          <p className="speel-oorleg-sub">Almal gratis. Niks om af te laai nie.</p>
+        </div>
+        <div className="speel-oorleg-lyf">
+          {lyf}
+        </div>
       </div>
     </div>
   )
