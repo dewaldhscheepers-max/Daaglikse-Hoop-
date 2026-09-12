@@ -205,11 +205,16 @@
 }
 .reel-wenk:active { background: rgba(13, 12, 13, 0.92); }
 
-/* ── Die einde ── */
-.reel-einde {
+/* ── Die mylpaal ──
+   EEN kaart, ná die eerste volle pas, en 'n mens swiep daaraan verby. Dit was
+   'n EINDE-skerm; Dewald: "nee man fok haal dit af... dis onvriendelik... dit
+   moet aangaan." Die kaart bly, want dit is die plek waar die deel-vraag
+   hoort — maar die voer loop daarna aan, en die laaste reël sê dit. */
+.reel-mylpaal {
   position: relative;
   height: 100%;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   background:
     radial-gradient(120% 66% at 50% 6%, rgba(217, 177, 131, 0.20), rgba(217, 177, 131, 0) 62%),
     #0D0C0D;
@@ -217,13 +222,13 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   text-align: center;
   padding: 0 32px var(--reels-onder);
   font-family: var(--font-body);
 }
 
-.reel-einde-merk {
+.reel-mylpaal-merk {
   color: var(--reels-goud);
   font-size: 10.5px;
   font-weight: 600;
@@ -231,7 +236,7 @@
   text-transform: uppercase;
 }
 
-.reel-einde-lyn {
+.reel-mylpaal-lyn {
   margin: 0;
   font-family: var(--font-serif);
   font-style: italic;
@@ -242,39 +247,55 @@
   text-wrap: balance;
 }
 
-.reel-einde-sub {
+.reel-mylpaal-sub {
   margin: 0;
-  color: rgba(244, 239, 231, 0.6);
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 30ch;
+  color: rgba(244, 239, 231, 0.62);
+  font-size: 13.5px;
+  line-height: 1.55;
+  max-width: 28ch;
 }
 
-.reel-einde-knop {
-  margin-top: 4px;
+/* Die enigste goue knoppie in die hele voer. Die voer bestaan vir hierdie een. */
+.reel-mylpaal-knop {
+  margin-top: 6px;
   background: var(--reels-goud);
   color: #17130E;
   border: 0;
   border-radius: 999px;
-  padding: 13px 30px;
+  padding: 14px 32px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.reel-einde-knop:active { background: #E8CBA4; }
+.reel-mylpaal-knop:active { background: #E8CBA4; }
 
-.reel-einde-stil {
-  background: none;
-  border: 0;
-  color: rgba(244, 239, 231, 0.6);
+/* Dit is die reël wat sê dat dit nie 'n doodloopstraat is nie. */
+.reel-mylpaal-aan {
+  margin: 10px 0 0;
+  color: rgba(244, 239, 231, 0.42);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* ── "Daardie een is nie meer hier nie" ──
+   Sy het 'n boodskap gekry wat 'n belofte maak. Is die clip weg en wys ons
+   stilweg 'n ander een, is die eerste ding wat hierdie app aan 'n vreemdeling
+   doen, om te lieg. Dieselfde besluit as HoopOntvang.jsx s'n. */
+.reels-weg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  margin: 0;
+  padding: 11px 16px calc(11px + 6px);
+  background: linear-gradient(to bottom, rgba(9, 8, 9, 0.94), rgba(9, 8, 9, 0.78));
+  color: var(--reels-wit);
   font-family: var(--font-body);
   font-size: 12.5px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: 6px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
 }
-.reel-einde-stil:active { color: var(--reels-goud); }

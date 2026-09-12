@@ -38,6 +38,19 @@ const { wieMag } = geheim
    langer word, is nie 'n skakel nie, dit is 'n lus. */
 const MAKS_SPRONGE = 4
 
+/* ── Die hele versoek het 'n BEGROTING, nie net elke sprong nie ──
+ *
+ * 'n Vercel-funksie sterf by tien sekondes as niks anders gesê word nie. Vier
+ * spronge maal agt sekondes is twee-en-dertig, dus sou 'n stadige ketting die
+ * funksie laat doodmaak — en dan sien Dewald "Failed to fetch" sonder enige
+ * rede. Dit is woord vir woord die fout wat die oggendkennisgewing gebreek het
+ * (sien CLAUDE.md: 'n `for`-lus met 'n `await` in, en geen `maxDuration`).
+ *
+ * Agt sekondes vir die HELE ketting, en elke sprong kry net wat oorbly. Loop
+ * die tyd uit, sê ons dit eerlik in plaas van om stil te sterf. */
+const BEGROTING_MS = 8000
+const MIN_SPRONG_MS = 1200
+
 /* Elke adres in die ketting moet HIER wees. 'n Suffiks-toets op die gasheer,
    nooit `includes` — "tiktok.com.boos.net" bevat "tiktok.com". */
 function isTiktokGasheer(u) {
@@ -80,7 +93,13 @@ export default async function handler(req, res) {
   let huidig = ontleed(/^https?:\/\//i.test(inset) ? inset : `https://${inset}`)
   if (!huidig) return res.status(400).json({ fout: 'Dit lyk nie soos n TikTok-skakel nie' })
 
+  const sluitTyd = Date.now() + BEGROTING_MS
+
   for (let sprong = 1; sprong <= MAKS_SPRONGE; sprong++) {
+    const oor = sluitTyd - Date.now()
+    if (oor < MIN_SPRONG_MS) {
+      return res.status(504).json({ fout: 'TikTok antwoord te stadig. Probeer weer.' })
+    }
     let antwoord
     try {
       antwoord = await fetch(huidig.toString(), {
@@ -89,7 +108,7 @@ export default async function handler(req, res) {
         /* TikTok gee 'n kaal bediener soms niks. 'n Gewone blaaier-agent is nie
            'n truuk nie — dit is wat die skakel verwag. */
         headers: { 'user-agent': 'Mozilla/5.0 (compatible; DaaglikseHoop/1.0)' },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(oor),
       })
     } catch {
       /* 'n Tydgrens of 'n netwerkfout. Dit is nie Dewald se skuld nie en die

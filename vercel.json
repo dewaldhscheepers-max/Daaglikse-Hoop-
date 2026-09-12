@@ -22,6 +22,9 @@
     },
     "api/send-notifications.js": {
       "maxDuration": 300
+    },
+    "api/reels-skakel.mjs": {
+      "maxDuration": 20
     }
   },
   "routes": [

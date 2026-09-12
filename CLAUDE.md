@@ -94,7 +94,7 @@ node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 75 toetse
-node src/data/reels.toets.mjs                 # die voer se reels, 82 toetse
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 136
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 ```
@@ -1242,8 +1242,47 @@ clip sonder 'n `naam` wys glad nie. 'n Ander bediening se clip kry ook GEEN brug
 terug na ons eie bladsye nie — dit sou lyk of ons hul werk gebruik om onsself te
 bemark, en dan is dit die laaste clip wat hulle ons gee.
 
-**Die voer EINDIG.** 'n Voer sonder 'n einde is een waarvan 'n mens skuldig
-opstaan, en dit is nie hierdie app nie.
+**Die voer HOU AAN, en dit was nie altyd so nie.** Dit het GEEINDIG met 'n
+klaar-skerm, want "'n voer sonder 'n einde is een waarvan 'n mens skuldig
+opstaan". Dewald het dit gesien en dit was 'n reguit oordeel: *"nee man fok haal
+dit af... dis onvriendelik... wys alles wat daar is om te wys... dit moet aangaan
+en as hulle alles gekyk het kan jy daai sit. maar dit moet verkieslik nooit stop
+nie."*
+
+Hy was reg, en die fout was groter as die beginsel: met 'n handjievol clips het
+daardie skerm ná DRIE swiepe gekom. 'n Voer wat 'n mens uitgooi voordat hy
+behoorlik begin het, is nie beskeie nie — dit is 'n deur wat in jou gesig
+toegaan.
+
+Elke **pas** is 'n nuwe skommeling, en `Reels.jsx` sit die volgende pas by sodra
+'n mens binne vier items van die onderkant kom. Die "jy het alles gesien"-kaart
+kom EEN keer — ná die eerste volle pas, waar dit waar is — en 'n mens swiep
+daaraan verby. Dit is 'n mylpaal, nie 'n doodloopstraat nie, en dit is die plek
+waar die deel-vraag hoort: sy het pas klaar gekyk, sy is tevrede, en daar is nie
+'n video wat om haar aandag meeding nie. Dit is die enigste goue knoppie in die
+hele voer.
+
+**Die volgorde is TOEVALLIG, en dit kom uit 'n SAAD.** Dewald: *"die nuwe videos
+moet random bo speel.. nie in volgorde soos ek dit paste nie. want anders speel
+almal van dieselfde persoon na mekaar."* Twee reëls volg daaruit, albei in
+`eenPas()`:
+
+* die **nuutstes staan bo** (`nuutsteEerste()` — op `datum` as daar een is,
+  anders is die LAASTE inskrywing die nuutste, want dit is hoe 'n mens byvoeg),
+  geskommel onder mekaar;
+* **geen twee clips van dieselfde mens volg op mekaar nie** (`ontklont()`).
+
+Die saad is nie 'n toets-gerief nie. Die voer word HERBOU elke keer as 'n pas
+bykom; met 'n saad bly wat sy reeds gesien het presies dieselfde en kom daar net
+iets by, en met `Math.random()` sou die voer onder haar vingers herskommel.
+
+`ontklont()` bou die lys OP en ruil nie. Die eerste weergawe het een keer
+deurgeloop en elke klont met 'n later item geruil — dit lyk reg en dit is dit
+nie: 'n ruil maak 'n nuwe klont verder aan, en teen die einde is daar niks om mee
+te ruil nie. En die dringendheids-toets moes `(t * 2) - 1 >= n` wees en nie
+`t > ceil(n / 2)` nie: 'n mens met `t` clips oor en `n` plekke oor het `2t - 1`
+plekke nodig, en een te laag beteken die laaste twee van daardie mens beland
+langs mekaar. Met 20 clips en 6 makers is dit nou **nul klonte oor 300 sade**.
 
 **Die kort skakel word deur die BEDIENER oopgemaak.** Dewald plak wat sy foon hom
 gee, en dit is `https://vt.tiktok.com/ZSqa9Knhv/` — 'n aanwyser wat die ID nie
@@ -1259,7 +1298,31 @@ Die clips kom uit Firestore (`reels`, EEN `getDocs` met 'n tydgrens, nooit 'n
 leeg is nie. Dit aanvaar nooit 'n antwoord kleiner as wat dit reeds het nie —
 dieselfde les as Luister s'n.
 
-Blaaiertoets: `kykReels.mjs` in die scratchpad. Dit meet die ding wat geen
+**Die Firestore-reël moet ONTPLOOI wees.** `reels` het geen reël gehad nie, en
+Firestore weier by verstek — die kliënt se `getDocs` het stil misluk en die voer
+het vir altyd die saai gewys. Die reël staan nou in `firestore.rules`: LEES oop
+(die vreemdeling op 'n gedeelde skakel is nie aangemeld nie), SKRYF toe (wie 'n
+clip kan skryf, kan enige video voor ses duisend mense sit). Dit werk nie voordat
+`firebase deploy --only firestore:rules` geloop het nie.
+
+**Die vreemdeling op 'n gedeelde skakel word GLAD NIE gevra nie** — nie oor geld
+nie, en nie oor installasie in die eerste drie sekondes nie. `if (reelId) return`
+in App.jsx se installasie-effek is die belangrikste van die vier sulke hekke
+(gebed, sorg, hoop, reels), want dit is die pad wat die app moet laat groei. En
+`reelDeepRef` laat die donasie-opspringer VAL in plaas van wag: sy het nog niks
+van hierdie plek ontvang.
+
+**Is die belowede clip weg, sê die app dit.** `klipWeg` in Reels.jsx. Sy het 'n
+boodskap gekry wat 'n belofte maak; wys ons stilweg 'n ander clip, is die eerste
+ding wat hierdie app aan 'n vreemdeling doen, om te lieg. Dieselfde besluit as
+HoopOntvang.jsx s'n: wys wél iets, maar sê dit.
+
+**Die oplosser het 'n BEGROTING.** Vier spronge maal agt sekondes is
+twee-en-dertig, en 'n Vercel-funksie sterf by tien — dieselfde fout as die
+oggendkennisgewing se `for`-lus. Agt sekondes vir die HELE ketting, en
+`maxDuration: 20` in `vercel.json` as vangnet.
+
+Blaaiertoets: `kykReels.mjs` in die scratchpad (74 metings). Dit meet die ding wat geen
 eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die

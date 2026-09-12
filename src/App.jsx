@@ -180,6 +180,11 @@ export default function App() {
   /* Is die voer oop? 'n Opspringer oor 'n video is 'n opspringer wat weggedruk
      word sonder dat iemand hom lees. */
   const reelsOopRef = useRef(false)
+  /* En het sy deur 'n GEDEELDE clip hier gekom? Dan is sy 'n vreemdeling, en
+     dan word daar glad nie oor geld gepraat nie — 'n aparte vraag van
+     `reelsOopRef`, want die app se eie mens op die Reels-oortjie is nie 'n
+     vreemdeling nie. */
+  const reelDeepRef = useRef(false)
   /* Is daar enige oorlegblad oop? Dieselfde rede as `tmgOopRef` hierbo: die
      boodskap se timer sien nie 'n toestand wat intussen verander het nie.
      Dit word tydens die render gestel, waar `boonsteLaag` bereken word. */
@@ -296,6 +301,16 @@ export default function App() {
      * Die skerm vra self, NA die ervaring, met sy eie knoppie na /go. Dit is
      * dus nie uitgestel nie — dit is oorbodig. */
     if (hoopId) return
+    /* ── En dieselfde uitstel vir 'n gedeelde REELS-skakel ──
+     *
+     * Dit is die belangrikste een van die vier, want dit is die pad wat die app
+     * moet laat groei. 'n Vreemdeling druk op 'n skakel om 'n VIDEO te sien.
+     * Sonder hierdie reël staan die installasie-uitklap DRIE SEKONDES later
+     * voor haar — voordat sy iets gesien het — en die antwoord is nee.
+     *
+     * Die voer vra self, NÁ die tweede swiep, wanneer sy self besluit het om
+     * aan te hou. Sien `magVraInstalleer()` in reels.js. */
+    if (reelId) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
     const t = setTimeout(() => {
@@ -309,7 +324,7 @@ export default function App() {
       }
     }, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId])
+  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId, reelId])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -353,9 +368,15 @@ export default function App() {
       /* 'n Vreemdeling wat pas 'n geskenk oopgemaak het, word nie vir geld
          gevra nie. Sy het nog niks van hierdie plek ontvang nie. */
       if (hoopOopRef.current) return
-      /* Die voer is oop. 'n Donasievraag oor 'n video word weggedruk sonder dat
-         iemand hom lees — en dan is daardie vraag vir vandag verbruik. Hy WAG,
-         net soos terwyl klank speel. */
+      /* 'n Vreemdeling wat deur 'n GEDEELDE clip hier gekom het, word nie oor
+         geld gevra nie — nie nou en nie later in hierdie sessie nie. Sy het nog
+         niks van hierdie plek ontvang; sy het op 'n skakel gedruk om 'n video te
+         sien. Dieselfde besluit as by 'n gedeelde HOOP-skakel hierbo, en dit is
+         'n LAAT VAL en nie 'n uitstel nie. */
+      if (reelDeepRef.current) return
+      /* Die voer is oop (haar eie app, haar eie oortjie). 'n Donasievraag oor 'n
+         video word weggedruk sonder dat iemand hom lees — en dan is daardie
+         vraag vir vandag verbruik. Hy WAG, net soos terwyl klank speel. */
       if (isPlayingRef.current || tmgOopRef.current || reelsOopRef.current) {
         setPendingPopup(popup)
       } else {
@@ -1600,6 +1621,7 @@ export default function App() {
   /* Die voer is 'n OORTJIE, nie 'n oorleg nie — hy staan dus nie in
      `oorlegLae` nie en moet sy eie ref dra. */
   reelsOopRef.current = tab === 'reels'
+  reelDeepRef.current = !!reelId
 
   /* Hoeveel lae die terug-knoppie kan afpel: die oortjie (as ons nie op
      Luister is nie) plus 'n oop oorlegblad. */
@@ -1795,6 +1817,7 @@ export default function App() {
             deepId={reelId}
             isInstalled={isInstalled}
             onNavigate={handleNav}
+            klankSpeelNou={() => isPlayingRef.current}
             onInstalleer={() => {
               if (isInstalled) return
               setShowInstallPopup(true)

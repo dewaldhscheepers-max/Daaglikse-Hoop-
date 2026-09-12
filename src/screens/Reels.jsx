@@ -1,46 +1,61 @@
 /* ── REELS ──
  *
- * 'n Volskerm vertikale voer. Een clip op 'n slag, hy klik vas, en hy EINDIG.
+ * 'n Volskerm vertikale voer. Een clip op 'n slag, hy klik vas, en hy HOU AAN.
  *
  * Die reëls staan in `src/data/reels.js` en is suiwer; hierdie lêer is die
  * skerm. Lees daardie kop eerste — veral waarom die voer bestaan (die skakel
- * wat uitgaan, nie die tyd in die app nie) en waarom 'n clip sonder 'n naam
- * glad nie wys nie.
+ * wat uitgaan, nie die tyd in die app nie), waarom die volgorde toevallig is,
+ * en waarom 'n clip sonder 'n naam glad nie wys nie.
  *
- * ── Drie dinge wat 'n mens nie uit die kode aflei nie ──
+ * ── Vier dinge wat 'n mens nie uit die kode aflei nie ──
+ *
+ * **Die voer eindig nie.** Dit het, en Dewald het dit op 12 September 2026
+ * gesien: *"nee man fok haal dit af... dis onvriendelik... wys alles wat daar is
+ * om te wys... dit moet aangaan."* Hy was reg. Elke pas is 'n nuwe skommeling,
+ * en sodra 'n mens naby die einde van wat gebou is kom, word die volgende pas
+ * bygesit. Die "jy het alles gesien"-kaart kom EEN keer, ná die eerste volle
+ * pas, en 'n mens swiep daaraan verby.
+ *
+ * **Die volgorde word uit 'n SAAD gebou, nie uit `Math.random()` nie.** Die voer
+ * word herbou elke keer as 'n pas bykom. Met 'n saad bly die stuk wat sy reeds
+ * gesien het presies dieselfde en kom daar net iets by; met `Math.random()` sou
+ * die voer onder haar vingers herskommel. Die saad word EEN keer per oopmaak
+ * gekies, dus is elke besoek se volgorde anders.
  *
  * **Net die AKTIEWE clip se speler is gemonteer.** Dit is nie 'n optimalisasie
- * nie, dit is die hele datarekening. Drie ingebedde spelers langs mekaar laai
+ * nie, dit is die hele datarekening: drie ingebedde spelers langs mekaar laai
  * drie videos, en op 'n foon met 'n data-bundel is dit die verskil tussen 'n
  * voer wat 'n mens gebruik en een wat sy toemaak. Dit doen ook die werk van 'n
- * pouse-knoppie: swiep sy weg, word die speler afgehaal en die klank hou op.
- * Daar is niks om te onthou om te stop nie.
+ * pouse-knoppie — swiep sy weg, word die speler afgehaal en die klank hou op.
+ * Daar is niks om te onthou om te stop nie, en dit is ook waarom niks agter die
+ * mylpaal-kaart aanspeel nie: daardie kaart is nie 'n clip nie.
  *
  * **Die klank begin STIL, en die "Tik vir klank" herbou die speler.** 'n Foon
  * weier om klank te speel voordat 'n mens getik het — "hardop" is nie 'n keuse
- * wat bestaan nie, dit is net 'n speler wat stilweg misluk. Tik sy, verander
- * die adres (`mute=0`) en die raam word herbou. Dit is 'n tik van 'n MENS, dus
- * laat die blaaier die klank deur. Dit is die enigste manier om dit sonder
- * YouTube se eie JS-API te doen, en dit is een reël in plaas van 'n biblioteek.
+ * wat bestaan nie, dit is net 'n speler wat stilweg misluk. Tik sy, verander die
+ * `key` van die raam (`mute=0`) en die raam word herbou. Dit is 'n tik van 'n
+ * MENS, dus laat die blaaier die klank deur. Een reël in plaas van YouTube se
+ * eie JS-API.
  *
- * **Die voer lees Firestore EEN keer** (`getDocs`, `limit(25)`), nooit 'n
- * `onSnapshot` nie. Om 06:30 maak duisende fone binne minute oop; 'n lewendige
- * luisteraar per mens is presies hoe die kwota verlede week opgeraak het.
- * Dieselfde besluit as Vandag se Tyd met God s'n, en dieselfde tydgrens:
- * `getDocs` het self GEEN tydgrens nie en kan vir altyd hang wanneer Android
- * die oortjie opgeskort het.
+ * ── Firestore ──
+ *
+ * EEN lees (`getDocs`, `limit(50)`), nooit 'n `onSnapshot` nie. Om 06:30 maak
+ * duisende fone binne minute oop; 'n lewendige luisteraar per mens is presies
+ * hoe die kwota verlede week opgeraak het. Dieselfde besluit as Vandag se Tyd
+ * met God s'n, en dieselfde tydgrens: `getDocs` het self GEEN tydgrens nie en
+ * kan vir altyd hang wanneer Android die oortjie opgeskort het.
  *
  * En dit **aanvaar nooit 'n antwoord wat kleiner is as wat dit reeds het nie**.
- * Is die SDK vanlyn, bedien `getDocs` uit sy eie kas, en daardie kas hou net
- * wat die SDK al gesien het — een dokument, soms. Skryf ons dit sonder om te
- * kyk, is twintig clips met een vervang, en dit oorleef 'n herlaai.
+ * Is die SDK vanlyn, bedien `getDocs` uit sy eie kas, en daardie kas hou net wat
+ * die SDK al gesien het — een dokument, soms. Skryf ons dit sonder om te kyk, is
+ * twintig clips met een vervang, en dit oorleef 'n herlaai.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { collection, query, limit, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { REELS_SAAI } from '../data/reelsLys'
 import {
-  skoonLys, volgordeVanaf, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
+  skoonLys, bouVoer, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
 } from '../data/reels'
 import { spelerAdres } from '../data/tiktokId'
 import './Reels.css'
@@ -52,6 +67,11 @@ const HAAL_TYDGRENS = 10000
 const KAS = 'cachedReels'
 const KAS_TYD = 'cachedReelsTime'
 const KAS_OUD = 6 * 60 * 60 * 1000
+
+/* Hoeveel passe vooruit gebou word, en hoeveel clips voor die einde 'n nuwe pas
+   bygesit word. Drie is genoeg dat 'n mens nooit die onderkant sien nie. */
+const PASSE_BEGIN = 3
+const BOU_VOORUIT = 4
 
 function leesKas() {
   try {
@@ -105,27 +125,59 @@ function spelerVir(klip, stil) {
   return String(klip.bronId || '')
 }
 
-export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled }) {
+export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, klankSpeelNou }) {
   const [rou, setRou]       = useState(() => leesKas().lys)
   const [aktief, setAktief] = useState(0)
   const [stil, setStil]     = useState(true)
-  const [wenk, setWenk]     = useState(true)
+  const [passe, setPasse]   = useState(PASSE_BEGIN)
+  /* ── Die klank-wenk kom NIE terwyl 'n stemboodskap speel nie ──
+   *
+   * Luister bly gemonteer wanneer 'n mens na 'n ander oortjie gaan — iemand kan
+   * dus na vandag se boodskap luister en intussen deur die voer rol. Die video
+   * begin stil, dus is dit reg. Maar "Tik vir klank" is 'n UITNODIGING om 'n
+   * tweede klank aan te sit oor die een wat sy klaar hoor, en dit is die soort
+   * ding wat soos 'n fout voel.
+   *
+   * 'n Getter en nie 'n prop-waarde nie: 'n toestand hiervoor sou App by elke
+   * speel en pouse laat hervorm, en dit is die app se warmste pad. */
+  const [wenk, setWenk]     = useState(() => !(klankSpeelNou && klankSpeelNou()))
   const [laai, setLaai]     = useState(true)
 
   const voerRef    = useRef(null)
   const gesienRef  = useRef(1)
   const gevraRef   = useRef(false)
   const getelRef   = useRef(false)
+  /* Die saad word EEN keer per oopmaak gekies. Sien die kop. */
+  const saadRef    = useRef(0)
+  if (!saadRef.current) saadRef.current = Math.floor(Math.random() * 2147483647) + 1
+  /* Die laaste EGTE clip wat sy gesien het — die mylpaal-kaart is nie een nie. */
+  const laasteRef  = useRef(null)
 
-  /* ── Die clips ──
+  /* ── Die voer ──
      Die saai staan onder die gehaalde lys, nie in die plek daarvan nie: is daar
      iets in Firestore, wen dit; is daar niks, is die oortjie steeds nie leeg
      nie. */
-  const klips = useMemo(() => {
+  const items = useMemo(() => {
     const gehaal = skoonLys(rou)
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
-    return volgordeVanaf(lys, deepId || null)
-  }, [rou, deepId])
+    return bouVoer(lys, { deepId: deepId || null, saad: saadRef.current, passe })
+  }, [rou, deepId, passe])
+
+  /* ── Is die belowede clip werklik hier? ──
+   *
+   * Sy het 'n boodskap gekry wat 'n BELOFTE maak: "Ek het hierdie gesien en aan
+   * jou gedink." Is daardie clip weg — uitgevee, of hy haal nie deur nie — en
+   * ons wys stilweg 'n ander een, dan is die eerste ding wat hierdie app aan 'n
+   * vreemdeling doen, om 'n leuen te vertel. Sy weet nie wat sy sien nie.
+   *
+   * Dieselfde besluit as `HoopOntvang.jsx`: ons wys wél iets (want 'n
+   * doodloopstraat is die ergste ding wat daardie skerm kan wees — dit is haar
+   * eerste en dalk enigste oomblik hier), maar ons SÊ dit.
+   *
+   * Net ná die laai klaar is: voor dit is "nie hier nie" bloot "nog nie hier
+   * nie", en 'n boodskap wat 'n halwe sekonde flits, is erger as geen. */
+  const klipWeg = !!deepId && !laai &&
+    !items.some(it => it.tipe === 'klip' && it.klip.id === deepId)
 
   /* ── Een lees, met 'n tydgrens ── */
   useEffect(() => {
@@ -135,7 +187,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
 
     ;(async () => {
       try {
-        const q = query(collection(db, 'reels'), limit(25))
+        const q = query(collection(db, 'reels'), limit(50))
         const snap = await Promise.race([
           getDocs(q),
           new Promise((_, nee) => setTimeout(() => nee(new Error('te lank')), HAAL_TYDGRENS)),
@@ -183,6 +235,14 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
         gesienRef.current = Math.max(gesienRef.current, i + 1)
         if (i > 0) setWenk(false)
 
+        const it = items[i]
+        if (it && it.tipe === 'klip') laasteRef.current = it.klip
+
+        /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
+           volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
+           wat sy reeds gesien het presies waar dit was. */
+        if (i >= items.length - BOU_VOORUIT) setPasse(p => p + 2)
+
         /* Ná die TWEEDE swiep, en nie 'n oomblik vroeër nie. Die hele besluit
            staan in `magVraInstalleer()`. */
         if (magVraInstalleer({
@@ -198,7 +258,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
 
     dele.forEach(d => kyker.observe(d))
     return () => kyker.disconnect()
-  }, [klips.length, isInstalled, onInstalleer])
+  }, [items, isInstalled, onInstalleer])
 
   /* Die wenk gaan vanself weg. */
   useEffect(() => {
@@ -208,6 +268,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
   }, [wenk])
 
   const deel = useCallback(async (klip) => {
+    if (!klip) return
     const skakel = reelSkakel(klip.id)
     if (!skakel) return
     const teks = deelBoodskap(klip, skakel)
@@ -219,7 +280,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
     } catch { /* sy het gekanselleer; dis nie 'n fout nie */ }
   }, [])
 
-  if (laai && !klips.length) {
+  if (laai && !items.length) {
     return (
       <div className="reels reels-leeg">
         <p>Een oomblik…</p>
@@ -229,11 +290,42 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
 
   return (
     <div className="reels">
+      {klipWeg && (
+        <p className="reels-weg" role="status">
+          Daardie een is nie meer hier nie — maar hier is wat vandag wel is.
+        </p>
+      )}
+
       <div className="reels-voer" ref={voerRef}>
-        {klips.map((klip, i) => {
+        {items.map((it, i) => {
+          /* ── Die mylpaal ──
+             EEN keer, ná die eerste volle pas, en 'n mens swiep daaraan verby.
+             Dit is die plek waar die deel-vraag hoort: sy het pas alles gesien,
+             sy is tevrede, en daar is nie 'n video wat om haar aandag meeding
+             nie. 'n Deel-knoppie op die rail langs 'n lopende video word
+             raakgevat deur wie al besluit het; hierdie een VRA. */
+          if (it.tipe === 'mylpaal') {
+            return (
+              <section className="reel-mylpaal" key={`m${i}`} data-reel={i}>
+                <span className="reel-mylpaal-merk">Jy het alles gesien</span>
+                <p className="reel-mylpaal-lyn">Dankie dat jy gekyk het.</p>
+                <p className="reel-mylpaal-sub">
+                  Iemand anders het vandag een van hierdie nodig.
+                </p>
+                {laasteRef.current && (
+                  <button className="reel-mylpaal-knop" onClick={() => deel(laasteRef.current)}>
+                    Stuur dit aan iemand
+                  </button>
+                )}
+                <p className="reel-mylpaal-aan">Swiep aan — daar is nog.</p>
+              </section>
+            )
+          }
+
+          const klip = it.klip
           const brug = brugVir(klip)
           return (
-            <section className="reel" key={klip.id} data-reel={i}>
+            <section className="reel" key={`${klip.id}-${i}`} data-reel={i}>
               {/* Net die AKTIEWE speler is gemonteer. Sien die kop. */}
               {i === aktief ? (
                 <iframe
@@ -289,31 +381,6 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled })
             </section>
           )
         })}
-
-        {/* ── Die einde ──
-            Die voer rol nie vir ewig nie. 'n Voer sonder 'n einde is een
-            waarvan 'n mens skuldig opstaan. */}
-        {/* `data-reel="-1"` is nie 'n truuk nie — dit is die rede waarom niks
-            meer speel wanneer 'n mens hier kom nie. Sonder dit word die
-            einde-blad nie dopgehou, bly `aktief` op die laaste clip staan, en
-            speel daardie video agter hierdie skerm aan: klank uit 'n toe skerm,
-            en data wat aanhou loop. Die blaaierlopie het dit gevang. */}
-        <section className="reel-einde" data-reel="-1">
-          <span className="reel-einde-merk">Dis al vir vandag</span>
-          <p className="reel-einde-lyn">Jy het by die einde gekom.</p>
-          <p className="reel-einde-sub">
-            Nuwe oomblikke elke week. Dit rol nie vir ewig nie — en dit is die punt.
-          </p>
-          <button
-            className="reel-einde-knop"
-            onClick={() => { const v = voerRef.current; if (v) v.scrollTo({ top: 0, behavior: 'smooth' }) }}
-          >
-            Terug na bo
-          </button>
-          <button className="reel-einde-stil" onClick={() => onNavigate && onNavigate('luister')}>
-            Gaan na vandag se boodskap
-          </button>
-        </section>
       </div>
     </div>
   )

@@ -116,6 +116,25 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    /* ── Reels: die voer ──
+     *
+     * LEES is oop, en dit moet wees: 'n vreemdeling wat op 'n gedeelde
+     * /reels/<id> druk, is nie aangemeld nie en moet die clip dadelik sien.
+     * Daar is niks privaat in 'n clip nie — dit is 'n naam, 'n video-id en 'n
+     * sin.
+     *
+     * SKRYF is TOE, en dit is die belangrike helfte. 'n Kliënt wat 'n clip kan
+     * skryf, kan enige video voor ses duisend mense sit. Clips kom deur 'n
+     * bediener-eindpunt met die diensrekening, wat hierdie reëls omseil —
+     * dieselfde besluit as by die ranglyste en by vjGroepe se lidmaatskap.
+     *
+     * Let wel: `notes` en `books` hierbo is `write: if true`. Dit is 'n ou
+     * losheid en nie 'n voorbeeld om te volg nie. */
+    match /reels/{id} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
     // App config — admin writes via panel, Luister reads
     match /config/{id} {
       allow read:  if true;
