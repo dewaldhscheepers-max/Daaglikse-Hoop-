@@ -96,7 +96,7 @@ node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 100 toetse
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 152
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 182
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1266,11 +1266,26 @@ is hoekom niks agter hom aanspeel nie; sonder daardie een attribuut bly `aktief`
 op die laaste clip staan en speel hy voort agter 'n toe skerm. Die blaaierlopie
 het dit gevang.
 
-**Die klank begin STIL.** Nie 'n smaakkeuse nie: 'n foon weier om klank te speel
-voordat 'n mens getik het, dus is "hardop" nie 'n keuse wat bestaan nie — dit is
-'n speler wat stilweg misluk. "Tik vir klank" verander die `key` van die raam,
-die raam word herbou, en omdat dit 'n MENS se tik was, laat die blaaier die klank
-deur. Een reël in plaas van YouTube se JS-API.
+**Die klank begin STIL, en WIE dit aanskakel hang van die bron af.** 'n Foon
+weier om klank te speel voordat 'n mens getik het, dus is "hardop" nie 'n keuse
+wat bestaan nie — dit is 'n speler wat stilweg misluk.
+
+By **YouTube** is dit ons s'n: die `key` van die raam dra `stil`, dus word die
+raam met `mute=0` herbou, en omdat dit 'n MENS se tik was, laat die blaaier die
+klank deur. Een reël in plaas van YouTube se JS-API.
+
+By **TikTok is dit hulle s'n**, en dit was 'n fout wat net op 'n regte foon
+uitgekom het. `spelerAdres()` het nie `stil` gedra nie, dus het "Tik vir klank"
+die raam herbou met PRESIES dieselfde bladsy — 'n knoppie wat niks doen nie, en
+dié is erger as stilte. 'n Mens kan nie van buite in 'n ander party se iframe
+ontdemp nie. `volume_control=1` maak hulle EIE klankknoppie sigbaar, en die wenk
+wys daarheen in plaas daarvan om 'n knoppie voor te gee.
+
+**En TikTok se speler teken sy eie oorleg.** Op 'n regte foon staan die
+handvatsel TWEE keer en hulle hartjie met sy telling sit agter ons Deel-knoppie.
+Daarom: by 'n TikTok-clip wys ons NIE ons eie maker-lyn nie, en die Deel-knoppie
+sit in die onderste stapel LINKS. Regs is hulle rail én die sweefende
+BYBEL-knoppie; links is die enigste kant wat aan ons behoort.
 
 **Die installasievraag kom NÁ die tweede swiep** (`magVraInstalleer()`). Sy het
 op 'n skakel gedruk om iets te SIEN; vra ons voordat sy iets gesien het, is die
@@ -1304,13 +1319,39 @@ hele voer.
 
 **Die volgorde is TOEVALLIG, en dit kom uit 'n SAAD.** Dewald: *"die nuwe videos
 moet random bo speel.. nie in volgorde soos ek dit paste nie. want anders speel
-almal van dieselfde persoon na mekaar."* Twee reëls volg daaruit, albei in
-`eenPas()`:
+almal van dieselfde persoon na mekaar."* Vier reëls maak dit, en drie van hulle
+het bygekom nadat hy dit op 'n regte foon gesien het:
 
-* die **nuutstes staan bo** (`nuutsteEerste()` — op `datum` as daar een is,
-  anders is die LAASTE inskrywing die nuutste, want dit is hoe 'n mens byvoeg),
-  geskommel onder mekaar;
-* **geen twee clips van dieselfde mens volg op mekaar nie** (`ontklont()`).
+* **die POST-ID is die tyd, nie `datum` nie** (`tydVan()`). 'n TikTok-post-id is
+  'n Snowflake — die tyd sit in die nommer. `datum` is die INVOERTYD, en die
+  invoer loop in happe van 24, dus kry vier-en-twintig clips presies dieselfde
+  "nuutste" tydstempel. Was een maker se clips laat in die plaklys, het hulle die
+  hele boonste blok gevul;
+* **die boonste blok is die nuutste van ELKE maker**, nie die nuutste vyf
+  (`nuutsteVanElkeMaker()`). Dit was die erger helfte: het een mens die vyf
+  nuutste videos gepos, was die hele bokant syne;
+* **die res word EWEREDIG per maker versprei** (`versprei()`). Elke maker kry 'n
+  steek eweredig aan sy aandeel: 60 uit 124 kom elke tweede keer, 30 elke
+  vierde. Die een met die MEESTE clips wys dus die meeste — wat is wat 'n mens
+  verwag;
+* **en geen twee clips van dieselfde mens volg op mekaar nie** (`ontklont()`),
+  as laaste veiligheidsnet.
+
+Dewald se woorde: *"teveel van Johandre Potgieter se videos wys bo. elke 2de 3de
+video is van hom... daar is meer videos van my maar syne wys meer.... soo dit
+skommel nie die urls gi3d genoeg nie."* Hy was reg, en `ontklont` alleen was die
+fout: dit keer net wat LANGS mekaar staan, en met 'n derde van die clips van een
+mens gee dit presies "elke tweede of derde".
+
+**Sy gaan VOORT waar sy opgehou het.** `reels_laaste` word by ELKE clip geskryf,
+nie by uitgang nie — 'n mens maak 'n app toe deur hom toe te maak, nie deur 'n
+knoppie te druk nie, en dan loop daar geen opruiming nie. 'n GEDEELDE skakel wen
+hieroor: kom sy deur 'n skakel, is daardie clip die rede waarom sy hier is.
+
+**Hoogstens TWEE keer dieselfde video** totdat sy alles gesien het
+(`MAKS_PASSE_VOOR_ALLES`). Elke pas wys elke clip een keer, dus is twee passe
+presies twee keer. Ná die mylpaal lig die perk — dan is 'n derde keer nie 'n
+herhaling nie, dit is 'n voer wat aangaan.
 
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
@@ -1417,7 +1458,7 @@ twee-en-dertig, en 'n Vercel-funksie sterf by tien — dieselfde fout as die
 oggendkennisgewing se `for`-lus. Agt sekondes vir die HELE ketting, en
 `maxDuration: 20` in `vercel.json` as vangnet.
 
-Blaaiertoets: `kykReels.mjs` in die scratchpad (90 metings). Dit meet die ding wat geen
+Blaaiertoets: `kykReels.mjs` in die scratchpad (105 metings). Dit meet die ding wat geen
 eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die

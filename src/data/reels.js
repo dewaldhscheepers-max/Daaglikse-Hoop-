@@ -44,9 +44,17 @@
    Dewald: *"die nuwe videos moet random bo speel.. nie in volgorde soos ek dit
    paste nie. want anders speel almal van dieselfde persoon na mekaar."*
 
-   Twee dinge volg daaruit, en albei staan in `eenPas()`: die NUUTSTE clips
-   staan bo (geskommel onder mekaar), en geen twee clips van dieselfde mens volg
-   op mekaar nie. Sonder die tweede reël lyk 'n voer soos 'n kanaal.
+   Drie dinge volg daaruit, en al drie staan in `eenPas()`: die NUUTSTE clips
+   staan bo (geskommel onder mekaar), die res word EWEREDIG per maker versprei
+   (`versprei()`), en geen twee clips van dieselfde mens volg op mekaar nie
+   (`ontklont()`).
+
+   Die tweede een het bygekom nadat Dewald dit op 'n regte foon gesien het:
+   *"teveel van Johandre Potgieter se videos wys bo. elke 2de 3de video is van
+   hom... daar is meer videos van my maar syne wys meer."* `ontklont` alleen keer
+   net wat LANGS mekaar staan, en dit gee presies "elke tweede of derde".
+   `versprei` deel die clips uit sodat elke maker 'n steek kry wat eweredig is
+   aan hoeveel hy het.
 
    ── 'n NUWE kyker sien die BESTE eerste, nie die nuutste nie ──
 
@@ -275,13 +283,108 @@ export function ontklont(lys, vorigeNaam) {
 export const NUUT_BO = 5
 export const BESTE_BO = 5
 
-/* Die nuutste eerste. `datum` is opsioneel; is dit nêrens nie, is die LAASTE
-   inskrywing in die lys die nuutste, want dit is hoe 'n mens byvoeg. */
+/* ── Die nuutste van ELKE maker, nie die nuutste vyf nie ──
+ *
+ * Dit is die tweede helfte van Dewald se klag, en dit was die erger een. Die
+ * boonste blok was die nuutste VYF clips — en as een mens die vyf nuutste
+ * videos gepos het, was die hele bokant syne. `ontklont` het hom toe net tussen
+ * ander ingevleg, en dit lees as "elke tweede video is van hom".
+ *
+ * Die blok is nou die nuutste EEN van elke maker, tot by die perk. Dit is nog
+ * steeds "wat is nuut", maar dit is wat nuut is by tot vyf VERSKILLENDE mense —
+ * en dit is wat 'n mens bedoel wanneer sy sê die voer moenie soos een kanaal
+ * lyk nie.
+ */
+export function nuutsteVanElkeMaker(klips, hoeveel) {
+  const lys = nuutsteEerste(Array.isArray(klips) ? klips : [])
+  const perk = Math.max(1, Number(hoeveel) || NUUT_BO)
+  const gesien = new Set()
+  const uit = []
+  for (const k of lys) {
+    const n = naamVanKlip(k)
+    if (gesien.has(n)) continue
+    gesien.add(n)
+    uit.push(k)
+    if (uit.length >= perk) break
+  }
+  return uit
+}
+
+/* ── Wanneer 'n clip gepos is ──
+ *
+ * Die POST-ID is die waarheid, nie `datum` nie. 'n TikTok-post-id is 'n
+ * Snowflake: die tyd sit in die nommer self, dus is 'n groter id 'n nuwer video.
+ * Dit is per VIDEO en dit kan nie dryf nie.
+ *
+ * `datum` is die INVOERTYD — wanneer die oplosser die dokument geskryf het. Dit
+ * lyk soos 'n publikasiedatum en dit is dit nie, en dit het 'n egte fout gemaak:
+ * die invoer loop in happe van 24, dus kry vier-en-twintig clips presies
+ * dieselfde "nuutste" tydstempel. Was een maker se clips laat in die plaklys,
+ * het hulle die hele boonste blok gevul. Dewald op 'n regte foon: *"teveel van
+ * Johandre Potgieter se videos wys bo... daar is meer videos van my maar syne
+ * wys meer."*
+ *
+ * Die id kom dus eerste, en `datum` is net die terugval vir 'n bron sonder 'n
+ * numeriese id (YouTube s'n is letters).
+ */
+export function tydVan(klip) {
+  const k = klip || {}
+  const id = String(k.bronId || '')
+  if (/^[0-9]{10,21}$/.test(id)) {
+    /* Die getal self, as 'n string van vaste lengte sodat 'n stringvergelyking
+       reg sorteer — 'n Snowflake is groter as Number.MAX_SAFE_INTEGER. */
+    return id.padStart(24, '0')
+  }
+  const d = String(k.datum || '')
+  return d ? `D${d}` : ''
+}
+
+/* Die nuutste eerste. Is daar niks om op te gaan nie, is die LAASTE inskrywing
+   in die lys die nuutste, want dit is hoe 'n mens byvoeg. */
 export function nuutsteEerste(klips) {
   const lys = Array.isArray(klips) ? [...klips] : []
-  const hetDatum = lys.some(k => k && k.datum)
-  if (!hetDatum) return lys.reverse()
-  return lys.sort((a, b) => String((b && b.datum) || '').localeCompare(String((a && a.datum) || '')))
+  const hetTyd = lys.some(k => tydVan(k))
+  if (!hetTyd) return lys.reverse()
+  return lys.sort((a, b) => tydVan(b).localeCompare(tydVan(a)))
+}
+
+/* ── Versprei die makers EWEREDIG ──
+ *
+ * `ontklont()` keer net dat twee van dieselfde mens LANGS mekaar staan. Dit is
+ * nie genoeg nie: met 'n derde van die clips van een maker gee dit presies
+ * "elke tweede of derde video is van hom" — wat is wat Dewald gesien het.
+ *
+ * Hierdie een deel die clips UIT. Elke maker kry 'n gelyke steek oor die hele
+ * pas: 'n mens met 60 uit 124 kom elke tweede keer, een met 30 elke vierde, een
+ * met 4 een keer elke een-en-dertig. Dit is eweredig aan hoeveel hy het, en dit
+ * is presies wat 'n mens verwag — die een met die MEESTE clips moet die meeste
+ * wys, nie die een wie se clips laas ingekom het nie.
+ *
+ * Die `skuif` is toevallig sodat nie elke maker se eerste clip bo-aan opstapel
+ * nie.
+ */
+export function versprei(lys, rnd) {
+  const alles = Array.isArray(lys) ? lys : []
+  if (alles.length <= 2) return [...alles]
+  const r = typeof rnd === 'function' ? rnd : saaiRnd(1)
+
+  const groepe = new Map()
+  for (const k of alles) {
+    const n = naamVanKlip(k)
+    if (!groepe.has(n)) groepe.set(n, [])
+    groepe.get(n).push(k)
+  }
+
+  const n = alles.length
+  const met = []
+  for (const groep of groepe.values()) {
+    const g = meng(groep, r)
+    const stap = n / g.length
+    const skuif = r() * stap
+    g.forEach((k, i) => met.push({ k, plek: skuif + i * stap }))
+  }
+  met.sort((a, b) => a.plek - b.plek)
+  return met.map(x => x.k)
 }
 
 /* ── Die mees gedeelde eerste ──
@@ -321,15 +424,17 @@ export function eenPas(klips, rnd, vorigeNaam, opsies) {
       const bo = bewys.slice(0, BESTE_BO)
       const boIds = new Set(bo.map(k => k.id))
       const res = lys.filter(k => !boIds.has(k.id))
-      return ontklont([...meng(bo, rnd), ...meng(res, rnd)], vorigeNaam)
+      return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
     }
   }
 
-  /* Die gewone orde: die nuutstes bo. */
-  const gesorteer = nuutsteEerste(lys)
-  const bo  = gesorteer.slice(0, NUUT_BO)
-  const res = gesorteer.slice(NUUT_BO)
-  return ontklont([...meng(bo, rnd), ...meng(res, rnd)], vorigeNaam)
+  /* Die gewone orde: die nuutstes bo, en die res EWEREDIG versprei sodat geen
+     maker elke tweede of derde plek vul nie. `ontklont` bly die laaste
+     veiligheidsnet vir wat nog langs mekaar beland. */
+  const bo = nuutsteVanElkeMaker(lys, NUUT_BO)
+  const boIds = new Set(bo.map(k => k.id))
+  const res = lys.filter(k => !boIds.has(k.id))
+  return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
 }
 
 /* ── Die hele voer, as 'n lys ITEMS ──
@@ -350,7 +455,20 @@ export function bouVoer(klips, opsies) {
   const passe = Math.max(1, Number(o.passe) || 1)
   const rnd = saaiRnd(o.saad || 1)
 
-  const deep = o.deepId ? alles.find(k => k.id === o.deepId) : null
+  /* ── Waar sy EERSTE moet land ──
+   *
+   * Twee dinge kan 'n clip vorentoe bring, en hulle is nie dieselfde ding nie:
+   *
+   *   `deepId` — 'n GEDEELDE skakel. Sy is 'n spesifieke video belowe, en 'n
+   *              voer wat by clip 1 begin, maak van daardie belofte 'n leuen.
+   *   `begin`  — waar sy LAAS OPGEHOU het. Dewald: "as iemand stop kyk moet dit
+   *              volgende keer daar aangaan." Sy kom terug en gaan voort in
+   *              plaas van om weer van voor af te begin.
+   *
+   * Die belofte wen oor die geheue: kom sy deur 'n skakel, is daardie clip die
+   * rede waarom sy hier is. */
+  const eerste = o.deepId || o.begin || null
+  const deep = eerste ? alles.find(k => k.id === eerste) : null
   const res = deep ? alles.filter(k => k.id !== deep.id) : alles
 
   const items = []

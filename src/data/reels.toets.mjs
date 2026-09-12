@@ -18,7 +18,7 @@ import {
   magWys, skoonLys, volgordeVanaf,
   deelBoodskap, magVraInstalleer, brugVir,
   saaiRnd, meng, ontklont, nuutsteEerste, eenPas, bouVoer,
-  BESTE_BO, meesteGedeelEerste,
+  BESTE_BO, meesteGedeelEerste, tydVan, versprei, nuutsteVanElkeMaker,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -236,6 +236,113 @@ console.log('\n── Geen twee van dieselfde mens na mekaar nie ──')
   is('een item',  ontklont([mk('a', 'D')], 'D').length, 1)
 }
 
+console.log('\n── Wanneer n clip GEPOS is ──')
+/* Die POST-ID is die waarheid. `datum` is die INVOERTYD — dit loop in happe van
+   24, dus kry 24 clips presies dieselfde "nuutste" tydstempel, en dan vul een
+   maker se clips die hele bokant. Dewald het dit op 'n regte foon gesien. */
+{
+  const oud  = { ...mk('a', 'A'), bronId: '7400000000000000000' }
+  const nuwe = { ...mk('b', 'B'), bronId: '7400000000000999999' }
+  is('n groter post-id is nuwer', tydVan(nuwe) > tydVan(oud), true)
+  is('en die sortering volg dit', nuutsteEerste([oud, nuwe]).map(k => k.id), ['b', 'a'])
+
+  /* Die INVOERTYD mag dit nie omkeer nie. Hier is die OU video laas ingevoer. */
+  const oudLaasIn  = { ...oud,  datum: '2026-09-12T10:05:00Z' }
+  const nuweEersIn = { ...nuwe, datum: '2026-09-12T10:00:00Z' }
+  is('die post-id wen oor die invoertyd',
+     nuutsteEerste([oudLaasIn, nuweEersIn]).map(k => k.id), ['b', 'a'])
+
+  /* Sonder 'n numeriese id (YouTube) is `datum` die terugval. */
+  const y1 = { ...mk('y1', 'A'), bron: 'youtube', bronId: 'aaaaaaaaaaa', datum: '2026-01-01' }
+  const y2 = { ...mk('y2', 'B'), bron: 'youtube', bronId: 'bbbbbbbbbbb', datum: '2026-06-01' }
+  is('sonder n numeriese id geld datum', nuutsteEerste([y1, y2]).map(k => k.id), ['y2', 'y1'])
+  is('n Snowflake groter as MAX_SAFE_INTEGER sorteer reg',
+     tydVan({ bronId: '7412345678901234567' }) < tydVan({ bronId: '7412345678901234568' }), true)
+  is('niks in gee n leë sleutel', tydVan(null), '')
+  is('gemors gee n leë sleutel',  tydVan({ bronId: 'abc' }), '')
+}
+
+console.log('\n── Die boonste blok is die nuutste van ELKE maker ──')
+/* Die erger helfte van Dewald se klag: was die vyf nuutste clips van EEN mens,
+   was die hele bokant syne. */
+{
+  const p = 7400000000000000000n
+  const lys = []
+  for (let i = 0; i < 5; i++) lys.push({ ...mk('j' + i, 'Johandre'), bronId: String(p + BigInt(900 + i)) })
+  for (let i = 0; i < 5; i++) lys.push({ ...mk('d' + i, 'Dewald'),   bronId: String(p + BigInt(100 + i)) })
+  for (let i = 0; i < 3; i++) lys.push({ ...mk('a' + i, 'Ander'),    bronId: String(p + BigInt(50 + i)) })
+
+  const bo = nuutsteVanElkeMaker(lys, 5)
+  is('een per maker', new Set(bo.map(k => k.naam)).size, bo.length)
+  is('en net drie makers bestaan', bo.length, 3)
+  is('Johandre se NUUTSTE is daarby', bo.some(k => k.id === 'j4'), true)
+  is('nie sy tweede-nuutste nie',     bo.some(k => k.id === 'j3'), false)
+  is('n lee lys', nuutsteVanElkeMaker([], 5), [])
+  is('niks in',   nuutsteVanElkeMaker(null, 5), [])
+}
+
+console.log('\n── Versprei: elke maker kry n steek eweredig aan sy aandeel ──')
+{
+  const p = 7400000000000000000n
+  const lys = []
+  for (let i = 0; i < 60; i++) lys.push({ ...mk('d' + i, 'Dewald'),   bronId: String(p + BigInt(i)) })
+  for (let i = 0; i < 30; i++) lys.push({ ...mk('j' + i, 'Johandre'), bronId: String(p + BigInt(200 + i)) })
+  for (let i = 0; i < 34; i++) lys.push({ ...mk('x' + i, 'Ander ' + (i % 4)), bronId: String(p + BigInt(100 + i)) })
+
+  function gaping(ry, naam) {
+    const pos = ry.map((n, i) => (n === naam ? i : -1)).filter(i => i >= 0)
+    let kleinste = Infinity
+    for (let i = 1; i < pos.length; i++) kleinste = Math.min(kleinste, pos[i] - pos[i - 1])
+    return { aantal: pos.length, kleinste }
+  }
+
+  let slegsteBo = 0, slegsteKlont = 0, slegsteGaping = Infinity
+  for (let saad = 1; saad <= 60; saad++) {
+    const ry = bouVoer(lys, { saad, passe: 1 }).map(i => i.klip.naam)
+    /* Geen maker mag die bokant besit nie. */
+    slegsteBo = Math.max(slegsteBo, ry.slice(0, 12).filter(n => n === 'Johandre').length)
+    for (let i = 1; i < ry.length; i++) if (ry[i] === ry[i - 1]) slegsteKlont++
+    slegsteGaping = Math.min(slegsteGaping, gaping(ry, 'Dewald').kleinste)
+  }
+  /* Johandre het 30 van 124 — sowat 'n kwart. Meer as 4 uit die eerste 12 sou
+     beteken die bokant is syne. */
+  is('hoogstens 4 van een maker in die eerste 12', slegsteBo <= 4, true)
+  is('geen klonte oor 60 sade', slegsteKlont, 0)
+  is('en die maker met die MEESTE clips staan nooit langs homself nie',
+     slegsteGaping >= 2, true)
+
+  /* Die een met meer clips moet MEER wys. Dit is die hele punt. */
+  const ry = bouVoer(lys, { saad: 11, passe: 1 }).map(i => i.klip.naam)
+  is('Dewald (60) wys meer as Johandre (30)',
+     ry.filter(n => n === 'Dewald').length > ry.filter(n => n === 'Johandre').length, true)
+
+  is('versprei verloor niks', versprei(lys, saaiRnd(3)).length, lys.length)
+  is('en dit raak nie die inset nie', lys[0].id, 'd0')
+  is('n lys van twee bly',  versprei([mk('a', 'A'), mk('b', 'B')], saaiRnd(1)).length, 2)
+  is('n lee lys',           versprei([], saaiRnd(1)), [])
+  is('niks in',             versprei(null, saaiRnd(1)), [])
+}
+
+console.log('\n── Waar sy LAAS opgehou het ──')
+/* Dewald: "onthou as iemand stop kyk moet dit volgende keer daar aangaan." */
+{
+  const lys = Array.from({ length: 6 }, (_, i) => mk('k' + i, 'M' + (i % 3)))
+  is('sy begin waar sy opgehou het',
+     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4' })[0].klip.id, 'k4')
+  is('en nie twee keer agter mekaar nie',
+     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4' })[1].klip.id !== 'k4', true)
+  is('niks gaan verlore nie',
+     new Set(bouVoer(lys, { saad: 5, passe: 1, begin: 'k4' }).map(i => i.klip.id)).size, 6)
+  /* 'n GEDEELDE skakel wen oor die geheue: daardie clip is die rede waarom sy
+     hier is. */
+  is('n gedeelde skakel wen oor die geheue',
+     bouVoer(lys, { saad: 5, passe: 2, begin: 'k4', deepId: 'k1' })[0].klip.id, 'k1')
+  is('n onbekende plek verander niks',
+     bouVoer(lys, { saad: 5, passe: 1, begin: 'weg' }).length, 6)
+  is('geen plek',
+     bouVoer(lys, { saad: 5, passe: 1, begin: null }).length, 6)
+}
+
 console.log('\n── Die nuutstes staan BO ──')
 {
   /* Met datums: die nuutste eerste. */
@@ -249,13 +356,19 @@ console.log('\n── Die nuutstes staan BO ──')
   is('n lee lys', nuutsteEerste([]), [])
   is('niks in',   nuutsteEerste(null), [])
 
-  /* Die nuwes moet in die BOONSTE deel van 'n pas wees. */
+  /* Die boonste blok is die nuutste van ELKE maker, nie die nuutste vyf nie —
+     anders besit een mens die bokant sodra hy die laaste paar videos gepos het.
+     Met 12 clips en 4 makers is dit dus VIER clips, een per mens. */
   const baie = Array.from({ length: 12 }, (_, i) => mk('k' + i, 'M' + (i % 4), '2026-01-' + String(i + 1).padStart(2, '0')))
-  const nuutste = nuutsteEerste(baie).slice(0, NUUT_BO).map(k => k.id)
+  const bo = nuutsteVanElkeMaker(baie, NUUT_BO)
+  is('een per maker', bo.length, 4)
+  is('en elkeen n ander mens', new Set(bo.map(k => k.naam)).size, 4)
+
   const pas = eenPas(baie, saaiRnd(5), '')
-  const boonste = pas.slice(0, NUUT_BO).map(k => k.id)
-  is('al die nuutstes staan in die boonste vyf', nuutste.every(id => boonste.includes(id)), true)
-  is('vyf tel as nuut', NUUT_BO, 5)
+  const boonste = pas.slice(0, bo.length).map(k => k.id)
+  is('daardie blok staan bo-aan die pas',
+     bo.map(k => k.id).every(id => boonste.includes(id)), true)
+  is('vyf is die perk', NUUT_BO, 5)
 }
 
 console.log('\n── Die voer HOU AAN ──')

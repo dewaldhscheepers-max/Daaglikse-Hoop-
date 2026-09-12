@@ -92,6 +92,10 @@ console.log('\n── Die speler se adres ──')
   is('herhaal',           /loop=1/.test(a), true)
   is('geen musiekblok',   /music_info=0/.test(a), true)
   is('geen beskrywing',   /description=0/.test(a), true)
+  /* Die speler se EIE klankknoppie moet sigbaar wees. Ons kan nie van buite in
+     'n ander party se iframe ontdemp nie, dus is dit die enigste pad na klank
+     wat werklik bestaan. */
+  is('die klankknoppie is aan', /volume_control=1/.test(a), true)
   const b = spelerAdres(ID, { speel: true })
   is('speel wanneer gevra', /autoplay=1/.test(b), true)
   is('n slegte id gee niks', spelerAdres('abc'), '')

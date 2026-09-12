@@ -143,46 +143,34 @@
 /* Net kleur. Geen transform. */
 .reel-brug:active { background: rgba(217, 177, 131, 0.18); }
 
-/* ── Die regterkant ──
-   Net Deel. Dewald, 12 September 2026: "net deel." 'n Hart beteken 'n telling,
-   en 'n telling beteken dat 'n mens sy eie getal begin dophou. */
-.reel-rail {
-  position: absolute;
-  right: 8px;
-  /* Hoog genoeg om die sweefende BYBEL-knoppie te mis.
-     Dié knoppie hang oor ELKE skerm in die app, regs bo die balk, en hy het
-     die Deel-knoppie letterlik doodgedruk — `elementFromPoint` op die middel
-     van Deel het `BUTTON.nav-bybel` gegee. Die blaaierlopie meet dit nou, want
-     dit is presies die soort fout wat 'n eenheidstoets nooit sien nie: die
-     knoppie was daar, hy was sigbaar, en hy was onbereikbaar. */
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 70px);
-  /* BO die teksblok: `.reel-onder` strek van rand tot rand en sy regterpadding
-     lê presies oor hierdie knoppie. Padding vang steeds tikke. */
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
+/* ── Die DEEL-knoppie, links onder ──
+   Hy het regs gestaan, op 'n eie rail — en op 'n regte foon het TikTok se eie
+   hartjie met sy telling daaragter gesit, plus die sweefende BYBEL-knoppie.
+   Regs behoort aan hulle speler; links behoort aan ons.
 
-.reel-knop {
-  display: flex;
-  flex-direction: column;
+   Net Deel. Dewald: "net deel." 'n Hart beteken 'n telling, en 'n telling
+   beteken dat 'n mens sy eie getal begin dophou. */
+.reel-deel {
+  pointer-events: auto;
+  align-self: flex-start;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: 0;
-  padding: 4px;
+  gap: 8px;
+  background: rgba(13, 12, 13, 0.72);
+  border: 1px solid rgba(244, 239, 231, 0.22);
   color: var(--reels-wit);
+  border-radius: 999px;
+  padding: 9px 16px 9px 13px;
   font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7));
   -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(6px);
 }
-.reel-knop svg { width: 27px; height: 27px; display: block; }
-.reel-knop:active { color: #E8CBA4; }
+/* Net kleur. Geen transform. */
+.reel-deel:active { background: rgba(217, 177, 131, 0.24); }
+.reel-deel svg { width: 19px; height: 19px; flex: none; display: block; }
 
 /* ── Die klank-wenk ── */
 .reel-wenk {
@@ -204,6 +192,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 .reel-wenk:active { background: rgba(13, 12, 13, 0.92); }
+
+/* By TikTok is dit 'n WENK en nie 'n knoppie nie — die klank is hulle speler
+   s'n en ons kan dit nie van buite raak nie. Dit lyk dus ook nie soos iets wat
+   'n mens kan druk nie. */
+.reel-wenk-stil {
+  margin: 0;
+  cursor: default;
+  pointer-events: none;
+  font-weight: 400;
+  max-width: 17ch;
+  text-align: center;
+  line-height: 1.4;
+}
 
 /* ── Die mylpaal ──
    EEN kaart, ná die eerste volle pas, en 'n mens swiep daaraan verby. Dit was

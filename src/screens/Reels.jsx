@@ -16,6 +16,16 @@
  * bygesit. Die "jy het alles gesien"-kaart kom EEN keer, ná die eerste volle
  * pas, en 'n mens swiep daaraan verby.
  *
+ * **Maar hoogstens TWEE keer dieselfde video** totdat sy alles gesien het
+ * (`MAKS_PASSE_VOOR_ALLES`). Elke pas wys elke clip een keer, dus is twee passe
+ * presies twee keer. Daarna lig die perk: dan is 'n derde keer nie 'n herhaling
+ * nie, dit is 'n voer wat aangaan.
+ *
+ * **En sy gaan VOORT waar sy opgehou het.** `reels_laaste` word by ELKE clip
+ * geskryf, nie by uitgang nie — 'n mens maak 'n app toe deur hom toe te maak,
+ * nie deur 'n knoppie te druk nie, en dan loop daar geen opruiming nie. Die
+ * volgende oopmaak begin by daardie clip.
+ *
  * **Die volgorde word uit 'n SAAD gebou, nie uit `Math.random()` nie.** Die voer
  * word herbou elke keer as 'n pas bykom. Met 'n saad bly die stuk wat sy reeds
  * gesien het presies dieselfde en kom daar net iets by; met `Math.random()` sou
@@ -30,12 +40,34 @@
  * Daar is niks om te onthou om te stop nie, en dit is ook waarom niks agter die
  * mylpaal-kaart aanspeel nie: daardie kaart is nie 'n clip nie.
  *
- * **Die klank begin STIL, en die "Tik vir klank" herbou die speler.** 'n Foon
+ * **Die klank begin STIL, en wie dit aanskakel, hang van die BRON af.** 'n Foon
  * weier om klank te speel voordat 'n mens getik het — "hardop" is nie 'n keuse
- * wat bestaan nie, dit is net 'n speler wat stilweg misluk. Tik sy, verander die
- * `key` van die raam (`mute=0`) en die raam word herbou. Dit is 'n tik van 'n
- * MENS, dus laat die blaaier die klank deur. Een reël in plaas van YouTube se
- * eie JS-API.
+ * wat bestaan nie, dit is net 'n speler wat stilweg misluk.
+ *
+ * By YOUTUBE is dit ons s'n: die `key` van die raam dra `stil`, dus word die
+ * raam met `mute=0` herbou, en omdat dit 'n MENS se tik was, laat die blaaier
+ * die klank deur. Een reël in plaas van YouTube se JS-API.
+ *
+ * By TIKTOK is dit HULLE s'n, en dit was 'n fout wat op 'n regte foon uitgekom
+ * het. Die adres het nie `stil` gedra nie, dus het my "Tik vir klank" die raam
+ * herbou met PRESIES dieselfde bladsy — 'n knoppie wat niks doen nie. 'n Mens
+ * kan nie van buite in 'n ander party se iframe ontdemp nie. Die speler se eie
+ * klankknoppie is nou aan (`volume_control=1`), en die wenk WYS daarheen in
+ * plaas daarvan om 'n knoppie voor te gee.
+ *
+ * ── TikTok teken sy EIE oorleg, en ons moet plek maak ──
+ *
+ * Op 'n regte foon staan die handvatsel TWEE keer — hulle s'n en ons s'n — en
+ * hulle hartjie met sy telling sit agter ons Deel-knoppie. Hulle speler is 'n
+ * volwaardige TikTok-skerm: handvatsel links onder, 'n eie rail regs.
+ *
+ * Twee dinge volg daaruit:
+ *
+ *   · by 'n TikTok-clip wys ons NIE ons eie maker-lyn nie. Hulle s'n staan
+ *     reeds daar, en twee name is 'n fout wat soos 'n fout lyk;
+ *   · die Deel-knoppie staan nie meer regs nie. Hy sit in die onderste stapel
+ *     LINKS, saam met die woorde. Regs is hulle rail én die sweefende
+ *     BYBEL-knoppie; links is die enigste kant wat aan ons behoort.
  *
  * ── Waar die clips vandaan kom ──
  *
@@ -79,6 +111,22 @@ const KAS_OUD = 6 * 60 * 60 * 1000
    MEES GEDEELDE clips bo, 'n bekende een die NUUTSTE. */
 const ALLES = 'reels_alles_gesien'
 
+/* Waar sy laas opgehou het. Dewald: *"onthou as iemand stop kyk moet dit
+   volgende keer daar aangaan."* Sy kom terug en gaan VOORT in plaas van om weer
+   van voor af te begin. */
+const LAASTE = 'reels_laaste'
+
+/* ── Hoogstens TWEE keer dieselfde video ──
+ *
+ * Dewald: *"probeer om nie dieselfde video meer as 2 keer te wys nie tensy hulle
+ * alles klaar gekyk het."*
+ *
+ * Elke pas wys elke clip een keer, dus is twee passe presies twee keer. Het sy
+ * alles gesien (die mylpaal is bereik), lig die perk — dan is dit haar eie keuse
+ * om aan te hou en 'n derde keer is nie 'n herhaling nie, dit is 'n voer wat
+ * aangaan. */
+const MAKS_PASSE_VOOR_ALLES = 2
+
 /* Hoeveel passe vooruit gebou word, en hoeveel clips voor die einde 'n nuwe pas
    bygesit word. Drie is genoeg dat 'n mens nooit die onderkant sien nie. */
 const PASSE_BEGIN = 3
@@ -106,6 +154,14 @@ function isAllesGesien() {
 
 function merkAllesGesien() {
   try { localStorage.setItem(ALLES, '1') } catch { /* privaat modus */ }
+}
+
+function leesLaaste() {
+  try { return localStorage.getItem(LAASTE) || '' } catch { return '' }
+}
+
+function skryfLaaste(id) {
+  try { localStorage.setItem(LAASTE, String(id || '')) } catch { /* privaat modus */ }
 }
 
 /* ── Een deel per clip per TOESTEL ──
@@ -169,7 +225,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   const [rou, setRou]       = useState(() => leesKas().lys)
   const [aktief, setAktief] = useState(0)
   const [stil, setStil]     = useState(true)
-  const [passe, setPasse]   = useState(PASSE_BEGIN)
+  const [passe, setPasse]   = useState(() => (
+    isAllesGesien() ? PASSE_BEGIN : Math.min(PASSE_BEGIN, MAKS_PASSE_VOOR_ALLES)
+  ))
   /* ── Die klank-wenk kom NIE terwyl 'n stemboodskap speel nie ──
    *
    * Luister bly gemonteer wanneer 'n mens na 'n ander oortjie gaan — iemand kan
@@ -197,6 +255,13 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   if (nuutRef.current === null) nuutRef.current = !isAllesGesien()
   /* Die laaste EGTE clip wat sy gesien het — die mylpaal-kaart is nie een nie. */
   const laasteRef  = useRef(null)
+  /* Waar sy laas opgehou het, EEN keer gelees. 'n Gedeelde skakel wen hieroor:
+     kom sy deur 'n skakel, is daardie clip die rede waarom sy hier is. */
+  const beginRef   = useRef(null)
+  if (beginRef.current === null) beginRef.current = deepId ? '' : leesLaaste()
+  /* Mag die voer nog groei? Die perk lig sodra sy alles gesien het. */
+  const maksRef    = useRef(0)
+  maksRef.current = isAllesGesien() ? Infinity : MAKS_PASSE_VOOR_ALLES
 
   /* ── Die voer ──
      Die saai staan onder die gehaalde lys, nie in die plek daarvan nie: is daar
@@ -207,6 +272,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
     return bouVoer(lys, {
       deepId: deepId || null,
+      /* Waar sy laas opgehou het. Sien `bouVoer` se kop vir waarom dit 'n ANDER
+         ding as `deepId` is. */
+      begin: beginRef.current || null,
       saad: saadRef.current,
       passe,
       /* 'n Vreemdeling sien die BESTE eerste, nie die nuutste nie. Dewald:
@@ -298,7 +366,13 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
         if (i > 0) setWenk(false)
 
         const it = items[i]
-        if (it && it.tipe === 'klip') laasteRef.current = it.klip
+        if (it && it.tipe === 'klip') {
+          laasteRef.current = it.klip
+          /* By ELKE clip, nie net by uitgang nie: 'n mens maak 'n app toe deur
+             hom toe te maak, nie deur 'n knoppie te druk nie, en dan loop daar
+             geen opruiming nie. */
+          skryfLaaste(it.klip.id)
+        }
         /* Sy is by die mylpaal — sy het ALLES gesien. Van die volgende oopmaak
            af is sy nie meer 'n nuwe kyker nie, en dan is "wat is nuut" die
            nuttiger vraag as "wat is die beste". */
@@ -307,7 +381,9 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
         /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
            volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
            wat sy reeds gesien het presies waar dit was. */
-        if (i >= items.length - BOU_VOORUIT) setPasse(p => p + 2)
+        if (i >= items.length - BOU_VOORUIT) {
+          setPasse(p => Math.min(p + 2, maksRef.current))
+        }
 
         /* Ná die TWEEDE swiep, en nie 'n oomblik vroeër nie. Die hele besluit
            staan in `magVraInstalleer()`. */
@@ -416,27 +492,36 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 <div className="reel-wag" aria-hidden="true" />
               )}
 
+              {/* By YOUTUBE skakel ONS die klank aan; by TIKTOK kan ons nie, en
+                  dan wys die wenk na hulle eie knoppie in plaas daarvan om 'n
+                  knoppie voor te gee wat niks doen nie. */}
               {wenk && i === aktief && stil && (
-                <button className="reel-wenk" onClick={() => { setStil(false); setWenk(false) }}>
-                  Tik vir klank
-                </button>
+                klip.bron === 'tiktok' ? (
+                  <p className="reel-wenk reel-wenk-stil">Tik die klankknoppie in die video</p>
+                ) : (
+                  <button className="reel-wenk" onClick={() => { setStil(false); setWenk(false) }}>
+                    Tik vir klank
+                  </button>
+                )
               )}
 
-              <div className="reel-rail">
-                <button className="reel-knop" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
+              <div className="reel-onder">
+                <button className="reel-deel" onClick={() => deel(klip)} aria-label={`Deel ${klip.naam} se boodskap`}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 3v13" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" />
                     <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
                   </svg>
                   <span>Deel</span>
                 </button>
-              </div>
 
-              <div className="reel-onder">
-                <div className="reel-maker">
-                  <b>{klip.naam}</b>
-                  {klip.handvatsel && <small>{klip.handvatsel}</small>}
-                </div>
+                {/* TikTok se speler wys die handvatsel self — twee name lees
+                    soos 'n fout. Sien die kop. */}
+                {klip.bron !== 'tiktok' && (
+                  <div className="reel-maker">
+                    <b>{klip.naam}</b>
+                    {klip.handvatsel && <small>{klip.handvatsel}</small>}
+                  </div>
+                )}
                 {klip.woorde && <p className="reel-woorde">{klip.woorde}</p>}
                 {brug && (
                   <button

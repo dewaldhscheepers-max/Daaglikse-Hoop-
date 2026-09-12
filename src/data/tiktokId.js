@@ -113,8 +113,22 @@ export function handvatselUit(inset) {
   return h ? `@${h}` : ''
 }
 
-/* TikTok se amptelike speler. Hy dra sy eie kontroles; ons vra vir so min as
-   moontlik chroom, want die voer se eie knoppies staan reeds daar. */
+/* ── TikTok se amptelike speler ──
+ *
+ * ── Die klank is HULLE s'n, nie ons s'n nie ──
+ *
+ * Hier het `music_info=0&description=0` gestaan en niks oor klank. Die voer se
+ * eie "Tik vir klank" het die raam herbou — en omdat hierdie adres nie verander
+ * het nie, het dit PRESIES dieselfde bladsy weer gelaai. Dewald op 'n regte
+ * foon: *"geen klank nie."* 'n Knoppie wat niks doen nie is erger as stilte, en
+ * dit was 'n knoppie wat niks doen nie.
+ *
+ * Ons kan nie van buite in 'n ander party se iframe ontdemp nie. Wat ons WEL
+ * kan, is hulle eie klankknoppie sigbaar maak: `volume_control=1`. Dan is daar
+ * 'n egte kontrole wat werk, in plaas van ons eie een wat lieg.
+ *
+ * `music_info` en `description` bly af — dit is TikTok se eie oorleg met die
+ * liedjie en die beskrywing, en die voer dra sy eie woorde. */
 export function spelerAdres(id, opsies) {
   if (!ID.test(String(id || ''))) return ''
   const o = opsies || {}
@@ -124,9 +138,9 @@ export function spelerAdres(id, opsies) {
     rel: '0',
     native_context_menu: '0',
     closed_caption: '0',
-    /* Klank begin STIL. Fone weier in elk geval om klank te speel voordat 'n
-       mens getik het, dus is "hardop" nie 'n keuse wat bestaan nie — dit is net
-       'n speler wat stilweg misluk. */
+    /* Die speler se EIE klankknoppie. Dit is die enigste pad na klank wat
+       werklik bestaan wanneer die video in hulle iframe speel. */
+    volume_control: '1',
     autoplay: o.speel ? '1' : '0',
     loop: '1',
   })
