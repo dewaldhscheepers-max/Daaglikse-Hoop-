@@ -3,6 +3,7 @@ import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { db } from '../firebase'
 import VolgJesusKaart from '../components/VolgJesusKaart'
 import Bybel365Kaart from '../components/Bybel365Kaart'
+import Speel from './Speel'
 import { eboekTotale } from '../data/eboekTotale'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
@@ -373,6 +374,24 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           <button className="lp-promo-btn" onClick={e => { e.stopPropagation(); setShowLeesplanne(true) }}>
             SIEN PLANNE →
           </button>
+        </div>
+
+        {/* ── Speletjies ──
+
+            Reels het Speel se oortjie gevat, en die speletjies woon nou hier.
+            Dewald, 12 September 2026: "Speel skuif na binne die E-boeke-blad as
+            'n aparte Speletjies-afdeling."
+
+            Dit staan ONDER die leesplanne en BO die utiliteite: dit is inhoud
+            wat 'n mens kom haal, nie 'n instelling nie. Die `id` is die anker
+            waarheen die "die speletjies het geskuif"-boodskap rol — sonder dit
+            land 'n mens bo-aan 'n lang blad en sien niks. */}
+        <div className="meer-section" id="speletjies">
+          <div className="section-header">
+            <h3 className="section-title">🎮 Speletjies</h3>
+            <span className="section-count">3 gratis</span>
+          </div>
+          <Speel ingebed />
         </div>
 
         {/* ── "Kry ek kennisgewings?" ──

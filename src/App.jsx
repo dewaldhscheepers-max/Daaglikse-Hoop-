@@ -49,7 +49,6 @@ import Grense from './screens/Grense'
 import Bybel365 from './screens/Bybel365'
 import HuiseVanHoop from './screens/HuiseVanHoop'
 import Bybel from './screens/Bybel'
-import Speel from './screens/Speel'
 import BouDieArk from './screens/BouDieArk'
 import Vrugtefees from './screens/Vrugtefees'
 import VolgJesusLewe from './screens/VolgJesusLewe'
@@ -59,6 +58,13 @@ import {
 } from './data/volgJesusNooi'
 import BidVirMy from './components/BidVirMy'
 import { idUitPad } from './data/gebedDeel'
+import Reels from './screens/Reels'
+import { idUitPad as reelIdUitPad } from './data/reels'
+import {
+  magWysSkuif as magWysSpeelSkuif, hetGespeel,
+  isGesien as speelSkuifGesien, merkGesien as merkSpeelSkuifGesien,
+  leesSpeelSleutels,
+} from './data/speelSkuif'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -163,6 +169,17 @@ export default function App() {
   /* 'n Ref daarby, want die installasie-uitklap se timer moet weet of sy oop
      is, en 'n timer sien nie 'n toestand wat intussen verander het nie. */
   const vjSkuifRef = useRef(false)
+  /* "Die speletjies het geskuif" — Reels het Speel se oortjie gevat. Presies
+     dieselfde vorm as die VOLG JESUS-boodskap hierbo, en om presies dieselfde
+     rede. Sien src/data/speelSkuif.js. */
+  const [showSpeelSkuif, setShowSpeelSkuif] = useState(false)
+  const speelSkuifRef = useRef(false)
+  /* Die clip-id uit 'n gedeelde skakel — /reels/<id>. Dit staan hier by die
+     ander deep links sodat die voer weet watter clip EERSTE moet wees. */
+  const [reelId, setReelId] = useState(null)
+  /* Is die voer oop? 'n Opspringer oor 'n video is 'n opspringer wat weggedruk
+     word sonder dat iemand hom lees. */
+  const reelsOopRef = useRef(false)
   /* Is daar enige oorlegblad oop? Dieselfde rede as `tmgOopRef` hierbo: die
      boodskap se timer sien nie 'n toestand wat intussen verander het nie.
      Dit word tydens die render gestel, waar `boonsteLaag` bereken word. */
@@ -286,7 +303,7 @@ export default function App() {
          in 'n leeftyd en sy verduidelik iets wat pas van die skerm af weg is;
          hierdie uitklap kom môre weer. Sonder hierdie hek het die uitklap
          drie sekondes later bo-op haar kom staan en die knoppie doodgedruk. */
-      if (!isPlayingRef.current && !vjSkuifRef.current) {
+      if (!isPlayingRef.current && !vjSkuifRef.current && !speelSkuifRef.current) {
         setShowInstallPopup(true)
         localStorage.setItem('installPopupDate', today)
       }
@@ -336,7 +353,10 @@ export default function App() {
       /* 'n Vreemdeling wat pas 'n geskenk oopgemaak het, word nie vir geld
          gevra nie. Sy het nog niks van hierdie plek ontvang nie. */
       if (hoopOopRef.current) return
-      if (isPlayingRef.current || tmgOopRef.current) {
+      /* Die voer is oop. 'n Donasievraag oor 'n video word weggedruk sonder dat
+         iemand hom lees — en dan is daardie vraag vir vandag verbruik. Hy WAG,
+         net soos terwyl klank speel. */
+      if (isPlayingRef.current || tmgOopRef.current || reelsOopRef.current) {
         setPendingPopup(popup)
       } else {
         setActivePopup(popup)
@@ -546,7 +566,7 @@ export default function App() {
      * Dit word nie uitgestel nie — dit word net nie NOU gevra nie. `merkGevra`
      * loop eers wanneer die vraag werklik gewys is, dus bly die kans staan en
      * die volgende oopmaak vra weer. */
-    if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current) return false
+    if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current || reelsOopRef.current) return false
 
     const mag = magVra({
       toestemming,
@@ -1375,6 +1395,66 @@ export default function App() {
     return () => clearInterval(klok)
   }, [])
 
+  /* ── "Die speletjies het geskuif" ──
+   *
+   * Reels het Speel se plek in die onderste balk gevat en die speletjies woon
+   * nou onder E-boeke. Dit is WOORD VIR WOORD dieselfde probleem as hierbo: die
+   * mens wat gister op Vredepad was, maak die app oop en die oortjie is weg. Sy
+   * dink die speletjies is verwyder — of dat haar vordering weg is — en sy gaan
+   * nie soek nie.
+   *
+   * Net vir wie werklik gespeel het; die hele besluit staan in
+   * `magWysSkuif()` in speelSkuif.js en het toetse.
+   *
+   * Dit WAG eerder as om te verdwyn, om dieselfde rede as die VOLG JESUS-een:
+   * wie nie geïnstalleer het nie, sien die installasie-uitklap by byna elke
+   * oopmaak, en dan sou hierdie boodskap nooit kom vir juis die mens wat hom
+   * nodig het. En dit kom NA die VOLG JESUS-boodskap — twee opspringers op een
+   * oopmaak is 'n muur, en daardie een is ouer. */
+  useEffect(() => {
+    if (speelSkuifGesien()) return
+    if (!hetGespeel(leesSpeelSleutels())) return
+
+    let pogings = 0
+    const klok = setInterval(() => {
+      pogings++
+      const mag = magWysSpeelSkuif({
+        gesien: speelSkuifGesien(),
+        gevind: leesSpeelSleutels(),
+        oortjie: tabRef.current,
+        klankSpeel: isPlayingRef.current,
+        /* Die VOLG JESUS-boodskap tel as 'n oorleg — sy staan reeds in
+           `oorlegRef` deur `activePopup` nie, dus noem ons haar hier. */
+        oorlegOop: oorlegRef.current || tmgOopRef.current || vjSkuifRef.current,
+      })
+      if (mag) { setShowSpeelSkuif(true); clearInterval(klok) }
+      else if (pogings >= 12) clearInterval(klok)   /* sowat 30s, dan môre weer */
+    }, 2500)
+    return () => clearInterval(klok)
+  }, [])
+
+  /* ── 'n Gedeelde skakel: /reels/<id> ──
+   *
+   * Dieselfde patroon as /bid/<id> en /hoop/<id>, en om dieselfde rede: die
+   * diensketter bedien `index.html` vir elke pad, dus is die adres weg teen die
+   * tyd dat React begin. sessionStorage dra hom oor.
+   *
+   * Die clip word NIE 'n eie oorlegskerm nie — die voer IS 'n oortjie, en die
+   * gedeelde clip staan eenvoudig eerste. Sien `volgordeVanaf()` in reels.js:
+   * sy is 'n spesifieke video belowe, en 'n voer wat by clip 1 begin, maak van
+   * daardie belofte 'n leuen. */
+  useEffect(() => {
+    try {
+      const uitPad = reelIdUitPad(window.location.pathname || '')
+      if (uitPad) {
+        sessionStorage.setItem('reel_id', uitPad)
+        window.history.replaceState({}, '', '/')
+      }
+      const onthou = sessionStorage.getItem('reel_id')
+      if (onthou) { setReelId(onthou); setTab('reels') }
+    } catch { /* privaat modus: dan is dit net die gewone voer */ }
+  }, [])
+
   // ── Auto-reload when new service worker takes control ──
   useEffect(() => {
     if (!navigator.serviceWorker) return
@@ -1516,6 +1596,10 @@ export default function App() {
      knoppie was doodgedruk. */
   oorlegRef.current = !!boonsteLaag || !!activePopup || showNotifBanner || wysStappe
   vjSkuifRef.current = showVjSkuif
+  speelSkuifRef.current = showSpeelSkuif
+  /* Die voer is 'n OORTJIE, nie 'n oorleg nie — hy staan dus nie in
+     `oorlegLae` nie en moet sy eie ref dra. */
+  reelsOopRef.current = tab === 'reels'
 
   /* Hoeveel lae die terug-knoppie kan afpel: die oortjie (as ons nie op
      Luister is nie) plus 'n oop oorlegblad. */
@@ -1690,10 +1774,34 @@ export default function App() {
               kaart. Dit gebruik dieselfde handleNav as die onderste nav, nie
               'n eie gebeurtenis nie. */}
           {tab === 'sorg'    && <Sorg onNavigate={handleNav} />}
-          {tab === 'speel'   && <Speel />}
           {tab === 'meer'    && <Meer targetBookId={targetBookId} onScrolled={() => setTargetBookId(null)} installPrompt={installPrompt} isInstalled={isInstalled} onNavigate={handleNav} />}
         </ErrorBoundary>
       </div>
+
+      {/* ── Die voer ──
+
+          Dit staan BUITE `.screen`, en dit is nie 'n netheidsding nie:
+          `.screen` rol self en dra 'n padding vir die nav. 'n Snap-voer binne
+          'n rollende houer veg met sy ouer — die snap gryp, die ouer skuif, en
+          niks klik ooit vas nie. Die voer kry dus sy eie laag onder die nav.
+
+          Die installasievraag kom uit die voer self, NA die tweede swiep. Sien
+          `magVraInstalleer()` in reels.js: sy het op 'n skakel gedruk om iets
+          te SIEN, en 'n vraag voor die waarde is hoe 'n mens 'n vreemdeling
+          verloor. */}
+      {tab === 'reels' && (
+        <ErrorBoundary>
+          <Reels
+            deepId={reelId}
+            isInstalled={isInstalled}
+            onNavigate={handleNav}
+            onInstalleer={() => {
+              if (isInstalled) return
+              setShowInstallPopup(true)
+            }}
+          />
+        </ErrorBoundary>
+      )}
 
       {/* Bid Nou is nie meer 'n oortjie nie — hy sit onder Bid Saam. Wys dus
           Bid Saam as die aktiewe een terwyl 'n mens op Bid Nou is, anders lyk
@@ -1935,6 +2043,61 @@ export default function App() {
             <button
               className="payment-popup-cancel"
               onClick={() => { setShowVjSkuif(false); merkGesien() }}
+            >
+              Ek verstaan
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Die speletjies het geskuif ──
+
+          Reels het Speel se oortjie gevat. Net vir wie werklik gespeel het —
+          iemand wat nooit 'n speletjie oopgemaak het nie, moet nooit hoor dat
+          iets geskuif het waarvan hy niks weet nie.
+
+          Die knoppie vat haar na die SPELETJIES, nie net na die blad nie: dit
+          stel die oortjie op E-boeke en rol na die afdeling. "Gaan soek dit
+          self" op 'n lang blad is hoe 'n mens iemand verloor.
+
+          Elke uitgang merk dit as gesien. */}
+      {showSpeelSkuif && (
+        <div
+          className="payment-popup-backdrop"
+          onClick={() => { setShowSpeelSkuif(false); merkSpeelSkuifGesien() }}
+        >
+          <div className="payment-popup" onClick={e => e.stopPropagation()}>
+            <div className="payment-popup-icon">🎮</div>
+            <div className="payment-popup-title">DIE SPELETJIES HET GESKUIF</div>
+            <p className="payment-popup-msg">
+              <strong>Jou vordering is veilig.</strong><br />
+              Vredepad, Bou die Ark en Vrugtefees is nou onder <strong>E-boeke</strong>.
+              Op hulle ou plek is daar nou kort video's.
+            </p>
+            <button
+              className="payment-popup-btn vj-skuif-btn"
+              onClick={() => {
+                setShowSpeelSkuif(false)
+                merkSpeelSkuifGesien()
+                setTab('meer')
+                /* Rol na die afdeling sodra Meer geteken is. Sonder hierdie
+                   uitstel bestaan die anker nog nie en doen die knoppie niks —
+                   dieselfde fout as `springNa` in die Bybel, wat op 'n
+                   tydhouer staatgemaak het voor die verse bestaan het. Hier is
+                   dit egter net 'n ROL en nie die inhoud nie: misluk dit, land
+                   sy steeds op die regte blad. */
+                requestAnimationFrame(() => {
+                  const el = document.getElementById('speletjies')
+                  if (el) el.scrollIntoView({ block: 'start' })
+                  else if (screenRef.current) screenRef.current.scrollTop = 0
+                })
+              }}
+            >
+              WYS MY WAAR
+            </button>
+            <button
+              className="payment-popup-cancel"
+              onClick={() => { setShowSpeelSkuif(false); merkSpeelSkuifGesien() }}
             >
               Ek verstaan
             </button>

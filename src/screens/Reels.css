@@ -1,0 +1,280 @@
+/* ── REELS ──
+ *
+ * Die enigste donker skerm wat 'n OORTJIE is. Daaglikse Hoop is 'n ligte app en
+ * `color-scheme: light only` staan in index.css — maar 'n video-voer op room is
+ * nie 'n video-voer nie. Elke volskerm-oomblik in hierdie app (Vandag se Tyd met
+ * God, die wallpapers) is reeds houtskool met warm goud, en die voer hoort daar.
+ *
+ * ── Die Android-reëls geld hier ook ──
+ *
+ * Geen `transform` of `opacity` op `:active` nie — net kleur. Geen `dvh` nie.
+ * Sien CLAUDE.md se afdeling oor die gekleurde strepe; die oorsaak het twee keer
+ * BUITE die speletjies gelê, in die globale nav en in die omhulsel.
+ *
+ * ── Waarom dit ABSOLUUT sit en nie in `.screen` nie ──
+ *
+ * `.screen` rol self en dra 'n `padding-bottom` vir die nav. 'n Snap-voer binne
+ * 'n rollende houer veg met sy ouer: die snap gryp, die ouer skuif, en niks klik
+ * ooit vas nie. Die voer kry dus sy eie laag binne `.app`, onder die nav se
+ * z-index 100 sodat die balk bo-op bly — presies soos TikTok dit doen.
+ */
+
+.reels {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  background: #0D0C0D;
+  overflow: hidden;
+  --reels-goud: #D9B183;
+  --reels-wit:  #F4EFE7;
+  /* Hoe hoog die onderste teks moet staan om bo die nav te bly. */
+  --reels-onder: calc(var(--nav-height) + var(--safe-bottom) + 14px);
+}
+
+.reels-leeg {
+  display: grid;
+  place-items: center;
+  color: rgba(244, 239, 231, 0.7);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.reels-voer {
+  height: 100%;
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.reels-voer::-webkit-scrollbar { display: none; }
+
+.reel {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  /* 'n ONDEURSIGTIGE grond. 'n Raam wat nog nie geverf is nie, wys hierdie
+     kleur in plaas van gemors. */
+  background: #151314;
+}
+
+.reel-speler,
+.reel-wag {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.reel-wag { background: #151314; }
+
+/* Die skrifstrook onder. Dieselfde sluier as op die Tyd met God-kaart: net
+   genoeg om die woorde te dra, nooit genoeg om die video dood te maak nie.
+
+   Dit sit op die KLIP en nie op die teksblok nie: die sluier moet van die
+   onderste rand af opkom, en 'n blok wat bo die nav swewe, begin te hoog. */
+.reel::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 46%;
+  background: linear-gradient(to top, rgba(9, 8, 9, 0.92) 12%, rgba(9, 8, 9, 0.48) 58%, rgba(0, 0, 0, 0));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.reel-onder {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: var(--reels-onder);
+  z-index: 3;
+  padding: 0 76px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  /* Die houer vang niks; net die knoppie. Anders is die helfte van die skerm
+     'n dooie strook waar 'n tik op die video niks doen nie. */
+  pointer-events: none;
+  font-family: var(--font-body);
+}
+
+.reel-maker { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.reel-maker b {
+  color: var(--reels-wit);
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+.reel-maker small {
+  color: rgba(244, 239, 231, 0.66);
+  font-size: 11.5px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+
+.reel-woorde {
+  margin: 0;
+  color: var(--reels-wit);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 34ch;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+}
+
+.reel-brug {
+  pointer-events: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(13, 12, 13, 0.72);
+  border: 1px solid rgba(217, 177, 131, 0.5);
+  color: #E8CBA4;
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Net kleur. Geen transform. */
+.reel-brug:active { background: rgba(217, 177, 131, 0.18); }
+
+/* ── Die regterkant ──
+   Net Deel. Dewald, 12 September 2026: "net deel." 'n Hart beteken 'n telling,
+   en 'n telling beteken dat 'n mens sy eie getal begin dophou. */
+.reel-rail {
+  position: absolute;
+  right: 8px;
+  /* Hoog genoeg om die sweefende BYBEL-knoppie te mis.
+     Dié knoppie hang oor ELKE skerm in die app, regs bo die balk, en hy het
+     die Deel-knoppie letterlik doodgedruk — `elementFromPoint` op die middel
+     van Deel het `BUTTON.nav-bybel` gegee. Die blaaierlopie meet dit nou, want
+     dit is presies die soort fout wat 'n eenheidstoets nooit sien nie: die
+     knoppie was daar, hy was sigbaar, en hy was onbereikbaar. */
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 70px);
+  /* BO die teksblok: `.reel-onder` strek van rand tot rand en sy regterpadding
+     lê presies oor hierdie knoppie. Padding vang steeds tikke. */
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.reel-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--reels-wit);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7));
+  -webkit-tap-highlight-color: transparent;
+}
+.reel-knop svg { width: 27px; height: 27px; display: block; }
+.reel-knop:active { color: #E8CBA4; }
+
+/* ── Die klank-wenk ── */
+.reel-wenk {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Een transform, en hy staan STIL — dit is 'n plasing, nie 'n animasie op
+     :active nie. */
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  background: rgba(13, 12, 13, 0.76);
+  border: 1px solid rgba(244, 239, 231, 0.16);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: var(--reels-wit);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.reel-wenk:active { background: rgba(13, 12, 13, 0.92); }
+
+/* ── Die einde ── */
+.reel-einde {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  background:
+    radial-gradient(120% 66% at 50% 6%, rgba(217, 177, 131, 0.20), rgba(217, 177, 131, 0) 62%),
+    #0D0C0D;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 0 32px var(--reels-onder);
+  font-family: var(--font-body);
+}
+
+.reel-einde-merk {
+  color: var(--reels-goud);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.reel-einde-lyn {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 27px;
+  line-height: 1.3;
+  color: var(--reels-wit);
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.reel-einde-sub {
+  margin: 0;
+  color: rgba(244, 239, 231, 0.6);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 30ch;
+}
+
+.reel-einde-knop {
+  margin-top: 4px;
+  background: var(--reels-goud);
+  color: #17130E;
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 30px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.reel-einde-knop:active { background: #E8CBA4; }
+
+.reel-einde-stil {
+  background: none;
+  border: 0;
+  color: rgba(244, 239, 231, 0.6);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.reel-einde-stil:active { color: var(--reels-goud); }

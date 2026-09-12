@@ -52,14 +52,20 @@ export default function BottomNav({ active, onChange, onBybel }) {
       )
     },
     {
-      id: 'speel',
-      label: 'Speel',
+      /* Reels vat Speel se plek. Dewald, 12 September 2026: "Reels moet die
+         bestaande Speel-oortjie vervang, so daar bly steeds net vyf... Speel
+         skuif na binne die E-boeke-blad as 'n aparte Speletjies-afdeling."
+
+         Die speletjies is NIE weg nie — hulle staan onder E-boeke, en wie al
+         gespeel het, kry een keer 'n boodskap wat sê waar hulle nou is. Sien
+         src/data/speelSkuif.js; dieselfde les as toe VOLG JESUS geskuif het. */
+      id: 'reels',
+      label: 'Reels',
       icon: (
+        /* 'n Vertikale raam met 'n speel-driehoek: een video, volskerm. */
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2.5" y="6" width="19" height="12" rx="4"/>
-          <path d="M7 10.5v3M5.5 12h3"/>
-          <circle cx="16" cy="11" r="1"/>
-          <circle cx="18" cy="13.5" r="1"/>
+          <rect x="6" y="2.5" width="12" height="19" rx="3.5"/>
+          <path d="M10.6 9.4v5.2l4.2-2.6z"/>
         </svg>
       )
     },

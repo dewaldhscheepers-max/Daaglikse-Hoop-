@@ -93,6 +93,10 @@ node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getall
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
+node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 75 toetse
+node src/data/reels.toets.mjs                 # die voer se reels, 82 toetse
+node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
+node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -1166,6 +1170,89 @@ drie gevalle) en `kykTmg.mjs`, wat die hele vloei deurloop, saai
 en tel die KLIKKE — die hele dag moet met sowat tien druk klaar wees.
 
 ---
+
+## Reels
+
+'n Volskerm vertikale voer. Dewald wou dit hê omdat mense van hierdie ouderdom
+rol, en omdat dit al die Afrikaanse predikers op een plek kan sit.
+
+**Dit bestaan vir die SKAKEL wat uitgaan, nie vir die tyd in die app nie.** Tyd
+in die app is nie groei nie — dit is dieselfde mense wat langer bly. Elke
+gedeelde clip is een vreemdeling wat binne twee sekondes 'n boodskap sien sonder
+'n muur voor haar; dieselfde masjien as `/bid/<id>` en `/hoop/<id>`. Daarom meet
+`tellers/reels` net **gedeel** en **oopgemaak**, en nooit "gekyk" nie: die dag
+wanneer 'n mens kyktyd begin tel, begin hy 'n voer optimeer vir die verkeerde
+ding. Geen naam, geen toestel-id, en NIE watter clip nie — 'n telling per clip
+is die eerste tree na "watter video het Sarel gedeel".
+
+**Reels het Speel se oortjie gevat; daar bly vyf.** Dewald, 12 September 2026:
+*"Ek wil nie 'n sesde oortjie byvoeg nie... Speel skuif na binne die E-boeke-blad
+as 'n aparte Speletjies-afdeling. Ek wil Reels nie hoog op Luister sit nie,
+omdat Luister spesifiek vir die Daaglikse Hoop-stemboodskappe moet bly."* Hy was
+reg, en ek was verkeerd — ek het aangeneem dit is 'n sesde oortjie en met "ses
+knyp op 'n klein foon" geantwoord op 'n vraag wat niemand gevra het nie.
+
+Die speletjies staan nou in `Meer.jsx` onder `#speletjies`, met `<Speel ingebed />`
+— dieselfde skerm, sonder sy eie kop en sonder sy `DonationCard`, want die blad
+dra reeds een. Twee skenkkaarte op een blad lees soos 'n tolhek.
+
+**Die skuif kos 'n boodskap, en dit is nie opsioneel nie.** `src/data/speelSkuif.js`
+is woord vir woord dieselfde patroon as `volgJesusSkuif.js`, en om dieselfde
+rede: die mens wat gister op Vredepad was, maak oop, die oortjie is weg, en sy
+dink haar vordering is weg. Net vir wie werklik gespeel het (die speletjies se
+eie localStorage-sleutels), een keer, net op Luister, nooit oor klank of 'n ander
+skerm nie. Kom 'n nuwe speletjie by, kom sy sleutel by `SPEEL_SLEUTELS` — staan
+hy nêrens, hoor sy spelers nooit waar hulle nou is nie.
+
+**Net die AKTIEWE clip se speler is gemonteer.** Dit is nie 'n optimalisasie nie,
+dit is die hele datarekening: drie ingebedde spelers langs mekaar laai drie
+videos. Dit doen ook die werk van 'n pouse-knoppie — swiep sy weg, word die
+speler afgehaal en die klank hou op. Die einde-blad dra `data-reel="-1"` en dít
+is hoekom niks agter hom aanspeel nie; sonder daardie een attribuut bly `aktief`
+op die laaste clip staan en speel hy voort agter 'n toe skerm. Die blaaierlopie
+het dit gevang.
+
+**Die klank begin STIL.** Nie 'n smaakkeuse nie: 'n foon weier om klank te speel
+voordat 'n mens getik het, dus is "hardop" nie 'n keuse wat bestaan nie — dit is
+'n speler wat stilweg misluk. "Tik vir klank" verander die `key` van die raam,
+die raam word herbou, en omdat dit 'n MENS se tik was, laat die blaaier die klank
+deur. Een reël in plaas van YouTube se JS-API.
+
+**Die installasievraag kom NÁ die tweede swiep** (`magVraInstalleer()`). Sy het
+op 'n skakel gedruk om iets te SIEN; vra ons voordat sy iets gesien het, is die
+antwoord nee en sy kom nie terug nie. Ná twee swiepe het sy self besluit om aan
+te hou — dít is die mens wat ja sê.
+
+**Erkenning is 'n HEK, nie 'n versiering nie.** `magWys()` is 'n witlys en 'n
+clip sonder 'n `naam` wys glad nie. 'n Ander bediening se clip kry ook GEEN brug
+terug na ons eie bladsye nie — dit sou lyk of ons hul werk gebruik om onsself te
+bemark, en dan is dit die laaste clip wat hulle ons gee.
+
+**Die voer EINDIG.** 'n Voer sonder 'n einde is een waarvan 'n mens skuldig
+opstaan, en dit is nie hierdie app nie.
+
+**Die kort skakel word deur die BEDIENER oopgemaak.** Dewald plak wat sy foon hom
+gee, en dit is `https://vt.tiktok.com/ZSqa9Knhv/` — 'n aanwyser wat die ID nie
+dra nie. `api/reels-skakel.mjs` volg hom. Dit is 'n eindpunt wat 'n ADRES gaan
+haal, dus die gevaarlike soort: dit is admin-alleen, dit aanvaar net TikTok se
+kort gashere, en dit keur **elke sprong** weer (`redirect: 'manual'`, hoogstens
+vier). `redirect: 'follow'` sou daardie hele keuring oorslaan. Die gasheer word
+met 'n suffiks getoets en nooit met `includes` — "tiktok.com.boos.net" bevat
+"tiktok.com".
+
+Die clips kom uit Firestore (`reels`, EEN `getDocs` met 'n tydgrens, nooit 'n
+`onSnapshot`), met `REELS_SAAI` in die kode daaronder sodat die oortjie nooit
+leeg is nie. Dit aanvaar nooit 'n antwoord kleiner as wat dit reeds het nie —
+dieselfde les as Luister s'n.
+
+Blaaiertoets: `kykReels.mjs` in die scratchpad. Dit meet die ding wat geen
+eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
+in hierdie app en het die Deel-knoppie letterlik doodgedruk —
+`elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
+knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
+
+Wat NOG nie bestaan nie: 'n admin om clips by te voeg (hulle staan in
+`reelsLys.js` of in Firestore), en 'n tapbare makerprofiel.
 
 ## Sorg & Ondersteuning dra mekaar — Dewald is nie die enjin nie
 

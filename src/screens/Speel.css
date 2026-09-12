@@ -146,3 +146,17 @@
   transition: background-color 0.12s;
 }
 .speel-deel:active { background: rgba(124, 111, 175, 0.1); }
+
+/* ── Ingebed in die e-boekblad ──
+   Reels het Speel se oortjie gevat en die speletjies woon nou binne E-boeke.
+   Daar dra die blad reeds sy eie kop, grond en kantruimte, dus val hulle hier
+   weg — anders sit daar 'n room-blok binne 'n room-blok met dubbele marges. */
+.speel-ingebed {
+  min-height: 0;
+  background: none;
+}
+
+.speel-ingebed .speel-body {
+  padding: 0;
+  gap: 12px;
+}

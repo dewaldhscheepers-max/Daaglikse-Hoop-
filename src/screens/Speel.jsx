@@ -66,19 +66,28 @@ const SPELETJIES = [
   },
 ]
 
-export default function Speel() {
+/* `ingebed` — die speletjies woon nou BINNE die e-boekblad (Reels het hulle
+   oortjie gevat). Ingebed val die groot kop weg, want Meer dra reeds sy eie
+   kop, en die DonationCard val weg omdat daar reeds een bo-aan daardie blad
+   staan. Twee skenkkaarte op een blad lees soos 'n tolhek.
+
+   Die skerm bly bestaan sodat die speletjies en hul deel-knoppies op EEN plek
+   staan; net die omhulsel verskil. */
+export default function Speel({ ingebed = false }) {
   function open(spel) {
     window.dispatchEvent(new CustomEvent(spel.event))
   }
 
   return (
-    <div className="speel">
-      <div className="screen-header speel-header">
-        <h1 className="speel-title">Speel</h1>
-        <p className="speel-sub">
-          Speletjies wat jou help om te ontspan en vrede te vind. Almal gratis.
-        </p>
-      </div>
+    <div className={ingebed ? 'speel speel-ingebed' : 'speel'}>
+      {!ingebed && (
+        <div className="screen-header speel-header">
+          <h1 className="speel-title">Speel</h1>
+          <p className="speel-sub">
+            Speletjies wat jou help om te ontspan en vrede te vind. Almal gratis.
+          </p>
+        </div>
+      )}
 
       <div className="speel-body">
         {SPELETJIES.map(spel => (
@@ -114,7 +123,7 @@ export default function Speel() {
 
         <p className="speel-binnekort">Meer speletjies is op pad.</p>
 
-        <DonationCard />
+        {!ingebed && <DonationCard />}
       </div>
     </div>
   )
