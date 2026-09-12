@@ -95,6 +95,7 @@ node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag lan
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 100 toetse
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
+node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 152
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
@@ -1353,12 +1354,35 @@ Die clips kom uit Firestore (`reels`, EEN `getDocs` met 'n tydgrens, nooit 'n
 leeg is nie. Dit aanvaar nooit 'n antwoord kleiner as wat dit reeds het nie —
 dieselfde les as Luister s'n.
 
-**Die Firestore-reël moet ONTPLOOI wees.** `reels` het geen reël gehad nie, en
-Firestore weier by verstek — die kliënt se `getDocs` het stil misluk en die voer
-het vir altyd die saai gewys. Die reël staan nou in `firestore.rules`: LEES oop
-(die vreemdeling op 'n gedeelde skakel is nie aangemeld nie), SKRYF toe (wie 'n
-clip kan skryf, kan enige video voor ses duisend mense sit). Dit werk nie voordat
-die reëls gepubliseer is nie.
+**Die voer lees deur 'n BEDIENER-eindpunt, en dit is 'n les wat duur was.**
+
+Dit was 'n `getDocs(collection(db, 'reels'))` vanaf die kliënt. Firestore weier
+waar geen reël pas nie, dus het die voer stil die saai gewys en 'n `allow read`
+moes eers in `firestore.rules` kom **en gepubliseer word**. Toe kon dit nie
+gebeur nie: Dewald was op 'n foon, en die Firebase-konsole se reëls-redigeerder
+is op 'n foon onbruikbaar (die "Develop and Test"-knoppie is 'n
+emulator-inligtingsvenster, nie die redigeerder nie). Ek kan dit ook nie van die
+kodebasis af doen nie — geen CLI, geen aanmelding, geen diensrekening-sleutel.
+
+Die regte antwoord was nie om hom deur die konsole te sleep nie. Dit is om die
+lees te skuif: `api/reels-lys.mjs` lees met die diensrekening, wat die reëls
+omseil. Drie dinge het daarmee beter geword:
+
+* **niks hoef gepubliseer te word nie.** `reels` is nou albei kante toe in
+  `firestore.rules`, wat presies is wat Firestore by verstek doen;
+* die **witlys** kom gratis saam (`src/data/reelsOpenbaar.js`) — dieselfde vorm
+  as `volgJesusOpenbaar.js`. Voeg iemand môre 'n interne nota by 'n clip, kom dit
+  nie oor die draad nie;
+* **een lees vir die hele wêreld** in plaas van een per foon, want die rand kas
+  dit vyf minute.
+
+Die reël bly: *'n funksie wat van 'n mens vra om 'n sekuriteitsreël te publiseer
+voordat sy kan werk, het 'n handrem op.*
+
+Die kliënt **aanvaar nooit 'n leë antwoord** nie. 'n Eindpunt wat `{ klips: [] }`
+gee omdat Firestore net nie opgekom het nie, mag nie twintig clips in
+`cachedReels` met nul vervang nie — daardie skryf oorleef 'n herlaai. Dieselfde
+les as Luister se `getDocs`.
 
 **En moenie die konsole se datum vertrou om te weet wat lewendig is nie.** Die
 weergawe-lys het "19 Aug 2026" as die laaste publikasie gewys, en
@@ -1367,14 +1391,14 @@ VOLG JESUS-groepreëls nooit ontplooi is nie en vir Dewald gesê die groepchat i
 drie weke lank stil stukkend. **Dit was verkeerd.** Toe hy die lewende teks
 gekopieer en gestuur het, was `vjGroepe` wel daar.
 
-Wat WEL gekort het, was `reels` en `magChat()` — en `magChat()` is die een wat
-saak maak: die "verwyder iemand uit die groepchat"-knoppie werk in die app, maar
-sonder daardie reël steek net die SKERM die gesprek weg en wie uitgehaal is, kon
-dit steeds met die SDK lees.
+**`magChat()` is die enigste ding in `firestore.rules` wat nog 'n publikasie
+kort**, en dit is 'n egte gaatjie: die "verwyder iemand uit die groepchat"-
+knoppie werk in die app, maar sonder daardie reël steek net die SKERM die gesprek
+weg en wie uitgehaal is, kan dit steeds met die SDK lees. Dit blokkeer niks nie,
+maar dit bly onwaar totdat iemand dit publiseer.
 
-Die enigste manier om te weet wat lewendig is, is om die lewende TEKS te lees en
-te vergelyk. Sien die kop van `firestore.rules` vir die volle vergelyking van
-12 September 2026.
+Sien die kop van `firestore.rules` vir die volle vergelyking van 12 September
+2026.
 
 **Die vreemdeling op 'n gedeelde skakel word GLAD NIE gevra nie** — nie oor geld
 nie, en nie oor installasie in die eerste drie sekondes nie. `if (reelId) return`
@@ -1393,7 +1417,7 @@ twee-en-dertig, en 'n Vercel-funksie sterf by tien — dieselfde fout as die
 oggendkennisgewing se `for`-lus. Agt sekondes vir die HELE ketting, en
 `maxDuration: 20` in `vercel.json` as vangnet.
 
-Blaaiertoets: `kykReels.mjs` in die scratchpad (82 metings). Dit meet die ding wat geen
+Blaaiertoets: `kykReels.mjs` in die scratchpad (90 metings). Dit meet die ding wat geen
 eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die

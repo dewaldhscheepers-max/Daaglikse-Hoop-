@@ -35,6 +35,10 @@ rules_version = '2';
  *     reel is dit net die SKERM wat die gesprek wegsteek: wie uitgehaal is, kon
  *     dit steeds met die SDK lees.
  *
+ * Die `reels`-blok is daarna NIE meer nodig nie — die voer lees deur 'n
+ * bediener-eindpunt en die blok is albei kante toe. `magChat()` is die enigste
+ * ding in hierdie leer wat nog 'n publikasie kort.
+ *
  * ── Die les, en dit het my mislei ──
  *
  * Die konsole se weergawe-lys se datum se NIE wat lewendig is nie. Die laaste
@@ -140,20 +144,27 @@ service cloud.firestore {
 
     /* ── Reels: die voer ──
      *
-     * LEES is oop, en dit moet wees: 'n vreemdeling wat op 'n gedeelde
-     * /reels/<id> druk, is nie aangemeld nie en moet die clip dadelik sien.
-     * Daar is niks privaat in 'n clip nie — dit is 'n naam, 'n video-id en 'n
-     * sin.
+     * ALBEI kante toe, en daarom hoef hierdie blok NIE ontplooi te word nie:
+     * Firestore weier klaar waar geen reel pas nie. Dit staan hier sodat die
+     * bedoeling swart op wit is.
      *
-     * SKRYF is TOE, en dit is die belangrike helfte. 'n Kliënt wat 'n clip kan
-     * skryf, kan enige video voor ses duisend mense sit. Clips kom deur 'n
-     * bediener-eindpunt met die diensrekening, wat hierdie reëls omseil —
-     * dieselfde besluit as by die ranglyste en by vjGroepe se lidmaatskap.
+     * Dit was eers `allow read: if true`, want die voer het Firestore direk
+     * gelees. Toe kon Dewald die reel nie gepubliseer kry nie — die konsole se
+     * reels-redigeerder is op 'n foon onbruikbaar, en 'n rekenaar was nie
+     * naby nie. 'n Funksie wat van 'n mens vra om 'n sekuriteitsreel te
+     * publiseer voordat sy kan werk, is 'n funksie met 'n handrem.
      *
-     * Let wel: `notes` en `books` hierbo is `write: if true`. Dit is 'n ou
-     * losheid en nie 'n voorbeeld om te volg nie. */
+     * Die voer lees nou deur `api/reels-lys.mjs` met die diensrekening, wat
+     * hierdie reels omseil. Drie dinge het daarmee beter geword: niks hoef
+     * gepubliseer te word nie, die WITLYS in `reelsOpenbaar.js` kom gratis saam
+     * (voeg iemand more 'n veld by, kom dit nie oor die draad nie), en die rand
+     * kas een lees vir die hele wereld in plaas van een per foon.
+     *
+     * Skryf loop deur `api/reels-voeg-by.mjs` en `api/reels-tel.mjs`, albei met
+     * die diensrekening. 'n Klient wat 'n clip kon skryf, kon enige video voor
+     * ses duisend mense sit. */
     match /reels/{id} {
-      allow read:  if true;
+      allow read:  if false;
       allow write: if false;
     }
 

@@ -37,22 +37,27 @@
  * MENS, dus laat die blaaier die klank deur. Een reël in plaas van YouTube se
  * eie JS-API.
  *
- * ── Firestore ──
+ * ── Waar die clips vandaan kom ──
  *
- * EEN lees (`getDocs`, `limit(50)`), nooit 'n `onSnapshot` nie. Om 06:30 maak
- * duisende fone binne minute oop; 'n lewendige luisteraar per mens is presies
- * hoe die kwota verlede week opgeraak het. Dieselfde besluit as Vandag se Tyd
- * met God s'n, en dieselfde tydgrens: `getDocs` het self GEEN tydgrens nie en
- * kan vir altyd hang wanneer Android die oortjie opgeskort het.
+ * Deur `api/reels-lys.mjs`, nie deur Firestore direk nie. Dit was 'n
+ * `getDocs(collection(db, 'reels'))`, en dan moet daar 'n `allow read` in
+ * `firestore.rules` staan — en daardie reël moet GEPUBLISEER word. Dewald het
+ * dit twee keer op 'n foon probeer; die Firebase-konsole se reëls-redigeerder is
+ * op 'n foon onbruikbaar, en ek kan dit nie van hier doen nie.
+ *
+ * Die eindpunt lees met die diensrekening, wat die reëls omseil. `reels` bly dus
+ * heeltemal TOE vir kliënte, niks hoef gepubliseer te word nie, en die WITLYS in
+ * `reelsOpenbaar.js` kom gratis saam. Dieselfde besluit as VOLG JESUS s'n.
+ *
+ * EEN lees per foon, met 'n tydgrens — en die rand kas die eindpunt vyf minute,
+ * dus tref duisende fone om 06:30 die kas en nie die funksie nie.
  *
  * En dit **aanvaar nooit 'n antwoord wat kleiner is as wat dit reeds het nie**.
- * Is die SDK vanlyn, bedien `getDocs` uit sy eie kas, en daardie kas hou net wat
- * die SDK al gesien het — een dokument, soms. Skryf ons dit sonder om te kyk, is
- * twintig clips met een vervang, en dit oorleef 'n herlaai.
+ * 'n Halwe antwoord — 'n eindpunt wat 'n leë lys gee omdat Firestore net nie
+ * opgekom het nie — mag nie twintig clips met nul vervang nie, want daardie
+ * skryf oorleef 'n herlaai.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { collection, query, limit, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
 import { REELS_SAAI } from '../data/reelsLys'
 import {
   skoonLys, bouVoer, reelSkakel, deelBoodskap, magVraInstalleer, brugVir,
@@ -60,8 +65,9 @@ import {
 import { spelerAdres } from '../data/tiktokId'
 import './Reels.css'
 
-/* `getDocs` het self geen tydgrens nie. Sonder hierdie getal bly "Een
-   oomblik..." vir altyd staan wanneer Android die oortjie opgeskort het. */
+/* 'n Haal sonder tydgrens bly vir altyd staan wanneer Android die oortjie
+   opgeskort het, en dan sit "Een oomblik..." daar tot die mens die app toemaak.
+   Dieselfde les as Luister se `getDocs`. */
 const HAAL_TYDGRENS = 10000
 
 const KAS = 'cachedReels'
@@ -233,16 +239,26 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
     ;(async () => {
       try {
-        const q = query(collection(db, 'reels'), limit(50))
-        const snap = await Promise.race([
-          getDocs(q),
-          new Promise((_, nee) => setTimeout(() => nee(new Error('te lank')), HAAL_TYDGRENS)),
-        ])
+        const beheer = new AbortController()
+        const klok = setTimeout(() => beheer.abort(), HAAL_TYDGRENS)
+        let lys = []
+        try {
+          const r = await fetch('/api/reels-lys', {
+            headers: { accept: 'application/json' },
+            signal: beheer.signal,
+          })
+          if (!r.ok) throw new Error(`HTTP ${r.status}`)
+          const d = await r.json()
+          lys = Array.isArray(d.klips) ? d.klips : []
+        } finally {
+          clearTimeout(klok)
+        }
         if (!lewendig) return
-        const lys = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 
-        /* NOOIT 'n antwoord aanvaar wat kleiner is as wat ons reeds het nie.
-           'n Vanlyn SDK bedien uit sy eie kas en gee soms EEN dokument. */
+        /* NOOIT 'n antwoord aanvaar wat kleiner is as wat ons reeds het nie. 'n
+           Eindpunt wat 'n leë lys gee omdat Firestore net nie opgekom het nie,
+           mag nie twintig clips met nul vervang nie — daardie skryf oorleef 'n
+           herlaai. */
         const skoon = skoonLys(lys)
         if (skoon.length && skoon.length >= skoonLys(kas.lys).length) {
           setRou(lys)
