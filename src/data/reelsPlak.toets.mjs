@@ -8,6 +8,7 @@
  * Loop met:  node src/data/reelsPlak.toets.mjs
  */
 import { splitsSkakels, gelykeSkakel, keurPlaksel, MAKS_SKAKELS } from './reelsPlak.js'
+import { REELS_INVOER, REELS_INVOER_2 } from './reelsInvoer.js'
 
 let reg = 0, val = 0
 function is(naam, kry, wag) {
@@ -113,6 +114,34 @@ console.log('\n── Dewald se EGTE plaksel ──')
   is('die laaste',  uit[5], 'https://vt.tiktok.com/ZSqmNn1UC/')
   is('elkeen is n geldige kort skakel',
      uit.every(s => /^https:\/\/vt\.tiktok\.com\/[A-Za-z0-9]{9}\/$/.test(s)), true)
+}
+
+console.log('\n── Die twee werklyste ──')
+/* Dewald het hulle twee keer gestuur: 124 op 12 September, 86 op die 13de.
+   Hulle staan in KODE omdat hy hulle EEN keer gestuur het en dit nie weer moet
+   doen nie. */
+{
+  for (const [naam, lys] of [['klomp 1', REELS_INVOER], ['klomp 2', REELS_INVOER_2]]) {
+    is(`${naam}: elke inskrywing is n egte kort skakel`,
+      lys.every(s => /^https:\/\/vt\.tiktok\.com\/[A-Za-z0-9]{6,16}\/$/.test(s)), true)
+    is(`${naam}: geen duplikate binne homself`,
+      new Set(lys.map(gelykeSkakel)).size, lys.length)
+    /* Die generator het een keer dubbele kommas geskryf en 124 inskrywings het
+       247 geword, met gate tussenin. Hierdie meting is die hek daarteen. */
+    is(`${naam}: geen lee inskrywings`, lys.every(s => typeof s === 'string' && s.length > 20), true)
+  }
+  is('klomp 1 is 124', REELS_INVOER.length, 124)
+  is('klomp 2 is 86',  REELS_INVOER_2.length, 86)
+
+  /* ── En die belangrikste ding wat hierdie toets NIE beweer nie ──
+     Dat die twee lyste nie oorvleuel nie, sê NIKS oor of dieselfde VIDEOS in
+     albei staan nie. 'n Kort skakel is nie die video se ID nie — TikTok gee 'n
+     nuwe een elke keer as 'n mens deel. Die egte ontdubbeling gebeur NA die
+     oplos, teen die post-ID, in `api/reels-voeg-by.mjs`, en dit word daar
+     getoets ("Dieselfde VIDEO onder twee kort skakels"). */
+  const een = new Set(REELS_INVOER.map(gelykeSkakel))
+  is('geen SKAKEL staan in albei lyste',
+    REELS_INVOER_2.some(s => een.has(gelykeSkakel(s))), false)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

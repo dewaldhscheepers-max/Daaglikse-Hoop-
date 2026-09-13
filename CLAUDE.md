@@ -95,7 +95,7 @@ node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag lan
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
-node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 43 toetse
+node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 227
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
@@ -1864,8 +1864,39 @@ en die "mees gedeelde bo"-rangorde was stil weg. Die `datum` word net by 'n NUWE
 clip geskryf, anders keer 'n herhaalde lopie die hele voer se orde om.
 
 Die 124 skakels self staan in `src/data/reelsInvoer.js` met 'n knoppie in die
-admin, want hy het hulle EEN keer gestuur en moet dit nie weer doen nie. Nuwe
-skakels gaan deur die plakkassie.
+admin, want hy het hulle EEN keer gestuur en moet dit nie weer doen nie. Op 13
+September het 'n TWEEDE klomp van 86 gekom (`REELS_INVOER_2`), met sy eie
+knoppie, om dieselfde rede.
+
+**Dewald se vraag daarby was die belangrike deel:** *"don't add it if it is
+already on the Reel page, because I think more than half of these links we
+already added."*
+
+Dit gebeur reeds, en dit is die moeite werd om te verstaan HOEKOM dit nie op die
+skakel kan gebeur nie. **'n Kort skakel is nie die video se ID nie.** TikTok gee
+'n NUWE kort skakel elke keer as 'n mens deel, dus kan dieselfde video in albei
+lyste staan onder twee heeltemal verskillende skakels. Van sy 86 stem nie EEN
+ooreen met een van die eerste 124 nie — en dit sê presies niks oor hoeveel van
+hulle dieselfde videos is.
+
+Die ontdubbeling gebeur dus NA die oplos, teen die post-ID:
+
+* `bestaanAl()` vra Firestore in EEN `batchGet` watter van die opgeloste id's al
+  bestaan;
+* 'n clip wat al daar is, gaan in `oorgeslaan` en word **nie** as nuut getel nie;
+* hy word wel BYGEWERK (die maker se naam kan verander het) maar **sonder
+  `datum`** — sy `gedeel`-telling en sy plek in die voer bly presies soos hulle
+  was. Sonder daardie een uitsluiting sou 'n herhaalde lopie die hele voer se
+  orde omkeer;
+* en twee VERSKILLENDE kort skakels wat op dieselfde video uitkom, word binne
+  een hap ook ontdubbel (`perId`).
+
+Albei gevalle word getoets in `api/_reelsVoegBy.toets.mjs` ("'n Clip wat AL
+bestaan" en "Dieselfde VIDEO onder twee kort skakels").
+
+Die admin se verslag wys **Nuut** en **Was al daar** langs mekaar. Dit is die
+getal wat sy vraag beantwoord, en dit is die enigste een wat waar kan wees. Dit
+is dus veilig om enige klomp weer te druk.
 
 Blaaiertoets: `kykReelsAdmin.mjs` (28 metings) gebruik sy EGTE plaksel.
 

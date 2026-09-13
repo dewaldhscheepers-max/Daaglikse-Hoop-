@@ -147,3 +147,121 @@ export const REELS_INVOER = [
   'https://vt.tiktok.com/ZSqm6K2d6/',
   'https://vt.tiktok.com/ZSqmMJVBe/',
 ]
+
+/* ── Die TWEEDE klomp, 13 September 2026 ──
+ *
+ * Dewald: *"I have now copied more links for my Reel page... But don't add it if
+ * it is already on the Reel page, because I think more than half of these links
+ * we already added to the Reels page. So just add those that aren't on the page
+ * yet."*
+ *
+ * ── Waarom hierdie lys NIE teen die eerste een ontdubbel is nie ──
+ *
+ * Dit lyk na die voor die hand liggende ding om te doen, en dit sou 'n LEUEN
+ * wees. 'n Kort skakel is nie die video se ID nie — TikTok gee 'n NUWE kort
+ * skakel elke keer as 'n mens deel. Dieselfde video kan dus in albei lyste
+ * staan onder twee heeltemal verskillende skakels, en geen vergelyking van
+ * hierdie stringe sou dit sien nie.
+ *
+ * Nie een van hierdie 86 stem ooreen met een van die eerste 124 nie, en dit sê
+ * presies niks oor hoeveel van hulle dieselfde VIDEOS is.
+ *
+ * Die enigste plek waar dit eerlik beantwoord kan word, is NA die oplos, teen
+ * die post-ID — en dit staan reeds in `api/reels-voeg-by.mjs`: `bestaanAl()`
+ * vra Firestore watter id's al daar is, 'n clip wat al bestaan gaan in
+ * `oorgeslaan` en word NIE as nuut getel nie, en die skryf is 'n `update` met 'n
+ * `updateMask` sodat sy `gedeel`-telling en sy plek in die orde bly staan.
+ *
+ * Die admin se verslag wys dus "Nuut" en "Was al daar" langs mekaar. Dit is die
+ * getal wat sy vraag beantwoord, en dit is die enigste een wat waar kan wees.
+ *
+ * Dit is dus veilig om hierdie knoppie te druk, ook al is die helfte reeds daar.
+ */
+export const REELS_INVOER_2 = [
+  'https://vt.tiktok.com/ZSqHxCETq/',
+  'https://vt.tiktok.com/ZSqHxVXVW/',
+  'https://vt.tiktok.com/ZSqHxyvxQ/',
+  'https://vt.tiktok.com/ZSqHx2T1x/',
+  'https://vt.tiktok.com/ZSqHxF1gn/',
+  'https://vt.tiktok.com/ZSqHxaUK9/',
+  'https://vt.tiktok.com/ZSqH93Ko5/',
+  'https://vt.tiktok.com/ZSqHx1xVF/',
+  'https://vt.tiktok.com/ZSqHxeJHh/',
+  'https://vt.tiktok.com/ZSqH9svqB/',
+  'https://vt.tiktok.com/ZSqH9bDcR/',
+  'https://vt.tiktok.com/ZSqH9aRAX/',
+  'https://vt.tiktok.com/ZSqH99pPN/',
+  'https://vt.tiktok.com/ZSqH9fdw1/',
+  'https://vt.tiktok.com/ZSqH9fXFS/',
+  'https://vt.tiktok.com/ZSqH9yE3s/',
+  'https://vt.tiktok.com/ZSqH9P8fB/',
+  'https://vt.tiktok.com/ZSqH99WYJ/',
+  'https://vt.tiktok.com/ZSqH959c2/',
+  'https://vt.tiktok.com/ZSqH9agFy/',
+  'https://vt.tiktok.com/ZSqH9h5Q3/',
+  'https://vt.tiktok.com/ZSqH9ANX5/',
+  'https://vt.tiktok.com/ZSqH9anvU/',
+  'https://vt.tiktok.com/ZSqH9k3nm/',
+  'https://vt.tiktok.com/ZSqH9jEf8/',
+  'https://vt.tiktok.com/ZSqH9a32m/',
+  'https://vt.tiktok.com/ZSqH96Rgh/',
+  'https://vt.tiktok.com/ZSqH9apx8/',
+  'https://vt.tiktok.com/ZSqH9j8pT/',
+  'https://vt.tiktok.com/ZSqH9UhDL/',
+  'https://vt.tiktok.com/ZSqH99gDh/',
+  'https://vt.tiktok.com/ZSqH9QDh3/',
+  'https://vt.tiktok.com/ZSqH9UpXJ/',
+  'https://vt.tiktok.com/ZSqH9kQoc/',
+  'https://vt.tiktok.com/ZSqH9MLRE/',
+  'https://vt.tiktok.com/ZSqH9dU9H/',
+  'https://vt.tiktok.com/ZSqHHbgX4/',
+  'https://vt.tiktok.com/ZSqH9MKv2/',
+  'https://vt.tiktok.com/ZSqHHKcdC/',
+  'https://vt.tiktok.com/ZSqHHGfRJ/',
+  'https://vt.tiktok.com/ZSqHHpE9g/',
+  'https://vt.tiktok.com/ZSqHHcmeW/',
+  'https://vt.tiktok.com/ZSqH9Jf1C/',
+  'https://vt.tiktok.com/ZSqH988o5/',
+  'https://vt.tiktok.com/ZSqHHbbYU/',
+  'https://vt.tiktok.com/ZSqHH7m67/',
+  'https://vt.tiktok.com/ZSqHHcYLK/',
+  'https://vt.tiktok.com/ZSqHuhUfv/',
+  'https://vt.tiktok.com/ZSqHuNYFu/',
+  'https://vt.tiktok.com/ZSqHmEgW2/',
+  'https://vt.tiktok.com/ZSqHuYjPb/',
+  'https://vt.tiktok.com/ZSqHuktPE/',
+  'https://vt.tiktok.com/ZSqHujvT9/',
+  'https://vt.tiktok.com/ZSqHukkTe/',
+  'https://vt.tiktok.com/ZSqHu2xSU/',
+  'https://vt.tiktok.com/ZSqHmTYkS/',
+  'https://vt.tiktok.com/ZSqHuhHjE/',
+  'https://vt.tiktok.com/ZSqHmE5rh/',
+  'https://vt.tiktok.com/ZSqHm3Twv/',
+  'https://vt.tiktok.com/ZSqHuh571/',
+  'https://vt.tiktok.com/ZSqHuhTem/',
+  'https://vt.tiktok.com/ZSqHuhrXf/',
+  'https://vt.tiktok.com/ZSqHmLhk5/',
+  'https://vt.tiktok.com/ZSqHmYw6G/',
+  'https://vt.tiktok.com/ZSqHmAu3P/',
+  'https://vt.tiktok.com/ZSqHmN1GH/',
+  'https://vt.tiktok.com/ZSqHmteGu/',
+  'https://vt.tiktok.com/ZSqHmVt5J/',
+  'https://vt.tiktok.com/ZSqHmP3LR/',
+  'https://vt.tiktok.com/ZSqHmXQwu/',
+  'https://vt.tiktok.com/ZSqHmqfmp/',
+  'https://vt.tiktok.com/ZSqHmCd1U/',
+  'https://vt.tiktok.com/ZSqHmpvTb/',
+  'https://vt.tiktok.com/ZSqHm5a5d/',
+  'https://vt.tiktok.com/ZSqHmmXer/',
+  'https://vt.tiktok.com/ZSqHmsmHb/',
+  'https://vt.tiktok.com/ZSqHmgtfL/',
+  'https://vt.tiktok.com/ZSqHH5Dpm/',
+  'https://vt.tiktok.com/ZSqHHmen4/',
+  'https://vt.tiktok.com/ZSqHHqjkT/',
+  'https://vt.tiktok.com/ZSqHH9NuC/',
+  'https://vt.tiktok.com/ZSqHHrHta/',
+  'https://vt.tiktok.com/ZSqHHQxq6/',
+  'https://vt.tiktok.com/ZSqHHmqae/',
+  'https://vt.tiktok.com/ZSqHHBau5/',
+  'https://vt.tiktok.com/ZSqH9eww6/',
+]
