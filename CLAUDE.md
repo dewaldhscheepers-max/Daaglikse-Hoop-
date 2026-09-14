@@ -97,7 +97,7 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 225
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 251
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1731,6 +1731,33 @@ Twee dinge daaraan wat 'n mens nie uit die kode aflei nie:
   NOOIT. Die PLEK en nie die id nie — dieselfde clip kan wettig twee keer in een
   voer staan (rondte 0 en rondte 1), en dan is dit twee kyke.
 
+**'n Clip wat NET was, mag nie weer boaan die volgende rondte staan nie.**
+Dewald, 14 September 2026, nadat hy EEN nuwe skakel ingesit het: *"toe ek op
+reels gaan toe kyk ek daai video en toe ek opscroll toe wys hy weer."*
+
+'n Nuwe clip het telling 0, dus is hy die **enigste** een in rondte 0 — hy staan
+alleen eerste, en dit is reg. Maar dan begin rondte 1, en omdat hy die nuutste
+post-id het, staan hy weer heel bo daardie rondte. Een clip gekyk, een keer
+geswiep, en daar is hy weer.
+
+Die ou wag het net gevra of hy PRESIES eerste in die nuwe pas staan en hom dan
+een plek geskuif. Dit is te min: op plek twee of drie voel dit nog steeds soos 'n
+herhaling.
+
+`spasieer()` is nou die reël, suiwer en met toetse: enige clip wat in die laaste
+**agt** items voorgekom het, mag nie in die eerste agt plekke van die volgende
+rondte staan nie. Twee dinge daaraan is met opset:
+
+* die ruil kies sy maat met sorg — 'n blinde ruil kan 'n KLONT maak (twee clips
+  van dieselfde mens langs mekaar), dus word elke kandidaat getoets en die eerste
+  een gevat wat by ALBEI kante pas. Pas nie een nie, val dit terug: 'n herhaling
+  verder weg is erger as twee clips van dieselfde mens langs mekaar;
+* die spasie word afgekap teen die lys se eie lengte — met drie clips kan 'n mens
+  nie agt plekke spasieer nie, en dan sou die reël 'n lus wees wat niks doen nie.
+
+Gemeet oor 60 sade met 124 clips en 123 reeds gesien: die naaste herhaling is
+**nege plekke** uitmekaar, en daar is **nul** naam-klonte.
+
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
 dieselfde vraag nie: 'n mens wat die app ken, kom terug om te sien wat NUUT is,
@@ -1915,7 +1942,22 @@ Die admin se verslag wys **Nuut** en **Was al daar** langs mekaar. Dit is die
 getal wat sy vraag beantwoord, en dit is die enigste een wat waar kan wees. Dit
 is dus veilig om enige klomp weer te druk.
 
-Blaaiertoets: `kykReelsAdmin.mjs` (28 metings) gebruik sy EGTE plaksel.
+Blaaiertoets: `kykReelsAdmin.mjs` gebruik sy EGTE plaksel.
+
+**Twee keer insit kan nooit 'n duplikaat maak nie**, en die admin sê dit nou.
+Dewald, 14 September 2026: *"ek het skakel ingesit.... en toe weet ek nie of dit
+in is nie toe sit ek dit weer in."* Die dokument se naam IS die video se id, dus
+is 'n tweede lopie 'n `update` op dieselfde dokument.
+
+Wat hom laat twyfel het, was 'n REËL WAT GELIEG HET: *"die voer haal sy clips een
+keer per oopmaak en hou hulle ses uur lank."* Die voer haal ELKE oopmaak vars;
+die ses uur geld net vir wat hy WYS terwyl dit laai. Wat hom wel 'n paar minute
+kan ophou, is die bediener se vyf-minuut-kas, en dít staan nou daar.
+
+En hy kan dit self nagaan: die kassie onderaan heet nou **"Kyk of 'n clip in is —
+of haal hom uit"**. `Soek die clip` vee niks; dit sê net of die clip in die voer
+is en wie se clip dit is. Daardie vermoë was al die hele tyd daar — net die
+opskrif het dit weggesteek.
 
 ### Een clip UITHAAL
 

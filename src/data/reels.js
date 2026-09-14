@@ -437,6 +437,73 @@ export function eenPas(klips, rnd, vorigeNaam, opsies) {
   return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
 }
 
+/* ── Dieselfde clip mag nie NET-NET weer opkom nie ──
+ *
+ * Dewald, 14 September 2026: *"toe ek op reels gaan toe kyk ek daai video en toe
+ * ek opscroll toe wys hy weer."*
+ *
+ * Hy het pas EEN nuwe skakel ingesit, en dit is presies wat dit veroorsaak het.
+ * 'n Nuwe clip het telling 0, dus is hy die ENIGSTE een in rondte 0 — hy staan
+ * alleen eerste, wat reg is. Maar dan begin rondte 1, en omdat hy die nuutste
+ * post-id het, staan hy weer heel bo daardie rondte. Een clip gekyk, een keer
+ * geswiep, en daar is hy weer.
+ *
+ * Die ou wag het net gevra of hy PRESIES eerste in die nuwe pas staan, en hom
+ * dan een plek geskuif. Dit is te min: op plek twee of drie voel dit nog steeds
+ * soos 'n herhaling.
+ *
+ * Dit is 'n SPASIE-reël. Enige clip wat in die laaste `spasie` items voorgekom
+ * het, mag nie in die eerste `spasie` plekke van die volgende rondte staan nie;
+ * hy word met 'n latere een geruil.
+ *
+ * ── Die ruil kies sy maat met sorg ──
+ *
+ * 'n Blinde ruil kan 'n KLONT maak — twee clips van dieselfde mens langs mekaar
+ * — en dit is presies wat `ontklont()` vroeër moes regmaak. Die ruil probeer dus
+ * elke kandidaat en vat die eerste een wat by ALBEI kante pas. Pas nie een nie,
+ * val dit terug op die eerste beskikbare: 'n herhaling verder weg is erger as
+ * twee clips van dieselfde mens langs mekaar.
+ *
+ * Suiwer, en dit verander die INSET nie — dit gee 'n nuwe lys terug.
+ */
+export const SPASIE = 8
+
+function naamBy(lys, i) {
+  return i >= 0 && i < lys.length ? naamVanKlip(lys[i]) : ''
+}
+
+export function spasieer(pas, onlangs, spasie = SPASIE) {
+  const uit = Array.isArray(pas) ? [...pas] : []
+  const weg = onlangs instanceof Set ? onlangs : new Set(Array.isArray(onlangs) ? onlangs : [])
+  if (!weg.size || uit.length < 2) return uit
+
+  /* Nooit verder as die lys self nie: met drie clips kan 'n mens nie agt plekke
+     spasieer nie, en dan is die reël 'n lus wat niks doen. */
+  const n = Math.max(0, Math.min(Number(spasie) || 0, uit.length - 1))
+
+  for (let i = 0; i < n; i++) {
+    if (!weg.has(uit[i].id)) continue
+
+    let keuse = -1
+    let eerste = -1
+    for (let j = n; j < uit.length; j++) {
+      if (weg.has(uit[j].id)) continue
+      if (eerste < 0) eerste = j
+      /* Sou hierdie ruil 'n klont maak — by i of by j? */
+      const naamJ = naamVanKlip(uit[j])
+      const naamI = naamVanKlip(uit[i])
+      const botsI = naamJ && (naamJ === naamBy(uit, i - 1) || naamJ === naamBy(uit, i + 1))
+      const botsJ = naamI && (naamI === naamBy(uit, j - 1) || naamI === naamBy(uit, j + 1))
+      if (!botsI && !botsJ) { keuse = j; break }
+    }
+    if (keuse < 0) keuse = eerste
+    if (keuse < 0) continue
+
+    const t = uit[i]; uit[i] = uit[keuse]; uit[keuse] = t
+  }
+  return uit
+}
+
 /* ── Die hele voer, as 'n lys ITEMS ──
  *
  * 'n Item is `{ tipe: 'klip', klip }`, en dit is die ENIGSTE soort.
@@ -574,18 +641,20 @@ export function bouVoer(klips, opsies) {
        NIKS gesien nie. Binne 'n rondte staan die nuutstes bo — dit is Dewald se
        *"nuwe videos altyd eerste.... bo"*, en 'n clip wat hy vandag inplak, het
        telling 0 en staan dus in hierdie rondte. */
-    const pas = eenPas(rondte, rnd, laaste ? naamVanKlip(laaste) : '',
+    let pas = eenPas(rondte, rnd, laaste ? naamVanKlip(laaste) : '',
                        { nuut: !!o.nuut && p === 0 })
     if (!pas.length) continue
     /* Die rondte is nou gekyk, sover hierdie lys gaan. */
     for (const k of pas) telle[k.id] += 1
-    /* Dieselfde CLIP twee keer agter mekaar bly moontlik wanneer daar net een
-       mens is; dan help niks. Is daar meer, skuif hy een plek af. */
-    if (laaste && pas.length > 1 && pas[0].id === laaste.id) {
-      const j = pas.findIndex((k, x) => x > 0 && k.id !== laaste.id && naamVanKlip(k) !== naamVanKlip(laaste))
-      if (j > 0) { const t = pas[0]; pas[0] = pas[j]; pas[j] = t }
-    }
-    for (const k of pas) items.push({ tipe: 'klip', klip: k })
+    /* ── Geen clip wat NET was, mag weer boaan staan nie ──
+       Sien `spasieer()`. Dit vervang 'n ou wag wat net die EERSTE plek nagegaan
+       het; met een nuwe clip in rondte 0 het hy op plek vyf weer opgekom. */
+    const onlangs = new Set(
+      items.slice(-SPASIE).filter(i => i.tipe === 'klip').map(i => i.klip.id)
+    )
+    const ry = spasieer(pas, onlangs)
+    for (const k of ry) items.push({ tipe: 'klip', klip: k })
+    pas = ry
     laaste = pas[pas.length - 1]
   }
 

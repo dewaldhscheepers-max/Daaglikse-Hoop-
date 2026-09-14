@@ -25,6 +25,8 @@ import {
   SWIEPE_VOOR_VRA_GEDEEL,
   vraByEinde,
   SEKONDES_VOOR_EINDE,
+  spasieer,
+  SPASIE,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -503,6 +505,75 @@ console.log('\n── Die voer HOU AAN ──')
   const p1 = klipse(drie).slice(0, 6).map(k => k.id).join(',')
   const p2 = klipse(drie).slice(6, 12).map(k => k.id).join(',')
   is('pas 2 is n ander orde as pas 1', p1 !== p2, true)
+}
+
+console.log('\n── n Clip wat NET was, mag nie weer boaan staan nie ──')
+/* Dewald, 14 September 2026, nadat hy EEN nuwe skakel ingesit het: *"toe ek op
+   reels gaan toe kyk ek daai video en toe ek opscroll toe wys hy weer."*
+
+   Dit is presies wat 'n nuwe clip veroorsaak: hy het telling 0, dus is hy die
+   ENIGSTE een in rondte 0 en staan hy alleen eerste — wat reg is. Maar dan begin
+   rondte 1, en omdat hy die nuutste post-id het, staan hy weer heel bo daardie
+   rondte. Een clip gekyk, een keer geswiep, en daar is hy weer. */
+{
+  const mk2 = (id, naam) => ({ id, bron: 'tiktok', bronId: '7412345678901234567', naam })
+  const pas = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map((x, i) => mk2(x, 'M' + (i % 3)))
+
+  /* 'a' was NET — hy mag nie in die eerste `spasie` plekke wees nie. */
+  {
+    const uit = spasieer(pas, new Set(['a']), 4)
+    is('die clip wat net was, is geskuif', uit.slice(0, 4).some(k => k.id === 'a'), false)
+    is('maar hy is nie WEG nie', uit.some(k => k.id === 'a'), true)
+    is('en niks anders het verdwyn nie', new Set(uit.map(k => k.id)).size, pas.length)
+    is('die lengte bly', uit.length, pas.length)
+  }
+
+  /* MEER as een onlangse clip. */
+  {
+    const uit = spasieer(pas, new Set(['a', 'b', 'c']), 4)
+    is('al drie is uit die voorste plekke',
+      uit.slice(0, 4).some(k => ['a', 'b', 'c'].includes(k.id)), false)
+    is('en almal is nog daar', new Set(uit.map(k => k.id)).size, pas.length)
+  }
+
+  /* Die ruil mag nie 'n KLONT maak nie — twee van dieselfde mens langs mekaar. */
+  {
+    const uit = spasieer(pas, new Set(['a']), 4)
+    let klonte = 0
+    for (let i = 1; i < uit.length; i++) if (uit[i].naam === uit[i - 1].naam) klonte++
+    is('die ruil maak geen klont nie', klonte, 0)
+  }
+
+  /* Dit RAAK NIE die inset nie. */
+  {
+    const kopie = [...pas]
+    spasieer(pas, new Set(['a']), 4)
+    is('die inset bly onaangeraak', pas.map(k => k.id), kopie.map(k => k.id))
+  }
+
+  /* Rande: 'n mens kan nie agt plekke spasieer in 'n lys van drie nie. */
+  is('n lys van twee', spasieer([mk2('a', 'A'), mk2('b', 'B')], new Set(['a']), 8).length, 2)
+  is('n lys van een bly',  spasieer([mk2('a', 'A')], new Set(['a']), 8).length, 1)
+  is('geen onlangse clips', spasieer(pas, new Set(), 4).map(k => k.id), pas.map(k => k.id))
+  is('n lee lys',          spasieer([], new Set(['a']), 4), [])
+  is('niks in',            spasieer(null, new Set(['a']), 4), [])
+  is('die spasie is agt',  SPASIE, 8)
+}
+
+console.log('\n── En die HELE pad: een nuwe clip by n mens wat alles gesien het ──')
+{
+  const lys = Array.from({ length: 8 }, (_, i) => mk('k' + i, 'M' + (i % 4)))
+  /* Sewe gesien, een splinternuut — presies Dewald se geval. */
+  const gesien = {}
+  for (let i = 0; i < 7; i++) gesien['k' + i] = 1
+
+  for (const saad of [1, 2, 3, 7, 42, 99]) {
+    const ry = bouVoer(lys, { saad, passe: 3, gesien }).map(i => i.klip.id)
+    is(`saad ${saad}: die NUWE clip staan eerste`, ry[0], 'k7')
+    /* En hy kom nie weer voordat al die ander was nie. */
+    const weer = ry.indexOf('k7', 1)
+    is(`saad ${saad}: en nie weer voor die res was nie`, weer >= lys.length - 1, true)
+  }
 }
 
 console.log('\n── Die voer dra NET clips — geen kaart nie ──')

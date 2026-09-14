@@ -252,20 +252,39 @@ export default function ReelsAdmin({ geheim }) {
             </details>
           )}
 
+          {/* Hierdie reël het gesê die voer "hou hulle ses uur lank", en dit was
+              verkeerd genoeg om Dewald te laat twyfel: hy het 'n skakel ingesit,
+              dit nie gesien nie, en dit toe weer ingesit. Die voer haal ELKE
+              oopmaak vars; die ses uur geld net vir wat hy WYS terwyl dit laai.
+              Wat hom wel kan ophou, is die bediener se vyf-minuut-kas. */}
           <p className="admin-books-note" style={{ marginTop: 10 }}>
-            Die voer haal sy clips een keer per oopmaak en hou hulle ses uur lank.
-            Sien dit nie dadelik nie, maak die app toe en weer oop.
+            Die voer haal sy clips elke keer as dit oopmaak. Die bediener hou sy
+            antwoord vyf minute, dus maak die app toe en weer oop — of wag 'n
+            paar minute as jy dit nie dadelik sien nie.
           </p>
         </div>
       )}
 
       {/* ── Een clip uithaal ── */}
       <div className="ra-invoer ra-weg">
-        <div className="ra-invoer-kop">Haal een clip uit</div>
+        <div className="ra-invoer-kop">Kyk of 'n clip in is — of haal hom uit</div>
+        {/* Dewald, 14 September 2026: *"ek het skakel ingesit.... en toe weet ek
+            nie of dit in is nie toe sit ek dit weer in."*
+
+            Hierdie kassie doen albei. `Soek die clip` VEE NIKS — dit sê net of
+            hy in die voer is en wie se clip dit is. Dit is die antwoord op "is
+            dit in?", en dit was al die hele tyd hier; net die opskrif het dit
+            weggesteek. */}
         <p className="admin-books-note">
-          Speel 'n clip nie (&ldquo;Video currently unavailable&rdquo;), druk
-          <b> Deel</b> langs daardie clip en plak die skakel hier. Dit wys eers
-          wie se clip dit is; die rooi knoppie kom daarna.
+          Plak enige skakel en druk <b>Soek die clip</b> — dit sê of hy reeds in
+          die voer is en wie se clip dit is. Dit vee niks uit nie.
+        </p>
+        <p className="admin-books-note">
+          Twee keer insit kan nooit 'n duplikaat maak nie: die video se eie id is
+          sy naam in die databasis. Speel 'n clip nie
+          (&ldquo;Video currently unavailable&rdquo;), druk <b>Deel</b> langs
+          daardie clip en plak die skakel hier — die rooi knoppie kom eers nadat
+          jy sien wie se clip dit is.
         </p>
         <input
           className="ra-weg-kassie"
