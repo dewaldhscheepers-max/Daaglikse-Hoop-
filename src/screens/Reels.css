@@ -93,6 +93,10 @@ video.reel-speler { object-fit: cover; background: #151314; }
   z-index: 2;
 }
 
+/* Die gebedskaart dra sy eie dagbreek-grond; die skrifstrook se sluier sou net
+   'n donker band oor sy onderste helfte wees. Sien ReelsGebedKaart.css. */
+.reel-gebed::after { display: none; }
+
 .reel-onder {
   position: absolute;
   left: 0; right: 0;

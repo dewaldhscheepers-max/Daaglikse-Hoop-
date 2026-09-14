@@ -15,12 +15,20 @@
  * en sodra 'n mens naby die einde van wat gebou is kom, word die volgende pas
  * bygesit.
  *
- * **Daar is GEEN kaart tussen die clips nie.** Hier het 'n "JY HET ALLES
- * GESIEN"-mylpaal gestaan; Dewald, 14 September 2026: *"verwyder die skerm."*
- * Die kaart het nooit sy eie bestaan verdien nie — dit het BEGIN as 'n
- * klaar-skerm wat die voer doodgemaak het, en is toe 'n mylpaal waaraan 'n mens
- * verby swiep. 'n Voer wat AANHOU, het nie 'n mylpaal nodig nie: die kaart
- * onderbreek presies die ding wat hy beweer om te vier.
+ * **Daar is presies EEN kaart tussen die clips, en dit is 'n GEBEDSKAART.**
+ * Een keer per dag, ná die 5de clip, en 'n mens swiep net so daarby verby. Die
+ * reëls staan in `src/data/reelsGebed.js` en die skerm in
+ * `src/components/ReelsGebedKaart.jsx`.
+ *
+ * Hier het OOK 'n "JY HET ALLES GESIEN"-mylpaal gestaan; Dewald, 14 September
+ * 2026: *"verwyder die skerm."* Daardie kaart het nooit sy eie bestaan verdien
+ * nie — dit het BEGIN as 'n klaar-skerm wat die voer doodgemaak het, en is toe 'n
+ * mylpaal waaraan 'n mens verby swiep. 'n Voer wat AANHOU, het nie 'n mylpaal
+ * nodig nie: die kaart onderbreek presies die ding wat hy beweer om te vier.
+ *
+ * Die gebedskaart is 'n ander soort ding: hy vier niks, hy NOOI, en hy kom een
+ * keer per dag in plaas van by elke rondte. Dit is die hele verskil tussen 'n
+ * uitnodiging en 'n tolhek.
  *
  * **Hoogstens TWEE keer dieselfde video** voordat sy alles gesien het — en dit
  * is nou die VORM van die lys, nie 'n teller nie. `bouVoer` bou RONDTES, en 'n
@@ -115,6 +123,10 @@ import { spelerAdres } from '../data/tiktokId'
 import {
   stelKlank, stelWag, beginVanVoor, isTiktokBoodskap, tydUitBoodskap,
 } from '../data/tiktokKlank'
+import {
+  GEBED_DAG, dagVan, magWysGebed, magWysSteun, voegGebedIn,
+} from '../data/reelsGebed'
+import ReelsGebedKaart from '../components/ReelsGebedKaart'
 import './Reels.css'
 
 /* 'n Haal sonder tydgrens bly vir altyd staan wanneer Android die oortjie
@@ -226,6 +238,25 @@ function merkGesien(id) {
     localStorage.setItem(GESIEN, JSON.stringify(w))
     return w
   } catch { return {} }
+}
+
+/* ── Die dag waarop laas oor GELD gepraat is ──
+ *
+ * Dieselfde sleutel as App.jsx s'n, en dit is met opset: "vandag is klaar
+ * gevra" moet EEN ding beteken in hierdie app. Druk sy DEEL MY GEBEDSVERSOEK,
+ * is sy op pad om haar hart neer te skryf, en dan kom daar vandag geen
+ * opspringer meer nie — nie donasie nie, nie 'n e-boek nie.
+ *
+ * Sien CLAUDE.md: *"Nooit geld op 'n dag wat iemand iets in die gebedskassie
+ * getik het nie."* */
+const POPUP_DAG = 'lastPopupDate'
+
+function leesSleutel(sleutel) {
+  try { return localStorage.getItem(sleutel) || '' } catch { return '' }
+}
+
+function skryfSleutel(sleutel, waarde) {
+  try { localStorage.setItem(sleutel, waarde) } catch { /* privaat modus */ }
 }
 
 /* ── Een deel per clip per TOESTEL ──
@@ -411,6 +442,34 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    * staan (rondte 0 en rondte 1), en dan is dit twee kyke. */
   const getelPlekRef = useRef(new Set())
 
+  /* ── Die gebedskaart, EEN keer per oopmaak besluit ──
+   *
+   * Dieselfde rede as `nuutRef` s'n: die voer word herbou elke keer as 'n pas
+   * bykom, en 'n besluit wat by elke herbou weer gelees word, sou die kaart
+   * onder haar vingers laat verdwyn op die oomblik dat sy hom bereik (want dan
+   * is die dag reeds gemerk).
+   *
+   * Die REËLS staan in `src/data/reelsGebed.js`. */
+  const dagRef = useRef('')
+  if (!dagRef.current) dagRef.current = dagVan(new Date())
+  const gebedRef = useRef(null)
+  if (gebedRef.current === null) {
+    gebedRef.current = magWysGebed({
+      vandag: dagRef.current,
+      laasGewys: leesSleutel(GEBED_DAG),
+      /* 'n Vreemdeling op 'n gedeelde skakel word reeds gevra om te
+         installeer. Twee volskerm-vrae op een besoek is 'n tolhek. */
+      gedeel: !!deepId,
+    })
+  }
+  const steunRef = useRef(null)
+  if (steunRef.current === null) {
+    steunRef.current = magWysSteun({
+      vandag: dagRef.current,
+      dagGevra: leesSleutel(POPUP_DAG),
+    })
+  }
+
   /* ── Die voer ──
      Die saai staan onder die gehaalde lys, nie in die plek daarvan nie: is daar
      iets in Firestore, wen dit; is daar niks, is die oortjie steeds nie leeg
@@ -418,7 +477,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   const items = useMemo(() => {
     const gehaal = skoonLys(rou)
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
-    return bouVoer(lys, {
+    return voegGebedIn(bouVoer(lys, {
       deepId: deepId || null,
       /* Wat sy REEDS gesien het. Hieruit kom die rondtes: eers alles wat sy nog
          nie gesien het nie, en 'n tweede keer eers wanneer daar niks ongesien
@@ -429,7 +488,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
       /* 'n Vreemdeling sien die BESTE eerste, nie die nuutste nie. Dewald:
          "die wat die meeste ge deel is kry voorkeer by nuwe kykers." */
       nuut: nuutRef.current,
-    })
+    }), { wys: gebedRef.current })
   }, [rou, deepId, passe])
 
   /* ── Is die belowede clip werklik hier? ──
@@ -531,6 +590,12 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
             merkGesien(it.klip.id)
           }
         }
+        /* ── Die gebedskaart is GESIEN ──
+           Die dag word HIER gemerk en nie by die bou nie: word dit by die bou
+           gemerk, het 'n mens wat die voer oopmaak en ná drie clips uitklim, sy
+           kaart vir vandag verloor sonder om hom ooit te sien. Een keer per dag
+           beteken een keer GESIEN. */
+        if (it && it.tipe === 'gebed') skryfSleutel(GEBED_DAG, dagRef.current)
         /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
            volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
            wat sy reeds gesien het presies waar dit was. */
@@ -782,6 +847,30 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     } catch { /* sy het gekanselleer; dis nie 'n fout nie */ }
   }, [])
 
+  /* ── Die gebedskaart se knoppie ──
+   *
+   * Dit skep NIKS. `bidsaam_fokus` is dieselfde vlag wat SorgVorm.jsx al
+   * gebruik: Bid Saam rol na die versoek-kaart en sit die wyser IN die
+   * teksblok. Sy land dus nie bo-aan 'n muur waar sy moet soek nie.
+   *
+   * En die dag word as GEVRA gemerk. Sy is op pad om haar hart neer te skryf;
+   * 'n donasie- of e-boek-opspringer drie skerms later is presies die fout wat
+   * hierdie app al gemaak het. Sien CLAUDE.md se reël by Tyd met God. */
+  const deelVersoek = useCallback(() => {
+    try { sessionStorage.setItem('bidsaam_fokus', 'versoek') } catch { /* privaat modus */ }
+    skryfSleutel(POPUP_DAG, dagRef.current)
+    /* Dieselfde gebeurtenis as Bid Nou s'n — App.jsx stel die oortjie en rol bo
+       toe. Die voer word daarmee afgehaal, dus hou die video op. */
+    window.dispatchEvent(new CustomEvent('bidnou-navigate', { detail: 'bidsaam' }))
+  }, [])
+
+  /* Die twee BESTAANDE skenk-vorms, presies soos SorgSteun.jsx hulle roep.
+     Geen nuwe betaalpad nie. */
+  const skenk = useCallback((soort) => {
+    const naam = soort === 'maand' ? 'open-hoop-vennoot' : 'open-donation'
+    window.dispatchEvent(new CustomEvent(naam))
+  }, [])
+
   if (laai && !items.length) {
     return (
       <div className="reels reels-leeg">
@@ -800,6 +889,22 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
       <div className="reels-voer" ref={voerRef}>
         {items.map((it, i) => {
+          /* ── Die gebedskaart ──
+             Hy is 'n gewone `.reel` met sy eie `data-reel`, sodat hy presies
+             soos 'n clip vasklik en 'n mens net so daarby kan verbyswiep. Hy
+             dra GEEN rail nie: daar is niks om te deel en geen klank. */
+          if (it.tipe === 'gebed') {
+            return (
+              <section className="reel reel-gebed" key={`gebed-${i}`} data-reel={i}>
+                <ReelsGebedKaart
+                  wysSteun={steunRef.current}
+                  onDeelVersoek={deelVersoek}
+                  onSkenk={skenk}
+                />
+              </section>
+            )
+          }
+
           const klip = it.klip
           const brug = brugVir(klip)
           return (

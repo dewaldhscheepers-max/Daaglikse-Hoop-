@@ -102,6 +102,7 @@ node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
 node api/_reelsVoegBy.toets.mjs               # die klomp-oplosser, vals TikTok + Firestore, 47
+node src/data/reelsGebed.toets.mjs            # die gebedskaart in die voer, 34 toetse
 node src/data/reelsVerwyder.toets.mjs         # wat n mens mag inplak om n clip uit te haal, 33
 node api/_reelsVerwyder.toets.mjs             # en die verwydering self, vals Firestore, 35
 ```
@@ -1638,8 +1639,9 @@ toegaan.
 Elke **pas** is 'n nuwe skommeling, en `Reels.jsx` sit die volgende pas by sodra
 'n mens binne vier items van die onderkant kom.
 
-**En daar is GEEN kaart tussen die clips nie.** Hier het 'n "JY HET ALLES
-GESIEN"-mylpaal gestaan — met 'n deel-knoppie, en 'n reël wat sê dat die voer
+**Daar is presies EEN kaart tussen die clips, en dit is 'n GEBEDSKAART** — een
+keer per dag, ná die 5de clip; sien hieronder. 'n MYLPAAL is daar nie. Hier het
+'n "JY HET ALLES GESIEN"-mylpaal gestaan — met 'n deel-knoppie, en 'n reël wat sê dat die voer
 aangaan. Dewald, 14 September 2026, met 'n skermkiekie daarvan: *"verwyder die
 skerm."*
 
@@ -1869,6 +1871,76 @@ eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
 knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
+
+### Die gebedskaart in die voer
+
+Die enigste kaart tussen die clips. Dewald se eie ontwerp, 14 September 2026:
+*"dont code. what about this.. Los die e-boeks uit."*
+
+Sy eerste voorstel was drie soorte kaart (gebed, gratis e-boek, stemboodskap)
+elke agt clips. Dit is ses vrae in een sessie, en dit is 'n tolhek. Hy het dit
+self afgeskaal tot **een kaart, een keer per dag, ná die 5de clip** — en
+daardie vereenvoudiging het twee van die drie besware vanself opgelos.
+
+**Dit skep NIKS.** Dieselfde besluit as Vandag se Tyd met God s'n. Die knoppie
+maak die BESTAANDE gebedsvorm op Bid Saam oop, tot IN die kassie
+(`bidsaam_fokus`, dieselfde vlag wat `SorgVorm.jsx` al gebruik), en die twee
+klein skakels onder maak die BESTAANDE skenk-vorms oop (`open-donation`,
+`open-hoop-vennoot`). Geen tweede gebedsmuur, geen tweede betaalpad.
+
+**Daar is GEEN tikkassie op die kaart nie**, en dit is nie 'n vereenvoudiging
+nie. 'n Vrye teksblok wat direk op die muur land, gaan verby die krisis-keuring
+wat die egte vorm reeds doen — en 'n sleutelbord in 'n snap-voer veg in elk
+geval met die voer.
+
+**Net die KNOPPIE navigeer.** Dewald se eie regstelling: *"net as ek op deel
+gebedsversoek kliek."* Hy is reg, en dit is die belangrikste besluit hierin: 'n
+volskerm-tikteiken in 'n swiep-voer vuur op SWIEP-bedoeling — sy trek op, haar
+vinger lig 'n oomblik, en sy is op 'n ander skerm. Dan voel die kaart soos 'n
+strik en die volgende keer swiep sy vinniger daaroor.
+
+**Die vreemdeling op 'n gedeelde skakel sien hom nie.** Sy word reeds gevra om
+te installeer (`SWIEPE_VOOR_VRA_GEDEEL`), en twee volskerm-vrae op een besoek is
+die tolhek wat hierdie app oral elders vermy.
+
+**Die ondersteuner-reël is die een plek waar hierdie kaart teen 'n bestaande
+reël druk.** Dewald: *"word Daaglikse Hoop ondersteuner moet bietjie groter."*
+Op die KAART is dit reg en dit is so gedoen (13px teen Tyd met God se 12,5px,
+en die goue pil bly die enigste ding wat skree). Maar dit mag nie saam met haar
+deur die knoppie gaan nie:
+
+> Nooit geld op 'n dag wat iemand iets in die gebedskassie getik het nie...
+> Iemand wat pas geskryf het dat sy huwelik in stukke lê, is nie die mens vir 'n
+> R50-vraag drie skerms later nie.
+
+Daarom twee hekke, albei in `src/data/reelsGebed.js`:
+
+* druk sy **DEEL MY GEBEDSVERSOEK**, word `lastPopupDate` op vandag gestel —
+  dieselfde sleutel as App.jsx s'n, want "vandag is klaar gevra" moet EEN ding
+  beteken. Daar kom vandag geen opspringer meer nie;
+* en is die dag **reeds** gevra (sy het vanoggend deur Tyd met God gegaan en
+  daar getik), val die ondersteuner-reël van die kaart af weg. Die UITNODIGING
+  om te bid bly staan — dit is nie 'n geldvraag nie.
+
+**Die dag word gemerk wanneer die kaart GESIEN is**, nie wanneer die voer gebou
+word nie. Anders verloor 'n mens wat ná drie clips uitklim haar kaart vir vandag
+sonder om hom ooit te sien.
+
+**Die besluit word EEN keer per oopmaak gelees** (`gebedRef`, `steunRef`) —
+dieselfde rede as `nuutRef` s'n. Die voer word herbou elke keer as 'n pas bykom;
+'n besluit wat by elke herbou weer gelees word, sou die kaart onder haar vingers
+laat verdwyn op die oomblik dat sy hom bereik.
+
+**Die grond is 'n `linear-gradient` op 'n ONDEURSIGTIGE kleur** — nag bo,
+dagbreek onder. Geen `<img>`, geen `filter: blur()`, geen `backdrop-filter`: 'n
+saamgestelde laag oor 'n bewegende voer is presies waar die gekleurde strepe op
+Android vandaan kom. Die 🙏 is dieselfde uitsondering as `TekenHande` op Tyd met
+God, en om dieselfde rede.
+
+Blaaiertoets: `kykReels.mjs` se laaste drie blokke. Hulle meet wat geen
+eenheidstoets kan sien — dat 'n tik op die KAART niks doen nie, dat die knoppie
+werklik op Bid Saam land met `document.activeElement` in die teksblok, en dat
+die ondersteuner-reël verdwyn op 'n dag wat reeds gevra is.
 
 ### Skakels inplak
 

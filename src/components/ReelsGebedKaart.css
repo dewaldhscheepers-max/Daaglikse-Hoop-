@@ -1,0 +1,192 @@
+/* ── DIE GEBEDSKAART IN DIE VOER ──
+ *
+ * Dewald se ontwerp: nag bo, dagbreek onder, serif-hoofletters, 'n goue pil in
+ * die middel, en 'n haarlyn met 'n klein ondersteuner-reël heel onder.
+ *
+ * ── Die Android-reëls ──
+ *
+ * Die grond is 'n ONDEURSIGTIGE kleur met 'n `linear-gradient` daarop. Geen
+ * `<img>` (die grootste tekstuur op 'n blad, en presies waar die gekleurde
+ * strepe vandaan gekom het), geen `filter: blur()`, geen `backdrop-filter` — 'n
+ * saamgestelde laag oor 'n bewegende voer is die duurste fout in hierdie
+ * projek se geskiedenis. 'n Gradiënt word in die ouer se laag geverf.
+ *
+ * Geen `transform` of `opacity` op `:active` nie. Net kleur. Sien CLAUDE.md.
+ */
+
+.rg {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  /* ── Bo die nav ÉN bo die sweefende BYBEL-knoppie ──
+     Dieselfde 70px as `.reel-rail` s'n, en om presies dieselfde rede: daardie
+     knoppie hang oor ELKE skerm in hierdie app, en hy is die eerste ding om te
+     onthou wanneer iets in 'n onderste hoek beland. Hy het die Deel-knoppie in
+     hierdie voer al letterlik doodgedruk, en op 'n 360px-foon het hy op
+     "Maandelikse donasie" gaan staan. */
+  padding: 34px 26px calc(var(--nav-height) + var(--safe-bottom) + 70px);
+  /* ONDEURSIGTIG, en dan die dagbreek daarop: diep nag bo, warm goud waar die
+     son deurbreek. Een grond, nooit twee stelle woorde oor mekaar — dieselfde
+     les as die wallpaper agter Tyd met God se klaar-skerm. */
+  background:
+    linear-gradient(
+      to bottom,
+      #0B1220 0%,
+      #121D33 34%,
+      #2A2A3A 62%,
+      #5C452F 84%,
+      #8A6034 100%
+    ),
+    #0B1220;
+  text-align: center;
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* ── Die hele blok staan in die MIDDEL, en die ondersteuner-reël sit DIREK
+   onder die knoppie ──
+
+   Dit was 'n oomblik lank anders: die boodskap in die middel en die reël aan
+   die heel onderkant vasgepen. Dewald het na die eerste weergawe gewys — *"die
+   een.."* — en hy is reg. Die reël hoort aan die KAART, nie aan die onderkant
+   van die skerm nie; vasgepen lyk dit soos 'n voetstuk wat by die app hoort en
+   nie by hierdie kaart nie. */
+.rg-binne {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  /* Dieselfde breedte as die haarlyn hieronder: twee blokke wat amper — maar
+     nie heeltemal — ooreenstem, lees soos 'n fout. */
+  width: 100%;
+  max-width: 360px;
+}
+
+/* 'n <span> meet nie soos 'n SVG nie: die grootte kom uit `font-size`, en 'n
+   vaste breedte sou die glief plat druk. Dieselfde as `.tmg-emoji`. */
+.rg-emoji {
+  font-size: 40px;
+  line-height: 1;
+}
+
+/* `text-wrap: balance` deel die kop in twee EWE reëls — KAN ONS SAAM / MET JOU
+   BID? — in plaas van "KAN ONS SAAM MET / JOU BID?" met 'n hangende tweede
+   reël. 'n Blaaier wat dit nie ken nie, breek soos altyd; niks gaan stukkend
+   nie. 'n `max-width` in `ch` het hier NIE gewerk nie: op 'n serif van 30px is
+   13ch te smal en die kop word DRIE reëls. */
+.rg-kop {
+  margin: 0 auto;
+  text-wrap: balance;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #F6EFE4;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+
+.rg-lei {
+  margin: 0 auto;
+  max-width: 30ch;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: #E8CBA4;
+}
+
+.rg-teks {
+  margin: 0 auto;
+  max-width: 30ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(246, 239, 228, 0.82);
+}
+
+/* Die enigste ding op hierdie skerm wat soos 'n knoppie skree. */
+.rg-knop {
+  margin-top: 6px;
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 16px 22px;
+  background: linear-gradient(to bottom, #E6C495, #CFA268);
+  color: #241708;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+/* Net kleur. Geen transform. */
+.rg-knop:active { background: linear-gradient(to bottom, #D6B184, #BE8F57); }
+
+/* ── Die ondersteuner-reël ──
+   Bietjie groter as `.tmg-steun-knop` se 12.5px — Dewald: *"word Daaglikse
+   Hoop ondersteuner moet bietjie groter"* — maar steeds duidelik kleiner as die
+   goue pil hierbo. Die blaaierlopie meet daardie verhouding. */
+.rg-steun {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 360px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(246, 239, 228, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rg-steun-lei {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: rgba(246, 239, 228, 0.9);
+}
+
+.rg-steun-ry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* ── Hulle STAPEL eerder as om te breek ──
+   Op 'n smal foon pas "Maandelikse donasie" nie langs sy maat nie, en 'n
+   knoppie wat oor twee reëls breek, word HOËR as die goue pil — dan skree die
+   verkeerde ding op die skerm. Met 'n basis van 160px wikkel hulle self na
+   onder mekaar en bly albei op een reël. Geen media-navraag nodig. */
+.rg-steun-knop {
+  flex: 1 1 160px;
+  min-width: 150px;
+  border: 1px solid rgba(232, 203, 164, 0.42);
+  border-radius: 14px;
+  /* Dun sye: "Maandelikse donasie" moet op EEN reël pas. 'n Knoppie wat oor
+     twee reëls breek, word hoër as die goue pil — en dan skree die verkeerde
+     ding. Die blaaierlopie meet daardie verhouding. */
+  padding: 10px 6px;
+  background: rgba(246, 239, 228, 0.06);
+  color: #E8CBA4;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Net kleur. */
+.rg-steun-knop:active { background: rgba(246, 239, 228, 0.14); }
+
+/* Op 'n baie kort skerm hoef die kop nie die kaart te breek nie. */
+@media (max-height: 640px) {
+  .rg { gap: 18px; }
+  .rg-emoji { font-size: 32px; }
+  .rg-kop { font-size: 25px; }
+}
