@@ -209,6 +209,12 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                    'Matteus 28:18–20', 'Handelinge 8:26–39',
                    'Galasiërs 3:27', 'Handelinge 8:36', 'Handelinge 10:47',
                    '1 Petrus 3:21', 'Johannes 2:19',
+      /* Week 6 — elke dag se LEES-blok, die admin se twee velde en die
+         groepsessie se kern-Skrifte. Ook hierdie week het geen opname nie; die
+         geskrewe hoofboodskap op Dag 1 haal Lukas 9 en Lukas 14 aan sonder
+         versnommers, en 'n hoofstuk sonder verse is niks om teen te keur. */
+      /* Week 6 */ 'Lukas 9:23–25', 'Lukas 22:39–46', 'Markus 10:17–22',
+                   'Matteus 10:37–39', 'Johannes 6:60–69', 'Lukas 14:25–33',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

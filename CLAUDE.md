@@ -49,7 +49,8 @@ node src/data/volgJesusWeek1.toets.mjs        # Week 1 se pad: niks herhaal, 58 
 node src/data/volgJesusWeek2.toets.mjs        # Week 2 se pad, teen dieselfde perke, 69 toetse
 node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde perke, 84 toetse
 node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra Dag 4 alleen, 111
-node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n GESKREWE boodskap, 130
+node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n GESKREWE boodskap, 131
+node src/data/volgJesusWeek6.toets.mjs        # Week 6 se pad — ook geen opname, 138 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -749,10 +750,33 @@ VERWYSINGS-lys. `ontleedVerwysing` sê net of die VORM reg is; daardie lus vra
 of die hoofstuk en die verse werklik bestaan. Sit 'n nuwe week se verse daar
 by. Dit vervang nie Dewald se eie nagaan nie.
 
-Blaaiertoetse: `kykWeek4.mjs` en `kykWeek5.mjs` in die scratchpad loop die hele
-week deur teen 'n onderskepte `/api/volg-jesus-openbaar`, en tel die KLIKKE —
-tien tot elf vir vyf dae. Week 5 s'n gee doelbewus 'n LEË `stemboodskapUrl`,
-presies soos die bediener sal, en eis dat daar nêrens 'n speler is nie.
+**Week 6 is die tweede so 'n week**, en dit was die maklike een — die vorm het
+reeds bestaan. Wat WEL geskuif het, is die 180-woord-perk op 'n teksblok.
+
+Daardie getal is gekalibreer toe elke week 'n opname gehad het: die opname het
+die onderrig gedra en die blokke op die skerm was kort. Sonder 'n opname staan
+die hele week se onderrig geskrewe — ook op Dag 2 tot 5, nie net in die een
+`boodskap`-blok nie. Dewald se opdrag was uitdruklik (*"MOENIE ENIGE WOORDE
+VERANDER NIE"*, *"moenie dit verkort nie"*), dus was die keuse tussen sy woorde
+sny en die getal skuif.
+
+`volgJesusWeek6.toets.mjs` se `MAKS_TEKS = 210` is daardie keuse, as EEN sigbare
+konstante met die rede langsaan — nie 'n getal wat stilweg in 'n lus verander
+het nie. Die reël self (*'n dag mag nie soos huiswerk voel nie*) word steeds
+gedra deur die twee perke wat NIE beweeg het nie: hoogstens vyf inhoudsblokke
+per dag en hoogstens twee private antwoorde per dag.
+
+Twee plekke waar Dewald se uitleg twee skryfkassies gehad het (Week 6 se Dag 3
+se "VOLTOOI DIE SIN" en Dag 4/5 se "OPVOLG") is EEN vraagblok wat albei vra. Sy
+woorde staan albei daar, in sy volgorde; die dag sou andersins ses blokke hê.
+
+Blaaiertoetse: `kykWeek4.mjs`, `kykWeek5.mjs` en `kykWeek6.mjs` in die
+scratchpad loop die hele week deur teen 'n onderskepte
+`/api/volg-jesus-openbaar`, en tel die KLIKKE — tien tot elf vir vyf dae. Week 5
+en Week 6 s'n gee doelbewus 'n LEË `stemboodskapUrl`, presies soos die bediener
+sal, en eis dat daar nêrens 'n speler is nie. Week 6 s'n eis boonop dat daar
+GEEN "volgende week"-kaart is nie — Week 7 bestaan nog nie, en 'n kaart wat 'n
+week belowe wat nie bestaan nie, is 'n knoppie wat niks doen nie.
 
 Albei moet die "VOLG JESUS het geskuif"-opspringer kan wegklik: hulle saai 'n
 mens wat die program reeds begin het, en dit is presies wie daardie boodskap

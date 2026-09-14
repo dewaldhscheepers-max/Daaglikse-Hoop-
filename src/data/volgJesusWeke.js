@@ -308,4 +308,64 @@ export const WEKE = {
       'Moenie mense druk om onmiddellik gedoop te word nie. Moenie sê die water self red nie. Moenie sê iemand is nie gered bloot omdat hy of sy nog nie gedoop is nie. Moenie sommer vir iemand sê ’n vorige doop tel nie. Moenie die week in ’n stryery oor verskillende kerke se sienings verander nie. Hou die gesprek by Jesus, die evangelie, geloof en gehoorsaamheid.',
     pastoraleRisiko: 'medium',
   },
+  /* ── Week 6 ──
+   *
+   * Die TWEEDE week sonder 'n opname. `videoId` en `stemboodskapUrl` is albei
+   * leeg en `geskreweBoodskap` is die vlaggie wat die publiseer-hek oopmaak —
+   * presies soos Week 5. Dewald: "WEEK 6 HET GEEN STEMBOODSKAP OF KLANKLÊER
+   * NIE... Week 6 moet dieselfde werk as Week 5."
+   *
+   * Wat die GEBRUIKER sien, staan in src/data/volgJesusWeek6.js. */
+  6: {
+    weeknommer: 6,
+    titel: 'Wat kos dit om Jesus te volg?',
+    doel:
+      'Om te verstaan dat ons nie redding verdien deur opofferings te maak nie. Redding is genade. Maar wanneer Jesus ons Here is, raak dit die manier waarop ons leef en die keuses wat ons maak.',
+    weekKern:
+      'Jy ontdek die koste van dissipelskap wanneer Jesus se pad nie meer die maklikste pad is nie.',
+    openingskerm:
+      'Jesus roep mense om Hom te volg. Hy steek nooit weg dat gehoorsaamheid soms iets kos nie.\n\n'
+      + 'Daar kom tye wanneer wat ons wil hê en wat Jesus van ons vra nie dieselfde is nie.\n\n'
+      + 'Dan word die vraag persoonlik:\n\n'
+      + 'WIE KRY DIE LAASTE SÊ?',
+    primereSkrif: 'Lukas 9:23–25',
+    ondersteunendeSkrif: 'Lukas 14:25–33',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 se noot: sonder hierdie vlaggie sou die publiseer-hek se
+       "geen hoofboodskap" die week vir altyd gesper hou. */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'Jy ontdek die koste van dissipelskap wanneer Jesus se pad nie meer die maklikste pad is nie.',
+    eenSin:
+      'Jy ontdek die koste van dissipelskap wanneer Jesus se pad nie meer die maklikste pad is nie.',
+    privaatRefleksie:
+      'Waar probeer ek nog my eie wil kry, terwyl ek reeds weet wat Jesus van my vra?',
+    gehoorsaamheidStap:
+      'Kies een ding wat jy hierdie week gaan doen omdat jy Jesus wil gehoorsaam. Dit kan wees: vergewe iemand; vra om verskoning; hou op met iets wat jy weet verkeerd is; stel ’n gesonde grens; wees eerlik oor iets wat jy wegsteek; sê nee vir iets wat jou van Jesus af wegtrek; hou op om iemand se goedkeuring na te jaag; doen iets wat jy reeds weet Jesus van jou vra. Kies een stap en neem dit.',
+    gebed:
+      'Here Jesus, dankie dat ons U liefde nie hoef te verdien nie. U red ons uit genade. Help ons om U werklik te volg. Wys ons waar ons nog aan ons eie wil vasklou. Gee ons moed wanneer gehoorsaamheid moeilik is. Help ons om niks en niemand die plek te gee wat aan U behoort nie. U kry die laaste sê. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: hoe eerlik Jesus self in Getsemane was — en waarom jou gevoelens nie die laaste sê kry nie.',
+    dag1Titel: 'Jesus het nooit gesê dit gaan jou niks kos nie',
+    dag2Titel: 'Jou gevoelens kry nie die laaste sê nie',
+    dag3Titel: 'Wat hou jy te styf vas?',
+    dag4Titel: 'Wanneer mense se goedkeuring jou beheer',
+    dag5Titel: 'Na wie toe sal ons gaan?',
+    groepVraag1:
+      'Wat het jou hierdie week die meeste getref?',
+    groepVraag2:
+      'Wat is die verskil tussen jouself verloën en jouself haat?',
+    groepVraag3:
+      'Waarom dink julle het Jesus mense vooraf gevra om die koste te bereken?',
+    groepVraag4:
+      'Wat beteken Petrus se woorde vir julle: “Here, na wie toe sal ons gaan?”',
+    fasiliteerderHoofpunt:
+      'Die boodskap van hierdie week is nie dat mense genoeg moet ly of genoeg moet opoffer om goeie Christene te wees nie. Redding is ’n geskenk van God. Maar wanneer Jesus ons Here is, raak dit ons hele lewe: ons keuses, ons verhoudings, ons geld, ons gevoelens, ons gewoontes en ons planne. Jesus roep ons om Hom eerste te stel. Die groot vraag van die week is: WIE KRY DIE LAASTE SÊ?',
+    fasiliteerderGrens:
+      'Om jouself te verloën beteken nie dat jy jouself moet haat nie. Dit beteken ook nie dat jy nooit mag rus nie; dat jy geen behoeftes mag hê nie; dat jy nooit vir iemand mag nee sê nie; dat jy mishandeling moet verdra nie; dat jy in ’n gevaarlike situasie moet bly nie; of dat iemand anders jou mag beheer nie. Om Jesus te volg beteken dat Hy die laaste sê kry. Nie jou maat nie. Nie jou familie nie. Nie ’n pastoor of groepleier nie. Nie mense se opinies nie. Nie jou eie gevoelens nie. Jesus. Moenie iemand dwing om private dinge in die groep te deel nie.',
+    pastoraleRisiko: 'medium',
+  },
 }

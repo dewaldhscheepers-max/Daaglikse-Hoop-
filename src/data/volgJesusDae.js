@@ -42,6 +42,10 @@ import {
   WEEK5_DAE, WEEK5_REIS, WEEK5_OPENING, WEEK5_DEELSIN, WEEK5_VOLGENDE,
   WEEK5_TRANSKRIPSIE, WEEK5_SESSIE, WEEK5_KLAAR,
 } from './volgJesusWeek5.js'
+import {
+  WEEK6_DAE, WEEK6_REIS, WEEK6_OPENING, WEEK6_DEELSIN, WEEK6_VOLGENDE,
+  WEEK6_TRANSKRIPSIE, WEEK6_SESSIE, WEEK6_KLAAR,
+} from './volgJesusWeek6.js'
 
 const WEKE = {
   1: {
@@ -91,6 +95,19 @@ const WEKE = {
     transkripsie: WEEK5_TRANSKRIPSIE,
     sessie: WEEK5_SESSIE,
     klaar: WEEK5_KLAAR,
+  },
+  6: {
+    dae: WEEK6_DAE,
+    reis: WEEK6_REIS,
+    opening: WEEK6_OPENING,
+    deelsin: WEEK6_DEELSIN,
+    /* `null` totdat Week 7 bestaan — sien die kop van volgJesusWeek6.js. */
+    volgende: WEEK6_VOLGENDE,
+    /* Leeg: ook hierdie week het geen opname nie. Dewald: "WEEK 6 HET GEEN
+       STEMBOODSKAP OF KLANKLÊER NIE." */
+    transkripsie: WEEK6_TRANSKRIPSIE,
+    sessie: WEEK6_SESSIE,
+    klaar: WEEK6_KLAAR,
   },
 }
 

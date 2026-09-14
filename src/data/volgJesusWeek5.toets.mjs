@@ -185,7 +185,8 @@ waar(`en hoogstens 400 karakters (${WEEK5_OPENING.length})`, WEEK5_OPENING.lengt
 console.log('\n── Die register ken Week 5 ──\n')
 is('hetDae(5)', hetDae(5), true)
 is('die eerste vier ook', [hetDae(1), hetDae(2), hetDae(3), hetDae(4)], [true, true, true, true])
-is('maar nie week 6 nie', hetDae(6), false)
+is('en week 6 intussen ook', hetDae(6), true)
+is('maar nie week 7 nie', hetDae(7), false)
 is('weekDae(5) gee vyf dae', weekDae(5).length, 5)
 is('blokkeVir(5, 1) gee Dag 1 se blokke', blokkeVir(5, 1).length, blokkeVirDag5(1).length)
 is("en die deelsin is die week s'n", weekDeelsin(5), WEEK5_DEELSIN)
@@ -199,11 +200,11 @@ console.log('\n── Week 4 wys nou NA Week 5 ──\n')
   is('met Week 5 se titel', brug && brug.titel, WEKE[5].titel)
 }
 
-console.log('\n── En Week 5 wys reeds na Week 6 ──\n')
+console.log('\n── En Week 5 wys na Week 6 ──\n')
 {
-  /* Dewald het Week 6 se titel saamgestuur. Die brug bestaan dus reeds, ook al
-     is die week nog nie geskryf nie — dit is 'n BELOFTE op die skerm, nie 'n
-     pad nie, en dit is presies wat hy gegee het. */
+  /* Dewald het Week 6 se titel saamgestuur voordat die week bestaan het. Dit
+     was toe 'n BELOFTE op die skerm; noudat Week 6 geskryf is, moet die belofte
+     waar wees — volgJesusWeek6.toets.mjs toets die titel teen WEKE[6]. */
   is('WEEK5_VOLGENDE wys na 6', WEEK5_VOLGENDE.nommer, 6)
   waar('met n titel', WEEK5_VOLGENDE.titel.length > 3)
   waar('en n sin daarby', WEEK5_VOLGENDE.lyf.length > 20)
