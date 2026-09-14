@@ -34,10 +34,10 @@
    wat in jou gesig toegaan.
 
    Die voer loop nou AAN: elke pas is 'n nuwe skommeling, en wanneer 'n mens by
-   die einde van een kom, is die volgende al daar. Die "jy het alles gesien"-
-   kaart kom EEN keer — ná die eerste volle pas, wanneer dit waar is — en 'n
-   mens kan daaraan verby swiep. Dit is 'n mylpaal, nie 'n doodloopstraat nie,
-   en dit is die plek waar die deel-vraag hoort.
+   die einde van een kom, is die volgende al daar. Daar is ook GEEN kaart
+   tussenin nie — 'n "jy het alles gesien"-mylpaal het 'n ruk lank tussen die
+   passe gestaan, en Dewald het hom op 14 September 2026 laat verwyder. 'n Voer
+   wat aanhou, het nie 'n mylpaal nodig nie.
 
    ── Die volgorde is TOEVALLIG, nie die plak-volgorde nie ──
 
@@ -439,9 +439,16 @@ export function eenPas(klips, rnd, vorigeNaam, opsies) {
 
 /* ── Die hele voer, as 'n lys ITEMS ──
  *
- * 'n Item is `{ tipe: 'klip', klip }` of `{ tipe: 'mylpaal' }`. Die mylpaal kom
- * EEN keer, ná die eerste volle pas — daar waar "jy het alles gesien" waar is —
- * en die voer loop daarna aan.
+ * 'n Item is `{ tipe: 'klip', klip }`, en dit is die ENIGSTE soort.
+ *
+ * Hier het ook 'n `{ tipe: 'mylpaal' }` gestaan — 'n "JY HET ALLES GESIEN"-kaart
+ * ná die eerste volle pas. Dewald het dit op 14 September 2026 laat verwyder:
+ * *"verwyder die skerm."*
+ *
+ * Hy is reg, en die kaart het nooit sy eie bestaan verdien nie. Dit het BEGIN as
+ * 'n klaar-skerm wat die voer doodgemaak het; toe is dit 'n "mylpaal" waaraan 'n
+ * mens verby swiep. Maar 'n voer wat aanhou, hét nie 'n mylpaal nodig nie — die
+ * kaart onderbreek presies die ding wat hy beweer om te vier.
  *
  * `deepId` staan heel eerste en word uit die eerste pas gehaal, sodat 'n mens
  * nie dieselfde clip twee keer agter mekaar sien nie. Die belofte in die
@@ -543,18 +550,12 @@ export function bouVoer(klips, opsies) {
   for (const k of alles) telle[k.id] = gesienTel(o.gesien, k.id)
   if (deep) telle[deep.id] += 1
 
-  /* Was daar iets wat sy nog NIE gesien het nie toe ons begin het? Net dan is
-     die mylpaal waar. Het sy alles klaar gesien, sê "jy het alles gesien" niks
-     nuuts en dan is dit 'n kaart wat elke oopmaak in die pad staan. */
-  const hetOngesien = alles.some(k => telle[k.id] === 0)
 
   const items = []
   if (deep) items.push({ tipe: 'klip', klip: deep })
 
-  /* Die laaste EGTE clip, nie die laaste item nie: die mylpaal staan tussen twee
-     passe, en 'n naat-toets wat op `items[items.length - 1]` kyk, sien dan die
-     kaart en slaan die hele toets oor. Die gevolg was dieselfde clip twee keer
-     agter mekaar met 'n kaart tussenin. */
+  /* Die laaste clip van die vorige pas, sodat die NAAT tussen twee passe nie
+     dieselfde mens (of dieselfde clip) twee keer agter mekaar gee nie. */
   let laaste = deep || null
 
   for (let p = 0; p < passe; p++) {
@@ -586,10 +587,6 @@ export function bouVoer(klips, opsies) {
     }
     for (const k of pas) items.push({ tipe: 'klip', klip: k })
     laaste = pas[pas.length - 1]
-    /* Die mylpaal, een keer, ná die eerste volle pas — en NET as daar iets was
-       wat sy nog nie gesien het nie. Anders sê "jy het alles gesien" niks nuuts
-       en staan die kaart by elke oopmaak in die pad. */
-    if (p === 0 && passe > 1 && hetOngesien) items.push({ tipe: 'mylpaal' })
   }
 
   return items

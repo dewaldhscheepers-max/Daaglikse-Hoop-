@@ -409,16 +409,7 @@ console.log('\n── Wat sy REEDS GESIEN het ──')
   {
     const alles = { k0: 1, k1: 1, k2: 1, k3: 1, k4: 1, k5: 1 }
     is('alles gesien: die volle lys kom weer', new Set(ids({ saad: 5, passe: 1, gesien: alles })).size, 6)
-    /* En die mylpaal-kaart kom NIE weer nie — "jy het alles gesien" se niks
-       nuuts vir iemand wat dit reeds weet, en dan staan die kaart by elke
-       oopmaak in die pad. */
-    is('en GEEN mylpaal meer nie',
-       bouVoer(lys, { saad: 5, passe: 3, gesien: alles }).some(i => i.tipe === 'mylpaal'), false)
   }
-
-  /* 'n Vars kyker: die mylpaal hoort WEL daar, want dit is waar. */
-  is('n vars kyker kry die mylpaal',
-     bouVoer(lys, { saad: 5, passe: 3, gesien: {} }).some(i => i.tipe === 'mylpaal'), true)
 
   /* 'n NUWE clip wat hy vandag inplak, het telling 0 — hy staan dus in die
      eerste rondte, by die ongesiene. Dewald: "nuwe videos altyd eerste.... bo." */
@@ -514,20 +505,26 @@ console.log('\n── Die voer HOU AAN ──')
   is('pas 2 is n ander orde as pas 1', p1 !== p2, true)
 }
 
-console.log('\n── Die mylpaal kom EEN keer, en die voer loop daarna aan ──')
+console.log('\n── Die voer dra NET clips — geen kaart nie ──')
+/* Hier het 'n "JY HET ALLES GESIEN"-kaart tussen die passe gestaan. Dewald,
+   14 September 2026: *"verwyder die skerm."*
+
+   Hy is reg, en die kaart het nooit sy eie bestaan verdien nie: dit het BEGIN as
+   'n klaar-skerm wat die voer doodgemaak het, en is toe 'n "mylpaal" waaraan 'n
+   mens verby swiep. Maar 'n voer wat AANHOU, het nie 'n mylpaal nodig nie — die
+   kaart onderbreek presies die ding wat hy beweer om te vier. */
 {
   const lys = Array.from({ length: 5 }, (_, i) => mk('k' + i, 'M' + (i % 3)))
   const items = bouVoer(lys, { saad: 3, passe: 4 })
-  const mylpale = items.filter(i => i.tipe === 'mylpaal')
-  is('presies een mylpaal', mylpale.length, 1)
-  const waar = items.findIndex(i => i.tipe === 'mylpaal')
-  is('hy staan NA die eerste volle pas', waar, 5)
-  /* Dit is die hele punt van Dewald se klag: dit mag nie die einde wees nie. */
-  is('daar is nog clips NA hom', items.slice(waar + 1).some(i => i.tipe === 'klip'), true)
-  is('en die laaste item is n CLIP, nie die kaart nie', items[items.length - 1].tipe, 'klip')
-
-  /* Een pas alleen: dan is daar nog niks om "alles gesien" te sê. */
-  is('een pas dra geen mylpaal', bouVoer(lys, { saad: 3, passe: 1 }).some(i => i.tipe === 'mylpaal'), false)
+  is('elke item is n klip', items.every(i => i.tipe === 'klip'), true)
+  is('daar is GEEN mylpaal nie', items.some(i => i.tipe === 'mylpaal'), false)
+  /* En die voer loop steeds aan: vier passe maal vyf clips. */
+  is('die voer loop aan', items.length, 20)
+  is('en die laaste item is n CLIP', items[items.length - 1].tipe, 'klip')
+  /* Ook vir 'n mens wat reeds alles gesien het. */
+  const alles = Object.fromEntries(lys.map(k => [k.id, 1]))
+  is('ook vir wie alles gesien het',
+    bouVoer(lys, { saad: 3, passe: 3, gesien: alles }).every(i => i.tipe === 'klip'), true)
 }
 
 console.log('\n── Die gedeelde clip staan steeds EERSTE ──')
@@ -625,16 +622,17 @@ console.log('\n── n NUWE kyker sien die BESTE eerste ──')
   }
   is('n bekende kyker se orde is ANDERS', bekendeKryOokDieBeste, false)
 
-  /* Die tweede pas is nie meer "nuut" nie: sy het alles een keer gesien. */
+  /* Die TWEEDE rondte is nie meer "nuut" nie: sy het alles een keer gesien.
+     Die grens was die mylpaal-kaart; die kaart is weg, en die grens is nou
+     eenvoudig die lengte van die eerste rondte — elke rondte wys elke clip
+     presies een keer. */
   {
     const items = bouVoer(lys, { saad: 9, passe: 3, nuut: true })
     const klips = items.filter(i => i.tipe === 'klip')
-    const grens = items.findIndex(i => i.tipe === 'mylpaal')
-    const naMylpaal = items.slice(grens + 1).filter(i => i.tipe === 'klip')
-      .slice(0, BESTE_BO).map(i => i.klip.id)
     is('en niks gaan verlore nie', new Set(klips.map(k => k.klip.id)).size, lys.length)
-    is('die tweede pas is nie weer die top vyf nie',
-       naMylpaal.every(id => beste.includes(id)), false)
+    const tweede = klips.slice(lys.length, lys.length + BESTE_BO).map(i => i.klip.id)
+    is('die tweede rondte is nie weer die top vyf nie',
+       tweede.every(id => beste.includes(id)), false)
   }
 
   /* Die gedeelde clip staan STEEDS eerste — die belofte wen oor die rangorde. */

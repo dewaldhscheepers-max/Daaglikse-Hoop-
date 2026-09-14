@@ -97,7 +97,7 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 227
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 225
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1636,12 +1636,31 @@ behoorlik begin het, is nie beskeie nie — dit is 'n deur wat in jou gesig
 toegaan.
 
 Elke **pas** is 'n nuwe skommeling, en `Reels.jsx` sit die volgende pas by sodra
-'n mens binne vier items van die onderkant kom. Die "jy het alles gesien"-kaart
-kom EEN keer — ná die eerste volle pas, waar dit waar is — en 'n mens swiep
-daaraan verby. Dit is 'n mylpaal, nie 'n doodloopstraat nie, en dit is die plek
-waar die deel-vraag hoort: sy het pas klaar gekyk, sy is tevrede, en daar is nie
-'n video wat om haar aandag meeding nie. Dit is die enigste goue knoppie in die
-hele voer.
+'n mens binne vier items van die onderkant kom.
+
+**En daar is GEEN kaart tussen die clips nie.** Hier het 'n "JY HET ALLES
+GESIEN"-mylpaal gestaan — met 'n deel-knoppie, en 'n reël wat sê dat die voer
+aangaan. Dewald, 14 September 2026, met 'n skermkiekie daarvan: *"verwyder die
+skerm."*
+
+Hy is reg, en die kaart het nooit sy eie bestaan verdien nie. Kyk na sy
+geskiedenis: dit het BEGIN as 'n klaar-skerm wat die voer doodgemaak het (*"nee
+man fok haal dit af"*), is toe 'n "mylpaal" waaraan 'n mens verby swiep, en toe
+'n mylpaal wat net wys as daar iets ongesien WAS. Elke regstelling het hom
+kleiner gemaak, en dit was die aanduiding: **'n voer wat AANHOU, het nie 'n
+mylpaal nodig nie.** Die kaart onderbreek presies die ding wat hy beweer om te
+vier, en die deel-knoppie staan in elk geval langs ELKE clip.
+
+Twee dinge het saam met hom uitgegaan, en albei moes:
+
+* **`MAKS_PASSE_VOOR_ALLES`**, die perk op die aantal passe. Die kaart was die
+  enigste ding wat daardie perk gelig het; laat hom staan sonder die kaart, en
+  die voer loop ná twee rondtes dood — presies wat Dewald nooit wou hê nie. Die
+  reël self is nie weg nie, dit is nou die **VORM van die lys**: `bouVoer` bou
+  rondtes, en 'n clip kry sy tweede kyk eers in rondte 1, wat eers bestaan
+  wanneer rondte 0 (alles ongesien) op is;
+* **`reels_alles_gesien`**, die vlaggie. Dit is net by die mylpaal gestel, en
+  niks lees dit meer nie — "nuut" hang aan `reels_gesien` (die lys self).
 
 **Die volgorde is TOEVALLIG, en dit kom uit 'n SAAD.** Dewald: *"die nuwe videos
 moet random bo speel.. nie in volgorde soos ek dit paste nie. want anders speel
@@ -1688,8 +1707,8 @@ reël:
   telling 0, rondte 1 elke clip met telling 1, en so aan. 'n Clip kan dus nooit
   'n tweede keer wys terwyl daar een is wat sy nog nie gesien het nie — dit is
   nie 'n toets wat ons doen nie, dit is die VORM van die lys;
-* **"hoogstens twee keer"** is die perk op die aantal rondes
-  (`MAKS_PASSE_VOOR_ALLES`), en dit lig ná die mylpaal;
+* **"hoogstens twee keer"** kom gratis saam: rondte 1 — 'n clip se tweede kyk —
+  bestaan eers wanneer rondte 0 op is;
 * en 'n **NUWE clip** wat hy vandag inplak, het telling 0 en staan dus in die
   eerste rondte — bo, saam met die ander wat sy nog nie gesien het nie. Dit is
   sy *"nuwe videos altyd eerste.... bo"*, en dit kos niks ekstra.
@@ -1712,10 +1731,6 @@ Twee dinge daaraan wat 'n mens nie uit die kode aflei nie:
   NOOIT. Die PLEK en nie die id nie — dieselfde clip kan wettig twee keer in een
   voer staan (rondte 0 en rondte 1), en dan is dit twee kyke.
 
-**En die mylpaal-kaart kom net as daar werklik iets ongesien WAS.** "Jy het alles
-gesien" sê niks nuuts vir iemand wat dit reeds weet, en dan staan die kaart by
-elke oopmaak in die pad.
-
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
 dieselfde vraag nie: 'n mens wat die app ken, kom terug om te sien wat NUUT is,
@@ -1727,8 +1742,8 @@ dan is dit met clips opgevul wat nog nooit gedeel is nie — presies die
 teenoorgestelde van wat gevra is. Is daar nog niks gedeel nie, val dit terug op
 die nuutste bo: daar is dan niks om voorkeur aan te gee.
 
-"Nuut" beteken **sy het nog NIKS gesien nie** — `reels_gesien` is leeg. Dit was
-`!isAllesGesien()`, en dit was te breed: iemand wat honderd clips gesien het maar
+"Nuut" beteken **sy het nog NIKS gesien nie** — `reels_gesien` is leeg. Dit het
+op `reels_alles_gesien` gehang, en dit was te breed: iemand wat honderd clips gesien het maar
 nie almal nie, het die "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat
 NUUT is. Dit word EEN keer per oopmaak gelees — verander dit midde-in 'n sessie,
 herskommel die voer onder haar vingers.

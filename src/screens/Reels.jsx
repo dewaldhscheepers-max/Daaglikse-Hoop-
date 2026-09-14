@@ -13,18 +13,24 @@
  * gesien: *"nee man fok haal dit af... dis onvriendelik... wys alles wat daar is
  * om te wys... dit moet aangaan."* Hy was reg. Elke pas is 'n nuwe skommeling,
  * en sodra 'n mens naby die einde van wat gebou is kom, word die volgende pas
- * bygesit. Die "jy het alles gesien"-kaart kom EEN keer, ná die eerste volle
- * pas, en 'n mens swiep daaraan verby.
+ * bygesit.
  *
- * **Maar hoogstens TWEE keer dieselfde video** totdat sy alles gesien het
- * (`MAKS_PASSE_VOOR_ALLES`). Elke pas wys elke clip een keer, dus is twee passe
- * presies twee keer. Daarna lig die perk: dan is 'n derde keer nie 'n herhaling
- * nie, dit is 'n voer wat aangaan.
+ * **Daar is GEEN kaart tussen die clips nie.** Hier het 'n "JY HET ALLES
+ * GESIEN"-mylpaal gestaan; Dewald, 14 September 2026: *"verwyder die skerm."*
+ * Die kaart het nooit sy eie bestaan verdien nie — dit het BEGIN as 'n
+ * klaar-skerm wat die voer doodgemaak het, en is toe 'n mylpaal waaraan 'n mens
+ * verby swiep. 'n Voer wat AANHOU, het nie 'n mylpaal nodig nie: die kaart
+ * onderbreek presies die ding wat hy beweer om te vier.
  *
- * **En sy gaan VOORT waar sy opgehou het.** `reels_laaste` word by ELKE clip
- * geskryf, nie by uitgang nie — 'n mens maak 'n app toe deur hom toe te maak,
- * nie deur 'n knoppie te druk nie, en dan loop daar geen opruiming nie. Die
- * volgende oopmaak begin by daardie clip.
+ * **Hoogstens TWEE keer dieselfde video** voordat sy alles gesien het — en dit
+ * is nou die VORM van die lys, nie 'n teller nie. `bouVoer` bou RONDTES, en 'n
+ * clip kry sy tweede kyk eers in rondte 1, wat eers bestaan wanneer rondte 0
+ * (alles ongesien) op is. Die ou `MAKS_PASSE_VOOR_ALLES` is weg saam met die
+ * kaart, en dit MOES saamgaan: daardie kaart was die enigste ding wat die perk
+ * gelig het, en 'n perk wat niks lig nie, laat die voer doodloop.
+ *
+ * **En sy gaan VOORT waar sy opgehou het** — nie by 'n PLEK nie, maar by die
+ * clips wat sy nog nie gesien het nie. `reels_gesien` is die waarheid.
  *
  * **Die volgorde word uit 'n SAAD gebou, nie uit `Math.random()` nie.** Die voer
  * word herbou elke keer as 'n pas bykom. Met 'n saad bly die stuk wat sy reeds
@@ -37,8 +43,7 @@
  * drie videos, en op 'n foon met 'n data-bundel is dit die verskil tussen 'n
  * voer wat 'n mens gebruik en een wat sy toemaak. Dit doen ook die werk van 'n
  * pouse-knoppie — swiep sy weg, word die speler afgehaal en die klank hou op.
- * Daar is niks om te onthou om te stop nie, en dit is ook waarom niks agter die
- * mylpaal-kaart aanspeel nie: daardie kaart is nie 'n clip nie.
+ * Daar is niks om te onthou om te stop nie.
  *
  * **Die klank is AAN sodra die blaaier dit toelaat.** Dewald: *"hoekom hou jy
  * nie die klank aan nie... hoekom moet mens dit aansit."* Dit is nie 'n keuse
@@ -121,11 +126,6 @@ const KAS = 'cachedReels'
 const KAS_TYD = 'cachedReelsTime'
 const KAS_OUD = 6 * 60 * 60 * 1000
 
-/* Het hierdie foon al ALLES gesien? Dit is die enigste ding wat 'n "nuwe kyker"
-   van 'n bekende een skei. Sien `eenPas()` in reels.js: 'n nuwe kyker kry die
-   MEES GEDEELDE clips bo, 'n bekende een die NUUTSTE. */
-const ALLES = 'reels_alles_gesien'
-
 /* Waar sy laas opgehou het. Dewald: *"onthou as iemand stop kyk moet dit
    volgende keer daar aangaan."* Sy kom terug en gaan VOORT in plaas van om weer
    van voor af te begin. */
@@ -155,11 +155,18 @@ const MAKS_GESIEN = 2000
  * Dewald: *"probeer om nie dieselfde video meer as 2 keer te wys nie tensy hulle
  * alles klaar gekyk het."*
  *
- * Elke pas wys elke clip een keer, dus is twee passe presies twee keer. Het sy
- * alles gesien (die mylpaal is bereik), lig die perk — dan is dit haar eie keuse
- * om aan te hou en 'n derde keer is nie 'n herhaling nie, dit is 'n voer wat
- * aangaan. */
-const MAKS_PASSE_VOOR_ALLES = 2
+ * Hier het 'n PERK op die aantal passe gestaan (`MAKS_PASSE_VOOR_ALLES = 2`),
+ * gelig deur die mylpaal-kaart. Albei is weg, en die reël is NIE weg nie — hy is
+ * nou struktureel.
+ *
+ * `bouVoer` bou RONDTES: rondte 0 is elke clip met telling 0, rondte 1 elke clip
+ * met telling 1. 'n Clip kan dus sy TWEEDE kyk eers in rondte 1 kry, en rondte 1
+ * bestaan eers wanneer rondte 0 — alles wat sy nog nie gesien het nie — op is.
+ * Die perk is die VORM van die lys, nie 'n teller nie.
+ *
+ * En dit is hoekom die perk MOES gaan toe die mylpaal gegaan het: daardie kaart
+ * was die enigste ding wat hom gelig het, en sonder hom sou die voer ná twee
+ * rondtes doodloop — presies wat Dewald nooit wou hê nie. */
 
 /* Hoeveel passe vooruit gebou word, en hoeveel clips voor die einde 'n nuwe pas
    bygesit word. Drie is genoeg dat 'n mens nooit die onderkant sien nie. */
@@ -194,14 +201,6 @@ function skryfKas(lys) {
     localStorage.setItem(KAS, JSON.stringify(lys))
     localStorage.setItem(KAS_TYD, String(Date.now()))
   } catch { /* privaat modus, of die berging is vol */ }
-}
-
-function isAllesGesien() {
-  try { return localStorage.getItem(ALLES) === '1' } catch { return false }
-}
-
-function merkAllesGesien() {
-  try { localStorage.setItem(ALLES, '1') } catch { /* privaat modus */ }
 }
 
 function leesGesien() {
@@ -336,7 +335,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     return true
   })
   const [passe, setPasse]   = useState(() => (
-    isAllesGesien() ? PASSE_BEGIN : Math.min(PASSE_BEGIN, MAKS_PASSE_VOOR_ALLES)
+    PASSE_BEGIN
   ))
   /* ── Die klank-wenk kom NIE terwyl 'n stemboodskap speel nie ──
    *
@@ -398,8 +397,6 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
      "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat NUUT is. */
   const nuutRef    = useRef(null)
   if (nuutRef.current === null) nuutRef.current = !Object.keys(gesienRefLys.current).length
-  /* Die laaste EGTE clip wat sy gesien het — die mylpaal-kaart is nie een nie. */
-  const laasteRef  = useRef(null)
   /* ── Watter PLEKKE in hierdie voer al getel is ──
    *
    * Die blaaierlopie het dit gevang: een clip het op telling 2 gestaan ná een
@@ -413,9 +410,6 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    * Die PLEK en nie die id nie: dieselfde clip kan wettig twee keer in een voer
    * staan (rondte 0 en rondte 1), en dan is dit twee kyke. */
   const getelPlekRef = useRef(new Set())
-  /* Mag die voer nog groei? Die perk lig sodra sy alles gesien het. */
-  const maksRef    = useRef(0)
-  maksRef.current = isAllesGesien() ? Infinity : MAKS_PASSE_VOOR_ALLES
 
   /* ── Die voer ──
      Die saai staan onder die gehaalde lys, nie in die plek daarvan nie: is daar
@@ -522,7 +516,6 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
         const it = items[i]
         if (it && it.tipe === 'klip') {
-          laasteRef.current = it.klip
           /* By ELKE clip, nie net by uitgang nie: 'n mens maak 'n app toe deur
              hom toe te maak, nie deur 'n knoppie te druk nie, en dan loop daar
              geen opruiming nie.
@@ -538,16 +531,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
             merkGesien(it.klip.id)
           }
         }
-        /* Sy is by die mylpaal — sy het ALLES gesien. Van die volgende oopmaak
-           af is sy nie meer 'n nuwe kyker nie, en dan is "wat is nuut" die
-           nuttiger vraag as "wat is die beste". */
-        if (it && it.tipe === 'mylpaal') merkAllesGesien()
-
         /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
            volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
            wat sy reeds gesien het presies waar dit was. */
         if (i >= items.length - BOU_VOORUIT) {
-          setPasse(p => Math.min(p + 2, maksRef.current))
+          setPasse(p => p + 2)
         }
 
         /* Ná die TWEEDE swiep — of ná die EERSTE, as sy op 'n gedeelde skakel
@@ -812,34 +800,6 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
 
       <div className="reels-voer" ref={voerRef}>
         {items.map((it, i) => {
-          /* ── Die mylpaal ──
-             EEN keer, ná die eerste volle pas, en 'n mens swiep daaraan verby.
-             Dit is die plek waar die deel-vraag hoort: sy het pas alles gesien,
-             sy is tevrede, en daar is nie 'n video wat om haar aandag meeding
-             nie. 'n Deel-knoppie op die rail langs 'n lopende video word
-             raakgevat deur wie al besluit het; hierdie een VRA. */
-          if (it.tipe === 'mylpaal') {
-            return (
-              <section className="reel-mylpaal" key={`m${i}`} data-reel={i}>
-                <span className="reel-mylpaal-merk">Jy het alles gesien</span>
-                <p className="reel-mylpaal-lyn">Dankie dat jy gekyk het.</p>
-                <p className="reel-mylpaal-sub">
-                  Iemand anders het vandag een van hierdie nodig.
-                </p>
-                {laasteRef.current && (
-                  <button className="reel-mylpaal-knop" onClick={() => deel(laasteRef.current)}>
-                    Stuur dit aan iemand
-                  </button>
-                )}
-                {/* Dit is die reël wat sê dit is nie 'n einde nie. Dewald: "dit
-                    moet aangaan... dit moet verkieslik nooit stop nie" en
-                    "wanneer iemand al die videos gekyk het moet dit oor begin."
-                    Dit begin oor — in 'n NUWE orde, nie dieselfde ry nie. */}
-                <p className="reel-mylpaal-aan">Swiep aan — dit begin weer, in 'n nuwe orde.</p>
-              </section>
-            )
-          }
-
           const klip = it.klip
           const brug = brugVir(klip)
           return (
