@@ -102,6 +102,8 @@ node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
 node api/_reelsVoegBy.toets.mjs               # die klomp-oplosser, vals TikTok + Firestore, 47
+node src/data/reelsVerwyder.toets.mjs         # wat n mens mag inplak om n clip uit te haal, 33
+node api/_reelsVerwyder.toets.mjs             # en die verwydering self, vals Firestore, 35
 ```
 
 Blaaiertoetse loop met Playwright teen Chromium op
@@ -1899,6 +1901,67 @@ getal wat sy vraag beantwoord, en dit is die enigste een wat waar kan wees. Dit
 is dus veilig om enige klomp weer te druk.
 
 Blaaiertoets: `kykReelsAdmin.mjs` (28 metings) gebruik sy EGTE plaksel.
+
+### Een clip UITHAAL
+
+Dewald, 14 September 2026, met 'n skermkiekie van *"Video currently
+unavailable"* in die voer: *"how to remove only this one that isn't playing how
+will i know what link it is."*
+
+Albei helftes van daardie sin was 'n egte gat. 'n Clip kan enige dag doodgaan
+sonder dat ons dit weet — die maker vee hom uit, maak hom privaat, of TikTok
+haal hom af — en die app het net 'n knoppie gehad wat 210 skakels INSIT.
+
+**Die tweede helfte is die interessante een: hoe weet hy WATTER een dit is?**
+Elke clip in die voer is vir hom anoniem, en TikTok se foutblad wys nie eens die
+maker se naam nie. Daar is dus niks op die skerm om mee te soek.
+
+Maar daar IS 'n knoppie wat die clip se identiteit gee, en hy staan reeds langs
+hom: **Deel**. Daardie skakel is `…/reels/<id>`, en `<id>` is presies die
+dokumentnaam in Firestore. Een tik, plak dit in die admin, en die app weet
+presies watter clip hy bedoel.
+
+**Daar kom dus GEEN admin-kontrole in die voer nie.** Die voer is die publieke
+skerm; 'n knoppie daar is 'n nuwe oppervlak met nuwe maniere om verkeerd te
+loop, en die Deel-knoppie doen die werk reeds.
+
+`src/data/reelsVerwyder.js` is suiwer en aanvaar vier vorms — ons deel-skakel,
+'n kaal id, TikTok se volle adres, en TikTok se KORT skakel. Die eerste drie dra
+die id in die string; die vierde nie, en dié word deur die BEDIENER oopgemaak
+met dieselfde `volgSkakel()` as die invoerder.
+
+**Die GASHEER maak nie saak nie, die ID wel.** Hy plak dalk die lewende adres of
+'n Vercel-voorskou. Maar `geldigeId()` alleen was te los — dit laat `123` deur,
+en die toets het 'n vreemde webwerf se `/reels/123` gevang. Elke clip in `reels`
+is 'n TikTok-post-id, dus moet 'n id wat uit net syfers bestaan, LANK genoeg wees
+om een te kan wees (`bruikbareId()`).
+
+**Dit is TWEE stappe, en dit is nie oorversigtigheid nie.** Sonder `verwyder`
+kyk `api/reels-verwyder.mjs` net en gee terug WIE die clip is; die admin wys
+daardie naam, en die rooi knoppie kom eers daarna. Die enigste ding wat 'n mens
+van die skerm af in die hand het, is 'n id van negentien syfers — 'n mens kan dit
+nie lees en nie nagaan nie. Vee ons dadelik uit, is die eerste keer dat hy die
+maker se naam sien, NÁ die clip weg is.
+
+Drie dinge daaraan:
+
+* **admin-alleen** (`wieMag`). 'n Oop verwyder-eindpunt is die hele voer;
+* **'n clip wat nie bestaan nie, is nie 'n fout nie** — hy is reeds weg, en dit
+  word so gesê;
+* **dit is omkeerbaar.** Plak die skakel weer in die invoer-kassie en die clip
+  kom terug. Wat NIE terugkom nie, is sy `gedeel`-telling, en die skerm sê dit
+  voordat 'n mens druk. Daar is ook geen lêer in Storage nie — 'n clip is 'n paar
+  velde wat na TikTok wys, dus is die dokument ALLES. Dit is anders as 'n e-boek,
+  waar die PDF bly staan.
+
+Die soek-knoppie dra 'n EIE klas (`ra-weg-soek`) en nie net `ra-invoer-knop`
+nie: die twee invoer-knoppies deel daardie klas, en 'n toets wat `.last()`
+gebruik het, het dadelik hierdie een gegryp. Die blaaierlopie het dit binne een
+lopie uitgewys.
+
+Blaaiertoets: `kykReelsAdmin.mjs` loop albei stappe — dit meet dat die eerste
+druk NIE vee nie, dat die maker se naam op die skerm kom, dat die deel-telling
+se waarskuwing daar is, en dat gemors geen rooi knoppie oplewer nie.
 
 Wat NOG nie bestaan nie: 'n manier om Dewald se eie woorde by 'n clip te sit
 (die voer werk sonder dit), en 'n tapbare makerprofiel.

@@ -25,6 +25,7 @@
 import { useMemo, useState } from 'react'
 import { keurPlaksel } from '../data/reelsPlak'
 import { REELS_INVOER, REELS_INVOER_2 } from '../data/reelsInvoer'
+import { beskryf } from '../data/reelsVerwyder'
 import './ReelsAdmin.css'
 
 export default function ReelsAdmin({ geheim }) {
@@ -33,7 +34,49 @@ export default function ReelsAdmin({ geheim }) {
   const [staan, setStaan]     = useState('')
   const [verslag, setVerslag] = useState(null)
 
+  /* ── Een clip UITHAAL ──
+   *
+   * Dewald, 14 September 2026, met 'n skermkiekie van "Video currently
+   * unavailable": *"how to remove only this one that isn't playing how will i
+   * know what link it is."*
+   *
+   * Die antwoord op sy tweede vraag is die DEEL-knoppie langs die clip: daardie
+   * skakel is `…/reels/<id>`, en `<id>` is die dokumentnaam. Een tik, en hy
+   * plak dit hier.
+   *
+   * Dit is twee stappe met opset. `gevind` dra die maker se naam, en die rooi
+   * knoppie kom eers daarna — die enigste ding wat 'n mens van die skerm af in
+   * die hand het, is 'n id van negentien syfers, en niemand kan dit lees nie. */
+  const [weg, setWeg]         = useState('')
+  const [gevind, setGevind]   = useState(null)
+  const [wegBesig, setWegBesig] = useState(false)
+  const [wegFout, setWegFout] = useState('')
+
   const keur = useMemo(() => keurPlaksel(plaksel), [plaksel])
+
+  async function soekOfVee(verwyder) {
+    setWegBesig(true)
+    setWegFout('')
+    if (!verwyder) setGevind(null)
+    try {
+      const r = await fetch('/api/reels-verwyder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ inset: weg.trim(), verwyder: !!verwyder }),
+      })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { setWegFout(j.fout || `Fout ${r.status}`); setGevind(null); return }
+      setGevind(j)
+      /* Die kassie word leeg NA 'n verwydering, sodat 'n tweede druk nie
+         dieselfde ding weer probeer nie. */
+      if (j.verwyder) setWeg('')
+    } catch (e) {
+      setWegFout(e.message)
+      setGevind(null)
+    } finally {
+      setWegBesig(false)
+    }
+  }
 
   /* ── Stuur 'n lys in happe ──
    *
@@ -215,6 +258,65 @@ export default function ReelsAdmin({ geheim }) {
           </p>
         </div>
       )}
+
+      {/* ── Een clip uithaal ── */}
+      <div className="ra-invoer ra-weg">
+        <div className="ra-invoer-kop">Haal een clip uit</div>
+        <p className="admin-books-note">
+          Speel 'n clip nie (&ldquo;Video currently unavailable&rdquo;), druk
+          <b> Deel</b> langs daardie clip en plak die skakel hier. Dit wys eers
+          wie se clip dit is; die rooi knoppie kom daarna.
+        </p>
+        <input
+          className="ra-weg-kassie"
+          value={weg}
+          onChange={e => { setWeg(e.target.value); setGevind(null); setWegFout('') }}
+          placeholder="Plak die Deel-skakel"
+          disabled={wegBesig}
+        />
+        {/* 'n EIE klas, nie `ra-invoer-knop` alleen nie. Die twee invoer-knoppies
+            deel daardie klas, en 'n toets wat `.last()` gebruik, sou hierdie een
+            gryp — die blaaierlopie het dit dadelik gevang. */}
+        <button
+          className="ra-invoer-knop ra-weg-soek"
+          onClick={() => soekOfVee(false)}
+          disabled={wegBesig || !weg.trim()}
+        >
+          {wegBesig ? 'Besig…' : 'Soek die clip'}
+        </button>
+
+        {wegFout && <p className="ra-weg-fout">{wegFout}</p>}
+
+        {gevind && !gevind.gevind && (
+          <p className="admin-books-note">
+            Daardie clip is nie in die voer nie — hy is reeds uit.
+          </p>
+        )}
+
+        {gevind && gevind.gevind && gevind.verwyder && (
+          <p className="ra-weg-klaar">
+            Uit die voer: <b>{beskryf(gevind)}</b>
+          </p>
+        )}
+
+        {gevind && gevind.gevind && !gevind.verwyder && (
+          <>
+            <p className="ra-weg-gevind">
+              <b>{beskryf(gevind)}</b>
+              {gevind.gedeel > 0 && (
+                <span> — {gevind.gedeel} keer gedeel, en daardie telling kom nie terug nie.</span>
+              )}
+            </p>
+            <button
+              className="ra-invoer-knop ra-weg-knop"
+              onClick={() => soekOfVee(true)}
+              disabled={wegBesig}
+            >
+              {wegBesig ? 'Besig…' : 'Haal hom uit die voer'}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   )
 }

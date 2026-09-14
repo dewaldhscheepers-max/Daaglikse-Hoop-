@@ -88,3 +88,38 @@
 .ra-lys li { margin-bottom: 4px; line-height: 1.5; }
 .ra-lys code { font-size: 11.5px; word-break: break-all; }
 .ra-lys-fout summary { color: #B3261E; }
+
+/* ── Een clip uithaal ──
+   Dieselfde vorm as die invoer-blokke, maar die DAAD is rooi. 'n Knoppie wat
+   data uitvee moet nie soos sy bure lyk nie. */
+.ra-weg-kassie {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0;
+  padding: 11px 12px;
+  border: 1px solid var(--cream-dark, #E6DFD4);
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  background: var(--white, #fff);
+  color: var(--text, #2D2040);
+}
+
+.ra-weg-gevind, .ra-weg-klaar, .ra-weg-fout {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ra-weg-gevind { color: var(--text, #2D2040); }
+.ra-weg-klaar  { color: #2F6B4F; }
+.ra-weg-fout   { color: #A63A2E; }
+
+/* Die enigste rooi knoppie in hierdie skerm. Net kleur op :active. */
+.ra-weg-knop {
+  margin-top: 10px;
+  background: #A63A2E;
+  color: #fff;
+  border-color: #A63A2E;
+}
+.ra-weg-knop:active { background: #8A2E24; }
