@@ -24,7 +24,7 @@
  */
 import { useMemo, useState } from 'react'
 import { keurPlaksel } from '../data/reelsPlak'
-import { REELS_INVOER, REELS_INVOER_2 } from '../data/reelsInvoer'
+import { REELS_INVOER, REELS_INVOER_2, REELS_INVOER_3 } from '../data/reelsInvoer'
 import { beskryf } from '../data/reelsVerwyder'
 import './ReelsAdmin.css'
 
@@ -83,7 +83,7 @@ export default function ReelsAdmin({ geheim }) {
    * Die bediener sê hoeveel oorbly en GEE die res terug; ons stuur dit weer.
    * Nooit 'n lus wat self die happe uitwerk nie — dan is daar twee plekke wat
    * die hap-grootte ken en die een bly agter. */
-  async function stuur(skakels) {
+  async function stuur(skakels, taal) {
     setBesig(true)
     setVerslag(null)
     const gedoen = []
@@ -99,7 +99,10 @@ export default function ReelsAdmin({ geheim }) {
         const r = await fetch('/api/reels-voeg-by', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
-          body: JSON.stringify({ skakels: oor }),
+          /* Die taal gaan by ELKE hap saam. Die bediener hou niks tussen happe
+             vas nie — 'n hap is 'n versoek, en hap twee moet dieselfde weet as
+             hap een. */
+          body: JSON.stringify(taal ? { skakels: oor, taal } : { skakels: oor }),
         })
         const j = await r.json().catch(() => ({}))
         if (!r.ok) {
@@ -208,6 +211,33 @@ export default function ReelsAdmin({ geheim }) {
           disabled={besig}
         >
           {besig ? staan || 'Besig…' : `Voer die ${REELS_INVOER_2.length} skakels in`}
+        </button>
+      </div>
+
+      {/* ── Die Engelse klomp ──
+          Dewald, 15 September 2026: *"voeg dit net tussen die videos wat reeds
+          op die reel page is... voeg dit tussen in"*, en die rede: *"dis Engelse
+          videos en ek wil dit graag meng tussen die Afrikaanse videos ander gaan
+          alles Engelse wees na mekaar."*
+
+          Dit is 'n APARTE knoppie en nie die plakkassie nie, want die taal moet
+          saam. Sonder daardie veld het hulle almal telling 0, staan hulle almal
+          alleen in rondte 0, en is die voer vier-en-dertig Engelse clips
+          agtermekaar — presies wat hy nie wil hê nie. */}
+      <div className="ra-invoer ra-engels">
+        <div className="ra-invoer-kop">Die Engelse klomp</div>
+        <p className="admin-books-note">
+          Die {REELS_INVOER_3.length} Engelse skakels van 15 September. Hulle word
+          as Engels gemerk, en die voer vleg hulle een vir een TUSSEN die
+          Afrikaanse clips in — hulle kom nooit agtermekaar nie. Wat al 'n clip
+          is, word oorgeslaan.
+        </p>
+        <button
+          className="ra-invoer-knop ra-engels-knop"
+          onClick={() => stuur(REELS_INVOER_3, 'en')}
+          disabled={besig}
+        >
+          {besig ? staan || 'Besig…' : `Voer die ${REELS_INVOER_3.length} Engelse skakels in`}
         </button>
       </div>
 

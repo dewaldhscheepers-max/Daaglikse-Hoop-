@@ -27,6 +27,7 @@ import {
   SEKONDES_VOOR_EINDE,
   spasieer,
   SPASIE,
+  TALE, EIE_TAAL, taalVan, perTaal, mengTale, isTaalMuur,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -716,6 +717,178 @@ console.log('\n── n NUWE kyker sien die BESTE eerste ──')
     slegste = Math.max(slegste, klonte(bouVoer(lys, { saad, passe: 3, nuut: true })))
   }
   is('steeds geen klonte', slegste, 0)
+}
+
+/* ── DIE TAAL ─────────────────────────────────────────────────
+ *
+ * Dewald, 15 September 2026, met 34 Engelse skakels: *"voeg dit net tussen die
+ * videos wat reeds op die reel page is... voeg dit tussen in"*, want *"ander
+ * gaan alles Engelse wees na mekaar."*
+ *
+ * Die belangrikste blok hieronder is die LAASTE een: die kyker wat elke
+ * Afrikaanse clip reeds gesien het. Vir haar is rondte 0 net die nuwe Engelse
+ * clips, en daar kan `mengTale()` niks doen nie — daar is niks om mee te meng.
+ * Sonder die muur-reël is dít presies vier-en-dertig Engelse clips agtermekaar.
+ */
+console.log('\n── Die taal van n clip ──')
+{
+  is('geen veld is Afrikaans',   taalVan(mk('a', 'A')), 'af')
+  is('af bly af',                taalVan({ ...mk('a', 'A'), taal: 'af' }), 'af')
+  is('en is en',                 taalVan({ ...mk('a', 'A'), taal: 'en' }), 'en')
+  is('hoofletters tel ook',      taalVan({ ...mk('a', 'A'), taal: 'EN' }), 'en')
+  is('spasies om',               taalVan({ ...mk('a', 'A'), taal: ' en ' }), 'en')
+  /* 'n WITLYS: wat ons nie ken nie, is die verstek. 'n Onbekende taal wat 'n
+     eie groep word, is 'n groep wat niemand ooit gaan sien nie. */
+  is('n taal wat ons nie ken nie', taalVan({ ...mk('a', 'A'), taal: 'fr' }), 'af')
+  is('gemors',                     taalVan({ ...mk('a', 'A'), taal: 42 }), 'af')
+  is('niks in',                    taalVan(null), 'af')
+  is('die eie taal staan vas',     EIE_TAAL, 'af')
+  is('en die witlys',              TALE, ['af', 'en'])
+}
+
+console.log('\n── perTaal: die grootste groep eerste ──')
+{
+  const lys = [
+    { ...mk('a', 'A'), taal: 'en' }, mk('b', 'B'), mk('c', 'C'),
+    { ...mk('d', 'D'), taal: 'en' }, mk('e', 'E'),
+  ]
+  const g = perTaal(lys)
+  is('twee groepe', g.length, 2)
+  is('die grootste eerste', g[0].length, 3)
+  is('en die volgorde BINNE n groep bly', g[0].map(k => k.id), ['b', 'c', 'e'])
+  is('die kleiner een ook', g[1].map(k => k.id), ['a', 'd'])
+  is('een taal gee EEN groep', perTaal([mk('a', 'A'), mk('b', 'B')]).length, 1)
+  is('niks in', perTaal(null), [])
+}
+
+console.log('\n── mengTale: dit VLEG, dit skommel nooit ──')
+{
+  const af = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6']
+  const en = ['e1', 'e2']
+  const uit = mengTale([af, en])
+  is('almal is daar', uit.length, 8)
+  /* Die volgorde BINNE elke taal bly presies soos dit was — die skommeling het
+     reeds in `eenPas` gebeur, en twee skommelings is een te veel. */
+  is('die Afrikaanse orde bly', uit.filter(x => x[0] === 'a'), af)
+  is('die Engelse orde bly',    uit.filter(x => x[0] === 'e'), en)
+  is('geen twee Engelse langs mekaar',
+     uit.some((x, i) => i > 0 && x[0] === 'e' && uit[i - 1][0] === 'e'), false)
+
+  /* Twee ewe groot groepe loop om die beurt — die stabiele sortering doen dit. */
+  is('ewe groot groepe loop om die beurt',
+     mengTale([['a1', 'a2', 'a3'], ['e1', 'e2', 'e3']]),
+     ['a1', 'e1', 'a2', 'e2', 'a3', 'e3'])
+
+  is('een groep bly net so', mengTale([af]), af)
+  is('n lee groep val weg',  mengTale([af, []]), af)
+  is('niks in',              mengTale(null), [])
+  is('gemors in',            mengTale([null, 'nee']), [])
+  /* Dit raak nie aan die inset nie. */
+  const in_ = [...af]
+  mengTale([in_, en])
+  is('die inset word nie aangeraak nie', in_, af)
+}
+
+console.log('\n── isTaalMuur: NIE "een taal" nie — "geen Afrikaans" ──')
+{
+  const af1 = mk('a', 'A'), en1 = { ...mk('e', 'E'), taal: 'en' }
+  /* Die onderskeid is die hele punt: hierdie is 'n Afrikaanse app, dus is 'n
+     rondte van net Afrikaanse clips die NORMALE toestand. */
+  is('net Afrikaans is GEEN muur', isTaalMuur([af1, mk('b', 'B')]), false)
+  is('net Engels is n muur',       isTaalMuur([en1, { ...mk('f', 'F'), taal: 'en' }]), true)
+  is('gemeng is geen muur',        isTaalMuur([af1, en1]), false)
+  is('n lee rondte is geen muur',  isTaalMuur([]), false)
+  is('niks in',                    isTaalMuur(null), false)
+}
+
+console.log('\n── Die voer VLEG die tale inmekaar ──')
+{
+  /* Die egte verhouding: sowat 210 Afrikaanse clips en 34 Engelse.
+     En die egte VORM: 'n handvatsel pos in EEN taal, dus is 'n Engelse maker se
+     naam nooit 'n Afrikaanse maker se naam nie. */
+  const maak = (n, pre, taal) => Array.from({ length: n }, (_, i) => ({
+    id: pre + i, bron: 'tiktok',
+    bronId: String(74000000000000000 + (taal === 'en' ? 900000 : 0) + i),
+    naam: (taal === 'en' ? '@en' : '@af') + (i % 40),
+    ...(taal === 'en' ? { taal: 'en' } : {}),
+  }))
+  const lys = [...maak(210, 'a'), ...maak(34, 'e', 'en')]
+
+  function langsteRy(items) {
+    let maks = 0, ry = 0
+    for (const it of items) {
+      if (it.tipe !== 'klip') continue
+      if (taalVan(it.klip) === 'en') { ry++; maks = Math.max(maks, ry) } else ry = 0
+    }
+    return maks
+  }
+
+  let slegste = 0
+  for (let saad = 1; saad <= 40; saad++) {
+    slegste = Math.max(slegste, langsteRy(bouVoer(lys, { saad, passe: 3 })))
+  }
+  is('n nuwe kyker kry NOOIT twee Engelse langs mekaar nie', slegste, 1)
+
+  /* En die maker-reël mag nie deur die vleg breek nie. */
+  let klont = 0
+  for (let saad = 1; saad <= 40; saad++) {
+    klont = Math.max(klont, klonte(bouVoer(lys, { saad, passe: 3 })))
+  }
+  is('en steeds geen maker-klonte', klont, 0)
+
+  /* Die Engelse clips is nie weggesteek nie — hulle kom vroeg. */
+  const items = bouVoer(lys, { saad: 7, passe: 3 })
+  const eerste = items.findIndex(i => i.tipe === 'klip' && taalVan(i.klip) === 'en')
+  is('die eerste Engelse clip kom binne die eerste tien', eerste >= 0 && eerste < 10, true)
+
+  console.log('\n── Die ERGSTE geval: sy het elke Afrikaanse clip gesien ──')
+  /* Rondte 0 is dan NET die 34 Engelse clips. Sonder die muur-reël is dit
+     vier-en-dertig Engelse clips agtermekaar — presies wat Dewald nie wil hê
+     nie. Die rondte word met die volgende saamgevoeg en dan gemeng. */
+  const gesien = {}
+  for (const k of lys) if (taalVan(k) === 'af') gesien[k.id] = 1
+  slegste = 0
+  for (let saad = 1; saad <= 40; saad++) {
+    slegste = Math.max(slegste, langsteRy(bouVoer(lys, { gesien, saad, passe: 3 })))
+  }
+  is('ook dan nooit twee langs mekaar nie', slegste, 1)
+
+  /* En sy kry hulle steeds ALMAL — die muur-reël stel niks uit nie. */
+  const uit = bouVoer(lys, { gesien, saad: 3, passe: 3 })
+  const engelseIds = new Set(uit.filter(i => i.tipe === 'klip' && taalVan(i.klip) === 'en')
+    .map(i => i.klip.id))
+  is('al 34 Engelse clips is in die voer', engelseIds.size, 34)
+
+  console.log('\n── n Versameling van NET Afrikaans verander niks ──')
+  /* Dit is die toestand van vandag, voor die knoppie gedruk word. Die muur-reël
+     mag daar NIKS doen nie — 'n rondte van net Afrikaans is normaal. */
+  const netAf = maak(20, 'a')
+  const gesienAf = {}
+  for (const k of netAf) gesienAf[k.id] = 0
+  const a = bouVoer(netAf, { saad: 5, passe: 2 })
+  is('die voer is presies so lank as altyd', a.length, 40)
+  is('en geen klonte', klonte(a), 0)
+
+  console.log('\n── DIESELFDE handvatsel in albei tale ──')
+  /* Dit klink onmoontlik en dit is dit nie: een kanaal kan 'n Afrikaanse EN 'n
+     Engelse clip pos, en dan gaan die een deur die gewone knoppie en die ander
+     deur die Engelse een. `ontklont()` loop PER TAAL en sien daardie paar nooit;
+     `oorTaalNaat()` is die naat-reël wat dit vang. */
+  const deel = (n, pre, taal) => Array.from({ length: n }, (_, i) => ({
+    id: pre + i, bron: 'tiktok',
+    bronId: String(74000000000000000 + (taal === 'en' ? 900000 : 0) + i),
+    naam: '@albei' + (i % 40),          /* ALBEI tale gebruik dieselfde name */
+    ...(taal === 'en' ? { taal: 'en' } : {}),
+  }))
+  const gedeelde = [...deel(210, 'a'), ...deel(34, 'e', 'en')]
+  let ergsteDeel = 0
+  for (let saad = 1; saad <= 40; saad++) {
+    ergsteDeel = Math.max(ergsteDeel, klonte(bouVoer(gedeelde, { saad, passe: 3 })))
+  }
+  is('ook dan geen klonte oor 40 sade', ergsteDeel, 0)
+  is('en die vleg bly heel',
+     Math.max(...Array.from({ length: 40 }, (_, i) =>
+       langsteRy(bouVoer(gedeelde, { saad: i + 1, passe: 3 })))), 1)
 }
 
 console.log('\n── Niks gooi nie ──')

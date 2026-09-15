@@ -98,7 +98,7 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling, 251
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 291
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
@@ -1708,6 +1708,9 @@ het bygekom nadat hy dit op 'n regte foon gesien het:
 * **en geen twee clips van dieselfde mens volg op mekaar nie** (`ontklont()`),
   as laaste veiligheidsnet.
 
+Al vier loop **per TAAL**, en die tale word daarna ingevleg — sien "Die Engelse
+clips word INGEVLEG" hieronder.
+
 Dewald se woorde: *"teveel van Johandre Potgieter se videos wys bo. elke 2de 3de
 video is van hom... daar is meer videos van my maar syne wys meer.... soo dit
 skommel nie die urls gi3d genoeg nie."* Hy was reg, en `ontklont` alleen was die
@@ -1895,6 +1898,84 @@ eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
 knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
+
+### Die Engelse clips word INGEVLEG, nie agteraan gesit nie
+
+Dewald, 15 September 2026, met 34 nuwe skakels: *"voeg dit net tussen die videos
+wat reeds op die reel page is... voeg dit tussen in."* En die rede: *"dis Engelse
+videos en ek wil dit graag meng tussen die Afrikaanse videos ander gaan alles
+Engelse wees na mekaar."*
+
+Sy vrees was reg, en dit sou nie deur toeval gebeur het nie — dit sou
+**struktureel** gebeur het. 'n Nuwe clip het telling 0 en staan dus alleen in
+rondte 0; word 34 op een dag ingesit, is rondte 0 vier-en-dertig Engelse clips
+agtermekaar. `ontklont()` keer dit nie: dit ken net die MAKER se naam, en dit is
+vier-en-dertig verskillende makers.
+
+**Die verstek is Afrikaans, en dit is nie luiheid nie.** Elke clip wat vandag
+bestaan, dra geen `taal`-veld nie. `taalVan()` lees 'n ontbrekende veld as `af`,
+dus bly die hele bestaande voer presies soos hy is en hoef geen ou dokument ooit
+aangeraak te word nie. Dit is 'n WITLYS (`TALE`): 'n taal wat ons nie ken nie,
+tel as Afrikaans eerder as om 'n eie groep te word wat niemand ooit gaan sien
+nie. Dieselfde hek staan op die eindpunt — 'n string uit die liggaam beland
+nooit reguit in Firestore nie.
+
+**Die vleg gebeur PER TAAL, en dan word die groepe ingevleg.** `eenPas()` doen
+al die bestaande werk (nuutstes bo, makers versprei, klonte uit) apart vir elke
+taal, en `mengTale()` sit die resultate eweredig deurmekaar — dieselfde
+steek-rekening as `versprei()`. 34 uit 250 kom dus elke sewende keer.
+
+Die volgorde is nie omkeerbaar nie: vleg 'n mens eers en ontklont dan, breek die
+ontklonting die vleg; ontklont 'n mens oor albei tale heen, breek dit die
+steke. Per taal, dan vleg.
+
+**Die skuif is 'n HALWE steek en nie toevallig nie.** `versprei()` skuif
+toevallig sodat nie elke maker se eerste clip bo-aan opstapel nie; hier is die
+teenoorgestelde nodig, want 'n toevallige skuif kan twee groepe se plekke laat
+saamval en dan staan twee Engelse clips langs mekaar — presies wat dit moes
+keer. 'n Halwe steek sit elke groep in die MIDDEL van sy eie gleuf. Twee ewe
+groot groepe val wel saam, en dan wen die sortering se stabiliteit: groot,
+klein, groot, klein — om die beurt, wat is wat 'n mens wil hê.
+
+**Die NAAT tussen twee tale het 'n eie reël nodig** (`oorTaalNaat()`). Dit klink
+onmoontlik — 'n maker is mos een kanaal in een taal — en dit is dit nie:
+dieselfde handvatsel kan 'n Afrikaanse én 'n Engelse clip pos, en dan gaan die
+een deur die gewone knoppie en die ander deur die Engelse een. `ontklont()` loop
+per taal en sien daardie paar nooit. Die regstelling ruil BINNE dieselfde taal —
+dít is die truuk, want dan skuif die vleg-patroon nie een haar nie. Sy soek
+vorentoe én agtertoe: die klont kan die minderheid se LAASTE clip wees, en dan
+is daar niks ná hom om mee te ruil nie. Daardie een geval het op saad 3
+oorgebly totdat die agtertoe-soek bygekom het.
+
+**'n Rondte sonder een Afrikaanse clip is nie 'n rondte nie — dit is 'n MUUR.**
+Vir iemand wat elke Afrikaanse clip reeds gesien het, is rondte 0 net die 34
+nuwe Engelse clips, en dan kan `mengTale()` niks doen nie: daar is niks om mee
+te meng. So 'n rondte word met die VOLGENDE een saamgevoeg en die hele ding
+gemeng.
+
+Dit kos **niks**: daardie volgende rondte sou in elk geval onmiddellik daarna
+gekom het, want die voer bou drie passe vooruit. Al wat verander, is die
+VOLGORDE — nie wat sy sien nie, net wanneer. Sy kry steeds al 34.
+
+Die hek is eng met opset (`isTaalMuur()`): dit toets nie "almal dieselfde taal"
+nie, maar "niemand in die app se eie taal nie". Hierdie is 'n Afrikaanse app, dus
+is 'n rondte van net Afrikaanse clips die NORMALE toestand en word nooit
+aangeraak nie. Is die hele versameling Afrikaans — soos dit was voordat die
+knoppie gedruk is — gebeur hier niks.
+
+Gemeet oor 40 sade met 210 Afrikaanse en 34 Engelse clips: **nooit twee Engelse
+langs mekaar nie**, ook nie vir die mens wat alles gesien het nie, en **nul**
+maker-klonte. Die eerste Engelse clip kom binne die eerste tien.
+
+**Die knoppie in die admin is 'n derde knoppie en nie die plakkassie nie**, want
+die TAAL moet saam. Plak 'n mens hulle in die gewone kassie, kom hulle in as
+Afrikaans en die hele vleg bestaan nie. Hy dra ook sy eie kleur: dit is die een
+knoppie op daardie blad wat 'n ander soort clip inskryf.
+
+Die taal gaan by **elke hap** saam. Die bediener hou niks tussen happe vas nie —
+'n hap is 'n versoek — en val dit by hap twee weg, is tien clips Engels en die
+res Afrikaans, en niemand sou dit ooit sien nie. Die blaaierlopie meet daardie
+een ding.
 
 ### Die gebedskaart in die voer
 

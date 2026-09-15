@@ -55,6 +55,16 @@
 .ra-invoer-knop:active { background: var(--cream-dark, #F0EBE3); }
 .ra-invoer-knop:disabled { opacity: 0.55; cursor: default; }
 
+/* Die Engelse klomp kry sy eie kleur, en dit is nie versiering nie: dit is die
+   EEN knoppie op hierdie blad wat 'n ander soort clip inskryf, en 'n mens moet
+   nooit per ongeluk Afrikaanse skakels daardeur stuur nie. Net kleur — geen
+   transform op :active, soos oral. */
+.ra-engels-knop {
+  border-color: #3F7F6B;
+  color: #2F6353;
+}
+.ra-engels-knop:active { background: #E4F0EA; }
+
 .ra-verslag {
   margin-top: 20px;
   padding: 14px 15px;

@@ -104,6 +104,22 @@ is('n lee voorwerp gee die vier kaal velde',
 /* En so 'n kaal ding mag NIE wys nie — magWys is die tweede hek. */
 is('en dit mag nie wys nie', magWys(openbareKlip({})), false)
 
+console.log('\n── Die TAAL ──')
+/* 'n Witlys, soos alles anders hier. En dit kom net saam wanneer dit NIE die
+   verstek is nie — 'n `taal: 'af'` op tweehonderd clips is bandwydte vir niks,
+   en `taalVan()` lees 'n ontbrekende veld in elk geval as Afrikaans. */
+{
+  const basis = { id: 'a', bron: 'tiktok', bronId: '7412345678901234567', naam: '@iemand' }
+  is('en kom deur',        openbareKlip({ ...basis, taal: 'en' }).taal, 'en')
+  is('af kom NIE deur nie', 'taal' in openbareKlip({ ...basis, taal: 'af' }), false)
+  is('geen veld',          'taal' in openbareKlip(basis), false)
+  is('hoofletters word klein', openbareKlip({ ...basis, taal: 'EN' }).taal, 'en')
+  is('n taal wat ons nie ken nie val weg',
+     'taal' in openbareKlip({ ...basis, taal: 'fr' }), false)
+  is('gemors val weg', 'taal' in openbareKlip({ ...basis, taal: { a: 1 } }), false)
+  is('dit staan in die VELDE-lys', VELDE.includes('taal'), true)
+}
+
 console.log('\n── Die lys ──')
 is('elke clip word omgeskakel', openbareLys([VOL, VOL]).length, 2)
 is('gemors val weg',           openbareLys([VOL, null, 'abc', 7]).length, 1)

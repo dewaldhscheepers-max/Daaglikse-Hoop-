@@ -265,3 +265,56 @@ export const REELS_INVOER_2 = [
   'https://vt.tiktok.com/ZSqHHBau5/',
   'https://vt.tiktok.com/ZSqH9eww6/',
 ]
+
+/* ── Die Engelse klomp ──
+ *
+ * Dewald, 15 September 2026: *"voeg dit net tussen die videos wat reeds op die
+ * reel page is... voeg dit tussen in."* En die rede daarby: *"dis Engelse
+ * videos en ek wil dit graag meng tussen die Afrikaanse videos ander gaan alles
+ * Engelse wees na mekaar."*
+ *
+ * Hierdie 34 skakels word met `taal: 'en'` geskryf, en DAARDIE veld is die hele
+ * ding: `mengTale()` in reels.js vleg hulle een vir een tussen die Afrikaanse
+ * clips in. Sonder die veld sou hulle telling 0 gehad het en rondte 0 sou
+ * vier-en-dertig Engelse clips agtermekaar gewees het.
+ *
+ * Hulle moet steeds deur die BEDIENER opgelos word — 'n kort skakel dra die
+ * post-ID nie, en TikTok is nie bereikbaar van die plek waar hierdie kode
+ * geskryf is nie. Vandaar die knoppie in die admin; dit is een druk.
+ */
+export const REELS_INVOER_3 = [
+  'https://vt.tiktok.com/ZSqXjdL5h/',
+  'https://vt.tiktok.com/ZSqXjfg1a/',
+  'https://vt.tiktok.com/ZSqX667Tj/',
+  'https://vt.tiktok.com/ZSqX6FpCD/',
+  'https://vt.tiktok.com/ZSqX6kR3j/',
+  'https://vt.tiktok.com/ZSqX6djw5/',
+  'https://vt.tiktok.com/ZSqX66d1H/',
+  'https://vt.tiktok.com/ZSqX62LDp/',
+  'https://vt.tiktok.com/ZSqX6XYUf/',
+  'https://vt.tiktok.com/ZSqX6xHpv/',
+  'https://vt.tiktok.com/ZSqX65e5w/',
+  'https://vt.tiktok.com/ZSqX6UPSJ/',
+  'https://vt.tiktok.com/ZSqX6g97q/',
+  'https://vt.tiktok.com/ZSqX6gs2V/',
+  'https://vt.tiktok.com/ZSqX69EF5/',
+  'https://vt.tiktok.com/ZSqX6uN2g/',
+  'https://vt.tiktok.com/ZSqX6sxRo/',
+  'https://vt.tiktok.com/ZSqX6uKeX/',
+  'https://vt.tiktok.com/ZSqXM8LqD/',
+  'https://vt.tiktok.com/ZSqXM1pgv/',
+  'https://vt.tiktok.com/ZSqX6oGrH/',
+  'https://vt.tiktok.com/ZSqXMNQEX/',
+  'https://vt.tiktok.com/ZSqX6EwDy/',
+  'https://vt.tiktok.com/ZSqXMxsq6/',
+  'https://vt.tiktok.com/ZSqXMCyjs/',
+  'https://vt.tiktok.com/ZSqXre8Bq/',
+  'https://vt.tiktok.com/ZSqXMsYyb/',
+  'https://vt.tiktok.com/ZSqXrJX4W/',
+  'https://vt.tiktok.com/ZSqXMsQvG/',
+  'https://vt.tiktok.com/ZSqXMbq7W/',
+  'https://vt.tiktok.com/ZSqXrduET/',
+  'https://vt.tiktok.com/ZSqXrmQqq/',
+  'https://vt.tiktok.com/ZSqXru2SC/',
+  'https://vt.tiktok.com/ZSqXrfuJB/',
+]

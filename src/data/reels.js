@@ -399,12 +399,186 @@ export function meesteGedeelEerste(klips) {
   return lys.sort((a, b) => Number((b && b.gedeel) || 0) - Number((a && a.gedeel) || 0))
 }
 
+/* ── DIE TAAL ────────────────────────────────────────────────
+ *
+ * Dewald, 15 September 2026, met 34 nuwe skakels: *"voeg dit net tussen die
+ * videos wat reeds op die reel page is... voeg dit tussen in."* En die rede:
+ * *"dis Engelse videos en ek wil dit graag meng tussen die Afrikaanse videos
+ * ander gaan alles Engelse wees na mekaar."*
+ *
+ * Hy is reg, en sonder hierdie reël sou dit presies gebeur — nie deur toeval
+ * nie, maar STRUKTUREEL. 'n Nuwe clip het telling 0 en staan dus alleen in
+ * rondte 0; word 34 op een dag ingesit, is rondte 0 vier-en-dertig Engelse
+ * clips agtermekaar. `ontklont()` keer dit nie: dit ken net die MAKER se naam,
+ * en dit is vier-en-dertig verskillende makers.
+ *
+ * ── Die verstek is Afrikaans, en dit is nie luiheid nie ──
+ *
+ * Elke clip wat vandag bestaan, dra geen `taal`-veld nie. 'n Verstek van 'af'
+ * beteken die hele bestaande voer bly presies soos hy is, en 'n ou dokument
+ * hoef nooit aangeraak te word nie. 'n Witlys, soos oral elders: 'n taal wat
+ * ons nie ken nie, tel as Afrikaans eerder as om 'n eie groep te word wat
+ * niemand ooit gaan sien nie.
+ */
+export const TALE = ['af', 'en']
+
+/* Die app se eie taal. Dit is nie 'n voorkeur nie — dit bepaal wat 'n MUUR is;
+   sien `isTaalMuur()`. */
+export const EIE_TAAL = 'af'
+
+export function taalVan(klip) {
+  const t = String((klip && klip.taal) || '').trim().toLowerCase()
+  return TALE.includes(t) ? t : EIE_TAAL
+}
+
+/* Die clips per taal, die GROOTSTE groep eerste. Die volgorde binne elke groep
+   bly presies soos dit was. */
+export function perTaal(klips) {
+  const lys = Array.isArray(klips) ? klips : []
+  const groepe = new Map()
+  for (const k of lys) {
+    const t = taalVan(k)
+    if (!groepe.has(t)) groepe.set(t, [])
+    groepe.get(t).push(k)
+  }
+  return [...groepe.values()].sort((a, b) => b.length - a.length)
+}
+
+/* ── Vleg die tale INMEKAAR ──
+ *
+ * Elke groep is reeds klaar georden (die nuutstes bo, die makers versprei, die
+ * klonte uit). Hierdie een raak nie aan daardie volgorde nie — dit sit die
+ * groepe net EWEREDIG deurmekaar, dieselfde steek-rekening as `versprei()`:
+ * 'n groep van 34 uit 250 kom elke sewende keer.
+ *
+ * ── Hoekom die skuif 'n HALWE steek is en nie toevallig nie ──
+ *
+ * `versprei()` skuif toevallig sodat nie elke maker se eerste clip bo-aan
+ * opstapel nie. Hier is die teenoorgestelde nodig: 'n toevallige skuif kan twee
+ * groepe se plekke laat saamval, en dan staan twee Engelse clips langs mekaar —
+ * presies wat dit moes keer. 'n HALWE steek sit elke groep in die MIDDEL van sy
+ * eie gleuf, en dan kan hulle nie bots nie.
+ *
+ * Twee groepe van dieselfde grootte val wel presies saam, en dan wen die
+ * sortering se stabiliteit: groot-eerste, klein-tweede, groot, klein — wat
+ * presies om die beurt is, en dit is wat 'n mens wil hê.
+ *
+ * Dit vleg net; dit skommel nooit. Die skommeling het reeds gebeur.
+ */
+export function mengTale(passe) {
+  const groepe = (Array.isArray(passe) ? passe : [])
+    .filter(g => Array.isArray(g) && g.length)
+  if (!groepe.length) return []
+  if (groepe.length === 1) return [...groepe[0]]
+
+  const n = groepe.reduce((s, g) => s + g.length, 0)
+  const met = []
+  for (const g of groepe) {
+    const stap = n / g.length
+    const skuif = stap / 2
+    g.forEach((k, i) => met.push({ k, plek: skuif + i * stap }))
+  }
+  /* `sort` is stabiel, dus hou 'n gelykop die groep-volgorde — sien die kop. */
+  met.sort((a, b) => a.plek - b.plek)
+  return met.map(x => x.k)
+}
+
+/* ── Wanneer 'n rondte 'n MUUR is ──
+ *
+ * Nie "almal dieselfde taal" nie — "niemand in die app se eie taal nie".
+ *
+ * Die onderskeid is die hele punt. Hierdie is 'n Afrikaanse app: 'n rondte van
+ * net Afrikaanse clips is die NORMALE toestand en moet niks kos nie. 'n Rondte
+ * waarin daar geen enkele Afrikaanse clip is nie, is die ding wat Dewald nie
+ * wil hê nie.
+ */
+export function isTaalMuur(rondte) {
+  const lys = Array.isArray(rondte) ? rondte : []
+  if (!lys.length) return false
+  return lys.every(k => taalVan(k) !== EIE_TAAL)
+}
+
 /* ── Een pas deur al die clips ──
  *
  * Die nuutstes bo, onder mekaar geskommel; die res daarna, ook geskommel; en
  * dan word dieselfde-naam-langs-mekaar uitgehaal.
+ *
+ * Is daar meer as een TAAL, gebeur al daardie werk PER TAAL en word die
+ * resultate ingevleg — sien `mengTale()`. Dit is die enigste manier waarop die
+ * maker-reëls en die taal-reël albei kan geld: vleg 'n mens eers en ontklont
+ * dan, breek die ontklonting die vleg, en andersom net so.
  */
 export function eenPas(klips, rnd, vorigeNaam, opsies) {
+  const lys = skoonLys(klips)
+  if (lys.length <= 1) return lys
+  const groepe = perTaal(lys)
+  if (groepe.length <= 1) return eenPasEenTaal(lys, rnd, vorigeNaam, opsies)
+  return oorTaalNaat(
+    mengTale(groepe.map(g => eenPasEenTaal(g, rnd, vorigeNaam, opsies)))
+  )
+}
+
+/* ── Die NAAT tussen twee tale ──
+ *
+ * `ontklont()` waarborg dat geen twee clips van dieselfde maker langs mekaar
+ * staan nie — maar dit loop PER TAAL, en die vleg bring die groepe daarna
+ * bymekaar. Waar 'n Afrikaanse en 'n Engelse clip nou langs mekaar beland, is
+ * daardie waarborg nog nie nagegaan nie.
+ *
+ * Dit klink onmoontlik — 'n maker is mos een kanaal in een taal — en dit is dit
+ * nie: dieselfde handvatsel kan 'n Afrikaanse clip EN 'n Engelse clip pos, en
+ * dan gaan die een deur die gewone knoppie en die ander deur die Engelse een.
+ * Die toets het dit binne een lopie gevang.
+ *
+ * Die regstelling ruil BINNE dieselfde taal. Dit is die hele truuk: twee clips
+ * van dieselfde taal ruil hul plekke sonder dat die vleg-patroon een haar
+ * verskuif — die taal op elke plek bly presies wat dit was. Die maat word gekies
+ * sodat die ruil nie 'n nuwe klont maak nie; pas niemand nie, bly dit soos dit
+ * is. Een klont is beter as 'n gebreekte vleg.
+ */
+function oorTaalNaat(lys) {
+  const uit = Array.isArray(lys) ? [...lys] : []
+
+  /* Die eerste maat wat by ALBEI kante pas — by i en by j. */
+  function maat(i, taal, kandidate) {
+    const naam = naamVanKlip(uit[i])
+    for (const j of kandidate) {
+      if (j === i - 1 || j === i || j === i + 1) continue
+      if (taalVan(uit[j]) !== taal) continue
+      const naamJ = naamVanKlip(uit[j])
+      if (naamJ === naamBy(uit, i - 1) || naamJ === naamBy(uit, i + 1)) continue
+      if (naam === naamBy(uit, j - 1) || naam === naamBy(uit, j + 1)) continue
+      return j
+    }
+    return -1
+  }
+
+  for (let i = 1; i < uit.length; i++) {
+    const naam = naamVanKlip(uit[i])
+    if (!naam || naam !== naamBy(uit, i - 1)) continue
+    const taal = taalVan(uit[i])
+
+    /* VORENTOE eerste, want dan bly die deel wat reeds nagegaan is onaangeraak.
+       Maar die klont kan heel AAN DIE EINDE van die pas wees — die minderheid se
+       laaste clip het niks ná hom om mee te ruil nie — en dan moet dit agtertoe
+       soek. Sonder daardie helfte bly presies daardie een klont staan, en die
+       blaaierlopie het hom op saad 3 gevind. */
+    const vorentoe = []
+    for (let j = i + 1; j < uit.length; j++) vorentoe.push(j)
+    let j = maat(i, taal, vorentoe)
+    if (j < 0) {
+      const agtertoe = []
+      for (let k = i - 2; k >= 0; k--) agtertoe.push(k)
+      j = maat(i, taal, agtertoe)
+    }
+    if (j < 0) continue
+
+    const t = uit[i]; uit[i] = uit[j]; uit[j] = t
+  }
+  return uit
+}
+
+function eenPasEenTaal(klips, rnd, vorigeNaam, opsies) {
   const lys = skoonLys(klips)
   if (lys.length <= 1) return lys
   const o = opsies || {}
@@ -635,7 +809,25 @@ export function bouVoer(klips, opsies) {
        Die eerste pas laat die gedeelde clip uit; hy staan reeds bo. */
     const bron = (p === 0 ? res : alles)
     const min = bron.length ? Math.min(...bron.map(k => telle[k.id])) : 0
-    const rondte = bron.filter(k => telle[k.id] === min)
+    let rondte = bron.filter(k => telle[k.id] === min)
+
+    /* ── 'n Rondte sonder EEN Afrikaanse clip is nie 'n rondte nie, dit is 'n MUUR ──
+     *
+     * Sit Dewald 34 Engelse skakels op een dag in, het hulle almal telling 0 en
+     * is rondte 0 net hulle. `mengTale()` kan dan niks doen nie — daar is niks
+     * om mee te meng. Presies wat hy nie wil hê nie.
+     *
+     * Die rondte word dan met die VOLGENDE een saamgevoeg en die hele ding
+     * gemeng. Dit kos NIKS: daardie volgende rondte sou in elk geval onmiddellik
+     * hierna gekom het, want die voer bou drie passe vooruit. Al wat verander,
+     * is die VOLGORDE — nie wat sy sien nie, net wanneer.
+     *
+     * Die hek is eng met opset. Is die hele versameling Afrikaans (soos dit
+     * vandag is), gebeur hier niks. En 'n rondte van net Afrikaanse clips is
+     * die normale toestand van 'n Afrikaanse app en word nooit aangeraak nie. */
+    if (isTaalMuur(rondte) && alles.some(k => taalVan(k) === EIE_TAAL)) {
+      rondte = bron.filter(k => telle[k.id] <= min + 1)
+    }
 
     /* Net die EERSTE pas kry die nuwe-kyker-orde, en `nuut` beteken sy het nog
        NIKS gesien nie. Binne 'n rondte staan die nuutstes bo — dit is Dewald se

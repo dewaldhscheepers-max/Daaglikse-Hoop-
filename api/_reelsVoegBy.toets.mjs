@@ -154,6 +154,59 @@ console.log('\n── n Clip wat AL bestaan ──')
   is('maar KRY GEEN nuwe datum nie', w[0].updateMask.fieldPaths.includes('datum'), false)
 }
 
+console.log('\n── Die TAAL ──')
+/* Dewald, 15 September 2026: 34 Engelse skakels wat *"tussen"* die Afrikaanse
+   clips moet kom. Die veld wat dit moontlik maak, word HIER geskryf — sonder hom
+   is `mengTale()` in reels.js blind en staan al 34 agtermekaar. */
+{
+  const { res, gesien } = await loop(
+    { skakels: [kort('AAA111222')], taal: 'en' },
+    { wys: { AAA111222: lank('ds.jan', ID(1)) } }
+  )
+  is('die clip word geskryf', res.lyf.gedoen.length, 1)
+  const w = gesien.commits[0].writes[0]
+  is('die taal is in die masker', w.updateMask.fieldPaths.includes('taal'), true)
+  is('en die waarde is en', w.update.fields.taal.stringValue, 'en')
+}
+{
+  /* Sonder die taal skryf dit PRESIES wat dit nog altyd geskryf het. Die 210
+     clips wat vandag bestaan, kry nooit 'n taal-veld nie. */
+  const { res, gesien } = await loop(
+    { skakels: [kort('AAA111222')] },
+    { wys: { AAA111222: lank('ds.jan', ID(1)) } }
+  )
+  is('dit werk soos altyd', res.lyf.gedoen.length, 1)
+  is('en daar is GEEN taal-veld nie',
+     gesien.commits[0].writes[0].updateMask.fieldPaths.includes('taal'), false)
+}
+{
+  /* 'af' is die verstek en word ook nie geskryf nie. */
+  const { gesien } = await loop(
+    { skakels: [kort('AAA111222')], taal: 'af' },
+    { wys: { AAA111222: lank('ds.jan', ID(1)) } }
+  )
+  is('af word nie geskryf nie',
+     gesien.commits[0].writes[0].updateMask.fieldPaths.includes('taal'), false)
+}
+{
+  /* 'n WITLYS. 'n String uit die liggaam mag nooit reguit in Firestore beland
+     nie — dit is die hele rede waarom `TALE` bestaan. */
+  for (const rommel of ['fr', 'EN-GB', '../../stuk', 42, { a: 1 }, '']) {
+    const { gesien } = await loop(
+      { skakels: [kort('AAA111222')], taal: rommel },
+      { wys: { AAA111222: lank('ds.jan', ID(1)) } }
+    )
+    is(`${JSON.stringify(rommel)} word nie geskryf nie`,
+       gesien.commits[0].writes[0].updateMask.fieldPaths.includes('taal'), false)
+  }
+  /* Maar hoofletters en spasies is 'n mens se tikwerk, nie 'n inbraak nie. */
+  const { gesien } = await loop(
+    { skakels: [kort('AAA111222')], taal: ' EN ' },
+    { wys: { AAA111222: lank('ds.jan', ID(1)) } }
+  )
+  is('" EN " word en', gesien.commits[0].writes[0].update.fields.taal.stringValue, 'en')
+}
+
 console.log('\n── Een stukkende skakel mag nie die res kos nie ──')
 {
   const { res } = await loop(

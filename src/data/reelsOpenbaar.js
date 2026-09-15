@@ -22,6 +22,8 @@
  * VOLG JESUS, en om dieselfde rede.
  */
 
+import { TALE, EIE_TAAL } from './reels.js'
+
 /* Net hierdie velde gaan oor die draad. Niks anders nie. */
 export const VELDE = [
   'id',          /* die dokumentnaam — die post-id */
@@ -35,6 +37,7 @@ export const VELDE = [
   'brug',
   'gedeel',      /* die aggregaat wat 'n nuwe kyker se voer rangskik */
   'datum',
+  'taal',        /* 'af' | 'en' — die voer vleg die tale inmekaar */
 ]
 
 /* 'n Clip se `datum` kom as 'n Firestore-tydstempel of as 'n string. Die voer
@@ -74,6 +77,12 @@ export function openbareKlip(rou) {
   if (Number.isFinite(gedeel) && gedeel > 0) uit.gedeel = Math.floor(gedeel)
   const datum = datumUit(d.datum)
   if (datum) uit.datum = datum
+  /* Die taal kom net saam as dit NIE die verstek is nie. Elke clip wat vandag
+     bestaan, dra geen taal-veld nie en is Afrikaans; 'n `taal: 'af'` op twee
+     honderd clips is bandwydte vir niks. En dit is 'n WITLYS — 'n taal wat ons
+     nie ken nie, val weg en die clip is Afrikaans, presies soos `taalVan()`. */
+  const taal = String(d.taal || '').trim().toLowerCase()
+  if (TALE.includes(taal) && taal !== EIE_TAAL) uit.taal = taal
 
   return uit
 }

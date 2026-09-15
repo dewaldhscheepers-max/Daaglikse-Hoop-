@@ -39,7 +39,7 @@
 import crypto from 'node:crypto'
 import { volgSkakel } from './_tiktokVolg.mjs'
 import { splitsSkakels } from '../src/data/reelsPlak.js'
-import { geldigeId } from '../src/data/reels.js'
+import { geldigeId, TALE, EIE_TAAL } from '../src/data/reels.js'
 import geheim from './_geheim.js'
 const { wieMag } = geheim
 
@@ -118,6 +118,11 @@ async function skryfClips(token, clips) {
       naam:       { stringValue: c.naam },
       handvatsel: { stringValue: c.handvatsel },
     }
+    /* Die TAAL word net geskryf as dit NIE die verstek is nie. Die eerste twee
+       klompe skryf dus presies wat hulle nog altyd geskryf het, en die 210
+       clips wat vandag bestaan, bly onaangeraak — 'n `taal: 'af'` op elkeen sou
+       niks beteken nie. Sien `taalVan()` in reels.js. */
+    if (c.taal && c.taal !== EIE_TAAL) velde.taal = { stringValue: c.taal }
     /* Net by 'n NUWE clip. 'n Herhaalde lopie mag nie die voer se orde omkeer
        nie. */
     if (c.nuut) velde.datum = { timestampValue: new Date().toISOString() }
@@ -170,6 +175,11 @@ export default async function handler(req, res) {
   const alles = splitsSkakels(rou.join('\n'))
   if (!alles.length) return res.status(400).json({ fout: 'Geen TikTok-skakels gevind' })
 
+  /* 'n WITLYS. Wat ons nie ken nie, is die verstek — nooit 'n string uit die
+     liggaam wat reguit in Firestore beland nie. */
+  const rouTaal = String(lyf.taal || '').trim().toLowerCase()
+  const taal = TALE.includes(rouTaal) ? rouTaal : EIE_TAAL
+
   const hap = alles.slice(0, MAKS_PER_HAP)
   const oor = alles.length - hap.length
 
@@ -208,7 +218,7 @@ export default async function handler(req, res) {
     for (const o of perId.values()) {
       const nuut = !daar.has(o.id)
       if (!nuut) oorgeslaan.push({ skakel: o.skakel, id: o.id })
-      clips.push({ id: o.id, naam: o.handvatsel, handvatsel: o.handvatsel, nuut })
+      clips.push({ id: o.id, naam: o.handvatsel, handvatsel: o.handvatsel, nuut, taal })
     }
     await skryfClips(token, clips)
     gedoen = clips.filter(c => c.nuut).map(c => ({ id: c.id, naam: c.naam }))
