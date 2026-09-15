@@ -25,6 +25,7 @@
 import { useMemo, useState } from 'react'
 import { keurPlaksel } from '../data/reelsPlak'
 import { REELS_INVOER, REELS_INVOER_2, REELS_INVOER_3 } from '../data/reelsInvoer'
+import { verspreiding, opsomming } from '../data/reelsMeet'
 import { beskryf } from '../data/reelsVerwyder'
 import './ReelsAdmin.css'
 
@@ -53,6 +54,35 @@ export default function ReelsAdmin({ geheim }) {
   const [wegFout, setWegFout] = useState('')
 
   const keur = useMemo(() => keurPlaksel(plaksel), [plaksel])
+
+  /* ── Word die voer werklik gekyk? ──
+   *
+   * Dewald, 15 September 2026: *"i want to make sure this page is actually
+   * working."* Hy het 210 clips ingesit sonder om ooit EEN getal te sien — die
+   * tellers het bestaan, maar die eindpunt was POST-alleen en die admin het
+   * niks gewys nie.
+   *
+   * Dit word op 'n KNOPPIE gehaal en nie by elke oopmaak nie: dit is tien
+   * dokument-lesings, en niemand kom hierheen om die getalle te sien wanneer hy
+   * skakels kom insit nie. */
+  const [tellers, setTellers]   = useState(null)
+  const [telBesig, setTelBesig] = useState(false)
+  const [telFout, setTelFout]   = useState('')
+
+  async function haalTellers() {
+    setTelBesig(true)
+    setTelFout('')
+    try {
+      const r = await fetch('/api/reels-tel', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { setTelFout(j.fout || `Fout ${r.status}`); return }
+      setTellers(j.tellers || {})
+    } catch (e) {
+      setTelFout(e.message)
+    } finally {
+      setTelBesig(false)
+    }
+  }
 
   async function soekOfVee(verwyder) {
     setWegBesig(true)
@@ -164,6 +194,68 @@ export default function ReelsAdmin({ geheim }) {
       >
         {besig ? staan || 'Besig…' : `Voeg ${keur.aantal || ''} by`.trim()}
       </button>
+
+      {/* ── Word die voer gekyk? ──
+          Dit staan BO die invoer-knoppies met opset: dit is die vraag waarmee
+          'n mens hierheen kom, en die skakels insit is die werk daarna. */}
+      <div className="ra-invoer ra-meet">
+        <div className="ra-invoer-kop">Word die voer gekyk?</div>
+        <p className="admin-books-note">
+          Hoeveel sessies die voer oopgemaak het, en hoe diep hulle gegaan het.
+          'n Sessie is EEN oopmaak — dieselfde mens wat drie keer 'n dag kom
+          kyk, is drie sessies. Daar word niks per mens gestoor nie.
+        </p>
+        <button
+          className="ra-invoer-knop ra-meet-knop"
+          onClick={haalTellers}
+          disabled={telBesig}
+        >
+          {telBesig ? 'Besig…' : 'Haal die getalle'}
+        </button>
+
+        {telFout && <p className="ra-fout">{telFout}</p>}
+
+        {tellers && (() => {
+          const o = opsomming(tellers)
+          return (
+            <div className="ra-meet-uit">
+              <div className="ra-ry">
+                <span>Het die voer oopgemaak</span><b>{o.oop}</b>
+              </div>
+              <div className="ra-ry">
+                <span>Het werklik gekyk</span>
+                <b>{o.gekyk}{o.persent !== null && ` · ${o.persent}%`}</b>
+              </div>
+              <div className="ra-ry">
+                <span>Het by 3+ clips gebly</span><b>{o.bleef}</b>
+              </div>
+
+              <div className="ra-meet-kop">Hoe diep hulle gegaan het</div>
+              {verspreiding(tellers).map(r => (
+                <div className="ra-ry" key={r.merk}>
+                  <span>{r.woorde}</span><b>{r.aantal}</b>
+                </div>
+              ))}
+
+              <div className="ra-meet-kop">Die skakel wat uitgaan</div>
+              <div className="ra-ry">
+                <span>Keer gedeel</span><b>{Number(tellers.gedeel || 0)}</b>
+              </div>
+              <div className="ra-ry">
+                <span>Gedeelde skakels oopgemaak</span><b>{Number(tellers.oopgemaak || 0)}</b>
+              </div>
+
+              {o.oop === 0 && (
+                <p className="admin-books-note">
+                  Nog geen oopmaak getel nie. Die tellers begin loop sodra
+                  hierdie weergawe op mense se fone is — 'n foon wat nog die ou
+                  weergawe loop, stuur niks.
+                </p>
+              )}
+            </div>
+          )
+        })()}
+      </div>
 
       {/* ── Dewald se eerste klomp ──
           Sy 124 skakels staan in `reelsInvoer.js`, want hy het hulle EEN keer

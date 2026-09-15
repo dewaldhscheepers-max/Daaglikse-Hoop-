@@ -38,16 +38,25 @@ const SKERWE = 10
 
 const BASIS = 'tellers/volgJesus'
 
-/* Skerf 0 IS die ou dokument. Sien hierbo. */
-function skerfPad(i) {
+/* ── Die BASIS is 'n parameter, met VOLG JESUS s'n as verstek ──
+ *
+ * Op 15 September 2026 het die REELS-voer dieselfde beskerming nodig gekry:
+ * Dewald wou weet of die blad werklik gekyk word, en daardie tellers skryf by
+ * elke oopmaak en by elke drempel — presies die bursty las waarvoor die skerwe
+ * gebou is. Sien `api/reels-tel.mjs`.
+ *
+ * Die verstek bly `tellers/volgJesus`, dus verander geen bestaande oproep nie
+ * en bly elke getal wat vandag bestaan presies waar hy is. */
+function skerfPad(i, basis) {
+  const b = String(basis || BASIS)
   const n = Number(i)
-  if (!Number.isInteger(n) || n <= 0) return BASIS
-  return `${BASIS}_s${Math.min(n, SKERWE - 1)}`
+  if (!Number.isInteger(n) || n <= 0) return b
+  return `${b}_s${Math.min(n, SKERWE - 1)}`
 }
 
-function alleSkerfPaaie() {
+function alleSkerfPaaie(basis) {
   const uit = []
-  for (let i = 0; i < SKERWE; i++) uit.push(skerfPad(i))
+  for (let i = 0; i < SKERWE; i++) uit.push(skerfPad(i, basis))
   return uit
 }
 

@@ -51,11 +51,26 @@
    ──────────────────────────────────────────────────────────── */
 import crypto from 'node:crypto'
 import { geldigeId } from '../src/data/reels.js'
+import { MEET_GEBEURE } from '../src/data/reelsMeet.js'
+import skerwe from './_telSkerwe.js'
+import geheim from './_geheim.js'
+const { skerfPad, alleSkerfPaaie, kiesSkerf, telOp: telSkerweOp } = skerwe
+const { wieMag } = geheim
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
 const DOK = 'tellers/reels'
 
+/* ── Die gebeurtenisse wat 'n oop POST mag optel ──
+ *
+ * 'n WITLYS, en die kliënt stuur NOOIT 'n veldnaam nie — hy stuur 'n
+ * gebeurtenis en hierdie leer maak die naam. Sien die kop.
+ *
+ * `oop` en die `bereikN`-drempels het op 15 September bygekom: Dewald wou weet
+ * of die blad werklik gekyk word. Hulle is GLOBALE heelgetalle — nooit per
+ * clip en nooit per mens nie. Sien `src/data/reelsMeet.js` vir waarom dit
+ * drempels is en nie 'n totaal aan die einde van 'n sessie nie. */
 const VELDE = { gedeel: 'gedeel', oopgemaak: 'oopgemaak' }
+for (const g of MEET_GEBEURE) VELDE[g] = g
 
 /* Net 'n DEEL word per clip getel. "Oopgemaak" per clip sou sê hoe gewild 'n
    gedeelde skakel was, en dít begin lyk soos 'n profiel van wat rondgestuur
@@ -91,9 +106,16 @@ async function kryToken() {
    oomblik druk, tel altwee; 'n lees-dan-skryf sou een van hulle verloor. */
 async function telOp(token, veld, klipId) {
   const wortel = `projects/${PROJECT_ID}/databases/(default)/documents`
+  /* ── Die skryf land op 'n TOEVALLIGE SKERF ──
+     Firestore hou sowat een skryf per sekonde op EEN dokument vol. `gedeel` en
+     `oopgemaak` was skaars genoeg om dit te oorleef; `oop` en die drempels is
+     nie — hulle skryf by elke oopmaak van die voer, en dit is bursty. Skerf 0
+     IS die ou dokument, dus gaan geen bestaande getal verlore nie. Sien
+     `api/_telSkerwe.js`. */
+  const pad = skerfPad(kiesSkerf(Math.random()), DOK)
   const skrywes = [{
     transform: {
-      document: `${wortel}/${DOK}`,
+      document: `${wortel}/${pad}`,
       fieldTransforms: [{ fieldPath: veld, increment: { integerValue: '1' } }],
     },
   }]
@@ -116,9 +138,52 @@ async function telOp(token, veld, klipId) {
   if (!r.ok) throw new Error('commit ' + r.status)
 }
 
+/* ── Die getalle LEES ──
+ *
+ * Dit was die tweede helfte van wat stukkend was: selfs die twee tellers wat
+ * altyd bestaan het, kon nêrens gelees word nie. Die eindpunt was POST-alleen,
+ * dus het Dewald 210 clips ingesit sonder om ooit een getal te sien.
+ *
+ * Die GET is TOE (admin-alleen), presies soos `api/volg-jesus-telling.js` s'n.
+ * Die POST bly oop — 'n gewone foon moet kan tel — maar wie die getalle mag
+ * SIEN, is 'n ander vraag.
+ */
+async function leesTellers(token) {
+  const wortel = `projects/${PROJECT_ID}/databases/(default)/documents`
+  const r = await fetch(`https://firestore.googleapis.com/v1/${wortel}:batchGet`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      documents: alleSkerfPaaie(DOK).map(p => `${wortel}/${p}`),
+    }),
+  })
+  if (!r.ok) throw new Error('batchGet ' + r.status)
+  const uit = await r.json()
+  const dokke = (Array.isArray(uit) ? uit : []).map(ry => ry && ry.found).filter(Boolean)
+  return telSkerweOp(dokke)
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store')
-  if (req.method !== 'POST') return res.status(405).json({ fout: 'Method Not Allowed' })
+
+  if (req.method === 'GET') {
+    if (!wieMag(req)) return res.status(401).json({ fout: 'Nee' })
+    if (!process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      return res.status(500).json({ fout: 'diensrekening ontbreek' })
+    }
+    try {
+      const token = await kryToken()
+      return res.status(200).json({ tellers: await leesTellers(token) })
+    } catch (e) {
+      console.warn('[reels-tel] kon nie lees nie:', e.message)
+      return res.status(500).json({ fout: e.message })
+    }
+  }
+
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, POST')
+    return res.status(405).json({ fout: 'Method Not Allowed' })
+  }
 
   let lyf = req.body
   if (typeof lyf === 'string') { try { lyf = JSON.parse(lyf) } catch { lyf = null } }

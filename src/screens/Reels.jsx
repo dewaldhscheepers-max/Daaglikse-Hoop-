@@ -126,6 +126,7 @@ import {
 import {
   GEBED_DAG, dagVan, magWysGebed, magWysSteun, voegGebedIn,
 } from '../data/reelsGebed'
+import { drempelVir, OOP } from '../data/reelsMeet'
 import ReelsGebedKaart from '../components/ReelsGebedKaart'
 import './Reels.css'
 
@@ -557,6 +558,22 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     tel('oopgemaak')
   }, [deepId])
 
+  /* ── Die voer is OOPGEMAAK ──
+   *
+   * Dewald: *"i want to make sure this page is actually working."* Hierdie een
+   * getal is die noemer van die hele vraag — sonder dit sê "180 het gekyk"
+   * niks, want 'n mens weet nie of dit uit 200 of uit 2 000 is nie.
+   *
+   * EEN keer per sessie, by die montering. 'n Sessie is een oopmaak van die
+   * voer; dieselfde mens wat drie keer 'n dag oopmaak, is drie sessies. Dit is
+   * die eerlike eenheid en die enigste een wat sonder 'n identiteit bestaan. */
+  const oopRef = useRef(false)
+  useEffect(() => {
+    if (oopRef.current) return
+    oopRef.current = true
+    tel(OOP)
+  }, [])
+
   /* ── Watter clip is op die skerm ── */
   useEffect(() => {
     const voer = voerRef.current
@@ -588,6 +605,15 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
           if (!getelPlekRef.current.has(i)) {
             getelPlekRef.current.add(i)
             merkGesien(it.klip.id)
+            /* ── Word die voer werklik gekyk? ──
+               Die aantal clips in HIERDIE sessie is die grootte van daardie
+               stel. Steek dit 'n drempel oor, sê ons dit een keer — 'n GLOBALE
+               heelgetal, nooit per clip en nooit per mens. Sien
+               `src/data/reelsMeet.js` vir waarom dit drempels is en nie 'n
+               totaal aan die einde nie: op 'n foon is daar geen betroubare
+               einde. */
+            const drempel = drempelVir(getelPlekRef.current.size)
+            if (drempel) tel(drempel)
           }
         }
         /* ── Die gebedskaart is GESIEN ──

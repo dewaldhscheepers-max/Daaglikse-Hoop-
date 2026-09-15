@@ -21,6 +21,7 @@ process.env.FIREBASE_PRIVATE_KEY = privateKey
   .export({ type: 'pkcs8', format: 'pem' })
   .replace(/\n/g, '\\n')
 process.env.FIREBASE_PROJECT_ID = 'toets-projek'
+process.env.SORG_ADMIN_GEHEIM = 'n-geheim-wat-lank-genoeg-is'
 
 const { default: handler } = await import('./reels-tel.mjs')
 
@@ -40,7 +41,7 @@ function maakRes() {
 }
 
 /* Die vals Google: een token, en dan onthou ons die commit se liggaam. */
-function saai() {
+function saai(lees) {
   const gestuur = []
   globalThis.fetch = async (adres, opsies) => {
     const u = String(adres)
@@ -48,15 +49,29 @@ function saai() {
       return { ok: true, json: async () => ({ access_token: 'teken' }) }
     }
     gestuur.push(JSON.parse((opsies && opsies.body) || '{}'))
+    /* Die LEES: Firestore se batchGet gee 'n ry per dokument. Ons gee die
+       skerwe wat `lees` beskryf; die res "bestaan nie", presies soos 'n skerf
+       wat nog nooit geskryf is nie. */
+    if (u.includes(':batchGet')) {
+      const rye = (lees || []).map(velde => ({
+        found: {
+          fields: Object.fromEntries(
+            Object.entries(velde).map(([k, v]) => [k, { integerValue: String(v) }])
+          ),
+        },
+      }))
+      return { ok: true, json: async () => rye }
+    }
     return { ok: true, json: async () => ({}) }
   }
   return gestuur
 }
 
-async function loop(lyf, metode) {
-  const gestuur = saai()
+async function loop(lyf, metode, opsies = {}) {
+  const gestuur = saai(opsies.lees)
   const res = maakRes()
-  await handler({ method: metode || 'POST', body: lyf, headers: {}, query: {} }, res)
+  const koppe = opsies.geheim ? { 'x-sorg-geheim': opsies.geheim } : {}
+  await handler({ method: metode || 'POST', body: lyf, headers: koppe, query: {} }, res)
   return { res, gestuur }
 }
 
@@ -70,7 +85,10 @@ console.log('\n── Die totale ──')
   is('200', res.kode, 200)
   const w = skrywesVan(gestuur)
   is('een skrywe sonder n clip', w.length, 1)
-  is('op die tellers-dokument', /documents\/tellers\/reels$/.test(w[0].transform.document), true)
+  /* Op 'n SKERF van `tellers/reels` — skerf 0 IS die ou dokument, dus is albei
+     vorme reg. Sien `api/_telSkerwe.js`. */
+  is('op n skerf van die tellers-dokument',
+     /documents\/tellers\/reels(_s[1-9])?$/.test(w[0].transform.document), true)
   is('dit tel `gedeel`', w[0].transform.fieldTransforms[0].fieldPath, 'gedeel')
   is('met een', w[0].transform.fieldTransforms[0].increment.integerValue, '1')
   is('geen kas', res.koppe['Cache-Control'], 'no-store')
@@ -119,10 +137,85 @@ for (const boos of ['iets', 'gedeel2', 'GEDEEL', 1, null, undefined, [], {}]) {
   is(`wat=${JSON.stringify(boos)}: 400`, res.kode, 400)
 }
 
+console.log('\n── WORD DIE VOER GEKYK? ──')
+/* Dewald, 15 September 2026: *"i want to make sure this page is actually
+   working. so i need you to count how many people click on reels and how many
+   videos each person watched."* Die drempels is die antwoord; sien
+   `src/data/reelsMeet.js`. */
+{
+  const { res, gestuur } = await loop({ wat: 'oop' })
+  is('n oopmaak tel', res.kode, 200)
+  const w = skrywesVan(gestuur)
+  is('een skrywe', w.length, 1)
+  is('en dit tel `oop`', w[0].transform.fieldTransforms[0].fieldPath, 'oop')
+}
+for (const n of [1, 3, 5, 10, 25]) {
+  const { res, gestuur } = await loop({ wat: `bereik${n}` })
+  is(`bereik${n} tel`, res.kode, 200)
+  is(`en die veld is bereik${n}`,
+     skrywesVan(gestuur)[0].transform.fieldTransforms[0].fieldPath, `bereik${n}`)
+}
+{
+  /* 'n Drempel wat NIE bestaan nie, is nie 'n veld nie. Die eindpunt is oop,
+     dus is die witlys die enigste ding tussen 'n vreemdeling en enige veld op
+     daardie dokument. */
+  for (const boos of ['bereik2', 'bereik0', 'bereik999', 'bereik', 'oopgemaak_x']) {
+    const { res } = await loop({ wat: boos })
+    is(`${boos}: 400`, res.kode, 400)
+  }
+}
+{
+  /* Die drempels is GLOBAAL. 'n Clip-id daarby mag nooit 'n clip-dokument
+     aanraak nie — dít sou 'n kyk-telling PER CLIP wees, en dit is die een ding
+     wat hierdie voer nooit mag hê nie. */
+  const { gestuur } = await loop({ wat: 'bereik5', klip: '7412345678901234567' })
+  is('geen tweede skrywe na die clip', skrywesVan(gestuur).length, 1)
+}
+
+console.log('\n── Die getalle LEES ──')
+{
+  const { res } = await loop(null, 'GET')
+  is('sonder die geheim: 401', res.kode, 401)
+}
+{
+  const { res } = await loop(null, 'GET', {
+    geheim: 'verkeerd-maar-lank-genoeg',
+  })
+  is('met die verkeerde geheim: 401', res.kode, 401)
+}
+{
+  /* Die skerwe word OPGETEL — dit is die hele punt van die skerwe. */
+  const { res } = await loop(null, 'GET', {
+    geheim: 'n-geheim-wat-lank-genoeg-is',
+    lees: [
+      { oop: 100, bereik1: 90, bereik3: 60 },
+      { oop: 40,  bereik1: 35, bereik3: 20 },
+      { oop: 10 },
+    ],
+  })
+  is('200', res.kode, 200)
+  is('die oopmaak-tellings word opgetel', res.lyf.tellers.oop, 150)
+  is('en die drempels ook', res.lyf.tellers.bereik1, 125)
+  is('en die derde een', res.lyf.tellers.bereik3, 80)
+}
+{
+  /* Nog nooit geskryf nie: elke skerf ontbreek, en dan is alles nul — nie 'n
+     fout nie. */
+  const { res } = await loop(null, 'GET', { geheim: 'n-geheim-wat-lank-genoeg-is', lees: [] })
+  is('n leeg begin is 200', res.kode, 200)
+  is('met geen getalle', res.lyf.tellers, {})
+}
+
 console.log('\n── Wat verkeerd kan loop ──')
 {
+  /* Die GET bestaan nou — hy LEES die tellers — maar hy is admin-alleen. Sonder
+     die geheim is dit 401 en nie 405 nie. */
   const { res } = await loop({ wat: 'gedeel' }, 'GET')
-  is('GET: 405', res.kode, 405)
+  is('GET sonder die geheim: 401', res.kode, 401)
+}
+{
+  const { res } = await loop({ wat: 'gedeel' }, 'PUT')
+  is('PUT: 405', res.kode, 405)
 }
 {
   const { res } = await loop(null)

@@ -101,7 +101,8 @@ node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaa
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 291
 node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
-node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 58
+node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
+node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
 node api/_reelsVoegBy.toets.mjs               # die klomp-oplosser, vals TikTok + Firestore, 47
 node src/data/reelsGebed.toets.mjs            # die gebedskaart in die voer, 34 toetse
 node src/data/reelsVerwyder.toets.mjs         # wat n mens mag inplak om n clip uit te haal, 33
@@ -1263,9 +1264,13 @@ rol, en omdat dit al die Afrikaanse predikers op een plek kan sit.
 in die app is nie groei nie — dit is dieselfde mense wat langer bly. Elke
 gedeelde clip is een vreemdeling wat binne twee sekondes 'n boodskap sien sonder
 'n muur voor haar; dieselfde masjien as `/bid/<id>` en `/hoop/<id>`. Daarom meet
-`tellers/reels` net **gedeel** en **oopgemaak**, en nooit "gekyk" nie: die dag
-wanneer 'n mens kyktyd begin tel, begin hy 'n voer optimeer vir die verkeerde
-ding.
+`tellers/reels` **gedeel** en **oopgemaak**, en nooit KYKTYD nie: die dag wanneer
+'n mens kyktyd begin tel, begin hy 'n voer optimeer vir die verkeerde ding.
+
+Sedert 15 September 2026 tel dit ook `oop` en 'n paar kyk-DREMPELS — Dewald moes
+kan sien of die blad werk. Dit breek nie die reël nie: dit is GLOBALE getalle,
+nooit per clip en nooit per mens, dus kan niks daarmee gerangskik of
+geoptimeer word nie. Sien "Word die voer werklik gekyk?" hieronder.
 
 **Daar is nou ook 'n telling PER CLIP, en dit was eers verbied.** Hier het
 gestaan: *"NIE watter clip nie — 'n telling per clip is die eerste tree na
@@ -1898,6 +1903,71 @@ eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
 knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
+
+### Word die voer werklik gekyk?
+
+Dewald, 15 September 2026: *"i want to make sure this page is actually working.
+so i need you to count how many people click on reels and how many videos each
+person watched."*
+
+Dit was op TWEE maniere stukkend, en die tweede is die een wat 'n mens maklik
+mis: `tellers/reels` het `gedeel` en `oopgemaak` aangeteken sedert dag een — en
+`api/reels-tel.mjs` was **POST-alleen**. Daar was geen GET nie en die admin het
+niks gewys nie. Hy het 210 clips ingesit sonder om ooit een getal te sien.
+
+**Dit word NIE per mens gestoor nie, en dit is nie 'n halwe antwoord nie.** 'n
+Lys van driehonderd mense se kyke beantwoord sy vraag nie — hy sou dit nooit
+lees nie. Wat hy wil weet, is of die blad WERK, en daardie vraag word presies
+beantwoord deur 'n VERSPREIDING. Die app se grens bly ook heel: 'n aggregaat
+mag; enigiets per MENS nooit.
+
+**DREMPELS, nie 'n totaal aan die einde nie.** Die voor-die-hand-liggende
+ontwerp is om by die einde van 'n sessie te sê "sy het 7 gekyk". Dit werk nie op
+'n foon nie: daar is geen betroubare einde. `beforeunload` vuur nie op iOS
+wanneer 'n mens die app wegvee nie, en `visibilitychange` vuur ook wanneer sy 'n
+oproep antwoord. Daardie ontwerp verloor stil 'n deel van sy tellings, en **'n
+teller wat stil verloor, is erger as geen teller nie — hy lyk soos 'n feit.**
+
+`DREMPELS = [1, 3, 5, 10, 25]` in `src/data/reelsMeet.js`. Elke drempel word
+getel op die OOMBLIK dat sy hom oorsteek; maak sy die app middel-in toe, is
+alles wat sy wel gekyk het, reeds getel. Die tellers is KUMULATIEF (`bereik5` is
+"minstens vyf"), en die verspreiding kom daaruit deur af te trek — altyd
+konsekwent, want 'n sessie wat drie gekyk het, het een gekyk.
+
+**Die eenheid is 'n SESSIE, nie 'n mens nie.** Een oopmaak van die voer.
+Dieselfde mens wat drie keer 'n dag kom kyk, is drie sessies. Dit is die
+eerlike eenheid en die enigste een wat sonder 'n identiteit bestaan.
+
+**`oop` is die noemer.** Sonder dit sê "180 het gekyk" niks — 'n mens weet nie of
+dit uit 200 of uit 2 000 is nie. En die ry wat die meeste sê, is *"het
+oopgemaak, niks gekyk"*: 'n groot getal daar beteken die voer laai te stadig of
+die eerste clip speel nie.
+
+**Die skrywes loop oor SKERWE.** `gedeel` en `oopgemaak` was skaars genoeg om
+een dokument te oorleef; `oop` en die drempels is nie — hulle skryf by elke
+oopmaak en is bursty. `api/_telSkerwe.js` se `skerfPad()` en `alleSkerfPaaie()`
+neem nou 'n BASIS (verstek bly `tellers/volgJesus`, dus verander geen bestaande
+oproep nie). Skerf 0 IS die ou dokument, dus gaan geen getal wat vandag bestaan
+verlore nie.
+
+**Die POST bly oop; die GET is TOE.** 'n Gewone foon moet kan tel — dieselfde as
+`tel-toestemming` — maar wie die getalle mag SIEN, is 'n ander vraag. Dieselfde
+vorm as `api/volg-jesus-telling.js`.
+
+Die getalle word op 'n KNOPPIE gehaal en nie by elke oopmaak van die admin nie:
+dit is tien dokument-lesings, en niemand kom hierheen om getalle te sien wanneer
+hy skakels kom insit nie.
+
+Blaaiertoetse: `kykReels.mjs` se laaste blok meet die een ding wat geen
+eenheidstoets kan sien — dat elke drempel **presies een keer** gestuur word, ook
+nadat 'n mens heen en weer gerol het. Die waarnemer vuur meer as een keer per
+plek, en presies daardie fout het `reels_gesien` al op 2 laat staan ná een enkele
+kyk. `kykReelsAdmin.mjs` meet dat die getalle werklik op die skerm kom en dat
+daar nooit 'n negatiewe getal is nie.
+
+Een val om te onthou: die kykgetal-blok deel die `ra-invoer`-vorm maar is nie 'n
+invoer nie, dus dra die walk se keuses `:not(.ra-meet)`. Dit is woord vir woord
+dieselfde val as `ra-weg-soek` — 'n gedeelde klas wat 'n indeks-keuse gryp.
 
 ### Die Engelse clips word INGEVLEG, nie agteraan gesit nie
 

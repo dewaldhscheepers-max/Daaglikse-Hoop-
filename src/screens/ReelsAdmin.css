@@ -65,6 +65,30 @@
 }
 .ra-engels-knop:active { background: #E4F0EA; }
 
+/* ── Die kykgetalle ──
+   Dit staan bo-aan die blad: dit is die vraag waarmee 'n mens hierheen kom. */
+.ra-meet-knop { border-color: #4A6FA5; color: #3A5A8A; }
+.ra-meet-knop:active { background: #E6EDF6; }
+
+.ra-meet-uit { margin-top: 14px; }
+
+.ra-meet-kop {
+  margin: 16px 0 6px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft, #6B6259);
+}
+
+.ra-fout {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: #A8412F;
+}
+
 .ra-verslag {
   margin-top: 20px;
   padding: 14px 15px;
