@@ -253,6 +253,81 @@ video.reel-speler { object-fit: cover; background: #151314; }
 }
 .reel-wenk:active { background: rgba(13, 12, 13, 0.92); }
 
+/* ── "Gly jou vinger boontoe" ──
+ *
+ * Dewald, 16 September 2026: *"Wys op die eerste Reel vir die gebruiker hierdie
+ * boodskap: Gly jou vinger boontoe om die volgende video te sien. wys hulle
+ * hoe."*
+ *
+ * ── Die beweging loop op `top`, NOOIT op `transform` ──
+ *
+ * Dit is die hele Android-les, en hier is dit skerper as gewoonlik. 'n
+ * `transform`- of `opacity`-animasie word deur die blaaier op die GPU gedoen en
+ * maak 'n SAAMGESTELDE LAAG — en hierdie een sou oor 'n BEWEGENDE VIDEO lê,
+ * presies waar `backdrop-filter` se gekleurde strepe vandaan gekom het.
+ *
+ * `top` op 'n klein, relatief geplaasde SVG kos 'n uitleg per raam en niks
+ * meer. Dit is 'n lae prys vir 'n wenk wat sowat drie sekondes se pad loop.
+ *
+ * Die POT is ondeursigtig en staan stil; net die pyl binne-in beweeg. 'n Pil
+ * wat self op en af wip, lees soos 'n haper.
+ */
+.reel-swiep {
+  position: absolute;
+  left: 50%;
+  /* Bo die skrifstrook en die maker se naam, onder die middel van die skerm —
+     en ver van die rail regs. Marges sentreer, nooit `translateX(-50%)`: dít
+     maak die pil vir altyd 'n eie saamgestelde laag. Sien CLAUDE.md se
+     `.bottom-nav`. */
+  /* 248px, nie 280 nie: die rail sit `right: 2px` en is 70px wyd, dus begin hy
+     op 'n 412px-foon by x=340. 'n Pil van 280 loop tot 346 en die rail lê oor
+     sy hoek. Dieselfde les as die speelbalkie en die BYBEL-knoppie — wat in 'n
+     onderste hoek beland, moet gemeet word, nie geraai nie. */
+  margin-left: -124px;
+  width: 248px;
+  bottom: calc(var(--reels-onder) + 128px);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px 14px;
+  background: rgba(13, 12, 13, 0.74);
+  border: 1px solid rgba(244, 239, 231, 0.16);
+  border-radius: 18px;
+  pointer-events: none;   /* dit vang niks — 'n swiep moet deur hom loop */
+  text-align: center;
+}
+
+/* Die hoogte is VAS sodat die pil nie saam met die pyl op en af groei nie. */
+.reel-swiep-pyl {
+  position: relative;
+  height: 34px;
+  color: #E8CBA4;
+  animation: reel-swiep-op 1.7s ease-in-out infinite;
+}
+.reel-swiep-pyl svg { width: 22px; height: 31px; display: block; }
+
+@keyframes reel-swiep-op {
+  0%   { top: 6px; }
+  55%  { top: -6px; }
+  100% { top: 6px; }
+}
+
+.reel-swiep-woorde {
+  margin: 0;
+  color: var(--reels-wit);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+
+/* Wie beweging afgeskakel het, kry die WOORDE — hulle dra die boodskap. */
+@media (prefers-reduced-motion: reduce) {
+  .reel-swiep-pyl { animation: none; top: 0; }
+}
+
 /* ── "Daardie een is nie meer hier nie" ──
    Sy het 'n boodskap gekry wat 'n belofte maak. Is die clip weg en wys ons
    stilweg 'n ander een, is die eerste ding wat hierdie app aan 'n vreemdeling

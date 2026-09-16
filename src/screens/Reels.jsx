@@ -127,6 +127,7 @@ import {
   GEBED_DAG, dagVan, magWysGebed, magWysSteun, voegGebedIn,
 } from '../data/reelsGebed'
 import { drempelVir, OOP } from '../data/reelsMeet'
+import { GESWIEP, SWIEP_WOORDE, magWysSwiep } from '../data/reelsWenk'
 import ReelsGebedKaart from '../components/ReelsGebedKaart'
 import './Reels.css'
 
@@ -429,6 +430,17 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
      "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat NUUT is. */
   const nuutRef    = useRef(null)
   if (nuutRef.current === null) nuutRef.current = !Object.keys(gesienRefLys.current).length
+  /* ── Het sy al ooit geswiep? ──
+   *
+   * EEN keer per oopmaak gelees, dieselfde rede as `nuutRef` s'n: die wenk mag
+   * nie onder haar vingers verdwyn op die oomblik dat sy hom volg nie. Sy word
+   * weggeneem omdat sy by clip TWEE is, nie omdat die vlaggie geskryf is. */
+  const geswiepRef = useRef(null)
+  if (geswiepRef.current === null) {
+    let al = false
+    try { al = localStorage.getItem(GESWIEP) === '1' } catch { /* privaat modus */ }
+    geswiepRef.current = al
+  }
   /* ── Watter PLEKKE in hierdie voer al getel is ──
    *
    * Die blaaierlopie het dit gevang: een clip het op telling 2 gestaan ná een
@@ -507,6 +519,32 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    * nie", en 'n boodskap wat 'n halwe sekonde flits, is erger as geen. */
   const klipWeg = !!deepId && !laai &&
     !items.some(it => it.tipe === 'klip' && it.klip.id === deepId)
+
+  /* ── "Gly jou vinger boontoe" ──
+   * Die hele besluit staan in `src/data/reelsWenk.js`. `wenk` is die
+   * klank-wenk; twee boodskappe oor een video is nie 'n wenk nie. */
+  const wysSwiep = magWysSwiep({
+    gesienNiks: nuutRef.current,
+    geswiep: geswiepRef.current,
+    aktief,
+    anderWenk: wenk && stil,
+  })
+
+  /* ── Sy het geswiep ──
+   *
+   * Die vlaggie word DADELIK geskryf: 'n mens maak 'n app toe deur hom toe te
+   * maak, nie deur 'n knoppie te druk nie, en dan loop daar geen opruiming nie.
+   *
+   * En `geswiepRef` skuif SAAM. Sonder daardie een reël kom die wenk terug
+   * sodra sy weer boontoe rol na clip een — 'n beginnerswenk aan iemand wat
+   * pas gewys het sy weet hoe. Die blaaierlopie het dit binne een lopie gevang.
+   * Dit is veilig om hier te skuif: hierdie effek loop eers wanneer sy REEDS
+   * geswiep het, dus kan dit die wenk nooit onder haar vingers wegneem nie. */
+  useEffect(() => {
+    if (aktief <= 0 || geswiepRef.current) return
+    geswiepRef.current = true
+    try { localStorage.setItem(GESWIEP, '1') } catch { /* privaat modus */ }
+  }, [aktief])
 
   /* ── Een lees, met 'n tydgrens ── */
   useEffect(() => {
@@ -1019,6 +1057,37 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
                 <button className="reel-wenk" onClick={() => { setStil(false); setWenk(false) }}>
                   Tik vir klank
                 </button>
+              )}
+
+              {/* ── "Gly jou vinger boontoe" ──
+                  Dewald, 16 September 2026: *"Wys op die eerste Reel vir die
+                  gebruiker hierdie boodskap: Gly jou vinger boontoe om die
+                  volgende video te sien. wys hulle hoe."*
+
+                  Dit is die een ding wat 'n voer as vanselfsprekend aanvaar en
+                  wat dit nie is: die mens vir wie hierdie app gebou is, het
+                  dalk nog nooit 'n vertikale voer gesien nie. Sy sien EEN
+                  video, dit loop klaar, dit begin weer — en sy gaan weg.
+
+                  Die hele besluit staan in `src/data/reelsWenk.js`. Dit wys net
+                  op die eerste clip, net vir wie nog niks gekyk het nie, en
+                  nooit weer sodra sy een keer geswiep het nie.
+
+                  `aria-hidden` op die tekening, nie op die woorde nie — 'n
+                  skermleser moet die sin hoor; die pyl is die prentjie. */}
+              {i === aktief && wysSwiep && (
+                <div className="reel-swiep" role="status">
+                  <div className="reel-swiep-pyl" aria-hidden="true">
+                    <svg viewBox="0 0 24 34" fill="none" stroke="currentColor"
+                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Die vingerpunt, en die pad wat hy loop. */}
+                      <circle cx="12" cy="26" r="4.5" />
+                      <path d="M12 19V9" />
+                      <path d="m6.5 13.5 5.5-6 5.5 6" />
+                    </svg>
+                  </div>
+                  <p className="reel-swiep-woorde">{SWIEP_WOORDE}</p>
+                </div>
               )}
 
               {/* ── Die Deel-knoppie dek TikTok se eie deel-ikoon ──

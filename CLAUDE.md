@@ -103,6 +103,7 @@ node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
 node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
+node src/data/reelsWenk.toets.mjs             # "gly jou vinger boontoe", 16 toetse
 node api/_reelsVoegBy.toets.mjs               # die klomp-oplosser, vals TikTok + Firestore, 47
 node src/data/reelsGebed.toets.mjs            # die gebedskaart in die voer, 34 toetse
 node src/data/reelsVerwyder.toets.mjs         # wat n mens mag inplak om n clip uit te haal, 33
@@ -1903,6 +1904,52 @@ eenheidstoets kan sien nie: die sweefende **BYBEL**-knoppie hang oor elke skerm
 in hierdie app en het die Deel-knoppie letterlik doodgedruk —
 `elementFromPoint` op die middel van Deel het `BUTTON.nav-bybel` gegee. Die
 knoppie was daar, hy was sigbaar, en hy was onbereikbaar.
+
+### "Gly jou vinger boontoe"
+
+Dewald, 16 September 2026: *"Wys op die eerste Reel vir die gebruiker hierdie
+boodskap: Gly jou vinger boontoe om die volgende video te sien. wys hulle
+hoe."*
+
+Dit is die een ding wat 'n voer as vanselfsprekend aanvaar en wat dit nie is.
+Wie TikTok gebruik, weet dit sonder om te dink; die mens vir wie hierdie app
+gebou is, het dalk nog nooit 'n vertikale voer gesien nie. Sy sien EEN video,
+dit loop klaar, dit begin weer — en sy gaan weg, want sy dink dis al.
+
+Die reëls staan in `src/data/reelsWenk.js`, suiwer en met toetse. Die woorde is
+Dewald se sin, woord vir woord.
+
+**Drie hekke, en die derde is die belangrikste.** Hy wys net op die EERSTE clip;
+hy wys net vir wie nog NIKS gekyk het nie (dieselfde `nuut`-toets as die voer se
+orde); en hy kom **nooit weer** sodra sy een keer geswiep het. Sonder die tweede
+hek sou elke bestaande kyker môre 'n beginnerswenk kry oor iets wat sy 'n week
+laas gedoen het.
+
+**`geswiep` moet ook BINNE 'n sessie skuif.** Die eerste weergawe het die vlaggie
+net by die mount gelees, "sodat die wenk verdwyn omdat sy by clip twee is en nie
+omdat 'n vlaggie geskryf is nie". Dit klink versigtig en dit was verkeerd: rol sy
+weer boontoe na clip een, is die beginnerswenk terug — vir iemand wat pas gewys
+het sy weet hoe. `geswiepRef` skuif nou saam met die skryf. Dit is veilig omdat
+daardie effek eers loop wanneer sy REEDS geswiep het.
+
+**Die beweging loop op `top`, NOOIT op `transform`.** Dit is die Android-les,
+hier skerper as gewoonlik: 'n `transform`- of `opacity`-animasie word op die GPU
+gedoen en maak 'n SAAMGESTELDE LAAG — en hierdie een sou oor 'n BEWEGENDE VIDEO
+lê, presies waar `backdrop-filter` se gekleurde strepe vandaan gekom het. `top`
+op 'n klein SVG kos 'n uitleg per raam en niks meer. Die pil self staan stil en
+word met MARGES gesentreer, nooit met `translateX(-50%)`.
+
+**Hy vang niks.** `pointer-events: none` — 'n wenk wat die gebaar blokkeer wat hy
+leer, is die ergste soort. Die blaaierlopie meet dit met `elementFromPoint`.
+
+**En hy raak nie aan die rail nie.** Die eerste weergawe was 280px breed en die
+Deel-rail (`right: 2px`, 70px wyd) het oor sy hoek gelê. Hy is nou 248px. Wat in
+'n onderste hoek beland, word gemeet en nie geraai nie — dieselfde les as die
+speelbalkie en die BYBEL-knoppie; daar is 'n meting wat dit vashou.
+
+Nooit twee wenke oor een video nie: "Tik vir klank" staan in die middel van
+dieselfde skerm en gaan self ná 'n paar sekondes weg. Hierdie een kom eers
+daarna.
 
 ### Word die voer werklik gekyk?
 
