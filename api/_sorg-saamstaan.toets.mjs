@@ -131,24 +131,34 @@ const MUUR = {
   af:     { teks: 'z', gepubliseer: false, saam: 0, reaksies: {}, sensitief: false },
 }
 
-afdeling('n SENSITIEWE plasing kry GEEN vrye teks nie')
+afdeling('Ook op n SWAAR plasing kan n mens SKRYF')
 {
-  stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
-  let r = await stuur({ muurId: 'swaar', toestel: 'jan', teks: 'Net bid, God sal haar genees.' })
-  kyk('vrye teks word geweier', r.kode === 400, r.lyf)
-  kyk('en die mens word na die klaar woorde gestuur',
-      String(r.lyf.fout).includes('woorde hier onder'), r.lyf)
-  kyk('niks is geskryf nie', skryfwerk.length === 0, skryfwerk)
+  /* Dit was andersom, en die skerm en die bediener het 'n maand lank van
+     mekaar verskil: die kassie het oop voor die mens gestaan en elke opmerking
+     het 'n 400 gekry. Dewald het 'n hele gebed getik op 'n storie oor
+     skoonouers en dit kon nie geplaas word nie.
 
-  /* Die aanval: sê self dat dit nie sensitief is nie. */
+     Hierdie afdeling is die wag oor daardie hek. */
+  const gebed = 'Here, gee haar wysheid en moed om gesonde grense te stel. Amen.'
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
-  r = await stuur({ muurId: 'swaar', toestel: 'jan', teks: 'Hospitale het my ma doodgemaak.', sensitief: false })
-  kyk('n versoek kan NIE die vlag omdraai nie', r.kode === 400, r.lyf)
+  let r = await stuur({ muurId: 'swaar', toestel: 'jan', teks: gebed })
+  kyk('n gebed op n swaar storie gaan DEUR', r.kode === 200 && r.lyf.ok, r.lyf)
+  kyk('dit wys dadelik', r.lyf.wag === false && !!r.lyf.woord, r.lyf)
+  kyk('en die woorde bly heel', r.lyf.woord.teks === gebed, r.lyf)
+  kyk('dit is werklik gestoor',
+      Object.values(winkel.sorg_woorde).some(w => w.teks === gebed && w.status === 'wys'),
+      winkel.sorg_woorde)
 
-  /* Maar klaargemaakte woorde werk wel daar — dit is die punt. */
+  /* Die ou boodskap mag NOOIT terugkom nie. Dit is hoe 'n mens agterkom dat
+     die hek teruggesit is. */
+  kyk('en die ou weiering is weg',
+      !String(r.lyf.fout || '').includes('woorde hier onder'), r.lyf)
+
+  /* Klaargemaakte woorde werk steeds daar — hulle is nou 'n gerief en nie meer
+     die enigste pad nie. */
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
   r = await stuur({ muurId: 'swaar', toestel: 'jan', woord: 'alleen' })
-  kyk('n klaargemaakte woord gaan wel deur', r.kode === 200 && r.lyf.ok, r.lyf)
+  kyk('n klaargemaakte woord gaan ook deur', r.kode === 200 && r.lyf.ok, r.lyf)
   kyk('en dit wys dadelik', r.lyf.woord && r.lyf.woord.teks === 'Jy is nie alleen nie.', r.lyf)
 }
 
@@ -197,10 +207,14 @@ afdeling('n Gewone woord WYS DADELIK')
   r = await stuur({ muurId: 'gewoon', toestel: 'piet', teks: 'kyk by https://x.co' })
   kyk('n skakel WYS ook', r.lyf.wag === false && !!r.lyf.woord, r.lyf)
 
-  /* Die enigste ding wat vrye teks nog keer. */
+  /* Die enigste ding wat vrye teks nog keer, is 'n LEË kassie. */
   stelWinkel({ sorg_muur: MUUR, sorg_woorde: {} })
-  r = await stuur({ muurId: 'swaar', toestel: 'jan', teks: 'Net bid.' })
-  kyk('n krisisplasing weier steeds', r.kode === 400, r.lyf)
+  r = await stuur({ muurId: 'gewoon', toestel: 'jan', teks: '   ' })
+  kyk('n leë kassie word geweier', r.kode === 400, r.lyf)
+  kyk('en die mens word gevra om meer te skryf',
+      String(r.lyf.fout).includes('bietjie meer'), r.lyf)
+  kyk('en niks is geskryf nie',
+      Object.keys(winkel.sorg_woorde).length === 0, winkel.sorg_woorde)
 }
 
 afdeling('EEN mens mag meer as een keer praat')

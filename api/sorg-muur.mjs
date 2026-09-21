@@ -103,9 +103,12 @@ function virDieSkerm(m, woorde) {
     /* Net WERKLIKE drukke. Die tweede argument was die drie gesaaide
        reaksies; hulle is weg. */
     reaksies: saamTel(m.reaksies, null),
-    /* Die skerm moet dit weet om die skryfblok weg te laat. Dit is 'n
-       vlaggie, nie inligting oor die mens nie — dit se net dat hierdie
-       storie te swaar is vir 'n vreemdeling se raad. */
+    /* Die skerm sit 'n RIGLYN bo die kassie ("Praat sag... moenie raad gee
+       oor medisyne of behandeling nie"). Dit was eens 'n slot wat die
+       skryfblok heeltemal weggevat het; sien `woordStatus` se kop in
+       src/data/sorgSaamstaan.js vir hoekom dit nie terugkom nie. Dit is 'n
+       vlaggie, nie inligting oor die mens nie — dit se net dat hierdie storie
+       swaar is. */
     sensitief: m.sensitief === true,
     /* Hoeveel mense dit gerapporteer het. Die MUUR wys dit nooit — dit is vir
        die admin. Sien die rapporteer-aksie hieronder. */

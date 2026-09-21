@@ -15,7 +15,7 @@ import {
   REAKSIES, keurReaksie, reaksieBy, wysReaksies,
   KLAAR_WOORDE, VIDEO_KLAAR, klaarWoordeVir, klaarWoordTeks, MAKS_WOORD,
   saamTelReaksies,
-  skoonWoord, woordVlae, magVryeTeks, woordStatus,
+  skoonWoord, woordVlae, woordStatus,
 } from './sorgSaamstaan.js'
 
 let gedruip = 0
@@ -149,18 +149,29 @@ afdeling('Wat vir Dewald se oog gehou word')
       woordVlae('Psalm 23 het my gedra'))
 }
 
-afdeling('SENSITIEWE plasings kry GEEN vrye teks nie')
+afdeling('Ook op n SWAAR storie kan n mens skryf')
 {
-  /* Die belangrikste reel op hierdie blad. Op 'n storie oor iemand wat
-     weier om hospitaal toe te gaan, kan "hospitale het my ma doodgemaak"
-     iemand se lewe kos — en geen filter vang daardie sin nie, want daar is
-     niks verkeerd met die WOORDE nie. */
-  kyk('n sensitiewe plasing laat geen vrye teks toe', magVryeTeks({ sensitief: true }) === false)
-  kyk('n gewone plasing wel', magVryeTeks({ sensitief: false }) === true)
-  kyk('sonder die vlag is dit toegelaat', magVryeTeks({}) === true)
+  /* Dit was andersom, en dit het 'n maand lank stil gebreek: die skerm is op
+     23 Augustus oopgemaak ("hoe de fok moet hulle mekaar bemoedig as hul nie
+     kan komment nie") en HIERDIE kant is vergeet. Die kassie het dus oop voor
+     die mens gestaan en die bediener het elke keer geweier.
 
-  const s = woordStatus({ teks: 'Net bid, God sal haar genees.', sensitief: true })
-  kyk('vrye teks word geweier op n sensitiewe plasing', s.status === 'weier', s)
+     Dewald het dit op 21 September self raakgeloop — 'n hele gebed getik op 'n
+     storie oor skoonouers, en dit kon nie geplaas word nie.
+
+     Hierdie blok is die wag daaroor. Val hy, is die hek terug. */
+  const gebed = 'Here, gee haar wysheid en moed om gesonde grense te stel. Amen.'
+  const s = woordStatus({ teks: gebed, sensitief: true })
+  kyk('n gebed op n swaar storie GAAN DEUR', s.status === 'wys', s)
+  kyk('en die woorde bly heel', s.teks === gebed, s)
+
+  /* `sensitief` doen NIKS meer aan hierdie besluit nie — dit is die hele punt.
+     Die vlag leef nog op die plasing, want die SKERM gebruik hom vir die
+     riglyn bo die kassie; hy is net nie meer 'n slot nie. */
+  kyk('die vlag verander niks',
+      woordStatus({ teks: gebed, sensitief: true }).status ===
+      woordStatus({ teks: gebed, sensitief: false }).status)
+  kyk('en sonder die vlag ook nie', woordStatus({ teks: gebed }).status === 'wys')
 }
 
 afdeling('n Gewone woord WYS DADELIK')
@@ -188,10 +199,7 @@ afdeling('n Gewone woord WYS DADELIK')
   kyk('n skoon sin word NIE gevlag nie',
       (woordStatus(gewoon).vlae || []).length === 0, woordStatus(gewoon))
 
-  /* Die enigste ding wat vrye teks nog keer. */
-  kyk('n sensitiewe plasing weier steeds',
-      woordStatus({ teks: 'Net bid.', sensitief: true }).status === 'weier')
-
+  /* Die enigste ding wat vrye teks nog keer, is 'n LEË kassie. */
   kyk('te kort word geweier',
       woordStatus({ teks: ' ', sensitief: false }).status === 'weier')
   kyk('die skoongemaakte teks kom saam terug',

@@ -16,9 +16,11 @@
    hersiening, want klaargemaakte woorde word mos vertrou. Ons soek die teks
    hier op uit die lys.
 
-   Dieselfde met `sensitief`: dit kom uit die PLASING soos dit in Firestore
-   staan, nooit uit die versoek nie. Anders sê 'n aanvaller eenvoudig
-   `sensitief: false` en skryf wat hy wil onder 'n selfmoordboodskap.
+   Wat 'n mens WEL mag doen, en wat lank nie kon nie: op 'n swaar storie skryf.
+   `sensitief` was hier 'n hek en dit het net klaargemaakte frases toegelaat.
+   Dit is weg — die beskerming sit in die krisis-hopie, in die riglyn bo die
+   kassie, en in Rapporteer. Sien `woordStatus` se kop in
+   src/data/sorgSaamstaan.js; daar staan hoekom, en hoekom dit nie terugkom nie.
 
    ── Die toestel ──
 
@@ -212,9 +214,6 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skryw
     return res.status(404).json({ fout: 'daardie plasing bestaan nie' })
   }
 
-  /* Uit die PLASING, nooit uit die versoek nie. */
-  const sensitief = plasing.sensitief === true
-
   const almal = await lysDokke(WOORDE, { grootte: 300 })
   const vandag = new Date().toISOString().slice(0, 10)
   const myne = almal.filter(w => w.toestel === toestel)
@@ -246,12 +245,16 @@ async function doenWoord(res, { muurId, toestel, woordSleutel, teks, waar, skryw
     if (!klaar) return res.status(400).json({ fout: 'onbekende woord' })
     doc = { muurId, toestel, teks: klaar, sleutel: woordSleutel, bron: 'klaar', status: 'wys' }
   } else {
-    const uitslag = woordStatus({ teks, sensitief })
+    /* ── Die enigste weiering wat oorbly, is 'n LEË kassie ──
+     *
+     * Hier het ook 'n hek op `plasing.sensitief` gestaan, en dit het 'n maand
+     * lank stil gebreek: die skerm is op 23 Augustus oopgemaak en hierdie kant
+     * is vergeet, dus het elke opmerking op 'n swaar storie 'n 400 gekry terwyl
+     * die kassie oop voor die mens gestaan het. Sien `woordStatus` se kop in
+     * src/data/sorgSaamstaan.js voor jy dit terugsit. */
+    const uitslag = woordStatus({ teks })
     if (uitslag.status === 'weier') {
-      const rede = uitslag.rede === 'sensitiewe plasing'
-        ? 'Op hierdie storie kan jy een van die woorde hier onder stuur.'
-        : 'Skryf net ’n bietjie meer.'
-      return res.status(400).json({ fout: rede })
+      return res.status(400).json({ fout: 'Skryf net ’n bietjie meer.' })
     }
     doc = {
       muurId, toestel, teks: uitslag.teks, sleutel: '', bron: 'eie',

@@ -34,7 +34,9 @@
    Nul modereringsrisiko, want hy het dit self geskryf. Dit verskyn dadelik,
    en van die eerste dag af staan daar regte menslike sinne onder 'n storie.
 
-   Vrye teks kom daarby, maar met reels — sien `magVryeTeks`.
+   Vrye teks kom daarby, en dit is nie 'n mindere pad nie: die klaargemaakte
+   sinne is 'n gerief vir wie nie weet wat om te sê nie, nooit 'n slot. Sien
+   `woordStatus` — daar staan hoekom daardie slot weg is.
 
    Hierdie lêer is SUIWER: geen window, geen fetch, geen Date.now() in die
    besluite. Die bediener en die skerm gebruik dieselfde reels, en die toetse
@@ -216,19 +218,12 @@ export function woordVlae(teks) {
   return vlae
 }
 
-/* ── Mag hierdie mens vrye teks skryf, en mag dit dadelik wys? ──
+/* ── Mag hierdie mens skryf, en mag dit dadelik wys? ──
 
-   Drie reels, en die eerste is die belangrikste.
+   Ja, en ja. ELKE plasing kan geskryf word, en alles wys dadelik — altyd,
+   vir almal.
 
-   1. Op 'n SENSITIEWE plasing — een waar die krisiswoorde getref het — is
-      daar GEEN vrye teks nie. Net Dewald se klaargemaakte woorde. 'n Storie
-      oor iemand wat weier om hospitaal toe te gaan, mag nie 'n vreemdeling
-      se "hospitale het my ma doodgemaak" onder hom kry nie. Geen filter vang
-      daardie sin nie, want daar is niks verkeerd met die WOORDE nie.
-
-   2. Al die res WYS DADELIK. Alles. Altyd. Vir almal.
-
-   Daar was twee hekke voor hierdie een, en albei is weg omdat albei
+   Daar was DRIE hekke voor hierdie een, en al drie is weg omdat al drie
    dieselfde ding gedoen het: iemand se woorde laat verdwyn sonder dat hy
    weet hoekom.
 
@@ -241,22 +236,42 @@ export function woordVlae(teks) {
    Gesprek waar 'n mens nie weet of jou woorde deurgekom het nie, is nie 'n
    gesprek nie.
 
-   Die vlae BESTAAN nog — hulle keer net niks meer nie. Wat 'n nommer of 'n
-   skakel bevat, wys saam met die res EN verskyn in Dewald se hopie met die
-   rede daarby, sodat hy dit kan sien sonder dat iemand se woorde intussen
-   in 'n laai gele het.
+   ── Die derde was `sensitief`, en dit het 'n MAAND lank stil gebreek ──
+
+   Op 'n plasing waar die krisiswoorde getref het, was daar geen vrye teks
+   nie — net Dewald se klaargemaakte sinne. Die bedoeling was om iemand in 'n
+   donker plek te beskerm teen verkeerde raad.
+
+   Dewald, 23 Augustus 2026: *"hoe de fok moet hulle mekaar bemoedig as hul
+   nie kan komment nie."*
+
+   Hy was reg, en die hek het die hele blad se punt weerspreek. Maar daardie
+   regstelling (`a6903d1`) het VIER lêers aangeraak en al vier was SKERMS.
+   Hierdie reël — die een wat werklik besluit — het agtergebly. Die kassie het
+   dus oopgegaan, 'n mens kon tik, en die bediener het elke keer geweier met
+   *"Op hierdie storie kan jy een van die woorde hier onder stuur."*
+
+   Dewald het dit self op 21 September op 'n storie oor skoonouers raakgeloop:
+   hy het 'n hele gebed getik en dit kon nie geplaas word nie.
+
+   Dit is die duur les van hierdie kodebasis, weer: **'n reël wat op twee
+   plekke staan, breek op die plek wat nie verander is nie.** Die besluit woon
+   HIER, en die skerm teken net wat hier besluit word. Moenie 'n hek terugsit
+   wat net een van die twee kante ken nie.
+
+   Die vlae BESTAAN nog — hulle keer niks. Wat 'n nommer of 'n skakel bevat,
+   wys saam met die res EN verskyn in Dewald se hopie met die rede daarby,
+   sodat hy dit kan sien sonder dat iemand se woorde intussen in 'n laai gele
+   het.
 
    Wat oorbly om skade te keer, en dit is genoeg:
-     · 'n krisisplasing laat glad geen vrye teks toe nie — daar is net
-       Dewald se klaargemaakte sinne;
-     · Rapporteer haal 'n woord met EEN druk dadelik af;
+     · die swaarste stories gaan nie vanself op die muur nie — 'n mens kyk
+       eers daarna (sien api/sorg-stuur.mjs se krisis-hopie);
+     · op 'n swaar storie staan 'n RIGLYN bo die kassie ("Praat sag... moenie
+       raad gee oor medisyne of behandeling nie") in plaas van 'n slot;
+     · Rapporteer, en by drie toestelle word 'n woord versteek;
      · alles wat gerapporteer of gevlag is, land in die Woorde-hopie. */
-export function magVryeTeks({ sensitief }) {
-  return !sensitief
-}
-
-export function woordStatus({ teks, sensitief }) {
-  if (sensitief) return { status: 'weier', rede: 'sensitiewe plasing' }
+export function woordStatus({ teks }) {
   const skoon = skoonWoord(teks)
   if (skoon.length < 2) return { status: 'weier', rede: 'te kort' }
   /* Die vlae keer niks. Hulle sê net vir Dewald waarna om te kyk. */
