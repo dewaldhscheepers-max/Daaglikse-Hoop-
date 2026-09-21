@@ -36,6 +36,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { onderwerpNaam } from '../data/sorgOnderwerpe'
 import { vergeetMuur } from '../data/sorgMuur'
+import { bouUittreksel, leernaam } from '../data/sorgUittreksel'
 import SorgOpname from '../components/SorgOpname'
 import './SorgKeur.css'
 
@@ -659,6 +660,25 @@ function Muur({ data, doen, besig }) {
     if (d && d.ok) setWysigOop(null)
   }
 
+  /* Die muur as een .txt. Dieselfde vorm as `laaiRugsteun` hierbo.
+   *
+   * Wat AFGEHAAL is (`gepubliseer === false`) gaan nie saam nie: dit staan nie
+   * meer op die muur nie, en 'n lêer wat "die muur" heet, moet die muur wees.
+   *
+   * Die omskakeling self woon in `src/data/sorgUittreksel.js` en is suiwer —
+   * hierdie funksie doen net die aflaai. */
+  function laaiMuurTeks() {
+    const openbaar = muur.filter(m => m.gepubliseer !== false)
+    const vandag = new Date().toISOString().slice(0, 10)
+    const blob = new Blob([bouUittreksel(openbaar, { opTrek: vandag })],
+      { type: 'text/plain;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = leernaam(vandag)
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000)
+  }
+
   /* Wat NIEMAND nog gedra het nie. Hier het "N plasings wag nog op jou
      antwoord" gestaan, en daardie getal kon net groei. Dit is nou 'n getal
      oor die gemeenskap, nie oor Dewald nie — en dit is 'n getal wat kan daal
@@ -698,6 +718,28 @@ function Muur({ data, doen, besig }) {
           {' '}jy hoef nie op hulle te antwoord nie.
         </p>
       )}
+
+      {/* ── Die hele muur as een tekslêer ──
+       *
+       * Dewald, 21 September 2026: *"ek wil dit vir chat gpt stuur sodat ons
+       * kan kyk waarmee mense die meeste sukkel."*
+       *
+       * Veertig stories lees 'n mens nie in sy kop bymekaar nie, en hierdie
+       * blad wys hulle een vir een — reg vir wie kom help, nutteloos vir wie
+       * wil sien wat TERUGKEER.
+       *
+       * Die lêer dra NET die stories, die datums en die onderwerpe. Geen
+       * naam, geen foto, geen toestel-id, geen opmerkings. Sien
+       * src/data/sorgUittreksel.js vir hoekom daardie lys eng is: hierdie
+       * lêer verlaat die app, en wat een keer uitgaan, kom nie terug nie. */}
+      <div className="sk-uittrek">
+        <button className="sk-knop" onClick={laaiMuurTeks}>
+          ⬇ Laai die muur af as teks
+        </button>
+        <span className="sk-uittrek-fyn">
+          Net die stories, die datums en die onderwerpe — geen name.
+        </span>
+      </div>
 
       {/* Die merkie is nou vir 'n plasing wat ALLEEN staan, nie vir een
           sonder Dewald se antwoord nie. En "nog geen antwoord" is weg: 'n

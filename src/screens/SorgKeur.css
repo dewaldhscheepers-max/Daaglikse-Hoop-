@@ -339,6 +339,21 @@
   font-size: 12.5px; line-height: 1.5; color: var(--text-muted);
 }
 
+/* Die muur as een tekslêer. Dit staan bo die lys, want dit gaan oor die HELE
+   muur en nie oor een plasing nie — en dit is stil: 'n gewone knoppie met 'n
+   reël daaronder, nie iets wat met die rapport-waarskuwing meeding.
+
+   Geen `transform` op `:active` nie; sien CLAUDE.md se Android-reëls. */
+.sk-uittrek {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+  margin: 0 0 14px; padding: 11px 12px;
+  background: #FAF9FC; border: 1px solid #E7E3EE; border-radius: 12px;
+}
+.sk-uittrek-fyn {
+  flex: 1 1 200px;
+  font-size: 12px; line-height: 1.45; color: var(--text-muted);
+}
+
 /* Gerapporteer. Die enigste rooi op hierdie blad — plasings gaan nou dadelik
    op die muur, dus is 'n rapport die een sein wat 'n oog moet vang. */
 .sk-rapport-kop {
