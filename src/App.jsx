@@ -18,6 +18,9 @@ import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup,
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
 import { kiesBoek } from './data/eboekPopup'
+import {
+  vensterVir, siklusVir, reedsGegee, SIKLUS_SLEUTEL, VENNOOT_SLEUTEL,
+} from './data/skenkStatus'
 import { haalOpgelaaideBoeke } from './data/eboekLys'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
@@ -82,20 +85,25 @@ function shouldShowSharePopup() {
   return true
 }
 
+/* Die reels woon in src/data/skenkStatus.js en is suiwer — sien daardie leer
+   se kop vir die twee foute wat hulle regmaak. Hierdie wrapper bly sodat die
+   noemers onveranderd lees. */
 function getSkenkWindow() {
-  const now   = new Date()
-  const day   = now.getDate()
-  const year  = now.getFullYear()
-  const month = now.getMonth()
-  if (day >= 25) {
-    return { cycleId: `${year}-${String(month + 1).padStart(2, '0')}`, chance: 1 }
-  }
-  if (day === 2 || day === 3) {
-    const pm = month === 0 ? 11 : month - 1
-    const py = month === 0 ? year - 1 : year
-    return { cycleId: `${py}-${String(pm + 1).padStart(2, '0')}`, chance: 2 }
-  }
-  return null
+  return vensterVir(new Date())
+}
+
+/* Gee hierdie mens reeds? EEN vraag, EEN antwoord, vir elke skerm.
+ *
+ * Dit was op drie plekke met drie effens verskillende toetse, en die
+ * MAANDELIKSE VENNOOT het in al drie deurgeval — hy is nerens neergeskryf nie
+ * en is dus elke maand gevra of hy nie wil begin gee nie. */
+function gefeReeds(siklus) {
+  let gestoorSiklus = '', gestoorVennoot = ''
+  try {
+    gestoorSiklus  = localStorage.getItem(SIKLUS_SLEUTEL) || ''
+    gestoorVennoot = localStorage.getItem(VENNOOT_SLEUTEL) || ''
+  } catch { /* privaat modus — dan vra ons eerder as om te lieg */ }
+  return reedsGegee({ siklus, gestoorSiklus, gestoorVennoot })
 }
 
 export default function App() {
@@ -379,7 +387,7 @@ export default function App() {
       let donationDue = false
       if (sw) {
         const { cycleId, chance } = sw
-        const paid = localStorage.getItem('skenkPaid') === cycleId
+        const paid = gefeReeds(cycleId)
         const c1   = localStorage.getItem('skenkChance1') === cycleId
         const c2   = localStorage.getItem('skenkChance2') === cycleId
         if (!paid && chance === 1 && !c1) donationDue = true
@@ -843,9 +851,20 @@ export default function App() {
     if (status === 'success') {
       if (type !== 'subscription') setTab('meer')
       window.history.replaceState({}, '', '/')
+      /* ── Wat 'n betaling neerskryf ──
+       *
+       * Hier het `if (sw)` gestaan — die siklus is net geskryf as ons op
+       * daardie oomblik toevallig BESIG was om te vra. Gee iemand op die 10de,
+       * is dit vergeet en op die 25ste word sy weer gevra. `siklusVir` gee
+       * altyd 'n antwoord, ook op 'n dag wanneer ons niks vra nie.
+       *
+       * En `type === 'subscription'` het NIKS geskryf nie. Sien die kop van
+       * src/data/skenkStatus.js. */
       if (type === 'donation') {
-        const sw = getSkenkWindow()
-        if (sw) localStorage.setItem('skenkPaid', sw.cycleId)
+        try { localStorage.setItem(SIKLUS_SLEUTEL, siklusVir(new Date())) } catch {}
+      }
+      if (type === 'subscription') {
+        try { localStorage.setItem(VENNOOT_SLEUTEL, new Date().toISOString()) } catch {}
       }
       if (type === 'ebook' && bookIds.length > 0) {
         // Trigger immediate email delivery and get download tokens
@@ -1301,8 +1320,12 @@ export default function App() {
      nie. Die skenk-VENSTER speel nie meer 'n rol in die vloei nie — die
      klaar-skerm se geldvraag is nou 'n klein, stil ry heel onder wat elke dag
      daar is. Sien slotVraag() en wysKleinSteun(). */
-  const tmgVenster = getSkenkWindow()
-  const tmgReedsGegee = !!(tmgVenster && localStorage.getItem('skenkPaid') === tmgVenster.cycleId)
+  /* Die klein steun-ry op die klaar-skerm. 'n Vennoot sien 'n DANKIE, nie 'n
+     vraag nie — en hy het dit voorheen nooit gesien nie, want daar is net na
+     `skenkPaid` gekyk. Die siklus kom nou van die DAG af, nie van die venster
+     nie, sodat dit ook op die 12de die waarheid praat (die ou `tmgVenster` was
+     `null` op die meeste dae, en dan was `reedsGegee` altyd vals). */
+  const tmgReedsGegee = gefeReeds(siklusVir(new Date()))
 
   // ── Maandelikse Hoop-Vennoot CTA ──
   useEffect(() => {
