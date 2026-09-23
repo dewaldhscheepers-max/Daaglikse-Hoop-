@@ -1,66 +1,51 @@
 /* ── Die steun-kaart ──
  *
- * Dewald, 24 September 2026: *"kom ons maak die donasie kaart op die eboek
- * bladsy dan net mooier en beter lyk."*
+ * Dewald, 24 September 2026, met 'n skermkiekie van die lewende app: *"dit lyk
+ * te groot... haal dalk die harjie weg. Dis net wit... dit voel weird."* En:
+ * *"Die eindresultaat moet amper soos 'n natuurlike deel van die e-boekblad
+ * voel, nie soos 'n donasie-pop-up wat permanent oopstaan nie. Die groen
+ * knoppie moet die enigste sterk visuele element wees."*
  *
- * Twee Android-reëls geld hier, en albei kom uit CLAUDE.md se "gekleurde
- * strepe":
+ * Hy was reg, en die diagnose is presies die regte een: spierwit op 'n room
+ * blad lees soos iets wat BO-OP die blad lê. Die hartjie in sy kring, die
+ * gekleurde strook bo en 'n reël wat die knoppie se rede herhaal, het dit saam
+ * 'n venster gemaak in plaas van 'n afdeling.
  *
- *   · GEEN `transform` op `:active` nie — net kleur. Die twee ou knoppies het
- *     `transform: scale(0.97)` gedra en is nou skoon; dit is woord vir woord
- *     die Ark se oorspronklike oorsaak;
- *   · 'n `box-shadow` mag (dit word in die OUER se laag geverf), 'n `filter`
- *     of 'n `backdrop-filter` nooit — dié maak 'n saamgestelde laag.
+ * Wat weg is, en waarom:
  *
- * Die kaart se boonste strook is 'n `linear-gradient` op 'n ONDEURSIGTIGE
- * grond, nie 'n prent nie, en nie 'n sluier oor iets anders nie.
+ *   · die HARTJIE en sy kring — 50px van niks, heel bo, waar 'n mens se oog
+ *     eerste land;
+ *   · die gekleurde STROOK bo — dit is 'n opskrifbalk, en opskrifbalke behoort
+ *     aan vensters;
+ *   · die reël onder die groen knoppie ("Help elke maand om...") — dit sê
+ *     woordeliks wat die sin BO die knoppie reeds sê;
+ *   · spierwit — nou 'n warm room wat by die blad meng;
+ *   · die skaduwee — 'n rand is genoeg, en 'n skaduwee laat 'n ding sweef.
+ *
+ * Die kaart is sowat 'n derde korter. Die groen knoppie is die enigste sterk
+ * ding wat oorbly, en dit is die hele punt.
+ *
+ * ── Android ──
+ *
+ * GEEN `transform` op `:active` nie — net kleur. Dit is woord vir woord die
+ * Ark se oorspronklike oorsaak van die gekleurde strepe; sien CLAUDE.md. 'n
+ * `box-shadow` mag (dit word in die OUER se laag geverf), 'n `filter` of
+ * `backdrop-filter` nooit.
  */
 
 .donation-card {
-  position: relative;
-  background: #fff;
-  border: 1px solid #EFEAF6;
-  border-radius: 20px;
-  padding: 22px 20px 18px;
+  background: #FBF8F2;
+  border: 1px solid #ECE4D8;
+  border-radius: 16px;
+  padding: 16px 18px 14px;
   text-align: center;
-  box-shadow: 0 6px 22px rgba(92, 78, 142, 0.10);
-  margin: 14px 0 6px;
-  overflow: hidden;
+  margin: 12px 0 4px;
 }
 
-/* 'n Dun warm strook heel bo. Dit gee die kaart 'n kant sonder om 'n tweede
-   kleur oor die teks te bring. */
-.donation-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #2E7D4F 0%, #5C9E6E 45%, #C9A961 100%);
-}
-
-.donation-card-heart {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #FCEFEF;
-  font-size: 19px;
-  line-height: 1;
-  color: #D9534F;
-  margin-bottom: 10px;
-}
-
-/* Die BEWYS — die lewende R-bedrag van die e-boekblad, bo die titel: dit is 'n
-   feit wat die vraag dra, nie die vraag self nie.
- *
- * GEEN `text-transform: uppercase` nie. Dit was so, en die reël is te lank
- * daarvoor: "R260 000+ SE E-BOEKE REEDS GRATIS WEGGEGEE" het oor twee reëls
- * gebreek en soos 'n banier oor die kaart gelê in plaas van 'n stil feit.
- * Gewone skrif pas op een reël en lees rustiger. */
+/* Die BEWYS — die lewende R-bedrag van die e-boekblad. Dit lei die kaart nou,
+   want dit is die enigste FEIT hier; die res is 'n uitnodiging. */
 .donation-card-bewys {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: .01em;
@@ -69,64 +54,61 @@
 }
 
 .donation-card-title {
-  font-size: 16.5px;
+  font-size: 15.5px;
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.32;
   color: var(--text);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .donation-card-text {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin: 0 0 15px;
+  line-height: 1.55;
+  margin: 0 0 13px;
 }
 
 .donation-card-btn-monthly {
   display: block;
   width: 100%;
-  padding: 14px 16px;
+  padding: 13px 16px;
   background: #2E7D4F;
   color: #fff;
   border: none;
-  border-radius: 13px;
+  border-radius: 12px;
   font-family: var(--font-body);
   font-size: 14.5px;
   font-weight: 800;
   letter-spacing: .2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 3px 10px rgba(46, 125, 79, .26);
   transition: background .18s;
 }
 .donation-card-btn-monthly:active { background: #245F3C; }
 
-/* Die REDE onder die maandelikse knoppie. Sonder dit lees die twee keuses soos
-   dieselfde ding, net duurder. */
-.donation-card-rede {
-  margin: 8px 0 11px;
-  font-size: 11.5px;
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
+/* "Gee eenmalig" is 'n TEKS-knoppie, nie 'n tweede blok nie. Twee omlynde
+   knoppies onder mekaar lees soos twee gelyke keuses; hier is die een die
+   hoofpad en die ander 'n uitweg. */
 .donation-card-btn-once {
   display: block;
   width: 100%;
-  padding: 12px 16px;
-  background: #fff;
+  margin-top: 9px;
+  padding: 6px 8px;
+  background: none;
   color: #4A3E6B;
-  border: 1.5px solid #E4DDF0;
-  border-radius: 13px;
+  border: none;
+  border-radius: 8px;
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background .15s, border-color .15s;
+  transition: color .15s;
 }
-.donation-card-btn-once:active { background: #F6F2FB; border-color: #D5CBE8; }
+.donation-card-btn-once:active { color: #2E7D4F; }
 
 /* ── Die een-knoppie-weergawe (VOLG JESUS) ── */
 .donation-card-btn-enkel {
@@ -136,49 +118,34 @@
   background: #2E7D4F;
   color: #fff;
   border: none;
-  border-radius: 13px;
+  border-radius: 12px;
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 800;
   letter-spacing: .3px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 3px 10px rgba(46, 125, 79, .26);
   transition: background .2s;
 }
 .donation-card-btn-enkel:active { background: #245F3C; }
 
 .donation-card-fyn {
-  font-size: 11.5px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.45;
   color: var(--text-muted);
-  margin: 11px 0 0;
+  margin: 9px 0 0;
 }
 
 /* ── Die DANKIE-gesigte ──
  *
  * Wie reeds gee, sien nie 'n vraag nie. Die kaart word stiller: geen groen,
- * geen skaduwee wat skree, en die strook bo word goud in plaas van groen —
- * dieselfde vorm, 'n ander stem. */
+ * en 'n effens warmer grond — dieselfde vorm, 'n ander stem. */
 .donation-card.is-dankie {
-  background: #FDFCFA;
-  border-color: #EDE6D8;
-  box-shadow: 0 3px 14px rgba(92, 78, 142, .07);
-}
-.donation-card.is-dankie::before {
-  background: linear-gradient(90deg, #C9A961 0%, #E0C888 55%, #C9A961 100%);
-}
-.donation-card.is-dankie .donation-card-heart {
-  background: #FAF3E4;
-  color: #B8912F;
+  background: #FAF6EC;
+  border-color: #E8DCC4;
 }
 .donation-card.is-dankie .donation-card-text { margin-bottom: 0; }
-.donation-card.is-dankie .donation-card-btn-once { margin-top: 14px; }
+.donation-card.is-dankie .donation-card-btn-once { margin-top: 12px; }
 
-/* Onder die dae van 'n VOLG JESUS-week. Die blad se agtergrond is room, dus
-   kry die kaart 'n rand eerder as 'n skaduwee wat daarop swem. */
-.donation-card.vs-steun {
-  margin-top: 18px;
-  border: 1px solid #EDE8F8;
-  box-shadow: none;
-}
+/* Onder die dae van 'n VOLG JESUS-week. */
+.donation-card.vs-steun { margin-top: 18px; }

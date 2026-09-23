@@ -36,6 +36,13 @@ import './DonationCard.css'
  * 'n Getal wat hier vasstaan, is oor 'n maand 'n leuen op sewe skerms.
  *
  * Sonder die prop lyk die kaart presies soos altyd.
+ *
+ * ── Die kaart is KORT ──
+ *
+ * Dewald, 24 September 2026: *"dit lyk te groot... haal dalk die harjie weg.
+ * Dis net wit... dit voel weird."* Die hartjie in sy kring, die strook bo en 'n
+ * reël wat die knoppie se rede herhaal, het dit saam 'n venster gemaak in
+ * plaas van 'n afdeling van die blad. Sien DonationCard.css se kop.
  */
 export default function DonationCard({
   titel = 'Help om Daaglikse Hoop gratis te hou.',
@@ -72,7 +79,6 @@ export default function DonationCard({
      * doen nie, is erger as stilte. Dus die tweede. */
     return (
       <div className={`donation-card is-dankie${klas ? ' ' + klas : ''}`}>
-        <span className="donation-card-heart" aria-hidden="true">♥</span>
         <h3 className="donation-card-title">Dankie, Hoop-Vennoot</h3>
         <p className="donation-card-text">
           Jou maandelikse ondersteuning help ons om hoop gratis beskikbaar te hou.
@@ -87,7 +93,6 @@ export default function DonationCard({
   if (gesig === 'gewer') {
     return (
       <div className={`donation-card is-dankie${klas ? ' ' + klas : ''}`}>
-        <span className="donation-card-heart" aria-hidden="true">♥</span>
         <h3 className="donation-card-title">Dankie vir jou bydrae</h3>
         <p className="donation-card-text">
           Jou ondersteuning help ons om Daaglikse Hoop gratis te hou.
@@ -113,7 +118,6 @@ export default function DonationCard({
 
   return (
     <div className={`donation-card${klas ? ' ' + klas : ''}`}>
-      <span className="donation-card-heart" aria-hidden="true">♥</span>
       {bewys && <p className="donation-card-bewys">{bewys}</p>}
       <h3 className="donation-card-title">{titel}</h3>
       <p className="donation-card-text">{teks}</p>
@@ -122,18 +126,16 @@ export default function DonationCard({
         <button className="donation-card-btn-enkel" onClick={handleOnce}>{knop}</button>
       ) : (
         <>
-          {/* Die maandelikse keuse staan eerste EN dra sy eie rede. Sonder die
-              rede lees "R50 eenmalig" teenoor "R50 elke maand" soos dieselfde
-              ding, net duurder — en dan kies niemand die tweede nie. */}
+          {/* Die maandelikse keuse is die HOOFpad en die enigste sterk ding op
+              die kaart. Die rede daarvoor staan in die sin BO die knoppie
+              ("die app, e-boeke en daaglikse boodskappe") — hier het dit 'n
+              tweede keer onder die knoppie gestaan, en dit het die kaart
+              langer gemaak sonder om iets by te sê. */}
           <button className="donation-card-btn-monthly" onClick={handleMonthly}>
-            Word 'n Maandelikse Hoop-Vennoot
+            Word 'n maandelikse Hoop-Vennoot
           </button>
-          <p className="donation-card-rede">
-            Help elke maand om die app, die e-boeke en die daaglikse boodskap
-            gratis te hou.
-          </p>
           <button className="donation-card-btn-once" onClick={handleOnce}>
-            Eenmalige bydrae
+            Gee eenmalig
           </button>
         </>
       )}

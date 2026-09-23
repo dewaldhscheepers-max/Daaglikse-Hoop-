@@ -315,7 +315,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             ? null
             : `R${Math.floor(wysWaarde).toLocaleString('af-ZA')}+ se e-boeke reeds gratis weggegee`}
           titel="Help die volgende persoon om ook gratis hoop te ontvang."
-          teks="Jou bydrae help dat Daaglikse Hoop gratis bly vir mense wat hoop, gebed en geestelike hulp nodig het."
+          teks="Jou bydrae help om die app, e-boeke en daaglikse boodskappe gratis te hou."
         />
 
         {/* ── VOLG JESUS ──
