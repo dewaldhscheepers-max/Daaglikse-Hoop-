@@ -291,7 +291,32 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       </div>
 
       <div className="meer-body">
-        <DonationCard />
+        {/* ── Die steun-kaart praat HIER oor e-boeke ──
+         *
+         * Dewald, 24 September 2026. Die gewone kaart begin by ONS kostes
+         * ("stemboodskappe, app-kostes, advertensies"). Op die blad waar sy pas
+         * iets gratis gekry het, is die eerlike sin 'n ander een: help die
+         * VOLGENDE mens om dieselfde te kry.
+         *
+         * Die bewys is `wysWaarde` — dieselfde lewende getal as die banier
+         * hierbo, nie 'n syfer wat iemand in die kaart getik het. Getik sou dit
+         * binne 'n maand 'n leuen wees, en op sewe ander skerms ook. */}
+        {/* ── "SE E-BOEKE", en nooit net "weggegee" nie ──
+         *
+         * Die eerste weergawe het gesê "R260 000+ reeds gratis weggegee".
+         * Dewald: *"nie net R8000.... weggegee... eboeke weggegee."*
+         *
+         * Hy is reg, en dit is nie 'n woordkeuse nie — dit is 'n feit wat
+         * verkeerd gelees kan word. Sonder "se e-boeke" lyk dit of hierdie
+         * bediening 'n kwart miljoen rand KONTANT uitgedeel het. Dit is die
+         * WAARDE van boeke wat weggegee is, en die sin moet dit sê. */}
+        <DonationCard
+          bewys={wysWaarde === null
+            ? null
+            : `R${Math.floor(wysWaarde).toLocaleString('af-ZA')}+ se e-boeke reeds gratis weggegee`}
+          titel="Help die volgende persoon om ook gratis hoop te ontvang."
+          teks="Jou bydrae help dat Daaglikse Hoop gratis bly vir mense wat hoop, gebed en geestelike hulp nodig het."
+        />
 
         {/* ── VOLG JESUS ──
             Dieselfde kaart as op Luister, en dit gaan na dieselfde plek.

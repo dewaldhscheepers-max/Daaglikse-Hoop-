@@ -119,3 +119,30 @@ export function reedsGegee({ siklus, gestoorSiklus, gestoorVennoot } = {}) {
   const s = String(siklus || '')
   return !!s && String(gestoorSiklus || '') === s
 }
+
+/* ── WATTER GESIG DIE STEUN-KAART WYS ──
+ *
+ * Die kaart het drie gesigte, nie een nie. Dieselfde fout as die
+ * VOLG JESUS-kaart wat "GAAN VOORT" gewys het aan iemand wat klaar was: 'n
+ * kaart wat vir almal dieselfde sê, lieg vir twee uit die drie.
+ *
+ *   'vennoot' — sy gee ELKE MAAND. Sy word BEDANK en niks word gevra nie.
+ *               Geen knoppie nie: die enigste ding wat sy sou wou doen — haar
+ *               bydrae verander — gebeur by PayFast, nie hier nie, en 'n
+ *               knoppie wat niks doen nie, is erger as geen knoppie.
+ *
+ *   'gewer'   — sy het HIERDIE siklus eenmalig gegee. Sy word bedank, en die
+ *               enigste uitnodiging is om 'n vennoot te word. Dit is die
+ *               regte oomblik daarvoor en dit is die waardevolste tree in die
+ *               hele app — maar dit staan stil, nie in die groen knoppie nie.
+ *
+ *   'vra'     — die gewone kaart.
+ *
+ * Dit is suiwer sodat die drie gevalle getoets kan word. Die WOORDE staan in
+ * die komponent; hierdie funksie sê net wie kyk. */
+export function kaartGesig({ siklus, gestoorSiklus, gestoorVennoot } = {}) {
+  if (isVennoot(gestoorVennoot)) return 'vennoot'
+  const s = String(siklus || '')
+  if (s && String(gestoorSiklus || '') === s) return 'gewer'
+  return 'vra'
+}

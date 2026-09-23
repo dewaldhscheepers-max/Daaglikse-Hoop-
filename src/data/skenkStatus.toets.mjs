@@ -10,7 +10,7 @@
  *   node src/data/skenkStatus.toets.mjs
  */
 import {
-  siklusVir, vensterVir, isVennoot, reedsGegee,
+  siklusVir, vensterVir, isVennoot, reedsGegee, kaartGesig,
   SIKLUS_SLEUTEL, VENNOOT_SLEUTEL, SIKLUS_BEGIN, SIKLUS_EINDE,
 } from './skenkStatus.js'
 
@@ -138,6 +138,47 @@ console.log('\n── Die sleutels staan vas ──')
   is('die vennoot-sleutel', VENNOOT_SLEUTEL, 'skenkVennoot')
   is('die siklus begin op die 25ste', SIKLUS_BEGIN, 25)
   is('en eindig op die 3de', SIKLUS_EINDE, 3)
+}
+
+console.log('\n── Die steun-kaart se DRIE gesigte ──')
+{
+  /* n Kaart wat vir almal dieselfde se, lieg vir twee uit die drie. */
+  is('n vennoot kry n DANKIE',
+     kaartGesig({ siklus: '2026-09', gestoorVennoot: '2026-03-14T08:00:00.000Z' }), 'vennoot')
+  is('ook al het sy nooit eenmalig gegee nie',
+     kaartGesig({ siklus: '2026-09', gestoorSiklus: '', gestoorVennoot: '2026-03-14T08:00:00.000Z' }), 'vennoot')
+
+  is('wie hierdie siklus gegee het, kry n dankie + n uitnodiging',
+     kaartGesig({ siklus: '2026-09', gestoorSiklus: '2026-09' }), 'gewer')
+
+  is('almal anders kry die gewone kaart',
+     kaartGesig({ siklus: '2026-09', gestoorSiklus: '', gestoorVennoot: '' }), 'vra')
+  is('ook wie VERLEDE siklus gegee het',
+     kaartGesig({ siklus: '2026-09', gestoorSiklus: '2026-08' }), 'vra')
+
+  /* n Vennoot wat OOK eenmalig gegee het, bly n vennoot — die stiller gesig
+     wen, want dit is die een wat niks vra nie. */
+  is('vennoot wen bo gewer',
+     kaartGesig({ siklus: '2026-09', gestoorSiklus: '2026-09', gestoorVennoot: '2026-03-14T08:00:00.000Z' }),
+     'vennoot')
+
+  is('gemors gee die gewone kaart', kaartGesig(), 'vra')
+  is('n lee voorwerp ook', kaartGesig({}), 'vra')
+  /* Twee lee stringe is NIE "sy het gegee" nie. */
+  is('twee lee stringe ook',
+     kaartGesig({ siklus: '', gestoorSiklus: '', gestoorVennoot: '' }), 'vra')
+
+  /* Die gesig en `reedsGegee` mag nooit uitmekaar dryf nie: albei paaie moet
+     dieselfde mens herken. */
+  for (const geval of [
+    { siklus: '2026-09', gestoorVennoot: 'x' },
+    { siklus: '2026-09', gestoorSiklus: '2026-09' },
+    { siklus: '2026-09', gestoorSiklus: '2026-08' },
+    { siklus: '2026-09' },
+  ]) {
+    is(`gesig en reedsGegee stem ooreen: ${JSON.stringify(geval)}`,
+       kaartGesig(geval) !== 'vra', reedsGegee(geval))
+  }
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)
