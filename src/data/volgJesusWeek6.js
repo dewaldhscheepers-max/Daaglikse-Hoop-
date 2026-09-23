@@ -436,10 +436,20 @@ export const WEEK6_DEELSIN =
 
 /* ── Die brug na Week 7 ──
  *
- * `null` totdat Dewald Week 7 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie; Week 5 s'n kon na 6 wys omdat hy Week 6 se
- * titel self saamgestuur het. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK6_VOLGENDE = null
+ * Dit was `null`, en dan eindig Week 6 op 'n doodloopstraat. Dewald het Week 7
+ * op 24 September 2026 gestuur, dus wys die brug nou werklik iewers heen.
+ *
+ * Dit is een van die vyf plekke wat CLAUDE.md uitwys, en die maklikste een om
+ * te vergeet: die week SELF werk sonder hom, en niemand sou dit agterkom nie
+ * behalwe die mens wat Dag 5 klaarmaak en dan niks kry. Week 3 het 'n dag lank
+ * so gestaan. */
+export const WEEK6_VOLGENDE = {
+  week: 7,
+  titel: 'Wat soek jy?',
+  lyf: 'Volgende week kyk ons na Jesus se eerste vraag in Johannes se '
+     + 'Evangelie \u2014 en na wat gebeur wanneer jy ontdek dat Hy jou reeds sien '
+     + 'en ken.',
+}
 
 export function blokkeVirDag6(n) {
   const dag = WEEK6_DAE.find(d => d.n === n)

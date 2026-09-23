@@ -227,7 +227,7 @@ waar('en dit eindig by die week se vraag', /WIE KRY DIE LAASTE SÊ\?$/.test(WEEK
 console.log('\n── Die register ken Week 6 ──\n')
 is('hetDae(6)', hetDae(6), true)
 is('die eerste vyf ook', [1, 2, 3, 4, 5].map(hetDae), [true, true, true, true, true])
-is('maar nie week 7 nie', hetDae(7), false)
+is('maar nie week 8 nie', hetDae(8), false)
 is('weekDae(6) gee vyf dae', weekDae(6).length, 5)
 is('blokkeVir(6, 1) gee Dag 1 se blokke', blokkeVir(6, 1).length, blokkeVirDag6(1).length)
 is('n onbekende week gee niks', blokkeVir(9, 1), [])
@@ -244,13 +244,20 @@ console.log('\n── Week 5 wys nou NA Week 6, en die titel stem ──\n')
   is('met Week 6 se titel', brug && brug.titel, WEKE[6].titel)
 }
 
-console.log('\n── En Week 6 loop nog nie verder nie ──\n')
+console.log('\n── En Week 6 loop DEUR na Week 7 ──\n')
 {
-  /* `null` totdat Dewald Week 7 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
-     belofte wat ons nie kan hou nie. Skuif dit saam wanneer Week 7 kom; sien
-     CLAUDE.md se "Om 'n WEEK by te voeg". */
-  is('WEEK6_VOLGENDE is null', WEEK6_VOLGENDE, null)
-  is('en die register gee ook null', weekVolgende(6), null)
+  /* Dit was `null`, en dan eindig Week 6 op n doodloopstraat: die mens maak
+     Dag 5 klaar en kry niks. Week 3 het n dag lank so gestaan.
+
+     Die brug is een van die vyf plekke wat CLAUDE.md uitwys, en die maklikste
+     om te vergeet, want die week SELF werk sonder hom. */
+  waar('WEEK6_VOLGENDE bestaan', !!WEEK6_VOLGENDE)
+  is('en dit wys na week 7', WEEK6_VOLGENDE.week, 7)
+  is('met Week 7 se egte titel', WEEK6_VOLGENDE.titel, 'Wat soek jy?')
+  is('die register gee dieselfde', weekVolgende(6), WEEK6_VOLGENDE)
+  /* n Brug wat n titel VOORSPEL is n belofte wat ons nie kan hou nie. Hierdie
+     een kom uit Week 7 se eie rekord. */
+  waar('die titel is nie versin nie', WEEK6_VOLGENDE.titel.length > 3)
 }
 
 console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')

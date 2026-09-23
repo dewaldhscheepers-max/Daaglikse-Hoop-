@@ -46,6 +46,10 @@ import {
   WEEK6_DAE, WEEK6_REIS, WEEK6_OPENING, WEEK6_DEELSIN, WEEK6_VOLGENDE,
   WEEK6_TRANSKRIPSIE, WEEK6_SESSIE, WEEK6_KLAAR,
 } from './volgJesusWeek6.js'
+import {
+  WEEK7_DAE, WEEK7_REIS, WEEK7_OPENING, WEEK7_DEELSIN, WEEK7_VOLGENDE,
+  WEEK7_TRANSKRIPSIE, WEEK7_SESSIE, WEEK7_KLAAR,
+} from './volgJesusWeek7.js'
 
 const WEKE = {
   1: {
@@ -101,13 +105,27 @@ const WEKE = {
     reis: WEEK6_REIS,
     opening: WEEK6_OPENING,
     deelsin: WEEK6_DEELSIN,
-    /* `null` totdat Week 7 bestaan — sien die kop van volgJesusWeek6.js. */
+    /* Wys nou na Week 7. Dit was `null` en Week 6 het op 'n doodloopstraat
+       geëindig; sien die kop van volgJesusWeek6.js. */
     volgende: WEEK6_VOLGENDE,
     /* Leeg: ook hierdie week het geen opname nie. Dewald: "WEEK 6 HET GEEN
        STEMBOODSKAP OF KLANKLÊER NIE." */
     transkripsie: WEEK6_TRANSKRIPSIE,
     sessie: WEEK6_SESSIE,
     klaar: WEEK6_KLAAR,
+  },
+  7: {
+    dae: WEEK7_DAE,
+    reis: WEEK7_REIS,
+    opening: WEEK7_OPENING,
+    deelsin: WEEK7_DEELSIN,
+    /* `null` totdat Week 8 bestaan — sien die kop van volgJesusWeek7.js. */
+    volgende: WEEK7_VOLGENDE,
+    /* Leeg: ook hierdie week het geen opname nie. Dewald: "WEEK 7 HET GEEN
+       STEMBOODSKAP OF AUDIO NIE." */
+    transkripsie: WEEK7_TRANSKRIPSIE,
+    sessie: WEEK7_SESSIE,
+    klaar: WEEK7_KLAAR,
   },
 }
 

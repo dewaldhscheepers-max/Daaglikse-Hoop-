@@ -215,6 +215,10 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
          versnommers, en 'n hoofstuk sonder verse is niks om teen te keur. */
       /* Week 6 */ 'Lukas 9:23–25', 'Lukas 22:39–46', 'Markus 10:17–22',
                    'Matteus 10:37–39', 'Johannes 6:60–69', 'Lukas 14:25–33',
+      /* Week 7 — elke dag se LEES-blok, plus die admin se twee velde en die
+         groepsessie se kern-Skrifte. */
+      /* Week 7 */ 'Johannes 1:35–51', 'Psalm 27:4–8', 'Johannes 15:1–5',
+                   'Genesis 28:10–17', 'Markus 1:16–20',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

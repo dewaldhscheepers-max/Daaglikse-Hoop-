@@ -368,4 +368,57 @@ export const WEKE = {
       'Om jouself te verloën beteken nie dat jy jouself moet haat nie. Dit beteken ook nie dat jy nooit mag rus nie; dat jy geen behoeftes mag hê nie; dat jy nooit vir iemand mag nee sê nie; dat jy mishandeling moet verdra nie; dat jy in ’n gevaarlike situasie moet bly nie; of dat iemand anders jou mag beheer nie. Om Jesus te volg beteken dat Hy die laaste sê kry. Nie jou maat nie. Nie jou familie nie. Nie ’n pastoor of groepleier nie. Nie mense se opinies nie. Nie jou eie gevoelens nie. Jesus. Moenie iemand dwing om private dinge in die groep te deel nie.',
     pastoraleRisiko: 'medium',
   },
+  7: {
+    weeknommer: 7,
+    titel: 'Wat soek jy?',
+    doel:
+      'Om te ontdek dat Jesus jou reeds sien en ken voordat jy Hom soek \u2014 en dat dissipelskap begin wanneer jy nader kom, nie wanneer jy alles verstaan nie.',
+    weekKern:
+      'Jy hoef nie die hele pad te sien voordat jy die volgende tree neem nie.',
+    openingskerm:
+      'Jesus begin nie deur vir die eerste dissipels al die antwoorde te gee nie. Hy vra eenvoudig:\n\n'
+      + '\u201CWat soek julle?\u201D\n\n'
+      + 'Hierdie week gaan ons kyk na wat gebeur wanneer jy nader aan Jesus kom en ontdek dat Hy jou reeds sien, jou ken en jou roep om Hom te volg.\n\n'
+      + 'JY HOEF NIE DIE HELE PAD TE SIEN VOORDAT JY DIE VOLGENDE TREE NEEM NIE.',
+    primereSkrif: 'Johannes 1:35\u201351',
+    ondersteunendeSkrif: 'Markus 1:16\u201320',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 en 6 se noot: sonder hierdie vlaggie sou die publiseer-hek se
+       "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "WEEK 7 HET
+       GEEN STEMBOODSKAP OF AUDIO NIE." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'Jy hoef nie die hele pad te sien voordat jy die volgende tree neem nie.',
+    eenSin:
+      'Ek hoef nie elke antwoord te h\u00EA voordat ek Jesus volg nie. Ek wil Hom beter leer ken en my volgende tree neem.',
+    privaatRefleksie:
+      'Wat soek ek eintlik wanneer ek na Jesus toe kom?',
+    gehoorsaamheidStap:
+      'Neem hierdie week een tree nader aan Jesus. Dit kan wees: maak tyd om stil by Hom te wees; lees \u2019n gedeelte van Johannes se Evangelie; bid eerlik oor wat jou hart werklik soek; hou op om op jou eie sterk genoeg te probeer wees; of nooi iemand om saam met jou meer van Jesus te ontdek. Kies een tree en neem dit.',
+    gebed:
+      'Vader, dankie dat U my sien en ken. Leer my om U te soek en nie net dit wat U vir my kan gee nie. Help my om naby Jesus te bly, Hom beter te leer ken en Hom te volg. Maak my o\u00EB oop om meer van Jesus te sien. En gebruik my om iemand anders ook nader aan Hom te bring. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'M\u00F4re: die een ding wat Dawid gesoek het \u2014 en waarom dit nie \u2019n lewe sonder probleme was nie.',
+    dag1Titel: 'Jy dink jy het Jesus gevind',
+    dag2Titel: 'Soek jy God \u2014 of net wat Hy vir jou kan gee?',
+    dag3Titel: 'Die geheim is om te bly',
+    dag4Titel: 'Jy het nog nie gesien hoe groot Jesus is nie',
+    dag5Titel: 'Mense wat Jesus ontmoet, bring ander saam',
+    groepVraag1:
+      'Waarom dink julle vra Jesus: \u201CWat soek julle?\u201D',
+    groepVraag2:
+      'Wat is die verskil tussen baie van Jesus weet en werklik naby Hom leef?',
+    groepVraag3:
+      'Wat het julle hierdie week nuut oor Jesus raakgesien?',
+    groepVraag4:
+      'Andreas en Filippus het ander mense na Jesus toe gebring. Wie kan jy eenvoudig nooi om saam met jou meer van Jesus te ontdek?',
+    fasiliteerderHoofpunt:
+      'Week 7 beweeg deur hierdie eenvoudige pad: Wat soek jy? \u2192 Kom nader \u2192 Bly naby Jesus \u2192 Sien Wie Hy werklik is \u2192 Volg Hom \u2192 Bring iemand saam. Die doel is nie bloot dat mense aan die einde meer feite oor Jesus ken nie. Die doel is dat hulle nader aan Jesus leef en Hom volg.',
+    fasiliteerderGrens:
+      'Moenie iemand se eerlike vrae of twyfel vinnig veroordeel nie. Natanael kom met \u2019n vraag, en Jesus roep hom steeds nader. Moenie mense druk om hulle private antwoorde met die groep te deel nie. Moenie raai wat Natanael onder die vyeboom gedoen of gedink het nie \u2014 die teks s\u00EA net dat Jesus hom daar gesien het. Wanneer Dag 4 bespreek word, hou die Jakob-verbinding eenvoudig: Jesus se woorde oor die oop hemel en die engele laat ons terugdink aan Jakob se droom in Genesis 28. Moenie meer s\u00EA as wat die teks toelaat nie.',
+    pastoraleRisiko: 'laag',
+  },
 }
