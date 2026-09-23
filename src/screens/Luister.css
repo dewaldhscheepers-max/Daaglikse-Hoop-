@@ -926,6 +926,20 @@
 /* ── Deel vandag se wallpaper ──
    Die prent is klaar 9:16 met die skakel ingebrand. Die knoppie gee die foon
    se eie deelvenster; geen transform op :active nie, sien CLAUDE.md. */
+/* Vandag se nota het geen klanklêer nie. Dit is n REEL en nie n knoppie nie:
+   daar is niks om weer te probeer nie. Dieselfde plek en gewig as
+   `.hero-klankfout`, sodat die hero se vorm nie spring nie. */
+.hero-geenklank {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, .14);
+  border-radius: 10px;
+  color: #FBF6EC;
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .wp-deel-knop {
   display: block;
   width: 100%;

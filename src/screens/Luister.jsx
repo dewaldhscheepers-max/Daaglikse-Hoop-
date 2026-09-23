@@ -9,6 +9,7 @@ import TydMetGodKaart from '../components/TydMetGodKaart'
 import { merkGeluisterNou as tmgGeluister } from '../data/tydMetGodBerging'
 import { like as likeNota, leesGelike, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import VorigePrente from '../components/VorigePrente'
+import { hetKlank, GEEN_KLANK } from '../data/notaKlank'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -838,6 +839,19 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   }
 
   function toggle(note) {
+    /* ── 'n Nota SONDER 'n klanklêer ──
+     *
+     * Hier het niks gestaan nie, en 'n blaaierlopie het gewys wat dit kos: die
+     * knoppie draai om na 'n POUSE-ikoon, niks speel, en dit bly so — ook ná
+     * 'n herlaai, want dit is die DATA wat kort en nie die skerm nie.
+     *
+     * Dit is presies "'n speler wat lieg is erger as een wat stukkend is".
+     * Die skerm sê dit nou; sien `GEEN_KLANK` hieronder. */
+    if (!hetKlank(note)) {
+      setActiveId(note.id)
+      setPlaying(false); onPlayingChange?.(false)
+      return
+    }
     if (activeId === note.id) {
       const next = !playing
       setPlaying(next); onPlayingChange?.(next)
@@ -1196,10 +1210,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
           </div>
           {/* 'n Speler wat stilweg doodgaan is hoe hierdie fout maande lank
               onsigbaar gebly het. Kry ons dit nie reg nie, sê ons dit. */}
-          {klankFout && activeId === today.id && (
+          {klankFout && activeId === today.id && hetKlank(today) && (
             <button className="hero-klankfout" onClick={probeerWeer}>
               Die boodskap wou nie klaar speel nie. Tik om weer te probeer.
             </button>
+          )}
+          {/* Geen lêer om te speel nie. Dit is nie 'n "probeer weer"-geval nie
+              — daar is niks om weer te probeer — dus is dit 'n reël en nie 'n
+              knoppie nie. */}
+          {!hetKlank(today) && (
+            <p className="hero-geenklank">{GEEN_KLANK}</p>
           )}
           <div className="hero-actions">
             <button className={`hero-like-btn ${liked.includes(today.id) ? 'liked' : ''}`} onClick={() => handleLike(today.id)}>
