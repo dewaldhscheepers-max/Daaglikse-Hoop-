@@ -11,6 +11,9 @@ import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import './Admin.css'
 import { reekseUit, stelReeksGelyk } from '../data/reekse'
+/* Die opspringer se boeklys hou ses uur. Laai Dewald 'n boek op, moet hy nie
+   ses uur wag voordat die app dit kan adverteer nie. */
+import { vergeetBoeke } from '../data/eboekLys'
 
 /* ── Die wagwoord ──
 
@@ -581,6 +584,7 @@ export default function Admin({ onClose }) {
           async () => {
             const pdfUrl = await getDownloadURL(task.snapshot.ref)
             await setDoc(doc(db, 'books', book.id), { pdfUrl }, { merge: true })
+            vergeetBoeke()
             resolve()
           }
         )
@@ -611,6 +615,7 @@ export default function Admin({ onClose }) {
     setBoekBesig(true)
     try {
       await deleteDoc(doc(db, 'books', id))
+      vergeetBoeke()
       /* Die lys kom uit 'n onSnapshot en werk homself by; ons maak net die
          vraag toe. */
       setBoekSkrap(null)
@@ -641,6 +646,7 @@ export default function Admin({ onClose }) {
            src/data/eboekeVolgorde.js. */
         createdAt: new Date().toISOString(),
       })
+      vergeetBoeke()
       setNewTitle(''); setNewDesc(''); setNewValue(''); setNewEmoji('📚')
       setBookAdded(true)
       setTimeout(() => setBookAdded(false), 3000)
@@ -673,6 +679,7 @@ export default function Admin({ onClose }) {
           async () => {
             const coverUrl = await getDownloadURL(task.snapshot.ref)
             await setDoc(doc(db, 'books', book.id), { coverUrl }, { merge: true })
+            vergeetBoeke()
             resolve()
           }
         )

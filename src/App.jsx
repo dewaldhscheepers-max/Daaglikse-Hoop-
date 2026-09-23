@@ -17,6 +17,8 @@ import { naTydMetGod } from './data/tmgPopup'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
 import { BOOKS } from './data/books'
+import { kiesBoek } from './data/eboekPopup'
+import { haalOpgelaaideBoeke } from './data/eboekLys'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
 import { kiesPad } from './data/installeerPad'
@@ -217,6 +219,39 @@ export default function App() {
   const [hoopId, setHoopId] = useState(null)
   const hoopOopRef = useRef(false)
 
+  /* ── Twee opspringers mag NOOIT saam op die skerm wees nie ──
+   *
+   * 'n Blaaierlopie het dit gevang terwyl dit die e-boek-opspringer gemeet
+   * het: die kennisgewing-vraag kom 2,5s ná oopmaak, die e-boek-opspringer ná
+   * 30s, en niemand het vir die ander gekyk nie. Die tweede het dus bo-op die
+   * eerste kom staan.
+   *
+   * Dit is duurder as wat dit lyk, en dit is presies die fout wat reeds een
+   * keer reggemaak is toe die vraag bo-op Tyd met God beland het: 'n mens word
+   * HOOGSTENS DRIE KEER in sy leeftyd oor kennisgewings gevra, en 'n vraag wat
+   * weggedruk word omdat iets anders oor haar lê, brand een van daardie drie.
+   *
+   * Albei kante kyk nou. Refs en nie toestand nie, want albei word uit 'n
+   * `setTimeout` gelees wat 'n ou render se waardes vashou. */
+  const activePopupRef = useRef(null)
+  const notifBannerRef = useRef(false)
+
+  /* ── Die teruggehoue opspringer kom LOS ──
+   *
+   * Hy word teruggehou terwyl klank speel, Tyd met God oop is, die voer oop
+   * is, of die kennisgewing-vraag staan. Die klank-kant het sy eie loslating
+   * in `onAudioPlayingChange`; hierdie een is vir die vraag.
+   *
+   * Sonder dit is "wag" 'n uitvee met 'n ander naam: die mens druk die vraag
+   * weg, en die e-boek wat sy sou sien, kom eers môre — of nooit, want die
+   * volgende oopmaak begin weer van voor af. */
+  useEffect(() => {
+    if (showNotifBanner || !pendingPopup) return
+    if (isPlayingRef.current || tmgOopRef.current || reelsOopRef.current) return
+    setActivePopup(pendingPopup)
+    setPendingPopup(null)
+  }, [showNotifBanner, pendingPopup])
+
   function onAudioPlayingChange(playing) {
     isPlayingRef.current = playing
     /* Klaar geluister — as 'n nuwe weergawe gewag het, kom dit nou. */
@@ -328,7 +363,8 @@ export default function App() {
 
   // ── Popup manager ──
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let afgeskiet = false
+    const timer = setTimeout(async () => {
       const today     = new Date().toISOString().slice(0, 10)
       if (!isInstalled) return
       if (localStorage.getItem('lastPopupDate') === today) return
@@ -338,9 +374,6 @@ export default function App() {
 
       // Don't show ebook/donation to someone who only opened the app once
       if (appOpenDays.length < 2) return
-
-      const seenEbooks = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
-      const unseenBook = BOOKS.find(b => !seenEbooks.includes(b.id))
 
       const sw = getSkenkWindow()
       let donationDue = false
@@ -356,8 +389,22 @@ export default function App() {
       let popup = null
       if (donationDue) {
         popup = { type: 'donation' }
-      } else if (unseenBook) {
-        popup = { type: 'ebook', book: unseenBook }
+      } else {
+        /* ── Die opgelaaide boeke tel OOK ──
+         *
+         * Hier het `BOOKS.find(...)` gestaan — die ingeboude lys alleen. 'n Boek
+         * wat Dewald deur die admin oplaai, leef net in Firestore en was dus
+         * nooit eens 'n kandidaat nie: Skinderstories is opgelaai en daar was
+         * geen opspringer nie, en dit sou vir elke toekomstige boek so gewees
+         * het. Sien die kop van src/data/eboekPopup.js.
+         *
+         * Die haal staan HIER, ná die goedkoop hekke, sodat die oorgrote
+         * meerderheid oopmaak steeds niks van Firestore vra nie. */
+        const seenEbooks = JSON.parse(localStorage.getItem('seenEbooks') || '[]')
+        const opgelaai = await haalOpgelaaideBoeke()
+        if (afgeskiet) return
+        const boek = kiesBoek({ ingebou: BOOKS, opgelaai, gesien: seenEbooks })
+        if (boek) popup = { type: 'ebook', book: boek }
       }
 
       if (!popup) return
@@ -377,14 +424,20 @@ export default function App() {
       /* Die voer is oop (haar eie app, haar eie oortjie). 'n Donasievraag oor 'n
          video word weggedruk sonder dat iemand hom lees — en dan is daardie
          vraag vir vandag verbruik. Hy WAG, net soos terwyl klank speel. */
-      if (isPlayingRef.current || tmgOopRef.current || reelsOopRef.current) {
+      /* Die kennisgewing-vraag staan reeds (sy kom ná 2,5s, hierdie een ná
+         30s). Sy WAG — sy word nie laat val nie, want dit is 'n e-boek wat
+         Dewald opgelaai het en môre is daar weer 'n kans. */
+      if (isPlayingRef.current || tmgOopRef.current || reelsOopRef.current
+          || notifBannerRef.current) {
         setPendingPopup(popup)
       } else {
         setActivePopup(popup)
       }
     }, 30000)
 
-    return () => clearTimeout(timer)
+    /* Die haal is `await`, dus kan die komponent intussen afgaan. Sonder
+       hierdie vlag stel ons toestand op 'n afgeskiete komponent. */
+    return () => { afgeskiet = true; clearTimeout(timer) }
   }, [isInstalled])
 
   function dismissPopup() {
@@ -588,6 +641,8 @@ export default function App() {
      * loop eers wanneer die vraag werklik gewys is, dus bly die kans staan en
      * die volgende oopmaak vra weer. */
     if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current || reelsOopRef.current) return false
+    /* En nie bo-op 'n opspringer nie — die e-boek-, donasie- of deelkaart. */
+    if (activePopupRef.current) return false
 
     const mag = magVra({
       toestemming,
@@ -1616,6 +1671,10 @@ export default function App() {
      hulle het die boodskap ONDER die installasie-uitklap verskyn en die
      knoppie was doodgedruk. */
   oorlegRef.current = !!boonsteLaag || !!activePopup || showNotifBanner || wysStappe
+  /* Sien die kop by `activePopupRef`: die twee opspringer-paaie lees mekaar
+     hiermee, en hulle loop albei uit 'n tydhouer. */
+  activePopupRef.current = activePopup
+  notifBannerRef.current = showNotifBanner
   vjSkuifRef.current = showVjSkuif
   speelSkuifRef.current = showSpeelSkuif
   /* Die voer is 'n OORTJIE, nie 'n oorleg nie — hy staan dus nie in
