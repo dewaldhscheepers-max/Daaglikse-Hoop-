@@ -943,6 +943,40 @@
 .wp-deel-knop:active   { background: #4A3E75; }
 .wp-deel-knop:disabled { background: #9C93BC; }
 
+/* ── "Vorige prente" ──
+ *
+ * Dit was 'n stil teks-skakel op 13px, en die redenasie was dat "Deel hierdie
+ * prent" iets aan HIERDIE prent doen terwyl hierdie een WEGGAAN — dus moet die
+ * tweede sagter wees.
+ *
+ * Dewald het dit op sy foon gesien: *"maak vorige prent knopie groter."* Hy is
+ * reg, en die redenasie was te suinig. Agter daardie knoppie lê elke wallpaper
+ * wat hy nog ooit gemaak het — dit is 'n BESTEMMING, nie 'n voetnoot nie, en 'n
+ * skakel wat soos fynskrif lyk, word nooit gedruk nie.
+ *
+ * Hy is nou 'n egte knoppie van dieselfde grootte as die deel-een, maar OMLYN
+ * in plaas van gevul. So bly die rangorde sigbaar sonder dat hy wegkruip: die
+ * pers een is die daad, hierdie een is die deur.
+ *
+ * Geen `transform` op `:active` nie — net kleur. Sien CLAUDE.md. */
+.wp-vorige-knop {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 12px;
+  background: #fff;
+  border: 1.5px solid #D9D1EC;
+  border-radius: 13px;
+  color: #4A3E75;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s, border-color .15s;
+}
+.wp-vorige-knop:active { background: #F3EFFA; border-color: #BFB2E0; }
+
 .wp-card-fyn {
   font-size: 12.5px;
   line-height: 1.5;

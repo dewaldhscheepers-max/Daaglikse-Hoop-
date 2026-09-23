@@ -8,6 +8,7 @@ import DonationCard from '../components/DonationCard'
 import TydMetGodKaart from '../components/TydMetGodKaart'
 import { merkGeluisterNou as tmgGeluister } from '../data/tydMetGodBerging'
 import { like as likeNota, leesGelike, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
+import VorigePrente from '../components/VorigePrente'
 
 // ── Cache helpers (5-min TTL for first page of notes) ────────────────────────
 const NOTES_TTL  = 5 * 60 * 1000
@@ -253,6 +254,8 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
   const [bookmarkToast, setBookmarkToast]   = useState(false)
   const [listenShareNote, setListenShareNote] = useState(null)
   const [wpBesig, setWpBesig]         = useState(false)
+  /* Die prente-galery. Sien src/components/VorigePrente.jsx. */
+  const [prenteOop, setPrenteOop]     = useState(false)
   const [wpFout, setWpFout]           = useState(null)
   const [wpNota, setWpNota]           = useState(null)
   const [search, setSearch]           = useState('')
@@ -1270,7 +1273,23 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
             <button className="wp-deel-knop" onClick={deelWallpaper} disabled={wpBesig}>
               {wpBesig ? 'Een oomblik…' : 'Deel hierdie prent'}
             </button>
-            <div className="wp-card-fyn">Sit dit op jou WhatsApp-status, of stuur dit vir iemand.</div>
+            {/* ── Vorige prente ──
+             *
+             * Dewald, 24 September 2026: *"delete daai text en voeg knopie by
+             * 'Vorige Prente'. al die prente is opgelaai saam vorige
+             * stemboodskappe."*
+             *
+             * Die reël wat hier gestaan het ("Sit dit op jou WhatsApp-status,
+             * of stuur dit vir iemand") het 'n knoppie verduidelik wat geen
+             * verduideliking nodig het nie.
+             *
+             * Hierdie knoppie is STIL en nie 'n tweede blok nie: "Deel hierdie
+             * prent" doen iets aan HIERDIE prent, en hierdie een gaan WEG na 'n
+             * ander skerm. Twee gelyke knoppies sou lees soos twee gelyke
+             * keuses. Dieselfde les as "Gee eenmalig" op die steun-kaart. */}
+            <button className="wp-vorige-knop" onClick={() => setPrenteOop(true)}>
+              Vorige prente
+            </button>
             {wpNota && <div className="wp-card-nota">{wpNota}</div>}
             {wpFout && <div className="wp-card-fout">{wpFout}</div>}
           </div>
@@ -1444,6 +1463,26 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
       {shareToast    && <div className="share-toast">Boodskap gekopieër! Plak dit in WhatsApp om te deel.</div>}
       {bookmarkToast && <div className="share-toast">Gestoor! Blaai af na onder om dit te sien 🔖</div>}
+
+      {/* ── Die prente-galery ──
+       *
+       * Sy kry die notas wat hierdie skerm REEDS het — geen tweede
+       * Firestore-lees nie. Vandag se prent staan bo-aan die blad en word dus
+       * uitgelaat; die skerm heet VORIGE prente.
+       *
+       * `onLuister` maak die boodskap oop waaraan die prent behoort. Die
+       * verbinding is gratis: albei lê op dieselfde dokument. */}
+      {prenteOop && (
+        <VorigePrente
+          notas={notes}
+          sonder={today?.id}
+          onSluit={() => setPrenteOop(false)}
+          onLuister={id => {
+            const n = notes.find(x => x.id === id)
+            if (n) toggle(n)
+          }}
+        />
+      )}
     </div>
   )
 }

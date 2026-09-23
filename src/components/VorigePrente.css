@@ -1,0 +1,257 @@
+/* ── Die prente-galery ──
+ *
+ * Android-reëls, en hulle geld hier skerper as gewoonlik omdat dit 'n blad vol
+ * PRENTE is — die grootste teksture in die app:
+ *
+ *   · geen `transform` of `opacity` op `:active` nie — net kleur;
+ *   · geen `filter` of `backdrop-filter` nie;
+ *   · elke teël en die oorleg staan op 'n ONDEURSIGTIGE grond, sodat 'n prent
+ *     wat nog laai soos 'n teël lyk en nie soos 'n gat nie;
+ *   · `100svh`, nooit `100dvh` — `dvh` skuif saam met Chrome se adresbalk en
+ *     dan hervorm die hele blad by elke raam van daardie animasie.
+ */
+
+.vp {
+  position: fixed;
+  inset: 0;
+  z-index: 245;               /* bo die blad, ONDER die Bybel se 250 */
+  height: 100svh;
+  background: var(--cream);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px calc(var(--nav-height, 64px) + var(--safe-bottom, 0px) + 80px);
+}
+
+.vp-kop {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 12px;
+  background: var(--cream);   /* ONDEURSIGTIG — die prente rol hieronder deur */
+  border-bottom: 1px solid var(--cream-dark);
+  margin: 0 -16px 14px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.vp-terug {
+  width: 38px; height: 38px;
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  border: 1px solid var(--cream-dark);
+  border-radius: 50%;
+  font-size: 19px;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s;
+}
+.vp-terug:active { background: var(--cream-dark); }
+
+.vp-titel {
+  margin: 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.vp-fyn {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.vp-leeg {
+  margin: 40px 4px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Die rooster ── */
+.vp-rooster {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.vp-teel {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 1px solid var(--cream-dark);
+  border-radius: 14px;
+  overflow: hidden;
+  /* Die grond agter die prent. 'n Teël wat nog laai, lyk soos 'n teël. */
+  background: #2A2140;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .15s;
+}
+.vp-teel:active { border-color: #C9A961; }
+
+.vp-prent {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Die datum onderaan die teël. 'n Mens soek "die een van verlede Dinsdag".
+   'n `linear-gradient` op 'n ondeursigtige kleur, nie 'n `backdrop-filter`. */
+.vp-datum {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 16px 8px 7px;
+  background: linear-gradient(to top, rgba(14, 10, 22, .88), rgba(14, 10, 22, 0));
+  color: #F1EAF8;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.vp-meer {
+  display: block;
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 13px 16px;
+  background: #fff;
+  color: var(--text);
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 13px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s;
+}
+.vp-meer:active { background: var(--cream-dark); }
+
+/* ── Een prent, oopgemaak ── */
+.vp-oorleg {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: rgba(18, 12, 28, .88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.vp-blad {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--cream);
+  border-radius: 18px;
+  padding: 14px 14px 16px;
+  text-align: center;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.vp-x {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .92);
+  border: none;
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Die prent word NIE gesny nie — 'n mens moet sien wat sy stoor. `contain` op
+   'n ondeursigtige houer; dieselfde besluit as Tyd met God se wallpaper. */
+.vp-groot {
+  display: block;
+  width: 100%;
+  max-height: 46svh;
+  object-fit: contain;
+  background: #2A2140;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.vp-blad-titel {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+.vp-blad-datum {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.vp-knop {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  color: var(--text);
+  border: 1.5px solid var(--cream-dark);
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s;
+}
+.vp-knop:active { background: var(--cream-dark); }
+.vp-knop:disabled { color: var(--text-muted); }
+
+.vp-knop-hoof {
+  margin-top: 0;
+  background: #5B4A8F;
+  border-color: #5B4A8F;
+  color: #fff;
+}
+.vp-knop-hoof:active { background: #4A3B78; }
+.vp-knop-hoof:disabled { background: #8A7CB0; border-color: #8A7CB0; color: #fff; }
+
+/* "Luister na hierdie boodskap" is 'n derde soort ding — dit gaan WEG van
+   hierdie prent af. Stil, soos "Gee eenmalig" op die steun-kaart. */
+.vp-knop-stil {
+  background: none;
+  border: none;
+  color: #5B4A8F;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 13px;
+  padding: 8px;
+}
+.vp-knop-stil:active { background: none; color: #2E7D4F; }
+
+.vp-nota {
+  margin: 11px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.vp-fout {
+  margin: 11px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #A03B33;
+}
