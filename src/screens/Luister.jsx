@@ -950,16 +950,38 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     }
   }
 
+  /* ── Al die notas, EEN keer ──
+   *
+   * Dit voed die soekkassie EN die prente-galery; `fetchedAllRef` sorg dat die
+   * twee saam een lees kos en nie twee nie.
+   *
+   * ── Die tydgrens ──
+   *
+   * `getDocs` het GEEN tydgrens nie. Word die oortjie opgeskort, los die
+   * belofte nie op EN verwerp dit nie — dan bly `loadingAll` vir altyd waar,
+   * en die galery se "Die res laai nog…" is 'n reel wat nooit waar word nie.
+   * Dieselfde fout wat Luister se notalys twee keer stilweg gebreek het; sien
+   * CLAUDE.md se "Firestore se getDocs het geen tydgrens nie".
+   *
+   * Die `finally` laat die vlag in ELKE geval los, en `fetchedAllRef` gaan
+   * terug sodat 'n tweede probeerslag moontlik bly. */
   async function fetchAllForSearch() {
     if (fetchedAllRef.current) return
     fetchedAllRef.current = true
     setLoadingAll(true)
     try {
       const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'))
-      const snap = await getDocs(q)
-      setAllNotes(snap.docs.map(mapDoc))
+      const snap = await Promise.race([
+        getDocs(q),
+        new Promise((_, weier) => setTimeout(() => weier(new Error('tydgrens')), 15000)),
+      ])
+      /* Aanvaar nooit 'n antwoord kleiner as wat ons reeds het nie — vanlyn
+         bedien die SDK uit sy eie kas, en daardie kas hou net wat hy al gesien
+         het. Dieselfde les as die notalys s'n. */
+      const gelaai = snap.docs.map(mapDoc)
+      if (gelaai.length >= notasRef.current.length) setAllNotes(gelaai)
     } catch { fetchedAllRef.current = false }
-    setLoadingAll(false)
+    finally { setLoadingAll(false) }
   }
 
   async function handleShare(note) {
@@ -1494,7 +1516,20 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
        * verbinding is gratis: albei lê op dieselfde dokument. */}
       {prenteOop && (
         <VorigePrente
+          /* ── Die galery moet ALLE notas sien, nie net die eerste bladsy ──
+           *
+           * Hier het `notas={notes}` gestaan, en `notes` is die eerste bladsy:
+           * `PAGE_SIZE = 20`. Dewald het dit binne 'n dag gesien — *"daars net
+           * 19 of 20"* — en dit was presies reg: twintig gelaai, minus vandag
+           * s'n.
+           *
+           * `fetchAllForSearch()` haal die HELE versameling en bestaan reeds
+           * vir die soekkassie. Dit loop EEN keer (`fetchedAllRef`), dus kos
+           * die galery en die soek saam een lees en nie twee nie. */
           notas={notes}
+          alleNotas={allNotes}
+          laaiAlles={fetchAllForSearch}
+          besigMetAlles={loadingAll}
           sonder={today?.id}
           onSluit={() => setPrenteOop(false)}
           onLuister={id => {

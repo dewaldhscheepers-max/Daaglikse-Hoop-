@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { prentPad } from '../data/prentPad'
 import { deelPrent, laaiPrentAf } from '../data/prentStuur'
 import {
@@ -36,8 +36,25 @@ import './VorigePrente.css'
  * galery 'n tweede pad in die argief in, vir 'n mens wat met haar oë soek in
  * plaas van met 'n titel.
  */
-export default function VorigePrente({ notas, sonder, onSluit, onLuister }) {
-  const prente = useMemo(() => prenteUit(notas, { sonder }), [notas, sonder])
+export default function VorigePrente({
+  notas, alleNotas, laaiAlles, besigMetAlles, sonder, onSluit, onLuister,
+}) {
+  /* ── ALLE notas, nie net die eerste bladsy ──
+   *
+   * Luister hou `PAGE_SIZE = 20` notas in geheue. Die galery het daardie lys
+   * gekry en het dus 19 prente gewys (twintig minus vandag s'n). Dewald het dit
+   * binne 'n dag raakgesien.
+   *
+   * `laaiAlles()` is Luister se `fetchAllForSearch` — dit haal die hele
+   * versameling en loop EEN keer, dus deel die galery en die soekkassie dieselfde
+   * lees. Ons vra dit sodra die galery oopmaak.
+   *
+   * Intussen wys ons wat ons het. 'n Leë skerm wat wag, is erger as negentien
+   * prente wat groei. */
+  useEffect(() => { if (laaiAlles) laaiAlles() }, [laaiAlles])
+
+  const bron = (Array.isArray(alleNotas) && alleNotas.length) ? alleNotas : notas
+  const prente = useMemo(() => prenteUit(bron, { sonder }), [bron, sonder])
   const [blaaie, setBlaaie] = useState(1)
   const [oop, setOop] = useState(null)      /* die prent wat oopgemaak is */
   const [besig, setBesig] = useState(false)
@@ -82,7 +99,9 @@ export default function VorigePrente({ notas, sonder, onSluit, onLuister }) {
       ) : (
         <>
           <p className="vp-fyn">
-            Laai enige prent af vir jou skerm, of stuur dit vir iemand.
+            {prente.length} {prente.length === 1 ? 'prent' : 'prente'} — laai enige
+            een af vir jou skerm, of stuur dit vir iemand.
+            {besigMetAlles && ' Die res laai nog\u2026'}
           </p>
 
           <div className="vp-rooster">
