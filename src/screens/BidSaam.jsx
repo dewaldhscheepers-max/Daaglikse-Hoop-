@@ -238,8 +238,11 @@ function SaamgebedFlow({ prayers, prayed, gereed, fout, onClose, onPray, onHerpr
           <span className="sg-prayer-meta">Anoniem · {timeLabel(current.createdAt)}</span>
         </div>
 
-        <p className="sg-verse">"Dra mekaar se laste, en vervul so die wet van Christus."</p>
-        <p className="sg-verse-ref">Galasiërs 6:2</p>
+        {/* Ook hier was Galasiërs 6:2 — die ANDER blad se naam, gewys aan iemand
+            wat op hierdie oomblik besig is om te bid. Sien die noot by die
+            gemeenskapskaart hieronder. Jakobus 5:16, GAB se eie woorde. */}
+        <p className="sg-verse">“bid die een vir die ander, dat julle genees mag word.”</p>
+        <p className="sg-verse-ref">Jakobus 5:16</p>
 
         <button className="sg-prayed-btn" onClick={handlePray}>
           <span className="sg-prayed-icon">🙏</span>
@@ -548,9 +551,23 @@ export default function BidSaam() {
 
         {/* ── Community prayer card ── */}
         <div className="community-prayer-card card">
+          {/* ── Galasiërs 6:2 is HIER weg ──
+           *
+           * Die vers het gelees: *"Dra mekaar se laste…"* — en dit is woord vir
+           * woord die naam van die ANDER blad ("Dra Mekaar se Laste"), wat ook
+           * sy eie opskrif en sy eie vers is.
+           *
+           * Dewald, 29 September 2026: *"Van die mense vra nogsteeds vir gebed
+           * op die dra mekaar blad... dit is waarvoor bidsaam daar is."*
+           *
+           * Hierdie kaart was 'n deel van die rede. 'n Mens lees op BID SAAM 'n
+           * vers, sien "Dra mekaar" onderaan die skerm, en gaan presies daarheen
+           * — ons het haar self gestuur.
+           *
+           * Jakobus 5:16 bly, want DIT is die gebedsvers, en dit staan nou in
+           * die GAB se eie bewoording. */}
           <h3 className="community-prayer-title">Bid vandag vir 3 mense</h3>
-          <p className="community-prayer-verse">"Dra mekaar se laste…" — Galasiërs 6:2</p>
-          <p className="community-prayer-verse">"Bid vir mekaar…" — Jakobus 5:16</p>
+          <p className="community-prayer-verse">“bid die een vir die ander…” — Jakobus 5:16</p>
           <p className="community-prayer-desc">
             Wanneer jy iemand anders in gebed dra, staan daardie persoon nie meer alleen nie — en jou eie hart word ook dikwels ligter.
           </p>

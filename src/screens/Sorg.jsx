@@ -480,9 +480,19 @@ export default function Sorg({ onNavigate }) {
           </div>
         </div>
 
+        {/* Hier het gestaan: "Hier luister ons, hier BID ons, en hier dra ons
+            saam."
+
+            Dewald, 29 September 2026: *"Van die mense vra nogsteeds vir gebed
+            op die dra mekaar blad... dit is waarvoor bidsaam daar is."*
+
+            Hulle het nie 'n fout gemaak nie — die blad het dit gese. Gebed bly
+            'n ANTWOORD hier (die eerste reaksie op elke plasing is steeds
+            🙏 "Ek bid saam"), maar dit is nie meer wat die blad van jou
+            VRA nie. */}
         <p className="sorg-inlei">
-          Hier luister ons, hier bid ons, en hier dra ons saam. Bring wat op jou
-          hart is — sonder oordeel, en sonder om dit alleen te dra.
+          Hier luister ons, en hier dra ons saam. Bring wat op jou hart is —
+          sonder oordeel, en sonder om dit alleen te dra.
         </p>
       </div>
 
@@ -516,7 +526,19 @@ export default function Sorg({ onNavigate }) {
          * en die mense begin binne een skerm. */}
         <div className="sorg-doen">
           <h2>Wat is vandag op jou hart?</h2>
-          <p>Jy kan iets deel, na iemand luister, of later terugkom na 'n gesprek.</p>
+          {/* ── Die KEUSE staan voor die knoppies ──
+           *
+           * Hierdie reel het eers 'n dun balk ONDER die twee knoppies gewees:
+           * "Soek jy spesifiek gebed? Gaan na Bid Saam". Teen die tyd dat 'n
+           * mens daar kom, het die blad haar reeds gevra wat op haar hart is en
+           * twee knoppies gegee — die keuse was klaar gemaak.
+           *
+           * Nou staan die onderskeid waar die besluit geneem word, en dit se
+           * albei kante: waarvoor Bid Saam is, en waarvoor HIERDIE blad is. */}
+          <p>
+            Soek jy gebed? Dit gebeur op <b>Bid Saam</b>. Hier deel ons ons
+            stories en stap ons saam met mekaar.
+          </p>
           <div className="sorg-doen-knoppe">
             <button
               className="sorg-knop"

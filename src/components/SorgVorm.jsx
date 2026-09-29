@@ -214,10 +214,22 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               </div>
             )}
 
+            {/* ── "Waarmee jy hulp nodig het" is weg ──
+             *
+             * Dewald, 29 September 2026: *"Van die mense vra nogsteeds vir
+             * gebed op die dra mekaar blad."*
+             *
+             * Hierdie sin was een van die redes. "Waarmee het jy hulp nodig" is
+             * vir hierdie gehoor 'n GEBEDSVRAAG — dit vra vir 'n versoek, en
+             * dan skryf sy een.
+             *
+             * Die res van die sin bly woord vir woord: "Jy hoef nie die regte
+             * woorde te hê nie" is die ding wat iemand laat begin tik, en dit
+             * word nie aangeraak nie. */}
             <h2 className="sv-vraag">Ek luister.</h2>
             <p className="sv-fyn">
               Jy hoef nie die regte woorde te hê nie. Vertel my net wat gebeur
-              het, hoe jy voel en waarmee jy hulp nodig het.
+              het en hoe jy daaroor voel.
             </p>
 
             {/* ── Die krisisband ──
@@ -304,7 +316,9 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               className="sv-teks"
               value={teks}
               maxLength={MAKS_LENGTE}
-              placeholder="Tik jou vraag of vertel jou storie hier…"
+              /* "Tik jou VRAAG of vertel jou storie" — die eerste helfte nooi
+                 'n versoek. Net die storie bly. */
+              placeholder="Vertel jou storie hier…"
               onChange={e => setTeks(e.target.value)}
             />
             <div className="sv-teller">
