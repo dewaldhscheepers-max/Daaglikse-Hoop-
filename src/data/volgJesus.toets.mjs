@@ -219,6 +219,10 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
          groepsessie se kern-Skrifte. */
       /* Week 7 */ 'Johannes 1:35–51', 'Psalm 27:4–8', 'Johannes 15:1–5',
                    'Genesis 28:10–17', 'Markus 1:16–20',
+      /* Week 8 — elke dag se LEES-blok, plus die admin se twee velde en die
+         groepsessie se kern-Skrifte. */
+      /* Week 8 */ 'Markus 1:14–20', 'Matteus 12:22–28', 'Matteus 6:9–13',
+                   'Matteus 13:44–46', 'Markus 10:42–45',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

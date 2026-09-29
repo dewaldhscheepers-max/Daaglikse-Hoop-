@@ -421,4 +421,58 @@ export const WEKE = {
       'Moenie iemand se eerlike vrae of twyfel vinnig veroordeel nie. Natanael kom met \u2019n vraag, en Jesus roep hom steeds nader. Moenie mense druk om hulle private antwoorde met die groep te deel nie. Moenie raai wat Natanael onder die vyeboom gedoen of gedink het nie \u2014 die teks s\u00EA net dat Jesus hom daar gesien het. Wanneer Dag 4 bespreek word, hou die Jakob-verbinding eenvoudig: Jesus se woorde oor die oop hemel en die engele laat ons terugdink aan Jakob se droom in Genesis 28. Moenie meer s\u00EA as wat die teks toelaat nie.',
     pastoraleRisiko: 'laag',
   },
+  8: {
+    weeknommer: 8,
+    titel: 'Die Koninkryk van God het naby gekom',
+    doel:
+      'Om te verstaan dat die Koninkryk van God beteken dat God se heerskappy in Jesus naby gekom het, en dat dit ons hele lewe raak.',
+    weekKern:
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
+    openingskerm:
+      'Jesus het nie net gekom om mense te help nie.\n\n'
+      + 'Hy het gekom as Koning.\n\n'
+      + 'En wanneer die Koning kom, verander alles.\n\n'
+      + 'Hierdie week kyk ons na wat Jesus bedoel wanneer Hy s\u00EA: \u201CDie Koninkryk van God het naby gekom.\u201D\n\n'
+      + 'Dit gaan nie net oor waarheen jy eendag gaan nie. Dit gaan oor Wie nou die Koning is \u2014 en wat gebeur wanneer Sy wil in jou lewe begin regeer.',
+    primereSkrif: 'Markus 1:14\u201320',
+    ondersteunendeSkrif: 'Markus 10:42\u201345',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5, 6 en 7 se noot: sonder hierdie vlaggie sou die publiseer-hek
+       se "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "WEEK 8 HET
+       GEEN STEMBOODSKAP OF AUDIO NIE." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
+    eenSin:
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
+    privaatRefleksie:
+      'Waar wil ek nog h\u00EA Jesus moet my help, maar wil ek nie h\u00EA Hy moet oor daardie deel van my lewe regeer nie?',
+    gehoorsaamheidStap:
+      'Voltooi hierdie sin en neem die stap: \u201COmdat Jesus my Koning is, gaan ek hierdie week \u2026\u201D Kies een konkrete ding. Dit kan wees: vergewe iemand; gee iets op wat jou van Hom af wegtrek; bring \u2019n besluit eers in gebed na Hom toe; dien iemand sonder dat hulle dit kan terugbetaal; of gehoorsaam iets wat jy reeds weet Hy van jou vra.',
+    gebed:
+      'Jesus, U is Koning. Dankie dat U nie net gekom het om ons te help nie, maar om ons deel van U Koninkryk te maak. Laat U wil al hoe meer in ons lewe gebeur. Wys ons waar ons nog self die laaste s\u00EA wil h\u00EA. Help ons om U Koninkryk eerste te soek en ander te dien soos U ons gedien het. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'M\u00F4re: wat gebeur waar die Koning werklik kom \u2014 en hoekom Jesus se wonderwerke meer as wonderwerke was.',
+    dag1Titel: 'Die Koninkryk van God het naby gekom',
+    dag2Titel: 'Waar die Koning kom, begin dinge verander',
+    dag3Titel: 'U Koninkryk kom',
+    dag4Titel: 'Wanneer jy die skat sien',
+    dag5Titel: 'Die Koning wat Sy lewe gegee het',
+    groepVraag1:
+      'Wat verstaan jy nou anders oor die woorde \u201CKoninkryk van God\u201D?',
+    groepVraag2:
+      'Waarom dink julle leer Jesus ons om te bid \u201CLaat U Koninkryk kom\u201D?',
+    groepVraag3:
+      'Wat leer die skat en die p\u00EArel ons oor die waarde van Jesus?',
+    groepVraag4:
+      'Wat leer Markus 10 ons oor die soort Koning wat Jesus is?',
+    fasiliteerderHoofpunt:
+      'Die Koninkryk van God beteken meer as net \u2019n plek waar gelowiges eendag sal wees. Jesus kondig aan dat God se heerskappy in Hom naby gekom het. Sy wonderwerke wys iets daarvan. Sy leer wys hoe mense onder God se heerskappy leef. Die kruis wys watter soort Koning Hy is. En Sy opstanding wys dat selfs die dood nie die laaste woord het nie. Die antwoord op die Koninkryk is: bekeer jou, glo, volg Jesus. Maar maak dit duidelik: ons verdien nie God se Koninkryk deur gehoorsaam genoeg te wees nie. Redding is genade. Gehoorsaamheid is ons antwoord daarop.',
+    fasiliteerderGrens:
+      '\u201CJesus is Koning\u201D beteken nooit dat \u2019n pastoor, groepleier of ander Christen die reg kry om mense te beheer nie. Jesus s\u00EA self: \u201CMaar so moet dit onder julle nie wees nie.\u201D Sy manier van lei is diens. Moenie jou eie mening sommer \u201CGod se wil\u201D noem nie. Waar die Skrif duidelik praat, volg ons dit. Waar die Skrif nie \u2019n spesifieke antwoord gee nie, moet ons nie maak asof God iets ges\u00EA het wat Hy nie ges\u00EA het nie.',
+    pastoraleRisiko: 'laag',
+  },
 }

@@ -227,7 +227,7 @@ waar('en dit eindig by die week se vraag', /WIE KRY DIE LAASTE SÊ\?$/.test(WEEK
 console.log('\n── Die register ken Week 6 ──\n')
 is('hetDae(6)', hetDae(6), true)
 is('die eerste vyf ook', [1, 2, 3, 4, 5].map(hetDae), [true, true, true, true, true])
-is('maar nie week 8 nie', hetDae(8), false)
+is('maar nie week 9 nie', hetDae(9), false)
 is('weekDae(6) gee vyf dae', weekDae(6).length, 5)
 is('blokkeVir(6, 1) gee Dag 1 se blokke', blokkeVir(6, 1).length, blokkeVirDag6(1).length)
 is('n onbekende week gee niks', blokkeVir(9, 1), [])

@@ -498,9 +498,17 @@ export const WEEK7_DEELSIN =
 
 /* ── Die brug na Week 8 ──
  *
- * `null` totdat Dewald Week 8 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK7_VOLGENDE = null
+ * Dit was `null`, en dan eindig Week 7 op 'n doodloopstraat. Dewald het Week 8
+ * op 29 September 2026 gestuur, dus wys die brug nou werklik iewers heen.
+ *
+ * Die titel kom uit Week 8 se eie rekord en word nie hier voorspel nie — 'n
+ * brug wat 'n titel RAAI, is 'n belofte wat ons nie kan hou nie. */
+export const WEEK7_VOLGENDE = {
+  week: 8,
+  titel: 'Die Koninkryk van God het naby gekom',
+  lyf: 'Volgende week kyk ons na wat Jesus bedoel wanneer Hy sê dat die '
+     + 'Koninkryk naby gekom het — en watter soort Koning Hy werklik is.',
+}
 
 export function blokkeVirDag7(n) {
   const dag = WEEK7_DAE.find(d => d.n === n)
