@@ -441,9 +441,10 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             kaart met sy eie versinde ikone sou van die speletjies af wegdryf die
             dag wanneer een bykom.
 
-            Die `id` is die anker waarheen die "die speletjies het geskuif"-
-            boodskap rol — sonder dit land 'n mens bo-aan 'n lang blad en sien
-            niks. */}
+            Die `id` was die anker waarheen die "die speletjies het geskuif"-
+            boodskap gerol het. Daardie boodskap is weg (1 Oktober 2026), maar
+            die anker BLY: hy kos niks, en enigiets wat ooit weer hierheen moet
+            rol — 'n skakel, 'n kennisgewing — het hom nodig. */}
         <div
           className="speel-promo"
           id="speletjies"

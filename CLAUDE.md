@@ -99,7 +99,6 @@ node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 291
-node src/data/speelSkuif.toets.mjs            # wie hoor dat Speel geskuif het, 38 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
 node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
@@ -1346,13 +1345,19 @@ foutboodskap gelees op 'n blad wat oor geskenke gaan. `.meer-onderaan` maak dit
 'n voetnoot. Dit is nie versteek nie: wie dit nodig het, soek dit, en dit is die
 enigste skerm waar 'n mens tot heel onder rol.
 
-**Die skuif kos 'n boodskap, en dit is nie opsioneel nie.** `src/data/speelSkuif.js`
-is woord vir woord dieselfde patroon as `volgJesusSkuif.js`, en om dieselfde
-rede: die mens wat gister op Vredepad was, maak oop, die oortjie is weg, en sy
-dink haar vordering is weg. Net vir wie werklik gespeel het (die speletjies se
-eie localStorage-sleutels), een keer, net op Luister, nooit oor klank of 'n ander
-skerm nie. Kom 'n nuwe speletjie by, kom sy sleutel by `SPEEL_SLEUTELS` — staan
-hy nêrens, hoor sy spelers nooit waar hulle nou is nie.
+**Die skuif het 'n boodskap gekos, en daardie boodskap is nou weg.**
+`src/data/speelSkuif.js` het een keer vir wie al gespeel het gesê waar die
+speletjies nou is — dieselfde patroon as `volgJesusSkuif.js`, en dit was reg
+toe die oortjie pas geskuif het.
+
+Dewald, 1 Oktober 2026: *"Verwyder die speletjies het geskyf popup heeltemal
+af."* Hy is reg: die skuif was teen daardie tyd drie weke oud, elke mens wat ooit
+'n speletjie oopgemaak het, het die boodskap lankal gesien, en wat oorbly is 'n
+opspringer wat 'n ou verandering aankondig.
+
+Die les bly staan vir die VOLGENDE keer dat iets skuif — sien
+`volgJesusSkuif.js`, wat nog leef. 'n Skuif-boodskap is tydelik van aard: bou
+hom, en vee hom uit sodra die skuif oud is.
 
 **Die aktiewe clip se speler EN die volgende een is gemonteer — nooit drie.**
 Dewald: *"die volgende video laai telank.... dit moet basies dadelik wys as ek

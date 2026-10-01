@@ -56,9 +56,12 @@ export default function BottomNav({ active, onChange, onBybel }) {
          bestaande Speel-oortjie vervang, so daar bly steeds net vyf... Speel
          skuif na binne die E-boeke-blad as 'n aparte Speletjies-afdeling."
 
-         Die speletjies is NIE weg nie — hulle staan onder E-boeke, en wie al
-         gespeel het, kry een keer 'n boodskap wat sê waar hulle nou is. Sien
-         src/data/speelSkuif.js; dieselfde les as toe VOLG JESUS geskuif het. */
+         Die speletjies is NIE weg nie — hulle staan onder E-boeke.
+
+         Daar was 'n "die speletjies het geskuif"-boodskap vir wie al gespeel
+         het. Dewald het dit op 1 Oktober 2026 laat verwyder: die skuif was drie
+         weke oud, elke speler het dit lankal gesien, en 'n boodskap oor 'n ou
+         verandering is net nog 'n opspringer. */
       id: 'reels',
       label: 'Reels',
       icon: (
