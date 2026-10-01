@@ -142,10 +142,21 @@
   overflow: hidden;
 }
 
+/* Twee knoppies langs mekaar: "Kry gratis" en "Deel".
+ *
+ * `justify-content: flex-end` was hier van toe daar EEN knoppie was. Met twee
+ * het dit hulle albei na regs gedruk en die eerste een se teks laat breek —
+ * "Kry gratis" op een reel en die pyltjie op die volgende. Dewald: *"Die kry
+ * gratis knoppie is te groot.... lyk snaaks."*
+ *
+ * Nou vat die hoofknoppie die oorblywende ruimte en "Deel" bly sy eie breedte. */
 .book-footer {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  /* `stretch` en nie `center` nie: die twee knoppies het verskillende
+     opvulling, en met `center` was "Deel" 35px langs n 46px-knoppie — skeef.
+     So pas die kleiner een homself by die groter een aan. */
+  align-items: stretch;
+  gap: 8px;
   margin-top: 10px;
 }
 
@@ -161,12 +172,16 @@
 }
 
 .book-buy-btn {
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 600;
+  flex: 1 1 auto;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
   border-radius: 12px;
   text-align: center;
   text-decoration: none;
+  /* Sonder dit breek "Kry gratis →" in twee reels sodra die Deel-knoppie
+     langs hom staan, en dan is die knoppie dubbeld so hoog. */
+  white-space: nowrap;
 }
 
 .btn-free {
@@ -1054,12 +1069,6 @@
  * is wat die mens self kom doen het; deel is wat sy DAARNA doen.
  *
  * Geen `transform` op `:active` nie — net kleur. Sien CLAUDE.md. */
-.book-footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .book-deel-btn {
   display: inline-flex;
   align-items: center;
