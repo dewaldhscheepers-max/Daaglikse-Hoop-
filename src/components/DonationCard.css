@@ -86,29 +86,39 @@
 }
 .donation-card-btn-monthly:active { background: #245F3C; }
 
-/* "Gee eenmalig" is 'n TEKS-knoppie, nie 'n tweede blok nie. Twee omlynde
-   knoppies onder mekaar lees soos twee gelyke keuses; hier is die een die
-   hoofpad en die ander 'n uitweg. */
+/* ── "Gee eenmalig" ──
+ *
+ * Dit was 'n onderstreepte TEKS-skakel op 13px, en die redenasie was dat twee
+ * omlynde knoppies onder mekaar soos twee gelyke keuses lees.
+ *
+ * Dewald het dit twee keer op sy foon gesien en twee keer dieselfde gesê — die
+ * laaste keer: *"Die gee eenmalig knoppie is te klein.... dit moet oral groter
+ * wees."* Dit is dieselfde regstelling as "Vorige prente", en dit is my patroon
+ * wat verkeerd was: vir hierdie gehoor lees 'n onderstreepte skakel soos
+ * FYNSKRIF, nie soos 'n knoppie nie.
+ *
+ * Hy is nou 'n egte knoppie van dieselfde grootte as die groen een, maar OMLYN
+ * in plaas van gevul. Die rangorde bly sigbaar sonder dat hy wegkruip.
+ *
+ * Geen `transform` op `:active` nie — net kleur. Sien CLAUDE.md. */
 .donation-card-btn-once {
   display: block;
   width: 100%;
-  margin-top: 9px;
-  padding: 6px 8px;
-  background: none;
+  margin-top: 10px;
+  padding: 13px 16px;
+  background: #fff;
   color: #4A3E6B;
-  border: none;
-  border-radius: 8px;
+  border: 1.5px solid #D9D1EC;
+  border-radius: 12px;
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: .2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color .15s;
+  transition: background .15s, border-color .15s;
 }
-.donation-card-btn-once:active { color: #2E7D4F; }
+.donation-card-btn-once:active { background: #F3EFFA; border-color: #BFB2E0; }
 
 /* ── Die een-knoppie-weergawe (VOLG JESUS) ── */
 .donation-card-btn-enkel {

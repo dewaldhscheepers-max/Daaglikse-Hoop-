@@ -1042,3 +1042,55 @@
   font-size: 12.5px;
   color: var(--text-muted, #8A7E9A);
 }
+
+
+/* ── Die DEEL-knoppie op elke e-boek ──
+ *
+ * Dewald, 1 Oktober 2026: *"daar is geen deel knoppie op enige eboek. En dis
+ * juis hoe die app groei."*
+ *
+ * Hy staan NAAS "Kry gratis", nie onder nie: die kaart is kort en n derde ry
+ * sou elke boek langer maak. Hy is ook die sagter van die twee — "Kry gratis"
+ * is wat die mens self kom doen het; deel is wat sy DAARNA doen.
+ *
+ * Geen `transform` op `:active` nie — net kleur. Sien CLAUDE.md. */
+.book-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.book-deel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 9px 13px;
+  background: #fff;
+  color: #4A3E75;
+  border: 1.5px solid #E2DCEF;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s, border-color .15s;
+}
+.book-deel-btn:active { background: #F3EFFA; border-color: #BFB2E0; }
+
+/* Die knipbord-terugval se reel. Hy sweef onder, bo die nav. */
+.meer-deel-toast {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--nav-height, 64px) + var(--safe-bottom, 0px) + 16px);
+  z-index: 60;
+  padding: 12px 14px;
+  background: #2E2440;
+  color: #F6F2FB;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}

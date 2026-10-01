@@ -65,6 +65,7 @@ import BidVirMy from './components/BidVirMy'
 import { idUitPad } from './data/gebedDeel'
 import Reels from './screens/Reels'
 import { idUitPad as reelIdUitPad } from './data/reels'
+import { idUitPad as boekIdUitPad } from './data/boekSkakel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -1204,6 +1205,29 @@ export default function App() {
       }
       const onthou = sessionStorage.getItem('hoop_nota')
       if (onthou) { setHoopId(onthou); hoopOopRef.current = true }
+    } catch {}
+  }, [])
+
+  /* ── 'n Gedeelde skakel: /boek/<boek-id> ──
+   *
+   * Dewald, 1 Oktober 2026: *"dis juis hoe die app groei."* Die skakel dra die
+   * BOEK, nie die tuisblad nie — dieselfde reel as /hoop/<nota-id>.
+   *
+   * Dit stel die oortjie op E-boeke en gee die id vir `Meer`, wat na daardie
+   * kaart rol. Die pad word uit die adresbalk gevee sodra ons hom het, anders
+   * sit dit in die geskiedenis en 'n mens deel per ongeluk sy eie blaaierblad.
+   *
+   * Geen sessie-berging hier nie, anders as by HOOP: daardie een moet 'n
+   * installasie-sprong oorleef omdat die ontvanger dalk eers installeer. 'n
+   * Boek staan op 'n blad wat in elk geval bly, en 'n id wat n week later
+   * weer rol, is 'n app wat vreemd optree. */
+  useEffect(() => {
+    try {
+      const boek = boekIdUitPad(window.location.pathname || '')
+      if (!boek) return
+      window.history.replaceState({}, '', '/')
+      setTab('meer')
+      setTargetBookId(boek)
     } catch {}
   }, [])
 

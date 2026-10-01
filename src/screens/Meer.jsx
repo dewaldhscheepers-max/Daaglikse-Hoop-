@@ -5,6 +5,7 @@ import VolgJesusKaart from '../components/VolgJesusKaart'
 import Bybel365Kaart from '../components/Bybel365Kaart'
 import Speel, { SPELETJIES } from './Speel'
 import { eboekTotale } from '../data/eboekTotale'
+import { boekSkakel, deelBoodskap as boekDeelBoodskap } from '../data/boekSkakel'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
@@ -23,7 +24,19 @@ const STATIC_IDS = new Set(STATIC_BOOKS.map(b => b.id))
 function fmtNum(n) { return n.toLocaleString('af-ZA') }
 
 /* ── Free book card ── */
-function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
+/* Dieselfde vorm as die deel-ikoon op Luister en in Reels — geteken, nie n
+   emoji nie: n emoji is die FOON se lettertipe en lyk op elke toestel anders. */
+function ShareIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+      <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+    </svg>
+  )
+}
+
+function FreeBookCard({ book, claimed, onClaim, onDeel, downloadCount }) {
   const pdfUrl = book.pdfUrl
   return (
     <div className="book-card">
@@ -51,6 +64,19 @@ function FreeBookCard({ book, claimed, onClaim, downloadCount }) {
               : <button className="btn-free book-buy-btn" onClick={onClaim}>📥 Laai af</button>
             : <button className="btn-primary book-buy-btn" onClick={onClaim}>Kry gratis →</button>
           }
+          {/* ── DEEL ──
+           *
+           * Dewald, 1 Oktober 2026: *"daar is geen deel knoppie op enige
+           * eboek. En dis juis hoe die app groei."*
+           *
+           * Die skakel dra die BOEK se id, nie die tuisblad nie — dieselfde
+           * reel as /hoop/<nota-id>. 'n Mens stuur nie "laai hierdie app af"
+           * nie; sy stuur n BOEK, want sy weet waarmee haar vriendin sukkel.
+           * Land die skakel op die tuisblad, moet die ontvanger deur 21 boeke
+           * soek en die sin daarby is n leuen. */}
+          <button className="book-deel-btn" onClick={onDeel} aria-label={`Deel ${book.title}`}>
+            <ShareIcon /> Deel
+          </button>
         </div>
       </div>
     </div>
@@ -115,6 +141,37 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
      nooit ophou nie. */
   const [vjDoen,              setVjDoen]              = useState(0)
   const [activeBook,          setActiveBook]          = useState(null)
+  /* Wys kort "Gekopieer!" wanneer die foon nie self kan deel nie. */
+  const [deelKopie,           setDeelKopie]           = useState(false)
+
+  /* ── Deel een boek ──
+   *
+   * `navigator.share` gee die foon se eie deelvenster — WhatsApp, e-pos,
+   * alles. Dieselfde patroon as Luister se deel-knoppie.
+   *
+   * Op 'n rekenaar bestaan dit nie, en dan gaan die boodskap na die knipbord
+   * met 'n reel wat dit se. 'n Knoppie wat stilweg niks doen nie, is erger as
+   * geen knoppie — dit is die les van die hele kodebasis.
+   *
+   * Die mens wat die venster TOEMAAK, kry niks: dit is nie 'n fout nie, sy het
+   * van plan verander. */
+  async function deelBoek(boek) {
+    const skakel = boekSkakel(boek.id)
+    const boodskap = boekDeelBoodskap(boek.title, skakel)
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: boek.title, text: boodskap })
+        return
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return
+    }
+    try {
+      await navigator.clipboard.writeText(boodskap)
+      setDeelKopie(true)
+      setTimeout(() => setDeelKopie(false), 2500)
+    } catch { /* geen knipbord — dan kan ons niks doen en se ons ook niks */ }
+  }
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
   const [showLeesplanne,     setShowLeesplanne]     = useState(false)
@@ -492,6 +549,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
                   book={b}
                   claimed={!!claimedMap[b.id]}
                   onClaim={() => setActiveBook(b)}
+                  onDeel={() => deelBoek(b)}
                   downloadCount={b.isRG ? rgCount : undefined}
                 />
               </div>
@@ -563,6 +621,12 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
             if (activeBook.isRG) fetchRgCount()
           }}
         />
+      )}
+
+      {/* Net wanneer die foon nie self kon deel nie — dan het die boodskap na
+          die knipbord gegaan en die mens moet dit WEET. */}
+      {deelKopie && (
+        <div className="meer-deel-toast">Gekopieer! Plak dit in WhatsApp om te deel.</div>
       )}
     </div>
   )
