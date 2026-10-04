@@ -2491,34 +2491,37 @@ blaaier. Moenie die merkers wegvat nie.
 `oudit.mjs` in die scratchpad loop elke blaaier teen `/` en `/go` en val om
 as enigiemand niks kry nie.
 
-## Die Android-app is nie die webwerf nie
+## Die Android-app is NIE voltooi nie — Daaglikse Hoop is web/PWA
 
-Op Google Play staan 'n **regte app**, gebou met Capacitor, in `android/`.
-Dit was 'n TWA — 'n houer wat die webwerf in die foon se verstek-blaaier
-oopmaak — en op 'n Samsung beteken dit Samsung Internet besit alles wat saak
-maak: die kennisgewing is syne om oor te handig (hy doen dit nie), en die
-kleure is syne om om te keer (hy doen dit wel).
+**Daar is GEEN lewende Google Play-app nie.** 'n Capacitor-steier lê in
+`android/`, maar dit is **nooit voltooi of na Google Play ontplooi nie** — die
+werk het juis by die kennisgewings vasgehaak. Moenie 'n toekomstige
+argitektuurbesluit op 'n inheemse Android-app baseer nie: dit bestaan nie.
 
-Drie dinge om te weet voor jy hieraan raak:
+Wat vandag lewe, is die **web/PWA** — in Chrome, Samsung Internet, Safari, en
+'n PWA wat 'n mens op die tuisskerm sit. iPhone én Android is almal web. Daar
+is dus **geen inheemse toestel-id** nie (die foon se identiteit is die anonieme
+Firebase-uid plus localStorage, wat by 'n herinstallasie of 'n ander blaaier
+verdwyn).
 
-* **Die app laai die LEWENDE webwerf.** Dieselfde bundel loop in Chrome, in
-  Samsung Internet en in die app. `isInheems` in
-  `src/data/inheemseKennisgewings.js` is die skakelaar wat keer dat push
-  **twee keer** registreer en een mens die oggendboodskap dubbel kry.
-* **`Notification.permission` lieg binne die app.** Dit is die WEBVIEW se
-  toestemming; die een wat tel is `POST_NOTIFICATIONS`, wat aan die app
-  behoort. 'n WebView wat nooit gevra is nie gee dikwels `denied`. `App.jsx`
-  lees die inheemse staat in `inheemsePermRef` en gebruik dít — vir die vraag
-  én vir die drie tellers op `tellers/toestemming`.
-* **Die web en die PWA verander niks.** iPhone, bestaande PWA-installasies en
-  gewone webbesoekers loop presies soos altyd. Die bediener het niks nodig
-  gehad nie: die inheemse token gaan na dieselfde `fcm_tokens`-versameling.
+Wat die onvoltooide steier in `android/` bedoel het om te doen — en wat 'n mens
+moet verstaan as dit ooit weer opgetel word:
 
-Die `.aab` kan **nie hier gebou word nie** — `dl.google.com` word deur die
-uitgangsbeleid geblokkeer, en dit is waar die Android-SDK én die hele
-Google-Maven sit. Dit word in Android Studio gebou.
+* **Dit sou 'n TWA wees** — 'n houer wat die lewende webwerf in die foon se
+  verstek-blaaier oopmaak. Op 'n Samsung is dit Samsung Internet, en dan besit
+  Samsung alles wat saak maak: die kennisgewing is syne om oor te handig (hy
+  doen dit nie), en dit is presies waar dit misluk het.
+* **`isInheems` in `src/data/inheemseKennisgewings.js`** was die beplande
+  skakelaar om te keer dat push twee keer registreer. Dit is kode wat bestaan
+  vir 'n app wat nooit gelewe het nie.
+* **Die web en die PWA is die waarheid.** iPhone, PWA-installasies en gewone
+  webbesoekers loop soos altyd; die FCM-token gaan na die
+  `fcm_tokens`-versameling.
 
-Volledig in `docs/android-app.md`. Lees dit voor jy aan `android/` raak.
+Die `.aab` kan in elk geval **nie hier gebou word nie** — `dl.google.com` is
+deur die uitgangsbeleid geblokkeer. As die Android-pad ooit hervat word, gebeur
+dit in Android Studio, en die kennisgewing-probleem is die eerste ding om op te
+los. Agtergrond in `docs/android-app.md`.
 
 ## Kennisgewings
 
