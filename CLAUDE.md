@@ -61,7 +61,7 @@ node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
 node src/data/boekTeks.toets.mjs              # PDF-teks skoonmaak + hoofstuk-split, 27 toetse
-node src/data/luisterStukke.toets.mjs         # TTS-stukke + stemkeuse, 18 toetse
+node src/data/luisterStukke.toets.mjs         # TTS-stukke + MANSTEM-keuse, 25 toetse
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
@@ -2536,6 +2536,14 @@ nie:
   "Speel weer" begin die huidige stuk oor; omdat 'n stuk ~een sin is, hoor 'n
   mens skaars die herhaling. Die posisie (hoofstuk + stuk) lê in localStorage per
   boek en hervat daar.
+
+**Dit kies 'n MANSTEM** (Dewald: *"a normal man voice not woman"*). Die blaaier
+het geen geslag-veld nie; `kiesStem()` lees die NAAM en Android se stemkode
+(`voiceURI`) teen twee lyste, en verkies dan Natural/Neural/Enhanced. "Female"
+bevat "male" — die vroue-lys keer dat dit deurglip. Die toonhoogte word NIE
+verlaag om 'n vrou na 'n man te laat klink nie; dit klink vervormd. Het die foon
+geen manstem nie (Chrome op Android wys dikwels net een stem per taal), besluit
+die foon se eie spraak-instelling.
 
 **Die stem verskil per toestel** — dit is browser-TTS se bekende prys, en dit is
 die MVP. Dieselfde onttrekte teks kan later AI-stem-oudio voed. Dit kan nie in

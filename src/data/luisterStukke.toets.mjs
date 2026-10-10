@@ -2,7 +2,7 @@
  *
  *   node src/data/luisterStukke.toets.mjs
  */
-import { maakStukke, totaleStukke, kiesStem, MAKS_STUK } from './luisterStukke.js'
+import { maakStukke, totaleStukke, kiesStem, isManstem, MAKS_STUK } from './luisterStukke.js'
 
 let reg = 0, val = 0
 function is(naam, kry, wag) {
@@ -65,6 +65,26 @@ console.log('\n── kiesStem ──')
   is('null gee null', kiesStem(null), null)
   /* 'n Nie-plaaslike Engelse stem word steeds gekies as daar niks beters is. */
   is('nie-plaaslik is ok', kiesStem([{ name: 'Cloud EN', lang: 'en-US', localService: false }]).name, 'Cloud EN')
+}
+
+
+console.log('\n── kiesStem: MANSTEM, so natuurlik as moontlik ──')
+{
+  const v = (name, lang, localService = true, voiceURI = '') => ({ name, lang, localService, voiceURI })
+  /* Chrome op 'n rekenaar: vrou eerste in die lys, man moet wen. */
+  is('Google: Male bo Female', kiesStem([v('Google UK English Female','en-GB',false), v('Google UK English Male','en-GB',false)]).name, 'Google UK English Male')
+  /* "Female" bevat "male" — mag NOOIT as man tel nie. */
+  is('Female is nie Male nie', isManstem(v('Google UK English Female','en-GB')), false)
+  /* iPhone: Daniel (Brits, man) bo Samantha en Karen. */
+  is('iPhone: Daniel', kiesStem([v('Samantha','en-US'), v('Karen','en-AU'), v('Daniel','en-GB')]).name, 'Daniel')
+  /* Edge: 'n NATUURLIKE manstem bo 'n gewone manstem. */
+  is('Edge: Natural man wen', kiesStem([v('Microsoft David - English (United States)','en-US'), v('Microsoft Ryan Online (Natural) - English (United Kingdom)','en-GB',false), v('Microsoft Sonia Online (Natural) - English (United Kingdom)','en-GB',false)]).name, 'Microsoft Ryan Online (Natural) - English (United Kingdom)')
+  /* Man wen selfs oor die taal-voorkeur: 'n Amerikaanse man bo 'n SA-vrou. */
+  is('man bo taal', kiesStem([v('SA Female','en-ZA'), v('Aaron','en-US')]).name, 'Aaron')
+  /* Android: die stemkode in voiceURI. */
+  is('Android: gbd is man', kiesStem([v('English United Kingdom','en-GB',true,'en-gb-x-gba-local'), v('English United Kingdom','en-GB',true,'en-gb-x-gbd-local')]).voiceURI, 'en-gb-x-gbd-local')
+  /* Geen manstem nie → steeds 'n Engelse stem, nie null nie. */
+  is('geen man: beste Engels', kiesStem([v('Samantha','en-US'), v('Afrikaans','af-ZA')]).name, 'Samantha')
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

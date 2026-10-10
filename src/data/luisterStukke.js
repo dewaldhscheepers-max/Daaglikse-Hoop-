@@ -77,24 +77,54 @@ export function totaleStukke(afdelings) {
     .reduce((n, a) => n + maakStukke(a && a.teks).length, 0)
 }
 
-/* ── Kies 'n Engelse stem ──
+/* ── Kies 'n Engelse MANSTEM, so natuurlik as moontlik ──
  *
- * Voorkeur: 'n plaaslike (op die toestel geïnstalleerde) Engelse stem, en onder
- * die Engelses 'n Suid-Afrikaanse/Britse voor 'n Amerikaanse — nader aan hoe die
- * meeste van hierdie mense Engels hoor. Gee `null` as daar geen Engelse stem is;
- * dan kies die blaaier self. */
+ * Dewald, 10 Oktober 2026: *"change it to a normal man voice not woman. As
+ * normal as possible."*
+ *
+ * Die blaaier sê NIE of 'n stem 'n man of 'n vrou is nie — `SpeechSynthesisVoice`
+ * het geen geslag-veld nie. Die enigste eerlike teken is die NAAM (en op Android
+ * die stemkode in `voiceURI`). Daarom twee lyste van bekende name:
+ *
+ *   MANS    — Apple (Daniel, Aaron, Arthur, Gordon, Rishi, Alex, Fred, Oliver,
+ *             Tom), Microsoft (Guy, Ryan, Christopher, Eric, Andrew, Brian,
+ *             William, Liam, David, Mark, George, James, Thomas, Luke), Google
+ *             ("… Male"), en Android se kodes (iol, iom, tpd, gbb, gbd, rjs, aub,
+ *             aud).
+ *   VROUE   — sodat 'n naam wat met "female" eindig of 'n bekende vrouenaam
+ *             nooit as man deurgaan nie ("Female" bevat "male").
+ *
+ * Volgorde van belang: MAN, dan NATUURLIK (Natural/Neural/Enhanced/Premium —
+ * dit is die stemme wat nie soos 'n robot klink nie), dan die taal (SA, Brits,
+ * Australies, Amerikaans), dan plaaslik. Ons verlaag NIE die toonhoogte van 'n
+ * vrouestem om 'n man na te maak nie — dit klink soos 'n vervormde stem, die
+ * teenoorgestelde van "so normaal as moontlik".
+ *
+ * Is daar geen manstem op die foon nie (Chrome op Android wys dikwels net EEN
+ * stem per taal, sonder naam), kies ons die beste wat daar is. Dan besluit die
+ * foon se eie spraak-instelling. Gee `null` as daar geen Engelse stem is nie. */
+const MANS = /\b(daniel|aaron|arthur|gordon|rishi|alex|fred|oliver|tom|guy|ryan|christopher|eric|andrew|brian|william|liam|david|mark|george|james|thomas|luke|lee|male)\b|x-(iol|iom|tpd|gbb|gbd|rjs|aub|aud)\b/i
+const VROUE = /female|\b(samantha|karen|moira|tessa|victoria|zira|hazel|susan|libby|sonia|jenny|aria|natasha|catherine|serena|kate|fiona|veena|emma|ava|allison|leah|clara|michelle|sara|nicky|martha|joanna|salli|kimberly|ivy|amy|olivia)\b|x-(sfg|iob|iog|tpc|tpf|gba|gbc|gbg|aua|auc)\b/i
+const NATUURLIK = /natural|neural|enhanced|premium|online/i
+
+function etiket(s) { return `${s.name || ''} ${s.voiceURI || ''}` }
+export function isManstem(s) { const e = etiket(s); return MANS.test(e) && !VROUE.test(e) }
+
 export function kiesStem(stemme, voorkeur = ['en-za', 'en-gb', 'en-au', 'en-us', 'en']) {
   const lys = Array.isArray(stemme) ? stemme.filter(s => s && typeof s.lang === 'string') : []
-  if (!lys.length) return null
   const engels = lys.filter(s => s.lang.toLowerCase().startsWith('en'))
   if (!engels.length) return null
 
-  for (const pre of voorkeur) {
-    /* Eers 'n plaaslike stem wat pas, dan enige wat pas. */
-    const plaaslik = engels.find(s => s.lang.toLowerCase().startsWith(pre) && s.localService)
-    if (plaaslik) return plaaslik
-    const enige = engels.find(s => s.lang.toLowerCase().startsWith(pre))
-    if (enige) return enige
+  const taalRang = s => {
+    const l = s.lang.toLowerCase().replace('_', '-')
+    const i = voorkeur.findIndex(pre => l.startsWith(pre))
+    return i < 0 ? voorkeur.length : i
   }
-  return engels[0]
+  /* Laer is beter, in hierdie volgorde. */
+  const sleutel = s => [isManstem(s) ? 0 : 1, NATUURLIK.test(etiket(s)) ? 0 : 1, taalRang(s), s.localService ? 0 : 1]
+  return engels.slice().sort((a, b) => {
+    const x = sleutel(a), y = sleutel(b)
+    for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]
+    return 0
+  })[0]
 }
