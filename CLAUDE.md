@@ -2457,11 +2457,22 @@ luisteraar. 'n Leë SDK-kas-antwoord word nooit aanvaar nie, en tot een bron
 antwoord sê die blad "Loading the books…". Blaaiertoets: `kykEngelsSpoed.mjs`
 (Firestore geblokkeer: boeke binne ~0,8s).
 
-**Op /english is daar GEEN installasiemuur voor 'n boek nie.** `FreeBookModal`
-slaan die installeer-stap oor wanneer `taal === 'en'` — reguit na die e-posvorm.
-Dewald: *"Moenie vir hulle vra om eers app te install nie."* 'n Engelse besoeker
-het vir 'n BOEK gekom, en die app is Afrikaans. Die Afrikaanse pad vra steeds
-eers. Albei Deel-knoppies (op die boek en ná die aflaai) deel
+**Die TELLER kom saam met die boeke.** Dewald, die volgende oomblik: *"Now the
+counter takes longer."* Die boeke was vinnig, die teller het nog op Firestore
+se `stats/ebooks_given` en die ongekasde `campaign-count` gewag. Die eindpunt
+stuur nou `teller` en `campagne` saam (dieselfde dokumente, net heelgetalle).
+Drie reëls hou dit eerlik: 'n leë SDK-kas-antwoord is nie nul nie; faal die
+eindpunt, val die blad dadelik terug soos altyd; en net 'n EGTE getal
+(`tellerEg`) mag die foon se gekasde getal oorskryf of op die skerm vervang —
+anders wis 'n swak lyn 'n goeie getal uit. Blaaiertoets: `kykTellerSpoed.mjs`
+(Firestore geblokkeer, campaign-count 6s stadig: teller binne ~0,7s).
+
+**Niemand word eers gevra om die app te installeer voordat hy 'n boek kry nie**
+— nie op /english nie en nie op die Afrikaanse e-boekblad nie. `FreeBookModal`
+begin altyd by die e-posvorm (`skipInstall = true`). Eers Engels (*"Moenie vir
+hulle vra om eers app te install nie"*), toe Afrikaans (*"everyone can download
+it. Only remove that popup... i still need them to give their email... dont
+change anything else"*). Die e-posvorm en alles daarna is onveranderd. Albei Deel-knoppies (op die boek en ná die aflaai) deel
 `https://www.dewaldscheepers.com/english`, nie `/go` nie. Blaaiertoets:
 `kykEngelsAflaai.mjs`.
 

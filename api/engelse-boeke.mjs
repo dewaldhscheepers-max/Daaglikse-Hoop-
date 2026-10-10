@@ -11,7 +11,7 @@
  * diensrekening lees, 'n WITLYS (src/data/engelseBoekeOpenbaar.js), en die rand
  * kas dit vyf minute — EEN lees vir die hele wêreld in plaas van een per foon.
  * Die blad se lewendige luisteraar bly staan vir as die admin iets verander. */
-import { lysDokke } from './_sorgFirestore.mjs'
+import { lysDokke, leesDok } from './_sorgFirestore.mjs'
 import { openbareEngelseBoeke } from '../src/data/engelseBoekeOpenbaar.js'
 
 export default async function handler(req, res) {
@@ -20,9 +20,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ fout: 'Net GET' })
   }
   try {
-    const boeke = openbareEngelseBoeke(await lysDokke('books', { grootte: 300, maks: 600 }))
+    /* Die TELLER kom saam (Dewald: *"Now the counter takes longer"*). Dit is
+       dieselfde `stats/ebooks_given` as die Afrikaanse blad s'n — net twee
+       heelgetalle, geen naam nie. Misluk dit, kom die boeke steeds. */
+    const [rou, stats, campagne] = await Promise.all([
+      lysDokke('books', { grootte: 300, maks: 600 }),
+      leesDok('stats', 'ebooks_given').catch(() => null),
+      /* Dieselfde dokument as api/campaign-count.js — die derde bron van die
+         teller, sodat die Engelse blad alles in EEN gekasde versoek kry. */
+      leesDok('counters', 'campaign_huise').catch(() => null),
+    ])
+    const boeke = openbareEngelseBoeke(rou)
+    const getal = v => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Math.floor(Number(v)) : null)
+    const teller = stats ? { count: getal(stats.count) ?? 0, value: getal(stats.value) ?? 0 } : null
+    const campagneTotaal = campagne ? (getal(campagne.total) ?? 0) : null
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
-    return res.status(200).json({ boeke })
+    return res.status(200).json({ boeke, teller, campagne: campagneTotaal })
   } catch (e) {
     console.warn('[engelse-boeke] kon nie lees nie:', e.message)
     res.setHeader('Cache-Control', 'no-store')

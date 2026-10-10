@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { db } from '../firebase'
 import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { eboekTotale } from '../data/eboekTotale'
@@ -79,6 +79,16 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
      blad "Loading", nie "on the way" nie — daardie sin het gelieg terwyl die
      boeke nog net nie aangekom het nie. */
   const [gelaai, setGelaai] = useState(() => Object.keys(leesBoekeKas()).length > 0)
+  /* Het die gekasde eindpunt gefaal? Dan wag die teller nie meer op hom nie —
+     sien die stats-luisteraar hieronder. */
+  const eindpuntFaalRef = useRef(false)
+  const firestoreFaalRef = useRef(false)
+  const valTerugOpNul = () => { setLiveCount(c => c ?? 0); setLiveValue(v => v ?? 0) }
+  /* Kom die teller uit 'n EGTE bron (die eindpunt of Firestore self), of is dit
+     die nul-terugval? Net 'n egte getal mag die foon se kas oorskryf of 'n
+     gekasde getal op die skerm vervang — anders wis 'n slegte lyn 'n goeie
+     getal uit, die "aanvaar nooit 'n kleiner antwoord nie"-les. */
+  const [tellerEg, setTellerEg] = useState(false)
   const [rgCount,   setRgCount]   = useState(null)
   const [liveCount, setLiveCount] = useState(null)
   const [liveValue, setLiveValue] = useState(null)
@@ -102,6 +112,16 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
       .then(r => r.json())
       .then(j => {
         if (dood) return
+        /* Die teller kom saam — net as die lewendige luisteraar nog niks gesê
+           het nie (`?? `), sodat 'n vars getal nooit deur 'n gekasde een vervang
+           word nie. */
+        /* Dieselfde reël as die campaign-count-haal hieronder: 0 → die doel. */
+        if (j && typeof j.campagne === 'number') setRgCount(c => c ?? (j.campagne || CAMPAIGN.goal))
+        if (j && j.teller) {
+          setLiveCount(c => c ?? j.teller.count)
+          setLiveValue(v => v ?? j.teller.value)
+          setTellerEg(true)
+        } else valTerugOpNul()
         const lys = Array.isArray(j && j.boeke) ? j.boeke : []
         if (lys.length) {
           const o = Object.fromEntries(lys.map(b => [b.id, b]))
@@ -110,7 +130,14 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
         }
         setGelaai(true)
       })
-      .catch(() => {})
+      .catch(() => {
+        if (dood) return
+        /* Die eindpunt is weg: dan doen die blad presies wat dit altyd gedoen
+           het — 'n laer getal nou, en die lewendige luisteraar maak dit reg
+           sodra Firestore antwoord. */
+        eindpuntFaalRef.current = true
+        valTerugOpNul()
+      })
     return () => { dood = true }
   }, [])
 
@@ -118,7 +145,7 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
     const unsub = onSnapshot(collection(db, 'books'), snap => {
       /* 'n Leë antwoord uit die SDK se eie kas is nie "geen boeke nie" — dit is
          "nog niks gehoor nie". Aanvaar dit nooit bo wat ons reeds wys nie. */
-      if (snap.empty && snap.metadata.fromCache) return
+      if (snap.empty && snap.metadata?.fromCache) return
       const o = {}
       snap.docs.forEach(d => { o[d.id] = d.data() })
       setBookOverrides(o)
@@ -133,7 +160,7 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
     fetch('/api/campaign-count')
       .then(r => r.json())
       .then(d => setRgCount(d && d.total ? d.total : CAMPAIGN.goal))
-      .catch(() => setRgCount(CAMPAIGN.goal))
+      .catch(() => setRgCount(c => c ?? CAMPAIGN.goal))
   }, [])
 
   useEffect(() => {
@@ -146,12 +173,24 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   }, [])
 
   useEffect(() => {
+    /* 'n Leë antwoord uit die SDK se KAS is "nog niks gehoor nie", nie nul nie;
+       en 'n fout mag nie 'n 0 inskryf voordat /api/engelse-boeke die regte getal
+       kon bring nie. Val albei, wys dit dadelik 0 (soos altyd); andersins ná agt
+       sekondes, sodat die blad nooit vir altyd op "—" staan nie. */
+    let laat = null
     const unsub = onSnapshot(doc(db, 'stats', 'ebooks_given'), snap => {
+      if (!snap.exists() && snap.metadata?.fromCache) return
       const data = snap.exists() ? snap.data() : {}
       setLiveCount(data.count ?? 0)
       setLiveValue(data.value ?? 0)
-    }, () => { setLiveCount(0); setLiveValue(0) })
-    return unsub
+      setTellerEg(true)
+    }, () => {
+      firestoreFaalRef.current = true
+      /* Het die eindpunt ook gefaal, is daar niemand meer om op te wag nie. */
+      if (eindpuntFaalRef.current) valTerugOpNul()
+      else laat = setTimeout(valTerugOpNul, 8000)
+    })
+    return () => { unsub(); if (laat) clearTimeout(laat) }
   }, [])
 
   // ── Which uploaded books are English ──
@@ -176,8 +215,16 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   /* Die laaste goeie paar, dieselfde as die Afrikaanse blad s'n (`eboekTotale`
      in localStorage) — sodat 'n mens 'n getal sien in plaas van "—" terwyl die
      bronne nog laai. */
-  const wysBoeke  = totalBooks !== null ? totalBooks : gekasteTotale.b
-  const wysWaarde = totalValue !== null ? totalValue : gekasteTotale.w
+  /* Die laaste goeie paar op hierdie foon — dieselfde sleutel as Meer.jsx s'n,
+     sodat 'n tweede besoek die getal dadelik wys. */
+  useEffect(() => {
+    if (!tellerEg || totalBooks === null || totalValue === null) return
+    try { localStorage.setItem('eboekTotale', JSON.stringify({ b: totalBooks, w: totalValue })) } catch {}
+  }, [tellerEg, totalBooks, totalValue])
+  /* Is die getal nog net die terugval, wen die foon se gekasde getal. */
+  const kasWen = !tellerEg && gekasteTotale.b !== null
+  const wysBoeke  = kasWen ? gekasteTotale.b : (totalBooks !== null ? totalBooks : gekasteTotale.b)
+  const wysWaarde = kasWen ? gekasteTotale.w : (totalValue !== null ? totalValue : gekasteTotale.w)
 
   /* ── Deel ──
      Dewald, 10 Oktober 2026: 'n gedeelde Engelse boek gaan na /english. Die ou

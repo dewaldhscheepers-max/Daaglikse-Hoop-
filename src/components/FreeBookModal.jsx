@@ -84,13 +84,15 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
 
   const alreadyClaimed = localStorage.getItem(storageKey) === '1'
   const isStandalone   = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-  /* Die Engelse blad vra NOOIT eers om te installeer nie. Dewald, 10 Oktober
-     2026: *"wanneer iemand op die Engelse blad eboek aflaai moet dit kan
-     aflaai... Moenie vir hulle vra om eers app te install nie."* 'n Engelse
-     besoeker het vir 'n BOEK gekom, en die app is Afrikaans — 'n installasie-
-     muur voor die boek is net 'n rede om weg te gaan. Die Afrikaanse pad bly
-     presies soos dit was. */
-  const skipInstall    = taal === 'en' || isInstalled || isStandalone || alreadyClaimed
+  /* ── Niemand word eers gevra om te installeer nie ──
+     Dit was 'n stap VOOR die e-posvorm: "Installeer eers die app". Eers het die
+     Engelse blad dit verloor (Dewald: *"Moenie vir hulle vra om eers app te
+     install nie"*), en toe die Afrikaanse een: *"everyone can download it. Only
+     remove that popup... i still need them to give their email... dont change
+     anything else."* Die e-posvorm bly presies soos dit was. Die
+     installeer-stap se kode hieronder bly staan maar word nie meer bereik nie;
+     moet dit nie weer aanskakel sonder dat Dewald dit vra nie. */
+  const skipInstall    = true
 
   const [step,        setStep]        = useState(alreadyClaimed && book.pdfUrl ? 'success' : skipInstall ? 'form' : 'install')
   const [installDone, setInstallDone] = useState(false)
