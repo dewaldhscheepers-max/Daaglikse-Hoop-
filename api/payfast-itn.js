@@ -73,11 +73,11 @@ async function handleSubscriptionItn(data, projectId) {
     const subEmail = (data.email_address || '').toLowerCase().trim()
     if (subEmail) {
       const emailId = Buffer.from(subEmail).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-      fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
+      await fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
         email:   { stringValue: subEmail },
         source:  { stringValue: 'subscription' },
         addedAt: { timestampValue: new Date().toISOString() },
-      }).catch(() => {})
+      })
     }
     // Send thank you email for new successful subscriptions
     if (data.payment_status === 'COMPLETE' && subEmail) {
@@ -123,6 +123,23 @@ async function handleSubscriptionItn(data, projectId) {
   }
 }
 
+/* ── Die werk gebeur VOOR die antwoord, nie daarna nie ──
+ *
+ * Dit het `res.status(200).send('OK')` heel eerste gedoen "sodat PayFast nie
+ * wag nie", en DAARNA die dankie-e-pos gestuur. Op Vercel word 'n funksie
+ * gevries sodra sy antwoord uit is: wat daarna kom, loop dalk nooit, of eers
+ * wanneer die volgende versoek die funksie wakker maak. Dewald, 10 Oktober
+ * 2026, ná 'n Engelse skenking: *"I did not receive... an email to say thank
+ * you."* Die kode het die regte e-pos gebou; dit het net nie altyd uitgekom
+ * nie — vir albei tale.
+ *
+ * Nou word alles eers gedoen en dan geantwoord. PayFast wag gemaklik 'n paar
+ * sekondes; `TYDGRENS_MS` sorg dat 'n hangende diens hom nooit laat wag tot hy
+ * weer probeer nie (dan sou die dankie twee keer kom). Ons antwoord ALTYD 200,
+ * ook as iets binne misluk: 'n fout hier is ons s'n, nie PayFast s'n nie, en 'n
+ * herhaalde ITN sou net weer misluk en 'n tweede e-pos waag. */
+const TYDGRENS_MS = 8000
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed')
 
@@ -132,9 +149,18 @@ module.exports = async function handler(req, res) {
     data = Object.fromEntries(new URLSearchParams(data))
   }
 
-  // Respond 200 immediately so PayFast doesn't time out waiting for us
+  try {
+    await Promise.race([
+      verwerkItn(data),
+      new Promise(los => setTimeout(los, TYDGRENS_MS)),
+    ])
+  } catch (e) {
+    console.error('payfast-itn verwerk:', e && e.message)
+  }
   res.status(200).send('OK')
+}
 
+async function verwerkItn(data) {
   if (!data) return
 
   // ── Subscription ITN (has a recurring token, no bookIds) ──────────────────
@@ -156,11 +182,11 @@ module.exports = async function handler(req, res) {
     try { token = await getAccessToken() } catch {}
     if (token) {
       const emailId = Buffer.from(email.toLowerCase()).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-      fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
+      await fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
         email:   { stringValue: email.toLowerCase() },
         source:  { stringValue: 'donation' },
         addedAt: { timestampValue: new Date().toISOString() },
-      }).catch(() => {})
+      })
     }
     // Send thank-you email for once-off donation
     const donationHtml = `
@@ -184,8 +210,11 @@ module.exports = async function handler(req, res) {
         </div>
       </div>
     `
+    /* Die uitslag word aangeteken, soos `purchases` dit vir 'n aankoop doen —
+       anders is "ek het geen dankie gekry nie" 'n raaiskoot. */
+    let gestuur = false, antwoord = ''
     try {
-      await fetch('https://api.resend.com/emails', {
+      const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -196,8 +225,23 @@ module.exports = async function handler(req, res) {
           html:     isEngels ? engels.skenkDankie().html : donationHtml,
         }),
       })
+      gestuur = r.ok
+      antwoord = await r.text().catch(() => '')
+      if (!r.ok) console.error('Donation thank-you rejected:', antwoord)
     } catch (e) {
+      antwoord = e.message
       console.error('Donation thank-you email failed:', e.message)
+    }
+    if (token) {
+      await fsWrite(projectId, token, `skenkings/${Date.now()}_${String(data.pf_payment_id || 'x').replace(/\W/g, '')}`, {
+        email:          { stringValue: email.toLowerCase() },
+        taal:           { stringValue: isEngels ? 'en' : 'af' },
+        amount:         { stringValue: data.amount_gross || '' },
+        paymentId:      { stringValue: data.pf_payment_id || '' },
+        emailSent:      { booleanValue: gestuur },
+        resendResponse: { stringValue: String(antwoord).slice(0, 500) },
+        timestamp:      { timestampValue: new Date().toISOString() },
+      })
     }
     return
   }
@@ -234,11 +278,11 @@ module.exports = async function handler(req, res) {
   // ── Save buyer email to emailList ──
   if (token && email) {
     const emailId = Buffer.from(email.toLowerCase()).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-    fsWrite(projectId, token, `emailList/${emailId}`, {
+    await fsWrite(projectId, token, `emailList/${emailId}`, {
       email:   { stringValue: email.toLowerCase() },
       source:  { stringValue: 'purchase' },
       addedAt: { timestampValue: new Date().toISOString() },
-    }).catch(() => {})
+    })
   }
 
   // ── Log purchase to Firestore so admin can see it regardless of email outcome ──

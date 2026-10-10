@@ -2460,6 +2460,15 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   terugkeer-adres, sien `src/utils/payfast.js`). `payfast-itn.js` stuur dan die
   Engelse dankie/welkom en skryf na `emailListEn`. App.jsx wys die Engelse
   dankie-opspringer en maak /english weer oop.
+* **`payfast-itn.js` doen sy werk VOOR hy antwoord.** Dit het eers
+  `res.send('OK')` gedoen en DAARNA die dankie-e-pos gestuur — en Vercel vries
+  'n funksie sodra die antwoord uit is. Die e-pos het dus soms nooit uitgegaan
+  nie (Dewald, ná 'n Engelse skenking: *"I did not receive... an email to say
+  thank you"*), vir albei tale. Nou: werk eers, dan 200, met `TYDGRENS_MS` (8s)
+  sodat PayFast nooit so lank wag dat hy weer probeer en 'n tweede dankie
+  uitlok nie. 'n Eenmalige skenking skryf nou ook 'n rekord na `skenkings/`
+  (`emailSent`, `resendResponse`), soos `purchases/` dit vir 'n aankoop doen.
+  Toets: `kykItnVolgorde.cjs` in die scratchpad — die ou kode druip daarop.
 * **Waarom 'n aparte versameling en nie 'n merkie nie:** die Afrikaanse
   nuusbrief (`send-bulk-email`, die werkry) lees net `emailList`. Apart, kan 'n
   Engelse mens NOOIT per ongeluk 'n Afrikaanse blas kry nie — niemand hoef te
