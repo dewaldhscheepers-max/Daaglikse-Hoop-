@@ -8,7 +8,20 @@ import { boekSkakel } from '../data/boekSkakel'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
+import LuisterSpeler from '../components/LuisterSpeler'
 import './EngelseBoeke.css'
+
+/* Die onttrekte luister-teks staan as 'n JSON-string op die boek
+   (`luisterTeks`), en is net gereed wanneer `luisterStatus === 'gereed'`. Gee
+   die afdelings, of `null` — dan verskyn die ▶ LISTEN-knoppie glad nie (geen
+   teks, geen knoppie). */
+function luisterAfdelings(boek) {
+  if (!boek || boek.luisterStatus !== 'gereed' || !boek.luisterTeks) return null
+  try {
+    const a = JSON.parse(boek.luisterTeks)
+    return Array.isArray(a) && a.length ? a : null
+  } catch { return null }
+}
 
 /* ── DIE ENGELSE E-BOEKBLAD ──  /english
  *
@@ -53,6 +66,7 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   const [activeBook, setActiveBook] = useState(null)
   const [claimedMap, setClaimedMap] = useState({})
   const [deelKopie,  setDeelKopie]  = useState(false)
+  const [luisterBoek, setLuisterBoek] = useState(null)   /* watter boek se speler oop is */
 
   // ── Books (live) ──
   useEffect(() => {
@@ -196,33 +210,49 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           </p>
         ) : (
           <div className="en-book-list">
-            {boeke.map(b => (
-              <div key={b.id} className="en-book">
-                <div className="en-cover" style={{ background: b.coverUrl ? 'transparent' : (b.color || '#EDE8F8') }}>
-                  {b.coverUrl
-                    ? <img src={b.coverUrl} className="en-cover-img" alt={b.title} />
-                    : <span className="en-emoji">{b.emoji || '📚'}</span>}
-                  <span className="en-badge">FREE</span>
-                </div>
-                <div className="en-info">
-                  <h4 className="en-title">{b.title}</h4>
-                  {b.desc && <p className="en-desc">{b.desc}</p>}
-                  <div className="en-foot">
-                    {claimedMap[b.id] && b.pdfUrl
-                      ? <a href={b.pdfUrl} target="_blank" rel="noopener noreferrer" className="en-read">📖 Read free</a>
-                      : <button className="en-read" onClick={() => setActiveBook(b)}>📖 Read free</button>}
-                    <button className="en-deel" onClick={() => deelBoek(b)} aria-label={`Share ${b.title}`}>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                        <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
-                      </svg>
-                      Share
-                    </button>
+            {boeke.map(b => {
+              const afd = luisterAfdelings(b)
+              const luisterOop = luisterBoek === b.id
+              return (
+              <div key={b.id} className="en-book-wrap">
+                <div className="en-book">
+                  <div className="en-cover" style={{ background: b.coverUrl ? 'transparent' : (b.color || '#EDE8F8') }}>
+                    {b.coverUrl
+                      ? <img src={b.coverUrl} className="en-cover-img" alt={b.title} />
+                      : <span className="en-emoji">{b.emoji || '📚'}</span>}
+                    <span className="en-badge">{afd ? 'AUDIO' : 'FREE'}</span>
+                  </div>
+                  <div className="en-info">
+                    <h4 className="en-title">{b.title}</h4>
+                    {b.desc && <p className="en-desc">{b.desc}</p>}
+                    <div className="en-foot">
+                      {claimedMap[b.id] && b.pdfUrl
+                        ? <a href={b.pdfUrl} target="_blank" rel="noopener noreferrer" className="en-read">📖 Read free</a>
+                        : <button className="en-read" onClick={() => setActiveBook(b)}>📖 Read free</button>}
+                      <button className="en-deel" onClick={() => deelBoek(b)} aria-label={`Share ${b.title}`}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                          <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" /><line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+                        </svg>
+                        Share
+                      </button>
+                    </div>
+                    {/* ▶ LISTEN — net wanneer die teks onttrek is. Geen teks,
+                        geen knoppie (dieselfde reël as oral). */}
+                    {afd && (
+                      <button className={`en-luister${luisterOop ? ' oop' : ''}`}
+                              onClick={() => setLuisterBoek(luisterOop ? null : b.id)}>
+                        {luisterOop ? '✕ Close listening' : '🎧 Listen free'}
+                      </button>
+                    )}
                   </div>
                 </div>
+                {afd && luisterOop && (
+                  <LuisterSpeler afdelings={afd} titel={b.title} bookId={b.id} />
+                )}
               </div>
-            ))}
+            )})}
           </div>
         )}
 

@@ -299,3 +299,25 @@
   margin: 0;
   font-style: italic;
 }
+
+/* ── ▶ LISTEN ──
+   'n Volbreedte knoppie onder die Read/Share-ry, en die speler vou onder die
+   hele kaart oop. Android: geen transform op :active nie — net kleur. */
+.en-book-wrap { display: flex; flex-direction: column; }
+.en-luister {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: #fff;
+  color: var(--purple-dark);
+  border: 1.5px solid #D9D1EC;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.en-luister:active { background: #F3EFFA; border-color: #BFB2E0; }
+.en-luister.oop { background: #201A2E; color: #fff; border-color: #201A2E; }

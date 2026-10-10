@@ -59,6 +59,9 @@ node src/data/prentPad.toets.mjs              # waar 'n prent gehaal word om te 
 node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 toetse
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
+node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
+node src/data/boekTeks.toets.mjs              # PDF-teks skoonmaak + hoofstuk-split, 27 toetse
+node src/data/luisterStukke.toets.mjs         # TTS-stukke + stemkeuse, 18 toetse
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
@@ -2407,6 +2410,84 @@ Wat NIE mag terugkom nie: 'n geldknoppie tussen die stories. "Stuur vir Dewald
 'n dankie" het onder elke antwoord gestaan; noudat die ry onder ELKE plasing
 sit, ook onder 'n rou storie, lees dit soos 'n tolhek voor iemand se seer. Die
 versoek staan heel onder in dieselfde `DonationCard` as oral elders.
+
+## Die Engelse e-boekblad (/english)
+
+Dewald, 9–10 Oktober 2026: 'n aparte Engelse ingang wat hy met Engelssprekendes
+kan deel sonder dat hulle eers deur die Afrikaanse app hoef te gaan. Volledig in
+`src/screens/EngelseBoeke.jsx`.
+
+**Dit skep NIKS — dieselfde besluit as Tyd met God s'n.** Die Engelse boeke
+leef in dieselfde `books`-versameling; hulle dra net 'n `taal`-veld. Die teller
+is dieselfde `stats/ebooks_given` en dieselfde `eboekTotale()`-som as die
+Afrikaanse blad, en 'n Engelse READ loop deur dieselfde
+`/api/free-book-download`, wat die teller optel. **Daar is GEEN aparte Engelse
+teller nie** — die twee getalle bo-aan /english is woord vir woord die som van
+die Afrikaanse blad. Moet dit nooit 'n eie telling gee nie.
+
+**Die verstek is Afrikaans** (`isEngels()` in `src/data/engelsBoeke.js`, suiwer
++ toetse). 'n Ontbrekende `taal`-veld lees as Afrikaans, dus bly elke bestaande
+boek presies waar hy is. Die Afrikaanse lys in `Meer.jsx` sluit Engelse boeke
+UIT (`verdeelPerTaal`), anders wys 'n boek op twee blaaie. Die admin merk 'n
+boek met die "🌍 Engelse boek"-merkie by die oplaai, of die AF↔EN-knoppie per
+opgelaaide boek.
+
+**`/english` is 'n volskerm-oorname** (soos HoopOntvang), met 'n DEELBARE adres.
+Anders as /boek en /hoop word die pad NIE uitgevee nie — 'n herlaai moet die
+mens op die blad hou. Die kaart op die e-boekblad waai `open-engels`; App.jsx
+stoot die pad `/english` by, en `popstate` maak die oorname toe. Die "Go to the
+app"-knoppies gaan na `/go`.
+
+**Dieselfde `DonationCard` en `FreeBookModal`, met 'n `taal`-prop.** Geen tweede
+donasie- of e-posstelsel nie. 'n Kort persoonlike boodskap van Dewald met sy
+foto (`public/beelde/dewald-en.webp`) staan VOOR die donasie-kaart — 'n gesig
+voor enige vraag.
+
+### LUISTER — PDF-teks word OUTOMATIES onttrek
+
+Dewald wou nie elke boek se teks met die hand plak nie. Laai die PDF op, en die
+stelsel trek die teks self uit.
+
+* **`api/boek-teks-onttrek.mjs`** haal die PDF, `pdf-parse` trek die teks, en die
+  **suiwer** pyplyn (`verwerkBoekTeks` in `src/data/boekTeks.js`) maak dit skoon
+  en split dit in hoofstukke. Dit stoor `luisterTeks` (JSON-string) +
+  `luisterStatus` op die boek. `{ bookId }` doen een; `{ backfill:true }` loop
+  oor alle Engelse boeke binne 'n tyd-begroting en gee `oor` terug (happe, soos
+  `reels-voeg-by`). `maxDuration 60`, `memory 1024` in `vercel.json`.
+* **Die onttrekking loop EEN keer op die bediener, nie op elke foon nie** — so
+  kry elke toestel dieselfde skoon teks, en die PDF-biblioteek bly op die
+  bediener. Die teks word as 'n JSON-STRING gestoor (nie 'n Firestore-skikking),
+  want 'n string kan nie stil 'n veld verloor nie en bly onder die 1 MB-perk
+  (`MAKS_TOTAAL`).
+* **Hoofstuk-split is 'n HEURISTIEK.** Duidelike "Chapter N"/"Day N"-koppe split
+  skoon; sonder koppe val dit terug op gelyke stukke. `skoonTeks` isoleer 'n kop
+  al het die PDF geen leë reël gelos nie — anders word die kop en die eerste sin
+  een paragraaf en die grens is weg (dit was die eerste egte fout hier).
+* **'n Prent-PDF sonder tekslaag** → `genoegTeks()` vang dit, `luisterStatus`
+  word `geen-teks`, en die admin sien 'n waarskuwing. Die ▶ LISTEN-knoppie
+  verskyn dan glad nie — geen teks, geen knoppie.
+
+**Die speler** (`src/components/LuisterSpeler.jsx`) gebruik die blaaier se
+`speechSynthesis`. Die suiwer helfte staan in `src/data/luisterStukke.js`
+(stukke + stemkeuse, met toetse). Drie dinge wat 'n mens nie uit die kode aflei
+nie:
+
+* **Stukke, nie 'n hele hoofstuk nie.** 'n Blaaier kap 'n lang uiting af (op
+  party toestelle ná ~15s). Ons gee dit sin vir sin (`maakStukke`, ≤220 kar) en
+  ry hulle agtermekaar.
+* **'n Volgnommer (`seqRef`) is verpligtend.** `speechSynthesis.cancel()` laat
+  die vorige uiting se `onend` ook vuur; sonder die wag sou 'n pouse of 'n
+  hoofstuk-sprong twee stemme aanmekaar ja. 'n Terugroep wat nie meer die huidige
+  nommer dra nie, doen niks.
+* **Pouse KANSELLEER en onthou die stuk** — `pause()` is onbetroubaar op 'n foon.
+  "Speel weer" begin die huidige stuk oor; omdat 'n stuk ~een sin is, hoor 'n
+  mens skaars die herhaling. Die posisie (hoofstuk + stuk) lê in localStorage per
+  boek en hervat daar.
+
+**Die stem verskil per toestel** — dit is browser-TTS se bekende prys, en dit is
+die MVP. Dieselfde onttrekte teks kan later AI-stem-oudio voed. Dit kan nie in
+'n houer getoets word nie (geen TTS-stemme in 'n kaal Chromium); toets die klank
+self op 'n regte foon.
 
 ## E-boeke: 'n boek skrap
 
