@@ -410,10 +410,12 @@ export default function Admin({ onClose }) {
       })
       const j = await r.json().catch(() => ({}))
       let boodskap
-      if (j.ok) boodskap = `✅ ${j.stukke} hoofstuk${j.stukke === 1 ? '' : 'ke'} gereed`
-      else if (j.rede === 'geen-teks') boodskap = '⚠️ Geen teks in die PDF — gee die teks met die hand'
+      if (j.ok) boodskap = `✅ ${j.stukke} hoofstuk${j.stukke === 1 ? '' : 'ke'} gereed — die LISTEN-knoppie wys nou op /english`
+      else if (j.rede === 'geen-teks') boodskap = '⚠️ Geen teks in die PDF (dit is waarskynlik \'n geskandeerde prent) — Read werk, Listen nie'
       else if (j.rede === 'geen-pdf') boodskap = '⚠️ Laai eers die PDF op'
-      else boodskap = '⚠️ Kon nie teks uithaal nie'
+      else if (j.rede === 'pdf-onbereikbaar') boodskap = `⚠️ Kon nie die PDF aflaai nie${j.fout ? ' (' + j.fout + ')' : ''} — laai die PDF weer op`
+      else if (j.fout && !j.rede) boodskap = '⚠️ ' + j.fout       /* bv. "Nie n Engelse boek nie" */
+      else boodskap = `⚠️ Kon nie teks uithaal nie${j.fout ? ': ' + j.fout : ''}`
       setTeksBoodskap(m => ({ ...m, [bookId]: boodskap }))
       vergeetBoeke()
     } catch {
@@ -426,24 +428,43 @@ export default function Admin({ onClose }) {
     setBackfillBesig(true)
     setBackfillUitslag('Besig met Engelse boeke…')
     try {
-      let oor = Infinity, rondtes = 0, totaalGedoen = 0
-      /* Die bediener werk in happe (tyd-begroting). Roep weer tot niks oorbly,
-         maar hou op as dit nie meer vorder nie — dieselfde reël as reels-voeg-by. */
-      while (oor > 0 && rondtes < 20) {
+      /* Die bediener werk in happe (tyd-begroting) en sê hoeveel oorbly. Roep
+         weer — maar NET solank 'n hap iets laat SLAAG het. Dit was die hang: 'n
+         boek wat misluk, het in die volgende hap weer gekom, en die lus het
+         twintig keer dieselfde mislukking gestuur terwyl die knoppie "Besig…"
+         gesê het. Een mislukking word nou een keer probeer en gerapporteer. */
+      let rondtes = 0, totaalEngels = 0, sonderPdf = 0
+      const reg = [], geenTeks = [], fout = []
+      while (rondtes < 20) {
         const r = await fetch('/api/boek-teks-onttrek', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
           body: JSON.stringify({ backfill: true }),
         })
         const j = await r.json().catch(() => ({}))
-        if (j.fout) { setBackfillUitslag('⚠️ ' + j.fout); break }
-        totaalGedoen += (j.gedoen || []).length
-        if ((j.gedoen || []).length === 0) { oor = j.oor || 0; break }
-        oor = j.oor || 0
+        if (!r.ok || j.fout) { fout.push(j.fout || `HTTP ${r.status}`); break }
+        totaalEngels = j.totaalEngels || 0
+        sonderPdf = j.sonderPdf || 0
+        const hap = j.gedoen || []
+        for (const g of hap) {
+          if (g.ok) reg.push(g.id)
+          else if (g.rede === 'geen-teks') geenTeks.push(g.id)
+          else if (!fout.includes(g.id)) fout.push(g.id)
+        }
         rondtes++
-        setBackfillUitslag(`Besig… ${totaalGedoen} gedoen, ${oor} oor`)
+        setBackfillUitslag(`Besig… ${reg.length} gereed, ${j.oor || 0} oor`)
+        if (!(j.oor > 0) || !hap.some(g => g.ok)) break
       }
-      setBackfillUitslag(`✅ Klaar: ${totaalGedoen} boek(e) verwerk${oor > 0 ? `, ${oor} oor` : ''}`)
+      if (totaalEngels === 0 && !fout.length) {
+        setBackfillUitslag('⚠️ Geen Engelse boeke gevind nie. Merk die boeke eers as 🌍 Engels (die AF↔EN-knoppie, of die merkie by "Voeg nuwe boek by").')
+      } else {
+        const dele = [`✅ ${reg.length} boek(e) gereed vir LISTEN`]
+        if (geenTeks.length) dele.push(`${geenTeks.length} sonder teks in die PDF`)
+        if (fout.length) dele.push(`${fout.length} het misluk — sien die rooi reël by die boek`)
+        if (sonderPdf) dele.push(`${sonderPdf} het nog geen PDF nie`)
+        if (!reg.length && !geenTeks.length && !fout.length) dele[0] = '✅ Alle Engelse boeke is reeds gedoen'
+        setBackfillUitslag(dele.join(' · '))
+      }
       vergeetBoeke()
     } catch {
       setBackfillUitslag('⚠️ Kon nie die backfill voltooi nie')
@@ -1279,8 +1300,10 @@ export default function Admin({ onClose }) {
                             || (override.luisterStatus === 'gereed'
                                   ? `🎧 Luister gereed${override.luisterStukke ? ` (${override.luisterStukke} hoofstukke)` : ''}`
                                   : override.luisterStatus === 'geen-teks'
-                                    ? '⚠️ Geen teks in die PDF — gee die teks met die hand'
-                                    : '')}
+                                    ? '⚠️ Geen teks in die PDF (geskandeerde prent?) — Read werk, Listen nie'
+                                    : override.luisterStatus === 'fout'
+                                      ? `⚠️ Teks kon nie uitgehaal word nie${override.luisterFout ? ' (' + override.luisterFout + ')' : ''} — druk 🎧 Teks om weer te probeer`
+                                      : '')}
                         </div>
                       )}
                     </div>

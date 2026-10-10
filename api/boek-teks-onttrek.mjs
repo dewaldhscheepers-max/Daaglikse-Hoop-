@@ -33,6 +33,19 @@
 import crypto from 'node:crypto'
 import { verwerkBoekTeks } from '../src/data/boekTeks.js'
 import { isEngels } from '../src/data/engelsBoeke.js'
+/* ── Die pdfjs-WERKER met 'n VASTE invoer — dit is die hele regstelling ──
+ *
+ * pdfjs laai sy werker normaalweg DINAMIES (`import(workerSrc)`). Vercel se
+ * lêer-spoorder (@vercel/nft) sien so 'n invoer nie, dus is `pdf.worker.mjs`
+ * nooit saam ontplooi nie: elke PDF het op die lewende werf met 'pdf-fout'
+ * misluk, terwyl dit plaaslik gewerk het — want plaaslik IS die lêer daar.
+ *
+ * Hierdie vaste invoer laat die spoorder die lêer sien, en die werker sit
+ * homself op `globalThis.pdfjsWorker`; pdfjs gebruik dit dan in-proses en laai
+ * niks meer nie. Moenie dit verwyder nie. `kykNftTeks.mjs` in die scratchpad
+ * kopieer NET die gespoorde lêers na 'n leë gids en loop die eindpunt daar —
+ * die enigste eerlike toets, want dit is wat Vercel doen. */
+import 'pdfjs-dist/legacy/build/pdf.worker.mjs'
 import { PDFParse } from 'pdf-parse'
 import geheim from './_geheim.js'
 const { wieMag } = geheim
@@ -127,6 +140,21 @@ async function skryfBoek(token, id, velde) {
 /* Haal die PDF, trek die teks, en stoor die afdelings (of die geen-teks-vlag).
    Gee 'n kort opsomming terug. Gooi NOOIT — 'n enkele stukkende PDF mag nie 'n
    backfill-lopie omgooi nie. */
+/* 'n Mislukking word OP DIE BOEK aangeteken, met die rede. Dit was die fout wat
+   "niks gebeur nie" gemaak het: 'n boek wat misluk het, het geen status gekry
+   nie, die admin het niks gewys nie, en die backfill het dieselfde boek
+   telkens weer probeer. 'n 'fout' word steeds by die volgende druk weer probeer
+   — net nie eindeloos in een lopie nie. */
+async function merkFout(token, id, rede, detail) {
+  try {
+    await skryfBoek(token, id, {
+      luisterStatus: { stringValue: 'fout' },
+      luisterFout:   { stringValue: `${rede}${detail ? ': ' + String(detail).slice(0, 200) : ''}` },
+      luisterTyd:    { timestampValue: new Date().toISOString() },
+    })
+  } catch { /* kan ons nie eens dit skryf nie, sê die antwoord dit steeds */ }
+}
+
 async function doenBoek(token, boek) {
   if (!boek || !boek.pdfUrl) {
     return { id: boek?.id, ok: false, rede: 'geen-pdf' }
@@ -134,31 +162,40 @@ async function doenBoek(token, boek) {
   let rou = ''
   try {
     const pr = await fetch(boek.pdfUrl)
-    if (!pr.ok) return { id: boek.id, ok: false, rede: 'pdf-onbereikbaar' }
+    if (!pr.ok) {
+      await merkFout(token, boek.id, 'pdf-onbereikbaar', `HTTP ${pr.status}`)
+      return { id: boek.id, ok: false, rede: 'pdf-onbereikbaar', fout: `HTTP ${pr.status}` }
+    }
     const buf = Buffer.from(await pr.arrayBuffer())
     const parser = new PDFParse({ data: new Uint8Array(buf) })
-    const res = await parser.getText()
+    /* `pageJoiner: ''` — anders sit pdf-parse "-- 3 of 18 --" tussen elke bladsy,
+       en die stem lees dit hardop. skoonTeks vang dit ook, vir die veiligheid. */
+    const res = await parser.getText({ pageJoiner: '' })
     rou = res?.text || ''
     try { await parser.destroy?.() } catch {}
   } catch (e) {
-    return { id: boek.id, ok: false, rede: 'pdf-fout' }
+    await merkFout(token, boek.id, 'pdf-fout', e && e.message)
+    return { id: boek.id, ok: false, rede: 'pdf-fout', fout: e && e.message ? String(e.message).slice(0, 200) : '' }
   }
 
   const r = verwerkBoekTeks(rou, { titel: boek.title })
-  if (!r.ok) {
+  try {
+    if (!r.ok) {
+      await skryfBoek(token, boek.id, {
+        luisterStatus: { stringValue: 'geen-teks' },
+        luisterTyd:    { timestampValue: new Date().toISOString() },
+      })
+      return { id: boek.id, ok: false, rede: 'geen-teks' }
+    }
     await skryfBoek(token, boek.id, {
-      luisterStatus: { stringValue: 'geen-teks' },
+      luisterStatus: { stringValue: 'gereed' },
+      luisterStukke: { integerValue: String(r.afdelings.length) },
+      luisterTeks:   { stringValue: JSON.stringify(r.afdelings) },
       luisterTyd:    { timestampValue: new Date().toISOString() },
     })
-    return { id: boek.id, ok: false, rede: 'geen-teks' }
+  } catch (e) {
+    return { id: boek.id, ok: false, rede: 'skryf-fout', fout: e && e.message ? String(e.message).slice(0, 200) : '' }
   }
-
-  await skryfBoek(token, boek.id, {
-    luisterStatus: { stringValue: 'gereed' },
-    luisterStukke: { integerValue: String(r.afdelings.length) },
-    luisterTeks:   { stringValue: JSON.stringify(r.afdelings) },
-    luisterTyd:    { timestampValue: new Date().toISOString() },
-  })
   return { id: boek.id, ok: true, stukke: r.afdelings.length }
 }
 

@@ -92,5 +92,26 @@ console.log('\n── verwerkBoekTeks: die hele pyplyn ──')
   is('rede is geen-teks', sleg.rede, 'geen-teks')
 }
 
+console.log('\n── Wat n EGTE boek doen (uit n Chrome-PDF gemeet) ──')
+{
+  /* pdf-parse se bladsymerker word nie voorgelees nie. */
+  is('bladsymerker uit', skoonTeks('Body one\n-- 3 of 18 --\nBody two'), 'Body one Body two')
+  waar('ook "van"', !skoonTeks('A\n-- 2 van 9 --\nB').includes('--'))
+
+  const lyf = 'Readable sentence for the chapter body. '.repeat(30)
+  const boek = [
+    'RESTLESS THOUGHTS', 'Dewald Scheepers', 'Copyright © 2026 Dewald Scheepers. All rights reserved.',
+    'Contents', 'Chapter 1: Rest', 'Chapter 2: Captive',
+    'Chapter 1: Rest', lyf, 'Chapter 2: Captive', lyf,
+  ].join('\n\n')
+  const s2 = splitHoofstukke(boek, { titel: 'Restless' })
+  is('inhoudsopgawe + voorwerk weg: net die twee egte hoofstukke', s2.map(a => a.titel), ['Chapter 1: Rest', 'Chapter 2: Captive'])
+  waar('elke hoofstuk dra sy volle lyf', s2.every(a => a.teks.length > 500))
+
+  /* 'n Kort, EGTE inleiding (sonder kopiereg of inhoud) bly staan. */
+  const s3 = splitHoofstukke('Welcome, friend. This book is for you.\n\nChapter 1\n\n' + lyf, { titel: 'B' })
+  is('egte kort inleiding bly', s3.length, 2)
+}
+
 console.log(`\n${reg} reg, ${val} vals\n`)
 if (val) process.exit(1)

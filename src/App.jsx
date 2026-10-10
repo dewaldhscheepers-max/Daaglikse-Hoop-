@@ -5,6 +5,7 @@ import BidNou from './screens/BidNou'
 import Sorg from './screens/Sorg'
 import Meer from './screens/Meer'
 import EngelseBoeke from './screens/EngelseBoeke'
+import { isEngels } from './data/engelsBoeke'
 import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
@@ -1247,6 +1248,15 @@ export default function App() {
       window.history.replaceState({}, '', '/')
       setTab('meer')
       setTargetBookId(boek)
+      /* 'n ENGELSE boek staan nie op die Afrikaanse e-boekblad nie (hy word daar
+         weggesteek), dus sou 'n ou /boek/<id>-skakel na 'n Engelse boek op 'n
+         blad land waar die boek nie is nie. Maak dan die Engelse blad oop. */
+      getDoc(doc(db, 'books', boek)).then(snap => {
+        if (snap.exists() && isEngels(snap.data())) {
+          window.history.replaceState({}, '', '/english')
+          setEngelsOop(true)
+        }
+      }).catch(() => {})
     } catch {}
   }, [])
 

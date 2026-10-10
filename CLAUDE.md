@@ -2489,6 +2489,16 @@ stelsel trek die teks self uit.
   skoon; sonder koppe val dit terug op gelyke stukke. `skoonTeks` isoleer 'n kop
   al het die PDF geen leë reël gelos nie — anders word die kop en die eerste sin
   een paragraaf en die grens is weg (dit was die eerste egte fout hier).
+* **Die pdfjs-WERKER moet staties ingevoer word** (`import
+  'pdfjs-dist/legacy/build/pdf.worker.mjs'` bo-aan die eindpunt). pdfjs laai
+  hom met 'n DINAMIESE `import()`, en Vercel se lêerspoorder (nft) volg dit
+  nie — die lêer was in produksie eenvoudig nie daar nie, elke onttrekking het
+  stil misluk, en plaaslik het alles gewerk omdat `node_modules` volledig is.
+  `pdfjs-dist` is presies vasgepen op die weergawe wat `pdf-parse` self
+  gebruik. Toets met `kykNftTeks.mjs` in die scratchpad: dit kopieer NET die
+  gespoorde lêers na 'n leë gids en loop die egte eindpunt daar.
+* **'n Mislukking word GESKRYF** (`luisterStatus: 'fout'` + `luisterFout`), en
+  die admin sê dit. "Daar gebeur niks" was presies die klag.
 * **'n Prent-PDF sonder tekslaag** → `genoegTeks()` vang dit, `luisterStatus`
   word `geen-teks`, en die admin sien 'n waarskuwing. Die ▶ LISTEN-knoppie
   verskyn dan glad nie — geen teks, geen knoppie.
@@ -2505,6 +2515,13 @@ nie:
   die vorige uiting se `onend` ook vuur; sonder die wag sou 'n pouse of 'n
   hoofstuk-sprong twee stemme aanmekaar ja. 'n Terugroep wat nie meer die huidige
   nommer dra nie, doen niks.
+* **Cancel NET wanneer 'n mens onderbreek.** Die ketting van stuk na stuk
+  roep nooit `cancel()` nie; 'n hoofstuk-sprong of spoed wel, en spreek dan
+  eers ná 80ms — WebKit sluk 'n `speak()` direk ná `cancel()`, en dan stop die
+  boek ná een sin. Die ▶-druk spreek SINKROON (iOS wil die eerste uiting binne
+  die tik hê). Die uiting lê in `uitingRef`: Chrome vee 'n uiting uit waarna
+  niemand verwys nie, en dan vuur `onend` nooit. `kykLuisterSpeler.mjs` in die
+  scratchpad boots daardie gedrag na; die ou speler druip daarop.
 * **Pouse KANSELLEER en onthou die stuk** — `pause()` is onbetroubaar op 'n foon.
   "Speel weer" begin die huidige stuk oor; omdat 'n stuk ~een sin is, hoor 'n
   mens skaars die herhaling. Die posisie (hoofstuk + stuk) lê in localStorage per

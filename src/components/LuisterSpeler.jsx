@@ -61,6 +61,7 @@ export default function LuisterSpeler({ afdelings, titel, bookId }) {
   const posRef  = useRef({ sek: beginPos.sek, stuk: beginPos.stuk })
   const spoedRef = useRef(1)
   const speelRef = useRef(false)
+  const uitingRef = useRef(null)
 
   /* ── Kies 'n Engelse stem ── */
   useEffect(() => {
@@ -91,12 +92,20 @@ export default function LuisterSpeler({ afdelings, titel, bookId }) {
     bewaarPos(s, t)
   }
 
-  function spreek(s, t) {
+  /* hoe:
+   *   'ketting'   — die vorige stuk is pas klaar; GEEN cancel nie (dit sou die
+   *                 ry stukke self onderbreek);
+   *   'tik'       — die ▶-druk. Spreek SINKROON, binne die tik: iOS laat die
+   *                 eerste uiting net binne 'n gebruikersgebaar toe;
+   *   'onderbreek'— hoofstuk-sprong of spoed terwyl dit praat. Cancel, en
+   *                 spreek eers ná 'n kort wag: WebKit sluk 'n speak() wat
+   *                 direk ná cancel() kom. */
+  function spreek(s, t, hoe = 'ketting') {
     if (!synth) return
     const afdStukke = stukkePerAfd[s]
     if (!afdStukke) { klaar(); return }
     if (t >= afdStukke.length) { // volgende hoofstuk
-      if (s + 1 < stukkePerAfd.length) return spreek(s + 1, 0)
+      if (s + 1 < stukkePerAfd.length) return spreek(s + 1, 0, hoe)
       return klaar()
     }
     stel(s, t)
@@ -114,8 +123,22 @@ export default function LuisterSpeler({ afdelings, titel, bookId }) {
     }
     u.onend = gaanVoort
     u.onerror = gaanVoort                          // een slegte stuk mag nie die boek stop nie
-    try { synth.cancel() } catch {}
-    try { synth.speak(u) } catch {}
+    /* Hou die uiting vas: Chrome se vullisverwyderaar vat 'n uiting waarna
+     * niemand meer verwys nie, en dan vuur `onend` nooit — die boek stop
+     * stilweg ná een sin. */
+    uitingRef.current = u
+    const praat = () => {
+      if (mySeq !== seqRef.current) return
+      try { synth.resume() } catch {}              // Chrome kan in 'n "gepouseerde" toestand vassit
+      try { synth.speak(u) } catch {}
+    }
+    if (hoe === 'onderbreek') {
+      try { synth.cancel() } catch {}
+      setTimeout(praat, 80)
+    } else {
+      if (hoe === 'tik' && (synth.speaking || synth.pending)) { try { synth.cancel() } catch {} }
+      praat()
+    }
   }
 
   function klaar() {
@@ -134,19 +157,19 @@ export default function LuisterSpeler({ afdelings, titel, bookId }) {
     } else {
       speelRef.current = true
       setSpeel(true)
-      spreek(posRef.current.sek, posRef.current.stuk)
+      spreek(posRef.current.sek, posRef.current.stuk, 'tik')
     }
   }
 
   function springHoofstuk(rigting) {
     const nuwe = Math.min(Math.max(posRef.current.sek + rigting, 0), stukkePerAfd.length - 1)
     stel(nuwe, 0)
-    if (speelRef.current) spreek(nuwe, 0)
+    if (speelRef.current) spreek(nuwe, 0, 'onderbreek')
   }
 
   function stelSpoed(v) {
     setSpoed(v); spoedRef.current = v
-    if (speelRef.current) spreek(posRef.current.sek, posRef.current.stuk)  // herbegin huidige stuk teen die nuwe spoed
+    if (speelRef.current) spreek(posRef.current.sek, posRef.current.stuk, 'onderbreek')  // herbegin huidige stuk teen die nuwe spoed
   }
 
   if (!steun) {

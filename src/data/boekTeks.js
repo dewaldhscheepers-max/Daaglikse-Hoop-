@@ -25,9 +25,16 @@
    luister. */
 export const MAKS_STUK = 3500
 
-/* Firestore se dokument-perk is 1 MB. Ons hou die totale teks ruim daaronder;
-   'n boek wat groter is, word afgekap met 'n eerlike merker. */
-export const MAKS_TOTAAL = 900000
+/* Firestore se dokument-perk is 1 MB — in GREPE, nie karakters nie. 'n
+   Krul-aanhalingsteken is drie grepe, en die JSON-string ontsnap ook nog; 900 000
+   karakters kon dus oor die perk gaan en die skryf het stil misluk. 600 000 laat
+   ruim plek. 'n Gewone e-boek (30–60 000 woorde) is 200–400 000 karakters. 'n
+   Boek wat groter is, word by 'n hele hoofstuk afgekap. */
+export const MAKS_TOTAAL = 600000
+
+/* Korter as dit, en die stuk VOOR die eerste kop is voorblad/kopiereg/inhoud —
+   nie 'n inleiding nie. Sien splitHoofstukke. */
+export const MAKS_VOORBLAD = 600
 
 /* ── Skoonmaak ──
  *
@@ -48,6 +55,9 @@ export function skoonTeks(rou) {
   const blokke = []
   let blok = []
   const isBladsynommer = s => /^\s*[\divxlcIVXLC]{1,5}\s*$/.test(s) || /^\s*(page|bladsy|p\.)\s*\d+\s*$/i.test(s)
+    /* pdf-parse se verstek-bladsymerker, "-- 3 of 18 --". Die stem sou dit
+       hardop lees ("dash dash three of eighteen"). */
+    || /^\s*-{2,}\s*\d+\s*(of|van)\s*\d+\s*-{2,}\s*$/i.test(s)
 
   for (const roul of reels) {
     const l = roul.trim()
@@ -83,6 +93,11 @@ function lykKop(reel) {
   const r = String(reel || '').trim()
   if (!r || r.length > 80) return false
   return KOP_WOORD.test(r) || KOP_NOMMER.test(r)
+}
+
+/* Voorwerk: kopiereg of 'n inhoudsopgawe. */
+function lykVoorwerk(teks) {
+  return /©|\bcopyright\b|all rights reserved|kopiereg|alle regte voorbehou|\bcontents\b|\binhoud(sopgawe)?\b/i.test(String(teks || ''))
 }
 
 /* Op paragraaf-vlak: ná skoonTeks staan 'n kop op sy eie, dus is dit dieselfde
@@ -123,6 +138,34 @@ export function splitHoofstukke(skoon, { titel = '' } = {}) {
   /* Geen koppe (of die koppe het niks lyf gehad nie) → gelyke stukke. */
   if (!afdelings.length) {
     afdelings = stukkeByLengte(paras, titel)
+  }
+
+  /* ── Die INHOUDSOPGAWE en die VOORBLAD ──
+   *
+   * 'n Egte boek het 'n inhoudsopgawe wat elke hoofstuk se kop een keer VOOR
+   * die hoofstuk self noem. Daardie reëls lyk presies soos koppe, en sonder
+   * hierdie stap word elkeen 'n "hoofstuk" van een reël — "volgende" spring dan
+   * na niks, en die stem lees die inhoudsopgawe twee keer.
+   *
+   * Twee reëls:
+   *  1. Kom dieselfde kop meer as een keer voor, hou die een met die meeste teks.
+   *  2. Die stuk VOOR die eerste kop val weg as dit kort is EN soos voorwerk lyk
+   *     (©, copyright, inhoudsopgawe). 'n Kort EGTE inleiding bly staan — inhoud
+   *     verloor is erger as 'n kopiereg-reël wat voorgelees word.
+   */
+  if (hetKoppe && afdelings.length > 1) {
+    const sleutel = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim()
+    const beste = new Map()
+    afdelings.forEach((a, i) => {
+      const k = sleutel(a.titel)
+      const b = beste.get(k)
+      if (b === undefined || afdelings[b].teks.length < a.teks.length) beste.set(k, i)
+    })
+    afdelings = afdelings.filter((a, i) => beste.get(sleutel(a.titel)) === i)
+    if (afdelings.length > 1 && !isKop(afdelings[0].titel)
+        && afdelings[0].teks.length < MAKS_VOORBLAD && lykVoorwerk(afdelings[0].teks)) {
+      afdelings = afdelings.slice(1)
+    }
   }
 
   /* 'n Baie lang hoofstuk word self in stukke gebreek, anders is "volgende"

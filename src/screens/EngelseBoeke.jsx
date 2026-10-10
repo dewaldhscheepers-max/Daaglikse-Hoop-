@@ -4,7 +4,6 @@ import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { eboekTotale } from '../data/eboekTotale'
 import { verdeelPerTaal, deelBoodskapEn } from '../data/engelsBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
-import { boekSkakel } from '../data/boekSkakel'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
@@ -15,6 +14,17 @@ import './EngelseBoeke.css'
    (`luisterTeks`), en is net gereed wanneer `luisterStatus === 'gereed'`. Gee
    die afdelings, of `null` — dan verskyn die ▶ LISTEN-knoppie glad nie (geen
    teks, geen knoppie). */
+const DEEL_SKAKEL = 'https://www.dewaldscheepers.com/go'
+
+/* Een keer gelees — die Afrikaanse blad skryf dit wanneer al die bronne in is. */
+const gekasteTotale = (() => {
+  try {
+    const d = JSON.parse(localStorage.getItem('eboekTotale') || 'null')
+    if (d && typeof d.b === 'number' && typeof d.w === 'number') return d
+  } catch {}
+  return { b: null, w: null }
+})()
+
 function luisterAfdelings(boek) {
   if (!boek || boek.luisterStatus !== 'gereed' || !boek.luisterTeks) return null
   try {
@@ -123,11 +133,18 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   // ── Counter (same pure sum as the Afrikaans page) ──
   const { boeke: totalBooks, waarde: totalValue } =
     eboekTotale({ rgCount, liveCount, liveValue, vjDoen })
-  const wysBoeke  = totalBooks
-  const wysWaarde = totalValue
+  /* Die laaste goeie paar, dieselfde as die Afrikaanse blad s'n (`eboekTotale`
+     in localStorage) — sodat 'n mens 'n getal sien in plaas van "—" terwyl die
+     bronne nog laai. */
+  const wysBoeke  = totalBooks !== null ? totalBooks : gekasteTotale.b
+  const wysWaarde = totalValue !== null ? totalValue : gekasteTotale.w
 
+  /* ── Deel ──
+     Dewald, 10 Oktober 2026: 'n gedeelde Engelse boek gaan na /go. Die ou
+     `/boek/<id>` het op die AFRIKAANSE e-boekblad geland, waar Engelse boeke
+     juis weggesteek is — die ontvanger sou die boek nooit gekry het nie. */
   async function deelBoek(boek) {
-    const skakel = boekSkakel(boek.id)
+    const skakel = DEEL_SKAKEL
     const boodskap = deelBoodskapEn(boek.title, skakel)
     try {
       if (navigator.share) { await navigator.share({ title: boek.title, text: boodskap }); return }
