@@ -28,10 +28,6 @@
     },
     "api/reels-voeg-by.mjs": {
       "maxDuration": 60
-    },
-    "api/boek-teks-onttrek.mjs": {
-      "maxDuration": 60,
-      "memory": 1024
     }
   },
   "routes": [

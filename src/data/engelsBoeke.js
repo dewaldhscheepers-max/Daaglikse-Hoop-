@@ -56,7 +56,7 @@ export function deelBoodskapEn(titel, skakel) {
   const t = String(titel || '').trim()
   const s = String(skakel || '').trim()
   const sin = t
-    ? `This free e-book helped me: "${t}". It's completely free to read or listen to.`
-    : "This free e-book helped me, and it's completely free to read or listen to."
+    ? `This free e-book helped me: "${t}". It's completely free to read.`
+    : "This free e-book helped me, and it's completely free to read."
   return s ? `${sin}\n\n${s}` : sin
 }

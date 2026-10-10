@@ -55,7 +55,7 @@ console.log('\n── deelBoodskapEn: die boek, nie die app ──')
   /* Sonder 'n titel bly die sin heel, en sonder 'n skakel ook. */
   waar('geen titel', deelBoodskapEn('', skakel).toLowerCase().includes('free'))
   is('geen skakel: net die sin', deelBoodskapEn('X', ''),
-     'This free e-book helped me: "X". It\'s completely free to read or listen to.')
+     'This free e-book helped me: "X". It\'s completely free to read.')
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

@@ -7,13 +7,8 @@ import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
-import LuisterSpeler from '../components/LuisterSpeler'
 import './EngelseBoeke.css'
 
-/* Die onttrekte luister-teks staan as 'n JSON-string op die boek
-   (`luisterTeks`), en is net gereed wanneer `luisterStatus === 'gereed'`. Gee
-   die afdelings, of `null` — dan verskyn die ▶ LISTEN-knoppie glad nie (geen
-   teks, geen knoppie). */
 const DEEL_SKAKEL = 'https://www.dewaldscheepers.com/go'
 
 /* Een keer gelees — die Afrikaanse blad skryf dit wanneer al die bronne in is. */
@@ -24,14 +19,6 @@ const gekasteTotale = (() => {
   } catch {}
   return { b: null, w: null }
 })()
-
-function luisterAfdelings(boek) {
-  if (!boek || boek.luisterStatus !== 'gereed' || !boek.luisterTeks) return null
-  try {
-    const a = JSON.parse(boek.luisterTeks)
-    return Array.isArray(a) && a.length ? a : null
-  } catch { return null }
-}
 
 /* ── DIE ENGELSE E-BOEKBLAD ──  /english
  *
@@ -57,15 +44,14 @@ function luisterAfdelings(boek) {
  * ── Die deel-knoppie ──
  *
  * Dewald, 10 Oktober 2026: *"it also needs a share button next to ebook."* Die
- * skakel dra die BOEK (`/boek/<id>`), nie hierdie blad nie — dieselfde reël as
- * oral. Die sin is Engels (`deelBoodskapEn`).
+ * skakel gaan na /go (sien DEEL_SKAKEL). Die sin is Engels (`deelBoodskapEn`).
  *
- * ── LUISTER kom later ──
+ * ── Geen LUISTER nie ──
  *
- * Die ▶ LISTEN-knoppie verskyn eers wanneer 'n boek `luisterTeks` dra — teks
- * wat die bediener uit die PDF onttrek het. Geen teks, geen knoppie (dieselfde
- * "'n skerm sonder inhoud bestaan nie"-reël as oral). Die onttrekking en die
- * speler kom in 'n volgende stap.
+ * Daar was 'n ▶ LISTEN-knoppie wat die blaaier se spraak gebruik het. Dewald,
+ * 10 Oktober 2026: *"Just remove the audio versions it isnt right. Just keep
+ * the ebooks."* Die stem verskil per foon en klink soos 'n masjien. Moet dit nie
+ * terugsit nie; 'n egte opname per boek is die enigste weergawe wat sou werk.
  */
 export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   const [bookOverrides, setBookOverrides] = useState({})
@@ -76,7 +62,6 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   const [activeBook, setActiveBook] = useState(null)
   const [claimedMap, setClaimedMap] = useState({})
   const [deelKopie,  setDeelKopie]  = useState(false)
-  const [luisterBoek, setLuisterBoek] = useState(null)   /* watter boek se speler oop is */
 
   // ── Books (live) ──
   useEffect(() => {
@@ -209,7 +194,7 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           </div>
         </div>
 
-        <h1 className="en-header-title">Free English e-books &amp; audiobooks</h1>
+        <h1 className="en-header-title">Free English e-books</h1>
         <p className="en-header-sub">
           Practical, biblical encouragement for your thoughts, faith and everyday life.
         </p>
@@ -245,17 +230,14 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           </p>
         ) : (
           <div className="en-book-list">
-            {boeke.map(b => {
-              const afd = luisterAfdelings(b)
-              const luisterOop = luisterBoek === b.id
-              return (
+            {boeke.map(b => (
               <div key={b.id} className="en-book-wrap">
                 <div className="en-book">
                   <div className="en-cover" style={{ background: b.coverUrl ? 'transparent' : (b.color || '#EDE8F8') }}>
                     {b.coverUrl
                       ? <img src={b.coverUrl} className="en-cover-img" alt={b.title} />
                       : <span className="en-emoji">{b.emoji || '📚'}</span>}
-                    <span className="en-badge">{afd ? 'AUDIO' : 'FREE'}</span>
+                    <span className="en-badge">FREE</span>
                   </div>
                   <div className="en-info">
                     <h4 className="en-title">{b.title}</h4>
@@ -273,21 +255,10 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
                         Share
                       </button>
                     </div>
-                    {/* ▶ LISTEN — net wanneer die teks onttrek is. Geen teks,
-                        geen knoppie (dieselfde reël as oral). */}
-                    {afd && (
-                      <button className={`en-luister${luisterOop ? ' oop' : ''}`}
-                              onClick={() => setLuisterBoek(luisterOop ? null : b.id)}>
-                        {luisterOop ? '✕ Close listening' : '🎧 Listen free'}
-                      </button>
-                    )}
                   </div>
                 </div>
-                {afd && luisterOop && (
-                  <LuisterSpeler afdelings={afd} titel={b.title} bookId={b.id} />
-                )}
               </div>
-            )})}
+            ))}
           </div>
         )}
 

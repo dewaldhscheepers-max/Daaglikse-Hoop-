@@ -560,8 +560,8 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           <div className="eng-promo-row">
             <div className="eng-promo-left">
               <div className="eng-promo-flag">🌍 ENGLISH</div>
-              <h2 className="eng-promo-title">English E-books &amp; Audiobooks</h2>
-              <p className="eng-promo-sub">Free Christian books to read or listen to in English.</p>
+              <h2 className="eng-promo-title">English E-books</h2>
+              <p className="eng-promo-sub">Free Christian books to read in English.</p>
             </div>
             <div className="eng-promo-icon" aria-hidden="true">📚</div>
           </div>

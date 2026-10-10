@@ -99,7 +99,7 @@ function boekEpos({ titel, pdfUrl }) {
             📥 Download
           </a>
         </div>
-        <p style="color:#666;line-height:1.7;margin:16px 0 0;">You can also listen to it free on <a href="${ENGELSE_BLAD}" style="color:#5C4E8E;">dewaldscheepers.com/english</a>.</p>
+        <p style="color:#666;line-height:1.7;margin:16px 0 0;">More free English books are on <a href="${ENGELSE_BLAD}" style="color:#5C4E8E;">dewaldscheepers.com/english</a>.</p>
         ${STEUN}
         ${VOET}`),
     }

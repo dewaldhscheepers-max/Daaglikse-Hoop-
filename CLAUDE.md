@@ -60,8 +60,6 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
-node src/data/boekTeks.toets.mjs              # PDF-teks skoonmaak + hoofstuk-split, 27 toetse
-node src/data/luisterStukke.toets.mjs         # TTS-stukke + MANSTEM-keuse, 25 toetse
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
@@ -2474,81 +2472,23 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   admin-alleen) en laai dit af as CSV. 'n Nuusbrief AAN die Engelse lys stuur
   bestaan nog nie — die stuur-knoppie in ✉️ E-pos ken net die Afrikaanse lys.
 
-### LUISTER — PDF-teks word OUTOMATIES onttrek
+### Geen LUISTER nie — en hoekom
 
-Dewald wou nie elke boek se teks met die hand plak nie. Laai die PDF op, en die
-stelsel trek die teks self uit.
+Daar was 'n ▶ LISTEN-knoppie: die bediener het die PDF se teks uitgehaal
+(`pdf-parse`) en die blaaier se `speechSynthesis` het dit voorgelees. Dewald,
+10 Oktober 2026, nadat hy dit gehoor het: *"Just remove the audio versions it
+isnt right. Just keep the ebooks."*
 
-* **`api/boek-teks-onttrek.mjs`** haal die PDF, `pdf-parse` trek die teks, en die
-  **suiwer** pyplyn (`verwerkBoekTeks` in `src/data/boekTeks.js`) maak dit skoon
-  en split dit in hoofstukke. Dit stoor `luisterTeks` (JSON-string) +
-  `luisterStatus` op die boek. `{ bookId }` doen een; `{ backfill:true }` loop
-  oor alle Engelse boeke binne 'n tyd-begroting en gee `oor` terug (happe, soos
-  `reels-voeg-by`). `maxDuration 60`, `memory 1024` in `vercel.json`.
-* **Die onttrekking loop EEN keer op die bediener, nie op elke foon nie** — so
-  kry elke toestel dieselfde skoon teks, en die PDF-biblioteek bly op die
-  bediener. Die teks word as 'n JSON-STRING gestoor (nie 'n Firestore-skikking),
-  want 'n string kan nie stil 'n veld verloor nie en bly onder die 1 MB-perk
-  (`MAKS_TOTAAL`).
-* **Hoofstuk-split is 'n HEURISTIEK.** Duidelike "Chapter N"/"Day N"-koppe split
-  skoon; sonder koppe val dit terug op gelyke stukke. `skoonTeks` isoleer 'n kop
-  al het die PDF geen leë reël gelos nie — anders word die kop en die eerste sin
-  een paragraaf en die grens is weg (dit was die eerste egte fout hier).
-* **Die pdfjs-WERKER word deur ONS gelaai, met 'n LETTERLIKE pad**
-  (`api/_pdfLaai.mjs`). pdfjs laai hom met 'n BEREKENDE `import()`, en Vercel
-  se lêerspoorder (nft) volg dit nie — die lêer was in produksie eenvoudig nie daar nie, elke onttrekking het
-  stil misluk, en plaaslik het alles gewerk omdat `node_modules` volledig is.
-  `pdfjs-dist` is presies vasgepen op die weergawe wat `pdf-parse` self
-  gebruik. Toets met `kykNftTeks.mjs` in die scratchpad: dit kopieer NET die
-  gespoorde lêers na 'n leë gids en loop die egte eindpunt daar.
-* **Node 18 crash pdfjs 5 by die INVOER** (`DOMMatrix is not defined`) — 'n
-  kaal "HTTP 500" sonder boodskap, voor die handler loop. `_pdfLaai.mjs` vul
-  net aan wat ontbreek (`process.getBuiltinModule`, `Promise.withResolvers`, 'n
-  minimale `DOMMatrix`) en laai dinamies binne 'n try; die handler self is ook
-  in 'n try, so 'n fout is ALTYD leesbare JSON. Toets die sandbox onder Node
-  18, 20 EN 22 — ons weet nie watter een Vercel se projek gebruik nie.
-* **'n Mislukking word GESKRYF** (`luisterStatus: 'fout'` + `luisterFout`), en
-  die admin sê dit. "Daar gebeur niks" was presies die klag.
-* **'n Prent-PDF sonder tekslaag** → `genoegTeks()` vang dit, `luisterStatus`
-  word `geen-teks`, en die admin sien 'n waarskuwing. Die ▶ LISTEN-knoppie
-  verskyn dan glad nie — geen teks, geen knoppie.
+Alles is uit — die knoppie, die speler, die eindpunt, die admin se
+teks-knoppies en die PDF-biblioteek. Die `luisterTeks`/`luisterStatus`-velde wat
+op party boeke in Firestore staan, is onskadelik en niks lees hulle nie; die
+lewende data is nie aangeraak nie.
 
-**Die speler** (`src/components/LuisterSpeler.jsx`) gebruik die blaaier se
-`speechSynthesis`. Die suiwer helfte staan in `src/data/luisterStukke.js`
-(stukke + stemkeuse, met toetse). Drie dinge wat 'n mens nie uit die kode aflei
-nie:
-
-* **Stukke, nie 'n hele hoofstuk nie.** 'n Blaaier kap 'n lang uiting af (op
-  party toestelle ná ~15s). Ons gee dit sin vir sin (`maakStukke`, ≤220 kar) en
-  ry hulle agtermekaar.
-* **'n Volgnommer (`seqRef`) is verpligtend.** `speechSynthesis.cancel()` laat
-  die vorige uiting se `onend` ook vuur; sonder die wag sou 'n pouse of 'n
-  hoofstuk-sprong twee stemme aanmekaar ja. 'n Terugroep wat nie meer die huidige
-  nommer dra nie, doen niks.
-* **Cancel NET wanneer 'n mens onderbreek.** Die ketting van stuk na stuk
-  roep nooit `cancel()` nie; 'n hoofstuk-sprong of spoed wel, en spreek dan
-  eers ná 80ms — WebKit sluk 'n `speak()` direk ná `cancel()`, en dan stop die
-  boek ná een sin. Die ▶-druk spreek SINKROON (iOS wil die eerste uiting binne
-  die tik hê). Die uiting lê in `uitingRef`: Chrome vee 'n uiting uit waarna
-  niemand verwys nie, en dan vuur `onend` nooit. `kykLuisterSpeler.mjs` in die
-  scratchpad boots daardie gedrag na; die ou speler druip daarop.
-* **Pouse KANSELLEER en onthou die stuk** — `pause()` is onbetroubaar op 'n foon.
-  "Speel weer" begin die huidige stuk oor; omdat 'n stuk ~een sin is, hoor 'n
-  mens skaars die herhaling. Die posisie (hoofstuk + stuk) lê in localStorage per
-  boek en hervat daar.
-
-**Dit kies 'n MANSTEM** (Dewald: *"a normal man voice not woman"*). Die blaaier
-het geen geslag-veld nie; `kiesStem()` lees die NAAM en Android se stemkode
-(`voiceURI`) teen twee lyste, en verkies dan Natural/Neural/Enhanced. "Female"
-bevat "male" — die vroue-lys keer dat dit deurglip. Die toonhoogte word NIE
-verlaag om 'n vrou na 'n man te laat klink nie; dit klink vervormd. Het die foon
-geen manstem nie (Chrome op Android wys dikwels net een stem per taal), besluit
-die foon se eie spraak-instelling.
-
-**Die stem verskil per toestel** — dit is browser-TTS se bekende prys, en dit is
-die MVP. Dieselfde onttrekte teks kan later AI-stem-oudio voed. Dit kan nie in
-'n houer getoets word nie (geen TTS-stemme in 'n kaal Chromium); toets die klank
-self op 'n regte foon.
+Die les vir as dit ooit terugkom: **die blaaier se stem is die FOON se stem.**
+Dit verskil per toestel, die geslag kan nie gekies word nie (Chrome op Android
+wys dikwels net een stem), en dit klink soos 'n masjien. Die enigste weergawe
+wat sou werk, is 'n EGTE opname per boek (of een keer deur 'n AI-stemdiens
+gemaak), wat dan speel soos die stemboodskappe.
 
 ## E-boeke: 'n boek skrap
 
