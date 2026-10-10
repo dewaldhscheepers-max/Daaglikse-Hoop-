@@ -16,6 +16,7 @@ import KinderBibloteek from './KinderBibloteek'
 import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
+import { isEngels } from '../data/engelsBoeke'
 import { ToetsKnoppie } from '../components/KennisgewingKnoppie'
 import { huidigeToken } from '../data/kennisgewingLees'
 
@@ -288,7 +289,9 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
        src/data/eboekeVolgorde.js: uitgelig eerste, dan nuutste eerste. */
     ...sorteerNuutsteBo(
       Object.entries(bookOverrides)
-        .filter(([id, d]) => !STATIC_IDS.has(id) && d.title)
+        /* Engelse boeke woon op /english, nie hier nie — hulle sou andersins
+           dubbel wys, op twee blaaie, vir dieselfde leser. Sien engelsBoeke.js. */
+        .filter(([id, d]) => !STATIC_IDS.has(id) && d.title && !isEngels(d))
         .map(([id, d]) => {
           const isRG = id === 'rustelose-gedagtes' || (d.title || '').toLowerCase().includes('rustelose')
           return { id, color: '#EDE8F8', emoji: '📚', ...d, ...(isRG ? { badge: 'NUUT', isRG: true } : {}) }
@@ -374,6 +377,40 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           titel="Help die volgende persoon om ook gratis hoop te ontvang."
           teks="Jou bydrae help om die app, e-boeke en daaglikse boodskappe gratis te hou."
         />
+
+        {/* ── Engelse e-boeke & oudioboeke ──
+         *
+         * Dewald, 9 Oktober 2026: 'n aparte Engelse ingang (/english) wat hy met
+         * Engelssprekendes kan deel sonder dat hulle eers deur die Afrikaanse app
+         * hoef te gaan. Die kaart waai 'open-engels'; App.jsx maak die volskerm-
+         * blad oop en stoot die pad /english by (deelbaar, terug-knoppie werk).
+         *
+         * Die kleur is TEAL — nie pers (Leesplanne), warm (Kinderboeke) of groen
+         * (Speletjies) nie. 'n Vierde kaart in 'n bestaande kleur lees soos 'n
+         * herhaling. Dit staan hoog op die blad, want dit is 'n eie ingang en nie
+         * 'n bysaak soos die speletjies nie. */}
+        <div
+          className="eng-promo"
+          role="button"
+          tabIndex={0}
+          onClick={() => window.dispatchEvent(new CustomEvent('open-engels'))}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.dispatchEvent(new CustomEvent('open-engels')) }}
+        >
+          <div className="eng-promo-row">
+            <div className="eng-promo-left">
+              <div className="eng-promo-flag">🌍 ENGLISH</div>
+              <h2 className="eng-promo-title">English E-books &amp; Audiobooks</h2>
+              <p className="eng-promo-sub">Free Christian books to read or listen to in English.</p>
+            </div>
+            <div className="eng-promo-icon" aria-hidden="true">📚</div>
+          </div>
+          <button
+            className="eng-promo-btn"
+            onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('open-engels')) }}
+          >
+            EXPLORE ENGLISH LIBRARY →
+          </button>
+        </div>
 
         {/* ── VOLG JESUS ──
             Dieselfde kaart as op Luister, en dit gaan na dieselfde plek.

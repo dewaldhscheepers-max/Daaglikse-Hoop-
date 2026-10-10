@@ -4,6 +4,7 @@ import BidSaam from './screens/BidSaam'
 import BidNou from './screens/BidNou'
 import Sorg from './screens/Sorg'
 import Meer from './screens/Meer'
+import EngelseBoeke from './screens/EngelseBoeke'
 import Admin from './screens/Admin'
 import { DonationModal } from './screens/Webtuiste'
 import NooimyModal from './components/NooimyModal'
@@ -150,6 +151,8 @@ export default function App() {
   const [showVredepad, setShowVredepad]           = useState(false)
   const [showHoopVennoot, setShowHoopVennoot]     = useState(false)
   const [wysSteun, setWysSteun]                   = useState(false)
+  /* Die Engelse e-boekblad (/english) — 'n volskerm-oorname, soos HoopOntvang. */
+  const [engelsOop, setEngelsOop]                 = useState(false)
   const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
@@ -1231,6 +1234,53 @@ export default function App() {
     } catch {}
   }, [])
 
+  /* ── Die Engelse e-boekblad: /english ──
+   *
+   * Dewald, 9 Oktober 2026. 'n Aparte ingang wat hy met Engelssprekendes deel.
+   * Dit is 'n volskerm-oorname (soos HoopOntvang): 'n besoeker op /english sien
+   * net die Engelse biblioteek, nie die Afrikaanse app nie.
+   *
+   * Anders as /boek en /hoop VEE ons die pad NIE uit nie — die hele punt is 'n
+   * DEELBARE adres, en 'n herlaai moet die mens op dieselfde blad hou. Die kaart
+   * op die e-boekblad waai 'open-engels' en stoot die pad by, sodat die
+   * terug-knoppie die oorname toemaak in plaas van die hele app te verlaat. */
+  useEffect(() => {
+    try {
+      const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
+      if (pad === '/english') setEngelsOop(true)
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    function onOpen() {
+      try {
+        if ((window.location.pathname || '').toLowerCase().replace(/\/+$/, '') !== '/english') {
+          window.history.pushState({}, '', '/english')
+        }
+      } catch {}
+      setEngelsOop(true)
+    }
+    function onPop() {
+      try {
+        setEngelsOop((window.location.pathname || '').toLowerCase().replace(/\/+$/, '') === '/english')
+      } catch {}
+    }
+    window.addEventListener('open-engels', onOpen)
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('open-engels', onOpen)
+      window.removeEventListener('popstate', onPop)
+    }
+  }, [])
+
+  function engelsSluit() {
+    setEngelsOop(false)
+    try {
+      const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
+      if (pad === '/english') window.history.replaceState({}, '', '/')
+    } catch {}
+  }
+
   function hoopKlaar() {
     setHoopId(null)
     hoopOopRef.current = false
@@ -1975,6 +2025,15 @@ export default function App() {
       )}
 
       {hoopId && <HoopOntvang notaId={hoopId} onKlaar={hoopKlaar} />}
+
+      {/* Die Engelse e-boekblad — 'n volskerm-oorname bo-op alles. */}
+      {engelsOop && (
+        <EngelseBoeke
+          onClose={engelsSluit}
+          isInstalled={isInstalled}
+          installPrompt={installPrompt}
+        />
+      )}
 
       {tmgOop && tmgNota && (
         <TydMetGod

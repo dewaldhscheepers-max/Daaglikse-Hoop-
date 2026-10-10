@@ -1,7 +1,85 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './FreeBookModal.css'
 
-export default function FreeBookModal({ book, onClose, installPrompt, isInstalled }) {
+/* ── Die gratis-boek-venster ──
+ *
+ * Dit vang 'n e-pos, roep `/api/free-book-download` (wat die EEN gedeelde
+ * teller `stats/ebooks_given` optel) en wys die aflaai-skakel.
+ *
+ * ── Twee tale, EEN vloei ──
+ *
+ * Dewald, 9 Oktober 2026: 'n Engelse e-boekblad vir Engelssprekendes. Hulle gaan
+ * deur PRESIES dieselfde venster en dieselfde eindpunt — net die woorde skuif.
+ * 'n Tweede venster met sy eie pad is 'n tweede plek wat stilweg agterbly die
+ * dag wanneer die telling of die e-pos verander. Die `taal`-prop kies net die
+ * string-tabel; die logika bly een. */
+const WOORDE = {
+  af: {
+    installTitel: 'Installeer eers die app',
+    installSub:   'Hierdie gratis e-boek is deel van die Daaglikse Hoop-app. Installeer die app sodat jy ook die stemnotas, gebedsmuur en gebede kan gebruik.',
+    installKnop:  '📲 Installeer die app',
+    installKlaar: '✅ App geïnstalleer!',
+    installHoe:   'Hoe om te installeer:',
+    installHoe2:  'Maak die blaaier se menu oop en kies',
+    reedsApp:     'Ek het reeds die app →',
+    vormTitel:    (t) => `Kry "${t}" gratis`,
+    vormSub:      "Vul jou e-posadres in — ons stuur ook 'n kopie na jou e-pos.",
+    epos:         'E-posadres',
+    toestem:      'Ek sluit aan by die Daaglikse Hoop e-posgemeenskap en gee toestemming dat Dewald Scheepers vir my boodskappe van hoop, gratis hulpbronne en nuus mag stuur. Ek kan enige tyd uitteken.',
+    foutEpos:     "Voer asb 'n geldige e-posadres in.",
+    foutToestem:  'Gee asb toestemming om voort te gaan.',
+    foutAlg:      'Iets het fout gegaan. Probeer asb weer.',
+    stuur:        'Kry my gratis e-boek →',
+    besig:        'Besig...',
+    privaat:      '🔒 Jou besonderhede word veilig bewaar.',
+    klaarTitel:   'Jou boek is gereed!',
+    klaarSub:     "Ons het ook 'n kopie na jou e-pos gestuur.",
+    laai:         (t) => `📥 Laai ${t} af`,
+    komBinnekort: 'Hierdie boek word binnekort beskikbaar. Kyk jou e-pos.',
+    deel:         "🔗 Deel met 'n vriend",
+    gekopieer:    '✓ Gekopieer!',
+    deelMsg:      (t) => `Ek het sopas "${t}" gratis gekry op die Daaglikse Hoop app 🙏\n\nKry ook gratis Bybelse e-boeke:`,
+    steunReel:    'Help sodat die volgende persoon ook gratis hoop kan ontvang:',
+    maandeliks:   '💜 Maandelikse Vennoot',
+    eenmalig:     '🙏 Eenmalige Bydrae',
+    nieNou:       'Nie nou nie',
+    sluit:        'Sluit',
+  },
+  en: {
+    installTitel: 'Install the app first',
+    installSub:   'This free e-book is part of the Daaglikse Hoop app. Install it so you can also use the voice notes, prayer wall and prayers.',
+    installKnop:  '📲 Install the app',
+    installKlaar: '✅ App installed!',
+    installHoe:   'How to install:',
+    installHoe2:  "Open your browser's menu and choose",
+    reedsApp:     'I already have the app →',
+    vormTitel:    (t) => `Get "${t}" free`,
+    vormSub:      "Enter your email — we'll also send a copy to your inbox.",
+    epos:         'Email address',
+    toestem:      'I join the Daaglikse Hoop email community and give permission for Dewald Scheepers to send me messages of hope, free resources and news. I can unsubscribe at any time.',
+    foutEpos:     'Please enter a valid email address.',
+    foutToestem:  'Please give permission to continue.',
+    foutAlg:      'Something went wrong. Please try again.',
+    stuur:        'Get my free e-book →',
+    besig:        'Working...',
+    privaat:      '🔒 Your details are kept safe.',
+    klaarTitel:   'Your book is ready!',
+    klaarSub:     'We also sent a copy to your inbox.',
+    laai:         (t) => `📥 Download ${t}`,
+    komBinnekort: 'This book is coming soon. Check your email.',
+    deel:         '🔗 Share with a friend',
+    gekopieer:    '✓ Copied!',
+    deelMsg:      (t) => `I just got "${t}" free on the Daaglikse Hoop app 🙏\n\nGet free Christian e-books too:`,
+    steunReel:    'Help the next person receive free hope too:',
+    maandeliks:   '💜 Monthly Partner',
+    eenmalig:     '🙏 Give once',
+    nieNou:       'Not now',
+    sluit:        'Close',
+  },
+}
+
+export default function FreeBookModal({ book, onClose, installPrompt, isInstalled, taal = 'af' }) {
+  const t = WOORDE[taal] || WOORDE.af
   const storageKey = `fb_claimed_${book.id}`
 
   const alreadyClaimed = localStorage.getItem(storageKey) === '1'
@@ -38,11 +116,11 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
   async function handleSubmit() {
     const trimmedEmail = email.trim().toLowerCase()
     if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setError("Voer asb 'n geldige e-posadres in.")
+      setError(t.foutEpos)
       return
     }
     if (!consent) {
-      setError('Gee asb toestemming om voort te gaan.')
+      setError(t.foutToestem)
       return
     }
 
@@ -56,14 +134,14 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
       })
       const data = await r.json()
       if (!r.ok) {
-        setError(data.error || 'Iets het fout gegaan. Probeer asb weer.')
+        setError(data.error || t.foutAlg)
         return
       }
       localStorage.setItem(storageKey, '1')
       setResult(data)
       setStep('success')
     } catch {
-      setError('Iets het fout gegaan. Probeer asb weer.')
+      setError(t.foutAlg)
     } finally {
       setBusy(false)
     }
@@ -71,7 +149,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
 
   async function handleShare() {
     const shareUrl = 'https://dewaldscheepers.com/go'
-    const msg = `Ek het sopas "${book.title}" gratis gekry op die Daaglikse Hoop app 🙏\n\nKry ook gratis Bybelse e-boeke:`
+    const msg = t.deelMsg(book.title)
     if (navigator.share) {
       try { await navigator.share({ text: msg, url: shareUrl }) } catch {}
     } else {
@@ -94,7 +172,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
   return (
     <div className="fb-backdrop" onClick={handleBackdropClick}>
       <div className="fb-modal" onClick={e => e.stopPropagation()}>
-        <button className="fb-close" onClick={onClose} aria-label="Sluit">✕</button>
+        <button className="fb-close" onClick={onClose} aria-label={t.sluit}>✕</button>
 
         {/* ── Install step ── */}
         {step === 'install' && (
@@ -104,21 +182,21 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                 ? <img src={book.coverUrl} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />
                 : <span style={{ fontSize: 36 }}>{book.emoji || '📚'}</span>}
             </div>
-            <h2 className="fb-title">Installeer eers die app</h2>
-            <p className="fb-sub">Hierdie gratis e-boek is deel van die Daaglikse Hoop-app. Installeer die app sodat jy ook die stemnotas, gebedsmuur en gebede kan gebruik.</p>
+            <h2 className="fb-title">{t.installTitel}</h2>
+            <p className="fb-sub">{t.installSub}</p>
 
             {installDone ? (
-              <div className="fb-install-done">✅ App geïnstalleer!</div>
+              <div className="fb-install-done">{t.installKlaar}</div>
             ) : installPrompt ? (
-              <button className="fb-btn-primary" onClick={handleInstall}>📲 Installeer die app</button>
+              <button className="fb-btn-primary" onClick={handleInstall}>{t.installKnop}</button>
             ) : (
               <div className="fb-ios-tip">
-                <strong>Hoe om te installeer:</strong><br />
-                Maak die blaaier se menu oop en kies <em>"Add to Home Screen"</em> of <em>"Install app"</em>.
+                <strong>{t.installHoe}</strong><br />
+                {t.installHoe2} <em>"Add to Home Screen"</em> / <em>"Install app"</em>.
               </div>
             )}
 
-            <button className="fb-btn-skip" onClick={() => setStep('form')}>Ek het reeds die app →</button>
+            <button className="fb-btn-skip" onClick={() => setStep('form')}>{t.reedsApp}</button>
           </>
         )}
 
@@ -131,10 +209,10 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                 : <span style={{ fontSize: 36 }}>{book.emoji || '📚'}</span>}
             </div>
 
-            <h2 className="fb-title">Kry "{book.title}" gratis</h2>
-            <p className="fb-sub">Vul jou e-posadres in — ons stuur ook 'n kopie na jou e-pos.</p>
+            <h2 className="fb-title">{t.vormTitel(book.title)}</h2>
+            <p className="fb-sub">{t.vormSub}</p>
 
-            <label className="fb-label">E-posadres</label>
+            <label className="fb-label">{t.epos}</label>
             <input
               className="fb-input"
               type="email"
@@ -150,18 +228,16 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                 checked={consent}
                 onChange={e => { setConsent(e.target.checked); setError('') }}
               />
-              <span>
-                Ek sluit aan by die Daaglikse Hoop e-posgemeenskap en gee toestemming dat Dewald Scheepers vir my boodskappe van hoop, gratis hulpbronne en nuus mag stuur. Ek kan enige tyd uitteken.
-              </span>
+              <span>{t.toestem}</span>
             </label>
 
             {error && <p className="fb-error">{error}</p>}
 
             <button className="fb-btn-primary" onClick={handleSubmit} disabled={busy}>
-              {busy ? 'Besig...' : 'Kry my gratis e-boek →'}
+              {busy ? t.besig : t.stuur}
             </button>
 
-            <p className="fb-privacy">🔒 Jou besonderhede word veilig bewaar.</p>
+            <p className="fb-privacy">{t.privaat}</p>
           </>
         )}
 
@@ -169,8 +245,8 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
         {step === 'success' && (
           <>
             <div className="fb-success-icon">🎁</div>
-            <h2 className="fb-title">Jou boek is gereed!</h2>
-            <p className="fb-sub">Ons het ook 'n kopie na jou e-pos gestuur.</p>
+            <h2 className="fb-title">{t.klaarTitel}</h2>
+            <p className="fb-sub">{t.klaarSub}</p>
 
             {displayPdfUrl ? (
               <a
@@ -180,18 +256,18 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                 className="fb-btn-primary"
                 style={{ textDecoration: 'none', textAlign: 'center' }}
               >
-                📥 Laai {displayTitle} af
+                {t.laai(displayTitle)}
               </a>
             ) : (
-              <p className="fb-sub">Hierdie boek word binnekort beskikbaar. Kyk jou e-pos.</p>
+              <p className="fb-sub">{t.komBinnekort}</p>
             )}
 
             <button className="fb-btn-share" onClick={handleShare}>
-              {shareToast ? '✓ Gekopieer!' : '🔗 Deel met \'n vriend'}
+              {shareToast ? t.gekopieer : t.deel}
             </button>
 
             <div className="fb-donate-block">
-              <p>Help sodat die volgende persoon ook gratis hoop kan ontvang:</p>
+              <p>{t.steunReel}</p>
               <div className="fb-donate-row">
                 <button
                   className="fb-btn-monthly"
@@ -200,7 +276,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                     onClose()
                   }}
                 >
-                  💜 Maandelikse Vennoot
+                  {t.maandeliks}
                 </button>
                 <button
                   className="fb-btn-once"
@@ -209,12 +285,12 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
                     onClose()
                   }}
                 >
-                  🙏 Eenmalige Bydrae
+                  {t.eenmalig}
                 </button>
               </div>
             </div>
 
-            <button className="fb-btn-skip" onClick={onClose}>Nie nou nie</button>
+            <button className="fb-btn-skip" onClick={onClose}>{t.nieNou}</button>
           </>
         )}
       </div>

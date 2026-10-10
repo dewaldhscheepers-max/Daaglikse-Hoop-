@@ -44,6 +44,37 @@ import './DonationCard.css'
  * reël wat die knoppie se rede herhaal, het dit saam 'n venster gemaak in
  * plaas van 'n afdeling van die blad. Sien DonationCard.css se kop.
  */
+/* ── Twee tale ──
+ *
+ * Die Engelse e-boekblad (/english) gebruik dieselfde kaart en dieselfde twee
+ * gebeurtenisse. Net die vaste woorde — die drie gesigte se opskrifte en die
+ * knoppie-etikette — skuif met `taal`. Die props (titel/teks/bewys) kom reeds
+ * in die regte taal van die beller af. */
+const KAART_WOORDE = {
+  af: {
+    vennootTitel: 'Dankie, Hoop-Vennoot',
+    vennootTeks:  'Jou maandelikse ondersteuning help ons om hoop gratis beskikbaar te hou.',
+    gewerTitel:   'Dankie vir jou bydrae',
+    gewerTeks:    'Jou ondersteuning help ons om Daaglikse Hoop gratis te hou.',
+    wordVennoot:  "Word 'n Hoop-Vennoot",
+    gewerFyn:     'Kies maandeliks en help om Daaglikse Hoop elke dag gratis te hou.',
+    maandeliks:   "Word 'n maandelikse Hoop-Vennoot",
+    eenmalig:     'Gee eenmalig',
+    geenFyn:      'Alles bly gratis. Geen verpligting nie.',
+  },
+  en: {
+    vennootTitel: 'Thank you, Hope Partner',
+    vennootTeks:  'Your monthly support helps us keep hope freely available.',
+    gewerTitel:   'Thank you for your gift',
+    gewerTeks:    'Your support helps us keep Daaglikse Hoop free.',
+    wordVennoot:  'Become a Hope Partner',
+    gewerFyn:     'Choose monthly and help keep Daaglikse Hoop free every day.',
+    maandeliks:   'Become a monthly Hope Partner',
+    eenmalig:     'Give once',
+    geenFyn:      'Everything stays free. No obligation.',
+  },
+}
+
 export default function DonationCard({
   titel = 'Help om Daaglikse Hoop gratis te hou.',
   teks  = 'Jou bydrae help met stemboodskappe, app-kostes, advertensies en gratis geestelike hulpbronne.',
@@ -51,7 +82,9 @@ export default function DonationCard({
   knop,          /* net gegee vir die EEN-knoppie-weergawe */
   fyn,           /* die klein reël onderaan */
   klas = '',
+  taal = 'af',
 }) {
+  const w = KAART_WOORDE[taal] || KAART_WOORDE.af
   /* Een keer, by die monteer. Sien die kop. */
   const gesig = useMemo(() => {
     let gestoorSiklus = '', gestoorVennoot = ''
@@ -79,10 +112,8 @@ export default function DonationCard({
      * doen nie, is erger as stilte. Dus die tweede. */
     return (
       <div className={`donation-card is-dankie${klas ? ' ' + klas : ''}`}>
-        <h3 className="donation-card-title">Dankie, Hoop-Vennoot</h3>
-        <p className="donation-card-text">
-          Jou maandelikse ondersteuning help ons om hoop gratis beskikbaar te hou.
-        </p>
+        <h3 className="donation-card-title">{w.vennootTitel}</h3>
+        <p className="donation-card-text">{w.vennootTeks}</p>
       </div>
     )
   }
@@ -93,10 +124,8 @@ export default function DonationCard({
   if (gesig === 'gewer') {
     return (
       <div className={`donation-card is-dankie${klas ? ' ' + klas : ''}`}>
-        <h3 className="donation-card-title">Dankie vir jou bydrae</h3>
-        <p className="donation-card-text">
-          Jou ondersteuning help ons om Daaglikse Hoop gratis te hou.
-        </p>
+        <h3 className="donation-card-title">{w.gewerTitel}</h3>
+        <p className="donation-card-text">{w.gewerTeks}</p>
         {/* EEN knoppie, en dit is die VENNOOT-een.
          *
          * Die voorstel was "[ Gee weer ] of [ Word 'n Hoop-Vennoot ]". "Gee
@@ -107,11 +136,9 @@ export default function DonationCard({
          *
          * En twee knoppies op 'n dankie-kaart maak dit weer 'n vraag. */}
         <button className="donation-card-btn-once" onClick={handleMonthly}>
-          Word 'n Hoop-Vennoot
+          {w.wordVennoot}
         </button>
-        <p className="donation-card-fyn">
-          Kies maandeliks en help om Daaglikse Hoop elke dag gratis te hou.
-        </p>
+        <p className="donation-card-fyn">{w.gewerFyn}</p>
       </div>
     )
   }
@@ -132,16 +159,16 @@ export default function DonationCard({
               tweede keer onder die knoppie gestaan, en dit het die kaart
               langer gemaak sonder om iets by te sê. */}
           <button className="donation-card-btn-monthly" onClick={handleMonthly}>
-            Word 'n maandelikse Hoop-Vennoot
+            {w.maandeliks}
           </button>
           <button className="donation-card-btn-once" onClick={handleOnce}>
-            Gee eenmalig
+            {w.eenmalig}
           </button>
         </>
       )}
       {fyn
         ? <p className="donation-card-fyn">{fyn}</p>
-        : !knop && <p className="donation-card-fyn">Alles bly gratis. Geen verpligting nie.</p>}
+        : !knop && <p className="donation-card-fyn">{w.geenFyn}</p>}
     </div>
   )
 }
