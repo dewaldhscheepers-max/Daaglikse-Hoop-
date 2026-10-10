@@ -40,13 +40,12 @@ import { isEngels } from '../src/data/engelsBoeke.js'
  * nooit saam ontplooi nie: elke PDF het op die lewende werf met 'pdf-fout'
  * misluk, terwyl dit plaaslik gewerk het — want plaaslik IS die lêer daar.
  *
- * Hierdie vaste invoer laat die spoorder die lêer sien, en die werker sit
+ * Die werker word nou in `_pdfLaai.mjs` gelaai (ook op Node 18). Daardie invoer laat die spoorder die lêer sien, en die werker sit
  * homself op `globalThis.pdfjsWorker`; pdfjs gebruik dit dan in-proses en laai
  * niks meer nie. Moenie dit verwyder nie. `kykNftTeks.mjs` in die scratchpad
  * kopieer NET die gespoorde lêers na 'n leë gids en loop die eindpunt daar —
  * die enigste eerlike toets, want dit is wat Vercel doen. */
-import 'pdfjs-dist/legacy/build/pdf.worker.mjs'
-import { PDFParse } from 'pdf-parse'
+import { laaiPdfParse } from './_pdfLaai.mjs'
 import geheim from './_geheim.js'
 const { wieMag } = geheim
 
@@ -167,6 +166,7 @@ async function doenBoek(token, boek) {
       return { id: boek.id, ok: false, rede: 'pdf-onbereikbaar', fout: `HTTP ${pr.status}` }
     }
     const buf = Buffer.from(await pr.arrayBuffer())
+    const PDFParse = await laaiPdfParse()
     const parser = new PDFParse({ data: new Uint8Array(buf) })
     /* `pageJoiner: ''` — anders sit pdf-parse "-- 3 of 18 --" tussen elke bladsy,
        en die stem lees dit hardop. skoonTeks vang dit ook, vir die veiligheid. */
@@ -199,7 +199,15 @@ async function doenBoek(token, boek) {
   return { id: boek.id, ok: true, stukke: r.afdelings.length }
 }
 
+/* Niks mag ooit weer 'n KAAL 500 wees nie — die admin moet die rede kan lees. */
 export default async function handler(req, res) {
+  try { return await hanteer(req, res) }
+  catch (e) {
+    return res.status(500).json({ fout: 'Onverwagte fout: ' + String((e && e.message) || e).slice(0, 200) })
+  }
+}
+
+async function hanteer(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ fout: 'Net POST' })
   if (!wieMag(req)) return res.status(401).json({ fout: 'Nie toegelaat nie' })
 

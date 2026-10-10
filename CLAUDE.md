@@ -2494,14 +2494,19 @@ stelsel trek die teks self uit.
   skoon; sonder koppe val dit terug op gelyke stukke. `skoonTeks` isoleer 'n kop
   al het die PDF geen leë reël gelos nie — anders word die kop en die eerste sin
   een paragraaf en die grens is weg (dit was die eerste egte fout hier).
-* **Die pdfjs-WERKER moet staties ingevoer word** (`import
-  'pdfjs-dist/legacy/build/pdf.worker.mjs'` bo-aan die eindpunt). pdfjs laai
-  hom met 'n DINAMIESE `import()`, en Vercel se lêerspoorder (nft) volg dit
-  nie — die lêer was in produksie eenvoudig nie daar nie, elke onttrekking het
+* **Die pdfjs-WERKER word deur ONS gelaai, met 'n LETTERLIKE pad**
+  (`api/_pdfLaai.mjs`). pdfjs laai hom met 'n BEREKENDE `import()`, en Vercel
+  se lêerspoorder (nft) volg dit nie — die lêer was in produksie eenvoudig nie daar nie, elke onttrekking het
   stil misluk, en plaaslik het alles gewerk omdat `node_modules` volledig is.
   `pdfjs-dist` is presies vasgepen op die weergawe wat `pdf-parse` self
   gebruik. Toets met `kykNftTeks.mjs` in die scratchpad: dit kopieer NET die
   gespoorde lêers na 'n leë gids en loop die egte eindpunt daar.
+* **Node 18 crash pdfjs 5 by die INVOER** (`DOMMatrix is not defined`) — 'n
+  kaal "HTTP 500" sonder boodskap, voor die handler loop. `_pdfLaai.mjs` vul
+  net aan wat ontbreek (`process.getBuiltinModule`, `Promise.withResolvers`, 'n
+  minimale `DOMMatrix`) en laai dinamies binne 'n try; die handler self is ook
+  in 'n try, so 'n fout is ALTYD leesbare JSON. Toets die sandbox onder Node
+  18, 20 EN 22 — ons weet nie watter een Vercel se projek gebruik nie.
 * **'n Mislukking word GESKRYF** (`luisterStatus: 'fout'` + `luisterFout`), en
   die admin sê dit. "Daar gebeur niks" was presies die klag.
 * **'n Prent-PDF sonder tekslaag** → `genoegTeks()` vang dit, `luisterStatus`

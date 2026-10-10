@@ -464,7 +464,11 @@ export default function Admin({ onClose }) {
         setBackfillUitslag(`Besig… ${reg.length} gereed, ${j.oor || 0} oor`)
         if (!(j.oor > 0) || !hap.some(g => g.ok)) break
       }
-      if (totaalEngels === 0 && !fout.length) {
+      /* Het die bediener self misluk voordat hy kon tel, is elke getal hier 'n
+         leuen ("0 is as Engels gemerk"). Sê dan net die fout. */
+      if (rondtes === 0 && fout.length) {
+        setBackfillUitslag('⚠️ ' + fout.join('\n'))
+      } else if (totaalEngels === 0 && !fout.length) {
         setBackfillUitslag('⚠️ Geen Engelse boeke gevind nie. Merk die boeke eers as 🌍 Engels (die AF↔EN-knoppie, of die merkie by "Voeg nuwe boek by").')
       } else {
         const dele = [`✅ ${reg.length} boek(e) gereed vir LISTEN`]
