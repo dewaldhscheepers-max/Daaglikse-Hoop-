@@ -140,16 +140,17 @@ export default function DonationCard({
         <button className="donation-card-btn-once" onClick={handleMonthly}>
           {w.wordVennoot}
         </button>
-        <p className="donation-card-fyn">{w.gewerFyn}</p>
-        {/* ── "Skenk weer" — 'n SKAKEL, nie 'n tweede knoppie nie ──
+        {/* ── "Skenk weer" — 'n VOLLE knoppie, ewe groot ──
          * Dewald, 10 Oktober 2026, ná sy eie skenking: *"Nadat ek geskenk het
-         * moet daar steeds 'n eenmalige donate knoppie wees... as hul weer wil
-         * skenk."* Hy is reg: wie wil gee, moet nie eers 'n maand wag nie. Dit
-         * staan as stil teks onder die fyn reël, sodat die dankie 'n dankie bly
-         * en die vennoot-knoppie die enigste ding is wat soos 'n knoppie lyk. */}
-        <button className="donation-card-weer" onClick={handleOnce}>
+         * moet daar steeds 'n eenmalige donate knoppie wees."* Die eerste
+         * weergawe was 'n onderstreepte skakel, en hy het dadelik gesê: *"Daai
+         * is nie i knoppie nie."* Dit is die les wat reeds in DonationCard.css
+         * staan ("Gee eenmalig"): vir hierdie gehoor lees 'n skakel soos
+         * fynskrif. Moenie dit weer klein maak nie. */}
+        <button className="donation-card-btn-once" onClick={handleOnce}>
           {w.skenkWeer}
         </button>
+        <p className="donation-card-fyn">{w.gewerFyn}</p>
       </div>
     )
   }

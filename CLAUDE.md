@@ -2448,11 +2448,13 @@ donasie- of e-posstelsel nie. 'n Kort persoonlike boodskap van Dewald met sy
 foto (`public/beelde/dewald-en.webp`) staan VOOR die donasie-kaart — 'n gesig
 voor enige vraag.
 
-**Ná 'n skenking bly 'n stil "Skenk weer"/"Donate again"** onder op die
+**Ná 'n skenking bly 'n "Skenk weer"/"Donate again"** op die
 dankie-kaart (`DonationCard.jsx`, die `gewer`-gesig). Dewald: *"Nadat ek geskenk
 het moet daar steeds 'n eenmalige donate knoppie wees."* Dit is 'n onderstreepte
-SKAKEL, nie 'n tweede knoppie nie — die vennoot-knoppie bly die enigste ding op
-'n dankie-kaart wat soos 'n knoppie lyk. Blaaiertoets: `kykSkenkWeer.mjs`.
+VOLLE knoppie, ewe groot as die vennoot-knoppie. Die eerste weergawe was 'n
+onderstreepte skakel, en Dewald: *"Daai is nie i knoppie nie."* Dit was die
+TWEEDE keer dieselfde les (sien "Gee eenmalig" in DonationCard.css): vir hierdie
+gehoor lees 'n skakel soos fynskrif. Blaaiertoets: `kykSkenkWeer.mjs`.
 
 ### Die Engelse e-posse en die APARTE lys
 
