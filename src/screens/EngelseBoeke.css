@@ -301,6 +301,7 @@
   display: flex;
   gap: 13px;
   align-items: flex-start;
+  text-align: left;              /* die kop is gesentreer; die kaart bly links */
   background: var(--white);
   border: 1px solid var(--cream-dark);
   border-radius: 16px;
@@ -308,6 +309,9 @@
   margin-bottom: 14px;
   box-shadow: 0 2px 12px var(--shadow);
 }
+/* In die (donker, gesentreerde) kop: 'n bietjie lug bo en onder sodat dit nie
+   teen die etiket en die hoofopskrif druk nie. */
+.en-oor-bo { margin: 6px 0 20px; }
 .en-oor-foto {
   width: 72px;
   min-width: 72px;

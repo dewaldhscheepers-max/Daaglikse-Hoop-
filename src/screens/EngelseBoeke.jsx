@@ -171,6 +171,27 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
       {/* Header + shared counter */}
       <div className="en-header">
         <div className="en-header-label">Free English Library</div>
+
+        {/* ── A word from Dewald ──
+         *
+         * Dewald, 10 Oktober 2026: die persoonlike kaart (foto, naam, boodskap)
+         * staan nou heel BO — direk onder "Free English Library", VOOR die
+         * hoofopskrif — sodat 'n gesig en 'n hart die eerste ding is wat 'n mens
+         * sien. Dieselfde kaart, net 'n ander plek. Die foto is 'n klein, ronde
+         * <img> (geen volskerm-tekstuur, dus geen Android-strepe-risiko). */}
+        <div className="en-oor en-oor-bo">
+          <img className="en-oor-foto" src="/beelde/dewald-en.webp" alt="Dewald Scheepers"
+               width="72" height="72" loading="lazy" />
+          <div className="en-oor-lyf">
+            <p className="en-oor-naam">Dewald Scheepers</p>
+            <p className="en-oor-teks">
+              Out of my own brokenness, God has used these e-books to touch thousands of
+              lives with hope. My prayer is that these words will encourage you, strengthen
+              your faith, and remind you that you are not alone.
+            </p>
+          </div>
+        </div>
+
         <h1 className="en-header-title">Free English e-books &amp; audiobooks</h1>
         <p className="en-header-sub">
           Practical, biblical encouragement for your thoughts, faith and everyday life.
@@ -188,25 +209,6 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
       </div>
 
       <div className="en-body">
-        {/* ── A word from Dewald ──
-         *
-         * Dewald, 10 Oktober 2026: 'n kort persoonlike boodskap met sy foto. Dit
-         * staan VOOR die donasie-kaart — 'n gesig en 'n hart kom voor enige vraag.
-         * Die foto is 'n klein, ronde <img> (nie 'n volskerm-tekstuur nie, dus
-         * geen Android-strepe-risiko). */}
-        <div className="en-oor">
-          <img className="en-oor-foto" src="/beelde/dewald-en.webp" alt="Dewald Scheepers"
-               width="72" height="72" loading="lazy" />
-          <div className="en-oor-lyf">
-            <p className="en-oor-naam">Dewald Scheepers</p>
-            <p className="en-oor-teks">
-              Out of my own brokenness, God has used these e-books to touch thousands of
-              lives with hope. My prayer is that these words will encourage you, strengthen
-              your faith, and remind you that you are not alone.
-            </p>
-          </div>
-        </div>
-
         {/* Same donation card, in English */}
         <DonationCard
           taal="en"
@@ -272,11 +274,15 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           </div>
         )}
 
-        {/* Bottom: open the full app */}
-        <a className="en-openapp" href="/go">
-          Open the full Daaglikse Hoop app
-          <small>Daily voice notes · prayer wall · Bible · games</small>
-        </a>
+        {/* Bottom: open the full app — net vir wie dit nog NIE het nie,
+            dieselfde reël as die aflaai-knoppie bo. 'n Mens in die
+            geïnstalleerde app sien dit nie. */}
+        {!isInstalled && (
+          <a className="en-openapp" href="/go">
+            Open the full Daaglikse Hoop app
+            <small>Daily voice notes · prayer wall · Bible · games</small>
+          </a>
+        )}
       </div>
 
       {deelKopie && <div className="en-toast">✓ Link copied — paste it to share</div>}
