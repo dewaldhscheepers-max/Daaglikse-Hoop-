@@ -143,14 +143,26 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
 
   return (
     <div className="en-screen">
-      {/* Top: go to the full app */}
-      <a className="en-appbar" href="/go">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
-             strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M3 12h18M13 6l-6 6 6 6" />
-        </svg>
-        Go to the Daaglikse Hoop app
-      </a>
+      {/* Top: back (for readers already in the app) + download the app.
+          Dewald, 10 Oktober 2026: twee knoppies — 'n TERUG vir wie reeds in die
+          app is (dit maak die Engelse blad toe en land op die Afrikaanse
+          e-boekblad), en 'n AFLAAI-knoppie na /go. */}
+      <div className="en-appbar">
+        <button className="en-terug" onClick={onClose} aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
+               strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back
+        </button>
+        <a className="en-kry" href="/go">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+               strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" />
+          </svg>
+          Download the Daaglikse Hoop app
+        </a>
+      </div>
 
       {/* Header + shared counter */}
       <div className="en-header">

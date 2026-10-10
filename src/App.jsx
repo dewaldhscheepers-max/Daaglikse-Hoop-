@@ -1275,6 +1275,9 @@ export default function App() {
 
   function engelsSluit() {
     setEngelsOop(false)
+    /* Terug land op die Afrikaanse e-boekblad — dit is waar die kaart staan en
+       waarheen 'n mens wat reeds in die app is, hoort terug te gaan. */
+    setTab('meer')
     try {
       const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
       if (pad === '/english') window.history.replaceState({}, '', '/')
