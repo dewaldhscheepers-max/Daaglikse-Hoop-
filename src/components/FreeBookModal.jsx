@@ -84,7 +84,13 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
 
   const alreadyClaimed = localStorage.getItem(storageKey) === '1'
   const isStandalone   = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-  const skipInstall    = isInstalled || isStandalone || alreadyClaimed
+  /* Die Engelse blad vra NOOIT eers om te installeer nie. Dewald, 10 Oktober
+     2026: *"wanneer iemand op die Engelse blad eboek aflaai moet dit kan
+     aflaai... Moenie vir hulle vra om eers app te install nie."* 'n Engelse
+     besoeker het vir 'n BOEK gekom, en die app is Afrikaans — 'n installasie-
+     muur voor die boek is net 'n rede om weg te gaan. Die Afrikaanse pad bly
+     presies soos dit was. */
+  const skipInstall    = taal === 'en' || isInstalled || isStandalone || alreadyClaimed
 
   const [step,        setStep]        = useState(alreadyClaimed && book.pdfUrl ? 'success' : skipInstall ? 'form' : 'install')
   const [installDone, setInstallDone] = useState(false)
@@ -148,7 +154,8 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
   }
 
   async function handleShare() {
-    const shareUrl = 'https://dewaldscheepers.com/go'
+    /* Engels deel die Engelse blad — die ontvanger moet by die BOEKE land. */
+    const shareUrl = taal === 'en' ? 'https://www.dewaldscheepers.com/english' : 'https://dewaldscheepers.com/go'
     const msg = t.deelMsg(book.title)
     if (navigator.share) {
       try { await navigator.share({ text: msg, url: shareUrl }) } catch {}
@@ -216,7 +223,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
             <input
               className="fb-input"
               type="email"
-              placeholder="naam@epos.com"
+              placeholder={taal === 'en' ? 'name@email.com' : 'naam@epos.com'}
               value={email}
               onChange={e => { setEmail(e.target.value); setError('') }}
               autoFocus

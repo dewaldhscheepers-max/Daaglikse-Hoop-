@@ -9,7 +9,10 @@ import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
 import './EngelseBoeke.css'
 
-const DEEL_SKAKEL = 'https://www.dewaldscheepers.com/go'
+/* Dewald, 10 Oktober 2026: *"As ek engelse eboek share moet dit die link deel
+   nie die laai app op jou foon... www.dewaldscheepers.com/english"*. Die
+   ontvanger land by die Engelse boeke, nie by die Afrikaanse installeerblad. */
+const DEEL_SKAKEL = 'https://www.dewaldscheepers.com/english'
 
 /* Een keer gelees — die Afrikaanse blad skryf dit wanneer al die bronne in is. */
 const gekasteTotale = (() => {
@@ -44,7 +47,7 @@ const gekasteTotale = (() => {
  * ── Die deel-knoppie ──
  *
  * Dewald, 10 Oktober 2026: *"it also needs a share button next to ebook."* Die
- * skakel gaan na /go (sien DEEL_SKAKEL). Die sin is Engels (`deelBoodskapEn`).
+ * skakel gaan na /english (sien DEEL_SKAKEL). Die sin is Engels (`deelBoodskapEn`).
  *
  * ── Geen LUISTER nie ──
  *
@@ -125,7 +128,7 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   const wysWaarde = totalValue !== null ? totalValue : gekasteTotale.w
 
   /* ── Deel ──
-     Dewald, 10 Oktober 2026: 'n gedeelde Engelse boek gaan na /go. Die ou
+     Dewald, 10 Oktober 2026: 'n gedeelde Engelse boek gaan na /english. Die ou
      `/boek/<id>` het op die AFRIKAANSE e-boekblad geland, waar Engelse boeke
      juis weggesteek is — die ontvanger sou die boek nooit gekry het nie. */
   async function deelBoek(boek) {

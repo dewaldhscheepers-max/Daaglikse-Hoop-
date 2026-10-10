@@ -2441,7 +2441,15 @@ doen niks as 'n mens hom weer druk. Blaaiertoets: `kykAdminTaal.mjs` (vals
 Anders as /boek en /hoop word die pad NIE uitgevee nie — 'n herlaai moet die
 mens op die blad hou. Die kaart op die e-boekblad waai `open-engels`; App.jsx
 stoot die pad `/english` by, en `popstate` maak die oorname toe. Die "Go to the
-app"-knoppies gaan na `/go`.
+app"-knoppies gaan na `/go`; die DEEL-knoppies na `/english`.
+
+**Op /english is daar GEEN installasiemuur voor 'n boek nie.** `FreeBookModal`
+slaan die installeer-stap oor wanneer `taal === 'en'` — reguit na die e-posvorm.
+Dewald: *"Moenie vir hulle vra om eers app te install nie."* 'n Engelse besoeker
+het vir 'n BOEK gekom, en die app is Afrikaans. Die Afrikaanse pad vra steeds
+eers. Albei Deel-knoppies (op die boek en ná die aflaai) deel
+`https://www.dewaldscheepers.com/english`, nie `/go` nie. Blaaiertoets:
+`kykEngelsAflaai.mjs`.
 
 **Dieselfde `DonationCard` en `FreeBookModal`, met 'n `taal`-prop.** Geen tweede
 donasie- of e-posstelsel nie. 'n Kort persoonlike boodskap van Dewald met sy
