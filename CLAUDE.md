@@ -61,6 +61,7 @@ node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
+node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
@@ -2466,6 +2467,15 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   terugkeer-adres, sien `src/utils/payfast.js`). `payfast-itn.js` stuur dan die
   Engelse dankie/welkom en skryf na `emailListEn`. App.jsx wys die Engelse
   dankie-opspringer en maak /english weer oop.
+* **Die dankie-e-pos ná 'n skenking het TWEE paaie en een slot**
+  (`api/_skenkDankie.js`). PayFast se ITN stuur dit, EN die app self wanneer
+  die mens terugkom en die dankie-opspringer wys (`api/skenk-dankie.js`, uit
+  App.jsx se `payment=success`). Dewald: *"Sodra hulle terug kom... en die
+  thankyou message wys... kan die epos mos ook gestuur word."* Die ITN is die
+  pad wat stil kan misluk; die terugkeer sien ons. `skenk_dankie/<e-pos>_<tipe>`
+  keer 'n tweede e-pos binne 30 minute — nie 'n dag nie, want "Skenk weer"
+  bestaan. Die eindpunt is oop; die ergste wat dit kan doen, is een vaste
+  dankie per adres per 30 minute. Blaaiertoets: `kykTerugDankie.mjs`.
 * **PayFast se `notify_url` is die blad se EIE adres** (`itnUrl()` in
   `src/utils/payfast.js`). Dit was vas `https://dewaldscheepers.com/...` — sonder
   www — terwyl die werf op www loop. 'n Aanstuur volg PayFast nie: die betaling

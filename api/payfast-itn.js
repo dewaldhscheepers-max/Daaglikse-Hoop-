@@ -2,6 +2,9 @@ const crypto = require('crypto')
 /* 'n Skenking vanaf die ENGELSE blad dra custom_str3 = 'en'. Dan is die dankie
    Engels en die adres gaan na die aparte Engelse lys. Sien _eposEngels.js. */
 const engels = require('./_eposEngels.js')
+/* Die dankie-e-pos self — gedeel met die app se terugkeer (api/skenk-dankie.js),
+   sodat die mens hom EEN keer kry, watter pad ook al eerste aankom. */
+const { stuurSkenkDankie } = require('./_skenkDankie.js')
 
 // ── Get Firebase service-account access token (same pattern as send-notifications) ──
 async function getAccessToken() {
@@ -81,42 +84,7 @@ async function handleSubscriptionItn(data, projectId) {
     }
     // Send thank you email for new successful subscriptions
     if (data.payment_status === 'COMPLETE' && subEmail) {
-      const welcomeHtml = `
-        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
-          <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
-            <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
-            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
-          </div>
-          <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
-            <p style="font-size:17px;line-height:1.8;margin:0 0 16px;">Goeiedag,</p>
-            <p style="font-size:16px;line-height:1.8;margin:0 0 14px;">Dankie dat jy 'n Maandelikse Hoop-Vennoot geword het! Baie baie dankie vir die ondersteuning.</p>
-            <p style="font-size:16px;line-height:1.8;margin:0 0 24px;">Ek waardeer dit regtig uit my hart uit. Jou maandelikse bydrae help ons om aan te hou om hoop, gebed en God se Woord by mense uit te kry wat dit elke dag nodig het.</p>
-            <p style="font-size:16px;line-height:1.8;margin:0 0 28px;">Mag die Here u ryklik seën. 🙏🏻</p>
-            <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 24px;">
-            <p style="margin:0;font-size:15px;line-height:1.6;color:#2d2d2d;">Seënwense</p>
-            <p style="margin:4px 0 24px;font-size:15px;font-weight:700;color:#2d2d2d;">Dewald Scheepers</p>
-            <p style="color:#aaa;font-size:12px;line-height:1.6;margin:0;">
-              Vrae? Kontak ons by
-              <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
-            </p>
-          </div>
-        </div>
-      `
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from:     'Dewald Scheepers <noreply@dewaldscheepers.com>',
-            to:       subEmail,
-            reply_to: 'info@dewaldscheepers.com',
-            subject:  isEngels ? engels.vennootDankie().onderwerp : "Dankie dat jy 'n Hoop-Vennoot geword het 🙏",
-            html:     isEngels ? engels.vennootDankie().html : welcomeHtml,
-          }),
-        })
-      } catch (e) {
-        console.error('Sub thank-you email failed:', e.message)
-      }
+      await stuurSkenkDankie({ email: subEmail, isEngels, tipe: 'subscription', bron: 'itn', pfId: data.pf_payment_id, bedrag: data.amount_gross })
     }
   } else {
     console.log('payfast-itn sub (no auth):', JSON.stringify(data))
@@ -188,61 +156,7 @@ async function verwerkItn(data) {
         addedAt: { timestampValue: new Date().toISOString() },
       })
     }
-    // Send thank-you email for once-off donation
-    const donationHtml = `
-      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">
-        <div style="background:#5C4E8E;padding:32px 24px;text-align:center;border-radius:12px 12px 0 0;">
-          <h1 style="color:white;margin:0;font-size:28px;">Daaglikse Hoop</h1>
-          <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">met Dewald Scheepers</p>
-        </div>
-        <div style="padding:32px 24px;background:white;border-radius:0 0 12px 12px;border:1px solid #e8e4f0;">
-          <p style="font-size:17px;line-height:1.8;margin:0 0 16px;">Goeiedag,</p>
-          <p style="font-size:16px;line-height:1.8;margin:0 0 14px;">Baie baie dankie vir die ondersteuning. Ek waardeer dit regtig uit my hart uit.</p>
-          <p style="font-size:16px;line-height:1.8;margin:0 0 24px;">Jou ondersteuning help ons om aan te hou om hoop, gebed en God se Woord by mense uit te kry.</p>
-          <p style="font-size:16px;line-height:1.8;margin:0 0 28px;">Mag die Here u ryklik seën. 🙏🏻</p>
-          <hr style="border:none;border-top:1px solid #e8e4f0;margin:0 0 24px;">
-          <p style="margin:0;font-size:15px;line-height:1.6;color:#2d2d2d;">Seënwense</p>
-          <p style="margin:4px 0 24px;font-size:15px;font-weight:700;color:#2d2d2d;">Dewald Scheepers</p>
-          <p style="color:#aaa;font-size:12px;line-height:1.6;margin:0;">
-            Vrae? Kontak ons by
-            <a href="mailto:info@dewaldscheepers.com" style="color:#5C4E8E;">info@dewaldscheepers.com</a>
-          </p>
-        </div>
-      </div>
-    `
-    /* Die uitslag word aangeteken, soos `purchases` dit vir 'n aankoop doen —
-       anders is "ek het geen dankie gekry nie" 'n raaiskoot. */
-    let gestuur = false, antwoord = ''
-    try {
-      const r = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from:     'Dewald Scheepers <noreply@dewaldscheepers.com>',
-          to:       email.toLowerCase(),
-          reply_to: 'info@dewaldscheepers.com',
-          subject:  isEngels ? engels.skenkDankie().onderwerp : 'Dankie vir jou ondersteuning 🙏',
-          html:     isEngels ? engels.skenkDankie().html : donationHtml,
-        }),
-      })
-      gestuur = r.ok
-      antwoord = await r.text().catch(() => '')
-      if (!r.ok) console.error('Donation thank-you rejected:', antwoord)
-    } catch (e) {
-      antwoord = e.message
-      console.error('Donation thank-you email failed:', e.message)
-    }
-    if (token) {
-      await fsWrite(projectId, token, `skenkings/${Date.now()}_${String(data.pf_payment_id || 'x').replace(/\W/g, '')}`, {
-        email:          { stringValue: email.toLowerCase() },
-        taal:           { stringValue: isEngels ? 'en' : 'af' },
-        amount:         { stringValue: data.amount_gross || '' },
-        paymentId:      { stringValue: data.pf_payment_id || '' },
-        emailSent:      { booleanValue: gestuur },
-        resendResponse: { stringValue: String(antwoord).slice(0, 500) },
-        timestamp:      { timestampValue: new Date().toISOString() },
-      })
-    }
+    await stuurSkenkDankie({ email, isEngels, tipe: 'donation', bron: 'itn', pfId: data.pf_payment_id, bedrag: data.amount_gross })
     return
   }
 

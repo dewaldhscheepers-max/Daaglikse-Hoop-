@@ -858,6 +858,19 @@ export default function App() {
        die dankie Engels en die mens land terug op /english — nie in die
        Afrikaanse app nie. Sonder `lang` loop alles presies soos altyd. */
     const en = params.get('lang') === 'en'
+    /* ── Die dankie-e-pos gaan van HIER af, nie net van PayFast se ITN nie ──
+       Dewald: *"Sodra hulle terug kom... en die thankyou message wys... kan
+       die epos mos ook gestuur word."* Die ITN kan stil misluk; hierdie
+       oomblik sien ons. Die bediener sorg dat dit net EEN e-pos is, ook as die
+       ITN ook aankom (api/_skenkDankie.js). */
+    if (status === 'success' && email && (type === 'donation' || type === 'subscription')) {
+      fetch('/api/skenk-dankie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, tipe: type, taal: en ? 'en' : 'af' }),
+        keepalive: true,
+      }).catch(() => {})
+    }
     if (status === 'success') {
       if (en) {
         window.history.replaceState({}, '', '/english')
