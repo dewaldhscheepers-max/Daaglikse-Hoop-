@@ -2430,8 +2430,13 @@ die Afrikaanse blad. Moet dit nooit 'n eie telling gee nie.
 + toetse). 'n Ontbrekende `taal`-veld lees as Afrikaans, dus bly elke bestaande
 boek presies waar hy is. Die Afrikaanse lys in `Meer.jsx` sluit Engelse boeke
 UIT (`verdeelPerTaal`), anders wys 'n boek op twee blaaie. Die admin merk 'n
-boek met die "🌍 Engelse boek"-merkie by die oplaai, of die AF↔EN-knoppie per
-opgelaaide boek.
+boek met die "🌍 Engelse boek"-merkie by die oplaai, of die TWEE taalknoppies
+(🇿🇦 Afr | 🌍 English) per opgelaaide boek. **Nooit weer een wissel-knoppie nie:**
+dit het die HUIDIGE taal gewys en by 'n druk omgeruil, Dewald het "🌍 Engels" op
+'n Engelse boek gedruk om seker te maak, en die boek het van /english verdwyn. 'n
+Etiket wat 'n toestand sê, lees soos 'n bevel. Die gekose taal is vol met ✓ en
+doen niks as 'n mens hom weer druk. Blaaiertoets: `kykAdminTaal.mjs` (vals
+`firebase/firestore` via 'n Vite-alias in `vals/`).
 
 **`/english` is 'n volskerm-oorname** (soos HoopOntvang), met 'n DEELBARE adres.
 Anders as /boek en /hoop word die pad NIE uitgevee nie — 'n herlaai moet die

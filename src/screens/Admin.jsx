@@ -442,14 +442,23 @@ export default function Admin({ onClose }) {
           body: JSON.stringify({ backfill: true }),
         })
         const j = await r.json().catch(() => ({}))
-        if (!r.ok || j.fout) { fout.push(j.fout || `HTTP ${r.status}`); break }
+        if (!r.ok || j.fout) { fout.push(`die bediener: ${j.fout || 'HTTP ' + r.status}`); break }
         totaalEngels = j.totaalEngels || 0
         sonderPdf = j.sonderPdf || 0
         const hap = j.gedoen || []
         for (const g of hap) {
           if (g.ok) reg.push(g.id)
           else if (g.rede === 'geen-teks') geenTeks.push(g.id)
-          else if (!fout.includes(g.id)) fout.push(g.id)
+          else {
+            /* Die NAAM en die REDE, nie 'n id nie — "1 het misluk" sê niks. */
+            const titel = bookOverrides[g.id]?.title || g.id
+            const rede = g.rede === 'pdf-onbereikbaar' ? 'kon nie die PDF aflaai nie — laai dit weer op'
+                       : g.rede === 'pdf-fout'         ? 'die PDF kon nie gelees word nie'
+                       : g.rede === 'skryf-fout'       ? 'kon nie die teks stoor nie'
+                       : g.rede || 'onbekend'
+            const reel = `"${titel}": ${rede}${g.fout ? ' (' + g.fout + ')' : ''}`
+            if (!fout.includes(reel)) fout.push(reel)
+          }
         }
         rondtes++
         setBackfillUitslag(`Besig… ${reg.length} gereed, ${j.oor || 0} oor`)
@@ -460,10 +469,10 @@ export default function Admin({ onClose }) {
       } else {
         const dele = [`✅ ${reg.length} boek(e) gereed vir LISTEN`]
         if (geenTeks.length) dele.push(`${geenTeks.length} sonder teks in die PDF`)
-        if (fout.length) dele.push(`${fout.length} het misluk — sien die rooi reël by die boek`)
         if (sonderPdf) dele.push(`${sonderPdf} het nog geen PDF nie`)
         if (!reg.length && !geenTeks.length && !fout.length) dele[0] = '✅ Alle Engelse boeke is reeds gedoen'
-        setBackfillUitslag(dele.join(' · '))
+        dele.push(`(${totaalEngels} boek(e) is as Engels gemerk)`)
+        setBackfillUitslag(dele.join(' · ') + (fout.length ? '\n⚠️ Misluk:\n' + fout.join('\n') : ''))
       }
       vergeetBoeke()
     } catch {
@@ -1253,7 +1262,7 @@ export default function Admin({ onClose }) {
                 <button className="admin-save-btn" onClick={doenBackfill} disabled={backfillBesig}>
                   {backfillBesig ? 'Besig…' : 'Haal teks uit vir alle Engelse boeke'}
                 </button>
-                {backfillUitslag && <div style={{ fontSize: 12, marginTop: 6 }}>{backfillUitslag}</div>}
+                {backfillUitslag && <div style={{ fontSize: 12, marginTop: 6, whiteSpace: 'pre-line' }}>{backfillUitslag}</div>}
               </div>
 
               <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
@@ -1288,6 +1297,12 @@ export default function Admin({ onClose }) {
                           : isCoverSaved ? '✅ Cover opgelaai!'
                           : [hasCover ? 'Cover ✓' : null, hasPdf ? 'PDF ✓' : 'Geen PDF'].filter(Boolean).join(' · ')}
                       </div>
+                      {/* WAAR die boek wys — sodat niemand hoef te raai nie. */}
+                      {!staticIds.has(book.id) && (
+                        <div className="admin-note-meta" style={{ marginTop: 2 }}>
+                          {isEngels(book) ? '🌍 Op /english' : '🇿🇦 Op Afrikaans'}
+                        </div>
+                      )}
                       {(isPdfUploading || isCoverUploading) && (
                         <div className="admin-upload-bar" style={{ marginTop: 4 }}>
                           <div className="admin-upload-fill" style={{ width: `${isPdfUploading ? pdfProgress : coverProgress}%` }} />
@@ -1331,23 +1346,36 @@ export default function Admin({ onClose }) {
                       >
                         {book.featured ? '★ Uitgelig' : '☆ Lyn'}
                       </button>
-                      {/* ── Taal: AF ↔ EN ──
-                          Merk 'n OPGELAAIDE boek as Engels of Afrikaans. 'n
-                          vaste boek is Afrikaanse inhoud en kry nie die knoppie
-                          nie. `vergeetBoeke` sodat die e-boekblaaie dit dadelik
-                          sien in plaas van ses uur later. */}
+                      {/* ── Taal: TWEE knoppies, nooit een wissel-knoppie nie ──
+                          Hier was EEN knoppie wat die HUIDIGE taal gewys het
+                          ("🌍 Engels") en by 'n druk OMGERUIL het. Dewald het
+                          hom op 'n Engelse boek gedruk om seker te maak dit is
+                          Engels — en die boek het Afrikaans geword en van
+                          /english verdwyn. 'n Etiket wat 'n TOESTAND sê, lees
+                          soos 'n BEVEL. Nou staan albei tale daar, die gekose
+                          een is vol, en om hom weer te druk doen niks. */}
                       {!staticIds.has(book.id) && (
-                        <button
-                          className="admin-pdf-btn"
-                          onClick={() => {
-                            const naarEngels = !isEngels(book)
-                            setDoc(doc(db, 'books', book.id), { taal: naarEngels ? 'en' : 'af' }, { merge: true })
-                            vergeetBoeke()
-                          }}
-                          title="Wys hierdie boek op /english (Engels) of op die Afrikaanse blad"
-                        >
-                          {isEngels(book) ? '🌍 Engels' : '🇿🇦 Afr'}
-                        </button>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {[['af', '🇿🇦 Afr'], ['en', '🌍 English']].map(([t, etiket]) => {
+                            const gekies = (t === 'en') === isEngels(book)
+                            return (
+                              <button
+                                key={t}
+                                className="admin-pdf-btn"
+                                style={gekies ? undefined : { background: 'transparent', color: 'var(--purple, #5B4E8C)', border: '1.5px solid currentColor' }}
+                                aria-pressed={gekies}
+                                onClick={() => {
+                                  if (gekies) return
+                                  setDoc(doc(db, 'books', book.id), { taal: t }, { merge: true })
+                                  vergeetBoeke()
+                                }}
+                                title={t === 'en' ? 'Wys hierdie boek op /english' : 'Wys hierdie boek op die Afrikaanse e-boekblad'}
+                              >
+                                {gekies ? '✓ ' : ''}{etiket}
+                              </button>
+                            )
+                          })}
+                        </div>
                       )}
                       {/* Luister-teks uithaal — net vir 'n Engelse boek met 'n
                           PDF. Gewoonlik gebeur dit vanself ná die oplaai; hierdie
