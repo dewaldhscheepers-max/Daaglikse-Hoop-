@@ -9,6 +9,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { videoIdUit } from '../data/youtubeId'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
+import { isEngels } from '../data/engelsBoeke'
 import './Admin.css'
 import { reekseUit, stelReeksGelyk } from '../data/reekse'
 /* Die opspringer se boeklys hou ses uur. Laai Dewald 'n boek op, moet hy nie
@@ -354,6 +355,9 @@ export default function Admin({ onClose }) {
   const [newDesc, setNewDesc]     = useState('')
   const [newValue, setNewValue]   = useState('')
   const [newEmoji, setNewEmoji]   = useState('📚')
+  /* Merk 'n nuwe boek as ENGELS — dan woon hy op /english, nie op die
+     Afrikaanse e-boekblad nie. Sien engelsBoeke.js. */
+  const [newEngels, setNewEngels] = useState(false)
   const [addingBook, setAddingBook] = useState(false)
   const [bookAdded, setBookAdded] = useState(false)
   /* Watter boek se skrap-vraag oop is, en of die skryf loop. Sien skrapBoek. */
@@ -639,6 +643,9 @@ export default function Admin({ onClose }) {
         value:  Math.round(parseFloat(newValue) || 50),
         emoji:  newEmoji || '📚',
         color:  '#EDE8F8',
+        /* Engels → /english. Ons skryf die veld NET wanneer dit Engels is; 'n
+           ontbrekende veld lees as Afrikaans (die verstek). Sien engelsBoeke.js. */
+        ...(newEngels ? { taal: 'en' } : {}),
         /* Sodat die blad weet wat nuut is. Die id dra reeds `-${Date.now()}`
            en `boekTyd()` kan dit daaruit lees — hierdie veld is die
            betroubare een, en dit is die enigste manier om 'n boek later te
@@ -647,7 +654,7 @@ export default function Admin({ onClose }) {
         createdAt: new Date().toISOString(),
       })
       vergeetBoeke()
-      setNewTitle(''); setNewDesc(''); setNewValue(''); setNewEmoji('📚')
+      setNewTitle(''); setNewDesc(''); setNewValue(''); setNewEmoji('📚'); setNewEngels(false)
       setBookAdded(true)
       setTimeout(() => setBookAdded(false), 3000)
     } catch (e) { alert('Kon nie boek byvoeg nie: ' + e.message) }
@@ -1098,6 +1105,18 @@ export default function Admin({ onClose }) {
                 <label>Emoji</label>
                 <input value={newEmoji} onChange={e => setNewEmoji(e.target.value)} placeholder="📚" style={{ width: 60 }} />
               </div>
+              {/* ── Taal ──
+                  'n Engelse boek woon op die /english-blad, nie op die
+                  Afrikaanse e-boekblad nie. Hy tel by PRESIES dieselfde teller.
+                  Verstek is Afrikaans. */}
+              <div className="admin-field">
+                <label>
+                  <input type="checkbox" checked={newEngels}
+                         onChange={e => setNewEngels(e.target.checked)}
+                         style={{ marginRight: 8 }} />
+                  🌍 Engelse boek (wys op /english)
+                </label>
+              </div>
               {bookAdded && <div className="admin-success">✅ Boek bygevoeg! Laai nou cover en PDF op.</div>}
               <button className="admin-save-btn" onClick={handleAddBook} disabled={addingBook}>
                 {addingBook ? 'Byvoeg...' : '+ Voeg boek by'}
@@ -1168,6 +1187,24 @@ export default function Admin({ onClose }) {
                       >
                         {book.featured ? '★ Uitgelig' : '☆ Lyn'}
                       </button>
+                      {/* ── Taal: AF ↔ EN ──
+                          Merk 'n OPGELAAIDE boek as Engels of Afrikaans. 'n
+                          vaste boek is Afrikaanse inhoud en kry nie die knoppie
+                          nie. `vergeetBoeke` sodat die e-boekblaaie dit dadelik
+                          sien in plaas van ses uur later. */}
+                      {!staticIds.has(book.id) && (
+                        <button
+                          className="admin-pdf-btn"
+                          onClick={() => {
+                            const naarEngels = !isEngels(book)
+                            setDoc(doc(db, 'books', book.id), { taal: naarEngels ? 'en' : 'af' }, { merge: true })
+                            vergeetBoeke()
+                          }}
+                          title="Wys hierdie boek op /english (Engels) of op die Afrikaanse blad"
+                        >
+                          {isEngels(book) ? '🌍 Engels' : '🇿🇦 Afr'}
+                        </button>
+                      )}
                       {/* NET 'n boek wat hy self bygevoeg het. 'n Vaste boek se
                           dokument is sy byvoegsel, nie sy bestaan nie — sien
                           skrapBoek. */}
