@@ -363,6 +363,66 @@ export default function Admin({ onClose }) {
   /* Watter boek se skrap-vraag oop is, en of die skryf loop. Sien skrapBoek. */
   const [boekSkrap, setBoekSkrap] = useState(null)
   const [boekBesig, setBoekBesig] = useState(false)
+  /* Die LUISTER-teksonttrekking: watter boek is besig, en 'n kort boodskap per
+     boek. Plus die backfill-knoppie se toestand. */
+  const [teksBesig, setTeksBesig]   = useState(null)
+  const [teksBoodskap, setTeksBoodskap] = useState({})
+  const [backfillBesig, setBackfillBesig] = useState(false)
+  const [backfillUitslag, setBackfillUitslag] = useState('')
+
+  /* Trek 'n Engelse boek se teks uit sy PDF vir die LUISTER-knoppie. Loop
+     outomaties ná 'n PDF-oplaai, en kan met die hand per boek geroep word. */
+  async function haalTeksUit(bookId) {
+    setTeksBesig(bookId)
+    setTeksBoodskap(m => ({ ...m, [bookId]: 'Teks word uitgehaal…' }))
+    try {
+      const r = await fetch('/api/boek-teks-onttrek', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+        body: JSON.stringify({ bookId }),
+      })
+      const j = await r.json().catch(() => ({}))
+      let boodskap
+      if (j.ok) boodskap = `✅ ${j.stukke} hoofstuk${j.stukke === 1 ? '' : 'ke'} gereed`
+      else if (j.rede === 'geen-teks') boodskap = '⚠️ Geen teks in die PDF — gee die teks met die hand'
+      else if (j.rede === 'geen-pdf') boodskap = '⚠️ Laai eers die PDF op'
+      else boodskap = '⚠️ Kon nie teks uithaal nie'
+      setTeksBoodskap(m => ({ ...m, [bookId]: boodskap }))
+      vergeetBoeke()
+    } catch {
+      setTeksBoodskap(m => ({ ...m, [bookId]: '⚠️ Kon nie teks uithaal nie' }))
+    }
+    setTeksBesig(null)
+  }
+
+  async function doenBackfill() {
+    setBackfillBesig(true)
+    setBackfillUitslag('Besig met Engelse boeke…')
+    try {
+      let oor = Infinity, rondtes = 0, totaalGedoen = 0
+      /* Die bediener werk in happe (tyd-begroting). Roep weer tot niks oorbly,
+         maar hou op as dit nie meer vorder nie — dieselfde reël as reels-voeg-by. */
+      while (oor > 0 && rondtes < 20) {
+        const r = await fetch('/api/boek-teks-onttrek', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+          body: JSON.stringify({ backfill: true }),
+        })
+        const j = await r.json().catch(() => ({}))
+        if (j.fout) { setBackfillUitslag('⚠️ ' + j.fout); break }
+        totaalGedoen += (j.gedoen || []).length
+        if ((j.gedoen || []).length === 0) { oor = j.oor || 0; break }
+        oor = j.oor || 0
+        rondtes++
+        setBackfillUitslag(`Besig… ${totaalGedoen} gedoen, ${oor} oor`)
+      }
+      setBackfillUitslag(`✅ Klaar: ${totaalGedoen} boek(e) verwerk${oor > 0 ? `, ${oor} oor` : ''}`)
+      vergeetBoeke()
+    } catch {
+      setBackfillUitslag('⚠️ Kon nie die backfill voltooi nie')
+    }
+    setBackfillBesig(false)
+  }
 
   function getAdminTodaySAST() {
     return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10)
@@ -595,6 +655,9 @@ export default function Admin({ onClose }) {
       })
       setPdfSaved(book.id)
       setTimeout(() => setPdfSaved(null), 3000)
+      /* 'n Engelse boek se teks word DADELIK uitgehaal — die hele punt is dat
+         Dewald net die PDF oplaai en die LUISTER-knoppie self verskyn. */
+      if (isEngels(book)) haalTeksUit(book.id)
     } catch (e) { alert('PDF upload misluk: ' + e.message) }
 
     setPdfUploading(null); setPdfUploadTarget(null)
@@ -1125,6 +1188,21 @@ export default function Admin({ onClose }) {
               <div className="admin-section-title" style={{ marginTop: 24 }}>Alle boeke ({allBooks.length})</div>
               <div className="admin-books-note">Laai cover en PDF op vir elke boek.</div>
 
+              {/* ── Luister-teks vir Engelse boeke ──
+                  Haal die teks uit ALLE Engelse PDF's wat reeds opgelaai is,
+                  sodat die ▶ LISTEN-knoppie verskyn. Nuwe oplaaie doen dit
+                  vanself; hierdie knoppie is vir die klomp wat reeds daar is. */}
+              <div className="admin-field" style={{ background: 'var(--cream, #FAF8F5)', padding: 12, borderRadius: 10, marginTop: 8 }}>
+                <label>🎧 Luister-teks (Engelse boeke)</label>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', margin: '2px 0 8px' }}>
+                  Trek die teks uit die Engelse PDF's sodat mense dit kan laat voorlees.
+                </span>
+                <button className="admin-save-btn" onClick={doenBackfill} disabled={backfillBesig}>
+                  {backfillBesig ? 'Besig…' : 'Haal teks uit vir alle Engelse boeke'}
+                </button>
+                {backfillUitslag && <div style={{ fontSize: 12, marginTop: 6 }}>{backfillUitslag}</div>}
+              </div>
+
               <input ref={pdfInputRef} type="file" accept=".pdf,application/pdf"
                 style={{ display: 'none' }} onChange={handlePdfUpload} />
               <input ref={coverInputRef} type="file" accept="image/*"
@@ -1160,6 +1238,17 @@ export default function Admin({ onClose }) {
                       {(isPdfUploading || isCoverUploading) && (
                         <div className="admin-upload-bar" style={{ marginTop: 4 }}>
                           <div className="admin-upload-fill" style={{ width: `${isPdfUploading ? pdfProgress : coverProgress}%` }} />
+                        </div>
+                      )}
+                      {/* Luister-status vir 'n Engelse boek. */}
+                      {isEngels(book) && (teksBoodskap[book.id] || override?.luisterStatus) && (
+                        <div className="admin-note-meta" style={{ marginTop: 2 }}>
+                          {teksBoodskap[book.id]
+                            || (override.luisterStatus === 'gereed'
+                                  ? `🎧 Luister gereed${override.luisterStukke ? ` (${override.luisterStukke} hoofstukke)` : ''}`
+                                  : override.luisterStatus === 'geen-teks'
+                                    ? '⚠️ Geen teks in die PDF — gee die teks met die hand'
+                                    : '')}
                         </div>
                       )}
                     </div>
@@ -1203,6 +1292,20 @@ export default function Admin({ onClose }) {
                           title="Wys hierdie boek op /english (Engels) of op die Afrikaanse blad"
                         >
                           {isEngels(book) ? '🌍 Engels' : '🇿🇦 Afr'}
+                        </button>
+                      )}
+                      {/* Luister-teks uithaal — net vir 'n Engelse boek met 'n
+                          PDF. Gewoonlik gebeur dit vanself ná die oplaai; hierdie
+                          knoppie is om dit weer te probeer of om 'n bestaande
+                          boek by te werk. */}
+                      {!staticIds.has(book.id) && isEngels(book) && hasPdf && (
+                        <button
+                          className="admin-pdf-btn"
+                          onClick={() => haalTeksUit(book.id)}
+                          disabled={teksBesig === book.id}
+                          title="Trek die teks uit die PDF vir die LUISTER-knoppie"
+                        >
+                          {teksBesig === book.id ? '…' : '🎧 Teks'}
                         </button>
                       )}
                       {/* NET 'n boek wat hy self bygevoeg het. 'n Vaste boek se
