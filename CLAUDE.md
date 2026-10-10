@@ -2447,6 +2447,12 @@ donasie- of e-posstelsel nie. 'n Kort persoonlike boodskap van Dewald met sy
 foto (`public/beelde/dewald-en.webp`) staan VOOR die donasie-kaart — 'n gesig
 voor enige vraag.
 
+**Ná 'n skenking bly 'n stil "Skenk weer"/"Donate again"** onder op die
+dankie-kaart (`DonationCard.jsx`, die `gewer`-gesig). Dewald: *"Nadat ek geskenk
+het moet daar steeds 'n eenmalige donate knoppie wees."* Dit is 'n onderstreepte
+SKAKEL, nie 'n tweede knoppie nie — die vennoot-knoppie bly die enigste ding op
+'n dankie-kaart wat soos 'n knoppie lyk. Blaaiertoets: `kykSkenkWeer.mjs`.
+
 ### Die Engelse e-posse en die APARTE lys
 
 Dewald: *"aparte plek in admin vir engelse eposte... as iemand aflaai kry hul
@@ -2460,6 +2466,13 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   terugkeer-adres, sien `src/utils/payfast.js`). `payfast-itn.js` stuur dan die
   Engelse dankie/welkom en skryf na `emailListEn`. App.jsx wys die Engelse
   dankie-opspringer en maak /english weer oop.
+* **PayFast se `notify_url` is die blad se EIE adres** (`itnUrl()` in
+  `src/utils/payfast.js`). Dit was vas `https://dewaldscheepers.com/...` — sonder
+  www — terwyl die werf op www loop. 'n Aanstuur volg PayFast nie: die betaling
+  slaag, PayFast stuur sy eie e-posse, en ons bediener hoor NOOIT daarvan nie.
+  Daarom het GEEN dankie-e-pos uitgegaan nie, in albei tale, terwyl die gratis
+  e-boek-e-pos (relatief geroep) gewerk het. Moet die adres nooit weer vas tik
+  nie. Blaaiertoets: `kykNotify.mjs` vang die vorm wat na PayFast gaan.
 * **`payfast-itn.js` doen sy werk VOOR hy antwoord.** Dit het eers
   `res.send('OK')` gedoen en DAARNA die dankie-e-pos gestuur — en Vercel vries
   'n funksie sodra die antwoord uit is. Die e-pos het dus soms nooit uitgegaan

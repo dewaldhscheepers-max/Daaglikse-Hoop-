@@ -57,6 +57,7 @@ const KAART_WOORDE = {
     gewerTitel:   'Dankie vir jou bydrae',
     gewerTeks:    'Jou ondersteuning help ons om Daaglikse Hoop gratis te hou.',
     wordVennoot:  "Word 'n Hoop-Vennoot",
+    skenkWeer:    'Skenk weer',
     gewerFyn:     'Kies maandeliks en help om Daaglikse Hoop elke dag gratis te hou.',
     maandeliks:   "Word 'n maandelikse Hoop-Vennoot",
     eenmalig:     'Gee eenmalig',
@@ -68,6 +69,7 @@ const KAART_WOORDE = {
     gewerTitel:   'Thank you for your gift',
     gewerTeks:    'Your support helps us keep Daaglikse Hoop free.',
     wordVennoot:  'Become a Hope Partner',
+    skenkWeer:    'Donate again',
     gewerFyn:     'Choose monthly and help keep Daaglikse Hoop free every day.',
     maandeliks:   'Become a monthly Hope Partner',
     eenmalig:     'Give once',
@@ -139,6 +141,15 @@ export default function DonationCard({
           {w.wordVennoot}
         </button>
         <p className="donation-card-fyn">{w.gewerFyn}</p>
+        {/* ── "Skenk weer" — 'n SKAKEL, nie 'n tweede knoppie nie ──
+         * Dewald, 10 Oktober 2026, ná sy eie skenking: *"Nadat ek geskenk het
+         * moet daar steeds 'n eenmalige donate knoppie wees... as hul weer wil
+         * skenk."* Hy is reg: wie wil gee, moet nie eers 'n maand wag nie. Dit
+         * staan as stil teks onder die fyn reël, sodat die dankie 'n dankie bly
+         * en die vennoot-knoppie die enigste ding is wat soos 'n knoppie lyk. */}
+        <button className="donation-card-weer" onClick={handleOnce}>
+          {w.skenkWeer}
+        </button>
       </div>
     )
   }

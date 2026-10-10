@@ -4,7 +4,25 @@ const MERCHANT_ID  = '26753445'
 const MERCHANT_KEY = 'acdbj7mteeup0'
 const PASSPHRASE   = 'DaaglikseHoop5320'
 const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
-const ITN_URL      = 'https://dewaldscheepers.com/api/payfast-itn'
+/* ── Die ITN-adres is die adres waarop die blad WERKLIK loop ──
+ *
+ * Dit was vas `https://dewaldscheepers.com/api/payfast-itn` — sonder www. Die
+ * werf loop op www.dewaldscheepers.com, en stuur die kaal domein daarheen aan,
+ * dan kry PayFast se POST 'n aanstuur in plaas van ons bediener. PayFast volg
+ * dit nie: die betaling slaag, PayFast stuur sy eie e-posse, en ons hoor nooit
+ * daarvan nie — geen dankie-e-pos, nie in Engels en nie in Afrikaans nie
+ * (Dewald, 10 Oktober 2026, ná 'n R10- en 'n R50-skenking). Die gratis
+ * e-boek-e-pos het intussen gewerk, want die app roep daardie eindpunt RELATIEF.
+ *
+ * `window.location.origin` is per definisie 'n adres wat ons bediener direk
+ * bedien — die blad het pas daarvandaan gelaai. */
+function itnUrl() {
+  try {
+    const o = window.location.origin
+    if (/^https:\/\//.test(o)) return `${o}/api/payfast-itn`
+  } catch {}
+  return 'https://www.dewaldscheepers.com/api/payfast-itn'
+}
 
 function phpUrlencode(val) {
   return encodeURIComponent(String(val).trim())
@@ -51,7 +69,7 @@ export function checkoutBook(book, email, type = 'ebook', { taal } = {}) {
     merchant_key:  MERCHANT_KEY,
     return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}${en ? '&lang=en' : ''}`,
     cancel_url:    `${window.location.origin}/?payment=cancel${en ? '&lang=en' : ''}`,
-    notify_url:    ITN_URL,
+    notify_url:    itnUrl(),
     email_address: email,
     amount:        book.price.toFixed(2),
     item_name:     book.title.substring(0, 100),
@@ -76,7 +94,7 @@ export function checkoutCart(books, email) {
     merchant_key:  MERCHANT_KEY,
     return_url:    `${base}/?payment=success&type=ebook&books=${encodeURIComponent(books.map(b => b.id).join(','))}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${base}/?payment=cancel`,
-    notify_url:    ITN_URL,
+    notify_url:    itnUrl(),
     email_address: email,
     amount:        total.toFixed(2),
     item_name:     name,
@@ -107,7 +125,7 @@ export function checkoutSubscription(amountRand, email, { taal } = {}) {
     merchant_key:      MERCHANT_KEY,
     return_url:        returnUrl,
     cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription${en ? '&lang=en' : ''}`,
-    notify_url:        ITN_URL,
+    notify_url:        itnUrl(),
     amount,
     item_name:         en ? 'Monthly Hope Partner' : 'Maandelikse Hoop-Vennoot',
     /* Net vir die Engelse blad; PayFast stuur dit terug in elke ITN. */

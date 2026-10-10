@@ -146,6 +146,25 @@
   margin: 9px 0 0;
 }
 
+/* "Skenk weer" op die dankie-gesig: onderstreepte teks, geen raam. Net kleur
+   op :active — geen transform (die Android-reël). */
+.donation-card-weer {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple, #5B4E8C);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.donation-card-weer:active { color: var(--purple-dark, #3E3466); }
+
 /* ── Die DANKIE-gesigte ──
  *
  * Wie reeds gee, sien nie 'n vraag nie. Die kaart word stiller: geen groen,
