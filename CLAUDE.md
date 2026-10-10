@@ -2468,6 +2468,17 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   is NIE aangeraak nie. Sonder `taal`/`custom_str3` is elke pad woord vir woord
   die ou een — `_eposEngels.toets.mjs` sit 'n vals Firestore + Resend agter die
   egte eindpunte en eis dit vir albei tale.
+* **Die e-pos se skenk-knoppies** gaan na `/english?give=monthly` en
+  `/english?give=once` — die Engelse eweknie van die Afrikaanse
+  `/go/support`: die Engelse skenk-venster gaan DADELIK oop, nie bo-aan 'n blad
+  waar 'n mens self moet soek nie. Die bedoeling gaan deur sessionStorage
+  (`en_gee`), om dieselfde rede as `steun_versoek`.
+* **Op /english kom GEEN Afrikaanse opspringer nie** (`engelsOopRef`): die
+  installasie-uitklap, die e-boek-/donasie-opspringer, die kennisgewing-vraag en
+  "VOLG JESUS het geskuif". Hulle sit onsigbaar agter die blad (z-index 2000)
+  en verbruik intussen die dag — die kennisgewing-vraag selfs een van die drie
+  keer in 'n leeftyd. Blaaiertoets: `kykEngelsOudit.mjs`, wat ook eis dat `/` en
+  `/go/support` presies soos altyd werk.
 * **Admin → 🌍 English** wys die Engelse lys (`api/epos-engels.js`,
   admin-alleen) en laai dit af as CSV. 'n Nuusbrief AAN die Engelse lys stuur
   bestaan nog nie — die stuur-knoppie in ✉️ E-pos ken net die Afrikaanse lys.

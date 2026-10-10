@@ -154,6 +154,11 @@ export default function App() {
   const [wysSteun, setWysSteun]                   = useState(false)
   /* Die Engelse e-boekblad (/english) — 'n volskerm-oorname, soos HoopOntvang. */
   const [engelsOop, setEngelsOop]                 = useState(false)
+  /* Vir die opspringers wat uit 'n tydhouer loop. Op /english mag GEEN
+     Afrikaanse opspringer kom nie: hy sit onsigbaar agter die Engelse blad
+     (z-index 2000) en verbruik intussen die dag — of, by die kennisgewing-
+     vraag, een van die drie keer in 'n leeftyd. */
+  const engelsOopRef = useRef(false)
   const [showLeuensDuiwel,    setShowLeuensDuiwel]    = useState(false)
   const [showBybelMaklik,     setShowBybelMaklik]     = useState(false)
   const [showWanneerAngs,     setShowWanneerAngs]     = useState(false)
@@ -349,6 +354,9 @@ export default function App() {
      * Die voer vra self, NÁ die tweede swiep, wanneer sy self besluit het om
      * aan te hou. Sien `magVraInstalleer()` in reels.js. */
     if (reelId) return
+    /* Op /english staan 'n eie Engelse knoppie na /go bo-aan; die Afrikaanse
+       uitklap sou agter die blad sit en die dag verbruik. */
+    if (engelsOop) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
     const t = setTimeout(() => {
@@ -356,13 +364,13 @@ export default function App() {
          in 'n leeftyd en sy verduidelik iets wat pas van die skerm af weg is;
          hierdie uitklap kom môre weer. Sonder hierdie hek het die uitklap
          drie sekondes later bo-op haar kom staan en die knoppie doodgedruk. */
-      if (!isPlayingRef.current && !vjSkuifRef.current) {
+      if (!isPlayingRef.current && !vjSkuifRef.current && !engelsOopRef.current) {
         setShowInstallPopup(true)
         localStorage.setItem('installPopupDate', today)
       }
     }, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId, reelId])
+  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId, reelId, engelsOop])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -424,6 +432,9 @@ export default function App() {
          sien. Dieselfde besluit as by 'n gedeelde HOOP-skakel hierbo, en dit is
          'n LAAT VAL en nie 'n uitstel nie. */
       if (reelDeepRef.current) return
+      /* Op /english: die Afrikaanse e-boek- of donasie-opspringer sou agter die
+         Engelse blad sit, ongesiens, en die dag se vraag verbruik. */
+      if (engelsOopRef.current) return
       /* Die voer is oop (haar eie app, haar eie oortjie). 'n Donasievraag oor 'n
          video word weggedruk sonder dat iemand hom lees — en dan is daardie
          vraag vir vandag verbruik. Hy WAG, net soos terwyl klank speel. */
@@ -643,7 +654,7 @@ export default function App() {
      * Dit word nie uitgestel nie — dit word net nie NOU gevra nie. `merkGevra`
      * loop eers wanneer die vraag werklik gewys is, dus bly die kans staan en
      * die volgende oopmaak vra weer. */
-    if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current || reelsOopRef.current) return false
+    if (tmgOopRef.current || isPlayingRef.current || hoopOopRef.current || reelsOopRef.current || engelsOopRef.current) return false
     /* En nie bo-op 'n opspringer nie — die e-boek-, donasie- of deelkaart. */
     if (activePopupRef.current) return false
 
@@ -1273,7 +1284,26 @@ export default function App() {
   useEffect(() => {
     try {
       const pad = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '')
-      if (pad === '/english') setEngelsOop(true)
+      if (pad === '/english') {
+        /* ── Die e-pos se skenk-knoppies: /english?give=once | monthly ──
+           Dieselfde as die Afrikaanse e-pos se /go/support: wie op "Give once"
+           of "Monthly Partner" druk, land DADELIK in die Engelse skenk-venster,
+           nie bo-aan 'n blad waar hy self moet soek nie. Die bedoeling gaan in
+           sessionStorage om dieselfde rede as `steun_versoek`: die diensketter
+           kan die eerste besoek herlaai, en dan is die ?give= weg. */
+        const gee = (new URLSearchParams(window.location.search).get('give') || '').toLowerCase()
+        if (gee === 'once' || gee === 'monthly') {
+          sessionStorage.setItem('en_gee', gee)
+          window.history.replaceState({}, '', '/english')
+        }
+        const wil = sessionStorage.getItem('en_gee')
+        if (wil) {
+          sessionStorage.removeItem('en_gee')
+          if (wil === 'monthly') setShowHoopVennoot(true)
+          else if (wil === 'once') setDonation(true)
+        }
+        setEngelsOop(true)
+      }
     } catch {}
   }, [])
 
@@ -1579,7 +1609,7 @@ export default function App() {
         klaarPerWeek: leesKlaarPerWeek(),
         oortjie: tabRef.current,
         klankSpeel: isPlayingRef.current,
-        oorlegOop: oorlegRef.current || tmgOopRef.current,
+        oorlegOop: oorlegRef.current || tmgOopRef.current || engelsOopRef.current,
       })
       if (mag) { setShowVjSkuif(true); clearInterval(klok) }
       else if (pogings >= 12) clearInterval(klok)   /* sowat 30s, dan môre weer */
@@ -1759,6 +1789,7 @@ export default function App() {
      `oorlegLae` nie en moet sy eie ref dra. */
   reelsOopRef.current = tab === 'reels'
   reelDeepRef.current = !!reelId
+  engelsOopRef.current = engelsOop
 
   /* Hoeveel lae die terug-knoppie kan afpel: die oortjie (as ons nie op
      Luister is nie) plus 'n oop oorlegblad. */

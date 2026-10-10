@@ -51,12 +51,12 @@ const STEUN = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="padding:0 4px 10px 0;" width="50%">
-          <a href="${ENGELSE_BLAD}" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
+          <a href="${ENGELSE_BLAD}?give=monthly" style="display:block;background:#5C4E8E;color:white;text-decoration:none;border-radius:10px;padding:13px 10px;font-size:13px;font-weight:700;text-align:center;font-family:Georgia,serif;">
             💜 Monthly Partner
           </a>
         </td>
         <td style="padding:0 0 10px 4px;" width="50%">
-          <a href="${ENGELSE_BLAD}" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
+          <a href="${ENGELSE_BLAD}?give=once" style="display:block;background:white;color:#5C4E8E;text-decoration:none;border-radius:10px;padding:12px 10px;font-size:13px;font-weight:700;text-align:center;border:2px solid #5C4E8E;font-family:Georgia,serif;">
             🙏 Give once
           </a>
         </td>
