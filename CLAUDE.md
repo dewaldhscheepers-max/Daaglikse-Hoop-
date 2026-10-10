@@ -60,6 +60,7 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
+node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die draad gaan, 5 toetse
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
@@ -2442,6 +2443,19 @@ Anders as /boek en /hoop word die pad NIE uitgevee nie — 'n herlaai moet die
 mens op die blad hou. Die kaart op die e-boekblad waai `open-engels`; App.jsx
 stoot die pad `/english` by, en `popstate` maak die oorname toe. Die "Go to the
 app"-knoppies gaan na `/go`; die DEEL-knoppies na `/english`.
+
+**Die Engelse boeke laai deur 'n gekasde eindpunt, nie net Firestore nie.**
+Dewald: *"Why does the browser take so long to load the english ebooks?"* Die
+Afrikaanse blad voel vinnig omdat sy boeke se name in `books.js` staan; die
+Engelse een het NIKS gehad om te wys voordat Firestore se `onSnapshot` sy
+verbinding opgebou het — op 'n foon, veral in Facebook se ingeboude blaaier,
+etlike sekondes, terwyl die blad *"New English books are on the way"* gelieg
+het. Nou drie bronne, vinnigste eerste: die foon se kas (`engelseBoekeKas`),
+`api/engelse-boeke.mjs` (een GET, witlys in `engelseBoekeOpenbaar.js`, die
+rand kas dit 5 min — dieselfde vorm as `reels-lys`), en dan die lewendige
+luisteraar. 'n Leë SDK-kas-antwoord word nooit aanvaar nie, en tot een bron
+antwoord sê die blad "Loading the books…". Blaaiertoets: `kykEngelsSpoed.mjs`
+(Firestore geblokkeer: boeke binne ~0,8s).
 
 **Op /english is daar GEEN installasiemuur voor 'n boek nie.** `FreeBookModal`
 slaan die installeer-stap oor wanneer `taal === 'en'` — reguit na die e-posvorm.

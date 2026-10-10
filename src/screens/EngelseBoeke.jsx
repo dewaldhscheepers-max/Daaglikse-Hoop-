@@ -4,6 +4,7 @@ import { collection, onSnapshot, doc } from 'firebase/firestore'
 import { eboekTotale } from '../data/eboekTotale'
 import { verdeelPerTaal, deelBoodskapEn } from '../data/engelsBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
+import { openbareEngelseBoeke } from '../data/engelseBoekeOpenbaar'
 import { CAMPAIGN } from '../data/campaign'
 import DonationCard from '../components/DonationCard'
 import FreeBookModal from '../components/FreeBookModal'
@@ -13,6 +14,22 @@ import './EngelseBoeke.css'
    nie die laai app op jou foon... www.dewaldscheepers.com/english"*. Die
    ontvanger land by die Engelse boeke, nie by die Afrikaanse installeerblad. */
 const DEEL_SKAKEL = 'https://www.dewaldscheepers.com/english'
+
+/* Die laaste Engelse boekelys op HIERDIE foon — sodat 'n tweede besoek dadelik
+   boeke wys. Net die witlys se velde word bewaar (`openbareEngelseBoeke`). */
+const BOEKE_KAS = 'engelseBoekeKas'
+function leesBoekeKas() {
+  try {
+    const lys = JSON.parse(localStorage.getItem(BOEKE_KAS) || '[]')
+    return Array.isArray(lys) ? Object.fromEntries(lys.filter(b => b && b.id).map(b => [b.id, b])) : {}
+  } catch { return {} }
+}
+function skryfBoekeKas(lys) {
+  try {
+    const skoon = openbareEngelseBoeke(lys)
+    if (skoon.length) localStorage.setItem(BOEKE_KAS, JSON.stringify(skoon))
+  } catch {}
+}
 
 /* Een keer gelees — die Afrikaanse blad skryf dit wanneer al die bronne in is. */
 const gekasteTotale = (() => {
@@ -57,7 +74,11 @@ const gekasteTotale = (() => {
  * terugsit nie; 'n egte opname per boek is die enigste weergawe wat sou werk.
  */
 export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
-  const [bookOverrides, setBookOverrides] = useState({})
+  const [bookOverrides, setBookOverrides] = useState(leesBoekeKas)
+  /* Het EEN bron al geantwoord (kas, eindpunt of Firestore)? Tot dan sê die
+     blad "Loading", nie "on the way" nie — daardie sin het gelieg terwyl die
+     boeke nog net nie aangekom het nie. */
+  const [gelaai, setGelaai] = useState(() => Object.keys(leesBoekeKas()).length > 0)
   const [rgCount,   setRgCount]   = useState(null)
   const [liveCount, setLiveCount] = useState(null)
   const [liveValue, setLiveValue] = useState(null)
@@ -66,13 +87,44 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
   const [claimedMap, setClaimedMap] = useState({})
   const [deelKopie,  setDeelKopie]  = useState(false)
 
-  // ── Books (live) ──
+  // ── Books ──
+  /* Drie bronne, vinnigste eerste, en geen een mag 'n beter antwoord met 'n
+     swakker een vervang nie:
+       1. die foon se eie kas (`engelseBoekeKas`) — dadelik, by elke terugkeer;
+       2. /api/engelse-boeke — een gewone GET wat die rand vyf minute kas; dit
+          is wat 'n VREEMDELING op 'n gedeelde skakel binne 'n oomblik sien;
+       3. Firestore se lewendige luisteraar — stadig om op te bou, maar hy hou
+          die blad by wanneer die admin iets verander.
+     Sien die kop van api/engelse-boeke.mjs vir hoekom. */
+  useEffect(() => {
+    let dood = false
+    fetch('/api/engelse-boeke')
+      .then(r => r.json())
+      .then(j => {
+        if (dood) return
+        const lys = Array.isArray(j && j.boeke) ? j.boeke : []
+        if (lys.length) {
+          const o = Object.fromEntries(lys.map(b => [b.id, b]))
+          setBookOverrides(prev => ({ ...prev, ...o }))   /* voeg by, vervang nooit met minder nie */
+          skryfBoekeKas(lys)
+        }
+        setGelaai(true)
+      })
+      .catch(() => {})
+    return () => { dood = true }
+  }, [])
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'books'), snap => {
+      /* 'n Leë antwoord uit die SDK se eie kas is nie "geen boeke nie" — dit is
+         "nog niks gehoor nie". Aanvaar dit nooit bo wat ons reeds wys nie. */
+      if (snap.empty && snap.metadata.fromCache) return
       const o = {}
       snap.docs.forEach(d => { o[d.id] = d.data() })
       setBookOverrides(o)
-    })
+      setGelaai(true)
+      skryfBoekeKas(Object.entries(o).map(([id, d]) => ({ id, ...d })))
+    }, () => {})
     return unsub
   }, [])
 
@@ -227,7 +279,9 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           {boeke.length > 0 && <span className="en-sec-count">{boeke.length} {boeke.length === 1 ? 'book' : 'books'}</span>}
         </div>
 
-        {boeke.length === 0 ? (
+        {boeke.length === 0 && !gelaai ? (
+          <p className="en-leeg">Loading the books…</p>
+        ) : boeke.length === 0 ? (
           <p className="en-leeg">
             New English books are on the way. Check back soon — or open the full app below.
           </p>
