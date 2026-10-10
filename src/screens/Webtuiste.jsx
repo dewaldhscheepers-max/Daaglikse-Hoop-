@@ -6,7 +6,35 @@ import './Webtuiste.css'
 
 const PRESET_AMOUNTS = [50, 100, 250, 1000]
 
-export function DonationModal({ onClose, beginBedrag = null }) {
+/* Twee tale — die Engelse e-boekblad maak hierdie venster in Engels oop. Die
+   PayFast-pad bly presies dieselfde; net die woorde skuif. */
+const DM_WOORDE = {
+  af: {
+    titel: 'Ondersteun die Bediening',
+    doel: 'Help ons om daaglikse hoop by meer mense te kry. Jou bydrae help met stemnotas, tegnologie, advertensies en gratis geestelike hulpbronne.',
+    vers: '"Elke gewer wat vrolik gee, is vir God aangenaam." — 2 Kor. 9:7',
+    kies: "Kies 'n bedrag", ander: 'Ander',
+    anderPlek: 'Tik bedrag (bv. 350)',
+    epos: 'Jou e-posadres', eposPlek: 'naam@epos.com',
+    foutMin: 'Minimum skenking is R10.', foutEpos: "Voer asb 'n geldige e-posadres in.",
+    besig: 'Besig...', skenk: a => `Skenk R${a || '?'} via PayFast`,
+    veilig: '🔒 Kaart, EFT, SnapScan · Veilige betaling via PayFast',
+  },
+  en: {
+    titel: 'Support the Ministry',
+    doel: 'Help us bring daily hope to more people. Your gift helps with voice notes, technology, advertising and free spiritual resources.',
+    vers: '"God loves a cheerful giver." — 2 Cor. 9:7',
+    kies: 'Choose an amount', ander: 'Other',
+    anderPlek: 'Enter amount (e.g. 350)',
+    epos: 'Your email address', eposPlek: 'name@email.com',
+    foutMin: 'Minimum donation is R10.', foutEpos: 'Please enter a valid email address.',
+    besig: 'Working...', skenk: a => `Donate R${a || '?'} via PayFast`,
+    veilig: '🔒 Card, EFT, SnapScan · Secure payment via PayFast',
+  },
+}
+
+export function DonationModal({ onClose, beginBedrag = null, taal = 'af' }) {
+  const t = DM_WOORDE[taal] || DM_WOORDE.af
   const preset = PRESET_AMOUNTS.includes(beginBedrag) ? beginBedrag : null
   const [selected, setSelected] = useState(preset || 100)
   const [custom, setCustom]     = useState('')
@@ -20,8 +48,8 @@ export function DonationModal({ onClose, beginBedrag = null }) {
   const amount = showCustom && custom ? Number(custom) : selected
 
   function validate() {
-    if (!amount || amount < 10) { setError('Minimum skenking is R10.'); return false }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Voer asb 'n geldige e-posadres in."); return false }
+    if (!amount || amount < 10) { setError(t.foutMin); return false }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError(t.foutEpos); return false }
     return true
   }
 
@@ -41,13 +69,11 @@ export function DonationModal({ onClose, beginBedrag = null }) {
         <button className="modal-close" onClick={onClose}>✕</button>
 
         <div className="donation-icon">❤️</div>
-        <h3 className="modal-title">Ondersteun die Bediening</h3>
-        <p className="donation-purpose">
-          Help ons om daaglikse hoop by meer mense te kry. Jou bydrae help met stemnotas, tegnologie, advertensies en gratis geestelike hulpbronne.
-        </p>
-        <p className="donation-verse">"Elke gewer wat vrolik gee, is vir God aangenaam." — 2 Kor. 9:7</p>
+        <h3 className="modal-title">{t.titel}</h3>
+        <p className="donation-purpose">{t.doel}</p>
+        <p className="donation-verse">{t.vers}</p>
 
-        <p className="modal-label">Kies 'n bedrag</p>
+        <p className="modal-label">{t.kies}</p>
         <div className="amount-grid">
           {PRESET_AMOUNTS.map(a => (
             <button
@@ -62,7 +88,7 @@ export function DonationModal({ onClose, beginBedrag = null }) {
             className={`amount-btn${showCustom ? ' selected' : ''}`}
             onClick={() => { setShowCustom(true); setError('') }}
           >
-            Ander
+            {t.ander}
           </button>
         </div>
 
@@ -70,7 +96,7 @@ export function DonationModal({ onClose, beginBedrag = null }) {
           <input
             className="modal-input amount-input"
             type="number"
-            placeholder="Tik bedrag (bv. 350)"
+            placeholder={t.anderPlek}
             value={custom}
             min={10}
             autoFocus
@@ -78,11 +104,11 @@ export function DonationModal({ onClose, beginBedrag = null }) {
           />
         )}
 
-        <p className="modal-label">Jou e-posadres</p>
+        <p className="modal-label">{t.epos}</p>
         <input
           className="modal-input"
           type="email"
-          placeholder="naam@epos.com"
+          placeholder={t.eposPlek}
           value={email}
           onChange={e => { setEmail(e.target.value); setError('') }}
         />
@@ -90,15 +116,15 @@ export function DonationModal({ onClose, beginBedrag = null }) {
         {error && <p className="modal-error">{error}</p>}
 
         <button className="btn-primary modal-pay-btn donate-btn" onClick={pay} disabled={busy}>
-          {busy ? 'Besig...' : `Skenk R${amount || '?'} via PayFast`}
+          {busy ? t.besig : t.skenk(amount)}
         </button>
 
-        <p className="modal-secure">🔒 Kaart, EFT, SnapScan · Veilige betaling via PayFast</p>
+        <p className="modal-secure">{t.veilig}</p>
 
         {/* Die EFT-blok staan in EftBesonderhede.jsx sodat die bankbesonderhede
             op EEN plek lê — die eenmalige vorm en die maandelikse vorm wys
             dieselfde ding. */}
-        <EftBesonderhede />
+        <EftBesonderhede taal={taal} />
       </div>
     </div>
   )

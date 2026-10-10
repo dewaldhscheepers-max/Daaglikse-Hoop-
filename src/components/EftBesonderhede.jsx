@@ -36,7 +36,29 @@ const BANK = {
   takkode: '470010',
 }
 
-export default function EftBesonderhede({ maandeliks = false }) {
+/* Twee tale — die Engelse e-boekblad wys dieselfde EFT-blok in Engels. Die
+   bankbesonderhede bly dieselfde; net die woorde skuif. */
+const WOORDE = {
+  af: {
+    knopEenmalig: 'Of skenk direk via EFT',
+    knopMaandeliks: 'Of stel ’n maandelikse EFT op',
+    inlei: <>Stel dit een keer as ’n <b>maandelikse debietorder</b> by jou eie bank op. Dit loop dan vanself, en jy bly heeltemal in beheer — jy kan dit enige tyd by jou bank stop.</>,
+    bank: 'Bank', naam: 'Naam', rekening: 'Rekening', takkode: 'Tak-kode',
+    kopieer: 'Tik om te kopieer', gekopieer: '✓ Gekopieer',
+    nota: <>Gebruik jou <b>selfoonnommer</b> as verwysing, sodat ons weet wie jy is.</>,
+  },
+  en: {
+    knopEenmalig: 'Or give directly via EFT',
+    knopMaandeliks: 'Or set up a monthly EFT',
+    inlei: <>Set it up once as a <b>monthly debit order</b> with your own bank. It then runs by itself, and you stay fully in control — you can stop it at your bank at any time.</>,
+    bank: 'Bank', naam: 'Name', rekening: 'Account', takkode: 'Branch code',
+    kopieer: 'Tap to copy', gekopieer: '✓ Copied',
+    nota: <>Use your <b>cellphone number</b> as the reference, so we know who you are.</>,
+  },
+}
+
+export default function EftBesonderhede({ maandeliks = false, taal = 'af' }) {
+  const w = WOORDE[taal] || WOORDE.af
   const [oop, setOop] = useState(false)
   const [gekopieer, setGekopieer] = useState('')
 
@@ -56,33 +78,27 @@ export default function EftBesonderhede({ maandeliks = false }) {
       <button className="eft-knop" onClick={() => setOop(v => !v)}>
         <span className="eft-knop-ikoon" aria-hidden="true">🏦</span>
         <span className="eft-knop-teks">
-          {maandeliks ? 'Of stel ’n maandelikse EFT op' : 'Of skenk direk via EFT'}
+          {maandeliks ? w.knopMaandeliks : w.knopEenmalig}
         </span>
         <span className="eft-knop-pyl" aria-hidden="true">{oop ? '▲' : '▼'}</span>
       </button>
 
       {oop && (
         <div className="eft-blok">
-          {maandeliks && (
-            <p className="eft-inlei">
-              Stel dit een keer as ’n <b>maandelikse debietorder</b> by jou eie
-              bank op. Dit loop dan vanself, en jy bly heeltemal in beheer —
-              jy kan dit enige tyd by jou bank stop.
-            </p>
-          )}
+          {maandeliks && <p className="eft-inlei">{w.inlei}</p>}
 
-          <div className="eft-ry"><span>Bank</span><b>{BANK.bank}</b></div>
-          <div className="eft-ry"><span>Naam</span><b>{BANK.naam}</b></div>
+          <div className="eft-ry"><span>{w.bank}</span><b>{BANK.bank}</b></div>
+          <div className="eft-ry"><span>{w.naam}</span><b>{BANK.naam}</b></div>
 
           <button
             className="eft-ry eft-ry-kopieer"
             onClick={() => kopieer(BANK.rekening, 'rekening')}
           >
-            <span>Rekening</span>
+            <span>{w.rekening}</span>
             <b>
               {BANK.rekening}
               <span className="eft-kopie-merk">
-                {gekopieer === 'rekening' ? '✓ Gekopieer' : 'Tik om te kopieer'}
+                {gekopieer === 'rekening' ? w.gekopieer : w.kopieer}
               </span>
             </b>
           </button>
@@ -91,18 +107,16 @@ export default function EftBesonderhede({ maandeliks = false }) {
             className="eft-ry eft-ry-kopieer"
             onClick={() => kopieer(BANK.takkode, 'takkode')}
           >
-            <span>Tak-kode</span>
+            <span>{w.takkode}</span>
             <b>
               {BANK.takkode}
               <span className="eft-kopie-merk">
-                {gekopieer === 'takkode' ? '✓ Gekopieer' : 'Tik om te kopieer'}
+                {gekopieer === 'takkode' ? w.gekopieer : w.kopieer}
               </span>
             </b>
           </button>
 
-          <p className="eft-nota">
-            Gebruik jou <b>selfoonnommer</b> as verwysing, sodat ons weet wie jy is.
-          </p>
+          <p className="eft-nota">{w.nota}</p>
         </div>
       )}
     </div>

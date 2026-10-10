@@ -1963,7 +1963,7 @@ export default function App() {
         setWysSteun(false)
         try { sessionStorage.removeItem('steun_versoek') } catch {}
       }} />}
-      {showDonation && <DonationModal beginBedrag={steunBedrag} onClose={() => setDonation(false)} />}
+      {showDonation && <DonationModal beginBedrag={steunBedrag} taal={engelsOop ? 'en' : 'af'} onClose={() => setDonation(false)} />}
       {showNooimy   && <NooimyModal   onClose={() => setNooimy(false)} />}
 
       {activePopup?.type === 'ebook' && (
@@ -2049,7 +2049,7 @@ export default function App() {
       )}
 
       {showHoopVennoot && (
-        <HoopVennoot beginBedrag={steunBedrag} onClose={() => setShowHoopVennoot(false)} />
+        <HoopVennoot beginBedrag={steunBedrag} taal={engelsOop ? 'en' : 'af'} onClose={() => setShowHoopVennoot(false)} />
       )}
 
       {showBybelMaklik && (
