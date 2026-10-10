@@ -155,13 +155,17 @@ export default function EngelseBoeke({ onClose, isInstalled, installPrompt }) {
           </svg>
           Back
         </button>
-        <a className="en-kry" href="/go">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-               strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" />
-          </svg>
-          Download the Daaglikse Hoop app
-        </a>
+        {/* Net vir wie die app NOG NIE het nie — 'n mens wat reeds in die
+            geïnstalleerde app is (standalone), sien net Terug. */}
+        {!isInstalled && (
+          <a className="en-kry" href="/go">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" />
+            </svg>
+            Download the Daaglikse Hoop app
+          </a>
+        )}
       </div>
 
       {/* Header + shared counter */}
