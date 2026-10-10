@@ -56,10 +56,15 @@ export function DonationModal({ onClose, beginBedrag = null, taal = 'af' }) {
   function pay() {
     if (!validate()) return
     setBusy(true)
+    /* Die id bly 'skenking' — die ITN herken 'n skenking daaraan. Net die
+       titel (wat op PayFast se blad wys) en die taal-merker skuif. */
     checkoutBook(
-      { id: 'skenking', title: 'Skenking — Daaglikse Hoop', desc: 'Skenking vir die bediening van Daaglikse Hoop', price: amount },
+      taal === 'en'
+        ? { id: 'skenking', title: 'Donation — Daaglikse Hoop', desc: 'Donation to the Daaglikse Hoop ministry', price: amount }
+        : { id: 'skenking', title: 'Skenking — Daaglikse Hoop', desc: 'Skenking vir die bediening van Daaglikse Hoop', price: amount },
       email,
-      'donation'
+      'donation',
+      { taal }
     )
   }
 

@@ -1,4 +1,6 @@
 const crypto = require('crypto')
+/* Engelse boeke: Engelse e-pos + aparte lys. Sien _eposEngels.js. */
+const engels = require('./_eposEngels.js')
 
 const BOOK_VALUES = {
   'bid-nou': 105, 'narsistiese-verhoudings': 105, 'wen-die-oorlog': 105,
@@ -100,16 +102,23 @@ module.exports = async function handler(req, res) {
   let bookTitle = cleanBookTitle(bookId)
   let pdfUrl    = null
   let bookValue = BOOK_VALUES[bookId] ?? 50
+  let bookTaal  = ''
   try {
     const bookDoc = await fsGet(projectId, token, `books/${bookId}`)
     if (bookDoc?.fields) {
       bookTitle = bookDoc.fields.title?.stringValue  || cleanBookTitle(bookId)
       pdfUrl    = bookDoc.fields.pdfUrl?.stringValue || null
+      bookTaal  = bookDoc.fields.taal?.stringValue   || ''
       // Support explicit value field for dynamic/new books (integer or float)
       const rawVal = bookDoc.fields.value?.integerValue ?? bookDoc.fields.value?.doubleValue
       if (rawVal != null) bookValue = Math.round(parseFloat(rawVal))
     }
   } catch {}
+
+  /* 'n ENGELSE boek: die adres gaan na die aparte Engelse lys en die e-pos is
+     Engels. Alles anders — die teller, die ontdubbeling — bly presies dieselfde.
+     'n Afrikaanse boek loop woord vir woord die ou pad. */
+  const isEngels = engels.isEngelseTaal(bookTaal)
 
   // Deduplication check
   const dedupId    = crypto.createHash('sha256').update(`${cleanEmail}:${bookId}`).digest('hex').slice(0, 40)
@@ -122,7 +131,7 @@ module.exports = async function handler(req, res) {
   if (!isDuplicate) {
     // Save email to emailList
     const emailId = Buffer.from(cleanEmail).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-    await fsWrite(projectId, token, `emailList/${emailId}`, {
+    await fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
       email:   { stringValue: cleanEmail },
       source:  { stringValue: 'free-ebook' },
       bookId:  { stringValue: bookId },
@@ -195,7 +204,11 @@ module.exports = async function handler(req, res) {
   `
 
   let emailSubject, html
-  if (pdfUrl) {
+  if (isEngels) {
+    const e = engels.boekEpos({ titel: bookTitle, pdfUrl })
+    emailSubject = e.onderwerp
+    html = e.html
+  } else if (pdfUrl) {
     emailSubject = `Jou gratis e-boek: ${bookTitle} 🎁`
     html = `
       <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#2d2d2d;">

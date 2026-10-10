@@ -62,6 +62,7 @@ node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-bo
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
 node src/data/boekTeks.toets.mjs              # PDF-teks skoonmaak + hoofstuk-split, 27 toetse
 node src/data/luisterStukke.toets.mjs         # TTS-stukke + stemkeuse, 18 toetse
+node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
@@ -2442,6 +2443,31 @@ app"-knoppies gaan na `/go`.
 donasie- of e-posstelsel nie. 'n Kort persoonlike boodskap van Dewald met sy
 foto (`public/beelde/dewald-en.webp`) staan VOOR die donasie-kaart — 'n gesig
 voor enige vraag.
+
+### Die Engelse e-posse en die APARTE lys
+
+Dewald: *"aparte plek in admin vir engelse eposte... as iemand aflaai kry hul
+die epos in engels... die boodskap nadat hulle geskenk het moet ook engels
+wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
+
+* **'n Engelse boek** (`taal: 'en'` op die boek) → `free-book-download.js` stuur
+  die Engelse e-pos en skryf die adres na **`emailListEn`**, nooit na
+  `emailList` nie. Die teller en die ontdubbeling bly gedeel.
+* **'n Skenking vanaf /english** dra `custom_str3 = 'en'` (en `&lang=en` op die
+  terugkeer-adres, sien `src/utils/payfast.js`). `payfast-itn.js` stuur dan die
+  Engelse dankie/welkom en skryf na `emailListEn`. App.jsx wys die Engelse
+  dankie-opspringer en maak /english weer oop.
+* **Waarom 'n aparte versameling en nie 'n merkie nie:** die Afrikaanse
+  nuusbrief (`send-bulk-email`, die werkry) lees net `emailList`. Apart, kan 'n
+  Engelse mens NOOIT per ongeluk 'n Afrikaanse blas kry nie — niemand hoef te
+  onthou om te filter nie.
+* Al die Engelse woorde staan in **`api/_eposEngels.js`**; die Afrikaanse e-posse
+  is NIE aangeraak nie. Sonder `taal`/`custom_str3` is elke pad woord vir woord
+  die ou een — `_eposEngels.toets.mjs` sit 'n vals Firestore + Resend agter die
+  egte eindpunte en eis dit vir albei tale.
+* **Admin → 🌍 English** wys die Engelse lys (`api/epos-engels.js`,
+  admin-alleen) en laai dit af as CSV. 'n Nuusbrief AAN die Engelse lys stuur
+  bestaan nog nie — die stuur-knoppie in ✉️ E-pos ken net die Afrikaanse lys.
 
 ### LUISTER — PDF-teks word OUTOMATIES onttrek
 

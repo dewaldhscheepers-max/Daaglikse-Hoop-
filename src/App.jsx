@@ -842,7 +842,19 @@ export default function App() {
     const email       = params.get('em') ? decodeURIComponent(params.get('em')) : (localStorage.getItem('pendingEmail') || '')
     localStorage.removeItem('pendingPurchase')
     localStorage.removeItem('pendingEmail')
+    /* Kom die skenking van die ENGELSE blad (`&lang=en`, sien payfast.js), is
+       die dankie Engels en die mens land terug op /english — nie in die
+       Afrikaanse app nie. Sonder `lang` loop alles presies soos altyd. */
+    const en = params.get('lang') === 'en'
     if (status === 'success') {
+      if (en) {
+        window.history.replaceState({}, '', '/english')
+        setEngelsOop(true)
+        setPayment({ status: 'success', type, count: bookIds.length, taal: 'en' })
+        if (type === 'donation') { try { localStorage.setItem(SIKLUS_SLEUTEL, siklusVir(new Date())) } catch {} }
+        if (type === 'subscription') { try { localStorage.setItem(VENNOOT_SLEUTEL, new Date().toISOString()) } catch {} }
+        return
+      }
       if (type !== 'subscription') setTab('meer')
       window.history.replaceState({}, '', '/')
       /* ── Wat 'n betaling neerskryf ──
@@ -896,6 +908,10 @@ export default function App() {
       } else {
         setPayment({ status: 'success', type, count: bookIds.length })
       }
+    } else if (status === 'cancel' && en) {
+      window.history.replaceState({}, '', '/english')
+      setEngelsOop(true)
+      setPayment({ status: 'cancel', taal: 'en' })
     } else if (status === 'cancel') {
       setPayment({ status: 'cancel' })
       if (type !== 'subscription') setTab('meer')
@@ -2211,7 +2227,46 @@ export default function App() {
         />
       )}
 
-      {paymentResult?.status === 'success' && (
+      {/* ── Die ENGELSE dankie / kansellasie ──
+          Bo-op die Engelse blad (z-index 2000), dus 'n eie, hoër laag. Die
+          Afrikaanse opspringers hieronder bly presies soos hulle was. */}
+      {paymentResult?.taal === 'en' && (
+        <div className="payment-popup-backdrop" style={{ zIndex: 2100 }} onClick={() => setPayment(null)}>
+          <div className="payment-popup" onClick={e => e.stopPropagation()}>
+            {paymentResult.status === 'cancel' ? (
+              <>
+                <div className="payment-popup-icon">😔</div>
+                <div className="payment-popup-title">Payment cancelled</div>
+                <p className="payment-popup-msg">No payment was processed. You can try again any time.</p>
+              </>
+            ) : paymentResult.type === 'subscription' ? (
+              <>
+                <div className="payment-popup-icon">🌿</div>
+                <div className="payment-popup-title">Thank you for becoming a Hope Partner</div>
+                <p className="payment-popup-msg">
+                  Your monthly gift helps us keep Daaglikse Hoop freely available for people who need hope, prayer and God's Word.
+                </p>
+                <p className="payment-popup-note">May the Lord bless you richly.</p>
+              </>
+            ) : (
+              <>
+                <div className="payment-popup-icon">🙏</div>
+                <div className="payment-popup-title">Thank you so much!</div>
+                <p className="payment-popup-msg">
+                  Your donation has been received.<br />
+                  <strong>May God bless you abundantly.</strong>
+                </p>
+                <p className="payment-popup-note">"God loves a cheerful giver." — 2 Cor. 9:7</p>
+              </>
+            )}
+            <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
+              {paymentResult.status === 'cancel' ? 'OK' : 'Thank you! 🙏'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {paymentResult?.status === 'success' && paymentResult?.taal !== 'en' && (
         <div className="payment-popup-backdrop" onClick={() => setPayment(null)}>
           <div className="payment-popup" onClick={e => e.stopPropagation()}>
             {paymentResult.type === 'donation' ? (
@@ -2264,7 +2319,7 @@ export default function App() {
         </div>
       )}
 
-      {paymentResult?.status === 'cancel' && (
+      {paymentResult?.status === 'cancel' && paymentResult?.taal !== 'en' && (
         <div className="payment-popup-backdrop" onClick={() => setPayment(null)}>
           <div className="payment-popup" onClick={e => e.stopPropagation()}>
             <div className="payment-popup-icon">😔</div>

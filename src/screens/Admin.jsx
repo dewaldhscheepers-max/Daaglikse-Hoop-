@@ -37,7 +37,7 @@ function leesGeheim() {
 }
 
 const OORTJIE_SLEUTEL = 'admin_oortjie'
-const OORTJIES = ['notes', 'books', 'kinders', 'notif', 'email', 'video', 'sorg']
+const OORTJIES = ['notes', 'books', 'kinders', 'notif', 'email', 'english', 'video', 'sorg']
 
 /* Wat uit localStorage kom, word nagegaan. 'n Onbekende waarde sou elke
    oortjie leeg laat en soos 'n stukkende admin lyk. */
@@ -167,6 +167,10 @@ export default function Admin({ onClose }) {
   const [emailCount,     setEmailCount]     = useState(null)
   // Waar die verskil tussen die rou lys en die stuurlys vandaan kom.
   const [lysOpsomming,   setLysOpsomming]   = useState(null)
+  /* Die Engelse lys — eers gehaal wanneer hy die knoppie druk. */
+  const [enLys,       setEnLys]       = useState(null)
+  const [enLysBesig,  setEnLysBesig]  = useState(false)
+  const [enLysFout,   setEnLysFout]   = useState('')
   const [activeCampaign, setActiveCampaign] = useState(null)
   const [bulkSubject,    setBulkSubject]    = useState('')
   const [bulkBody,       setBulkBody]       = useState('')
@@ -372,6 +376,29 @@ export default function Admin({ onClose }) {
 
   /* Trek 'n Engelse boek se teks uit sy PDF vir die LUISTER-knoppie. Loop
      outomaties ná 'n PDF-oplaai, en kan met die hand per boek geroep word. */
+  /* ── Die Engelse e-poslys ── */
+  async function haalEngelseLys() {
+    setEnLysBesig(true); setEnLysFout('')
+    try {
+      const r = await fetch('/api/epos-engels', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) setEnLysFout(j.fout || 'Kon nie die lys lees nie')
+      else setEnLys(j)
+    } catch { setEnLysFout('Kon nie die lys lees nie') }
+    setEnLysBesig(false)
+  }
+
+  function laaiEngelseLysAf() {
+    if (!enLys || !enLys.adresse) return
+    const csv = 'email\n' + enLys.adresse.join('\n') + '\n'
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `engelse-eposlys-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a); a.click(); a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 2000)
+  }
+
   async function haalTeksUit(bookId) {
     setTeksBesig(bookId)
     setTeksBoodskap(m => ({ ...m, [bookId]: 'Teks word uitgehaal…' }))
@@ -949,6 +976,11 @@ export default function Admin({ onClose }) {
           </button>
           <button className={`admin-tab ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
             ✉️ E-pos
+          </button>
+          {/* Die ENGELSE e-poslys — 'n eie oortjie sodat die Afrikaanse
+              e-pos-afdeling glad nie aangeraak word nie. */}
+          <button className={`admin-tab ${activeTab === 'english' ? 'active' : ''}`} onClick={() => setActiveTab('english')}>
+            🌍 English
           </button>
           <button className={`admin-tab ${activeTab === 'video' ? 'active' : ''}`} onClick={() => setActiveTab('video')}>
             📹 Video
@@ -1729,6 +1761,42 @@ export default function Admin({ onClose }) {
           {activeTab === 'volgjesus' && <VolgJesusAdmin geheim={geheim} />}
           {activeTab === 'reels'   && <ReelsAdmin geheim={geheim} />}
           {activeTab === 'sorg'    && <SorgAdmin geheim={geheim} />}
+
+          {activeTab === 'english' && (
+            <div className="admin-section">
+              <div className="admin-section-title">🌍 Engelse e-poslys</div>
+              <div className="admin-books-note">
+                Mense wat 'n ENGELSE e-boek aflaai of vanaf die Engelse blad skenk. Hulle
+                staan APART van die Afrikaanse lys en kry nooit 'n Afrikaanse nuusbrief nie.
+                Hulle kry die boek en die dankie-e-pos in Engels.
+              </div>
+              <button className="admin-save-btn" onClick={haalEngelseLys} disabled={enLysBesig}>
+                {enLysBesig ? 'Besig…' : (enLys ? 'Herlaai' : 'Wys die Engelse lys')}
+              </button>
+              {enLysFout && <div className="admin-note-meta" style={{ marginTop: 8 }}>⚠️ {enLysFout}</div>}
+              {enLys && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 15, marginBottom: 6 }}>
+                    <b>{enLys.aktief}</b> Engelse inskrywers
+                    {enLys.totaal !== enLys.aktief && (
+                      <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+                        {' '}({enLys.totaal} rekords · {enLys.duplikate} duplikate{enLys.ongeldig ? ` · ${enLys.ongeldig} ongeldig` : ''}{enLys.geblok ? ` · ${enLys.geblok} geblok` : ''})
+                      </span>
+                    )}
+                  </div>
+                  {enLys.aktief > 0 && (
+                    <>
+                      <button className="admin-pdf-btn" onClick={laaiEngelseLysAf}>↓ Laai af as CSV</button>
+                      <div style={{ maxHeight: 260, overflowY: 'auto', marginTop: 10, fontSize: 13, lineHeight: 1.7,
+                                    background: 'var(--cream, #FAF8F5)', borderRadius: 10, padding: '8px 12px' }}>
+                        {enLys.adresse.map(a => <div key={a}>{a}</div>)}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {activeTab === 'video' && (
             <div className="admin-section">

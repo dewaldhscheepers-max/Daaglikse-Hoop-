@@ -97,12 +97,17 @@ function ontleedLys(documents) {
   }
 }
 
-/* Haal die hele emailList, met blaaie. Gee die ontleding terug. */
-async function haalEnOntleed(projectId, token) {
+/* Haal die hele emailList, met blaaie. Gee die ontleding terug.
+
+   `versameling` is net vir die Engelse lys (`emailListEn`, sien
+   _eposEngels.js). Die verstek is `emailList`, dus lees elke bestaande
+   oproeper — die Afrikaanse status en die grootstuur — presies wat hy altyd
+   gelees het. */
+async function haalEnOntleed(projectId, token, versameling = 'emailList') {
   const documents = []
   let pageToken = ''
   do {
-    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emailList?pageSize=300${pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : ''}`
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${versameling}?pageSize=300${pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : ''}`
     const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
     if (!r.ok) break
     const data = await r.json()

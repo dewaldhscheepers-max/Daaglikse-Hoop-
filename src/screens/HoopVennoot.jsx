@@ -72,7 +72,7 @@ export default function HoopVennoot({ onClose, beginBedrag = null, taal = 'af' }
       return
     }
     setBusy(true)
-    checkoutSubscription(amount, email)
+    checkoutSubscription(amount, email, { taal })
   }
 
   return (

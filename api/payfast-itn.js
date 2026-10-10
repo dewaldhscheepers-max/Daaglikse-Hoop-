@@ -1,4 +1,7 @@
 const crypto = require('crypto')
+/* 'n Skenking vanaf die ENGELSE blad dra custom_str3 = 'en'. Dan is die dankie
+   Engels en die adres gaan na die aparte Engelse lys. Sien _eposEngels.js. */
+const engels = require('./_eposEngels.js')
 
 // ── Get Firebase service-account access token (same pattern as send-notifications) ──
 async function getAccessToken() {
@@ -42,6 +45,7 @@ async function fsWrite(projectId, token, path, fields) {
 
 // ── Log subscription ITN to Firestore ─────────────────────────────────────
 async function handleSubscriptionItn(data, projectId) {
+  const isEngels = engels.isEngelseTaal(data.custom_str3)
   let token = null
   try { token = await getAccessToken() } catch (e) { console.error('Sub auth failed:', e.message) }
 
@@ -69,7 +73,7 @@ async function handleSubscriptionItn(data, projectId) {
     const subEmail = (data.email_address || '').toLowerCase().trim()
     if (subEmail) {
       const emailId = Buffer.from(subEmail).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-      fsWrite(projectId, token, `emailList/${emailId}`, {
+      fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
         email:   { stringValue: subEmail },
         source:  { stringValue: 'subscription' },
         addedAt: { timestampValue: new Date().toISOString() },
@@ -106,8 +110,8 @@ async function handleSubscriptionItn(data, projectId) {
             from:     'Dewald Scheepers <noreply@dewaldscheepers.com>',
             to:       subEmail,
             reply_to: 'info@dewaldscheepers.com',
-            subject:  "Dankie dat jy 'n Hoop-Vennoot geword het 🙏",
-            html:     welcomeHtml,
+            subject:  isEngels ? engels.vennootDankie().onderwerp : "Dankie dat jy 'n Hoop-Vennoot geword het 🙏",
+            html:     isEngels ? engels.vennootDankie().html : welcomeHtml,
           }),
         })
       } catch (e) {
@@ -146,12 +150,13 @@ module.exports = async function handler(req, res) {
 
   // Save donation email even if no bookIds (once-off donations use id 'skenking')
   if (email && bookIds.length === 0) {
+    const isEngels = engels.isEngelseTaal(data.custom_str3)
     const projectId = process.env.FIREBASE_PROJECT_ID || 'daaglikse-hoop'
     let token = null
     try { token = await getAccessToken() } catch {}
     if (token) {
       const emailId = Buffer.from(email.toLowerCase()).toString('base64').replace(/[^a-zA-Z0-9]/g, '_')
-      fsWrite(projectId, token, `emailList/${emailId}`, {
+      fsWrite(projectId, token, `${isEngels ? engels.ENGELSE_LYS : 'emailList'}/${emailId}`, {
         email:   { stringValue: email.toLowerCase() },
         source:  { stringValue: 'donation' },
         addedAt: { timestampValue: new Date().toISOString() },
@@ -187,8 +192,8 @@ module.exports = async function handler(req, res) {
           from:     'Dewald Scheepers <noreply@dewaldscheepers.com>',
           to:       email.toLowerCase(),
           reply_to: 'info@dewaldscheepers.com',
-          subject:  'Dankie vir jou ondersteuning 🙏',
-          html:     donationHtml,
+          subject:  isEngels ? engels.skenkDankie().onderwerp : 'Dankie vir jou ondersteuning 🙏',
+          html:     isEngels ? engels.skenkDankie().html : donationHtml,
         }),
       })
     } catch (e) {

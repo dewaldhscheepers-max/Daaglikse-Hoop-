@@ -35,23 +35,31 @@ function submitForm(params) {
   form.submit()
 }
 
-export function checkoutBook(book, email, type = 'ebook') {
+/* `taal: 'en'` kom van die ENGELSE blad. Dan dra die terugkeer-adres
+   `&lang=en` (die dankie-opspringer is Engels) en custom_str3 = 'en' (die
+   dankie-e-pos is Engels en die adres gaan na die Engelse lys — sien
+   api/_eposEngels.js). Sonder `taal` is die vorm WOORD VIR WOORD wat dit altyd
+   was: die Afrikaanse pad verander nie. */
+export function checkoutBook(book, email, type = 'ebook', { taal } = {}) {
+  const en = taal === 'en'
   if (type === 'ebook') {
     localStorage.setItem('pendingPurchase', book.id)
     localStorage.setItem('pendingEmail', email)
   }
-  submitForm({
+  const params = {
     merchant_id:   MERCHANT_ID,
     merchant_key:  MERCHANT_KEY,
-    return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}`,
-    cancel_url:    `${window.location.origin}/?payment=cancel`,
+    return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}${en ? '&lang=en' : ''}`,
+    cancel_url:    `${window.location.origin}/?payment=cancel${en ? '&lang=en' : ''}`,
     notify_url:    ITN_URL,
     email_address: email,
     amount:        book.price.toFixed(2),
     item_name:     book.title.substring(0, 100),
     custom_str1:   email,
     custom_str2:   book.id,
-  })
+  }
+  if (en) params.custom_str3 = 'en'
+  submitForm(params)
 }
 
 export function checkoutCart(books, email) {
@@ -77,7 +85,8 @@ export function checkoutCart(books, email) {
   })
 }
 
-export function checkoutSubscription(amountRand, email) {
+export function checkoutSubscription(amountRand, email, { taal } = {}) {
+  const en = taal === 'en'
   const amount = Number(amountRand).toFixed(2)
 
   if (email) localStorage.setItem('pendingEmail', email)
@@ -89,18 +98,20 @@ export function checkoutSubscription(amountRand, email) {
   const billingDate = new Date(today.getFullYear(), today.getMonth() + 1, billingDay)
     .toISOString().slice(0, 10)
 
-  const returnUrl = email
+  const returnUrl = (email
     ? `${window.location.origin}/?payment=success&type=subscription&em=${encodeURIComponent(email)}`
-    : `${window.location.origin}/?payment=success&type=subscription`
+    : `${window.location.origin}/?payment=success&type=subscription`) + (en ? '&lang=en' : '')
 
   const params = {
     merchant_id:       MERCHANT_ID,
     merchant_key:      MERCHANT_KEY,
     return_url:        returnUrl,
-    cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription`,
+    cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription${en ? '&lang=en' : ''}`,
     notify_url:        ITN_URL,
     amount,
-    item_name:         'Maandelikse Hoop-Vennoot',
+    item_name:         en ? 'Monthly Hope Partner' : 'Maandelikse Hoop-Vennoot',
+    /* Net vir die Engelse blad; PayFast stuur dit terug in elke ITN. */
+    ...(en ? { custom_str3: 'en' } : {}),
     subscription_type: '1',
     billing_date:      billingDate,
     recurring_amount:  amount,
