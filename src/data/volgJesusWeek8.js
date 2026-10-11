@@ -19,8 +19,9 @@
 
    Hy het die boodskap TWEE keer gestuur: een keer bo-aan, en een keer in die
    week se uitleg onder Dag 1 se "LEES VANDAG SE BOODSKAP". Die twee verskil
-   effens ("My geld" teen "Ons geld", en 'n paar sinne). Die een in die
-   UITLEG is die een wat hier staan — dit is die een wat hy op sy plek gesit het.
+   effens ("My geld" teen "Ons geld", en die slot "Die Koning is hier."). Ek
+   het eers die uitleg s'n gebruik; Dewald het dieselfde dag reggestel: *"Jy
+   moet die boonste een"* — dit is die een wat hier staan.
 
    ── WAT DIE WEEK DOEN ──
 
@@ -95,49 +96,51 @@ export const WEEK8_OPENING =
  * se woorde voluit, onder sy opskrif "LEES VANDAG SE BOODSKAP". */
 const DAG1_BOODSKAP = `DIE KONINKRYK VAN GOD HET NABY GEKOM
 
-Jesus begin Sy bediening in Markus met hierdie woorde:
+Markus 1 vertel vir ons wat Jesus se eerste groot boodskap was:
 
 “Die tyd is vervul en die Koninkryk van God het naby gekom. Bekeer julle en glo die evangelie.”
 
-Daardie paar woorde vertel vir ons baie van wat dit beteken om Jesus te volg.
+Daardie paar woorde bevat amper die hele Christelike lewe.
 
 Eerstens: Jesus kom nie net om jou lewe makliker te maak nie. Hy kom as Koning.
 
-Wanneer Jesus sê:
+Jesus sê:
 
-“Die tyd is vervul,”
+“Die tyd is vervul.”
 
-sê Hy dat die tyd waarop God se mense gewag het, aangebreek het.
+Met ander woorde: die oomblik waarna God se mense so lank uitgesien het, het aangebreek.
 
-Dan sê Hy:
+En dan:
 
 “Die Koninkryk van God het naby gekom.”
 
-God se Koninkryk gaan oor God wat regeer.
+Die Koninkryk is nie bloot ’n plek waarheen jy eendag gaan nie. Dit gaan oor God wat regeer.
 
 En nou het die Koninkryk naby gekom, want die Koning het gekom.
 
-Jesus kom nie om jou te help om ’n beter koning van jou eie lewe te word nie.
+Jesus kom dus nie om jou te help om ’n beter koning van jou eie lewe te word nie.
 
-Hy kom om die plek in te neem wat aan Hom behoort.
+Hy kom om die plek in te neem wat net aan Hom behoort.
 
-Daarom leer Jesus ons later bid:
+Dis hoekom Jesus ons later leer bid:
 
 “Laat U Koninkryk kom; laat U wil geskied.”
 
 Daardie twee dinge hoort bymekaar.
 
-WAAR GOD REGEER, KRY GOD SE WIL DIE LAASTE SÊ.
+Waar God regeer, kry God se wil die laaste sê.
 
-Tweedens sê Jesus: “Bekeer julle.”
+Tweedens: daarom sê Jesus: “Bekeer julle.”
 
-Die Griekse woord is metanoeō.
+Die Griekse woord wat hier gebruik word, kom van metanoeō.
 
-Dit beteken om anders te begin dink — ’n verandering van denke wat jou lewe en rigting verander.
+Dit beteken om van gedagte te verander, om anders te begin dink — ’n verandering wat jou rigting verander.
 
-Bekering is dus meer as om jammer te voel.
+Bekering is dus baie meer as:
 
-Jy kan jammer voel en steeds dieselfde pad aanhou loop.
+“Ek is jammer.”
+
+Jy kan jammer wees en steeds dieselfde pad loop.
 
 Bekering sê:
 
@@ -145,51 +148,49 @@ Bekering sê:
 
 Ek hou op om te leef asof ék die koning is.
 
-Ek hou op om net te vra:
+Ek hou op om net vir God te vra om my planne te seën.
 
-“God, seën my plan.”
-
-En ek begin vra:
+Nou vra ek:
 
 “Here, wat wil Ú hê?”
 
 Bekering is om van die troon af te klim.
 
-Derdens sê Jesus: “Glo die evangelie.”
+Derdens: Jesus sê: “Glo die evangelie.”
 
-Evangelie beteken goeie nuus.
+Die woord evangelie beteken goeie nuus.
 
-En kyk na die volgorde.
+En let op die volgorde:
 
-Jesus sê nie:
+Jesus sê nie eers:
 
-“Maak eers jou lewe reg en dan sal God nader kom.”
+“Maak jouself reg, en dan sal God nader kom.”
 
 nie.
 
-God het eerste nader gekom.
+Hy sê:
 
-Die Koninkryk het naby gekom.
+“Die Koninkryk het naby gekom. Bekeer julle en glo.”
 
-Ons antwoord met bekering en geloof.
+God beweeg eerste na ons toe. Ons antwoord met bekering en geloof.
 
-Geloof beteken dus meer as:
+En geloof beteken meer as:
 
 “Ek glo Jesus bestaan.”
 
 Dit beteken:
 
-“Ek vertrou die Koning genoeg om my lewe aan Hom toe te vertrou.”
+“Ek vertrou die Koning genoeg om my lewe onder Sy heerskappy te plaas.”
 
-En hier lê die probleem van ons hart:
+En hier lê die probleem van die menslike hart:
 
 ONS WIL MAKLIK GOD SE HULP HÊ SONDER OM ONDER GOD SE HEERSKAPPY TE LEEF.
 
 Ons wil Sy vrede hê.
 
-Sy beskerming.
-
 Sy voorsiening.
+
+Sy beskerming.
 
 Sy vergifnis.
 
@@ -197,21 +198,21 @@ Ons wil hê Hy moet ons gebede antwoord.
 
 Maar wat gebeur wanneer die Koning aan iets raak wat ons nie wil verander nie?
 
-Ons geld.
+My geld.
 
-Ons verhouding.
+My verhouding.
 
-Ons trots.
+My trots.
 
-Ons gewoontes.
+My planne.
 
-Ons planne.
+My gewoontes.
 
 Dáár word die Koninkryk persoonlik.
 
-Die evangelie is nie:
+Want die evangelie is nie:
 
-“Jesus, help my om my eie koninkryk beter te bestuur.”
+“Jesus, kom help my om my koninkryk beter te bestuur.”
 
 nie.
 
@@ -219,15 +220,25 @@ Die goeie nuus is:
 
 DIE WARE KONING HET GEKOM.
 
-En God se heerskappy is goeie nuus, omdat die Koning wat regeer ook die Vader is wat weet wat jy nodig het.
+En hier is die vreemde bevryding daarvan:
 
-Om Hom te laat regeer beteken nie dat jy ware lewe verloor nie.
+Om God te laat regeer, neem nie die lewe van jou weg nie. Dit bevry jou van die las om jou eie koning te probeer wees.
 
-Dit beteken dat jy ophou om ’n koning te probeer wees waarvoor jy nooit gemaak is nie.
+Daarom sê Jesus:
 
-Vra jouself vandag:
+Bekeer jou. Glo.
 
-WAAR WIL EK GOD SE HULP HÊ, MAAR NIE GOD SE HEERSKAPPY NIE?`
+Draai om.
+
+Vertrou die Koning.
+
+En vra vandag eerlik:
+
+WAAR WIL EK NOG GOD SE HULP HÊ, MAAR NIE GOD SE HEERSKAPPY NIE?
+
+Want die Koninkryk van God het naby gekom.
+
+Die Koning is hier.`
 
 /* ── Die vyf dae ── */
 
