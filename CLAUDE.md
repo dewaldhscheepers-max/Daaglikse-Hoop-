@@ -96,6 +96,7 @@ node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 38 toetse
 node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uitvee, 20 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
+node api/_ouPrente.toets.mjs                  # VOLG JESUS se vorige prente: witlys + net LEES, 21 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
@@ -802,6 +803,17 @@ Twee lesse daaruit, vir die volgende keer:
 `.vs-klaar-lyf` dra nou `white-space: pre-line` soos elke ander teksblok. Die
 week se slot het sedert Week 5 paragrawe gehad wat in een blok saamgeloop het;
 Week 8 se herskrywing het kort reëls gehad en het dit sigbaar gemaak.
+
+**"↓ Laai die geskrewe teks" maak die wallpaper-skakels LEEG** (`LEEG(n)`, en
+die plat rekord dra `wallpaper: ''`). Die prente self is nooit weg nie:
+PrentOplaai gee elke oplaai 'n eie naam (`covers/vj-w<n>-dag1-<tyd>`,
+`covers/vj-w<n>-week-<tyd>` — die SLEUTEL, nie die veldnaam nie) en niks vee
+'n lêer in Storage uit nie. Elke wallpaper-blok in die admin het nou
+"↺ Soek vorige prente vir hierdie plek" (`api/vj-ou-prente.js`, admin-alleen,
+`devstorage.read_only`, voorvoegsel uit 'n witlys gebou), en een druk sit 'n
+vorige prent terug. Dewald, 11 Oktober 2026: *"Het jy nie die ou wallpapers
+nie."* — die Storage-lys is van buite af toe (403), dus moes die bediener dit
+doen. Blaaiertoets: `kykOuPrente.mjs`.
 
 Blaaiertoetse: `kykWeek4.mjs`, `kykWeek5.mjs` en `kykWeek6.mjs` in die
 scratchpad loop die hele week deur teen 'n onderskepte

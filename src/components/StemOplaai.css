@@ -49,3 +49,14 @@
   background-position: center; background-repeat: no-repeat;
   border-radius: 10px;
 }
+
+/* "Soek vorige prente" — 'n stil knoppie onder die oplaai. Net KLEUR op
+   :active, geen transform nie (sien CLAUDE.md se Android-reels). */
+.so-ou { margin-top: 8px; background: transparent; color: #5C4E8E; border: 1px dashed #B8AFD6; }
+.so-ou:active { background: #F1EEF8; }
+.so-ou-lys { margin-top: 12px; display: grid; gap: 12px; }
+.so-ou-ry { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; }
+.so-ou-prent { max-height: 170px; }
+.so-ou-reg { display: grid; gap: 8px; }
+.so-ou-tyd { font-size: 13px; color: #5A5368; }
+.so-ou-hier { font-size: 13px; color: #3E7A4E; font-weight: 600; }

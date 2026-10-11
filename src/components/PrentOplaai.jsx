@@ -18,11 +18,28 @@ import { useRef, useState } from 'react'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { storage } from '../firebase'
 
-export default function PrentOplaai({ week, sleutel, kop, hulp, waarde, op }) {
+export default function PrentOplaai({ week, sleutel, kop, hulp, waarde, op, geheim = '' }) {
   const leerRef = useRef(null)
   const [besig, setBesig] = useState(false)
   const [pers, setPers]   = useState(0)
   const [fout, setFout]   = useState(null)
+  /* Die prente wat VOORHEEN vir hierdie week en hierdie plek opgelaai is.
+     null = nog nie gesoek nie. Sien api/vj-ou-prente.js. */
+  const [ou, setOu]       = useState(null)
+  const [soek, setSoek]   = useState(false)
+
+  async function soekOu() {
+    setSoek(true); setFout(null)
+    try {
+      const r = await fetch(`/api/vj-ou-prente?week=${encodeURIComponent(week)}&veld=${encodeURIComponent(sleutel)}`,
+                            { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json()
+      if (!j.ok) throw new Error(j.fout || 'Kon nie soek nie')
+      setOu(j.prente || [])
+    } catch (e) {
+      setFout('Kon nie die vorige prente kry nie: ' + (e && e.message))
+    } finally { setSoek(false) }
+  }
 
   async function stuurOp(leer) {
     if (!leer) return
@@ -68,6 +85,33 @@ export default function PrentOplaai({ week, sleutel, kop, hulp, waarde, op }) {
         <button className="so-knop" onClick={() => leerRef.current && leerRef.current.click()}>
           🖼  {waarde ? 'Vervang die prent' : 'Kies ’n prent'}
         </button>
+      )}
+
+      {ou === null ? (
+        <button className="so-knop so-ou" disabled={soek} onClick={soekOu}>
+          {soek ? 'Besig om te soek…' : '↺ Soek vorige prente vir hierdie plek'}
+        </button>
+      ) : ou.length === 0 ? (
+        <p className="so-leeg">Daar is nog nooit 'n prent vir hierdie plek in Week {week} opgelaai nie.</p>
+      ) : (
+        <div className="so-ou-lys">
+          <div className="so-daar-kop">Vorige prente vir hierdie plek — nuutste eerste</div>
+          {ou.map(p => (
+            <div key={p.url} className="so-ou-ry">
+              {/* Agtergrond, nie 'n <img> nie — sien die voorskou hierbo. */}
+              <div className="so-prent so-ou-prent" style={{ backgroundImage: `url("${p.url}")` }} />
+              <div className="so-ou-reg">
+                <span className="so-ou-tyd">
+                  {p.tyd ? new Date(p.tyd).toLocaleString('af-ZA', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : p.naam}
+                </span>
+                {p.url === waarde
+                  ? <span className="so-ou-hier">✓ Dit is die huidige een</span>
+                  : <button className="so-knop" onClick={() => op(p.url)}>Gebruik hierdie een</button>}
+              </div>
+            </div>
+          ))}
+          <p className="so-leeg">Druk daarna <strong>Stoor</strong>.</p>
+        </div>
       )}
 
       <input ref={leerRef} type="file" style={{ display: 'none' }} accept="image/*"

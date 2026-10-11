@@ -609,13 +609,13 @@ export default function VolgJesusAdmin({ geheim = '' }) {
 
       {/* TWEE wallpapers. Die een sluit Dag 1 af, die ander sluit die week af.
           Albei bly staan — die een vervang nie die ander nie. */}
-      <PrentOplaai week={week.weeknommer} sleutel="dag1"
+      <PrentOplaai week={week.weeknommer} sleutel="dag1" geheim={geheim}
                    kop="WALLPAPER — EINDE VAN DAG 1"
                    hulp="Dit wys nadat die stemboodskap gehoor is, aan die einde van Dag 1. Laat dit leeg en die skerm slaan dit stil oor."
                    waarde={week.wallpaperDag1}
                    op={v => stel('wallpaperDag1', v)} />
 
-      <PrentOplaai week={week.weeknommer} sleutel="week"
+      <PrentOplaai week={week.weeknommer} sleutel="week" geheim={geheim}
                    kop="WALLPAPER — EINDE VAN DIE WEEK"
                    hulp="Dit wys op Dag 5, waar die week afsluit."
                    waarde={week.wallpaper}
