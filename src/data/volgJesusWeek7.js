@@ -506,12 +506,8 @@ export const WEEK7_DEELSIN =
 export const WEEK7_VOLGENDE = {
   week: 8,
   titel: 'Die Koninkryk van God het naby gekom',
-  /* Dewald se eie woorde uit Week 8 se "BEGIN VAN DIE WEEK". Die eerste
-     weergawe het "watter soort Koning Hy werklik is" belowe — dit was die ou
-     Week 8 se Dag 5, en hy het die week op 11 Oktober 2026 herskryf. */
-  lyf: 'Jesus se eerste groot boodskap in Markus begin met ’n aankondiging: '
-     + '“Die tyd is vervul en die Koninkryk van God het naby gekom.” Die Koning '
-     + 'het gekom.',
+  lyf: 'Volgende week kyk ons na wat Jesus bedoel wanneer Hy sê dat die '
+     + 'Koninkryk naby gekom het — en watter soort Koning Hy werklik is.',
 }
 
 export function blokkeVirDag7(n) {

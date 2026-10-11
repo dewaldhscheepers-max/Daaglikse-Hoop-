@@ -35,13 +35,17 @@
    gedoen het. 'n NUWE herskrywing kry 'n NUWE merk.
    ──────────────────────────────────────────────────────────── */
 
-export const HERSKRYF = {
-  8: {
-    merk: '2026-10-11',
-    /* Die nuwe weergawe se vraag-id's — sien volgJesusWeek8.js. */
-    nuweIds: ['draai2', 'wil3', 'beheer4', 'wys5', 'stap5'],
-  },
-}
+/* LEEG, en dit is met opset. Week 8 se herskrywing van 11 Oktober is
+   dieselfde middag teruggedraai — Dewald het besluit die weergawe van 29
+   September bly Week 8. Daardie ou merkies is toe weer EGTE vordering, en 'n
+   inskrywing hier sou hulle op elke foon wat oopmaak, uitgevee het.
+
+   Herskryf Dewald weer 'n week en die inhoud VERVANG die oue, kom daardie week
+   hier in, met sy nuwe vraag-id's en 'n merk wat nog nooit gebruik is nie
+   (nie '2026-10-11' nie — sekere fone dra dit reeds vir Week 8):
+
+     8: { merk: '2026-11-02', nuweIds: ['...'] },  */
+export const HERSKRYF = {}
 
 const merkSleutel = w => `vj_herskryf_w${w}`
 
@@ -54,8 +58,8 @@ const merkSleutel = w => `vj_herskryf_w${w}`
  * Gee { vee, myWeek, merk }: `vee` sê of die merkies en die plek weg moet,
  * `myWeek` is die nuwe waarde (of null = los dit), `merk` moet geskryf word
  * (of null = niks om te skryf nie). */
-export function herskryfBesluit(week, { gesien = null, antwoordIds = [], myWeek = null } = {}) {
-  const h = HERSKRYF[week]
+export function herskryfBesluit(week, { gesien = null, antwoordIds = [], myWeek = null } = {}, tabel = HERSKRYF) {
+  const h = tabel[week]
   if (!h) return { vee: false, myWeek: null, merk: null }
   if (gesien === h.merk) return { vee: false, myWeek: null, merk: null }
 
@@ -69,10 +73,10 @@ export function herskryfBesluit(week, { gesien = null, antwoordIds = [], myWeek 
 /* Die onsuiwer helfte. Loop een keer, voor die app teken (main.jsx), sodat
    geen skerm ooit die ou merkies lees nie. Misluk die berging, gebeur niks —
    die ergste is dat die ou merkies bly staan, soos tot nou toe. */
-export function herstelHerskryfdeWeke(berging) {
+export function herstelHerskryfdeWeke(berging, tabel = HERSKRYF) {
   try {
     if (!berging) return
-    for (const w of Object.keys(HERSKRYF).map(Number)) {
+    for (const w of Object.keys(tabel).map(Number)) {
       const voor = `vj_a_w${w}_`
       const antwoordIds = []
       for (let i = 0; i < berging.length; i++) {
@@ -84,7 +88,7 @@ export function herstelHerskryfdeWeke(berging) {
         gesien: berging.getItem(merkSleutel(w)),
         antwoordIds,
         myWeek: Number.isFinite(myRou) ? myRou : null,
-      })
+      }, tabel)
       if (b.vee) {
         berging.removeItem(`vj_klaar_w${w}`)
         berging.removeItem(`vj_plek_w${w}`)

@@ -52,8 +52,8 @@ node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra D
 node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n GESKREWE boodskap, 131
 node src/data/volgJesusWeek6.toets.mjs        # Week 6 se pad — ook geen opname, 138 toetse
 node src/data/volgJesusWeek7.toets.mjs        # Week 7 se pad, 179 toetse
-node src/data/volgJesusWeek8.toets.mjs        # Week 8 (herskryf 11 Okt) — geen terugblik, nuwe id's, 183
-node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies gaan weg, 24 toetse
+node src/data/volgJesusWeek8.toets.mjs        # Week 8 se pad (die weergawe van 29 Sep), 177 toetse
+node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies, 26 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -778,35 +778,30 @@ Twee plekke waar Dewald se uitleg twee skryfkassies gehad het (Week 6 se Dag 3
 se "VOLTOOI DIE SIN" en Dag 4/5 se "OPVOLG") is EEN vraagblok wat albei vra. Sy
 woorde staan albei daar, in sy volgorde; die dag sou andersins ses blokke hê.
 
-**'n Week wat HERSKRYF word, kry NUWE vraag-id's.** Week 8 is op 11 Oktober
-2026 heeltemal oorgeskryf — ander gedeeltes, ander vrae. Wie die ou weergawe
-begin het, het `vj_a_w8_<id>` op sy foon vir vrae wat nie meer bestaan nie; 'n
-hergebruikte id sou sy ou antwoord onder 'n NUWE vraag wys, asof hy iets
-geskryf het wat hy nooit geskryf het nie. Die toets eis dat die ou id's nie
-terugkom nie.
+**Week 8 is op 11 Oktober 2026 herskryf en DIESELFDE MIDDAG teruggedraai.**
+Dewald het die week 'n tweede keer geskryf sonder om te onthou dat hy dit op 29
+September reeds gestuur het (dieselfde titel), en die nuwe weergawe het die oue
+vervang. Toe hy dit sien: *"Ek sweer ek het nog nie week 8 voorheen opgelaai
+nie"* — en sy keuse was om die weergawe van 29 September terug te sit. Die
+herskrewe teks staan in die geskiedenis (commit 7351f93) as hy dit ooit wil hê.
 
-**En die OU dag-merkies moet weg.** Dewald het dieselfde middag die nuwe
-Week 8 oopgemaak: *"Hoekom wys dit gedoen... ek het nog niks gedoen nie."* Die
-skerm het "4 van 5 dae gedoen" gesê. `vj_klaar_w<n>` ken net 'n DAGNOMMER, nie
-die inhoud wat daardie dag gedra het nie, dus het die ou week se vordering op
-die nuwe week gestaan — by almal wat die ou een begin het.
+Twee lesse daaruit, vir die volgende keer:
 
-`src/data/volgJesusHerskryf.js` loop een keer per foon per herskrywing, in
-`main.jsx` VOOR die eerste render. Het die mens 'n antwoord op een van die
-NUWE vrae, is sy vordering eg en word niks aangeraak nie; anders gaan
-`vj_klaar_w<n>` en `vj_plek_w<n>` weg en skuif `vj_my_week` terug, presies soos
-"Gaan terug na Week N". Geskrewe antwoorde bly staan. Herskryf Dewald weer 'n
-week, kry daardie week 'n inskrywing in `HERSKRYF` met 'n NUWE merk — verander
-nooit 'n merk wat reeds uit is nie, anders word elke foon weer skoongemaak.
-Blaaiertoets: `kykHerskryf.mjs` (dit val op die ou kode).
-
-**Geen vraag op Dag 1 nie, dan geen `terugblik` op Dag 5 nie.** Dewald se nuwe
-Week 8 het op Dag 1 net die boodskap en die gebed, en sy "KYK TERUG" haal die
-VRAAG aan. 'n Terugblik sou na 'n antwoord wys wat nooit gevra is nie.
+* **Kyk eers of die week reeds bestaan** voordat 'n nuwe week se teks iets
+  vervang, en sê dit vir Dewald. `git log -- src/data/volgJesusWeek<N>.js`.
+* **'n Herskrywing se OU dag-merkies lieg.** Die skerm het "4 van 5 dae gedoen"
+  gesê by dae wat hy nog nooit gesien het nie: `vj_klaar_w<n>` ken net 'n
+  DAGNOMMER. `src/data/volgJesusHerskryf.js` (in `main.jsx`, VOOR die eerste
+  render) vee dit een keer per foon uit — tensy daar 'n antwoord op 'n NUWE
+  vraag is. Die `HERSKRYF`-tabel is nou LEEG, want die ou week se merkies is
+  weer egte vordering. Kom daar weer 'n herskrywing, kry daardie week 'n
+  inskrywing met NUWE vraag-id's en 'n merk wat nooit gebruik is nie (nie
+  `'2026-10-11'` nie — party fone dra dit reeds). Blaaiertoets:
+  `kykHerskryf.mjs`.
 
 `.vs-klaar-lyf` dra nou `white-space: pre-line` soos elke ander teksblok. Die
 week se slot het sedert Week 5 paragrawe gehad wat in een blok saamgeloop het;
-Week 8 s'n is kort reëls en het dit sigbaar gemaak.
+Week 8 se herskrywing het kort reëls gehad en het dit sigbaar gemaak.
 
 Blaaiertoetse: `kykWeek4.mjs`, `kykWeek5.mjs` en `kykWeek6.mjs` in die
 scratchpad loop die hele week deur teen 'n onderskepte

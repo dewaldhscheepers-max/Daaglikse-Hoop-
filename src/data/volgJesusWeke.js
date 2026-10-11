@@ -424,60 +424,55 @@ export const WEKE = {
   8: {
     weeknommer: 8,
     titel: 'Die Koninkryk van God het naby gekom',
-    /* Dewald het die week op 11 Oktober 2026 herskryf; hierdie rekord volg sy
-       nuwe weergawe. Sy woorde, sy KERNSKRIF, sy DOEL en sy KERNWAARHEID. */
     doel:
-      'Om te verstaan dat Jesus nie bloot by ons bestaande lewe gevoeg word nie. Hy roep ons om Hom te vertrou en onder God se heerskappy te leef.',
+      'Om te verstaan dat die Koninkryk van God beteken dat God se heerskappy in Jesus naby gekom het, en dat dit ons hele lewe raak.',
     weekKern:
-      'ONS WIL MAKLIK GOD SE HULP H\u00CA SONDER OM ONDER GOD SE HEERSKAPPY TE LEEF.',
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
     openingskerm:
-      'Jesus se eerste groot boodskap in Markus begin met \u2019n aankondiging:\n\n'
-      + '\u201CDie tyd is vervul en die Koninkryk van God het naby gekom.\u201D\n\n'
-      + 'Die Koning het gekom.\n\n'
-      + 'Daarom verander die groot vraag van:\n\n'
-      + '\u201CWat wil ek h\u00EA?\u201D\n\n'
-      + 'na:\n\n'
-      + '\u201CWat wil Hy h\u00EA?\u201D',
-    primereSkrif: 'Markus 1:14\u201315',
-    ondersteunendeSkrif: 'Matteus 6:9\u201310',
+      'Jesus het nie net gekom om mense te help nie.\n\n'
+      + 'Hy het gekom as Koning.\n\n'
+      + 'En wanneer die Koning kom, verander alles.\n\n'
+      + 'Hierdie week kyk ons na wat Jesus bedoel wanneer Hy s\u00EA: \u201CDie Koninkryk van God het naby gekom.\u201D\n\n'
+      + 'Dit gaan nie net oor waarheen jy eendag gaan nie. Dit gaan oor Wie nou die Koning is \u2014 en wat gebeur wanneer Sy wil in jou lewe begin regeer.',
+    primereSkrif: 'Markus 1:14\u201320',
+    ondersteunendeSkrif: 'Markus 10:42\u201345',
     videoId: '',
     stemboodskapUrl: '',
     /* Sien Week 5, 6 en 7 se noot: sonder hierdie vlaggie sou die publiseer-hek
-       se "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "Week 8 is
-       leesinhoud. Moenie 'n stemboodskap of klankspeler byvoeg nie." */
+       se "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "WEEK 8 HET
+       GEEN STEMBOODSKAP OF AUDIO NIE." */
     geskreweBoodskap: true,
     kernwaarheid:
-      'ONS WIL MAKLIK GOD SE HULP H\u00CA SONDER OM ONDER GOD SE HEERSKAPPY TE LEEF.',
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
     eenSin:
-      'Die evangelie is nie dat Jesus jou help om \u2019n beter koning van jou eie lewe te word nie. Die goeie nuus is dat die ware Koning gekom het.',
+      'Jesus het nie gekom om jou eie koninkryk beter te bestuur nie. Hy het gekom om jou deel van S\u00FD Koninkryk te maak.',
     privaatRefleksie:
-      'Watter deel van my lewe probeer ek nog self regeer?',
+      'Waar wil ek nog h\u00EA Jesus moet my help, maar wil ek nie h\u00EA Hy moet oor daardie deel van my lewe regeer nie?',
     gehoorsaamheidStap:
-      'Voltooi hierdie sin:\n\n\u201COmdat Jesus my Koning is, gaan ek hierdie week __________.\u201D\n\nKies een konkrete ding.\n\nNie tien nie.\n\nEen.',
+      'Voltooi hierdie sin en neem die stap: \u201COmdat Jesus my Koning is, gaan ek hierdie week \u2026\u201D Kies een konkrete ding. Dit kan wees: vergewe iemand; gee iets op wat jou van Hom af wegtrek; bring \u2019n besluit eers in gebed na Hom toe; dien iemand sonder dat hulle dit kan terugbetaal; of gehoorsaam iets wat jy reeds weet Hy van jou vra.',
     gebed:
-      'Here Jesus, U is Koning. Dankie dat God eerste na ons toe gekom het. Help ons om te draai waar ons moet draai, die goeie nuus te glo en ons lewe aan U toe te vertrou. Laat U Koninkryk kom en laat U wil in ons lewe geskied. Amen.',
+      'Jesus, U is Koning. Dankie dat U nie net gekom het om ons te help nie, maar om ons deel van U Koninkryk te maak. Laat U wil al hoe meer in ons lewe gebeur. Wys ons waar ons nog self die laaste s\u00EA wil h\u00EA. Help ons om U Koninkryk eerste te soek en ander te dien soos U ons gedien het. Amen.',
     wallpaper: '',
     wallpaperDag1: '',
     moreTeaser:
-      'M\u00F4re: bekering is meer as om jammer te wees.',
-    dag1Titel: 'Die Koning het gekom',
-    dag2Titel: 'Bekering is meer as om jammer te wees',
-    dag3Titel: 'Laat U wil geskied',
-    dag4Titel: 'Soek eers die Koninkryk',
-    dag5Titel: 'Wie kry die laaste s\u00EA?',
+      'M\u00F4re: wat gebeur waar die Koning werklik kom \u2014 en hoekom Jesus se wonderwerke meer as wonderwerke was.',
+    dag1Titel: 'Die Koninkryk van God het naby gekom',
+    dag2Titel: 'Waar die Koning kom, begin dinge verander',
+    dag3Titel: 'U Koninkryk kom',
+    dag4Titel: 'Wanneer jy die skat sien',
+    dag5Titel: 'Die Koning wat Sy lewe gegee het',
     groepVraag1:
-      'Wat het jou hierdie week die meeste getref oor God se Koninkryk?',
+      'Wat verstaan jy nou anders oor die woorde \u201CKoninkryk van God\u201D?',
     groepVraag2:
-      'Wat is die verskil tussen jammer wees en werklik bekeer?',
+      'Waarom dink julle leer Jesus ons om te bid \u201CLaat U Koninkryk kom\u201D?',
     groepVraag3:
-      'Waarom hoort \u201CLaat U Koninkryk kom\u201D en \u201CLaat U wil geskied\u201D bymekaar?',
+      'Wat leer die skat en die p\u00EArel ons oor die waarde van Jesus?',
     groepVraag4:
-      'In watter dele van ons lewe wil ons maklik God se hulp h\u00EA sonder om Hom die laaste s\u00EA te gee?',
-    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en HOU DIE VOLGORDE REG. */
+      'Wat leer Markus 10 ons oor die soort Koning wat Jesus is?',
     fasiliteerderHoofpunt:
-      'Hierdie week gaan nie bloot oor \u201CGod se Koninkryk\u201D as \u2019n moeilike Bybelse begrip nie.\n\nDie eenvoudige waarheid is:\n\nGod regeer.\n\nEn in Jesus het die Koning naby gekom.\n\nDaarom roep Jesus mense tot bekering en geloof.\n\nBekering beteken nie bloot dat iemand sleg oor sonde voel nie. Dit begin \u2019n verandering bring in hoe die persoon dink en leef.\n\nGeloof beteken nie bloot om te erken dat Jesus bestaan nie. Dit beteken om Hom te vertrou.',
+      'Die Koninkryk van God beteken meer as net \u2019n plek waar gelowiges eendag sal wees. Jesus kondig aan dat God se heerskappy in Hom naby gekom het. Sy wonderwerke wys iets daarvan. Sy leer wys hoe mense onder God se heerskappy leef. Die kruis wys watter soort Koning Hy is. En Sy opstanding wys dat selfs die dood nie die laaste woord het nie. Die antwoord op die Koninkryk is: bekeer jou, glo, volg Jesus. Maar maak dit duidelik: ons verdien nie God se Koninkryk deur gehoorsaam genoeg te wees nie. Redding is genade. Gehoorsaamheid is ons antwoord daarop.',
     fasiliteerderGrens:
-      'HOU DIE VOLGORDE REG\n\nMarkus 1 s\u00EA eers:\n\n\u201CDie Koninkryk van God het naby gekom.\u201D\n\nD\u00E1n:\n\n\u201CBekeer julle en glo.\u201D\n\nGod tree eerste op.\n\nOns antwoord.\n\nRedding is dus nie iets wat ons deur goeie gedrag verdien nie.\n\nMaar wanneer Jesus ons Here is, begin Sy heerskappy ons lewe raak.',
+      '\u201CJesus is Koning\u201D beteken nooit dat \u2019n pastoor, groepleier of ander Christen die reg kry om mense te beheer nie. Jesus s\u00EA self: \u201CMaar so moet dit onder julle nie wees nie.\u201D Sy manier van lei is diens. Moenie jou eie mening sommer \u201CGod se wil\u201D noem nie. Waar die Skrif duidelik praat, volg ons dit. Waar die Skrif nie \u2019n spesifieke antwoord gee nie, moet ons nie maak asof God iets ges\u00EA het wat Hy nie ges\u00EA het nie.',
     pastoraleRisiko: 'laag',
   },
 }
