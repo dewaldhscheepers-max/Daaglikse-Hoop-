@@ -51,6 +51,8 @@ node src/data/volgJesusWeek3.toets.mjs        # Week 3 se pad, teen dieselfde pe
 node src/data/volgJesusWeek4.toets.mjs        # Week 4 se pad, en die stem dra Dag 4 alleen, 111
 node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n GESKREWE boodskap, 131
 node src/data/volgJesusWeek6.toets.mjs        # Week 6 se pad — ook geen opname, 138 toetse
+node src/data/volgJesusWeek7.toets.mjs        # Week 7 se pad, 179 toetse
+node src/data/volgJesusWeek8.toets.mjs        # Week 8 (herskryf 11 Okt) — geen terugblik, nuwe id's, 183
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -774,6 +776,21 @@ per dag en hoogstens twee private antwoorde per dag.
 Twee plekke waar Dewald se uitleg twee skryfkassies gehad het (Week 6 se Dag 3
 se "VOLTOOI DIE SIN" en Dag 4/5 se "OPVOLG") is EEN vraagblok wat albei vra. Sy
 woorde staan albei daar, in sy volgorde; die dag sou andersins ses blokke hê.
+
+**'n Week wat HERSKRYF word, kry NUWE vraag-id's.** Week 8 is op 11 Oktober
+2026 heeltemal oorgeskryf — ander gedeeltes, ander vrae. Wie die ou weergawe
+begin het, het `vj_a_w8_<id>` op sy foon vir vrae wat nie meer bestaan nie; 'n
+hergebruikte id sou sy ou antwoord onder 'n NUWE vraag wys, asof hy iets
+geskryf het wat hy nooit geskryf het nie. Die toets eis dat die ou id's nie
+terugkom nie.
+
+**Geen vraag op Dag 1 nie, dan geen `terugblik` op Dag 5 nie.** Dewald se nuwe
+Week 8 het op Dag 1 net die boodskap en die gebed, en sy "KYK TERUG" haal die
+VRAAG aan. 'n Terugblik sou na 'n antwoord wys wat nooit gevra is nie.
+
+`.vs-klaar-lyf` dra nou `white-space: pre-line` soos elke ander teksblok. Die
+week se slot het sedert Week 5 paragrawe gehad wat in een blok saamgeloop het;
+Week 8 s'n is kort reëls en het dit sigbaar gemaak.
 
 Blaaiertoetse: `kykWeek4.mjs`, `kykWeek5.mjs` en `kykWeek6.mjs` in die
 scratchpad loop die hele week deur teen 'n onderskepte

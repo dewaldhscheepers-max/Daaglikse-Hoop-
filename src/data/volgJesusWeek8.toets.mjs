@@ -1,11 +1,11 @@
 /* VOLG JESUS — WEEK 8: "DIE KONINKRYK VAN GOD HET NABY GEKOM"
  *
- * Dewald het die week op 29 September 2026 voluit gestuur. Hierdie toets keur
+ * Dewald het die week op 11 Oktober 2026 herskryf en voluit gestuur. Hierdie toets keur
  * die PERKE (wat keer dat 'n dag soos huiswerk voel), die vorm van 'n week
  * SONDER 'n opname, en die vyf plekke wat CLAUDE.md uitwys — veral die twee
  * wat maklik agterbly: die BRUG van Week 7 af, en die verse teen die GAB.
  *
- *   node src/data/volgJesusWeek7.toets.mjs
+ *   node src/data/volgJesusWeek8.toets.mjs
  */
 import {
   WEEK8_DAE, WEEK8_REIS, WEEK8_OPENING, WEEK8_DEELSIN, WEEK8_VOLGENDE,
@@ -108,7 +108,8 @@ console.log('\n── Elke Skrifgedeelte maak die Bybel oop ──\n')
 
 console.log('\n── GEEN STEMBOODSKAP: die boodskap word GELEES ──\n')
 {
-  /* Dewald: "WEEK 8 HET GEEN STEMBOODSKAP OF AUDIO NIE." */
+  /* Dewald: "Week 8 is leesinhoud. Moenie 'n stemboodskap of klankspeler
+     byvoeg tensy Dewald dit later self versoek nie." */
   for (const d of WEEK8_DAE) {
     is(`dag ${d.n} het geen stem-blok`, d.blokke.some(b => b.soort === 'stem'), false)
   }
@@ -153,13 +154,20 @@ console.log('\n── Elke vraag se id is UNIEK ──\n')
   const ids = WEEK8_DAE.flatMap(d => d.blokke).filter(b => b.id).map(b => b.id)
   is('geen duplikaat', new Set(ids).size, ids.length)
   waar('en daar is vyf', ids.length === 5)
-  /* Die terugblik op Dag 5 wys Dag 1 se antwoord — die belangrikste oomblik
-     van die week. Wys hy na n id wat nie bestaan nie, is die blok vir altyd
-     leeg en niemand sou dit agterkom nie. */
+  /* GEEN terugblik-blok nie, en dit is Dewald se ontwerp: Dag 1 het in sy
+     herskrewe week geen skryfkassie nie, dus haal Dag 5 se "KYK TERUG" die
+     VRAAG aan. 'n Terugblik sou na 'n antwoord wys wat nooit gevra is nie. */
   const tb = WEEK8_DAE.flatMap(d => d.blokke).filter(b => b.soort === 'terugblik')
-  is('daar is een terugblik', tb.length, 1)
-  waar('en dit wys na n egte vraag', ids.includes(tb[0].bronId))
-  is('naamlik Dag 1 s n', tb[0].bronId, 'troon1')
+  is('daar is geen terugblik nie', tb.length, 0)
+  is('Dag 1 vra niks om te skryf nie', WEEK8_DAE[0].blokke.some(b => b.id), false)
+  const kyk = WEEK8_DAE[4].blokke.find(b => b.kop === 'KYK TERUG')
+  waar('Dag 5 se KYK TERUG haal Dag 1 se vraag aan',
+       kyk && /Waar wil ek God se hulp hê, maar nie God se heerskappy nie\?/.test(kyk.lyf))
+  /* Die ou weergawe se id's mag nie terugkom nie: wie die ou Week 8 begin het,
+     se antwoorde was op ANDER vrae. */
+  for (const ou of ['troon1', 'regeer2', 'verander3', 'waarde4', 'koning5']) {
+    is(`die ou id "${ou}" is nie hergebruik nie`, ids.includes(ou), false)
+  }
   for (const id of ids) waar(`"${id}" is n bruikbare id`, /^[a-z][a-z0-9]*$/.test(id))
 }
 
@@ -227,7 +235,7 @@ console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')
      Week 4 klaarmaak, Week 1 se slot gelees het. */
   waar('dit is nie Week 1 se ou slot nie', !/BEGIN KYK/i.test(k.kop))
   waar('dit is nie Week 7 se slot nie', weekKlaar(7).kop !== k.kop)
-  waar('dit vra die week se vraag', /WYS MY LEWE DIT/i.test(k.lyf))
+  waar('dit vra die week se vraag', /WIE KRY DIE LAASTE SÊ\?$/.test(k.lyf))
 }
 
 console.log('\n── Die week se rekord kan PUBLISEER, SONDER n opname ──\n')
@@ -235,7 +243,7 @@ console.log('\n── Die week se rekord kan PUBLISEER, SONDER n opname ──\n
   const w = { ...WEKE[8] }
   const kontroles = { teks: true, konteks: true, jesus: true, toepassing: true, grens: true }
   waar('die week staan in die plat rekord', !!w.weeknommer)
-  is('weeknommer 7', w.weeknommer, 8)
+  is('weeknommer 8', w.weeknommer, 8)
   is('daar is geen stemboodskap nie', w.stemboodskapUrl, '')
   is('en geen video nie', w.videoId, '')
   /* Sonder hierdie vlaggie eis die hek n hoofboodskap wat hierdie week
@@ -278,12 +286,13 @@ console.log('\n── Die fasiliteerder kry sy grens ──\n')
   const w = WEKE[8]
   waar('daar is n hoofpunt', w.fasiliteerderHoofpunt.length > 80)
   waar('en n grens', w.fasiliteerderGrens.length > 80)
-  /* Dewald se eie waarskuwings vir hierdie week. */
-  /* Die belangrikste grens van hierdie week: "Jesus is Koning" mag NOOIT n
-     groepleier se gesag word nie. Dewald het dit self geskryf. */
-  waar('dit waarsku teen n leier wat mense beheer', /beheer/i.test(w.fasiliteerderGrens))
-  waar('en teen "God se wil" as jou eie mening', /God se wil/i.test(w.fasiliteerderGrens))
-  waar('dit se redding is genade', /genade/i.test(w.fasiliteerderHoofpunt))
+  /* Dewald se "VIR DIE GROEPLEIER": die HOOFPUNT, en HOU DIE VOLGORDE REG.
+     Die volgorde IS die evangelie van hierdie week — God tree eerste op. */
+  waar('die hoofpunt: God regeer', /God regeer\./.test(w.fasiliteerderHoofpunt))
+  waar('die volgorde word reg gehou', /^HOU DIE VOLGORDE REG/.test(w.fasiliteerderGrens))
+  waar('God tree eerste op', /God tree eerste op\./.test(w.fasiliteerderGrens))
+  waar('redding is nie verdien nie',
+       /nie iets wat ons deur goeie gedrag verdien nie/.test(w.fasiliteerderGrens))
 }
 
 console.log('\n── Die groepsessie ──\n')

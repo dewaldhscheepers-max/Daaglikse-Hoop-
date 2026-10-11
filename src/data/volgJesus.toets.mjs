@@ -221,8 +221,8 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
                    'Genesis 28:10–17', 'Markus 1:16–20',
       /* Week 8 — elke dag se LEES-blok, plus die admin se twee velde en die
          groepsessie se kern-Skrifte. */
-      /* Week 8 */ 'Markus 1:14–20', 'Matteus 12:22–28', 'Matteus 6:9–13',
-                   'Matteus 13:44–46', 'Markus 10:42–45',
+      /* Week 8 */ 'Markus 1:14–15', 'Matteus 4:17', 'Matteus 6:9–10',
+                   'Matteus 6:31–33', 'Lukas 6:46–49',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
