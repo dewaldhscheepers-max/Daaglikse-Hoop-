@@ -53,6 +53,7 @@ node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n
 node src/data/volgJesusWeek6.toets.mjs        # Week 6 se pad — ook geen opname, 138 toetse
 node src/data/volgJesusWeek7.toets.mjs        # Week 7 se pad, 179 toetse
 node src/data/volgJesusWeek8.toets.mjs        # Week 8 (herskryf 11 Okt) — geen terugblik, nuwe id's, 183
+node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies gaan weg, 24 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
 node src/data/volgJesusGroep.toets.mjs        # groepe: kodes, name, boodskappe, 100 toetse
@@ -783,6 +784,21 @@ begin het, het `vj_a_w8_<id>` op sy foon vir vrae wat nie meer bestaan nie; 'n
 hergebruikte id sou sy ou antwoord onder 'n NUWE vraag wys, asof hy iets
 geskryf het wat hy nooit geskryf het nie. Die toets eis dat die ou id's nie
 terugkom nie.
+
+**En die OU dag-merkies moet weg.** Dewald het dieselfde middag die nuwe
+Week 8 oopgemaak: *"Hoekom wys dit gedoen... ek het nog niks gedoen nie."* Die
+skerm het "4 van 5 dae gedoen" gesê. `vj_klaar_w<n>` ken net 'n DAGNOMMER, nie
+die inhoud wat daardie dag gedra het nie, dus het die ou week se vordering op
+die nuwe week gestaan — by almal wat die ou een begin het.
+
+`src/data/volgJesusHerskryf.js` loop een keer per foon per herskrywing, in
+`main.jsx` VOOR die eerste render. Het die mens 'n antwoord op een van die
+NUWE vrae, is sy vordering eg en word niks aangeraak nie; anders gaan
+`vj_klaar_w<n>` en `vj_plek_w<n>` weg en skuif `vj_my_week` terug, presies soos
+"Gaan terug na Week N". Geskrewe antwoorde bly staan. Herskryf Dewald weer 'n
+week, kry daardie week 'n inskrywing in `HERSKRYF` met 'n NUWE merk — verander
+nooit 'n merk wat reeds uit is nie, anders word elke foon weer skoongemaak.
+Blaaiertoets: `kykHerskryf.mjs` (dit val op die ou kode).
 
 **Geen vraag op Dag 1 nie, dan geen `terugblik` op Dag 5 nie.** Dewald se nuwe
 Week 8 het op Dag 1 net die boodskap en die gebed, en sy "KYK TERUG" haal die

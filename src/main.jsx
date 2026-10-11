@@ -2,6 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import { herstelHerskryfdeWeke } from './data/volgJesusHerskryf'
+
+/* VOOR die eerste render, sodat geen skerm ooit 'n herskrewe week se ou
+ * dag-merkies lees nie. Sien src/data/volgJesusHerskryf.js. */
+try { herstelHerskryfdeWeke(window.localStorage) } catch {}
 
 /* HIER het 'n onvoorwaardelike herlaai op `controllerchange` gestaan.
  *
