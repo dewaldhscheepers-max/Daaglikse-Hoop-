@@ -223,6 +223,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
          groepsessie se kern-Skrifte. */
       /* Week 8 */ 'Markus 1:14–20', 'Matteus 12:22–28', 'Matteus 6:9–13',
                    'Matteus 13:44–46', 'Markus 10:42–45',
+      /* Week 9 — elke dag se LEES-blok en die groepsessie se kern-Skrif. */
+      /* Week 9 */ 'Matteus 6:5–13', 'Matteus 6:8–9', 'Matteus 6:9–10',
+                   'Matteus 6:11', 'Matteus 6:12–13',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

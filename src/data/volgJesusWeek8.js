@@ -455,9 +455,15 @@ export const WEEK8_DEELSIN =
 
 /* ── Die brug na Week 9 ──
  *
- * `null` totdat Dewald Week 9 stuur. \u2019n Brug wat \u2019n titel VOORSPEL, is \u2019n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om \u2019n WEEK by te voeg". */
-export const WEEK8_VOLGENDE = null
+ * Dit was `null`, en dan eindig Week 8 op 'n doodloopstraat. Dewald het Week 9
+ * op 11 Oktober 2026 gestuur. Die titel kom uit Week 9 se eie rekord en word
+ * nie hier voorspel nie; die lyf is Dewald se eie openingsreëls. */
+export const WEEK8_VOLGENDE = {
+  week: 9,
+  titel: 'Here, leer ons bid',
+  lyf: 'Gebed is nie ’n manier om God te beïndruk nie. Jesus leer ons om te '
+     + 'begin met: “Ons Vader.”',
+}
 
 export function blokkeVirDag8(n) {
   const dag = WEEK8_DAE.find(d => d.n === n)

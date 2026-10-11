@@ -190,7 +190,7 @@ waar('en dit is Dewald se nuwe woorde',
      /Voordat ons vra hoe om Jesus te volg/.test(weekOpening(1)))
 waar('nie die ou een nie', !/Jy hoef nie hierdie week alles uit te werk nie/.test(weekOpening(1)))
 /* 'n Week sonder 'n dag-pad gee '' — dan val die skerm op die rekord terug. */
-is('n onbekende week gee n lee opening', weekOpening(9), '')
+is('n onbekende week gee n lee opening', weekOpening(99), '')
 
 console.log('\n── Die opening is KORT ──\n')
 /* Die vorige opening was sewe paragrawe. Dewald: "Moenie die huidige lang

@@ -194,7 +194,7 @@ console.log('\n── Die register ken Week 8 ──\n')
   is('blokkeVir stem ooreen', blokkeVir(8, 3), blokkeVirDag8(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag8(9), [])
   /* Sonder hierdie inskrywing val die week terug op die ou huiswerk-skerm. */
-  is('maar nie week 9 nie', hetDae(9), false)
+  is('maar nie week 10 nie', hetDae(10), false)
 }
 
 console.log('\n── Week 7 wys nou NA Week 8, en die titel stem ──\n')
@@ -210,12 +210,14 @@ console.log('\n── Week 7 wys nou NA Week 8, en die titel stem ──\n')
   waar('en dit se iets oor die week', WEEK7_VOLGENDE.lyf.length > 40)
 }
 
-console.log('\n── En Week 8 loop nog nie verder nie ──\n')
+console.log('\n── En Week 8 loop DEUR na Week 9 ──\n')
 {
-  /* `null` totdat Dewald Week 9 stuur. n Brug wat n titel VOORSPEL, is n
-     belofte wat ons nie kan hou nie. Skuif dit saam; sien CLAUDE.md. */
-  is('WEEK8_VOLGENDE is null', WEEK8_VOLGENDE, null)
-  is('en die register gee ook null', weekVolgende(8), null)
+  /* Die BRUG. Dit was `null` totdat Dewald Week 9 gestuur het. */
+  waar('WEEK8_VOLGENDE bestaan', !!WEEK8_VOLGENDE)
+  is('en dit wys na week 9', WEEK8_VOLGENDE.week, 9)
+  is('die register gee dieselfde', weekVolgende(8), WEEK8_VOLGENDE)
+  is('die titel is Week 9 se egte titel', WEEK8_VOLGENDE.titel, WEKE[9].titel)
+  waar('en dit se iets oor die week', WEEK8_VOLGENDE.lyf.length > 40)
 }
 
 console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')

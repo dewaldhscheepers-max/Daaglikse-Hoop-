@@ -475,4 +475,60 @@ export const WEKE = {
       '\u201CJesus is Koning\u201D beteken nooit dat \u2019n pastoor, groepleier of ander Christen die reg kry om mense te beheer nie. Jesus s\u00EA self: \u201CMaar so moet dit onder julle nie wees nie.\u201D Sy manier van lei is diens. Moenie jou eie mening sommer \u201CGod se wil\u201D noem nie. Waar die Skrif duidelik praat, volg ons dit. Waar die Skrif nie \u2019n spesifieke antwoord gee nie, moet ons nie maak asof God iets ges\u00EA het wat Hy nie ges\u00EA het nie.',
     pastoraleRisiko: 'laag',
   },
+  9: {
+    weeknommer: 9,
+    titel: 'Here, leer ons bid',
+    doel:
+      'Om te leer dat gebed begin by verhouding, God eerste plaas en ons leer om Hom met ons daaglikse behoeftes, vergifnis en versoeking te vertrou.',
+    weekKern:
+      'GEBED BEGIN NIE BY ALLES WAT EK VAN GOD WIL H\u00CA NIE. DIT BEGIN BY WIE GOD IS.',
+    openingskerm:
+      'Gebed is nie \u2019n manier om God te be\u00EFndruk nie.\n\n'
+      + 'Dit is nie \u2019n inkopielys nie.\n\n'
+      + 'Dit is nie \u2019n poging om God te oortuig om om te gee nie.\n\n'
+      + 'Jesus leer ons om te begin met:\n\n'
+      + '\u201COns Vader.\u201D\n\n'
+      + 'Hierdie week leer ons om weer te bid soos Jesus ons geleer het.',
+    primereSkrif: 'Matteus 6:5\u201313',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 8 se noot: sonder hierdie vlaggie sou die publiseer-hek
+       se "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "Gebruik
+       dieselfde eenvoudige lees-uitleg as Week 8." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'GEBED BEGIN NIE BY ALLES WAT EK VAN GOD WIL H\u00CA NIE. DIT BEGIN BY WIE GOD IS.',
+    eenSin:
+      'Gebed is nie hoe ek God kry om my w\u00EAreld te dien nie. Dit is hoe my hele w\u00EAreld weer onder God kom.',
+    privaatRefleksie:
+      'Waar probeer ek nog gebed gebruik om God by my plan te kry, in plaas daarvan om my hart aan Sy wil oor te gee?',
+    gehoorsaamheidStap:
+      'Bid vandag die Onse Vader stadig.\n\nStop n\u00E1 elke sin.\n\nMoenie jaag nie.\n\nLaat elke deel jou hart raak.',
+    gebed:
+      'Vader, dankie dat U ons sien en weet wat ons nodig het. Leer ons om U eerste te stel. Laat U Koninkryk kom en U wil geskied. Gee ons wat ons vandag nodig het. Vergewe ons, help ons om ander te vergewe en lei ons wanneer versoeking kom. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'M\u00F4re: Ons Vader.',
+    dag1Titel: 'Here, leer ons bid',
+    dag2Titel: 'Ons Vader',
+    dag3Titel: 'Laat U wil geskied',
+    dag4Titel: 'Gee ons vandag',
+    dag5Titel: 'Vergeef ons \u2014 lei ons',
+    groepVraag1:
+      'Wat het jou hierdie week die meeste getref oor gebed?',
+    groepVraag2:
+      'Waarom dink julle begin Jesus met \u201COns Vader\u201D?',
+    groepVraag3:
+      'Wat verander wanneer ons eers bid: \u201CLaat U wil geskied\u201D voordat ons ons eie behoeftes bring?',
+    groepVraag4:
+      'Waarom dink julle leer Jesus ons om oor vergifnis \u00E9n versoeking te bid?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Gebed is nie prestasie nie.\n\nDit is verhouding.\n\nJesus leer ons om by Vader te begin en ons hele lewe onder God te bring.\n\nDie Onse Vader wys hierdie volgorde:\n\nGod se Naam.\nGod se Koninkryk.\nGod se wil.\nOns daaglikse brood.\nVergifnis.\nLeiding in versoeking.',
+    fasiliteerderGrens:
+      'Moenie mense laat voel dat lang of indrukwekkende gebede nodig is om \u201Cgoed\u201D te bid nie.\n\nJesus waarsku juis teen gebed wat gedoen word om mense te be\u00EFndruk.\n\nHou die fokus op eenvoud, eerlikheid, vertroue en God se wil.',
+    pastoraleRisiko: 'laag',
+  },
 }
