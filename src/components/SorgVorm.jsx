@@ -86,7 +86,6 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   const [toestem, setToestem] = useState(false)
   const [hulpOop, setHulpOop] = useState(false)
   const [alleOnderwerpe, setAlleOnderwerpe] = useState(false)
-  const [reelsOop, setReelsOop] = useState(false)
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
   const [uitslag, setUitslag] = useState(null)
@@ -99,7 +98,6 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setTeks('')
     setOnderwerp('')
     setAlleOnderwerpe(false)
-    setReelsOop(false)
     setToestem(false)
     setHulpOop(false)
     setBesig(false)
@@ -188,12 +186,12 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   }
 
   return (
-    <div className="sv-oor" role="dialog" aria-label="Deel jou storie of vraag">
+    <div className="sv-oor" role="dialog" aria-label="Dra Mekaar">
       <div className="sv-kop">
         <button className="sv-terug" onClick={onSluit} aria-label="Maak toe">
           {uitslag ? 'Klaar' : 'Terug'}
         </button>
-        <span className="sv-kop-titel">{uitslag ? 'Dankie' : 'Ek luister'}</span>
+        <span className="sv-kop-titel">{uitslag ? 'Dankie' : 'Dra Mekaar'}</span>
       </div>
 
       <div className="sv-rol" ref={bo}>
@@ -214,22 +212,26 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               </div>
             )}
 
-            {/* ── "Waarmee jy hulp nodig het" is weg ──
+            {/* ── Dra Mekaar is vir RAAD, nie vir gebedsversoeke nie ──
              *
-             * Dewald, 29 September 2026: *"Van die mense vra nogsteeds vir
-             * gebed op die dra mekaar blad."*
+             * Dewald, 14 Oktober 2026, met twee skermkiekies van hierdie vorm:
+             * *"almal deel gebede daar... Hulle moet gebede op Bid Saam plaas
+             * nie op Dra Mekaar nie."* En: *"dit moet baie korter wees."*
              *
-             * Hierdie sin was een van die redes. "Waarmee het jy hulp nodig" is
-             * vir hierdie gehoor 'n GEBEDSVRAAG — dit vra vir 'n versoek, en
-             * dan skryf sy een.
-             *
-             * Die res van die sin bly woord vir woord: "Jy hoef nie die regte
-             * woorde te hê nie" is die ding wat iemand laat begin tik, en dit
-             * word nie aangeraak nie. */}
-            <h2 className="sv-vraag">Ek luister.</h2>
+             * "Ek luister. Jy hoef nie die regte woorde te hê nie. Vertel my net
+             * wat gebeur het" het soos 'n plek gelees waar 'n mens enige nood
+             * uitstort — en vir hierdie gehoor is 'n nood 'n GEBEDSVERSOEK. Die
+             * woorde sê nou waarvoor die blad is: raad en bemoediging van mense
+             * wat deur dieselfde gegaan het. Dit is Dewald se eie teks, woord
+             * vir woord. */}
+            <h2 className="sv-vraag">Dra Mekaar</h2>
             <p className="sv-fyn">
-              Jy hoef nie die regte woorde te hê nie. Vertel my net wat gebeur
-              het en hoe jy daaroor voel.
+              Gaan jy deur iets moeiliks en soek jy raad of bemoediging?
+            </p>
+            <p className="sv-fyn">
+              Deel kortliks wat gebeur. Ander wat deur iets soortgelyks gegaan
+              het, kan vertel wat hulle gehelp het, en Dewald kan waar moontlik
+              pastorale leiding gee.
             </p>
 
             {/* ── Die krisisband ──
@@ -246,79 +248,36 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
             )}
 
             {/* ── Dit gaan openbaar wees ──
-
-                Bo die kassie, nie onder nie, en nie in fyn druk nie. 'n
-                Uitnodiging hoort waar iemand besluit OF hy wil; 'n kontrak
-                hoort op die oomblik van verbintenis, en dit is hier. Iemand
-                wat via 'n kennisgewing of 'n gedeelde skakel reguit hierheen
-                kom, sien niks anders nie — hy moet dit HIER sien.
-
-                ── Waarom dit ingevou is ──
-
-                Dit was ses paragrawe, en dit was die eerste ding tussen "Ek
-                luister" en die kassie. Iemand wat gekom het om sy swaarste
-                ding te tik, het eers 'n muur van reels gekry. Elke woord was
-                waar en nie een was oorbodig nie — maar 'n mens LEES nie ses
-                paragrawe reels nie, hy sien 'n muur en gaan terug.
-
-                Die twee dinge wat 'n mens MOET weet voordat hy tik, staan nou
-                oop: dit word openbaar, en moenie name gebruik nie. Die res is
-                een druk weg en dit bly volledig — niks is weggegooi nie. */}
+                Bo die kassie, nie onder nie: 'n mens moet dit sien VOORDAT hy
+                tik. Die ses paragrawe reëls wat hier gestaan het, is weg —
+                Dewald: "Gebruik baie minder teks as tans." Wat oorbly, is die
+                twee dinge wat 'n mens MOET weet: dit is anoniem, en moenie
+                iemand anders se naam gebruik nie (die plasing gaan dadelik
+                op, dus is daar niemand wat dit vooraf uithaal nie). */}
             <div className="sv-openbaar">
-              <p className="sv-openbaar-kop">Voor jy jou boodskap deel</p>
-              {/* Dit het gesê "nadat dit nagegaan is". 'n Plasing gaan nou
-                  DADELIK op (sien api/sorg-stuur.mjs), en 'n vorm wat oor sy
-                  eie moderasie lieg, is die ergste plek om te lieg — 'n mens
-                  gee juis hier toestemming. */}
-              <p>
-                Jou boodskap verskyn <b>dadelik en anoniem op die Sorg &amp;
-                Ondersteuning-muur</b>, sodat die gemeenskap saam met jou kan
-                dra en ander wat deur dieselfde dinge gaan, daaruit kan leer.
-              </p>
-              <p>
-                Jou naam wys nooit. Moenie name, kontakbesonderhede of
-                inligting deel wat iemand kan identifiseer nie.
-              </p>
-              {reelsOop ? (
-                <>
-                  <p>
-                    Dewald lees gereeld saam en gee waar hy kan pastorale
-                    begeleiding. Hy kan jou boodskap ook verkort of liggies
-                    aanpas om jou en ander mense se privaatheid te beskerm.
-                  </p>
-                  {/* Dit is 'n TOESTEMMINGSITEM, nie 'n kenmerk nie. Iemand wat
-                      sy hart uitstort en dan vreemdelinge onder sy storie sien
-                      skryf, skrik — en dit is presies die verrassing wat 'n mens
-                      op hierdie blad nie wil he nie. */}
-                  {/* Ook 'n leuen geword: mense KAN nou skryf. Dewald: "hoe de
-                      fok moet hulle mekaar bemoedig as hul nie kan komment
-                      nie." */}
-                  <p>
-                    Ander wat op die muur lees, kan saam met jou staan en jou
-                    bemoedig — met 'n kort woord, hul eie ervaring, of iets wat
-                    hulle gehelp het. Enigiets wat nie hier hoort nie, kan
-                    gerapporteer word.
-                  </p>
-                  <p>
-                    Hierdie afdeling is vir pastorale begeleiding — nie vir
-                    geldelike of materiële hulpversoeke nie.
-                  </p>
-                </>
-              ) : (
-                <button className="sv-openbaar-meer" onClick={() => setReelsOop(true)}>
-                  Lees die res van die reels
-                </button>
-              )}
+              <p>Jou boodskap verskyn anoniem.</p>
+              <p>Moenie name of kontakbesonderhede deel nie.</p>
             </div>
+
+            {/* ── Soek jy net gebed? ──
+                Dit staan nou BO die kassie, in Dewald se volgorde. Dit het onder
+                gestaan sodat dit nie 'n "afrit voor die oprit" is nie — maar die
+                mense wat hier aankom, kom juis met 'n gebedsversoek, en hulle
+                moet die afrit sien VOORDAT hulle begin tik. Die knoppie vat hulle
+                reguit tot in Bid Saam se kassie. */}
+            <button className="sv-gebed" onClick={naBidSaam}>
+              <span className="sv-gebed-hoof">Soek jy net gebed?</span>
+              <span className="sv-gebed-fyn">Plaas dit asseblief op Bid Saam →</span>
+            </button>
 
             <textarea
               id="sv-teks"
               className="sv-teks"
               value={teks}
               maxLength={MAKS_LENGTE}
-              /* "Tik jou VRAAG of vertel jou storie" — die eerste helfte nooi
-                 'n versoek. Net die storie bly. */
-              placeholder="Vertel jou storie hier…"
+              /* Dewald se woorde: dit vra vir 'n situasie en 'n raadsvraag,
+                 nie vir 'n versoek nie. */
+              placeholder="Vertel kortliks waardeur jy gaan en waarmee jy raad nodig het…"
               onChange={e => setTeks(e.target.value)}
             />
             <div className="sv-teller">
@@ -329,29 +288,6 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                   : ' '}
             </div>
 
-            {/* ── Soek jy net gebed? ──
-
-                Van die eerste boodskappe was gebedsversoeke: "bid asb vir
-                ons", "ek vra gebed vir genesing". Dit is nie verkeerd nie —
-                dit is net op die verkeerde blad. Daar is niks om te ANTWOORD
-                nie, en die mens wag dan vir 'n antwoord wat nooit kom nie.
-
-                Bid Saam bestaan presies daarvoor, en dit is vinniger: sy
-                versoek is dadelik daar en ander bid dadelik saam. Hierdie
-                knoppie vat hom reguit tot in die kassie — nie net na die
-                blad toe nie.
-
-                Dit het BO die kassie gestaan, en dit was verkeerd: dit is
-                'n afrit wat voor die oprit staan. Die eerste ding wat 'n
-                mens sien wanneer hy kom skryf het, was 'n makliker uitweg.
-                Nou staan dit onder die kassie, waar dit help vir wie dit
-                nodig het en niemand anders keer nie. */}
-            <button className="sv-gebed" onClick={naBidSaam}>
-              <span className="sv-gebed-hoof">Soek jy net gebed?</span>
-              <span className="sv-gebed-fyn">
-                Plaas dit op Bid Saam — dan bid ander dadelik saam met jou →
-              </span>
-            </button>
 
             <label className="sv-etiket">Waaroor gaan dit? <span>Opsioneel</span></label>
             <div className="sv-onderwerpe">

@@ -2443,6 +2443,17 @@ dieselfde merkie-truuk as saamstaan. Die plasing verdwyn NIE vanself nie —
 'n outomatiese verwydering is 'n knoppie waarmee enigiemand iemand anders se
 seer kan uitvee. Dit gaan bo in die admin, met 'n rooi reël.
 
+**Die vorm vra vir RAAD, nie vir gebed nie.** Dewald, 14 Oktober 2026: *"almal
+deel gebede daar... Hulle moet gebede op Bid Saam plaas nie op Dra Mekaar
+nie"*, en *"dit moet baie korter wees."* "Ek luister. Vertel my net wat gebeur
+het" het soos 'n plek gelees om enige nood uit te stort — en vir hierdie gehoor
+is 'n nood 'n gebedsversoek. Die vorm heet nou **Dra Mekaar**, dra Dewald se eie
+kort teks (raad en bemoediging van mense wat deur dieselfde gegaan het), en
+"Soek jy net gebed? → Bid Saam" staan BO die kassie: die mense wat hier aankom,
+kom juis met 'n gebedsversoek, en hulle moet die afrit sien voordat hulle tik.
+Die noodbalk en die krisisband bly — dit is die veiligheidsnet, nie inligting
+nie. Blaaiertoets: `kykDraMekaar.mjs`.
+
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
 goedkeuring sal dit verskyn"*. 'n Blad wat oor sy eie moderasie lieg, is erger
