@@ -269,6 +269,27 @@ dood, bly `playing` waar, wys die knoppie 'n pouse-ikoon, vries die balkie, en
 niks probeer ooit weer nie. Die enigste pad uit was om die skerm te verlaat en
 terug te kom. Vandaar "ek moet in en uit gaan".
 
+### Die klank van 'n bestaande nota VERVANG
+
+Dewald, 14 Oktober 2026: *"i made a mistake in my voicenote... There is no
+place to edit it and delete old one and just replace it with new voicenote in
+admin."* Uitvee en oor maak kos die likes, die wallpaper, die vers en elke
+gedeelde `/hoop/<id>`-skakel. Die 🎙 ↻-knoppie by elke nota (`vervangKlank` in
+`Admin.jsx`) hou die NOTA en skryf net `audioUrl` en `lengthSeconds: 0`, met
+`merge`:
+
+* **'n Eie lêernaam** (`audio/<id>_v<tyd>.<ext>`), nooit 'n oorskrywing nie —
+  dieselfde les as die nota-wallpaper: dieselfde naam is dieselfde skakel, en
+  elke kas hou die oue.
+* **`lengthSeconds: 0`**, want die speler toets 'n vroeë `ended` teen daardie
+  getal. Bly die ou lengte staan en die nuwe opname is korter, "herstel" die
+  speler 'n klank wat net klaar is.
+* **'n Gebladmerkte nota is 'n KOPIE** (`savedNoteData`, met die ou
+  `audioUrl`). `savedList` in Luister.jsx laat die vars nota se velde wen,
+  anders hoor wie dit gestoor het, die foutiewe opname.
+
+Blaaiertoets: `kykKlankVervang.mjs` (vals `firebase/storage` in `vals/`).
+
 ### Die speelbalkie onderaan
 
 Die pers balkie wat opkom wanneer 'n mens 'n OUER nota speel (vandag se een

@@ -1189,7 +1189,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     [n.title, n.scripture, n.series, n.scriptureText].some(f => f?.toLowerCase().includes(term))
   ) : []
 
-  const savedList = Object.values(savedNotes).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
+  /* 'n Gebladmerkte nota is 'n KOPIE van die nota soos dit was toe dit gestoor
+     is. Vervang Dewald later die klank (die admin se 🎙 ↻), dra daardie kopie
+     nog die OU skakel. Is die vars nota bekend, wen sy velde dus — net
+     `savedAt` kom uit die kopie. */
+  const savedList = Object.values(savedNotes)
+    .map(s => {
+      const vars = notes.find(n => n.id === s.id) || allNotes.find(n => n.id === s.id)
+      return vars ? { ...s, ...vars, savedAt: s.savedAt } : s
+    })
+    .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))
 
   const bySeries = recent.reduce((acc, n) => {
     const key = n.series || 'Ouer boodskappe'

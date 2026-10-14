@@ -94,6 +94,12 @@ export default function Admin({ onClose }) {
   const [wpSaved,     setWpSaved]     = useState(null)
   const [wpTarget,    setWpTarget]    = useState(null)
   const wpInputRef = useRef(null)
+  /* Die klank van 'n nota wat REEDS lewendig is, vervang — sien vervangKlank. */
+  const [klankTarget, setKlankTarget] = useState(null)
+  const [klankBesig,  setKlankBesig]  = useState(null)
+  const [klankPers,   setKlankPers]   = useState(0)
+  const [klankKlaar,  setKlankKlaar]  = useState(null)
+  const klankInputRef = useRef(null)
 
   /* Die vers by 'n BESTAANDE nota — sien beginVers/stoorVers. */
   const [versTarget, setVersTarget] = useState(null)
@@ -805,6 +811,64 @@ export default function Admin({ onClose }) {
     setVersBesig(false)
   }
 
+  /* ── Die klank van 'n bestaande nota vervang ──
+   *
+   * Dewald, 14 Oktober 2026: "i made a mistake in my voicenote. So i edit the
+   * voicenote. There is no place to edit it and delete old one and just
+   * replace it with new voicenote in admin." Die enigste pad was om die nota
+   * uit te vee en 'n nuwe een te maak — en dan is die likes, die wallpaper,
+   * die vers en elke gedeelde /hoop/<id>-skakel weg.
+   *
+   * Hier bly die NOTA dieselfde en net `audioUrl` verander, met `merge`.
+   *
+   *   · 'n EIE lêernaam (`_v<tyd>`), nooit die ou een oorskryf nie. 'n Nuwe
+   *     naam is 'n nuwe skakel, en dan kan geen kas iewers die ou opname bedien
+   *     nie — dieselfde les as die wallpaper hieronder.
+   *   · `lengthSeconds: 0`. Die speler vergelyk 'n vroeë `ended` met daardie
+   *     getal; bly die OU opname se lengte staan en die nuwe een is korter, dink
+   *     die speler die klank het te vroeg gestop en probeer weer. Op 0 meet die
+   *     speler die nuwe lengte self, presies soos by 'n nuwe nota.
+   *   · Die ou lêer bly in Storage — die app lees net die dokument, en 'n
+   *     weeslêer kos niks. */
+  function beginKlankVervang(note) { setKlankTarget(note); klankInputRef.current?.click() }
+
+  async function vervangKlank(e) {
+    const file = e.target.files[0]
+    e.target.value = ''
+    const note = klankTarget
+    if (!file || !note) return
+    const ext = (file.name.split('.').pop() || '').toLowerCase()
+    if (!(file.type || '').startsWith('audio/') && !['mp3', 'm4a', 'aac', 'wav', 'ogg', 'opus', 'webm'].includes(ext)) {
+      alert('Dit lyk nie soos ’n klanklêer nie. Kies die stemboodskap self (mp3, m4a, …).')
+      setKlankTarget(null); return
+    }
+    if (!window.confirm(`Vervang die klank van “${note.title}”?\n\nDie likes, die wallpaper, die vers en gedeelde skakels bly. Net die opname verander.`)) {
+      setKlankTarget(null); return
+    }
+    setKlankBesig(note.id); setKlankPers(0)
+    try {
+      const basis = String(note.fileId || note.id).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60)
+      const sRef = ref(storage, `audio/${basis}_v${Date.now()}.${ext || 'mp3'}`)
+      await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, file)
+        task.on('state_changed',
+          sn => setKlankPers(Math.round(sn.bytesTransferred / sn.totalBytes * 100)),
+          reject,
+          async () => {
+            const audioUrl = await getDownloadURL(task.snapshot.ref)
+            await setDoc(doc(db, 'notes', note.id), { audioUrl, lengthSeconds: 0 }, { merge: true })
+            try { localStorage.removeItem('cachedNotesTime') } catch {}
+            resolve()
+          }
+        )
+      })
+      setKlankKlaar(note.id)
+      await loadNotes()
+      setTimeout(() => setKlankKlaar(k => (k === note.id ? null : k)), 4000)
+    } catch (err) { alert('Kon nie die klank vervang nie: ' + err.message) }
+    setKlankBesig(null); setKlankTarget(null)
+  }
+
   // ── Upload wallpaper for a voice note ──
   function triggerWpUpload(note) { setWpTarget(note); wpInputRef.current?.click() }
 
@@ -1013,6 +1077,7 @@ export default function Admin({ onClose }) {
               <div className="admin-section">
                 <div className="admin-section-title">Bestaande notas ({notes.length})</div>
                 <input ref={wpInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleWpUpload} />
+                <input ref={klankInputRef} type="file" accept="audio/*" style={{ display: 'none' }} onChange={vervangKlank} />
                 {notesLoading ? <div className="admin-loading">Laai notas...</div>
                   : notes.map(note => (
                     <div key={note.id}>
@@ -1054,6 +1119,15 @@ export default function Admin({ onClose }) {
                             {wpUploading === note.id ? `🖼 ${wpProgress}%`
                              : wpSaved === note.id ? '✅'
                              : note.wallpaperUrl ? '🖼 ↑' : '🖼 +'}
+                          </button>
+                          <button
+                            className="admin-pdf-btn"
+                            onClick={() => beginKlankVervang(note)}
+                            disabled={klankBesig === note.id}
+                            title="Vervang die stemboodskap (die nota bly dieselfde)"
+                          >
+                            {klankBesig === note.id ? `🎙 ${klankPers}%`
+                             : klankKlaar === note.id ? '✅' : '🎙 ↻'}
                           </button>
                           <button className="admin-delete-btn" onClick={() => setDeleteConfirm(note.id)}>🗑</button>
                         </div>
