@@ -681,7 +681,9 @@ export default function Admin({ onClose }) {
 
     try {
       const ext  = file.name.split('.').pop().toLowerCase() || 'jpg'
-      const sRef = ref(storage, `covers/${book.id}.${ext}`)
+      /* 'n Eie naam by elke oplaai — sien die nota-wallpaper hieronder. 'n
+         Vervangde omslag onder dieselfde naam bly in elke kas die oue. */
+      const sRef = ref(storage, `covers/${book.id}_${Date.now()}.${ext}`)
       await new Promise((resolve, reject) => {
         const task = uploadBytesResumable(sRef, file)
         task.on('state_changed',
@@ -814,7 +816,15 @@ export default function Admin({ onClose }) {
     setWpUploading(note.id); setWpProgress(0)
     try {
       const ext = file.name.split('.').pop().toLowerCase() || 'jpg'
-      const sRef = ref(storage, `covers/wp_${note.id}.${ext}`)
+      /* 'n EIE naam by elke oplaai, nooit `wp_<id>.<ext>` nie. Dewald, 14 Okt
+         2026: "I reupload the wallpaper of today... but the old wallpaper is
+         still showing." Dieselfde naam gee dieselfde skakel, en drie kaste hou
+         die prent per SKAKEL: Vercel se rand en die blaaier deur
+         /api/wallpaper (24 uur), en die diensketter (CacheFirst). Die nuwe
+         prent het dus nêrens deurgekom nie. 'n Nuwe naam is 'n nuwe skakel, en
+         dan is daar niks om uit 'n kas te bedien nie. Dieselfde as
+         PrentOplaai.jsx s'n. */
+      const sRef = ref(storage, `covers/wp_${note.id}_${Date.now()}.${ext}`)
       await new Promise((resolve, reject) => {
         const task = uploadBytesResumable(sRef, file)
         task.on('state_changed',
@@ -823,6 +833,9 @@ export default function Admin({ onClose }) {
           async () => {
             const wallpaperUrl = await getDownloadURL(task.snapshot.ref)
             await setDoc(doc(db, 'notes', note.id), { wallpaperUrl }, { merge: true })
+            /* Soos by die vers: anders sien hy sy eie nuwe prent eers wanneer
+               die notas-kas verval. */
+            try { localStorage.removeItem('cachedNotesTime') } catch {}
             resolve()
           }
         )
