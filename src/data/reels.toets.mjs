@@ -17,7 +17,7 @@ import {
   geldigeId, reelSkakel, idUitPad,
   magWys, skoonLys, volgordeVanaf,
   deelBoodskap, magVraInstalleer, brugVir,
-  saaiRnd, meng, ontklont, nuutsteEerste, eenPas, bouVoer,
+  saaiRnd, meng, ontklont, nuutsteEerste, eenPas, bouVoer, sonderHerhaling,
   BESTE_BO, meesteGedeelEerste, tydVan, versprei, nuutsteVanElkeMaker,
   gesienTel,
   laagsteTel,
@@ -895,7 +895,29 @@ console.log('\n── Niks gooi nie ──')
 is('n lee lys',      bouVoer([], { saad: 1, passe: 3 }), [])
 is('niks in',        bouVoer(null, { saad: 1, passe: 3 }), [])
 is('geen opsies',    Array.isArray(bouVoer([mk('a', 'A')])), true)
-is('een clip',       bouVoer([mk('a', 'A')], { saad: 1, passe: 3 }).filter(i => i.tipe === 'klip').length, 3)
+/* Hier het 3 gestaan — die toets het die FOUT vasgelê. Een clip, drie passe,
+   en dieselfde video drie keer onder mekaar. Dewald, 15 Oktober 2026: "Die
+   video onder reels wys drie keer na mekaar." Een clip is nou een item. */
+is('een clip',       bouVoer([mk('a', 'A')], { saad: 1, passe: 3 }).filter(i => i.tipe === 'klip').length, 1)
+
+console.log('\n── Nooit dieselfde clip twee keer DIREK agter mekaar nie ──')
+{
+  const ids = its => its.filter(i => i.tipe === 'klip').map(i => i.klip.id)
+  const geenBuur = its => ids(its).every((id, i, a) => i === 0 || a[i - 1] !== id)
+  is('net die gedeelde clip: een keer', ids(bouVoer([mk('d', 'D')], { saad: 3, passe: 5, deepId: 'd' })), ['d'])
+  is('een clip, sewe passe: een keer', ids(bouVoer([mk('a', 'A')], { saad: 2, passe: 7 })).length, 1)
+  is('twee clips wissel af, nooit langs mekaar', geenBuur(bouVoer([mk('a', 'A'), mk('b', 'B')], { saad: 4, passe: 6 })), true)
+  is('twee clips, een gedeel: nooit langs mekaar', geenBuur(bouVoer([mk('a', 'A'), mk('b', 'B')], { saad: 4, passe: 6, deepId: 'a' })), true)
+  let skoon = true
+  for (let n = 1; n <= 6; n++) for (let sd = 1; sd <= 30; sd++) {
+    const lys = Array.from({ length: n }, (_, i) => mk('k' + i, 'M' + (i % 2)))
+    if (!geenBuur(bouVoer(lys, { saad: sd, passe: 5, deepId: sd % 2 ? 'k0' : null }))) skoon = false
+  }
+  is('1-6 clips, 30 sade, met en sonder gedeelde clip: nooit langs mekaar', skoon, true)
+  is('sonderHerhaling laat die gebedskaart staan',
+     sonderHerhaling([{ tipe: 'klip', klip: mk('a', 'A') }, { tipe: 'gebed' }, { tipe: 'klip', klip: mk('a', 'A') }]).length, 3)
+  is('sonderHerhaling met niks', sonderHerhaling(null), [])
+}
 is('nul passe word een', bouVoer([mk('a', 'A')], { saad: 1, passe: 0 }).length >= 1, true)
 is('n clip wat nie mag wys nie kom nie in',
    bouVoer([mk('a', 'A'), { id: 'b', bron: 'youtube', bronId: 'x' }], { saad: 1, passe: 1 }).length, 1)

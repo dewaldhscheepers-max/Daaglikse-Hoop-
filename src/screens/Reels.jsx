@@ -367,6 +367,8 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
     } catch { /* ou blaaier */ }
     return true
   })
+  /* Die lengte van die voer by die laaste byvoeging van passe. */
+  const laasGroeiRef = useRef(0)
   const [passe, setPasse]   = useState(() => (
     PASSE_BEGIN
   ))
@@ -663,7 +665,13 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
         /* Die voer HOU AAN: kom sy naby die onderkant van wat gebou is, word die
            volgende pas bygesit. Omdat die volgorde uit 'n saad kom, bly alles
            wat sy reeds gesien het presies waar dit was. */
-        if (i >= items.length - BOU_VOORUIT) {
+        if (i >= items.length - BOU_VOORUIT && items.length > laasGroeiRef.current) {
+          /* Die hek op `laasGroeiRef`: is die lys te klein om te groei (een
+             clip — sien `sonderHerhaling` in reels.js), gee 'n nuwe pas niks
+             nuuts nie. Sonder die hek word die waarnemer by elke herbou weer
+             gemaak, vuur dadelik op dieselfde clip, en die voer herbou vir
+             altyd. */
+          laasGroeiRef.current = items.length
           setPasse(p => p + 2)
         }
 

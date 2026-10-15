@@ -109,7 +109,7 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 291
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 298
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
 node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
@@ -1889,6 +1889,18 @@ rondte staan nie. Twee dinge daaraan is met opset:
 
 Gemeet oor 60 sade met 124 clips en 123 reeds gesien: die naaste herhaling is
 **nege plekke** uitmekaar, en daar is **nul** naam-klonte.
+
+**Nooit dieselfde clip twee keer DIREK agter mekaar nie** (`sonderHerhaling()`,
+die laaste stap van `bouVoer`). Dewald, 15 Oktober 2026, met 'n gedeelde skakel:
+*"Die video onder reels wys drie keer na mekaar."* Elke pas is 'n rondte van die
+hele lys; bevat die lys net EEN clip (die bediener stadig of af en nog geen kas
+nie — dan is net die saai of net die gedeelde clip daar), is elke pas daardie een
+clip, en hy het drie, vyf keer onder mekaar gestaan. 'n Toets het dit selfs
+GEËIS (`'een clip' … 3`). Een clip is nou een item. Die passe-byvoeging in
+Reels.jsx het 'n hek (`laasGroeiRef`): groei die lys nie meer nie, word daar nie
+weer bygevoeg nie — anders herbou die waarnemer vir altyd op dieselfde clip.
+Blaaiertoets: `kykReelDeep.mjs` (bediener dadelik, stadig, af; geen herhaling
+langs mekaar, geen herbou-lus, en die volle voer groei steeds).
 
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie

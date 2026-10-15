@@ -850,7 +850,32 @@ export function bouVoer(klips, opsies) {
     laaste = pas[pas.length - 1]
   }
 
-  return items
+  return sonderHerhaling(items)
+}
+
+/* ── Nooit dieselfde clip twee keer DIREK agter mekaar nie ──
+ *
+ * Dewald, 15 Oktober 2026, met 'n gedeelde skakel: *"Die video onder reels wys
+ * drie keer na mekaar."* Elke pas is 'n rondte van die hele lys, en die voer
+ * bou drie passe vooruit (en meer soos sy rol). Bevat die lys net EEN clip —
+ * die bediener is stadig of faal en daar is nog geen kas nie, sodat net die
+ * saai of net die gedeelde clip oorbly — dan is elke pas daardie een clip, en
+ * staan hy drie, vyf, sewe keer onder mekaar. Sy swiep, en dit is dieselfde
+ * video weer: dit lyk soos 'n stukkende voer.
+ *
+ * `spasieer()` hou herhalings uitmekaar BINNE 'n gesonde lys; hierdie is die
+ * vangnet vir 'n lys wat te klein is om enigiets te spasieer. Een clip in die
+ * lys is dan EEN item in die voer. Die gebedskaart en die einde-blad word nie
+ * aangeraak nie — net 'n clip wat sy voorganger herhaal, val uit. */
+export function sonderHerhaling(items) {
+  const uit = []
+  for (const it of items || []) {
+    const vorige = uit[uit.length - 1]
+    if (it && it.tipe === 'klip' && vorige && vorige.tipe === 'klip'
+        && vorige.klip && it.klip && vorige.klip.id === it.klip.id) continue
+    uit.push(it)
+  }
+  return uit
 }
 
 /* ── Die woorde wat gestuur word ────────────────────────────
