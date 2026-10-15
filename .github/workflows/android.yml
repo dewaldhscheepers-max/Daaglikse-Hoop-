@@ -112,6 +112,58 @@ jobs:
           ls -la android/app/build/outputs/bundle/release/
           du -h android/app/build/outputs/bundle/release/*.aab
 
+      # Maak die bondel OOP en keur wat daarin is. 'n Groen bou wat die verkeerde
+      # ding bevat, is die duurste soort fout: dit lyk klaar, en dit kom eers op
+      # Dewald se foon uit.
+      - name: Keur die bondel
+        run: |
+          python3 -I - <<'PY'
+          import glob, os, re, sys, zipfile
+          aab = glob.glob('android/app/build/outputs/bundle/release/*.aab')[0]
+          z = zipfile.ZipFile(aab)
+          m = z.read('base/manifest/AndroidManifest.xml')
+          name = z.namelist()
+          fout = []
+          def moet(t, boodskap):
+              print(('OK   ' if t else 'FOUT ') + boodskap)
+              if not t: fout.append(boodskap)
+          moet(b'com.dewaldscheepers.daaglikshoop' in m, 'pakketnaam com.dewaldscheepers.daaglikshoop')
+          for p in (b'POST_NOTIFICATIONS', b'RECORD_AUDIO', b'MODIFY_AUDIO_SETTINGS', b'INTERNET'):
+              moet(p in m, 'toestemming ' + p.decode())
+          moet(b'autoVerify' in m and b'www.dewaldscheepers.com' in m and b'/hoop/' in m, 'gedeelde skakels maak die app oop')
+          moet(b'default_notification_icon' in m, 'kennisgewing-ikoon')
+          cfg = [n for n in name if n.endswith('capacitor.config.json')]
+          moet(bool(cfg) and b'https://www.dewaldscheepers.com' in z.read(cfg[0]) and b'payfast' in z.read(cfg[0]), 'capacitor.config.json (lewendige werf + PayFast)')
+          plug = [n for n in name if n.endswith('capacitor.plugins.json')]
+          pj = z.read(plug[0]).decode() if plug else ''
+          for p in ('PushNotifications', 'Share', 'Filesystem', 'App'):
+              moet(p in pj, 'inprop ' + p)
+          grootte = os.path.getsize(aab) / 1e6
+          moet(grootte < 150, f'grootte {grootte:.1f} MB (Google Play se perk is 200)')
+          if os.environ.get('DH_KEYSTORE_PAD'):
+              moet(os.path.exists('android/app/google-services.json'), 'google-services.json was in die bou')
+          if fout:
+              print('\n' + str(len(fout)) + ' FOUT(E) — hierdie bondel mag nie na Google Play nie.')
+              sys.exit(1)
+          print('\nAlles in die bondel is soos dit moet wees.')
+          PY
+
+      - name: Is dit met DEWALD se sleutel onderteken?
+        if: env.DH_KEYSTORE_PAD != ''
+        run: |
+          # Die ou app op Google Play en die webwerf se assetlinks.json dra
+          # albei hierdie vingerafdruk. 'n Ander sleutel = Google Play weier die
+          # opdatering, en gedeelde skakels maak in Chrome oop.
+          VERWAG="72:37:D1:1F:67:77:C7:CD:CD:9F:9B:EA:4B:11:BD:25:87:2F:C6:8E:37:B8:23:25:EE:5B:93:DE:D7:E0:E4:D9"
+          KRY=$(keytool -printcert -jarfile android/app/build/outputs/bundle/release/*.aab | grep 'SHA256:' | head -1 | awk '{print $2}')
+          echo "Verwag: $VERWAG"
+          echo "Gekry:  $KRY"
+          if [ "$KRY" != "$VERWAG" ]; then
+            echo "::error::Die bondel is NIE met die ou app se sleutel onderteken nie."
+            exit 1
+          fi
+          echo "::notice::Onderteken met die regte sleutel — Google Play sal dit as 'n opdatering aanvaar."
+
       - uses: actions/upload-artifact@v4
         with:
           name: daaglikse-hoop-${{ github.run_number }}
