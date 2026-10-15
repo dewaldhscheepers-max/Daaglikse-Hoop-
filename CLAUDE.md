@@ -2747,6 +2747,17 @@ Die duur lesse wat daarin vassit:
   fout wat installasie maande lank stukkend gehou het: Chrome het oopgemaak
   op die APP, waar daar geen installeerknoppie is nie, en die mens se enigste
   pad was daarna die spyskaart.
+* **Maar sedert 15 Oktober 2026 is die TUISBLAD die bestemming in Chrome.**
+  Die app HET nou 'n installeerknoppie: die uitklap ná 3s en die balk op
+  Luister, met Chrome se een-tik-venster. Dewald: *"Go moet hulle na Chrome
+  toe vat, dis die doel van go... en dan installeer hulle die app by
+  www.dewaldscheepers.com met die popup."* `go.html` se "Maak oop in Chrome"
+  maak dus `https://www.dewaldscheepers.com/` in Chrome oop, en wie `/go` IN
+  Chrome oopmaak (`kiesPad` → `stappe`/`prompt`), gaan dadelik daarheen —
+  die tweede blad met 'n knoppie was een tik meer. Die app se eie
+  Chrome-skakels (`installIntentUrl` in App.jsx) wys nog na `/go`, en dit
+  werk: /go stuur Chrome deur. iPhone en die ingeboude blaaiers bly op /go.
+  Blaaiertoets: `kykGo.mjs` (die hele pad tot by "Sit op my foon").
 
 `public/go.html` kan nie invoer nie (dit moet sonder die bundel werk) en dra
 'n kopie tussen `KIESPAD-BEGIN` en `KIESPAD-EINDE`.

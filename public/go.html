@@ -238,7 +238,12 @@
     <!-- Default: always visible, JS hides it for Chrome/iOS/desktop -->
     <div id="state-samsung">
       <p class="chrome-notice">Maak Daaglikse Hoop oop in <strong>Chrome</strong> vir die beste ervaring met installasie en 06:30 kennisgewings.</p>
-      <!-- Na /go toe, NIE na / nie.
+      <!-- 15 Oktober 2026: nou na die TUISBLAD (www), want daar staan die
+           installasie-uitklap met Chrome se een-tik-venster, en /go stuur
+           Chrome in elk geval reguit soontoe. Die ou rede hieronder het gegeld
+           toe die app self GEEN installeerknoppie gehad het nie.
+
+           Voorheen: na /go toe, NIE na / nie.
 
            Hier was die fout wat die hele "installeer" so moeilik gemaak het.
            Die skakel het na die app se wortel gewys, dus het Chrome oopgemaak
@@ -251,7 +256,7 @@
            en dit is klaar. Twee tikke van Samsung Internet af, sonder 'n
            enkele spyskaart. -->
       <a class="btn-chrome"
-         href="intent://dewaldscheepers.com/go#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fdewaldscheepers.com%2Fgo;end">
+         href="intent://www.dewaldscheepers.com/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fwww.dewaldscheepers.com%2F;end">
         Maak oop in Chrome
       </a>
       <p class="chooser-hint">As jou foon vra watter app om te gebruik,<br>kies <strong>Chrome</strong> en tik <strong>Altyd</strong>.</p>
@@ -385,6 +390,15 @@
 
         var pad = kiesPad({ ua: ua, kanPrompt: false })
         if (pad === 'rekenaar') return window.location.replace('/')
+        /* In Chrome (en ander Chromium-blaaiers op Android) is hierdie blad se
+           werk klaar: hy het die mens na Chrome gebring. Dewald, 15 Oktober
+           2026: "Go moet hulle na Chrome toe vat, dis die doel van go... en dan
+           installeer hulle die app by www.dewaldscheepers.com met die popup."
+           Die app se eie installasie-uitklap (App.jsx, ná 3s) en die balk op
+           Luister doen die res, met Chrome se een-tik-venster. Hier het 'n
+           tweede blad met 'n knoppie gestaan — een tik meer, en die soort plek
+           waar 'n mens ophou. */
+        if (pad === 'stappe' || pad === 'prompt') return window.location.replace('/')
         showState(BLOK[pad] || 'open')
       })()
 
