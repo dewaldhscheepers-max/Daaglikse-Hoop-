@@ -642,11 +642,19 @@ function eenPasEenTaal(klips, rnd, vorigeNaam, opsies) {
  */
 export const SPASIE = 8
 
-function naamBy(lys, i) {
+function naamBy(lys, i, vorige) {
+  if (i === -1 && vorige) return naamVanKlip(vorige)
   return i >= 0 && i < lys.length ? naamVanKlip(lys[i]) : ''
 }
+function taalBy(lys, i, vorige) {
+  if (i === -1 && vorige) return taalVan(vorige)
+  return i >= 0 && i < lys.length ? taalVan(lys[i]) : ''
+}
 
-export function spasieer(pas, onlangs, spasie = SPASIE) {
+/* `vorige` is die clip DIREK voor hierdie pas (die vorige pas se laaste). Sonder
+   hom is plek 0 se buurman "niemand", en dan kan 'n ruil 'n clip van dieselfde
+   maker (of 'n tweede Engelse clip) reg by die naat sit. */
+export function spasieer(pas, onlangs, spasie = SPASIE, vorige = null) {
   const uit = Array.isArray(pas) ? [...pas] : []
   const weg = onlangs instanceof Set ? onlangs : new Set(Array.isArray(onlangs) ? onlangs : [])
   if (!weg.size || uit.length < 2) return uit
@@ -666,13 +674,65 @@ export function spasieer(pas, onlangs, spasie = SPASIE) {
       /* Sou hierdie ruil 'n klont maak — by i of by j? */
       const naamJ = naamVanKlip(uit[j])
       const naamI = naamVanKlip(uit[i])
-      const botsI = naamJ && (naamJ === naamBy(uit, i - 1) || naamJ === naamBy(uit, i + 1))
+      const botsI = naamJ && (naamJ === naamBy(uit, i - 1, vorige) || naamJ === naamBy(uit, i + 1))
       const botsJ = naamI && (naamI === naamBy(uit, j - 1) || naamI === naamBy(uit, j + 1))
-      if (!botsI && !botsJ) { keuse = j; break }
+      /* En nie twee ENGELSE clips langs mekaar nie: `mengTale()` het hulle
+         versprei, en 'n blinde ruil kan daardie vleg breek. */
+      const tJ = taalVan(uit[j]), tI = taalVan(uit[i])
+      const taalI = tJ !== EIE_TAAL && (taalBy(uit, i - 1, vorige) === tJ || taalBy(uit, i + 1) === tJ)
+      const taalJ = tI !== EIE_TAAL && (taalBy(uit, j - 1) === tI || taalBy(uit, j + 1) === tI)
+      if (!botsI && !botsJ && !taalI && !taalJ) { keuse = j; break }
     }
     if (keuse < 0) keuse = eerste
     if (keuse < 0) continue
 
+    const t = uit[i]; uit[i] = uit[keuse]; uit[keuse] = t
+  }
+  return uit
+}
+
+/* ── Elke clip minstens `spasie` plekke weg van waar hy LAAS was ──
+ *
+ * Dit is die reël wat die voer gebruik. `afstand` sê van elke onlangse clip hoe
+ * ver van die einde hy staan (1 = die heel laaste clip bo hierdie pas). 'n Clip
+ * mag op plek `p` kom net as `p + afstand >= spasie` — die laaste clip van die
+ * vorige pas dus eers op plek 7, die tweede laaste op plek 6, en so aan.
+ *
+ * Dit vervang 'n venster ("die laaste N mag nie in die eerste N plekke nie"), en
+ * die strestoets het gewys waarom: die venster was óf te klein (die 6de laaste
+ * clip het op plek 0 gekom — 6 plekke uitmekaar), óf so groot dat die
+ * onlangses presies die agterste plekke moes vul en twee Engelse clips langs
+ * mekaar gedwing is. Hierdie reël vra presies wat bedoel word, en nie meer nie.
+ *
+ * Die spasie word afgekap teen die pas se lengte: met vyf clips kan niks agt
+ * plekke weg wees nie, maar vyf kan — en dit is altyd haalbaar (dieselfde orde
+ * as die vorige pas voldoen). */
+export function spasieerAfstand(pas, afstand, spasie = SPASIE, vorige = null) {
+  const uit = Array.isArray(pas) ? [...pas] : []
+  if (!(afstand instanceof Map) || !afstand.size || uit.length < 2) return uit
+  const eff = Math.max(0, Math.min(Number(spasie) || 0, uit.length))
+  const teNaby = (p, k) => afstand.has(k.id) && p + afstand.get(k.id) < eff
+  const klont = (lys, p, k) => {
+    const nm = naamVanKlip(k), t = taalVan(k)
+    const buur = q => (q === -1 ? vorige : (q >= 0 && q < lys.length ? lys[q] : null))
+    for (const q of [p - 1, p + 1]) {
+      const b = buur(q); if (!b || b === k) continue
+      if (nm && naamVanKlip(b) === nm) return true
+      if (t !== EIE_TAAL && taalVan(b) === t) return true
+    }
+    return false
+  }
+  for (let i = 0; i < eff; i++) {
+    if (!teNaby(i, uit[i])) continue
+    let keuse = -1, eerste = -1
+    for (let j = i + 1; j < uit.length; j++) {
+      if (teNaby(i, uit[j]) || teNaby(j, uit[i])) continue
+      if (eerste < 0) eerste = j
+      const proef = [...uit]; proef[i] = uit[j]; proef[j] = uit[i]
+      if (!klont(proef, i, proef[i]) && !klont(proef, j, proef[j])) { keuse = j; break }
+    }
+    if (keuse < 0) keuse = eerste
+    if (keuse < 0) continue
     const t = uit[i]; uit[i] = uit[keuse]; uit[keuse] = t
   }
   return uit
@@ -754,9 +814,33 @@ export function huidigeRondte(klips, gesien) {
   return lys.filter(k => gesienTel(gesien, k.id) === min)
 }
 
+/* ── Dieselfde clips is ALTYD dieselfde voer ──
+ *
+ * Die voer is 'n funksie van WATTER clips daar is, nie van die VOLGORDE waarin
+ * die bediener of die kas hulle gee nie. Die strestoets het dit gevang: met
+ * presies dieselfde clips in 'n ander volgorde was die voer in 200 uit 200
+ * gevalle anders, en die EERSTE video in 191. Die skerm wys eers die kas en dan
+ * die vars lys — en as hulle net in VOLGORDE verskil, het die video wat sy kyk
+ * onder haar vingers na 'n ander een gespring.
+ *
+ * Dus: sorteer op id, en hou elke id een keer. 'n Duplikaat (twee bladsye wat
+ * oorvleuel, 'n kas wat twee keer geskryf is) sou andersins dieselfde clip
+ * twee keer in een rondte sit. */
+export function vasteOrde(klips) {
+  const gesien = new Set()
+  const uit = []
+  for (const k of skoonLys(klips)) {
+    const id = String(k.id)
+    if (gesien.has(id)) continue
+    gesien.add(id)
+    uit.push(k)
+  }
+  return uit.sort((a, b) => (String(a.id) < String(b.id) ? -1 : String(a.id) > String(b.id) ? 1 : 0))
+}
+
 export function bouVoer(klips, opsies) {
   const o = opsies || {}
-  const alles = skoonLys(klips)
+  const alles = vasteOrde(klips)
   if (!alles.length) return []
 
   const passe = Math.max(1, Number(o.passe) || 1)
@@ -828,6 +912,15 @@ export function bouVoer(klips, opsies) {
     if (isTaalMuur(rondte) && alles.some(k => taalVan(k) === EIE_TAAL)) {
       rondte = bron.filter(k => telle[k.id] <= min + 1)
     }
+    /* ── 'n Rondte van EEN clip wat net gewys is, is ook 'n muur ──
+     * Sy het B nog nooit gesien nie en A en C al twee keer: rondte 0 is [B],
+     * en rondte 1 is wéér net [B]. Dan staan B langs homself, of — as
+     * `sonderHerhaling` hom uithaal — tel die voer hom as gewys terwyl hy nie
+     * was nie. Voeg die volgende rondte by; dieselfde as die taal-muur, en om
+     * dieselfde rede kos dit niks (die strestoets het dit gevang). */
+    if (rondte.length === 1 && laaste && rondte[0].id === laaste.id && bron.length > 1) {
+      rondte = bron.filter(k => telle[k.id] <= min + 1)
+    }
 
     /* Net die EERSTE pas kry die nuwe-kyker-orde, en `nuut` beteken sy het nog
        NIKS gesien nie. Binne 'n rondte staan die nuutstes bo — dit is Dewald se
@@ -839,12 +932,16 @@ export function bouVoer(klips, opsies) {
     /* Die rondte is nou gekyk, sover hierdie lys gaan. */
     for (const k of pas) telle[k.id] += 1
     /* ── Geen clip wat NET was, mag weer boaan staan nie ──
-       Sien `spasieer()`. Dit vervang 'n ou wag wat net die EERSTE plek nagegaan
-       het; met een nuwe clip in rondte 0 het hy op plek vyf weer opgekom. */
-    const onlangs = new Set(
-      items.slice(-SPASIE).filter(i => i.tipe === 'klip').map(i => i.klip.id)
-    )
-    const ry = spasieer(pas, onlangs)
+       Elke clip moet minstens SPASIE plekke weg wees van waar hy laas was —
+       sien `spasieerAfstand()`. Dit vervang twee vensters wat die strestoets
+       albei laat val het: 'n te klein een (6 plekke uitmekaar, en by 'n klein
+       lys 'n clip wat uitgehonger is) en 'n te groot een (geen speling om twee
+       Engelse clips uitmekaar te hou nie). `laaste` is die naat: plek 0 se
+       buurman. */
+    const afstand = new Map()
+    const agter = items.slice(-SPASIE)
+    agter.forEach((it, x) => { if (it.tipe === 'klip') afstand.set(it.klip.id, agter.length - x) })
+    const ry = spasieerAfstand(pas, afstand, SPASIE, laaste)
     for (const k of ry) items.push({ tipe: 'klip', klip: k })
     pas = ry
     laaste = pas[pas.length - 1]

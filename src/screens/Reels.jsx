@@ -456,6 +456,8 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
    * Die PLEK en nie die id nie: dieselfde clip kan wettig twee keer in een voer
    * staan (rondte 0 en rondte 1), en dan is dit twee kyke. */
   const getelPlekRef = useRef(new Set())
+  /* Wys die voer tans net die SAAI (die egte lys het nog nie gekom nie)? */
+  const saaiRef = useRef(true)
 
   /* ── Die gebedskaart, EEN keer per oopmaak besluit ──
    *
@@ -491,6 +493,7 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
      nie. */
   const items = useMemo(() => {
     const gehaal = skoonLys(rou)
+    saaiRef.current = !gehaal.length
     const lys = gehaal.length ? gehaal : skoonLys(REELS_SAAI)
     return voegGebedIn(bouVoer(lys, {
       deepId: deepId || null,
@@ -578,8 +581,20 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
            herlaai. */
         const skoon = skoonLys(lys)
         if (skoon.length && skoon.length >= skoonLys(kas.lys).length) {
-          setRou(lys)
           skryfKas(lys)
+          /* ── Nooit onder haar vingers nie ──
+             Het sy reeds verby die eerste clip geswiep, wys ons die vars lys NIE
+             nou nie: 'n nuwe clip skuif die rondtes, en dan spring die video wat
+             sy kyk na 'n ander een. Die vars lys is gestoor en wag vir die
+             volgende oopmaak. Een uitsondering — die belofte gaan voor: ontbreek
+             die GEDEELDE clip in wat sy nou het en is hy in die vars lys, wys
+             ons die vars lys, want anders kry sy "die clip is weg". */
+          setRou(huidig => {
+            if (gesienRef.current <= 1) return lys
+            const het = l => !!deepId && skoonLys(l).some(k => k.id === deepId)
+            if (deepId && !het(huidig) && het(lys)) return lys
+            return huidig
+          })
         }
       } catch {
         /* Die kas of die saai dra die skerm. Dit is nie 'n foutskerm werd nie. */
@@ -642,8 +657,14 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
              uit die eerste rondte.
 
              En PRESIES EEN keer per plek — sien `getelPlekRef`. */
-          if (!getelPlekRef.current.has(i)) {
-            getelPlekRef.current.add(i)
+          /* PLEK en clip saam: kom die vars lys op plek 0 in terwyl sy daar is,
+             is dit 'n ANDER clip wat sy nou sien, en dié moet ook getel word. */
+          const plek = i + '|' + it.klip.id
+          /* Die SAAI is 'n plekhouer terwyl die egte lys laai — 'n kyk daarvan is
+             nie 'n kyk nie. Tel dit, en die admin se "het oopgemaak, niks
+             gekyk"-ry lieg, en 'n saai-id beland in reels_gesien. */
+          if (!saaiRef.current && !getelPlekRef.current.has(plek)) {
+            getelPlekRef.current.add(plek)
             merkGesien(it.klip.id)
             /* ── Word die voer werklik gekyk? ──
                Die aantal clips in HIERDIE sessie is die grootte van daardie

@@ -110,6 +110,7 @@ node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 298
+node src/data/reelsStres.toets.mjs            # die voer se WAARBORGE oor 920 ewekansige voere, 4187 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
 node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
@@ -1901,6 +1902,42 @@ Reels.jsx het 'n hek (`laasGroeiRef`): groei die lys nie meer nie, word daar nie
 weer bygevoeg nie — anders herbou die waarnemer vir altyd op dieselfde clip.
 Blaaiertoets: `kykReelDeep.mjs` (bediener dadelik, stadig, af; geen herhaling
 langs mekaar, geen herbou-lus, en die volle voer groei steeds).
+
+**Die voer se waarborge word met 'n STRESTOETS gekeur, nie net met
+uitgesoekte gevalle nie** (`reelsStres.toets.mjs`). Dewald, 15 Oktober 2026:
+*"maak seker... dat die algoritme 100% reg werk en betroubaar is."* Die eerste
+lopie oor 4000 ewekansige voere het vyf egte foute gevind terwyl al 298
+eenheidstoetse groen was:
+
+* een clip drie, vyf keer onder mekaar (234 uit 4000 — sien hierbo);
+* 'n klein lys het een clip UITGEHONGER: hy is by die naat uitgehaal maar as
+  gewys getel, en het elke rondte verder agter geraak;
+* die naat tussen twee passe het twee van een maker langs mekaar gesit, want
+  `spasieer` het plek 0 se buurman nie geken nie;
+* 'n ruil het twee Engelse clips langs mekaar gesit;
+* **dieselfde clips in 'n ander VOLGORDE het 'n ander voer gegee** — 200 uit
+  200, en die EERSTE video in 191. Die skerm wys eers die kas en dan die vars
+  lys; verskil hulle net in volgorde, het die video onder haar vingers
+  gespring. `vasteOrde()` sorteer nou op id en gooi duplikate uit.
+
+Die spasie tussen herhalings is nou die reël self en nie 'n venster nie
+(`spasieerAfstand()`): elke clip minstens agt plekke weg van waar hy LAAS was.
+Albei vensters wat eers probeer is, het geval — 'n klein een (6 plekke
+uitmekaar) en 'n groot een (die onlangses vul die agterste plekke en twee
+Engelse word saamgedruk). 'n Rondte van EEN clip wat pas gewys is, word met die
+volgende saamgevoeg, soos die taal-muur.
+
+Op 'n realistiese voer (200-260 clips, 10-30 makers, tot 20% Engels, elke soort
+geskiedenis): nul herhalings binne agt plekke, nul clips meer as een kyk voor
+die res, nul Engelse langs mekaar, 0,001% maker-klonte. Waar die toets nog
+"klonte" meld, is dit 'n lys waar een maker amper die helfte het, of waar 45%
+Engels is — dan is 'n perfekte orde nie haalbaar nie.
+
+**Die skerm** (blaaiertoets `kykReelsVoer.mjs`): die vars lys word NIE
+ingeskuif as sy reeds verby die eerste clip is nie (dit word gestoor vir
+volgende keer — behalwe as die gedeelde clip net in die vars lys is); 'n kyk
+word aan PLEK én clip gekoppel; en die SAAI-plekhouer tel nooit as 'n kyk nie
+(`saaiRef`), anders lieg die admin se "het oopgemaak, niks gekyk".
 
 **'n NUWE kyker kry die MEES GEDEELDE clips bo, nie die nuutste nie.** Dewald:
 *"die wat die meeste ge deel is kry voorkeer by nuwe kykers."* Dit is nie
