@@ -22,6 +22,42 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- GEDEELDE SKAKELS maak die app oop, nie die blaaier nie.
+
+                 autoVerify: Android haal /.well-known/assetlinks.json van
+                 albei gashere af en kyk of die app se ondertekensleutel daarin
+                 staan. Daardie lêer bestaan reeds (public/.well-known, uit die
+                 TWA se tyd). Slaag dit nie, maak die skakel steeds in die
+                 BLAAIER oop — niks breek nie, dit is net nie die app nie.
+
+                 Die app gaan self na die skakel se pad: Capacitor laai altyd
+                 server.url. Sien `appBestemming` in src/data/inheemsBrug.js.
+
+                 GEEN /api, /privaatheid of prent-paaie nie — net bladsye wat
+                 die app WYS. /go (die installeerblad) gaan binne die app na
+                 die tuisblad. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="www.dewaldscheepers.com" />
+                <data android:host="dewaldscheepers.com" />
+                <data android:path="/" />
+                <data android:pathPrefix="/hoop/" />
+                <data android:pathPrefix="/bid/" />
+                <data android:pathPrefix="/reels" />
+                <data android:pathPrefix="/reel/" />
+                <data android:pathPrefix="/boek" />
+                <data android:pathPrefix="/sorg" />
+                <data android:pathPrefix="/english" />
+                <data android:pathPrefix="/volg-jesus" />
+                <data android:pathPrefix="/vj" />
+                <data android:pathPrefix="/go" />
+                <data android:pathPrefix="/steun" />
+                <data android:pathPrefix="/support" />
+            </intent-filter>
+
         </activity>
 
         <provider

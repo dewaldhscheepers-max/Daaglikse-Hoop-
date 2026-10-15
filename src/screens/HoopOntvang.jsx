@@ -51,7 +51,7 @@ function uitKas() {
   } catch { return [] }
 }
 
-export default function HoopOntvang({ notaId, onKlaar }) {
+export default function HoopOntvang({ notaId, onKlaar, geinstalleer = false }) {
   const [nota, setNota]   = useState(null)
   const [staat, setStaat] = useState('laai')   // laai · reg · vandag · niks
   const [gehoor, setGehoor] = useState(false)
@@ -157,7 +157,10 @@ export default function HoopOntvang({ notaId, onKlaar }) {
                   Dit verskyn wanneer sy begin luister het, nie voor nie. Vra
                   ons vooraf, is dit 'n muur; vra ons daarna, is dit 'n
                   uitnodiging. */}
-              {gehoor && (
+              {/* Net vir wie die app NIE het nie. Binne die Android-app (of 'n
+                  geïnstalleerde PWA) gaan "Kry Daaglikse Hoop" na /go — die
+                  installeerblad, vir iemand wat die app reeds in die hand hou. */}
+              {gehoor && !geinstalleer && (
                 <div className="ho-nooi">
                   <p className="ho-nooi-kop">
                     Wil jy môre weer 'n paar minute saam met God maak?
@@ -176,7 +179,7 @@ export default function HoopOntvang({ notaId, onKlaar }) {
           )}
 
           {/* Altyd 'n stil pad in, ook vir wie nie luister nie. */}
-          {!gehoor && staat !== 'laai' && (
+          {(!gehoor || geinstalleer) && staat !== 'laai' && (
             <button className="ho-knop ho-knop-stil" onClick={onKlaar}>
               Gaan na Daaglikse Hoop
             </button>

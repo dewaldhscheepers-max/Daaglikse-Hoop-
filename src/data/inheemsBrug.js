@@ -10,6 +10,9 @@
  *      doen niks: Capacitor gee die WebView geen aflaai-hanteerder nie. Die
  *      mens druk en daar gebeur stilweg niks — die ergste soort knoppie.
  *   3. `window.open` na 'n ander werf maak geen tweede venster nie.
+ *   5. 'n Gedeelde skakel (/hoop/…, /bid/…, /reels/…) wat die app oopmaak,
+ *      land op die TUISBLAD: Capacitor laai altyd `server.url`. Die brug lees
+ *      die skakel en gaan daarheen. Sien `appBestemming`.
  *   4. Die foon se TERUG-knoppie op die tuisblad doen niks. Sonder 'n
  *      luisteraar gaan Capacitor net terug as daar geskiedenis is; daarna is
  *      die knoppie dood en 'n mens kan nie uit die app kom nie.
@@ -130,6 +133,26 @@ async function stoor(href, naam) {
   }
 }
 
+/* Waarheen moet 'n skakel wat die app oopgemaak het, binne die app gaan?
+ *
+ * Net ons eie twee gashere tel; enigiets anders is `null` en dan gebeur
+ * niks. Die bestemming is altyd op `www`, want dit is die gasheer wat die
+ * app laai (die brug word net daar ingespuit). `/go` is die
+ * INSTALLEERblad — vir iemand wat die app reeds het, is die tuisblad die
+ * regte plek. `/api/…` is nooit 'n blad nie. */
+export const APP_GASHEER = 'www.dewaldscheepers.com'
+export function appBestemming(url) {
+  let u
+  try { u = new URL(String(url)) } catch { return null }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null
+  const h = u.host.toLowerCase()
+  if (h !== APP_GASHEER && h !== 'dewaldscheepers.com') return null
+  let pad = u.pathname || '/'
+  if (/^\/api(\/|$)/i.test(pad) || /^\/\.well-known(\/|$)/i.test(pad)) return null
+  if (/^\/go\/?$/i.test(pad)) return 'https://' + APP_GASHEER + '/'
+  return 'https://' + APP_GASHEER + pad + u.search + u.hash
+}
+
 let geinstalleer = false
 
 export function installeerInheemseBrug(w = window) {
@@ -174,6 +197,31 @@ export function installeerInheemseBrug(w = window) {
      dit deur presies dieselfde `popstate` as in Chrome, en elke skerm wat
      homself op terug toemaak (terugRef, die oorlae) werk net so. Is daar
      niks om na terug te gaan nie, sit die app weg — soos elke Android-app. */
+  /* 5. Skakels wat die app oopmaak.
+     Koue begin: die skakel staan in `getLaunchUrl`. Die bladsy wat dit lees,
+     is die tuisblad wat Capacitor gelaai het — gaan dus EEN keer daarheen.
+     Die merkie in sessionStorage is die hek: die app vee self die pad uit
+     (`replaceState('/')` ná /boek, /english, …), en sonder die merkie sou
+     elke herlaai weer na die skakel spring. 'n Nuwe oopmaak van die app is
+     'n nuwe sessie, dus werk dieselfde skakel môre weer.
+     Warm (die app is reeds oop): `appUrlOpen`. */
+  const gaanNa = (url, eenKeer) => {
+    const doel = appBestemming(url)
+    if (!doel) return
+    if (eenKeer) {
+      try {
+        if (w.sessionStorage.getItem('inheems_lanseer') === doel) return
+        w.sessionStorage.setItem('inheems_lanseer', doel)
+      } catch {}
+    }
+    if (doel === w.location.href) return
+    w.location.replace(doel)
+  }
+  try {
+    App.getLaunchUrl().then(r => { if (r && r.url) gaanNa(r.url, true) }).catch(() => {})
+    App.addListener('appUrlOpen', (e) => { if (e && e.url) gaanNa(e.url, false) })
+  } catch {}
+
   try {
     App.addListener('backButton', (e) => {
       /* Net 'n egte ja/nee. 'n Gebeurtenis sonder die veld mag die app

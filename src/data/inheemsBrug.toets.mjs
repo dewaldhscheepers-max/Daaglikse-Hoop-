@@ -1,5 +1,5 @@
 /* node src/data/inheemsBrug.toets.mjs — die brug se suiwer besluite. */
-import { isVreemdeAdres, veiligeNaam, isKanselleer } from './inheemsBrug.js'
+import { isVreemdeAdres, veiligeNaam, isKanselleer, appBestemming } from './inheemsBrug.js'
 let n = 0, f = 0
 const t = (ok, m) => { n++; if (!ok) { f++; console.log('✗ ' + m) } }
 const G = 'www.dewaldscheepers.com'
@@ -39,6 +39,28 @@ t(isKanselleer(new Error('Share canceled')) === true, 'Capacitor se kanselleer')
 t(isKanselleer({ errorMessage: 'Share cancelled' }) === true, 'errorMessage-vorm')
 t(isKanselleer(new Error('File not found')) === false, 'egte fout is nie kanselleer')
 t(isKanselleer(undefined) === false, 'niks')
+
+// appBestemming
+const W = 'https://www.dewaldscheepers.com'
+t(appBestemming(W + '/hoop/abc123') === W + '/hoop/abc123', 'hoop-skakel')
+t(appBestemming('https://dewaldscheepers.com/bid/xyz') === W + '/bid/xyz', 'apex word www')
+t(appBestemming(W + '/reels/7300000000000000000') === W + '/reels/7300000000000000000', 'reels')
+t(appBestemming(W + '/go') === W + '/', '/go is die installeerblad → tuis')
+t(appBestemming(W + '/go/') === W + '/', '/go/ ook')
+t(appBestemming(W + '/go/support') === W + '/go/support', '/go/support bly')
+t(appBestemming(W + '/go/volg-jesus/join?kode=AB12') === W + '/go/volg-jesus/join?kode=AB12', 'groepkode se navraag bly')
+t(appBestemming(W + '/english?give=once') === W + '/english?give=once', 'english met navraag')
+t(appBestemming(W + '/') === W + '/', 'tuis')
+t(appBestemming(W) === W + '/', 'sonder skuinsstreep')
+t(appBestemming(W + '/api/reels-lys') === null, 'nooit /api')
+t(appBestemming(W + '/.well-known/assetlinks.json') === null, 'nooit .well-known')
+t(appBestemming('https://boos.net/hoop/x') === null, 'vreemde gasheer')
+t(appBestemming('https://www.dewaldscheepers.com.boos.net/hoop/x') === null, 'suffiks-truuk')
+t(appBestemming('https://boos.dewaldscheepers.com/hoop/x') === null, 'ander subdomein')
+t(appBestemming('javascript:alert(1)') === null, 'javascript')
+t(appBestemming('daaglikshoop://hoop/x') === null, 'eie skema nie')
+t(appBestemming('') === null && appBestemming(null) === null, 'leeg')
+t(appBestemming(W + '/hoop/x#y') === W + '/hoop/x#y', 'hutsie bly')
 
 console.log(f ? `${f} van ${n} FOUT` : `${n} toetse groen`)
 process.exit(f ? 1 : 0)

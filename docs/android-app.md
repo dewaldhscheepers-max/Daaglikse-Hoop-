@@ -178,6 +178,11 @@ waar die TWA misluk het. Gaan na:
 7. Deel 'n boodskap — die deel-venster of WhatsApp kom op.
 8. Die foon se terug-knoppie maak 'n oop skerm toe in plaas van om die app
    te verlaat.
+9. Stuur vir jouself 'n `/hoop/…`-skakel op WhatsApp en tik daarop: die
+   APP moet oopmaak, by daardie boodskap. Maak die app toe en doen dit weer
+   (koue begin), en ook terwyl die app oop is.
+10. Hou die app oop, gaan na die Wallpaper en druk Stoor: Android se
+    deel-venster kom op met die prent.
 
 ### Laai op
 
@@ -274,10 +279,42 @@ Wees eerlik hieroor, want dit is waar die vorige keer misluk het:
 * **Die heel eerste oopmaak SONDER internet** wys "Daaglikse Hoop laai…"
   uit `android-web/`. Ná een oopmaak met internet laai die diensketter die
   app aflyn.
-* **'n Gedeelde skakel** (`/hoop/…`, `/reels/…`) maak in die BLAAIER oop,
-  nie in die app nie. Om dit in die app te laat land, is 'n
-  `intent-filter` plus `/.well-known/assetlinks.json` met die
-  ondertekensleutel se vingerafdruk — 'n volgende stap, nie 'n fout nie.
+
+## Gedeelde skakels maak die APP oop
+
+Wie die app het en op 'n gedeelde skakel tik (`/hoop/…`, `/bid/…`,
+`/reels/…`, `/boek…`, `/english`, `/volg-jesus…`, `/go…`, `/sorg…`, `/`),
+kom in die app uit en nie in Chrome nie. Wie die app NIE het nie, merk niks:
+die skakel maak in die blaaier oop soos altyd. Dit begin dus eers werk die
+dag wanneer die app op Google Play is.
+
+Drie stukke:
+
+1. **Die manifes** — 'n `intent-filter` met `autoVerify="true"` vir albei
+   gashere en net die paaie hierbo. Geen `/api`, geen prente.
+2. **`public/.well-known/assetlinks.json`** — bestaan reeds uit die TWA se
+   tyd, met vier sleutel-vingerafdrukke vir hierdie pakketnaam. Android haal
+   dit af en kyk of die app se sleutel daarin staan.
+3. **Die brug** — Capacitor laai altyd die tuisblad. `appBestemming()` in
+   `src/data/inheemsBrug.js` lees die skakel (`getLaunchUrl` by 'n koue
+   begin, `appUrlOpen` as die app reeds oop is) en gaan daarheen. `/go` (die
+   installeerblad) word die tuisblad. 'n Merkie in sessionStorage keer dat
+   'n herlaai weer spring.
+
+`HoopOntvang` wys nou "Kry Daaglikse Hoop" (na `/go`) NET vir wie die app
+nie het nie — binne die app, en in 'n geïnstalleerde PWA, is dit net
+"Gaan na Daaglikse Hoop".
+
+**Een ding om in Play Console na te gaan** (stap "Toets EERS" hieronder):
+*Test and release → App integrity → App signing*. Die **SHA-256** van die
+*App signing key certificate* moet een van die vier in `assetlinks.json`
+wees. Is dit nie daar nie, stuur dit vir my en ek sit dit by — anders maak
+skakels steeds in Chrome oop (niks breek nie; dit is net nie die app nie).
+*Grow users → Deep links* wys of Google dit kon verifieer.
+
+Blaaiertoetse: `kykInheemsSkakel.mjs` (koue begin, geen lus by 'n herlaai,
+warm `appUrlOpen`, `/go` → tuis, vreemde gasheer → niks) en `kykHoopApp.mjs`
+(die vreemdeling kry steeds die uitnodiging, die app-eienaar nie).
 
 ---
 

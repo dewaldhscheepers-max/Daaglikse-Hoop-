@@ -2129,7 +2129,7 @@ export default function App() {
         <Vredepad onClose={() => setShowVredepad(false)} />
       )}
 
-      {hoopId && <HoopOntvang notaId={hoopId} onKlaar={hoopKlaar} />}
+      {hoopId && <HoopOntvang notaId={hoopId} onKlaar={hoopKlaar} geinstalleer={isInstalled} />}
 
       {/* Die Engelse e-boekblad — 'n volskerm-oorname bo-op alles. */}
       {engelsOop && (
