@@ -65,4 +65,12 @@
          toestemming het bestaan, maar dit was die BLAAIER s'n, nie ons s'n
          nie, en Samsung Internet het dit nooit oorhandig nie. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Die mikrofoon, vir Dra Mekaar se stemopname en die admin se opname.
+         Capacitor se WebView vra dit self wanneer die bladsy getUserMedia
+         roep (BridgeWebChromeClient.onPermissionRequest) — maar Android
+         weier 'n toestemming wat nie HIER staan nie, stilweg, en dan doen die
+         opname-knoppie niks. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 </manifest>

@@ -91,6 +91,7 @@ node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 to
 node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
 node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse
 node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 toetse
+node src/data/inheemsBrug.toets.mjs           # die Android-app se Deel/Stoor/window.open, 30 toetse
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
@@ -2807,6 +2808,16 @@ sou gebreek het: `isInApp` het die app nie herken nie (opspringers verkeerd —
 presies wat hy in die TWA gesien het), en PayFast se POST sou na die blaaier
 gestuur word. Die stappe vir die rekenaar staan in `docs/android-app.md`
 ("stap vir stap"). Tot die app in produksie is, bly die web die waarheid.
+
+Daarna 'n tweede, volledige oudit teen Capacitor se EIE bronkode, en nog
+ses dinge gevind: die app het onder die statusbalk geteken, die ikone sou
+wit word in donker modus, Deel en Stoor het niks gedoen nie (geen
+`navigator.share`, geen aflaai-hanteerder in 'n WebView), die terug-knoppie
+was dood op die tuisblad, die mikrofoon-toestemming het ontbreek, en
+`webDir: dist` sou 220 MB in die app gesit het (Google Play se perk is
+200). Alles staan in `docs/android-app.md`, met die lys van wat NIE hier
+getoets kan word nie. **`src/data/inheemsBrug.js` doen niks in 'n blaaier
+nie** — moenie daaraan verander sonder om `kykInheemsBrug.mjs` te loop nie.
 
 ## Kennisgewings
 

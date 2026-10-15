@@ -3,10 +3,14 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { herstelHerskryfdeWeke } from './data/volgJesusHerskryf'
+import { installeerInheemseBrug } from './data/inheemsBrug'
 
 /* VOOR die eerste render, sodat geen skerm ooit 'n herskrewe week se ou
  * dag-merkies lees nie. Sien src/data/volgJesusHerskryf.js. */
 try { herstelHerskryfdeWeke(window.localStorage) } catch {}
+/* Net binne die Android-app: Deel, Stoor en window.open. Doen niks in 'n
+   blaaier nie. Sien src/data/inheemsBrug.js. */
+try { installeerInheemseBrug(window) } catch {}
 
 /* HIER het 'n onvoorwaardelike herlaai op `controllerchange` gestaan.
  *

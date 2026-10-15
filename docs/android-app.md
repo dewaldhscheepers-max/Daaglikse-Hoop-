@@ -137,13 +137,14 @@ wat Android Studio vir jou maak. Dit vat 'n paar dae.
 ### Elke keer: bou
 
 ```
-npm run build
+npm install
 npx cap sync android
 ```
 
-`cap sync` kopieer `capacitor.config.json` (met die PayFast-reël, sien
-hieronder) na die Android-projek. Vergeet dit en die app bou met die OU
-instellings.
+`cap sync` kopieer `capacitor.config.json` (die PayFast-reël, die
+statusbalk se kleur) en die inproppe na die Android-projek. Vergeet dit en
+die app bou met die OU instellings. `npm run build` is NIE nodig nie — die
+app laai die lewendige webwerf; die webwerf word deur Vercel gebou.
 
 Dan **Android Studio** → *Open* → kies die **`android`**-vouer (nie die hele
 projek nie) → wag totdat Gradle klaar is (die balk onderaan) →
@@ -197,29 +198,86 @@ found"*.
 
 ---
 
-## Twee foute wat die app op 15 Oktober 2026 nog gehad het
+## Wat die app op 15 Oktober 2026 nog verkeerd gehad het
 
-**Die app het homself nie herken nie.** `isInApp` in `src/firebase.js` het net
-die TWA se merke geken (`android-app://`-verwyser, standalone-vertoonmodus).
-'n Capacitor-WebView het nie een nie. Binne die app sou daar dus
-*"Sit Daaglikse Hoop op jou foon"* en *"Wys my hoe"* gestaan het, en die
-e-boek- en skenk-opspringers sou NOOIT gekom het nie (hulle wag op
-`isInstalled`). Dit is presies die *"fout met die popups"* wat Dewald in die
-TWA gesien het. Nou kyk `isInApp` eerste na `window.Capacitor`, en
-`isInstalled` begin uit `isInApp`. Blaaiertoets: `kykInheems.mjs` (nagebootste
-`window.Capacitor` met die WebView se `; wv)`-user-agent, en dieselfde UA
-SONDER Capacitor moet steeds die uitklap kry).
+Agt dinge, almal gevind deur Capacitor se EIE bronkode te lees
+(`node_modules/@capacitor/android`) eerder as om te raai. Elkeen sou op
+Dewald se foon uitgekom het.
 
-**PayFast sou die skenking breek.** Die skenkvorm is 'n POST na
-`www.payfast.co.za`. Capacitor stuur enige ander gasheer na die foon se
-blaaier — as 'n GET, sonder die vorm se data — en PayFast sou 'n fout wys.
-`server.allowNavigation` in `capacitor.config.json` hou PayFast en ons eie
-twee gashere BINNE die app, sodat die terugkeer-adres ook in die app land.
-Firebase Storage (die PDF's) staan doelbewus NIE in daardie lys nie: 'n
-WebView kan nie aflaai nie, Chrome kan.
+1. **Die app het homself nie herken nie.** `isInApp` (`src/firebase.js`) het
+   net die TWA se merke geken. 'n Capacitor-WebView het nie een nie — dus
+   *"Sit Daaglikse Hoop op jou foon"* BINNE die app, en die e-boek- en
+   skenk-opspringers het nooit gekom nie (hulle wag op `isInstalled`). Dit
+   is die *"fout met die popups"* uit die TWA. Nou kyk dit eerste na
+   `window.Capacitor.isNativePlatform()`, wat die egte `native-bridge.js`
+   stel voordat enige skrip op die bladsy loop.
+2. **PayFast sou na die blaaier gaan.** Capacitor stuur elke ander gasheer na
+   die foon se blaaier (`Bridge.launchIntent`). `server.allowNavigation`
+   hou PayFast en ons eie twee gashere in die app.
+3. **Die app het onder die statusbalk en die gebaarbalk geteken.** Met
+   `viewport-fit=cover` laat Capacitor se `SystemBars` die rande aan die
+   bladsy oor, en hierdie app vul net op 'n paar skerms daarvoor op. 'n Kort
+   ES5-skrip in `index.html` sit BINNE die app 'n tweede viewport-reël
+   sonder `cover` (Capacitor lees die LAASTE een), dan sit die app tussen
+   die balke. Die webwerf en iPhone het net die eerste reël.
+4. **Die statusbalk se ikone sou wit word op 'n foon in donker modus** — wit
+   op ons ligte grond, dus onsigbaar. `plugins.SystemBars.style = "LIGHT"`.
+5. **Deel en Stoor het niks gedoen nie.** 'n WebView het geen
+   `navigator.share` nie, en Capacitor gee hom geen aflaai-hanteerder nie —
+   "Stoor die wallpaper" was 'n dooie knoppie. `src/data/inheemsBrug.js`
+   maak `navigator.share` Android se eie deel-venster (ook met prente, deur
+   `@capacitor/share` en `@capacitor/filesystem`), en 'n blob-aflaai gaan
+   deur dieselfde venster (daar kies 'n mens Galery, Lêers of WhatsApp).
+   Geen skerm hoef te weet of hy in 'n app is nie. In 'n blaaier doen die
+   brug NIKS.
+6. **`window.open` na 'n ander werf** (wa.me, 'n PDF) word nou 'n navigasie
+   wat Capacitor vang en aan die regte app gee, terwyl die app se bladsy
+   bly staan. 'n WebView kan nie 'n PDF wys nie.
+7. **Die terug-knoppie was dood op die tuisblad.** Sonder 'n luisteraar gaan
+   `@capacitor/app` net terug as daar geskiedenis is. Die brug gaan nou
+   terug deur `history.back()` (dieselfde `popstate` as Chrome) en sit die
+   app weg as daar niks is nie.
+8. **Die mikrofoon**: `RECORD_AUDIO` en `MODIFY_AUDIO_SETTINGS` was nie in
+   die manifes nie. Android weier dit dan stilweg, en Dra Mekaar se opname
+   doen niks.
 
-Bly 'n bank se 3-D Secure-blad by 'n ander gasheer uit, gaan dit na die
-blaaier; dit is wat stap 6 hierbo moet uitwys.
+En een wat die OPLAAI sou laat misluk het: **`webDir` was `dist`** — 220 MB
+se e-boeke en Bybel in die app, wat niemand gebruik nie (die app laai die
+lewendige werf), en Google Play weier 'n bondel bo 200 MB. Dit is nou
+`android-web/`, een klein `index.html`. Die app is 8 KB se bates.
+
+Blaaiertoetse in die scratchpad, met Capacitor se EGTE `native-bridge.js`
+en 'n vals Android agter `window.androidBridge` (dieselfde boodskappe as die
+egte een; 'n luisteraar word NIE dadelik beantwoord nie, soos
+`setKeepAlive`):
+
+* `kykInheemsBrug.mjs` — die gebouide weergawe, met die diensketter: geen
+  installasie-uitklap, viewport sonder cover, Deel (teks en prent), Stoor,
+  kanselleer → AbortError, `window.open`, die terug-knoppie; en dat 'n
+  BLAAIER met dieselfde UA niks hiervan kry nie.
+* `kykInheemsToken.mjs` — dieselfde, plus die kennisgewing tot in
+  `fcm_tokens/<token>` met `platform: android` (vals Firestore, `vals/`).
+
+### Wat NIE hier getoets kan word nie
+
+Wees eerlik hieroor, want dit is waar die vorige keer misluk het:
+
+* **Die Gradle-bou self.** Die Android-SDK kan nie hier afgelaai word nie.
+  Die kode is gelees, nie gekompileer nie. Gee Android Studio 'n fout, stuur
+  die rooi teks.
+* **Klank in die agtergrond.** Capacitor pouseer die WebView nie
+  (`KeepRunning` is aan), dus behoort 'n nota voort te speel as die skerm
+  afgaan. Maar daar is GEEN beheerknoppies op die sluitskerm nie (Chrome
+  wys hulle; 'n WebView nie).
+* **'n Bank se 3-D Secure-blad.** Is dit nie op `payfast.co.za` nie, gaan
+  daardie blad na Chrome toe. Toets 'n klein skenking.
+* **Die heel eerste oopmaak SONDER internet** wys "Daaglikse Hoop laai…"
+  uit `android-web/`. Ná een oopmaak met internet laai die diensketter die
+  app aflyn.
+* **'n Gedeelde skakel** (`/hoop/…`, `/reels/…`) maak in die BLAAIER oop,
+  nie in die app nie. Om dit in die app te laat land, is 'n
+  `intent-filter` plus `/.well-known/assetlinks.json` met die
+  ondertekensleutel se vingerafdruk — 'n volgende stap, nie 'n fout nie.
 
 ---
 
