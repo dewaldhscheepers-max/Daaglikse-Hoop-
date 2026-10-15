@@ -43,7 +43,14 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - uses: android-actions/setup-android@v3
+      # GEEN android-actions/setup-android nie: dit probeer die ou 'tools'-pakket
+      # installeer wat nie meer bestaan nie, en die bou val by stap 4 om. GitHub
+      # se ubuntu-masjien dra die SDK reeds (ANDROID_HOME), en Gradle haal self
+      # 'n platform wat ontbreek.
+      - name: Die Android-SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms" | tail -3
 
       - name: Installeer
         run: npm ci
