@@ -64,6 +64,7 @@ node src/data/volgJesusSkoon.toets.mjs        # wat "begin oor" mag uitvee, 17 t
 node src/data/volgJesusBeginOor.toets.mjs     # en in WATTER volgorde, 19 toetse
 node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-boekblad, 29 toetse
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
+node src/data/eboekPopup.toets.mjs            # watter e-boek die opspringer wys — nooit 'n Engelse een, 34
 node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die draad gaan, 5 toetse
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
@@ -2516,6 +2517,12 @@ dit het die HUIDIGE taal gewys en by 'n druk omgeruil, Dewald het "🌍 Engels" 
 Etiket wat 'n toestand sê, lees soos 'n bevel. Die gekose taal is vol met ✓ en
 doen niks as 'n mens hom weer druk. Blaaiertoets: `kykAdminTaal.mjs` (vals
 `firebase/firestore` via 'n Vite-alias in `vals/`).
+
+**Die "nuwe e-boek"-opspringer op die app wys NOOIT 'n Engelse boek nie.**
+Dewald, 15 Oktober 2026: *"die Engelse boeke moet nie op app dit wys nie."*
+`kanWys()` in `src/data/eboekPopup.js` gebruik dieselfde `isEngels()` as die
+e-boekblad, en dit is die enigste hek: `kiesBoek()` is die enigste pad na die
+opspringer.
 
 **`/english` is 'n volskerm-oorname** (soos HoopOntvang), met 'n DEELBARE adres.
 Anders as /boek en /hoop word die pad NIE uitgevee nie — 'n herlaai moet die

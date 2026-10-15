@@ -40,6 +40,7 @@
  */
 
 import { sorteerNuutsteBo } from './eboekeVolgorde.js'
+import { isEngels } from './engelsBoeke.js'
 
 /* Dieselfde verstek as die e-boekblad s'n (sien `BOOKS` in Meer.jsx). Sonder
    hulle wys die opspringer 'n leë kring: `EbookPopup` teken `book.color` en
@@ -54,6 +55,13 @@ export const VERSTEK_EMOJI = '📚'
  * sonder PDF is 'n knoppie wat niks doen nie. */
 export function kanWys(boek) {
   if (!boek || typeof boek !== 'object') return false
+  /* 'n ENGELSE boek nooit. Dewald, 15 Oktober 2026: "Die Afrikaanse boeke wys
+     popup as daar nuwe eboeke is... die Engelse boeke moet nie op app dit wys
+     nie." Die app is Afrikaans; die Engelse boeke leef op /english en staan
+     ook nie op die Afrikaanse e-boekblad nie (`verdeelPerTaal` in Meer.jsx).
+     Dieselfde `isEngels()` as daardie blad, sodat die twee nooit uitmekaar
+     dryf nie — 'n ontbrekende `taal` bly Afrikaans en word steeds gewys. */
+  if (isEngels(boek)) return false
   if (!String(boek.title || '').trim()) return false
   return !!String(boek.pdfUrl || '').trim()
 }

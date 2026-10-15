@@ -128,6 +128,22 @@ console.log('\n── n Ingeboude boek se Firestore-dokument is sy BYVOEGSEL ─
      lys.filter(b => b.id === 'bid-nou').length, 1)
 }
 
+console.log('\n── n ENGELSE boek word nooit op die app geadverteer nie ──')
+{
+  /* Dewald, 15 Okt 2026: "die Engelse boeke moet nie op app dit wys nie." */
+  const ENG = { id: 'restless', title: 'Restless Thoughts', taal: 'en', pdfUrl: 'https://x/r.pdf', createdAt: 9e12 }
+  is('n Engelse boek kan nie gewys word nie', kanWys(ENG), false)
+  is('ook as "EN" met spasies', kanWys({ ...ENG, taal: ' EN ' }), false)
+  is('n boek sonder taal is Afrikaans en wys', kanWys({ ...ENG, taal: undefined }), true)
+  is('taal af wys', kanWys({ ...ENG, taal: 'af' }), true)
+  /* Die nuutste opgelaaide boek is Engels: die opspringer slaan hom oor en
+     kies die volgende Afrikaanse een. */
+  is('die nuutste Engelse boek word oorgeslaan',
+     kiesBoek({ ingebou: [], opgelaai: [ENG, SKINDER], gesien: [] }).title, 'Skinderstories')
+  is('net Engelse boeke ongesien: geen opspringer nie',
+     kiesBoek({ ingebou: [], opgelaai: [ENG, SKINDER], gesien: ['skinderstories', String(SKINDER.id)] }), null)
+}
+
 console.log('\n── Gemors breek dit nie ──')
 {
   is('niks in', kiesBoek(), null)
