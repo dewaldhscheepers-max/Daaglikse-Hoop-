@@ -5,9 +5,9 @@
      nie — sonder dit val die bou om by aapt met "resource color/colorPrimary
      not found". -->
 <resources>
-    <color name="colorPrimary">#7C6FAF</color>       <!-- --purple -->
-    <color name="colorPrimaryDark">#5C4E8E</color>   <!-- --purple-dark -->
-    <color name="colorAccent">#D4956A</color>        <!-- --gold -->
+    <color name="colorPrimary">#7C6FAF</color>       <!-- CSS: purple -->
+    <color name="colorPrimaryDark">#5C4E8E</color>   <!-- CSS: purple-dark -->
+    <color name="colorAccent">#D4956A</color>        <!-- CSS: gold -->
 
     <!-- Die room agter die WebView. Dit wys vir 'n oomblik voor die bladsy
          verf, en dit is die kleur wat die mens sien as hy die app van die
