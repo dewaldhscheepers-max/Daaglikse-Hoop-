@@ -38,9 +38,18 @@ export const isFacebookBrowser = /FBAN|FBAV|FBIOS|FB_IAB/.test(navigator.userAge
 
    Dit word EEN keer gelees en dan vasgehou: die vertoonmodus kan verander
    as 'n mens die blad in 'n oortjie oopmaak, maar die verwyser is dan al
-   lankal weg. */
+   lankal weg.
+
+   En 'n DERDE sein, vir die egte Android-app (Capacitor, `android/`). Sy
+   WebView het GEEN van die twee hierbo nie — geen TWA-verwyser, en 'n WebView
+   is nie "standalone" nie. Sonder hierdie reël het die app binne-in homself
+   "Sit Daaglikse Hoop op jou foon" en "Wys my hoe" gewys, en die e-boek- en
+   skenk-opspringers het NOOIT gekom nie (hulle wag op `isInstalled`).
+   Capacitor spuit `window.Capacitor` in voordat die bladsy se skrip loop. */
 export const isInApp = (() => {
   try {
+    if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &&
+        window.Capacitor.isNativePlatform()) return true
     if (typeof document !== 'undefined' &&
         String(document.referrer || '').startsWith('android-app://')) return true
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true

@@ -111,6 +111,8 @@ export default function App() {
   const [paymentResult, setPayment] = useState(null)
   const [showNotifBanner, setNotifBanner] = useState(false)
   const [isInstalled, setIsInstalled] = useState(
+    /* isInApp sluit die Capacitor-app in, wat nie "standalone" is nie. */
+    isInApp ||
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true
   )

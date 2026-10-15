@@ -9,7 +9,13 @@
   "server": {
     "url": "https://www.dewaldscheepers.com",
     "androidScheme": "https",
-    "cleartext": false
+    "cleartext": false,
+    "allowNavigation": [
+      "dewaldscheepers.com",
+      "www.dewaldscheepers.com",
+      "payfast.co.za",
+      "*.payfast.co.za"
+    ]
   },
   "plugins": {
     "PushNotifications": {

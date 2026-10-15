@@ -2801,6 +2801,13 @@ deur die uitgangsbeleid geblokkeer. As die Android-pad ooit hervat word, gebeur
 dit in Android Studio, en die kennisgewing-probleem is die eerste ding om op te
 los. Agtergrond in `docs/android-app.md`.
 
+**15 Oktober 2026: die kode-kant is klaar; net die bou en oplaai bly oor.**
+Dewald het dit weer opgetel. Twee foute is reggemaak wat die Capacitor-app
+sou gebreek het: `isInApp` het die app nie herken nie (opspringers verkeerd —
+presies wat hy in die TWA gesien het), en PayFast se POST sou na die blaaier
+gestuur word. Die stappe vir die rekenaar staan in `docs/android-app.md`
+("stap vir stap"). Tot die app in produksie is, bly die web die waarheid.
+
 ## Kennisgewings
 
 Ses duisend fone hang hieraan. Dit is die ding wat die app laat groei, en dit
