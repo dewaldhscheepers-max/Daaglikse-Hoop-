@@ -13,7 +13,8 @@
 #   DH_KEYSTORE_WAGWOORD    die sleutel se wagwoord (uit signing-key-info.txt)
 #   DH_SLEUTEL_ALIAS        die alias (uit signing-key-info.txt)
 #   DH_SLEUTEL_WAGWOORD     die alias se wagwoord, as dit anders is (opsioneel)
-#   DH_GOOGLE_SERVICES_JSON die inhoud van google-services.json (Firebase)
+#   DH_GOOGLE_SERVICES_JSON net nodig as android/app/google-services.json NIE in
+#                           die repo staan nie (sedert 15 Okt 2026 staan dit daar)
 #
 # Sonder die sleutel bou dit ONGETEKEN: dit bewys dat die bou werk, maar
 # Google Play aanvaar dit nie. Met die sleutel maar sonder google-services.json
@@ -74,6 +75,11 @@ jobs:
             printf '%s' "$GOOGLE_SERVICES" > android/app/google-services.json
             node -e "const j=require('./android/app/google-services.json'); const p=(j.client||[]).map(c=>c.client_info&&c.client_info.android_client_info&&c.client_info.android_client_info.package_name); if(!p.includes('com.dewaldscheepers.daaglikshoop')){console.error('google-services.json is nie vir com.dewaldscheepers.daaglikshoop nie: '+p.join(', ')); process.exit(1)}"
             echo "::notice::google-services.json is gevind en pas by die app."
+          elif [ -f android/app/google-services.json ]; then
+            # Die lêer staan in die repo (dit is nie geheim nie — Google se eie
+            # raad: dit dra net die projek se openbare identiteit).
+            node -e "const j=require('./android/app/google-services.json'); const p=(j.client||[]).map(c=>c.client_info&&c.client_info.android_client_info&&c.client_info.android_client_info.package_name); if(!p.includes('com.dewaldscheepers.daaglikshoop')){console.error('google-services.json is nie vir com.dewaldscheepers.daaglikshoop nie: '+p.join(', ')); process.exit(1)}"
+            echo "::notice::google-services.json uit die repo pas by die app."
           elif [ -n "$KEYSTORE_B64" ]; then
             echo "::error::Die sleutel is daar, maar google-services.json (DH_GOOGLE_SERVICES_JSON) nie. Sonder dit kom die oggendkennisgewing NOOIT nie — ek bou nie so 'n app nie."
             exit 1

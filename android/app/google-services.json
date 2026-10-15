@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "395898489739",
+    "project_id": "daaglikse-hoop",
+    "storage_bucket": "daaglikse-hoop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:395898489739:android:b2166511490758d81ebd8e",
+        "android_client_info": {
+          "package_name": "com.dewaldscheepers.daaglikshoop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyFm5HjxSZjVhOrqfcYci861TMWLovjyY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
