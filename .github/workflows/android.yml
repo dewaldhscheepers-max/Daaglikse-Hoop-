@@ -1,0 +1,112 @@
+# Die Android-app vir Google Play.
+#
+# Loop met die hand: Actions -> "Android-app" -> Run workflow.
+# Die klaar lêer (app-release.aab) staan onderaan die lopie onder "Artifacts".
+#
+# Waarom dit hier loop: die app kan nie in die wolk-ontwikkelomgewing gebou
+# word nie (dl.google.com is daar toe), en Dewald werk op 'n foon. GitHub se
+# masjiene het die Android-gereedskap reeds.
+#
+# Die geheime (Settings -> Secrets and variables -> Actions -> New secret):
+#
+#   DH_KEYSTORE_BASE64      die ondertekensleutel (signing.keystore) as base64
+#   DH_KEYSTORE_WAGWOORD    die sleutel se wagwoord (uit signing-key-info.txt)
+#   DH_SLEUTEL_ALIAS        die alias (uit signing-key-info.txt)
+#   DH_SLEUTEL_WAGWOORD     die alias se wagwoord, as dit anders is (opsioneel)
+#   DH_GOOGLE_SERVICES_JSON die inhoud van google-services.json (Firebase)
+#
+# Sonder die sleutel bou dit ONGETEKEN: dit bewys dat die bou werk, maar
+# Google Play aanvaar dit nie. Met die sleutel maar sonder google-services.json
+# weier dit om te bou — 'n app sonder die oggendkennisgewing mag nie uitgaan
+# nie; dit is presies waar die vorige app misluk het.
+#
+# Sien docs/android-app.md vir die hele pad.
+
+name: Android-app
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bou:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Installeer
+        run: npm ci
+
+      - name: Sinkroniseer Capacitor
+        run: npx cap sync android
+
+      - name: Die sleutel en google-services.json
+        env:
+          KEYSTORE_B64: ${{ secrets.DH_KEYSTORE_BASE64 }}
+          GOOGLE_SERVICES: ${{ secrets.DH_GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/dh.keystore"
+            echo "DH_KEYSTORE_PAD=$RUNNER_TEMP/dh.keystore" >> "$GITHUB_ENV"
+            echo "::notice::Die sleutel is gevind — die bondel word onderteken."
+          else
+            echo "::warning::GEEN sleutel (DH_KEYSTORE_BASE64) nie — die bondel is ONGETEKEN en Google Play sal dit nie aanvaar nie. Dit bewys net dat die bou werk."
+          fi
+          if [ -n "$GOOGLE_SERVICES" ]; then
+            printf '%s' "$GOOGLE_SERVICES" > android/app/google-services.json
+            node -e "const j=require('./android/app/google-services.json'); const p=(j.client||[]).map(c=>c.client_info&&c.client_info.android_client_info&&c.client_info.android_client_info.package_name); if(!p.includes('com.dewaldscheepers.daaglikshoop')){console.error('google-services.json is nie vir com.dewaldscheepers.daaglikshoop nie: '+p.join(', ')); process.exit(1)}"
+            echo "::notice::google-services.json is gevind en pas by die app."
+          elif [ -n "$KEYSTORE_B64" ]; then
+            echo "::error::Die sleutel is daar, maar google-services.json (DH_GOOGLE_SERVICES_JSON) nie. Sonder dit kom die oggendkennisgewing NOOIT nie — ek bou nie so 'n app nie."
+            exit 1
+          else
+            echo "::warning::GEEN google-services.json nie — kennisgewings sal nie werk nie (net 'n toetsbou)."
+          fi
+
+      - name: Wys die sleutel se vingerafdruk
+        if: env.DH_KEYSTORE_PAD != ''
+        env:
+          DH_KEYSTORE_WAGWOORD: ${{ secrets.DH_KEYSTORE_WAGWOORD }}
+          DH_SLEUTEL_ALIAS: ${{ secrets.DH_SLEUTEL_ALIAS }}
+        run: |
+          # Hierdie SHA-256 moet een van die vier in public/.well-known/assetlinks.json
+          # wees (anders maak gedeelde skakels in Chrome oop), en dit is wat
+          # Play Console onder "Upload key certificate" wys.
+          keytool -list -v -keystore "$DH_KEYSTORE_PAD" -storepass "$DH_KEYSTORE_WAGWOORD" -alias "$DH_SLEUTEL_ALIAS" | grep -E "SHA256|Alias|Valid"
+
+      - name: Bou die bondel
+        working-directory: android
+        env:
+          DH_KEYSTORE_WAGWOORD: ${{ secrets.DH_KEYSTORE_WAGWOORD }}
+          DH_SLEUTEL_ALIAS: ${{ secrets.DH_SLEUTEL_ALIAS }}
+          DH_SLEUTEL_WAGWOORD: ${{ secrets.DH_SLEUTEL_WAGWOORD }}
+        run: |
+          # Elke lopie 'n hoër getal. 100 + die lopie, sodat dit seker bo die ou
+          # TWA s'n is (PWABuilder begin by 1).
+          export DH_VERSION_CODE=$((100 + GITHUB_RUN_NUMBER))
+          export DH_VERSION_NAME="2.0.$GITHUB_RUN_NUMBER"
+          echo "versionCode $DH_VERSION_CODE, versionName $DH_VERSION_NAME"
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease
+
+      - name: Wat is gebou
+        run: |
+          ls -la android/app/build/outputs/bundle/release/
+          du -h android/app/build/outputs/bundle/release/*.aab
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: daaglikse-hoop-${{ github.run_number }}
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30

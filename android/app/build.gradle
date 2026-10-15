@@ -9,8 +9,11 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         /* Google Play aanvaar net 'n HOER versionCode as wat reeds daar is.
            Die ou TWA is as 1 gelaai; hierdie is die eerste egte app. */
-        versionCode 3
-        versionName "2.0.0"
+        /* Die GitHub-bou (.github/workflows/android.yml) gee elke lopie 'n eie,
+           hoër getal deur DH_VERSION_CODE — anders weier Google Play die tweede
+           oplaai. Sonder daardie veranderlike (Android Studio) bly dit 3. */
+        versionCode((System.getenv('DH_VERSION_CODE') ?: '3') as int)
+        versionName(System.getenv('DH_VERSION_NAME') ?: "2.0.0")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,8 +21,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    /* Die ondertekensleutel kom NOOIT uit die kode nie. Die GitHub-bou skryf
+       hom uit 'n geheim na 'n tydelike lêer en gee die pad en wagwoorde deur
+       omgewingsveranderlikes. Ontbreek hulle, bou die bondel ONGETEKEN — goed
+       om te bewys dat die bou werk, maar Google Play aanvaar dit nie. */
+    signingConfigs {
+        release {
+            def pad = System.getenv('DH_KEYSTORE_PAD')
+            if (pad) {
+                storeFile file(pad)
+                storePassword System.getenv('DH_KEYSTORE_WAGWOORD')
+                keyAlias System.getenv('DH_SLEUTEL_ALIAS')
+                keyPassword System.getenv('DH_SLEUTEL_WAGWOORD') ?: System.getenv('DH_KEYSTORE_WAGWOORD')
+            }
+        }
+    }
     buildTypes {
         release {
+            if (System.getenv('DH_KEYSTORE_PAD')) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
