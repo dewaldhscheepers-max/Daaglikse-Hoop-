@@ -2755,6 +2755,20 @@ blaaier. Moenie die merkers wegvat nie.
 `oudit.mjs` in die scratchpad loop elke blaaier teen `/` en `/go` en val om
 as enigiemand niks kry nie.
 
+**Die installasie-uitklap** (App.jsx, 3s ná oopmaak, een keer per dag) het
+drie gate gehad, 15 Oktober 2026:
+
+* nadat Chrome se eie venster beantwoord is, het die uitklap bly staan as 'n
+  kaart met net "Later" — `handleInstallCta` maak hom nou toe;
+* op 'n REKENAAR sonder Chrome se venster (`kiesPad` → `rekenaar`) het hy
+  gewys met niks om te druk nie. Hy wys nou nie; kom die venster later, loop
+  die effek weer;
+* speel klank op die derde sekonde, is hy vir die dag opgegee. Hy probeer nou
+  elke 3s vir sowat 'n minuut, en die dag word eers gemerk wanneer hy WYS.
+
+Blaaiertoets: `kykInstalleer.mjs` (egte diensketter, elke pad per blaaier, en
+dat hy ná 12s nog staan — die herlaai van 'n eerste besoek het hom weggevee).
+
 ## Die Android-app is NIE voltooi nie — Daaglikse Hoop is web/PWA
 
 **Daar is GEEN lewende Google Play-app nie.** 'n Capacitor-steier lê in

@@ -359,18 +359,32 @@ export default function App() {
     if (engelsOop) return
     const today = new Date().toISOString().slice(0, 10)
     if (localStorage.getItem('installPopupDate') === today) return
-    const t = setTimeout(() => {
+    /* Op 'n rekenaar sonder Chrome se venster is daar niks om te doen nie —
+       die uitklap sou net "Later" hê. Die balk op Luister bly wel.
+       Kom Chrome se venster later, loop hierdie effek weer (`installPrompt`). */
+    if (kiesPad({ ua: navigator.userAgent, kanPrompt: !!(installPrompt || window.__installPrompt) }) === 'rekenaar') return
+    let t
+    let pogings = 0
+    function probeer() {
       /* Nie bo-op die "VOLG JESUS het geskuif"-boodskap nie. Sy kom EEN keer
          in 'n leeftyd en sy verduidelik iets wat pas van die skerm af weg is;
          hierdie uitklap kom môre weer. Sonder hierdie hek het die uitklap
-         drie sekondes later bo-op haar kom staan en die knoppie doodgedruk. */
+         drie sekondes later bo-op haar kom staan en die knoppie doodgedruk.
+
+         Is iets in die pad (klank speel, die skuif-boodskap), probeer hy
+         weer elke 3s vir sowat 'n minuut. Dit het eers EEN keer gekyk en dan
+         vir die dag opgegee — wie die app oopmaak en dadelik druk speel, is
+         nooit gevra nie. Die dag word eers gemerk wanneer hy werklik wys. */
       if (!isPlayingRef.current && !vjSkuifRef.current && !engelsOopRef.current) {
         setShowInstallPopup(true)
         localStorage.setItem('installPopupDate', today)
+        return
       }
-    }, 3000)
+      if (++pogings < 20) t = setTimeout(probeer, 3000)
+    }
+    t = setTimeout(probeer, 3000)
     return () => clearTimeout(t)
-  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId, reelId, engelsOop])
+  }, [isInstalled, gebedId, gebedGebid, sorgGesprek, sorgGedra, hoopId, reelId, engelsOop, installPrompt])
 
   // ── Popup manager ──
   useEffect(() => {
@@ -520,6 +534,10 @@ export default function App() {
       const { outcome } = await installPrompt.userChoice
       if (outcome === 'accepted') setIsInstalled(true)
       setInstallPrompt(null)
+      /* Chrome se venster is beantwoord — ja of nee. Bly ons uitklap staan,
+         word hy 'n kaart met net "Later" (of hy spring na "Wys my hoe"),
+         want die venster kan nie twee keer gebruik word nie. */
+      setShowInstallPopup(false)
     } else {
       setShowInstallPopup(false)
       setShowInstallHelp(true)
