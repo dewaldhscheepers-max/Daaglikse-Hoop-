@@ -5,6 +5,7 @@ import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { magKas } from './data/kasBesluit.js'
+import { isEersteAktivering } from './data/herlaaiBesluit.js'
 
 
 /* Verhoog hierdie getal om elke geinstalleerde app te dwing om sy
@@ -120,10 +121,15 @@ const ANTWOORD_MS = 2000
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
+    /* Was hier al ooit 'n weergawe? Sien isEersteAktivering() in
+       herlaaiBesluit.js. Is die kas nie leesbaar nie, gedra ons ons soos
+       altyd (herlaai) — dit is die veilige kant vir 'n foon op ou kode. */
+    let eerste = false
     try {
       const k = await caches.open('dh-spoel')
       const r = await k.match('nommer')
       const vorige = r ? Number(await r.text()) : null
+      eerste = isEersteAktivering(vorige)
       if (vorige !== SPOEL) {
         await spoelLooptyd()
         await k.put('nommer', new Response(String(SPOEL)))
@@ -131,6 +137,12 @@ self.addEventListener('activate', event => {
     } catch { /* 'n kas wat nie oopmaak nie mag nooit die aktivering keer nie */ }
 
     await self.clients.claim()
+
+    /* 'n EERSTE installasie: die bladsy wat oop is, het reeds die nuutste kode
+       gelaai — daar is niks om na te herlaai nie. Herlaai ons tog, verdwyn die
+       installasie-uitklap twee sekondes nadat 'n vreemdeling hom gesien het.
+       Dewald, 15 Okt 2026: "na die eerste 2/3 sekondes spring die app". */
+    if (eerste) return
 
     /* Se vir elke oop bladsy om te herlaai. */
     const clients = await self.clients.matchAll({ type: 'window' })

@@ -102,7 +102,7 @@ node api/_ouPrente.toets.mjs                  # VOLG JESUS se vorige prente: wit
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
 node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getalle, 29 toetse
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
-node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land, 13 toetse
+node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land — nooit by 'n EERSTE installasie, 22
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
@@ -204,6 +204,24 @@ skerms nie die fout gewys het nie — maar as strepe daar opduik, kyk eerste
 daarna.
 
 ---
+
+## 'n Eerste besoek herlaai NIE
+
+Dewald, 15 Oktober 2026: *"op die browser... na die eerste 2/3 sekondes spring
+die app soos wanneer jy iets update... So die popup wat sê instaleer die app
+verdwyn."* Op 'n eerste besoek installeer die diensketter, `skipWaiting()`,
+`clients.claim()` — en `controllerchange` en `SW_UPDATED` het albei gelees as
+"nuwe weergawe", dus het die app (en die ketter self) die bladsy herlaai. Daar
+was niks nuuts nie, en die installasie-uitklap het verdwyn op juis die besoek
+waar 'n vreemdeling besluit.
+
+Twee hekke, een aan elke kant (`herlaaiBesluit.js`): `isEersteAktivering()` in
+`sw.js` — geen vorige SPOEL in `dh-spoel` nie, dan stuur die ketter niks en
+herlaai niemand nie; en `isEgteWissel()` in App.jsx — het die bladsy sonder 'n
+beheerder begin, is die EERSTE oorname net die installasie. Elke egte nuwe
+weergawe word steeds afgedwing. Blaaiertoets: `kykEersteBesoek.mjs` (egte
+diensketter; meet 'n `window`-merker, nie `framenavigated` nie — dit vuur ook
+by `replaceState`). Dit val op die ou kode.
 
 ## Die wit skerm
 

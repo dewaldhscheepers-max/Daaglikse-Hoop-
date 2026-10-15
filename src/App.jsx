@@ -35,7 +35,7 @@ import KennisgewingAf from './components/KennisgewingAf'
 import InstallTelling from './components/InstallTelling'
 import { getDoc, doc } from 'firebase/firestore'
 import ErrorBoundary from './components/ErrorBoundary'
-import { magHerlaai } from './data/herlaaiBesluit'
+import { magHerlaai, isEgteWissel } from './data/herlaaiBesluit'
 import DaeVanVrede from './screens/DaeVanVrede'
 import DingeVerander from './screens/DingeVerander'
 import SeerNaVryheid from './screens/SeerNaVryheid'
@@ -1677,6 +1677,11 @@ export default function App() {
        forseer dit. almal kry nou dadelik die nuwe weergawe."
        Die enigste hek wat oorbly is klank — sien magHerlaai(). */
     let wagtend = false
+    /* Het die bladsy MET 'n diensketter oopgemaak? Nee beteken 'n eerste
+       besoek, en dan is die eerste oorname net die installasie — geen nuwe
+       weergawe nie. Sien isEgteWissel() in herlaaiBesluit.js. */
+    const hadAanvanklik = !!navigator.serviceWorker.controller
+    let reedsOorgeneem = false
 
     function weeg() {
       if (magHerlaai({
@@ -1695,9 +1700,16 @@ export default function App() {
          die bladsy ná 'n paar sekondes — wat presies is wat 'n ou weergawe
          nodig het, maar hier sou dit ons klank-hek omseil. Sien sw.js. */
       try { e.source && e.source.postMessage({ type: 'EK_HANTEER' }) } catch {}
+      /* 'n Bladsy wat sonder 'n beheerder begin het en nog nie 'n egte wissel
+         gesien het nie, het reeds die nuutste kode. */
+      if (!isEgteWissel({ hadAanvanklik, reedsOorgeneem })) return
       merkWagtend()
     }
-    function onControllerChange()                                      { merkWagtend() }
+    function onControllerChange() {
+      const egte = isEgteWissel({ hadAanvanklik, reedsOorgeneem })
+      reedsOorgeneem = true
+      if (egte) merkWagtend()
+    }
     navigator.serviceWorker.addEventListener('message',          onMessage)
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
     return () => {

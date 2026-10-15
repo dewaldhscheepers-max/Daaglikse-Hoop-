@@ -10,7 +10,7 @@
  * Een hek bly: KLANK. 'n Herlaai middel-in 'n stemboodskap is die duurste
  * enkele fout in hierdie app se geskiedenis.
  */
-import { magHerlaai } from './herlaaiBesluit.js'
+import { magHerlaai, isEersteAktivering, isEgteWissel } from './herlaaiBesluit.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -46,6 +46,20 @@ console.log('\n── Die volgorde van die hekke ──\n')
    lus. */
 is('herlaaiTans wen oor wagtend', magHerlaai({ wagtend: true, herlaaiTans: true }), false)
 is('en klank wen oor wagtend',    magHerlaai({ wagtend: true, speelKlank: true }), false)
+
+console.log('\n── n EERSTE installasie herlaai niks nie ──\n')
+/* Dewald, 15 Okt 2026: die app spring na 2/3 sekondes en die
+   installasie-uitklap verdwyn. */
+is('geen vorige aktivering: eerste', isEersteAktivering(null), true)
+is('undefined ook', isEersteAktivering(undefined), true)
+is('NaN (stukkende kas) ook', isEersteAktivering(NaN), true)
+is('n vorige SPOEL: nie eerste nie', isEersteAktivering(26), false)
+is('selfs SPOEL 0', isEersteAktivering(0), false)
+
+is('bladsy sonder beheerder, eerste oorname: GEEN herlaai', isEgteWissel({ hadAanvanklik: false, reedsOorgeneem: false }), false)
+is('bladsy sonder beheerder, tweede wissel: egte opdatering', isEgteWissel({ hadAanvanklik: false, reedsOorgeneem: true }), true)
+is('bladsy met beheerder: elke wissel is egte', isEgteWissel({ hadAanvanklik: true }), true)
+is('geen argumente: geen herlaai', isEgteWissel(), false)
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)
