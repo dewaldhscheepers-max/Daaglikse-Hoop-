@@ -93,6 +93,36 @@ en gebruik dít. Dieselfde geld vir die drie tellers op `tellers/toestemming`
 
 ---
 
+## Die maklike pad: GitHub bou die app (sonder 'n rekenaar)
+
+`.github/workflows/android.yml`. Actions → **Android-app** → *Run workflow*.
+Die klaar `.aab` staan onderaan die lopie onder *Artifacts*.
+
+Vyf geheime (Settings → Secrets and variables → Actions):
+`DH_KEYSTORE_BASE64` (die PWABuilder-sleutel as base64), `DH_KEYSTORE_WAGWOORD`,
+`DH_SLEUTEL_ALIAS` (`daaglikshoop`), `DH_SLEUTEL_WAGWOORD`, en
+`DH_GOOGLE_SERVICES_JSON` (die lêer se inhoud).
+
+Die bou KEUR homself en misluk eerder as om iets verkeerds te lewer:
+
+* die bondel word oopgemaak en elke ding wat hierdie app nodig het, word
+  nagegaan — pakketnaam, die toestemmings, die App Links, die
+  kennisgewing-ikoon, die Capacitor-instellings, die vier inproppe, grootte;
+* met 'n sleutel maar sonder `google-services.json` weier dit om te bou — 'n app
+  sonder die oggendkennisgewing is presies die TWA se fout;
+* die handtekening moet `72:37:D1:…:E0:E4:D9` wees: die ou TWA se sleutel (sy
+  `.aab` is daarmee onderteken, weergawe 1) en die vierde vingerafdruk in
+  `public/.well-known/assetlinks.json`. 'n Ander sleutel = Google Play weier
+  die opdatering.
+
+`versionCode` = 100 + die lopienommer, dus altyd hoër as die ou TWA se 1 en as
+die vorige lopie.
+
+Drie dinge wat die eerste lopies gevang het, en wat 'n rekenaar ook sou gehad
+het: `android-actions/setup-android` installeer 'n `tools`-pakket wat nie meer
+bestaan nie (die SDK is reeds op die masjien); en `colors.xml` het `--` binne
+'n XML-kommentaar gehad, wat aapt weier.
+
 ## Om 'n weergawe uit te gee — stap vir stap
 
 Die Android-SDK kan **nie** in die wolk-ontwikkelomgewing afgelaai word nie
