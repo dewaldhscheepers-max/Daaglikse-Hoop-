@@ -70,7 +70,6 @@ node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die d
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
-node src/data/volgJesusSkuif.toets.mjs        # wie hoor dat VOLG JESUS geskuif het, 22 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels, 79 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/tmgPopup.toets.mjs              # die opspringer NA die vloei, 23 toetse
@@ -607,43 +606,17 @@ the e-books page."* Die struktuur is nou skoon: **Luister Nou is
 stemboodskappe; E-boeke is boeke en langer programme.** Moenie haar op Luister
 terugsit nie.
 
-**Die skuif self was die maklike helfte.** Die mens wat gister by Dag 3 was,
-maak die app oop, die knoppie is weg, en niks sê hoekom nie — sy dink haar
-vordering is weg en sy kom nie terug nie. Ons het geen kanaal na daardie foon
-nie; die oomblik waarop sy oopmaak, is die enigste een wat ons het.
+**Die skuif het 'n boodskap gekos, en daardie boodskap is nou weg.**
+`src/data/volgJesusSkuif.js` het een keer vir wie die program reeds begin het,
+gesê waar VOLG JESUS nou woon ("VOLG JESUS HET GESKUIF · Jou vordering is
+veilig"). Dit was reg toe die kaart pas geskuif het: die mens wat gister by
+Dag 3 was, het die knoppie gemis en gedink haar vordering is weg.
 
-Daarom kom daar EEN boodskap ("VOLG JESUS HET GESKUIF"), en die reëls staan in
-`src/data/volgJesusSkuif.js`:
-
-* **net vir wie reeds begin het** — dieselfde `hetBegin()` as die kaart s'n,
-  maar oor ALLE weke, want iemand wat Week 2 klaargemaak het en Week 3 nog nie
-  oopgemaak het nie, is net so seer besig;
-* **een keer** (`vj_skuif_gesien`), en elke uitgang merk dit — die knoppie,
-  "Ek verstaan", en die agtergrond;
-* **net op die Luister-oortjie.** Op die e-boekblad staan die kaart reg voor
-  jou en dan sê die boodskap niks;
-* **nooit bo-op iets anders nie** — nie oor klank, nie oor 'n ander skerm nie.
-
-**Die knoppie vat 'n mens na die PROGRAM, by sy eie dag** (dieselfde
-`open-volg-jesus` as die kaart), en stel die oortjie op E-boeke. Maak hy die
-program toe, land hy op die blad waar dit nou woon. Dit is die halwe punt van
-die boodskap; "gaan soek dit self" is hoe 'n mens iemand verloor.
-
-Twee dinge wat die eerste weergawe verkeerd gehad het, en albei kom uit die
-blaaiertoets:
-
-* dit het EEN keer gekyk en dan opgegee. Dit klink veilig en dit is nie: wie
-  nie geïnstalleer het nie, sien die installasie-uitklap by byna elke oopmaak,
-  en dan kom hierdie boodskap NOOIT — vir juis die mens wat hom nodig het. Dit
-  kyk nou elke 2,5s vir sowat 'n halfminuut en gee dan op tot die volgende
-  oopmaak;
-* die installasie-uitklap het DRIE sekondes later bo-op hom kom staan en die
-  knoppie doodgedruk. Daardie uitklap het nou 'n hek (`vjSkuifRef`). En
-  `oorlegLae` is nie genoeg om "is iets oop" te beantwoord nie — die
-  opspringer-bestuurder se eie vensters leef in `activePopup` en staan glad
-  nie in daardie lys nie.
-
-Blaaiertoets: `kykVjSkuif.mjs`.
+Dewald, 16 Oktober 2026, met 'n skermkiekie daarvan: *"Remove this popup it
+should never show again."* Die skuif was teen daardie tyd vyf weke oud. Alles
+is uit — die opspringer, die besluit, die toets, en die hek wat die
+installasie-uitklap daarvoor laat wag het. Die `vj_skuif_gesien`-merkie wat op
+party fone staan, is onskadelik; niks lees dit meer nie.
 
 `VolgJesusLewe.css` sit op `z-index: 240`, **onder** die Bybel se 250. Die
 LEES-kaart stuur 'n mens na die app se Bybel, en 'n Bybel wat agter hierdie
@@ -872,10 +845,6 @@ en Week 6 s'n gee doelbewus 'n LEË `stemboodskapUrl`, presies soos die bediener
 sal, en eis dat daar nêrens 'n speler is nie. Week 6 s'n eis boonop dat daar
 GEEN "volgende week"-kaart is nie — Week 7 bestaan nog nie, en 'n kaart wat 'n
 week belowe wat nie bestaan nie, is 'n knoppie wat niks doen nie.
-
-Albei moet die "VOLG JESUS het geskuif"-opspringer kan wegklik: hulle saai 'n
-mens wat die program reeds begin het, en dit is presies wie daardie boodskap
-kry.
 
 ### Groepe en die groepchat
 
@@ -1441,17 +1410,17 @@ enigste skerm waar 'n mens tot heel onder rol.
 
 **Die skuif het 'n boodskap gekos, en daardie boodskap is nou weg.**
 `src/data/speelSkuif.js` het een keer vir wie al gespeel het gesê waar die
-speletjies nou is — dieselfde patroon as `volgJesusSkuif.js`, en dit was reg
-toe die oortjie pas geskuif het.
+speletjies nou is — dieselfde patroon as die "VOLG JESUS het geskuif"-boodskap,
+en dit was reg toe die oortjie pas geskuif het.
 
 Dewald, 1 Oktober 2026: *"Verwyder die speletjies het geskyf popup heeltemal
 af."* Hy is reg: die skuif was teen daardie tyd drie weke oud, elke mens wat ooit
 'n speletjie oopgemaak het, het die boodskap lankal gesien, en wat oorbly is 'n
 opspringer wat 'n ou verandering aankondig.
 
-Die les bly staan vir die VOLGENDE keer dat iets skuif — sien
-`volgJesusSkuif.js`, wat nog leef. 'n Skuif-boodskap is tydelik van aard: bou
-hom, en vee hom uit sodra die skuif oud is.
+Die les bly staan vir die VOLGENDE keer dat iets skuif. 'n Skuif-boodskap is
+tydelik van aard: bou hom, en vee hom uit sodra die skuif oud is. Albei is
+intussen weg — VOLG JESUS s'n op 16 Oktober 2026, om dieselfde rede.
 
 **Die aktiewe clip se speler EN die volgende een is gemonteer — nooit drie.**
 Dewald: *"die volgende video laai telank.... dit moet basies dadelik wys as ek
@@ -2696,8 +2665,8 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   waar 'n mens self moet soek nie. Die bedoeling gaan deur sessionStorage
   (`en_gee`), om dieselfde rede as `steun_versoek`.
 * **Op /english kom GEEN Afrikaanse opspringer nie** (`engelsOopRef`): die
-  installasie-uitklap, die e-boek-/donasie-opspringer, die kennisgewing-vraag en
-  "VOLG JESUS het geskuif". Hulle sit onsigbaar agter die blad (z-index 2000)
+  installasie-uitklap, die e-boek-/donasie-opspringer en die kennisgewing-vraag.
+  Hulle sit onsigbaar agter die blad (z-index 2000)
   en verbruik intussen die dag — die kennisgewing-vraag selfs een van die drie
   keer in 'n leeftyd. Blaaiertoets: `kykEngelsOudit.mjs`, wat ook eis dat `/` en
   `/go/support` presies soos altyd werk.

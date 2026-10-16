@@ -14,7 +14,6 @@ import TydMetGod from './screens/TydMetGod'
 import HoopOntvang from './screens/HoopOntvang'
 import { idUitPad as hoopIdUitPad } from './data/hoopSkakel'
 import { SLEUTEL as TMG_SLEUTEL, dagSleutel as tmgDag, leegStaat as tmgLeeg, rolDag as tmgRol, magVraGeld } from './data/tydMetGod'
-import { magWysSkuif, hetProgramBegin, isGesien, merkGesien, leesModus, leesKlaarPerWeek } from './data/volgJesusSkuif'
 import { naTydMetGod } from './data/tmgPopup'
 import { DonationPopup, EbookPopup, InstallPopup, SharePopup, KennisgewingPopup, KennisgewingStappe } from './components/Popups'
 import InstallHelp from './components/InstallHelp'
@@ -180,12 +179,6 @@ export default function App() {
   const [showVrugtefees, setShowVrugtefees]       = useState(false)
   const [showVolgJesus, setShowVolgJesus]         = useState(false)
   const [showLeesplanNotice, setShowLeesplanNotice] = useState(false)
-  /* "VOLG JESUS het geskuif" — een keer, net vir wie reeds besig is.
-     Sien src/data/volgJesusSkuif.js. */
-  const [showVjSkuif, setShowVjSkuif] = useState(false)
-  /* 'n Ref daarby, want die installasie-uitklap se timer moet weet of sy oop
-     is, en 'n timer sien nie 'n toestand wat intussen verander het nie. */
-  const vjSkuifRef = useRef(false)
   /* Die clip-id uit 'n gedeelde skakel — /reels/<id>. Dit staan hier by die
      ander deep links sodat die voer weet watter clip EERSTE moet wees. */
   const [reelId, setReelId] = useState(null)
@@ -197,10 +190,6 @@ export default function App() {
      `reelsOopRef`, want die app se eie mens op die Reels-oortjie is nie 'n
      vreemdeling nie. */
   const reelDeepRef = useRef(false)
-  /* Is daar enige oorlegblad oop? Dieselfde rede as `tmgOopRef` hierbo: die
-     boodskap se timer sien nie 'n toestand wat intussen verander het nie.
-     Dit word tydens die render gestel, waar `boonsteLaag` bereken word. */
-  const oorlegRef = useRef(false)
 
   /* ── 'n Nuwe weergawe word AFGEDWING ──
    *
@@ -368,16 +357,11 @@ export default function App() {
     let t
     let pogings = 0
     function probeer() {
-      /* Nie bo-op die "VOLG JESUS het geskuif"-boodskap nie. Sy kom EEN keer
-         in 'n leeftyd en sy verduidelik iets wat pas van die skerm af weg is;
-         hierdie uitklap kom môre weer. Sonder hierdie hek het die uitklap
-         drie sekondes later bo-op haar kom staan en die knoppie doodgedruk.
-
-         Is iets in die pad (klank speel, die skuif-boodskap), probeer hy
+      /* Is iets in die pad (klank speel, die Engelse blad), probeer hy
          weer elke 3s vir sowat 'n minuut. Dit het eers EEN keer gekyk en dan
          vir die dag opgegee — wie die app oopmaak en dadelik druk speel, is
          nooit gevra nie. Die dag word eers gemerk wanneer hy werklik wys. */
-      if (!isPlayingRef.current && !vjSkuifRef.current && !engelsOopRef.current) {
+      if (!isPlayingRef.current && !engelsOopRef.current) {
         setShowInstallPopup(true)
         localStorage.setItem('installPopupDate', today)
         return
@@ -1611,44 +1595,6 @@ export default function App() {
     return () => clearTimeout(t)
   }, [])
 
-  /* ── "VOLG JESUS het geskuif" ──
-   *
-   * Die kaart is op 10 September 2026 van Luister af weggevat en leef nou net
-   * op die e-boekblad. Die mens wat gister by Dag 3 was, maak die app oop en
-   * die knoppie is weg — sy dink haar vordering is weg. Ons het geen kanaal
-   * na daardie foon nie; hierdie oomblik is die enigste een wat ons het.
-   *
-   * Die hele besluit staan in `magWysSkuif()` en het toetse. Hier lees ons net
-   * die foon en die skerm.
-   *
-   * Word dit geblokkeer — klank speel, die installasie-uitklap staan oop, 'n
-   * ander skerm is oop — dan WAG dit eerder as om te verdwyn. Dit kyk elke
-   * paar sekondes vir 'n halfminuut, en gee dan op tot die volgende oopmaak.
-   *
-   * Die eerste weergawe het EEN keer gekyk en dan opgegee. Dit klink veilig en
-   * dit is nie: 'n mens wat nie geïnstalleer het nie, sien die
-   * installasie-uitklap by byna elke oopmaak, en dan kom hierdie boodskap
-   * NOOIT — presies vir die mens wat hom die nodigste het. */
-  useEffect(() => {
-    if (isGesien()) return
-    if (!hetProgramBegin(leesModus(), leesKlaarPerWeek())) return
-
-    let pogings = 0
-    const klok = setInterval(() => {
-      pogings++
-      const mag = magWysSkuif({
-        gesien: isGesien(),
-        modus: leesModus(),
-        klaarPerWeek: leesKlaarPerWeek(),
-        oortjie: tabRef.current,
-        klankSpeel: isPlayingRef.current,
-        oorlegOop: oorlegRef.current || tmgOopRef.current || engelsOopRef.current,
-      })
-      if (mag) { setShowVjSkuif(true); clearInterval(klok) }
-      else if (pogings >= 12) clearInterval(klok)   /* sowat 30s, dan môre weer */
-    }, 2500)
-    return () => clearInterval(klok)
-  }, [])
 
 
   /* ── 'n Gedeelde skakel: /reels/<id> ──
@@ -1808,7 +1754,6 @@ export default function App() {
     { oop: wysSteun,                toe: () => { setWysSteun(false); try { sessionStorage.removeItem('steun_versoek') } catch {} } },
     { oop: showNooimy,              toe: () => setNooimy(false) },
     { oop: showLeesplanNotice,      toe: () => setShowLeesplanNotice(false) },
-    { oop: showVjSkuif,             toe: () => { setShowVjSkuif(false); merkGesien() } },
     { oop: showInstallHelp,         toe: () => setShowInstallHelp(false) },
     { oop: showInstallPopup,        toe: () => setShowInstallPopup(false) },
     { oop: showHoopVennoot,         toe: () => setShowHoopVennoot(false) },
@@ -1816,20 +1761,10 @@ export default function App() {
   ]
   const boonsteLaag = [...oorlegLae].reverse().find(l => l.oop) || null
 
-  /* Vir die "VOLG JESUS het geskuif"-boodskap. Sy timer lees dit; sonder dit
-     spring sy oor 'n oop leesplan of oor die Bybel uit.
-
-     `oorlegLae` is NIE genoeg nie: die opspringer-bestuurder se eie vensters
-     (donasie, e-boek, deel, installeer) leef in `activePopup` en staan glad
-     nie in daardie lys nie, en so ook nie die kennisgewing-vrae nie. Sonder
-     hulle het die boodskap ONDER die installasie-uitklap verskyn en die
-     knoppie was doodgedruk. */
-  oorlegRef.current = !!boonsteLaag || !!activePopup || showNotifBanner || wysStappe
   /* Sien die kop by `activePopupRef`: die twee opspringer-paaie lees mekaar
      hiermee, en hulle loop albei uit 'n tydhouer. */
   activePopupRef.current = activePopup
   notifBannerRef.current = showNotifBanner
-  vjSkuifRef.current = showVjSkuif
   /* Die voer is 'n OORTJIE, nie 'n oorleg nie — hy staan dus nie in
      `oorlegLae` nie en moet sy eie ref dra. */
   reelsOopRef.current = tab === 'reels'
@@ -2247,53 +2182,6 @@ export default function App() {
         </div>
       )}
 
-      {/* ── VOLG JESUS het geskuif ──
-
-          Dewald se eie woorde, ongewysig. Die 🙌 staan in die ikoonplek waar
-          hierdie opspringer reeds een dra, nie in die sin nie — twee emoji op
-          een kaart lees soos 'n fout.
-
-          Die knoppie vat 'n mens na die PROGRAM, by sy eie dag (dieselfde
-          `open-volg-jesus` as die kaart), en stel die oortjie op E-boeke —
-          maak hy die program toe, land hy op die blad waar dit nou woon. Dit
-          is die halwe punt van die boodskap.
-
-          Elke uitgang merk dit as gesien: die knoppie, "Ek verstaan", en die
-          agtergrond. */}
-      {showVjSkuif && (
-        <div
-          className="payment-popup-backdrop"
-          onClick={() => { setShowVjSkuif(false); merkGesien() }}
-        >
-          <div className="payment-popup" onClick={e => e.stopPropagation()}>
-            <div className="payment-popup-icon">🙌</div>
-            <div className="payment-popup-title">VOLG JESUS HET GESKUIF</div>
-            <p className="payment-popup-msg">
-              <strong>Jou vordering is veilig.</strong><br />
-              Die VOLG JESUS-program is nou onder <strong>E-boeke</strong> beskikbaar.
-              Gaan eenvoudig daar voort waar jy opgehou het.
-            </p>
-            <button
-              className="payment-popup-btn vj-skuif-btn"
-              onClick={() => {
-                setShowVjSkuif(false)
-                merkGesien()
-                setTab('meer')
-                if (screenRef.current) screenRef.current.scrollTop = 0
-                window.dispatchEvent(new CustomEvent('open-volg-jesus'))
-              }}
-            >
-              GAAN NA VOLG JESUS
-            </button>
-            <button
-              className="payment-popup-cancel"
-              onClick={() => { setShowVjSkuif(false); merkGesien() }}
-            >
-              Ek verstaan
-            </button>
-          </div>
-        </div>
-      )}
 
 
       {/* 'n Regte uitklap, nie 'n balkie onderaan nie. Dit vra nie meer
