@@ -226,6 +226,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 9 — elke dag se LEES-blok en die groepsessie se kern-Skrif. */
       /* Week 9 */ 'Matteus 6:5–13', 'Matteus 6:8–9', 'Matteus 6:9–10',
                    'Matteus 6:11', 'Matteus 6:12–13',
+      /* Week 10 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 10 */ 'Markus 4:1–20', 'Markus 4:9', 'Markus 4:18–19',
+                    'Markus 4:16–17', 'Markus 4:20',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

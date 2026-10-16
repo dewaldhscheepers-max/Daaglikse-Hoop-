@@ -483,9 +483,15 @@ export const WEEK9_DEELSIN =
 
 /* ── Die brug na Week 10 ──
  *
- * `null` totdat Dewald Week 10 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK9_VOLGENDE = null
+ * Dit was `null`, en dan eindig Week 9 op 'n doodloopstraat. Dewald het Week 10
+ * op 16 Oktober 2026 gestuur. Die titel kom uit Week 10 se eie rekord en word
+ * nie hier voorspel nie; die lyf is Dewald se eie openingsreëls. */
+export const WEEK9_VOLGENDE = {
+  week: 10,
+  titel: 'Dieselfde saad. Verskillende grond.',
+  lyf: 'Jesus vertel van ’n saaier wat dieselfde saad op verskillende soorte '
+     + 'grond saai. Die saad verander nie.',
+}
 
 export function blokkeVirDag9(n) {
   const dag = WEEK9_DAE.find(d => d.n === n)

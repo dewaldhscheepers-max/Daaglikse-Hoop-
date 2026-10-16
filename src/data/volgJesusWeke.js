@@ -531,4 +531,62 @@ export const WEKE = {
       'Moenie mense laat voel dat lang of indrukwekkende gebede nodig is om \u201Cgoed\u201D te bid nie.\n\nJesus waarsku juis teen gebed wat gedoen word om mense te be\u00EFndruk.\n\nHou die fokus op eenvoud, eerlikheid, vertroue en God se wil.',
     pastoraleRisiko: 'laag',
   },
+  10: {
+    weeknommer: 10,
+    titel: 'Dieselfde saad. Verskillende grond.',
+    doel:
+      'Om eerlik te kyk na hoe ons God se Woord ontvang, wat die Woord in ons lewe kan verstik en of dit werklik vrug dra.',
+    weekKern:
+      'DIT HELP NIE DIE WOORD BEREIK JOU ORE AS JY DIT NOOIT TOELAAT OM WORTEL TE SKIET NIE.',
+    openingskerm:
+      'Jesus vertel van ’n saaier wat dieselfde saad op verskillende soorte grond saai.\n\n'
+      + 'Die saad verander nie.\n\n'
+      + 'Maar wat met die saad gebeur, verskil.\n\n'
+      + 'Hierdie week vra ons daarom nie net:\n\n'
+      + '“Hoor ek God se Woord?”\n\n'
+      + 'nie.\n\n'
+      + 'Ons vra:\n\n'
+      + '“WAT GEBEUR IN MY HART NADAT EK DIT GEHOOR HET?”',
+    primereSkrif: 'Markus 4:1–20',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 9 se noot: sonder hierdie vlaggie sou die publiseer-hek
+       se "geen hoofboodskap" die week vir altyd gesper hou. Dewald: "Daar is
+       GEEN stemnota of klank in Week 10 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'DIT HELP NIE DIE WOORD BEREIK JOU ORE AS JY DIT NOOIT TOELAAT OM WORTEL TE SKIET NIE.',
+    eenSin:
+      'Die vraag is nie net: “Het ek die Woord gehoor?” nie. Die vraag is: “Wat het ek daarmee gedoen?”',
+    privaatRefleksie:
+      'Wat neem tans die meeste plek in my hart in — God se Woord of iets wat dit stadig verstik?',
+    gehoorsaamheidStap:
+      'Kies een ding uit God se Woord wat jy hierdie week doelbewus gaan toepas.\n\nNie tien dinge nie.\n\nEen.',
+    gebed:
+      'Here, ondersoek ons harte. Wys ons waar ons hard, vlak of vol dorings geword het. Help ons om U Woord te hoor, dit aan te neem, daaraan vas te hou en daarvolgens te leef. Laat ons lewe vrug dra. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Hoe luister jy?',
+    dag1Titel: 'Dieselfde saad. Verskillende grond.',
+    dag2Titel: 'Hoe luister jy?',
+    dag3Titel: 'Wat verstik die Woord?',
+    dag4Titel: 'Wortels word getoets',
+    dag5Titel: 'Dra vrug',
+    groepVraag1:
+      'Watter deel van die gelykenis het jou die meeste getref?',
+    groepVraag2:
+      'Waarom dink julle is die “dorings” soms so moeilik om raak te sien?',
+    groepVraag3:
+      'Wat is die verskil tussen ’n sterk begin en diep wortels?',
+    groepVraag4:
+      'Hoe lyk vrug prakties in iemand se gewone lewe?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Die doel van hierdie week is nie om mense in vier vaste geestelike groepe te verdeel nie.\n\nDie gelykenis laat elkeen eerder vra:\n\n“Hoe ontvang ek God se Woord?”\n\nHelp die groep om die vier verskillende reaksies raak te sien:\n\n- ’n harde hart;\n- ’n oppervlakkige reaksie sonder diep wortels;\n- ’n hart waarin ander dinge die Woord verstik;\n- ’n hart wat die Woord ontvang en vrug dra.',
+    fasiliteerderGrens:
+      'Moenie die indruk skep dat emosie verkeerd is nie.\n\nDie probleem met die klipperige grond was nie dat die persoon die Woord met blydskap ontvang het nie. Jesus sê die probleem was dat daar geen wortel was nie.\n\nMoet ook nie elke bekommernis of finansiële behoefte as sonde beskryf nie.\n\nJesus waarsku dat bekommernisse, die verleiding van rykdom en ander begeertes die Woord kan verstik wanneer hulle al hoe meer plek in die hart inneem.',
+    pastoraleRisiko: 'laag',
+  },
 }

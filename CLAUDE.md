@@ -53,7 +53,8 @@ node src/data/volgJesusWeek5.toets.mjs        # Week 5 se pad — GEEN opname, n
 node src/data/volgJesusWeek6.toets.mjs        # Week 6 se pad — ook geen opname, 138 toetse
 node src/data/volgJesusWeek7.toets.mjs        # Week 7 se pad, 179 toetse
 node src/data/volgJesusWeek8.toets.mjs        # Week 8 se pad (die weergawe van 29 Sep), 177 toetse
-node src/data/volgJesusWeek9.toets.mjs        # Week 9 "Here, leer ons bid" — geen terugblik, 178 toetse
+node src/data/volgJesusWeek9.toets.mjs        # Week 9 "Here, leer ons bid" — geen terugblik, 181 toetse
+node src/data/volgJesusWeek10.toets.mjs       # Week 10 "Dieselfde saad" — Dag 1 se gebed IN die boodskap, 210
 node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies, 26 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse

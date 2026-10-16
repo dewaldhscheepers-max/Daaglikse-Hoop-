@@ -58,6 +58,10 @@ import {
   WEEK9_DAE, WEEK9_REIS, WEEK9_OPENING, WEEK9_DEELSIN, WEEK9_VOLGENDE,
   WEEK9_TRANSKRIPSIE, WEEK9_SESSIE, WEEK9_KLAAR,
 } from './volgJesusWeek9.js'
+import {
+  WEEK10_DAE, WEEK10_REIS, WEEK10_OPENING, WEEK10_DEELSIN, WEEK10_VOLGENDE,
+  WEEK10_TRANSKRIPSIE, WEEK10_SESSIE, WEEK10_KLAAR,
+} from './volgJesusWeek10.js'
 
 const WEKE = {
   1: {
@@ -153,12 +157,23 @@ const WEKE = {
     reis: WEEK9_REIS,
     opening: WEEK9_OPENING,
     deelsin: WEEK9_DEELSIN,
-    /* `null` totdat Week 10 bestaan — sien die kop van volgJesusWeek9.js. */
     volgende: WEEK9_VOLGENDE,
     /* Leeg: ook hierdie week het geen opname nie — die boodskap word gelees. */
     transkripsie: WEEK9_TRANSKRIPSIE,
     sessie: WEEK9_SESSIE,
     klaar: WEEK9_KLAAR,
+  },
+  10: {
+    dae: WEEK10_DAE,
+    reis: WEEK10_REIS,
+    opening: WEEK10_OPENING,
+    deelsin: WEEK10_DEELSIN,
+    /* `null` totdat Week 11 bestaan — sien die kop van volgJesusWeek10.js. */
+    volgende: WEEK10_VOLGENDE,
+    /* Leeg: Dewald: "Daar is GEEN stemnota of klank in Week 10 nie." */
+    transkripsie: WEEK10_TRANSKRIPSIE,
+    sessie: WEEK10_SESSIE,
+    klaar: WEEK10_KLAAR,
   },
 }
 
