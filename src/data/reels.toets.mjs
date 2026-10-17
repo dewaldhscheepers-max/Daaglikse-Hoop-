@@ -28,6 +28,7 @@ import {
   spasieer,
   SPASIE,
   TALE, EIE_TAAL, taalVan, perTaal, mengTale, isTaalMuur,
+  VARS_DAE, isVars, vlegVars,
 } from './reels.js'
 
 let reg = 0, val = 0
@@ -921,6 +922,65 @@ console.log('\n── Nooit dieselfde clip twee keer DIREK agter mekaar nie ─�
 is('nul passe word een', bouVoer([mk('a', 'A')], { saad: 1, passe: 0 }).length >= 1, true)
 is('n clip wat nie mag wys nie kom nie in',
    bouVoer([mk('a', 'A'), { id: 'b', bron: 'youtube', bronId: 'x' }], { saad: 1, passe: 1 }).length, 1)
+
+console.log('\n── Pas INGESIT: bo-aan vir n paar dae ──\n')
+{
+  /* Dewald, 17 Oktober 2026: "I pasted these in reels.... but after 5 times i
+     went in and out it still hasn't played them." */
+  const NOU = Date.parse('2026-10-17T08:00:00Z')
+  const DAG = 864e5
+  const op = (dae) => new Date(NOU - dae * DAG).toISOString()
+  is('VARS_DAE is drie', VARS_DAE, 3)
+  is('gister ingesit is vars', isVars({ datum: op(1) }, NOU), true)
+  is('twee en n half dae ook', isVars({ datum: op(2.5) }, NOU), true)
+  is('drie dae nie meer nie', isVars({ datum: op(3) }, NOU), false)
+  is('n maand gelede nie', isVars({ datum: op(30) }, NOU), false)
+  is('geen datum nie', isVars({}, NOU), false)
+  is('gemors-datum nie', isVars({ datum: 'gister' }, NOU), false)
+  is('sonder n klok nie', isVars({ datum: op(1) }, undefined), false)
+  is('n uur in die toekoms mag (klok effens skeef)', isVars({ datum: op(-0.03) }, NOU), true)
+  is('n week in die toekoms nooit', isVars({ datum: op(-7) }, NOU), false)
+
+  const V = (id, naam) => ({ id, naam })
+  is('vlegVars wissel om die beurt', vlegVars([V('v1', 'a'), V('v2', 'b')], [V('o1', 'c'), V('o2', 'd'), V('o3', 'e')]).map(k => k.id),
+     ['v1', 'o1', 'v2', 'o2', 'o3'])
+  /* Die vars se beurt word oorgeslaan as dit 'n klont sou maak. */
+  is('vlegVars wag eerder as om twee van een maker langs mekaar te sit',
+     vlegVars([V('v1', 'a'), V('v2', 'b')], [V('o1', 'c'), V('o2', 'd')], 'a').map(k => k.id), ['o1', 'v1', 'o2', 'v2'])
+  is('en die twee lyste se eie volgorde bly', vlegVars([V('v1', 'a'), V('v2', 'b')], [V('o1', 'c'), V('o2', 'd')], 'a')
+     .filter(k => k.id[0] === 'v').map(k => k.id), ['v1', 'v2'])
+  is('vlegVars sonder vars gee die ander net so', vlegVars([], [V('o1', 'c')]).map(k => k.id), ['o1'])
+  is('vlegVars met gemors', vlegVars(null, null), [])
+
+  const mkD = (id, naam, dae, ekstra) => ({ id, bron: 'tiktok', bronId: String(7400000000000000000n + BigInt(id.length * 1000 + id.charCodeAt(id.length - 1))), naam, datum: op(dae), ...ekstra })
+  const ou = Array.from({ length: 40 }, (_, i) => mkD('ou' + i, 'm' + (i % 8), 20 + i))
+  const nuwe = [mkD('nA', 'nuweA', 0.5), mkD('nB', 'nuweB', 1), mkD('nC', 'nuweC', 1.5)]
+  const voer = o => bouVoer([...ou, ...nuwe], { saad: 7, passe: 2, ...o }).map(i => i.klip.id)
+
+  const met = voer({ nou: NOU })
+  is('met die klok: al drie nuwes in die eerste ses', ['nA', 'nB', 'nC'].every(id => met.indexOf(id) < 6), true)
+  is('en die eerste clip is n nuwe', ['nA', 'nB', 'nC'].includes(met[0]), true)
+  is('om die beurt, nie in n blok nie', ['nA', 'nB', 'nC'].includes(met[1]), false)
+  const sonder = voer({})
+  is('sonder die klok is die voer soos altyd (nuwes nie noodwendig bo nie)', sonder.join() === voer({ nou: undefined }).join(), true)
+
+  const gesienA = voer({ nou: NOU, gesien: { nA: 1 } })
+  is('n nuwe clip wat sy AL gesien het, is weer gewoon', gesienA.indexOf('nA') > 20, true)
+  is('maar die ander twee bly bo', gesienA.indexOf('nB') < 6 && gesienA.indexOf('nC') < 6, true)
+
+  /* 'n Vreemdeling sien steeds eers die BEWESE clips. */
+  const bewys = ou.map((k, i) => i < 3 ? { ...k, gedeel: 50 - i } : k)
+  const vreemd = bouVoer([...bewys, ...nuwe], { saad: 7, passe: 1, nou: NOU, nuut: true }).map(i => i.klip.id)
+  is('vreemdeling: die drie mees gedeelde eerste', vreemd.slice(0, 3).sort(), ['ou0', 'ou1', 'ou2'])
+  is('en die nuwes direk daarna', ['nA', 'nB', 'nC'].every(id => vreemd.indexOf(id) < 9), true)
+
+  /* Engels bly ingevleg: twee Engelse nuwes staan nooit langs mekaar nie. */
+  const en = [mkD('eA', 'enA', 1, { taal: 'en' }), mkD('eB', 'enB', 1, { taal: 'en' })]
+  const meng = bouVoer([...ou, ...nuwe, ...en], { saad: 3, passe: 1, nou: NOU }).map(i => i.klip)
+  is('geen twee Engelse langs mekaar nie',
+     meng.every((k, i) => !i || !(taalVan(k) === 'en' && taalVan(meng[i - 1]) === 'en')), true)
+  is('en die Engelse nuwes is die eerste Engelse clips', meng.filter(k => taalVan(k) === 'en').slice(0, 2).map(k => k.id).sort(), ['eA', 'eB'])
+}
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

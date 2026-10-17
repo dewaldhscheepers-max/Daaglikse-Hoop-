@@ -109,8 +109,8 @@ node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak wor
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
-node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 298
-node src/data/reelsStres.toets.mjs            # die voer se WAARBORGE oor 920 ewekansige voere, 4187 toetse
+node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 323
+node src/data/reelsStres.toets.mjs            # die voer se WAARBORGE oor 920 ewekansige voere, 4183 toetse
 node api/_reelsSkakel.toets.mjs               # die kort-skakel-oplosser + inbraakpogings, 35
 node api/_reelsTel.toets.mjs                  # die voer se tellings, vals Firestore, 86
 node src/data/reelsMeet.toets.mjs             # word die voer gekyk — die drempels, 53
@@ -1872,6 +1872,24 @@ Reels.jsx het 'n hek (`laasGroeiRef`): groei die lys nie meer nie, word daar nie
 weer bygevoeg nie — anders herbou die waarnemer vir altyd op dieselfde clip.
 Blaaiertoets: `kykReelDeep.mjs` (bediener dadelik, stadig, af; geen herhaling
 langs mekaar, geen herbou-lus, en die volle voer groei steeds).
+
+**'n Clip wat PAS INGESIT is, staan bo-aan — vir drie dae** (`isVars()`,
+`vlegVars()`). Dewald, 17 Oktober 2026: *"I pasted these in reels.... but after
+5 times i went in and out it still hasn't played them."* Hulle WAS in. Maar 'n
+nuwe clip staan in rondte 0 saam met ELKE ander clip wat hy nog nie gekyk het
+nie — honderde — en "nuut bo-aan" het die TikTok-POSDATUM beteken. 'n Ou video
+wat vandag ingeplak word, is volgens daardie klok nie nuut nie.
+
+Nou kry 'n clip wie se `datum` (die INVOERTYD; die bediener skryf dit net by 'n
+NUWE clip) binne `VARS_DAE` = 3 dae is, voorkeur — maar net op sy EERSTE kyk
+(`bouVoer` stuur net clips met telling 0), om die BEURT met die ander (plak hy
+30 in, is die bokant nie 30 agter mekaar nie), PER TAAL (die Engelse bly
+ingevleg en is die eerste Engelse clips), en vir 'n VREEMDELING eers ná die
+bewese clips. Die klok kom van buite (`nou`, een keer per oopmaak gelees in
+Reels.jsx), dus bly reels.js suiwer; sonder `nou` is die voer greep vir greep
+soos voorheen (die strestoets eis dit). Die tale se naat-reël kan selde vier
+nuwes langs mekaar laat land (hoogstens 2% van voere, nooit vyf). Blaaiertoets:
+`kykReelsVars.mjs`.
 
 **Die voer se waarborge word met 'n STRESTOETS gekeur, nie net met
 uitgesoekte gevalle nie** (`reelsStres.toets.mjs`). Dewald, 15 Oktober 2026:

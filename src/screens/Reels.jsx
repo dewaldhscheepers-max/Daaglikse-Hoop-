@@ -430,6 +430,11 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
   /* Nuwe kyker = sy het nog NIKS gesien nie. Dit was `!isAllesGesien()`, wat te
      breed was: iemand wat honderd clips gesien het maar nie almal nie, het die
      "mees gedeeldes bo"-orde gekry terwyl sy juis wou sien wat NUUT is. */
+  /* Die klok vir "pas ingesit" (`isVars`), EEN keer per oopmaak gelees: lees
+     die voer dit by elke herbou, kan 'n clip onder haar vingers van plek skuif
+     wanneer hy die drie dae oorsteek. */
+  const nouRef = useRef(0)
+  if (!nouRef.current) nouRef.current = Date.now()
   const nuutRef    = useRef(null)
   if (nuutRef.current === null) nuutRef.current = !Object.keys(gesienRefLys.current).length
   /* ── Het sy al ooit geswiep? ──
@@ -506,6 +511,8 @@ export default function Reels({ deepId, onInstalleer, onNavigate, isInstalled, k
       /* 'n Vreemdeling sien die BESTE eerste, nie die nuutste nie. Dewald:
          "die wat die meeste ge deel is kry voorkeer by nuwe kykers." */
       nuut: nuutRef.current,
+      /* Pas ingesitte clips bo-aan — sien `isVars` in reels.js. */
+      nou: nouRef.current,
     }), { wys: gebedRef.current })
   }, [rou, deepId, passe])
 

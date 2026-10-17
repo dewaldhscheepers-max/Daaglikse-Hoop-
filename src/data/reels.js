@@ -583,6 +583,17 @@ function eenPasEenTaal(klips, rnd, vorigeNaam, opsies) {
   if (lys.length <= 1) return lys
   const o = opsies || {}
 
+  /* Die VARS clips (sien `isVars`) word eers uitgehaal en heel aan die einde
+     om die beurt met die ander bo-aan ingevleg. Is daar geen, is alles
+     hieronder presies soos dit was — ook die saad se volgorde. */
+  const varsIds = o.vars instanceof Set && o.vars.size ? o.vars : null
+  const vars = varsIds ? lys.filter(k => varsIds.has(k.id)) : []
+  /* `ander` is klaar ontklont; die vars clips word daarna ingeskuif, sodat die
+     ander se orde (en sy maker-reël) onaangeraak bly. */
+  const vleg = (ander, varsOor) => varsOor.length
+    ? vlegVars(ontklont(meng(varsOor, rnd)), ander, vorigeNaam)
+    : ander
+
   /* ── 'n NUWE kyker sien die BEWESE clips eerste ──
    *
    * En net die BEWESE. Die blok was eers 'n vaste vyf, en dan is hy met clips
@@ -591,24 +602,93 @@ function eenPasEenTaal(klips, rnd, vorigeNaam, opsies) {
    * voorkeur-blok nie.
    *
    * Is daar NIKS gedeel nie (dag een, of 'n vars versameling), val dit terug op
-   * die nuutste bo. Daar is dan niks om voorkeur aan te gee. */
+   * die nuutste bo. Daar is dan niks om voorkeur aan te gee.
+   *
+   * Die vars clips kom DAARNA: vir 'n vreemdeling is wat ander mense gestuur
+   * het, die beste eerste indruk. */
   if (o.nuut) {
     const bewys = meesteGedeelEerste(lys).filter(k => Number((k && k.gedeel) || 0) > 0)
     if (bewys.length) {
       const bo = bewys.slice(0, BESTE_BO)
       const boIds = new Set(bo.map(k => k.id))
-      const res = lys.filter(k => !boIds.has(k.id))
-      return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
+      const varsOor = vars.filter(k => !boIds.has(k.id))
+      const varsOorIds = new Set(varsOor.map(k => k.id))
+      const res = lys.filter(k => !boIds.has(k.id) && !varsOorIds.has(k.id))
+      if (!varsOor.length) return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
+      const boOrde = ontklont(meng(bo, rnd), vorigeNaam)
+      const laasBo = boOrde.length ? naamVanKlip(boOrde[boOrde.length - 1]) : vorigeNaam
+      return [...boOrde, ...vlegVars(ontklont(meng(varsOor, rnd)), ontklont(versprei(res, rnd), laasBo), laasBo)]
     }
   }
 
   /* Die gewone orde: die nuutstes bo, en die res EWEREDIG versprei sodat geen
      maker elke tweede of derde plek vul nie. `ontklont` bly die laaste
      veiligheidsnet vir wat nog langs mekaar beland. */
-  const bo = nuutsteVanElkeMaker(lys, NUUT_BO)
+  const varsSet = new Set(vars.map(k => k.id))
+  const ander = vars.length ? lys.filter(k => !varsSet.has(k.id)) : lys
+  const bo = nuutsteVanElkeMaker(ander, NUUT_BO)
   const boIds = new Set(bo.map(k => k.id))
-  const res = lys.filter(k => !boIds.has(k.id))
-  return ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam)
+  const res = ander.filter(k => !boIds.has(k.id))
+  return vleg(ontklont([...meng(bo, rnd), ...versprei(res, rnd)], vorigeNaam), vars)
+}
+
+/* ── Pas INGESIT: bo-aan, vir 'n paar dae ──
+ *
+ * Dewald, 17 Oktober 2026: *"I pasted these in reels.... but after 5 times i
+ * went in and out it still hasn't played them."* Hulle WAS in. 'n Nuwe clip het
+ * telling 0 en staan dus in die eerste rondte — maar saam met elke ANDER clip
+ * wat hy nog nie gekyk het nie, en dit was honderde. "Nuut" bo-aan het die
+ * TikTok-postdatum beteken (`tydVan`), en 'n ou video wat vandag ingeplak word,
+ * is volgens daardie klok nie nuut nie.
+ *
+ * Nou kry 'n clip wat die afgelope `VARS_DAE` dae INGESIT is (`datum`, die
+ * invoertyd — die bediener skryf dit net by 'n NUWE clip), voorkeur:
+ *
+ *   · net op sy EERSTE kyk (`bouVoer` stuur net clips met telling 0) — het sy
+ *     hom gesien, is hy weer gewoon;
+ *   · om die BEURT met die ander (`vlegVars`), nooit in 'n blok nie — plak hy 30
+ *     op een dag, is die bokant nie 30 nuwes agter mekaar nie;
+ *   · PER TAAL, soos alles anders, dus vleg die Engelse steeds in;
+ *   · ná die bewese clips vir 'n vreemdeling (sien `eenPasEenTaal`).
+ *
+ * Die tyd kom van BUITE (`nou`) — hierdie lêer bly suiwer. 'n Datum in die
+ * toekoms (meer as 'n uur) tel nie: 'n foon met 'n verkeerde klok mag nie 'n
+ * clip vir altyd bo hou nie. */
+export const VARS_DAE = 3
+const DAG_MS = 24 * 60 * 60 * 1000
+
+export function isVars(klip, nou) {
+  const t = Date.parse(String((klip && klip.datum) || ''))
+  const n = Number(nou)
+  if (!Number.isFinite(t) || !Number.isFinite(n)) return false
+  return t <= n + 60 * 60 * 1000 && n - t < VARS_DAE * DAG_MS
+}
+
+/* Vars, ander, vars, ander … en wat oorbly agteraan.
+ *
+ * Die beurt word net oorgeslaan as dit twee van dieselfde maker langs mekaar
+ * sou sit — dan kom die ander kant eers. Die twee lyste se EIE volgorde word
+ * nooit verander nie; dit is waarom hier nie weer `ontklont` oor die geheel
+ * loop nie (dit het 'n vars clip agter 'n maker met baie clips ingedruk). */
+export function vlegVars(vars, ander, vorigeNaam) {
+  const v = Array.isArray(vars) ? [...vars] : []
+  const a = Array.isArray(ander) ? [...ander] : []
+  const uit = []
+  let vorige = String(vorigeNaam == null ? '' : vorigeNaam).trim().toLowerCase()
+  let beurtVars = true
+  while (v.length || a.length) {
+    const eerste = beurtVars ? v : a
+    const tweede = beurtVars ? a : v
+    let bron = eerste.length ? eerste : tweede
+    if (bron === eerste && eerste.length && tweede.length
+        && naamVanKlip(eerste[0]) === vorige && naamVanKlip(tweede[0]) !== vorige) bron = tweede
+    const k = bron.shift()
+    uit.push(k)
+    vorige = naamVanKlip(k)
+    /* Die beurt skuif net as die VERWAGTE kant gegee het; anders kom hy volgende. */
+    if (bron === eerste) beurtVars = !beurtVars
+  }
+  return uit
 }
 
 /* ── Dieselfde clip mag nie NET-NET weer opkom nie ──
@@ -926,8 +1006,13 @@ export function bouVoer(klips, opsies) {
        NIKS gesien nie. Binne 'n rondte staan die nuutstes bo — dit is Dewald se
        *"nuwe videos altyd eerste.... bo"*, en 'n clip wat hy vandag inplak, het
        telling 0 en staan dus in hierdie rondte. */
+    /* Pas ingesit en nog nooit gesien nie — sien `isVars`. Net op die eerste
+       kyk: 'n clip wat sy al gesien het, is weer gewoon. */
+    const vars = o.nou
+      ? new Set(rondte.filter(k => telle[k.id] === 0 && isVars(k, o.nou)).map(k => k.id))
+      : null
     let pas = eenPas(rondte, rnd, laaste ? naamVanKlip(laaste) : '',
-                       { nuut: !!o.nuut && p === 0 })
+                       { nuut: !!o.nuut && p === 0, vars })
     if (!pas.length) continue
     /* Die rondte is nou gekyk, sover hierdie lys gaan. */
     for (const k of pas) telle[k.id] += 1

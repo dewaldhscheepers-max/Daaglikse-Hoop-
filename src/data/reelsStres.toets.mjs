@@ -19,6 +19,8 @@ import { bouVoer, skoonLys, taalVan, SPASIE } from './reels.js'
 let reg = 0, val = 0
 const foute = {}
 function moet(t, soort, info) { if (t) { reg++; return } val++; (foute[soort] ||= []).push(info) }
+const DAG = 24 * 60 * 60 * 1000
+const NOU = Date.parse('2026-10-17T08:00:00Z')
 function rng(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
 
 function lysVir(r, { klein = false, realisties = false } = {}) {
@@ -29,7 +31,9 @@ function lysVir(r, { klein = false, realisties = false } = {}) {
     const m = Math.floor(Math.pow(r(), realisties ? 1.4 : 1.7) * makers)
     return { id: String(7500000000000000000n + BigInt(Math.floor(r() * 1e15))), bron: 'tiktok', bronId: 'b' + i,
       naam: 'maker' + m, handvatsel: '@m' + m, gedeel: r() < .3 ? Math.floor(r() * 50) : 0,
-      taal: r() < enDeel ? 'en' : undefined }
+      taal: r() < enDeel ? 'en' : undefined,
+      /* Die INVOERTYD: party pas ingesit (binne VARS_DAE), die res lank gelede. */
+      datum: new Date(NOU - (r() < .15 ? r() * 2.5 : 10 + r() * 60) * DAG).toISOString() }
   })
 }
 function geskiedenis(r, ids) {
@@ -42,7 +46,9 @@ function keur(lys, r, soort) {
   const skoon = skoonLys(lys), ids = skoon.map(k => k.id), n = ids.length
   const g = geskiedenis(r, ids)
   const deepId = r() < .4 ? ids[Math.floor(r() * n)] : null
-  const o = { deepId, gesien: g, saad: 1 + Math.floor(r() * 1e6), passe: 1 + Math.floor(r() * 5), nuut: !Object.keys(g).length }
+  const o = { deepId, gesien: g, saad: 1 + Math.floor(r() * 1e6), passe: 1 + Math.floor(r() * 5), nuut: !Object.keys(g).length,
+              /* Die helfte met die klok, sodat "pas ingesit" ook deur ELKE waarborg moet. */
+              nou: r() < .5 ? NOU : undefined }
   const ry = bouVoer(lys, o).map(i => i.klip)
   const id = ry.map(k => k.id)
 
@@ -88,6 +94,60 @@ for (let g = 0; g < 120; g++) {
 }
 moet(ee === 0, 'realisties: nooit twee Engelse langs mekaar nie', ee)
 moet(mk / items < 0.0005, `realisties: twee van een maker langs mekaar hoogstens 0,05% (${mk} uit ${items})`, mk)
+
+console.log('── Pas ingesit: bo-aan, gemeng, net die eerste kyk ──')
+{
+  /* Dewald se geval: ~250 clips, hy het 'n deel gesien, en hy plak 8 in. */
+  let laatste = 0, blok = 0, gesienBo = 0, gevalle = 0, enLaat = 0, vier = 0
+  const anderBo = {}
+  for (let g = 0; g < 150; g++) {
+    const r = rng(g * 7727 + 11)
+    const lys = lysVir(r, { realisties: true }).map(k => ({ ...k, datum: new Date(NOU - (20 + r() * 60) * DAG).toISOString() }))
+    const nuwe = Array.from({ length: 8 }, (_, i) => ({ id: 'vars' + g + '_' + i, bron: 'tiktok', bronId: 'v' + i,
+      naam: 'maker' + Math.floor(r() * 12), datum: new Date(NOU - r() * DAG).toISOString(),
+      taal: r() < .15 ? 'en' : undefined }))
+    const gesien = {}
+    for (const k of lys) if (r() < .3) gesien[k.id] = 1
+    /* Een vars clip het sy AL gesien: hy mag nie weer voorspring nie. */
+    gesien[nuwe[7].id] = 1
+    const kl = bouVoer([...lys, ...nuwe], { gesien, saad: 1 + g, passe: 2, nou: NOU }).map(i => i.klip)
+    const ry = kl.map(k => k.id)
+    /* Die AFRIKAANSE vars clips: bo-aan. */
+    const af = nuwe.slice(0, 7).filter(k => taalVan(k) !== 'en')
+    laatste = Math.max(laatste, ...af.map(k => ry.indexOf(k.id)))
+    /* Die ENGELSE bly ingevleg (een Engelse clip elke soveel plekke) — maar hulle
+       is die EERSTE Engelse clips wat kom. */
+    const en = nuwe.slice(0, 7).filter(k => taalVan(k) === 'en')
+    const engelsOrde = kl.filter(k => taalVan(k) === 'en').map(k => k.id)
+    for (const k of en) if (engelsOrde.indexOf(k.id) > en.length * 2) enLaat++
+    /* "Nie in 'n blok nie". Drie agter mekaar kan gebeur waar 'n Engelse vars
+       clip tussen twee Afrikaanse inval, en vier as die taal-naat se
+       maker-reël boonop een vorentoe ruil — skaars. Vyf nooit. */
+    const isV = new Set(nuwe.slice(0, 7).map(k => k.id))
+    for (let i = 4; i < 30; i++) if ([0, 1, 2, 3, 4].every(d => isV.has(ry[i - d]))) blok++
+    for (let i = 3; i < 30; i++) if ([0, 1, 2, 3].every(d => isV.has(ry[i - d]))) { vier++; break }
+    for (let i = 0; i < 20; i++) if (!isV.has(ry[i])) anderBo[g] = (anderBo[g] || 0) + 1
+    if (ry.indexOf(nuwe[7].id) < 20) gesienBo++
+    gevalle++
+  }
+  moet(laatste < 20, `elke Afrikaanse vars clip binne die eerste 20 plekke (laaste: ${laatste})`, 'vars')
+  moet(enLaat === 0, 'die Engelse vars clips kom by die eerste Engelse plekke in die voer (om die beurt)', enLaat)
+  moet(blok === 0, 'nooit vyf vars clips agter mekaar bo-aan nie', blok)
+  moet(vier <= gevalle * 0.02, `vier agter mekaar hoogstens in 2% van die voere (${vier} uit ${gevalle})`, vier)
+  moet(Object.values(anderBo).every(n => n >= 9), 'die eerste 20 is minstens 9 ander clips — gemeng, nie oorgeneem nie', anderBo)
+  moet(gesienBo === 0, "'n vars clip wat sy AL gesien het, spring nie voor nie", gesienBo)
+
+  /* Die klok mag NIKS verander as niks vars is nie. */
+  let anders = 0
+  for (let g = 0; g < 60; g++) {
+    const r = rng(g * 3571 + 2)
+    const lys = lysVir(r, { realisties: true }).map(k => ({ ...k, datum: new Date(NOU - 30 * DAG).toISOString() }))
+    const a = bouVoer(lys, { saad: g + 1, passe: 2 }).map(i => i.klip.id).join()
+    const b = bouVoer(lys, { saad: g + 1, passe: 2, nou: NOU }).map(i => i.klip.id).join()
+    if (a !== b) anders++
+  }
+  moet(anders === 0, 'sonder vars clips is die voer presies dieselfde as voorheen', anders)
+}
 
 console.log('── Gemors en duplikate ──')
 let ontplof = false, u = []
