@@ -134,15 +134,20 @@ jobs:
               print(('OK   ' if t else 'FOUT ') + boodskap)
               if not t: fout.append(boodskap)
           moet(b'com.dewaldscheepers.daaglikshoop' in m, 'pakketnaam com.dewaldscheepers.daaglikshoop')
-          for p in (b'POST_NOTIFICATIONS', b'RECORD_AUDIO', b'MODIFY_AUDIO_SETTINGS', b'INTERNET'):
+          # FOREGROUND_SERVICE_MEDIA_PLAYBACK: sonder hom val die app om sodra
+          # die stemboodskap begin speel (Android 14+), en sonder die diens
+          # hou die klank op wanneer die skerm afgaan.
+          for p in (b'POST_NOTIFICATIONS', b'RECORD_AUDIO', b'MODIFY_AUDIO_SETTINGS', b'INTERNET',
+                    b'FOREGROUND_SERVICE_MEDIA_PLAYBACK'):
               moet(p in m, 'toestemming ' + p.decode())
           moet(b'autoVerify' in m and b'www.dewaldscheepers.com' in m and b'/hoop/' in m, 'gedeelde skakels maak die app oop')
           moet(b'default_notification_icon' in m, 'kennisgewing-ikoon')
+          moet(b'MediaSessionService' in m, 'die klankdiens (skerm af) is in die manifest')
           cfg = [n for n in name if n.endswith('capacitor.config.json')]
           moet(bool(cfg) and b'https://www.dewaldscheepers.com' in z.read(cfg[0]) and b'payfast' in z.read(cfg[0]), 'capacitor.config.json (lewendige werf + PayFast)')
           plug = [n for n in name if n.endswith('capacitor.plugins.json')]
           pj = z.read(plug[0]).decode() if plug else ''
-          for p in ('PushNotifications', 'Share', 'Filesystem', 'App'):
+          for p in ('PushNotifications', 'Share', 'Filesystem', 'App', 'MediaSession'):
               moet(p in pj, 'inprop ' + p)
           grootte = os.path.getsize(aab) / 1e6
           moet(grootte < 150, f'grootte {grootte:.1f} MB (Google Play se perk is 200)')

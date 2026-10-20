@@ -1,5 +1,5 @@
 /* node src/data/inheemsBrug.toets.mjs — die brug se suiwer besluite. */
-import { isVreemdeAdres, veiligeNaam, isKanselleer, appBestemming } from './inheemsBrug.js'
+import { isVreemdeAdres, veiligeNaam, isKanselleer, appBestemming, klankStaat, kunsVir, STOP_WAG_MS } from './inheemsBrug.js'
 let n = 0, f = 0
 const t = (ok, m) => { n++; if (!ok) { f++; console.log('✗ ' + m) } }
 const G = 'www.dewaldscheepers.com'
@@ -61,6 +61,23 @@ t(appBestemming('javascript:alert(1)') === null, 'javascript')
 t(appBestemming('daaglikshoop://hoop/x') === null, 'eie skema nie')
 t(appBestemming('') === null && appBestemming(null) === null, 'leeg')
 t(appBestemming(W + '/hoop/x#y') === W + '/hoop/x#y', 'hutsie bly')
+
+// klankStaat — die voorgronddiens se staat kom NET uit die klank-element
+t(klankStaat('playing') === 'playing', 'playing → playing')
+t(klankStaat('play') === 'playing', 'play → playing')
+t(klankStaat('pause') === 'paused', 'pause → paused (die diens bly, met n speel-knoppie)')
+t(klankStaat('ended') === 'none', 'ended → none')
+t(klankStaat('emptied') === null, "emptied is GEEN einde nie (herlaai met die skerm af)")
+t(klankStaat('waiting') === null && klankStaat('timeupdate') === null && klankStaat(undefined) === null, 'ander gebeure verander niks')
+t(STOP_WAG_MS >= 3000 && STOP_WAG_MS <= 15000, 'die stop wag n paar sekondes, nie niks en nie vir altyd nie')
+
+// kunsVir — die inprop haal die prent self; net volle http(s)-adresse
+const kuns = kunsVir([{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }], W + '/')
+t(kuns.length === 1 && kuns[0].src === W + '/icons/icon-192.png', 'relatiewe prent word n volle adres')
+t(kuns[0].sizes === '192x192' && kuns[0].type === 'image/png', 'grootte en tipe bly')
+t(kunsVir([{ src: 'data:image/png;base64,xx' }, { src: 'blob:abc' }, { src: 'javascript:x' }], W).length === 0, 'data:, blob: en javascript: val uit')
+t(kunsVir([{ src: 'https://firebasestorage.googleapis.com/v0/x.jpg' }], W)[0].src.startsWith('https://firebasestorage'), 'n volle adres bly')
+t(kunsVir(null, W).length === 0 && kunsVir([null, {}], W).length === 0, 'gemors gee niks')
 
 console.log(f ? `${f} van ${n} FOUT` : `${n} toetse groen`)
 process.exit(f ? 1 : 0)

@@ -91,7 +91,7 @@ node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 to
 node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
 node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse
 node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 toetse
-node src/data/inheemsBrug.toets.mjs           # die Android-app se Deel/Stoor/window.open, 30 toetse
+node src/data/inheemsBrug.toets.mjs           # die Android-app se Deel/Stoor/window.open + klank met die skerm af, 61
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
@@ -2866,6 +2866,17 @@ was dood op die tuisblad, die mikrofoon-toestemming het ontbreek, en
 200). Alles staan in `docs/android-app.md`, met die lys van wat NIE hier
 getoets kan word nie. **`src/data/inheemsBrug.js` doen niks in 'n blaaier
 nie** — moenie daaraan verander sonder om `kykInheemsBrug.mjs` te loop nie.
+
+**Die stemboodskap met die skerm af** (20 Oktober 2026, build 105 op 'n regte
+foon: *"screen eventually goes black after few sec it stops playing"*). Android
+vries 'n app sonder 'n voorgronddiens; Chrome het een, die WebView nie. Die
+diens kom van `@capgo/capacitor-media-session` (VASGEPEN op 8.0.31), en die
+brug skakel hom aan uit die klank-ELEMENT se gebeure — nooit uit
+`mediaSession.playbackState` nie, want Luister skryf 'paused' by oopmaak.
+`FOREGROUND_SERVICE_MEDIA_PLAYBACK` moet in ONS manifest staan; die inprop s'n
+het hom nie, en sonder hom val die app om by die eerste speel. Die diens stop
+eers 5s ná 'n einde: weer begin uit die agtergrond verbied Android 12+. Volle
+rede in `docs/android-app.md`; blaaiertoets `kykKlankAgter.mjs`.
 
 ## Kennisgewings
 

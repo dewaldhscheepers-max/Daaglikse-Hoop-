@@ -16,6 +16,9 @@
  *   4. Die foon se TERUG-knoppie op die tuisblad doen niks. Sonder 'n
  *      luisteraar gaan Capacitor net terug as daar geskiedenis is; daarna is
  *      die knoppie dood en 'n mens kan nie uit die app kom nie.
+ *   6. Die stemboodskap hou op speel kort nadat die SKERM afgaan. Chrome het
+ *      'n voorgronddiens vir klank; 'n WebView nie, en dan vries Android die
+ *      app. Sien `klankBrug`.
  *
  * Hierdie lêer maak al drie reg op EEN plek, sodat geen skerm hoef te weet of
  * hy in 'n app loop nie. Dit doen NIKS buite die app nie: `installeer()` kyk
@@ -29,6 +32,7 @@ import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { App } from '@capacitor/app'
+import { MediaSession } from '@capgo/capacitor-media-session'
 
 /* Is hierdie adres 'n ANDER werf as die app s'n?
  *
@@ -153,6 +157,131 @@ export function appBestemming(url) {
   return 'https://' + APP_GASHEER + pad + u.search + u.hash
 }
 
+/* ── Klank met die skerm af ──
+ *
+ * Dewald, 20 Oktober 2026, op die Play-app: *"If i press play and screen
+ * eventually goes black after few sec it stops playing the voicenote. Also if
+ * i lock screen... it plays but eventually just stops."*
+ *
+ * In Chrome hou die blaaier se eie mediadiens die klank aan die lewe. In die
+ * app is daar niks: Android sien 'n app sonder 'n VOORGRONDDIENS, en 'n paar
+ * sekondes nadat die skerm afgaan, word hy gevries — die klank hou op. Die
+ * diens kom nou van @capgo/capacitor-media-session (vasgepen op 8.0.31): hy
+ * begin wanneer die staat 'playing' of 'paused' word en stop by 'none', met 'n
+ * kennisgewing en knoppies op die sluitskerm.
+ *
+ * Die STAAT kom net uit die klank-element self (`klankStaat`), nooit uit wat
+ * 'n skerm in `navigator.mediaSession.playbackState` skryf nie. Luister skryf
+ * daar 'paused' sodra die nota gelaai is — voordat iemand iets gedruk het — en
+ * dan sou die diens (en sy kennisgewing) by elke oopmaak opkom. Die elemente
+ * se gebeurtenisse geld vir ELKE speler: Luister, die VOLG JESUS-stem, 'n
+ * gedeelde /hoop-skakel en Tyd met God, ook dié wat self niks van 'n
+ * mediasessie weet nie.
+ *
+ * Die skerms se mediasessie (titel, en die sluitskerm se knoppies) word deur
+ * 'n plaasvervanger van `navigator.mediaSession` na die inprop deurgegee. */
+export function klankStaat(tipe) {
+  if (tipe === 'playing' || tipe === 'play') return 'playing'
+  if (tipe === 'pause') return 'paused'
+  if (tipe === 'ended') return 'none'
+  /* 'emptied' is GEEN einde nie: dit vuur wanneer Luister se herstel 'n
+     vasgehakte stroom herlaai, dikwels met die skerm af. Stop die diens dan en
+     begin hy weer, is dit 'n voorgronddiens wat uit die AGTERGROND begin — en
+     dit verbied Android 12+. Die klank sou juis daar sterf. */
+  return null
+}
+
+/* Hoe lank 'none' wag voordat die diens stop. Luister probeer 'n te vroeë
+   einde EEN keer weer; kom die klank binne hierdie tyd terug, het die diens
+   nooit gestop nie — sien die kop van `klankStaat`. */
+export const STOP_WAG_MS = 5000
+
+/* Die inprop haal die prent self oor HTTP; 'n relatiewe pad ken hy nie. */
+export function kunsVir(artwork, oorsprong) {
+  const uit = []
+  for (const a of Array.from(artwork || [])) {
+    if (!a || !a.src) continue
+    try {
+      const u = new URL(String(a.src), String(oorsprong))
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') continue
+      uit.push({ src: u.href, sizes: a.sizes || undefined, type: a.type || undefined })
+    } catch {}
+  }
+  return uit
+}
+
+const STANDAARD_TITEL = { title: 'Daaglikse Hoop', artist: 'Dewald Scheepers', album: 'Daaglikse Hoop' }
+
+function klankBrug(w) {
+  const veilig = p => { try { Promise.resolve(p).catch(() => {}) } catch {} }
+  let staat = 'none'
+  let metaGestel = false
+  let stopKlok = null
+  const stuur = (s) => { staat = s; veilig(MediaSession.setPlaybackState({ playbackState: s })) }
+  const stel = (s) => {
+    if (!s) return
+    if (stopKlok) { clearTimeout(stopKlok); stopKlok = null }
+    if (s === staat) return
+    if (s === 'none') { stopKlok = setTimeout(() => { stopKlok = null; stuur('none') }, STOP_WAG_MS); return }
+    stuur(s)
+  }
+
+  const isKlank = el => !!el && (el.tagName === 'AUDIO' || el.tagName === 'VIDEO')
+  const opGebeurtenis = (e) => {
+    if (!isKlank(e.target)) return
+    const s = klankStaat(e.type)
+    if (s === 'playing' && !metaGestel) veilig(MediaSession.setMetadata({ ...STANDAARD_TITEL }))
+    stel(s)
+  }
+  for (const t of ['playing', 'pause', 'ended']) {
+    w.document.addEventListener(t, opGebeurtenis, true)
+  }
+
+  /* Die sluitskerm se knoppies: een inheemse hanteerder per aksie, wat die
+     skerm se NUUTSTE hanteerder roep. Luister stel hulle by elke verandering
+     weer; elke keer 'n nuwe inheemse oproep sou hulle laat opstapel. */
+  const hanteerders = Object.create(null)
+  const geregistreer = new Set()
+  const sessie = {
+    get metadata() { return this._meta || null },
+    set metadata(m) {
+      this._meta = m || null
+      if (!m) return
+      metaGestel = true
+      veilig(MediaSession.setMetadata({
+        title: m.title || STANDAARD_TITEL.title,
+        artist: m.artist || STANDAARD_TITEL.artist,
+        album: m.album || STANDAARD_TITEL.album,
+        artwork: kunsVir(m.artwork, w.location.href),
+      }))
+    },
+    /* Gelees, nooit deurgegee nie — sien die kop. */
+    get playbackState() { return staat },
+    set playbackState(_s) {},
+    setActionHandler(aksie, h) {
+      hanteerders[aksie] = typeof h === 'function' ? h : null
+      if (geregistreer.has(aksie) || typeof h !== 'function') return
+      geregistreer.add(aksie)
+      veilig(MediaSession.setActionHandler({ action: aksie }, (d) => {
+        const f = hanteerders[aksie]
+        if (f) { try { f({ action: aksie, seekTime: d && d.seekTime }) } catch {} }
+      }))
+    },
+    setPositionState(p) {
+      if (!p) return
+      const d = Number(p.duration), pos = Number(p.position)
+      if (!Number.isFinite(d) || d <= 0 || !Number.isFinite(pos) || pos < 0) return
+      veilig(MediaSession.setPositionState({ duration: d, position: Math.min(pos, d), playbackRate: Number(p.playbackRate) || 1 }))
+    },
+  }
+  try {
+    if (typeof w.MediaMetadata !== 'function') {
+      w.MediaMetadata = function MediaMetadata(o) { Object.assign(this, o || {}) }
+    }
+    Object.defineProperty(w.navigator, 'mediaSession', { value: sessie, configurable: true, writable: true })
+  } catch {}
+}
+
 let geinstalleer = false
 
 export function installeerInheemseBrug(w = window) {
@@ -221,6 +350,9 @@ export function installeerInheemseBrug(w = window) {
     App.getLaunchUrl().then(r => { if (r && r.url) gaanNa(r.url, true) }).catch(() => {})
     App.addListener('appUrlOpen', (e) => { if (e && e.url) gaanNa(e.url, false) })
   } catch {}
+
+  // 6. Klank met die skerm af
+  try { klankBrug(w) } catch {}
 
   try {
     App.addListener('backButton', (e) => {

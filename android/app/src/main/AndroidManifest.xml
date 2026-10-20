@@ -109,4 +109,18 @@
          opname-knoppie niks. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Die stemboodskap speel voort met die SKERM AF. Dewald, 20 Oktober
+         2026: "If i press play and screen eventually goes black after few sec
+         it stops playing." Android vries 'n app sonder 'n voorgronddiens
+         sodra die skerm afgaan; Chrome het een, ons WebView nie. Die diens kom
+         van @capgo/capacitor-media-session (MediaSessionService, tipe
+         mediaPlayback) en loop net terwyl klank speel of gepouseer is.
+
+         Sy eie manifest verklaar net FOREGROUND_SERVICE. Vanaf Android 14 eis
+         startForeground(..., MEDIA_PLAYBACK) OOK hierdie tweede een — sonder
+         dit gooi die stelsel 'n SecurityException en die app val om op die
+         oomblik dat 'n mens druk speel. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 </manifest>

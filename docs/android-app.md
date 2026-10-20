@@ -300,10 +300,28 @@ Wees eerlik hieroor, want dit is waar die vorige keer misluk het:
 * **Die Gradle-bou self.** Die Android-SDK kan nie hier afgelaai word nie.
   Die kode is gelees, nie gekompileer nie. Gee Android Studio 'n fout, stuur
   die rooi teks.
-* **Klank in die agtergrond.** Capacitor pouseer die WebView nie
-  (`KeepRunning` is aan), dus behoort 'n nota voort te speel as die skerm
-  afgaan. Maar daar is GEEN beheerknoppies op die sluitskerm nie (Chrome
-  wys hulle; 'n WebView nie).
+* **Klank in die agtergrond.** Hier was 'n aanname — "Capacitor pouseer die
+  WebView nie, dus behoort 'n nota voort te speel" — en build 105 het dit
+  weerlê. Dewald, 20 Oktober 2026: *"If i press play and screen eventually
+  goes black after few sec it stops playing."* `KeepRunning` hou die
+  JavaScript aan, maar Android VRIES 'n app sonder 'n voorgronddiens kort
+  nadat die skerm afgaan. Chrome het sy eie mediadiens; 'n WebView nie.
+
+  Nou: `@capgo/capacitor-media-session` (vasgepen op 8.0.31 — die nuutste was
+  'n dag oud) se `MediaSessionService`, tipe `mediaPlayback`, met
+  `FOREGROUND_SERVICE_MEDIA_PLAYBACK` in ONS manifest (die inprop s'n vergeet
+  dit, en Android 14+ gooi dan 'n SecurityException by die eerste speel). Die
+  brug (`klankBrug` in `inheemsBrug.js`) skakel die diens aan uit die
+  klank-ELEMENT se gebeure — nooit uit `mediaSession.playbackState` nie, want
+  Luister skryf 'paused' by oopmaak en dan sou die kennisgewing elke keer
+  opkom — en stop hom eers 5s ná 'n einde, want 'n voorgronddiens wat uit die
+  agtergrond weer moet begin, verbied Android 12+. Daar IS nou knoppies op die
+  sluitskerm. Blaaiertoets: `kykKlankAgter.mjs` (vals inprop; die vries self
+  kan net op 'n foon getoets word).
+
+  **Google Play** vra vir 'n app met hierdie toestemming 'n verklaring onder
+  *App content → Foreground service permissions*: "Media playback — die
+  daaglikse stemboodskap speel voort met die skerm af." 
 * **'n Bank se 3-D Secure-blad.** Is dit nie op `payfast.co.za` nie, gaan
   daardie blad na Chrome toe. Toets 'n klein skenking.
 * **Die heel eerste oopmaak SONDER internet** wys "Daaglikse Hoop laai…"
