@@ -589,4 +589,58 @@ export const WEKE = {
       'Moenie die indruk skep dat emosie verkeerd is nie.\n\nDie probleem met die klipperige grond was nie dat die persoon die Woord met blydskap ontvang het nie. Jesus sê die probleem was dat daar geen wortel was nie.\n\nMoet ook nie elke bekommernis of finansiële behoefte as sonde beskryf nie.\n\nJesus waarsku dat bekommernisse, die verleiding van rykdom en ander begeertes die Woord kan verstik wanneer hulle al hoe meer plek in die hart inneem.',
     pastoraleRisiko: 'laag',
   },
+  11: {
+    weeknommer: 11,
+    titel: 'Wat is die grootste gebod?',
+    doel:
+      'Om te verstaan dat liefde vir God nie net iets is wat ons bely nie, maar iets wat sigbaar word in hoe ons mense behandel.',
+    weekKern:
+      'JOU VERHOUDING MET GOD WORD UITEINDELIK SIGBAAR IN HOE JY MENSE BEHANDEL.',
+    openingskerm:
+      'Jesus word gevra wat die grootste gebod is.\n\n'
+      + 'Sy antwoord bring alles terug na twee dinge:\n\n'
+      + 'Liefde vir God.\n\n'
+      + 'Liefde vir mense.\n\n'
+      + 'Hierdie week kyk ons na hoe daardie liefde prakties sigbaar word.',
+    primereSkrif: 'Matteus 22:34–40',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 10 se noot. Dewald: "Daar is GEEN stemnota of audio in
+       Week 11 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'JOU VERHOUDING MET GOD WORD UITEINDELIK SIGBAAR IN HOE JY MENSE BEHANDEL.',
+    eenSin:
+      'Liefde vir God word sigbaar in die manier waarop ek met mense leef.',
+    privaatRefleksie:
+      'Pas die manier waarop ek mense behandel by wat ek sê ek oor God glo?',
+    gehoorsaamheidStap:
+      'Kies een persoon en doen hierdie week iets doelbewus wat liefde wys.\n\nNie net ’n goeie voorneme nie.\n\nDoen iets.',
+    gebed:
+      'Here, leer ons om U met ons hele hart, siel en verstand lief te hê. Laat daardie liefde sigbaar word in hoe ons praat, reageer en mense behandel. Help ons om nie net oor liefde te praat nie, maar dit uit te leef. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Met jou hele hart',
+    dag1Titel: 'Wat is die grootste gebod?',
+    dag2Titel: 'Met jou hele hart',
+    dag3Titel: 'Liefde moet sigbaar word',
+    dag4Titel: 'Liefde wanneer dit moeilik is',
+    dag5Titel: 'Liefde doen iets',
+    groepVraag1:
+      'Waarom verbind Jesus liefde vir God so direk aan liefde vir mense?',
+    groepVraag2:
+      'Waar is dit maklik om liefde te bely, maar moeiliker om dit uit te leef?',
+    groepVraag3:
+      'Hoe kan pyn beïnvloed hoe ons ander mense behandel?',
+    groepVraag4:
+      'Wat is een praktiese manier waarop ons hierdie week liefde kan wys?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Hierdie week gaan oor die verbinding wat Jesus maak tussen:\n\nliefde vir God\nen liefde vir mense.\n\nDie kernvraag is:\n\nAs ek sê dat ek God liefhet, hoe word dit sigbaar in hoe ek mense behandel?',
+    fasiliteerderGrens:
+      'Moenie die week in ’n algemene gesprek oor verhoudings of grense verander nie.\n\nDie fokus bly:\n\nLiefde vir God moet deurwerk in hoe ons met mense leef.',
+    pastoraleRisiko: 'laag',
+  },
 }

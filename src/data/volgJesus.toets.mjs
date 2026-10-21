@@ -229,6 +229,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 10 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
       /* Week 10 */ 'Markus 4:1–20', 'Markus 4:9', 'Markus 4:18–19',
                     'Markus 4:16–17', 'Markus 4:20',
+      /* Week 11 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 11 */ 'Matteus 22:34–40', 'Matteus 22:37', 'Johannes 13:34–35',
+                    'Matteus 5:43–44', '1 Johannes 3:18',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

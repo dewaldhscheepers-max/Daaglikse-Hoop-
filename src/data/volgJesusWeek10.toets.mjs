@@ -233,7 +233,7 @@ console.log('\n── Die register ken Week 10 ──\n')
   is('blokkeVir stem ooreen', blokkeVir(10, 3), blokkeVirDag10(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag10(9), [])
   /* Sonder hierdie inskrywing val die week terug op die ou huiswerk-skerm. */
-  is('maar nie week 11 nie', hetDae(11), false)
+  is('maar nie week 12 nie', hetDae(12), false)
 }
 
 console.log('\n── Week 9 wys nou NA Week 10, en die titel stem ──\n')
@@ -245,10 +245,14 @@ console.log('\n── Week 9 wys nou NA Week 10, en die titel stem ──\n')
   waar('en dit se iets oor die week', WEEK9_VOLGENDE.lyf.length > 40)
 }
 
-console.log('\n── En Week 10 loop nog nie verder nie ──\n')
+console.log('\n── En Week 10 loop DEUR na Week 11 ──\n')
 {
-  is('WEEK10_VOLGENDE is null', WEEK10_VOLGENDE, null)
-  is('en die register gee ook null', weekVolgende(10), null)
+  /* Die BRUG. Dit was `null` totdat Dewald Week 11 gestuur het. */
+  waar('WEEK10_VOLGENDE bestaan', !!WEEK10_VOLGENDE)
+  is('en dit wys na week 11', WEEK10_VOLGENDE.week, 11)
+  is('die register gee dieselfde', weekVolgende(10), WEEK10_VOLGENDE)
+  is('die titel is Week 11 se egte titel', WEEK10_VOLGENDE.titel, WEKE[11].titel)
+  waar('en dit se iets oor die week', WEEK10_VOLGENDE.lyf.length > 40)
 }
 
 console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')

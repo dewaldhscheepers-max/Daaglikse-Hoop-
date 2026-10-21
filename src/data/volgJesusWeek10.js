@@ -484,9 +484,15 @@ export const WEEK10_DEELSIN =
 
 /* ── Die brug na Week 11 ──
  *
- * `null` totdat Dewald Week 11 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK10_VOLGENDE = null
+ * Dit was `null`, en dan eindig Week 10 op 'n doodloopstraat. Dewald het Week 11
+ * op 21 Oktober 2026 gestuur. Die titel kom uit Week 11 se eie rekord en word
+ * nie hier voorspel nie; die lyf is Dewald se eie openingsreëls. */
+export const WEEK10_VOLGENDE = {
+  week: 11,
+  titel: 'Wat is die grootste gebod?',
+  lyf: 'Jesus word gevra wat die grootste gebod is. Sy antwoord bring alles '
+     + 'terug na twee dinge: liefde vir God, en liefde vir mense.',
+}
 
 export function blokkeVirDag10(n) {
   const dag = WEEK10_DAE.find(d => d.n === n)
