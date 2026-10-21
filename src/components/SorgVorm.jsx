@@ -85,6 +85,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   const [anoniem, setAnoniem] = useState(() => !myProfiel())
   const [profielOop, setProfielOop] = useState(false)
   const [toestem, setToestem] = useState(false)
+  const [watKort, setWatKort] = useState('')   // 'teks' | 'blokkie' | ''
   const [hulpOop, setHulpOop] = useState(false)
   const [alleOnderwerpe, setAlleOnderwerpe] = useState(false)
   const [besig, setBesig] = useState(false)
@@ -113,6 +114,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setOnderwerp('')
     setAlleOnderwerpe(false)
     setToestem(false)
+    setWatKort('')
     setHulpOop(false)
     setBesig(false)
     setFout('')
@@ -452,10 +454,41 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               </div>
             )}
 
+            {/* ── 'n Knoppie wat niks doen nie, moet sê HOEKOM ──
+             *
+             * Dewald, 21 Oktober 2026, met 'n skermkiekie: "Die deel my
+             * boodskap knoppie werk nie." Dit was `disabled` omdat die kassie
+             * bo-aan te kort was — en daardie kassie was buite die skerm. Op 'n
+             * foon sien 'n mens dus net 'n grys knoppie wat dood is. Nou is hy
+             * nooit `disabled` nie: 'n druk sê wat nog kort en vat jou daarheen.
+             * Hy LYK steeds dof (`sv-stuur-wag`) totdat alles reg is. */}
             {!gebedVraag && (
-              <button className="sv-groot-knop sv-stuur" disabled={!magStuur} onClick={stuur}>
+              <button
+                className={`sv-groot-knop sv-stuur${magStuur ? '' : ' sv-stuur-wag'}`}
+                onClick={() => {
+                  if (besig) return
+                  if (!langGenoeg) {
+                    setWatKort('teks')
+                    const k = document.getElementById('sv-teks')
+                    if (k) { k.scrollIntoView({ behavior: 'smooth', block: 'center' }); k.focus({ preventScroll: true }) }
+                    return
+                  }
+                  if (!toestem) { setWatKort('blokkie'); return }
+                  setWatKort('')
+                  stuur()
+                }}
+              >
                 {besig ? 'Besig om te stuur…' : 'Deel my boodskap'}
               </button>
+            )}
+            {!gebedVraag && !magStuur && watKort && (
+              <p className="sv-watkort" role="alert">
+                {watKort === 'teks'
+                  ? (teks.trim().length === 0
+                    ? 'Skryf eers jou boodskap in die blokkie bo-aan.'
+                    : `Skryf net 'n bietjie meer in die blokkie bo-aan (minstens ${MIN_LENGTE} letters).`)
+                  : 'Merk asseblief eers die blokkie hierbo.'}
+              </p>
             )}
 
             <p className="sv-onder-fyn">

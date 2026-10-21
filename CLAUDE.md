@@ -2546,6 +2546,13 @@ druk hy die kassie 'n skerm af. `BidSaam.jsx` hou die kassie nou vier sekondes
 lank in die middel (`ResizeObserver` op die blad) en los sodra sy self raak of
 rol. Blaaiertoets: `kykBidSaamSprong.mjs` — dit val op die ou kode.
 
+**"Deel my boodskap" is NOOIT `disabled` nie.** Dewald, dieselfde dag: *"Die
+deel my boodskap knoppie werk nie."* Die kassie was te kort, en dit was BUITE
+die skerm — hy het net 'n dooie grys knoppie gesien. Nou lyk die knoppie dof
+(`sv-stuur-wag`) maar 'n druk SÊ wat kort (`sv-watkort`) en rol na die kassie.
+Ook geen `aria-disabled` nie: 'n knoppie wat iets doen, is nie gesper nie.
+Blaaiertoets: `kykDeelKnop.mjs`.
+
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
 goedkeuring sal dit verskyn"*. 'n Blad wat oor sy eie moderasie lieg, is erger
