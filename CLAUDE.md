@@ -35,6 +35,7 @@ node src/data/sorgTyd.toets.mjs               # "3 u" in plaas van "19 Augustus"
 node src/data/sorgVeilig.toets.mjs            # KRISIS gaan OP, ONVEILIG nie, 153 toetse
 node src/data/sorgProfiel.toets.mjs           # wie praat, en wie nie Dewald mag wees nie, 116
 node src/data/sorgModereer.toets.mjs          # een rapport verwyder NIKS, 89 toetse
+node src/data/sorgGebedVraag.toets.mjs        # klink dit soos 'n gebedsversoek? Krisis nooit Bid Saam toe, 34
 node src/data/sorgSkakels.toets.mjs           # elke skerm se eie skakel + UTM, 82 toetse
 node src/data/sorgMeet.toets.mjs              # wat gemeet word en wat NOOIT, 124 toetse
 node src/data/sorgKennis.toets.mjs            # die terugkeerkring se besluit, 92 toetse
@@ -2511,6 +2512,32 @@ kort teks (raad en bemoediging van mense wat deur dieselfde gegaan het), en
 kom juis met 'n gebedsversoek, en hulle moet die afrit sien voordat hulle tik.
 Die noodbalk en die krisisband bly — dit is die veiligheidsnet, nie inligting
 nie. Blaaiertoets: `kykDraMekaar.mjs`.
+
+**Eers kies, dan tik.** Dewald, 21 Oktober 2026: *"Mense hou steeds aan om op
+dra mekaar gebeds versoeke te plaas."* Die afrit "Soek jy net gebed?" het BO die
+kassie gestaan en mense het verby hom getik: vir hierdie gehoor is 'n kassie
+onder 'n Christelike opskrif 'n plek vir gebed. Die vorm begin nou met
+*"Waarmee kan ons jou help?"* en twee kaarte, en GEEN kassie nie — "Ek wil hê
+mense moet vir my bid" gaan reguit Bid Saam toe, en net "Ek soek raad of
+bemoediging" wys die kassie.
+
+Daaragter staan 'n tweede hek (`src/data/sorgGebedVraag.js`): klink die woorde
+by "Deel my boodskap" soos 'n VERSOEK om gebed ("bid vir my", "julle gebede"),
+vra die vorm EEN keer of dit eerder Bid Saam toe moet gaan, met die woorde
+saam. "Nee, ek soek raad" plaas dit hier. Twee reëls daaraan:
+
+* die patrone vra na 'n VERSOEK, nie na die woord "bid" nie — "ek bid elke
+  aand, wat het julle gehelp?" is 'n raadsvraag en gaan reguit deur;
+* **KRISIS gaan nooit Bid Saam toe nie** (`magVoorstel`). Bid Saam se muur is
+  direk vanaf die kliënt; 'n storie oor selfmoordgedagtes moet hier deur 'n
+  mens gaan.
+
+Die eerste reaksie-knoppie was "🙏 Ek bid saam" en het die blad laat sê "hier
+word gebid". Dit is nou **"🤝 Ek het dit ook beleef"**. Die sleutel `bid` leef
+in `OU_REAKSIES`: geen knoppie meer nie, maar sy bestaande tellings wys nog
+onder hulle eie naam, en die bediener aanvaar hom nog van ou weergawes. **Moenie
+'n sleutel herbenoem nie** — die tellings in Firestore staan onder die sleutel.
+Blaaiertoets: `kykDraMekaarKeuse.mjs`.
 
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná

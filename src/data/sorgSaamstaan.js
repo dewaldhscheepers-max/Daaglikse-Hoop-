@@ -43,14 +43,32 @@
    loop met plain `node`.
    ──────────────────────────────────────────────────────────── */
 
+/* ── Die vier knoppies ──
+ *
+ * "🙏 Ek bid saam" was die EERSTE knoppie, en dit het die blad laat sê
+ * "hier word gebid". Dewald, 21 Oktober 2026: *"Mense hou steeds aan om op dra
+ * mekaar gebeds versoeke te plaas."* Dra Mekaar is vir RAAD; gebed hoort op
+ * Bid Saam. Die eerste knoppie is nou "Ek het dit ook beleef" — die reaksie
+ * wat sê waarvoor hierdie muur bestaan.
+ *
+ * `bid` is NIE weg nie, net nie meer 'n knoppie nie (`OU_REAKSIES`). Daar
+ * staan tellings onder sy sleutel op bestaande plasings — mense HET gebid, en
+ * dit mag nie stilweg verdwyn nie, en ook nie onder 'n ander naam wys nie. Die
+ * sleutels in die databasis verander dus nooit; net wat 'n mens kan DRUK. */
 export const REAKSIES = [
-  { sleutel: 'bid',  teken: '🙏', naam: 'Ek bid saam' },
-  { sleutel: 'hoor', teken: '❤️', naam: 'Ek hoor jou' },
-  { sleutel: 'vas',  teken: '🤗', naam: 'Ek hou jou vas' },
-  { sleutel: 'moed', teken: '💪', naam: 'Hou moed' },
+  { sleutel: 'beleef', teken: '🤝', naam: 'Ek het dit ook beleef' },
+  { sleutel: 'hoor',   teken: '❤️', naam: 'Ek hoor jou' },
+  { sleutel: 'vas',    teken: '🤗', naam: 'Ek hou jou vas' },
+  { sleutel: 'moed',   teken: '💪', naam: 'Hou moed' },
 ]
 
-const REAKSIE_OP_SLEUTEL = new Map(REAKSIES.map(r => [r.sleutel, r]))
+/* Reaksies wat nie meer gedruk kan word nie, maar se tellings nog wys. */
+export const OU_REAKSIES = [
+  { sleutel: 'bid', teken: '🙏', naam: 'Ek bid saam' },
+]
+
+const ALLE_REAKSIES = [...REAKSIES, ...OU_REAKSIES]
+const REAKSIE_OP_SLEUTEL = new Map(ALLE_REAKSIES.map(r => [r.sleutel, r]))
 
 export function keurReaksie(s) {
   return REAKSIE_OP_SLEUTEL.has(s) ? s : ''
@@ -69,7 +87,7 @@ export function reaksieBy(s) {
    teruggestel nie: wat mense reeds gedra het, bly gedra. */
 export function wysReaksies(tellings, ouSaam = 0) {
   const t = tellings && typeof tellings === 'object' ? tellings : {}
-  const gewys = REAKSIES
+  const gewys = ALLE_REAKSIES
     .map(r => ({ ...r, tel: Math.max(0, Number(t[r.sleutel]) || 0) }))
     .filter(r => r.tel > 0)
   const totaal = gewys.reduce((n, r) => n + r.tel, 0) + Math.max(0, Number(ouSaam) || 0)

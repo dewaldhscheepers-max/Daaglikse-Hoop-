@@ -42,6 +42,22 @@ afdeling('Vier reaksies, en hulle bly vier')
   kyk('reaksieBy van onbekend gee null', reaksieBy('xyz') === null)
 }
 
+afdeling('Dra Mekaar is vir RAAD: "Ek bid saam" is nie meer n knoppie nie')
+{
+  /* Dewald, 21 Oktober 2026: "Mense hou steeds aan om op dra mekaar gebeds
+     versoeke te plaas." Die eerste knoppie het "hier word gebid" gesê. */
+  kyk('die eerste knoppie is "Ek het dit ook beleef"', REAKSIES[0].sleutel === 'beleef' && REAKSIES[0].naam === 'Ek het dit ook beleef')
+  kyk('bid is nie meer een van die knoppies nie', !REAKSIES.some(r => r.sleutel === 'bid'))
+  kyk('beleef kom deur die bediener se keuring', keurReaksie('beleef') === 'beleef')
+  /* Ou weergawes van die app (en ou kaste) stuur dalk nog `bid`. */
+  kyk('n druk op die OU bid word steeds aanvaar', keurReaksie('bid') === 'bid')
+  const r = wysReaksies({ bid: 4, beleef: 2 })
+  kyk('bestaande bid-tellings wys nog, onder hulle eie naam',
+      r.gewys.some(x => x.sleutel === 'bid' && x.tel === 4 && x.naam === 'Ek bid saam'), r.gewys)
+  kyk('en die totaal tel almal', r.totaal === 6, r.totaal)
+  kyk('reaksieBy ken bid nog', reaksieBy('bid') && reaksieBy('bid').teken === '🙏')
+}
+
 afdeling('n Nul word NOOIT gewys nie')
 {
   /* Dit is die hele ontwerp. Wys 'n mens nulle, lyk 'n jong muur dooier
@@ -61,7 +77,7 @@ afdeling('n Nul word NOOIT gewys nie')
   kyk('almal gestuur — almal wys', r.gewys.length === 4)
   kyk('die totaal is die som', r.totaal === 12, r.totaal)
   kyk('die volgorde is vas, nie volgens telling nie',
-      r.gewys.map(x => x.sleutel).join(',') === 'bid,hoor,vas,moed',
+      r.gewys.map(x => x.sleutel).join(',') === 'hoor,vas,moed,bid',
       r.gewys.map(x => x.sleutel))
 
   /* Wat mense reeds gedra het, bly gedra. */

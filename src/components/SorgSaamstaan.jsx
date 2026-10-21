@@ -39,7 +39,7 @@
    ──────────────────────────────────────────────────────────── */
 
 import { useState, useRef, useEffect } from 'react'
-import { REAKSIES, wysReaksies, telOpmerkings } from '../data/sorgSaamstaan'
+import { REAKSIES, wysReaksies, telOpmerkings, reaksieBy } from '../data/sorgSaamstaan'
 import { stuurReaksie, myReaksie } from '../data/sorgMuur'
 import { deelSorg } from '../data/sorgDeel'
 import SorgOpmerkings from './SorgOpmerkings'
@@ -74,7 +74,8 @@ export default function SorgSaamstaan({ plasing, soort = 'muur', deel = null }) 
      `woorde` groei wanneer 'n mens pas iets gestuur het en die bediener dit
      nog nie teruggegee het nie. */
   const aantal = telOpmerkings({ ...plasing, woordeTotaal: woorde.length })
-  const myReak = myne ? REAKSIES.find(r => r.sleutel === myne) : null
+  /* `reaksieBy` ken ook die ou `bid` — wie dit voorheen gedruk het, sien sy eie 🙏. */
+  const myReak = myne ? reaksieBy(myne) : null
 
   /* ── Wat van die bediener af inkom, wen ──
 

@@ -39,6 +39,7 @@ import { voorletters } from '../data/sorgProfiel'
 import { myProfiel } from '../data/sorgProfielBerging'
 import SorgProfiel from './SorgProfiel'
 import { stuurBoodskap } from '../data/sorgStuur'
+import { magVoorstel, BID_SAAM_MAKS } from '../data/sorgGebedVraag'
 import { telSorg } from '../data/telSorg'
 import SorgNommers from './SorgNommers'
 import SorgKlaar from './SorgKlaar'
@@ -89,6 +90,19 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
   const [besig, setBesig] = useState(false)
   const [fout, setFout] = useState('')
   const [uitslag, setUitslag] = useState(null)
+  /* ── Eers kies, dan tik ──
+   *
+   * Dewald, 21 Oktober 2026: *"Mense hou steeds aan om op dra mekaar gebeds
+   * versoeke te plaas."* Die afrit na Bid Saam het BO die kassie gestaan, en
+   * mense het verby hom getik: vir hierdie gehoor is 'n kassie onder 'n
+   * Christelike opskrif 'n plek vir gebed. Nou is daar EERS 'n keuse en geen
+   * kassie nie — wie gebed soek, gaan reguit Bid Saam toe, en die kassie
+   * verskyn net vir wie raad soek. */
+  const [kies, setKies] = useState(null)        // null | 'raad'
+  /* Die tweede hek, net voor plaas: klink die woorde soos 'n gebedsversoek,
+     vra ons EEN keer of dit eerder Bid Saam toe moet gaan. */
+  const [gebedVraag, setGebedVraag] = useState(false)
+  const [gebedGevra, setGebedGevra] = useState(false)
   const bo = useRef(null)
 
   /* Elke keer wat die vorm oopmaak, begin dit skoon. Niks van die vorige
@@ -103,6 +117,9 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
     setBesig(false)
     setFout('')
     setUitslag(null)
+    setKies(null)
+    setGebedVraag(false)
+    setGebedGevra(false)
     if (bo.current) bo.current.scrollTop = 0
   }, [oop])
 
@@ -135,8 +152,9 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
      *
      * Bid Saam se veld vat 500 karakters. Wat langer is, word afgekap — die
      * res sou in elk geval nie ingaan nie. */
+    meet('klikBidSaam')
     try {
-      const dra = teks.trim().slice(0, 500)
+      const dra = teks.trim().slice(0, BID_SAAM_MAKS)
       if (dra) sessionStorage.setItem('bidsaam_teks', dra)
       sessionStorage.setItem('bidsaam_fokus', 'versoek')
     } catch { /* privaat modus */ }
@@ -146,6 +164,14 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
 
   async function stuur() {
     if (magStuur === false) return
+    /* Klink dit soos 'n gebedsversoek, vra eers — een keer. Nooit by krisis
+       nie: so 'n storie moet hier deur 'n mens gaan. Sien sorgGebedVraag.js. */
+    if (magVoorstel({ teks, krisis: treffers.length > 0, reedsGevra: gebedGevra })) {
+      setGebedGevra(true)
+      setGebedVraag(true)
+      return
+    }
+    setGebedVraag(false)
     setBesig(true)
     setFout('')
     const d = await stuurBoodskap({
@@ -212,6 +238,28 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
               </div>
             )}
 
+            {/* ── Eers die keuse ── (sien `kies` hierbo) */}
+            {kies === null && (
+              <div className="sv-keuse">
+                <h2 className="sv-vraag">Waarmee kan ons jou help?</h2>
+                <button className="sv-keuse-knop" onClick={naBidSaam}>
+                  <span className="sv-keuse-teken" aria-hidden="true">🙏</span>
+                  <span className="sv-keuse-teks">
+                    <b>Ek wil hê mense moet vir my bid</b>
+                    <span>Plaas jou gebedsversoek op Bid Saam</span>
+                  </span>
+                </button>
+                <button className="sv-keuse-knop" onClick={() => { setKies('raad'); if (bo.current) bo.current.scrollTop = 0 }}>
+                  <span className="sv-keuse-teken" aria-hidden="true">💬</span>
+                  <span className="sv-keuse-teks">
+                    <b>Ek soek raad of bemoediging</b>
+                    <span>Van mense wat al deur iets soortgelyks gegaan het</span>
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {kies === 'raad' && (<>
             {/* ── Dra Mekaar is vir RAAD, nie vir gebedsversoeke nie ──
              *
              * Dewald, 14 Oktober 2026, met twee skermkiekies van hierdie vorm:
@@ -255,7 +303,11 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                 iemand anders se naam gebruik nie (die plasing gaan dadelik
                 op, dus is daar niemand wat dit vooraf uithaal nie). */}
             <div className="sv-openbaar">
-              <p>Jou boodskap verskyn anoniem.</p>
+              {/* Dit het ALTYD "anoniem" gesê, ook vir wie "Gebruik my naam"
+                  gekies het. */}
+              <p>{anoniem || !profiel
+                ? 'Jou boodskap verskyn anoniem.'
+                : `Jou boodskap verskyn onder jou naam, ${profiel.naam}.`}</p>
               <p>Moenie name of kontakbesonderhede deel nie.</p>
             </div>
 
@@ -374,7 +426,7 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
                     kies, sou daardie woord 'n leuen wees op presies die
                     plasing waar dit die duurste is. */}
                 Ek verstaan dat my boodskap {anoniem ? 'anoniem ' : ''}
-                openbaar op Sorg geplaas word, dat ander daarop kan reageer, en
+                openbaar op Dra Mekaar geplaas word, dat ander daarop kan reageer, en
                 dat dit verkort of aangepas mag word om mense se privaatheid te
                 beskerm.
               </span>
@@ -382,15 +434,36 @@ export default function SorgVorm({ oop, onSluit, videoData }) {
 
             {fout && <p className="sv-fout">{fout}</p>}
 
-            <button className="sv-groot-knop sv-stuur" disabled={!magStuur} onClick={stuur}>
-              {besig ? 'Besig om te stuur…' : 'Deel my boodskap'}
-            </button>
+            {/* ── Klink dit soos 'n gebedsversoek? ── Een keer, net voor plaas. */}
+            {gebedVraag && (
+              <div className="sv-gebedvraag" role="alert">
+                <p className="sv-gebedvraag-kop">Dit klink soos ’n gebedsversoek.</p>
+                <p className="sv-gebedvraag-teks">
+                  Op Bid Saam sal mense vir jou bid. Wil jy dit eerder daar plaas?
+                  Jou woorde gaan saam.
+                  {teks.trim().length > BID_SAAM_MAKS && ` (Bid Saam vat tot ${BID_SAAM_MAKS} karakters; die res moet jy dalk verkort.)`}
+                </p>
+                <button className="sv-groot-knop sv-gebedvraag-ja" onClick={naBidSaam}>
+                  Ja, plaas dit op Bid Saam
+                </button>
+                <button className="sv-gebedvraag-nee" onClick={stuur}>
+                  Nee, ek soek raad. Plaas dit hier
+                </button>
+              </div>
+            )}
+
+            {!gebedVraag && (
+              <button className="sv-groot-knop sv-stuur" disabled={!magStuur} onClick={stuur}>
+                {besig ? 'Besig om te stuur…' : 'Deel my boodskap'}
+              </button>
+            )}
 
             <p className="sv-onder-fyn">
               Die gemeenskap dra saam. Dewald lees gereeld saam en antwoord
               hier en daar, maar 'n persoonlike antwoord kan nie gewaarborg
               word nie.
             </p>
+            </>)}
           </div>
         )}
       </div>
