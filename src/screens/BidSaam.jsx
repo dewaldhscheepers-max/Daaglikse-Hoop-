@@ -337,14 +337,43 @@ export default function BidSaam() {
     } catch { /* privaat modus */ }
     if (fokus !== 'versoek') return
 
-    const t = setTimeout(() => {
+    /* ── Die kassie moet BLY waar hy is ──
+     *
+     * Dewald, 21 Oktober 2026, met 'n skermkiekie: die sprong het by die
+     * videogebed geland, nie by die kassie nie. Die videogebed staan BO die
+     * kassie en kom eers uit Firestore (`satVid`) NÁ die sprong — hy druk die
+     * kassie 'n hele skerm af. 'n Gladde rol eindig ook op 'n plek wat bereken
+     * is voordat die video daar was.
+     *
+     * Dus: spring sonder animasie, en hou die kassie vir 'n paar sekondes in
+     * die middel terwyl die blad bo hom groei. Sodra sy self raak of rol, los
+     * ons die blad — haar vinger wen altyd. */
+    const n0 = versoekRef.current
+    let los = false
+    const pen = () => {
       const n = versoekRef.current
-      if (!n) return
-      n.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      const kassie = n.querySelector('textarea')
+      if (!n || los) return
+      n.scrollIntoView({ behavior: 'auto', block: 'center' })
+    }
+    const laat = () => { los = true }
+    const t = setTimeout(() => {
+      pen()
+      const kassie = versoekRef.current?.querySelector('textarea')
       if (kassie) kassie.focus({ preventScroll: true })
     }, 260)
-    return () => clearTimeout(t)
+    let ro = null
+    if (n0 && n0.parentElement && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(pen)
+      ro.observe(n0.parentElement)
+    }
+    const klaar = setTimeout(laat, 4000)
+    const geleenthede = ['touchstart', 'wheel', 'keydown', 'mousedown']
+    geleenthede.forEach(g => window.addEventListener(g, laat, { passive: true, once: true }))
+    return () => {
+      clearTimeout(t); clearTimeout(klaar)
+      if (ro) ro.disconnect()
+      geleenthede.forEach(g => window.removeEventListener(g, laat))
+    }
   }, [])
   const [satVid,         setSatVid]         = useState({ active: false, videoId: '', title: '', subtitle: '' })
 

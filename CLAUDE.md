@@ -2539,6 +2539,13 @@ onder hulle eie naam, en die bediener aanvaar hom nog van ou weergawes. **Moenie
 'n sleutel herbenoem nie** — die tellings in Firestore staan onder die sleutel.
 Blaaiertoets: `kykDraMekaarKeuse.mjs`.
 
+**Die sprong na Bid Saam se kassie moet BLY staan.** Dewald, dieselfde dag: die
+knoppie het by die videogebed geland, nie by die kassie nie. Die videogebed
+(`satVid`) staan BO die kassie en kom eers uit Firestore NÁ die sprong, dus
+druk hy die kassie 'n skerm af. `BidSaam.jsx` hou die kassie nou vier sekondes
+lank in die middel (`ResizeObserver` op die blad) en los sodra sy self raak of
+rol. Blaaiertoets: `kykBidSaamSprong.mjs` — dit val op die ou kode.
+
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
 goedkeuring sal dit verskyn"*. 'n Blad wat oor sy eie moderasie lieg, is erger
