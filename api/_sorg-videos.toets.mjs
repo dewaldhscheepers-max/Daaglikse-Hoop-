@@ -19,11 +19,16 @@ const { keurOnderwerp } = await import(new URL('../src/data/sorgOnderwerpe.js', 
 const { saamTelReaksies } = await import(new URL('../src/data/sorgSaamstaan.js', import.meta.url).href)
 const { saaiReaksies, saaiWoorde } = await import(new URL('../src/data/sorgSaai.js', import.meta.url).href)
 
+const { videoBronUit } = await import(new URL('../src/data/videoBron.js', import.meta.url).href)
+/* 'n Vals `volgSkakel`: die egte een gaan na TikTok, wat hier geblokkeer is. */
+const gevolg = []
+const volgSkakel = async (s) => { gevolg.push(s); return /ZSgoed/.test(s) ? { ok: true, id: '7499999999999999999' } : { ok: false } }
+
 const begin = bron.indexOf('function haalVideoId')
 const eind  = bron.indexOf('export default')
-const M = new Function('keurOnderwerp', 'saamTelReaksies', 'saaiReaksies', 'saaiWoorde',
-  bron.slice(begin, eind) + '\nreturn { haalVideoId, skoonTeks, skoonVideo }')(
-  keurOnderwerp, saamTelReaksies, saaiReaksies, saaiWoorde)
+const M = new Function('keurOnderwerp', 'saamTelReaksies', 'saaiReaksies', 'saaiWoorde', 'videoBronUit', 'volgSkakel',
+  bron.slice(begin, eind) + '\nreturn { haalVideoId, skoonTeks, skoonVideo, bronVan }')(
+  keurOnderwerp, saamTelReaksies, saaiReaksies, saaiWoorde, videoBronUit, volgSkakel)
 
 let gedruip = 0
 const kyk = (n, w, e) => {
@@ -53,15 +58,31 @@ kyk('beheerkarakters uit', T('a' + String.fromCharCode(9) + 'b' + String.fromCha
 kyk('afgekap op lengte', T('abcdefghij', 4) === 'abcd')
 
 const V = M.skoonVideo
-const g = V({ videoId: 'https://youtu.be/LK-kieYHZJA', titel: 'Toets', onderwerpe: ['angs', 'onbekend', 'angs'] })
+const g = await V({ videoId: 'https://youtu.be/LK-kieYHZJA', titel: 'Toets', onderwerpe: ['angs', 'onbekend', 'angs'] })
 kyk('geldige video', !g.fout && g.video.videoId === 'LK-kieYHZJA')
+kyk('YouTube kry bron youtube', g.video.bron === 'youtube', g.video.bron)
 kyk('onbekende onderwerp word "ander"', g.video.onderwerpe.includes('ander'), g.video.onderwerpe)
 kyk('duplikate weg', g.video.onderwerpe.length === 2, g.video.onderwerpe)
-kyk('geen titel word geweier', !!V({ videoId: 'LK-kieYHZJA', titel: '  ' }).fout)
-kyk('geen video word geweier', !!V({ videoId: 'xxx!!', titel: 'Toets' }).fout)
-kyk('gepubliseer by verstek', V({ videoId: 'LK-kieYHZJA', titel: 'T' }).video.gepubliseer === true)
-kyk('versteek werk', V({ videoId: 'LK-kieYHZJA', titel: 'T', gepubliseer: false }).video.gepubliseer === false)
-kyk('slegte datum word vandag', /^\d{4}-\d{2}-\d{2}$/.test(V({ videoId: 'LK-kieYHZJA', titel: 'T', datum: 'gister' }).video.datum))
+kyk('geen titel word geweier', !!(await V({ videoId: 'LK-kieYHZJA', titel: '  ' })).fout)
+kyk('geen video word geweier', !!(await V({ videoId: 'xxx!!', titel: 'Toets' })).fout)
+kyk('gepubliseer by verstek', (await V({ videoId: 'LK-kieYHZJA', titel: 'T' })).video.gepubliseer === true)
+kyk('versteek werk', (await V({ videoId: 'LK-kieYHZJA', titel: 'T', gepubliseer: false })).video.gepubliseer === false)
+kyk('slegte datum word vandag', /^\d{4}-\d{2}-\d{2}$/.test((await V({ videoId: 'LK-kieYHZJA', titel: 'T', datum: 'gister' })).video.datum))
+kyk('n YouTube-video hou sy eie regop-keuse', (await V({ videoId: 'LK-kieYHZJA', titel: 'T', regop: false })).video.regop === false)
+
+/* ── TikTok (26 Oktober 2026) ── */
+const B = M.bronVan
+const vol = await V({ videoId: 'https://www.tiktok.com/@dewaldscheepers/video/7412345678901234567?is_from_webapp=1', titel: 'T' })
+kyk('volle TikTok-skakel', !vol.fout && vol.video.videoId === '7412345678901234567' && vol.video.bron === 'tiktok', vol)
+kyk('n TikTok is altyd regop', vol.video.regop === true)
+const kaal = await V({ videoId: '7412345678901234567', titel: 'T', regop: false })
+kyk('n kaal 19-syfer-ID is TikTok, nie YouTube nie (redigeer hou die bron)', kaal.video.bron === 'tiktok' && kaal.video.regop === true, kaal.video)
+const kort = await B('https://vt.tiktok.com/ZSgoed123/')
+kyk('n kort skakel word deur die bediener gevolg', kort && kort.videoId === '7499999999999999999' && kort.bron === 'tiktok' && gevolg.length === 1, { kort, gevolg })
+kyk('n kort skakel wat nie oopmaak nie: null', (await B('https://vt.tiktok.com/ZSsleg123/')) === null)
+kyk('n TikTok-PROFIEL glip nie as YouTube deur nie', (await B('https://www.tiktok.com/@dewaldscheepers')) === null)
+kyk('YouTube bly YouTube', (await B('https://youtube.com/shorts/LK-kieYHZJA')).bron === 'youtube')
+kyk('n kort skakel in skoonVideo', (await V({ videoId: 'https://vt.tiktok.com/ZSgoed999/', titel: 'T' })).video.videoId === '7499999999999999999')
 
 console.log(gedruip ? `\n${gedruip} GEDRUIP` : '\nalles geslaag')
 process.exit(gedruip ? 1 : 0)

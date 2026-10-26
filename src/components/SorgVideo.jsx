@@ -27,12 +27,28 @@
    Geen transform of opacity op :active nie — net kleur. Sien CLAUDE.md.
 */
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import SorgSaamstaan from './SorgSaamstaan'
+import { spelerAdres } from '../data/tiktokId'
+import useTiktokKlank from './useTiktokKlank'
 import './SorgVideo.css'
 
+/* ── 'n TikTok-video wys TikTok se EIE speler, dadelik ──
+
+   Dieselfde as Bid Saam se videogebed (sien SaturdayVideoCard). TikTok gee nie
+   'n duimnael by 'n vaste adres soos YouTube nie, en hulle oEmbed-prent het op
+   Dewald se foon nooit gewys nie. Hulle speler met `autoplay=0` teken self die
+   video se OMSLAG met 'n speelknoppie — dit IS die voorskou.
+
+   Daarom is 'n TikTok-video nie 'n klein kaartjie wat oopvou nie: daar is geen
+   prentjie om op die kaartjie te sit nie. Die speler staan dadelik, en
+   `loading="lazy"` laat 'n raam eers laai wanneer hy naby die skerm kom — 'n
+   lys van twintig laai dus nie twintig spelers vooraf nie. */
 export default function SorgVideo({ video, etiket = null, wysBalk = true, onSpeel = null }) {
   const [speel, setSpeel] = useState(false)
+  const raamRef = useRef(null)
+  const isTiktok = !!video && video.bron === 'tiktok'
+  useTiktokKlank(raamRef, isTiktok, video && video.videoId)
   if (!video || !video.videoId) return null
 
   const duim = `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
@@ -43,10 +59,26 @@ export default function SorgVideo({ video, etiket = null, wysBalk = true, onSpee
   }
 
   return (
-    <div className={`sv-kaart${speel ? ' sv-speel-aan' : ''}`}>
+    <div className={`sv-kaart${speel || isTiktok ? ' sv-speel-aan' : ''}`}>
       {etiket && <div className="sv-etiket">{etiket}</div>}
 
-      {speel ? (
+      {isTiktok ? (
+        <>
+          <h3 className="sv-titel">{video.titel}</h3>
+          <div className="sv-raam regop tiktok">
+            <iframe
+              ref={raamRef}
+              className="sv-speler"
+              /* Presies die Reels-voer se speler, met autoplay=0. */
+              src={spelerAdres(video.videoId, { speel: false })}
+              title={video.titel}
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
+        </>
+      ) : speel ? (
         <>
           <h3 className="sv-titel">{video.titel}</h3>
           {/* Die raam neem die VIDEO se verhouding aan, dus is daar nerens 'n

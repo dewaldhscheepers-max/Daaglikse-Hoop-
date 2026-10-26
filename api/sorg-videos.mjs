@@ -20,6 +20,8 @@ import { keurOnderwerp, raaiOnderwerpe } from '../src/data/sorgOnderwerpe.js'
 import { ontleedPlak } from '../src/data/sorgVideos.js'
 import { saaiReaksies, saaiWoorde } from '../src/data/sorgSaai.js'
 import { saamTelReaksies } from '../src/data/sorgSaamstaan.js'
+import { videoBronUit } from '../src/data/videoBron.js'
+import { volgSkakel } from './_tiktokVolg.mjs'
 
 const VERSAMELING = 'sorg_videos'
 const WOORDE = 'sorg_woorde'
@@ -38,6 +40,31 @@ function haalVideoId(inset) {
   if (bed) return bed[1]
   if (/^[a-zA-Z0-9_-]{6,20}$/.test(s)) return s
   return null
+}
+
+/* ── YouTube OF TikTok ──
+
+   Dewald, 26 Oktober 2026: Bid Saam se videogebed kan 'n TikTok wees, en
+   *"bou dieselfde vir die Dra mekaar blad se videos"*. TikTok word EERSTE
+   getoets (src/data/videoBron.js): 'n kaal TikTok-ID is 19 syfers, en
+   `haalVideoId` hierbo sou dit as 'n YouTube-ID aanvaar het. 'n Kort
+   vt.tiktok.com-skakel dra nie sy ID nie; die bediener volg hom met dieselfde
+   `volgSkakel()` as die Reels-invoer. Gee `null` as niks bruikbaar is nie. */
+async function bronVan(inset) {
+  const s = String(inset || '').trim()
+  const b = videoBronUit(s)
+  if (b.bron === 'tiktok') {
+    if (b.id) return { bron: 'tiktok', videoId: b.id }
+    if (b.kort) {
+      const u = await volgSkakel(s).catch(() => null)
+      return u && u.ok && u.id ? { bron: 'tiktok', videoId: String(u.id) } : null
+    }
+  }
+  /* 'n TikTok-adres wat ons nie kan lees nie (bv. 'n profiel), mag nooit as
+     'n YouTube-ID deurglip nie. */
+  if (/tiktok\.com/i.test(s)) return null
+  const id = haalVideoId(s)
+  return id ? { bron: 'youtube', videoId: id } : null
 }
 
 function skoonTeks(t, maks) {
@@ -63,10 +90,14 @@ function skoonTeks(t, maks) {
    op die id in plaas van om die hele invoer te laat val. 'n Video met 'n
    lelike naam is 'n naam wat Dewald kan regmaak; 'n video wat nie ingekom
    het nie, is werk wat hy weer moet doen. */
-async function haalTitel(videoId) {
+async function haalTitel(videoId, bron = 'youtube') {
   try {
-    const u = 'https://www.youtube.com/oembed?format=json&url=' +
-      encodeURIComponent('https://www.youtube.com/watch?v=' + videoId)
+    /* TikTok het ook 'n oop oEmbed. Misluk dit, val ons terug op die id —
+       presies soos by YouTube, en Dewald kan dit hernoem. */
+    const u = bron === 'tiktok'
+      ? 'https://www.tiktok.com/oembed?url=' + encodeURIComponent('https://www.tiktok.com/@tiktok/video/' + videoId)
+      : 'https://www.youtube.com/oembed?format=json&url=' +
+        encodeURIComponent('https://www.youtube.com/watch?v=' + videoId)
     const r = await fetch(u, { headers: { accept: 'application/json' } })
     if (!r.ok) return videoId
     const d = await r.json()
@@ -77,9 +108,10 @@ async function haalTitel(videoId) {
   }
 }
 
-function skoonVideo(lyf) {
-  const videoId = haalVideoId(lyf.videoId || lyf.skakel)
-  if (!videoId) return { fout: 'geen geldige YouTube-skakel of ID nie' }
+async function skoonVideo(lyf) {
+  const gevind = await bronVan(lyf.videoId || lyf.skakel)
+  if (!gevind) return { fout: 'geen geldige YouTube- of TikTok-skakel nie' }
+  const { videoId, bron } = gevind
 
   const titel = skoonTeks(lyf.titel, 120)
   if (!titel) return { fout: 'die video het \'n titel nodig' }
@@ -90,6 +122,9 @@ function skoonVideo(lyf) {
   return {
     video: {
       videoId,
+      /* Geen veld is YouTube (sien bronVan in src/data/videoBron.js), dus bly
+         elke ou video presies soos hy was. */
+      bron,
       titel,
       beskrywing: skoonTeks(lyf.beskrywing, 400),
       onderwerpe,
@@ -102,7 +137,8 @@ function skoonVideo(lyf) {
          vir ons kon sê hoe die video lyk, maar dan hang die blad van 'n
          tweede diens af om te weet hoe om 'n raam te teken. Een blokkie in
          die admin is goedkoper en dit breek nooit. */
-      regop: !!lyf.regop,
+      /* 'n TikTok is altyd regop. */
+      regop: bron === 'tiktok' ? true : !!lyf.regop,
       weekVideo: !!lyf.weekVideo,
       gepubliseer: lyf.gepubliseer !== false,
       /* Wanneer 'n video uit iemand se boodskap ontstaan het. Dit wys op die
@@ -306,15 +342,16 @@ export default async function handler(req, res) {
       let toonbank = 0
 
       for (const item of items) {
-        const videoId = haalVideoId(item.skakel)
-        if (!videoId) { uit.sleg++; continue }
+        const gevind = await bronVan(item.skakel)
+        if (!gevind) { uit.sleg++; continue }
+        const { videoId, bron } = gevind
         if (bestaan.has(videoId)) { uit.oorgeslaan++; continue }
         bestaan.add(videoId)
 
         /* SY titel wen. Hy het dit self geskryf, dit is in sy stem, en die
            emoji is deel van hoe die blad lyk. Net as hy niks gegee het nie,
            gaan haal ons dit by YouTube. */
-        const titel = skoonTeks(item.titel, 120) || await haalTitel(videoId)
+        const titel = skoonTeks(item.titel, 120) || await haalTitel(videoId, bron)
 
         /* Die onderwerp uit die titel. Konserwatief — sien `raaiOnderwerpe`.
            Kry dit niks, kom die video steeds in, net onder "Nog boodskappe
@@ -335,12 +372,13 @@ export default async function handler(req, res) {
         const id = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
         await skryfDok(VERSAMELING, id, {
           videoId,
+          bron,
           titel,
           volgorde,
           beskrywing: '',
           onderwerpe,
           datum: new Date().toISOString().slice(0, 10),
-          regop: /\/shorts\//i.test(item.skakel),
+          regop: bron === 'tiktok' || /\/shorts\//i.test(item.skakel),
           weekVideo: false,
           /* Hulle kom GEPUBLISEER in. Vroeer het hulle gewag totdat 'n mens
              die onderwerp gemerk het — maar die onderwerp word nou geraai,
@@ -363,7 +401,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true })
     }
 
-    const { video, fout } = skoonVideo(lyf)
+    const { video, fout } = await skoonVideo(lyf)
     if (fout) return res.status(400).json({ fout })
 
     const id = lyf.id || ('v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7))

@@ -272,8 +272,9 @@ export default function SorgAdmin({ geheim = '' }) {
         🤍 Pastorale Sorg — Video's
       </div>
       <p className="admin-books-note">
-        'n Video is 'n YouTube-skakel, nie 'n lêer nie. Plak die skakel; ons
-        haal die ID self daaruit. Die oorspronklike lêer hou jy self.
+        'n Video is 'n YouTube- of TikTok-skakel, nie 'n lêer nie. Plak die
+        skakel; ons haal die ID self daaruit. 'n TikTok-video wys op die blad
+        met TikTok se eie speler en is altyd regop.
       </p>
 
       {/* ── Plak baie skakels ── */}
@@ -290,11 +291,11 @@ export default function SorgAdmin({ geheim = '' }) {
               rows={8}
               value={skakels}
               onChange={e => setSkakels(e.target.value)}
-              placeholder={'4 Dinge wat vergifnis nie beteken nie\nhttps://youtu.be/abc123\n\nGod sien jou moegheid\nhttps://youtube.com/shorts/def456'}
+              placeholder={'4 Dinge wat vergifnis nie beteken nie\nhttps://youtu.be/abc123\n\nGod sien jou moegheid\nhttps://vt.tiktok.com/ZSabc123/'}
             />
             <div className="admin-books-note">
               Plak dit net soos jy dit in WhatsApp het. Jou <b>eie titel</b> word
-              gebruik; los jy hom uit, gaan haal ons hom by YouTube.
+              gebruik; los jy hom uit, gaan haal ons hom by YouTube of TikTok.
               'n <b>/shorts/</b>-skakel word as <b>regop</b> gemerk, en die
               <b> onderwerp word uit die titel geraai</b> — kry dit niks, kom
               die video steeds in en jy merk hom self.
@@ -342,11 +343,11 @@ export default function SorgAdmin({ geheim = '' }) {
       </div>
 
       <div className="admin-field">
-        <label>YouTube-skakel of ID *</label>
+        <label>YouTube- of TikTok-skakel *</label>
         <input
           value={vorm.videoId}
           onChange={e => setVorm(v => ({ ...v, videoId: e.target.value }))}
-          placeholder="https://youtu.be/… of net die ID"
+          placeholder="https://youtu.be/… of https://vt.tiktok.com/…"
         />
       </div>
 
@@ -431,6 +432,7 @@ export default function SorgAdmin({ geheim = '' }) {
         <div key={v.id} className={`sa-ry${v.gepubliseer ? '' : ' versteek'}`}>
           <div className="sa-ry-kop">
             {v.weekVideo && <span className="sa-merk">Vandag</span>}
+            {v.bron === 'tiktok' && <span className="sa-merk">🎵 TikTok</span>}
             {v.regop && <span className="sa-merk sa-merk-regop">📱 regop</span>}
             {!v.gepubliseer && <span className="sa-merk sa-merk-af">Versteek</span>}
             <span className="sa-ry-titel">{v.titel}</span>
@@ -452,9 +454,12 @@ export default function SorgAdmin({ geheim = '' }) {
 
                 Dit is dieselfde soort knoppie as Versteek/Publiseer hiernaas
                 en dit stoor dadelik. Lyk dit verkeerd, tik dit terug. */}
-            <button onClick={() => stuur({ ...v, regop: !v.regop })}>
-              {v.regop ? '↔ Maak wyd' : '📱 Maak regop'}
-            </button>
+            {/* 'n TikTok is altyd regop; die bediener dwing dit af. */}
+            {v.bron !== 'tiktok' && (
+              <button onClick={() => stuur({ ...v, regop: !v.regop })}>
+                {v.regop ? '↔ Maak wyd' : '📱 Maak regop'}
+              </button>
+            )}
             <button onClick={() => stuur({ ...v, gepubliseer: !v.gepubliseer })}>
               {v.gepubliseer ? 'Versteek' : 'Publiseer'}
             </button>

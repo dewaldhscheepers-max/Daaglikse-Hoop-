@@ -63,6 +63,26 @@
   aspect-ratio: 9 / 16;
 }
 
+/* ── 'n TikTok-video ──
+
+   'n YouTube-video is 'n kaartjie wat EERS by 'n tik oopvou, dan mag hy die
+   volle breedte hê. 'n TikTok-video staan ALTYD oop (TikTok se speler teken
+   self die omslag; sien SorgVideo.jsx), en oor die volle breedte sou elkeen
+   'n hele skerm hoog wees — die lys sou weer veertien skerms word.
+
+   Dieselfde vorm as Bid Saam se videogebed, wat Dewald goedgekeur het
+   (*"Dit werk, die preview wys nou"*): 'n smal, afgeronde raam in die middel
+   met 'n skaduwee — 'n ding wat so bedoel is, nie 'n strokie in 'n wye raam nie. */
+.sv-raam.tiktok {
+  width: 100%;
+  max-width: 240px;
+  margin: 10px auto 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
 /* YouTube se duimnael is ALTYD 480x360, ook vir 'n regop video — die regop
    raampie staan in die middel met swart weerskante, sowat 202px breed.
 

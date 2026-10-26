@@ -24,7 +24,7 @@ node src/game/vrugtefees/enjin.toets.mjs      # match-3-enjin, 133 toetse
 node src/game/vrugtefees/oes.toets.mjs        # oes-lopie + herspeel, 252 toetse
 node src/game/vrugtefees/ranglys.toets.mjs    # bediener se keuring, 58 toetse
 node src/game/vrugtefees/vlakke.toets.mjs     # keur al 90 fases se moeilikheid
-node api/_sorg-videos.toets.mjs               # Sorg se video-logika, 22 toetse
+node api/_sorg-videos.toets.mjs               # Sorg se video-logika, YouTube OF TikTok, 31 toetse
 node src/data/sorgVideos.toets.mjs            # die geplakte video-lys, 17 toetse
 node src/data/sorgOnderwerpe.toets.mjs        # raai die onderwerp uit 'n titel, 23 toetse
 node src/data/sorgSaai.toets.mjs              # die eerste reaksies en opmerkings, 63 toetse
@@ -2573,6 +2573,18 @@ Reels werk. Die druk op hulle speelknoppie gebeur BINNE hulle raam; ons sien dit
 net as die venster se `blur` (die raam kry fokus), en dan gaan die ontdemp-
 boodskappe op 'n begrensde ry tydhouers. Moenie terug na 'n eie duimnael vir
 TikTok nie; YouTube hou sy `i.ytimg.com`-duimnael.
+
+**Dra Mekaar se video's kan ook TikTok's wees, op dieselfde manier.** Dewald,
+26 Oktober 2026: *"Bou dieselfde vir die Dra mekaar blad se videos."*
+`api/sorg-videos.mjs` se `bronVan()` herken 'n TikTok EERSTE ('n kaal TikTok-ID
+is 19 syfers en `haalVideoId` sou dit as YouTube aanvaar het) en volg 'n kort
+skakel met `volgSkakel()`; die video kry `bron: 'tiktok'` en is altyd regop.
+`SorgVideo.jsx` wys TikTok se speler DADELIK (`autoplay=0`, `loading="lazy"`),
+240px breed in die middel soos Bid Saam se kaart — 'n volbreedte 9:16 wat
+altyd oop staan, sou elke video 'n hele skerm hoog maak. YouTube bly die
+kaartjie wat by 'n tik oopvou. Die klank-logika staan EEN keer, in
+`src/components/useTiktokKlank.js`, vir albei blaaie; elke raam reageer net op
+sy eie fokus en sy eie boodskappe. Blaaiertoets: `kykSorgTiktok.mjs`.
 
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná

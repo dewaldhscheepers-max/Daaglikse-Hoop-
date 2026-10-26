@@ -3,7 +3,7 @@ import './SaturdayVideoCard.css'
 import { db } from '../firebase'
 import { doc, onSnapshot, setDoc, increment } from 'firebase/firestore'
 import { spelerAdres } from '../data/tiktokId'
-import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
+import useTiktokKlank from './useTiktokKlank'
 
 /* `bron` is 'youtube' of 'tiktok' (src/data/videoBron.js). Elke video wat voor
    26 Oktober 2026 gestoor is, dra geen `bron` nie en is YouTube.
@@ -32,41 +32,8 @@ export default function SaturdayVideoCard({ videoId, bron, title, subtitle, onNa
     return unsub
   }, [])
 
-  /* ── TikTok se klank ──
-   *
-   * Hulle speler begin ALTYD gedemp (src/data/tiktokKlank.js). Die mens druk
-   * hulle EIE speelknoppie, BINNE hulle raam, en daardie druk sien ons nie —
-   * behalwe dat die venster sy fokus aan die raam afgee (`blur`, met die raam
-   * as `document.activeElement`). Dan stuur ons die ontdemp-boodskappe op 'n
-   * kort, begrensde ry tydhouers, en een keer weer by hulle eerste antwoord
-   * daarna. Nooit 'n interval nie, en nooit 'n antwoord op elke boodskap nie —
-   * hulle speler antwoord op 'n opdrag, en dit sou 'n eindelose pingpong wees. */
-  useEffect(() => {
-    if (!isTiktok) return
-    const raam = raamRef.current
-    if (!raam) return
-    let ts = []
-    let wagVirAntwoord = false
-    const stuur = () => stelKlank(raam.contentWindow, true)
-    function opBlur() {
-      if (document.activeElement !== raam) return
-      ts.forEach(clearTimeout)
-      ts = [0, 200, 600, 1200, 2000, 3500].map(ms => setTimeout(stuur, ms))
-      wagVirAntwoord = true
-    }
-    function opBoodskap(e) {
-      if (!wagVirAntwoord || !isTiktokBoodskap(e)) return
-      wagVirAntwoord = false
-      stuur()
-    }
-    window.addEventListener('blur', opBlur)
-    window.addEventListener('message', opBoodskap)
-    return () => {
-      window.removeEventListener('blur', opBlur)
-      window.removeEventListener('message', opBoodskap)
-      ts.forEach(clearTimeout)
-    }
-  }, [isTiktok, videoId])
+  /* TikTok se klank: gedeel met Dra Mekaar se video's. Sien useTiktokKlank. */
+  useTiktokKlank(raamRef, isTiktok, videoId)
 
   async function handleAmen() {
     if (amenSaid) return

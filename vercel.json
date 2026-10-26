@@ -28,6 +28,9 @@
     },
     "api/reels-voeg-by.mjs": {
       "maxDuration": 60
+    },
+    "api/sorg-videos.mjs": {
+      "maxDuration": 60
     }
   },
   "routes": [
