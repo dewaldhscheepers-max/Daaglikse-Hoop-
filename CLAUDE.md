@@ -2571,6 +2571,12 @@ dit vars en die rand kas dit ses uur. Die admin stoor die maker se `handvatsel`
 saam, want oEmbed wil die volle video-adres hê. TikTok is in hierdie houer
 geblokkeer, dus is elke mislukking stil: dan bly die pers grond.
 
+Dit het op Dewald se foon NIE gewerk nie (*"No preview..."*), en die oorsaak kon
+nie van hier af gevind word nie. Daarom drie lae, die eerste wat 'n prent gee,
+wen: 'n **opgelaaide** `voorskou` (admin, `covers/videogebed-<tyd>`, werk
+altyd); dan die bediener se oEmbed; dan oEmbed vanaf die FOON self (TikTok weier
+dalk 'n datasentrum). Daarna die pers grond.
+
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
 goedkeuring sal dit verskyn"*. 'n Blad wat oor sy eie moderasie lieg, is erger

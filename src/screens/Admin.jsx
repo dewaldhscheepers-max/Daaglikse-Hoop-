@@ -72,6 +72,10 @@ export default function Admin({ onClose }) {
   const [svSaving,   setSvSaving]   = useState(false)
   const [svSaved,    setSvSaved]    = useState(false)
   const [svFout,     setSvFout]     = useState('')
+  /* Eie voorskouprent vir die videogebed. TikTok se eie prent kom deur oEmbed
+     en dit kan misluk; 'n opgelaaide prent werk altyd en wen. */
+  const [svVoorskou, setSvVoorskou] = useState('')
+  const [svPrentPers, setSvPrentPers] = useState(-1)
 
 
   // ── Notes state ──
@@ -152,9 +156,35 @@ export default function Admin({ onClose }) {
         setSvVideoId(d.data().videoId || '')
         setSvTitle(d.data().title || '')
         setSvSubtitle(d.data().subtitle || '')
+        setSvVoorskou(d.data().voorskou || '')
       }
     }).catch(() => {})
   }, [unlocked])
+
+  /* 'n Eie lêernaam elke keer (dieselfde les as die nota-wallpaper: dieselfde
+     naam is dieselfde skakel, en elke kas hou die oue). Gestoor word dit eers
+     wanneer hy Stoor druk. */
+  async function laaiVoorskouOp(leer) {
+    if (!leer) return
+    setSvFout('')
+    setSvPrentPers(0)
+    try {
+      const uit = ((leer.name || '').split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+      const plek = ref(storage, `covers/videogebed-${Date.now()}.${uit}`)
+      const url = await new Promise((klaar, val) => {
+        const taak = uploadBytesResumable(plek, leer)
+        taak.on('state_changed',
+          k => setSvPrentPers(Math.round(k.bytesTransferred / k.totalBytes * 100)),
+          val,
+          async () => klaar(await getDownloadURL(taak.snapshot.ref)))
+      })
+      setSvVoorskou(url)
+    } catch (e) {
+      setSvFout('Die prent kon nie oplaai nie: ' + (e && e.message))
+    } finally {
+      setSvPrentPers(-1)
+    }
+  }
 
   /* YouTube OF TikTok (sien src/data/videoBron.js). 'n KORT TikTok-skakel van
      die foon dra nie sy ID nie, dus maak die bediener hom oop — dieselfde
@@ -187,7 +217,7 @@ export default function Admin({ onClose }) {
           return
         }
       }
-      await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: id, bron, handvatsel, title: svTitle.trim(), subtitle: svSubtitle.trim() })
+      await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: id, bron, handvatsel, voorskou: svVoorskou, title: svTitle.trim(), subtitle: svSubtitle.trim() })
       setSvVideoId(id)
       setSvSaved(true)
       setTimeout(() => setSvSaved(false), 2500)
@@ -1863,6 +1893,21 @@ export default function Admin({ onClose }) {
                     if (b.bron === 'youtube') return '▶️ YouTube-video'
                     return 'Dit lyk nie soos \'n YouTube- of TikTok-videoskakel nie.'
                   })()}
+                </div>
+              </div>
+              <div className="admin-field">
+                <label>Voorskouprent <span style={{ fontWeight: 400, opacity: 0.7 }}>(opsioneel)</span></label>
+                {svVoorskou ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <img src={svVoorskou} alt="" style={{ width: 60, height: 106, objectFit: 'cover', borderRadius: 8, background: '#1B1526' }} />
+                    <button type="button" className="admin-pdf-btn" onClick={() => setSvVoorskou('')}>Verwyder prent</button>
+                  </div>
+                ) : (
+                  <input type="file" accept="image/*" onChange={e => laaiVoorskouOp(e.target.files && e.target.files[0])} />
+                )}
+                {svPrentPers >= 0 && <div className="admin-books-note">Laai op… {svPrentPers}%</div>}
+                <div className="admin-books-note" style={{ marginTop: 6 }}>
+                  Wys hierdie prent op die kaart voordat die video speel. Sonder een probeer die app TikTok se eie prent kry.
                 </div>
               </div>
               {svFout && <div className="admin-error">{svFout}</div>}
