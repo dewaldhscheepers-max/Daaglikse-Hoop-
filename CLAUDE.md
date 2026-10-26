@@ -108,7 +108,6 @@ node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land — nooit by 'n EERSTE installasie, 22
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/videoBron.toets.mjs             # Bid Saam se videogebed: YouTube OF TikTok, 18 toetse
-node src/data/tiktokDuim.toets.mjs            # die TikTok-voorskouprent + sy eindpunt, 21 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
@@ -2564,18 +2563,16 @@ YouTube, dus wys elke ou video soos altyd. Die TikTok-speler begin gedemp, en di
 kaart stuur dieselfde ontdemp-boodskappe as Reels (`tiktokKlank.js`). Blaaiertoets:
 `kykVideoGebed.mjs`, met 'n vals Firestore in `node_modules/.toets/`.
 
-**Die voorskouprent** kom van TikTok se gedokumenteerde oEmbed
-(`api/tiktok-duim.mjs`, `src/data/tiktokDuim.js`). Daardie prent-adres is
-GETEKEN en verval, dus word dit nooit in Firestore gestoor nie — die bediener vra
-dit vars en die rand kas dit ses uur. Die admin stoor die maker se `handvatsel`
-saam, want oEmbed wil die volle video-adres hê. TikTok is in hierdie houer
-geblokkeer, dus is elke mislukking stil: dan bly die pers grond.
-
-Dit het op Dewald se foon NIE gewerk nie (*"No preview..."*), en die oorsaak kon
-nie van hier af gevind word nie. Daarom drie lae, die eerste wat 'n prent gee,
-wen: 'n **opgelaaide** `voorskou` (admin, `covers/videogebed-<tyd>`, werk
-altyd); dan die bediener se oEmbed; dan oEmbed vanaf die FOON self (TikTok weier
-dalk 'n datasentrum). Daarna die pers grond.
+**Die voorskou is TikTok se EIE speler, nie 'n prent nie.** Ons het eers
+TikTok se oEmbed-prent gehaal (deur die bediener en vanaf die foon) en 'n
+oplaai-veld gebou — op Dewald se foon het geen prent gewys nie, en hy wil nie
+prente oplaai nie: *"Bestudeer die reels blad... maak seker die preview wys."*
+Nou staan TikTok se speler DADELIK op die kaart met `autoplay=0`, en dan teken
+hulle self die omslag met 'n speelknoppie — dieselfde speler wat elke dag in
+Reels werk. Die druk op hulle speelknoppie gebeur BINNE hulle raam; ons sien dit
+net as die venster se `blur` (die raam kry fokus), en dan gaan die ontdemp-
+boodskappe op 'n begrensde ry tydhouers. Moenie terug na 'n eie duimnael vir
+TikTok nie; YouTube hou sy `i.ytimg.com`-duimnael.
 
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná

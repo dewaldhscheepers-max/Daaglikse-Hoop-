@@ -3,35 +3,21 @@ import './SaturdayVideoCard.css'
 import { db } from '../firebase'
 import { doc, onSnapshot, setDoc, increment } from 'firebase/firestore'
 import { spelerAdres } from '../data/tiktokId'
-import { oembedAdres, duimUit } from '../data/tiktokDuim'
 import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
 
 /* `bron` is 'youtube' of 'tiktok' (src/data/videoBron.js). Elke video wat voor
-   26 Oktober 2026 gestoor is, dra geen `bron` nie en is YouTube. */
-export default function SaturdayVideoCard({ videoId, bron, handvatsel, voorskou, title, subtitle, onNavigate }) {
+   26 Oktober 2026 gestoor is, dra geen `bron` nie en is YouTube.
+
+   ── 'n TikTok-video wys TikTok se EIE speler, dadelik ──
+   Dewald: *"Bestudeer die reels blad... en maak seker die preview wys."* Ons
+   het TikTok se voorskouprent deur hulle oEmbed probeer haal, en dit het op sy
+   foon nie gewerk nie. Die Reels-blad wys elke dag dat TikTok se speler self
+   werk: met `autoplay=0` teken die speler die video se OMSLAG met 'n
+   speelknoppie (Dewald het dit in Reels gesien: *"dit wys nou eers i play
+   button"*). Dit IS die voorskou, en dit kom van TikTok self. */
+export default function SaturdayVideoCard({ videoId, bron, title, subtitle, onNavigate }) {
   const isTiktok = bron === 'tiktok'
   const raamRef = useRef(null)
-  /* TikTok se voorskouprent, vars by die bediener (api/tiktok-duim.mjs). Kom
-     daar niks nie, bly die pers grond — die kaart breek nooit hieroor nie. */
-  const [duim, setDuim] = useState('')
-  useEffect(() => {
-    /* 'n Opgelaaide prent wen altyd; dan hoef TikTok niks te doen nie. */
-    if (!isTiktok || !videoId || voorskou) return
-    let lewendig = true
-    const q = new URLSearchParams({ id: videoId })
-    if (handvatsel) q.set('h', handvatsel)
-    fetch(`/api/tiktok-duim?${q}`)
-      .then(r => r.json())
-      .then(d => d && d.duim ? d.duim : '')
-      /* Kry die bediener niks (TikTok weier dalk 'n datasentrum se versoek),
-         probeer die FOON self. Laat TikTok dit nie toe nie, gooi die blaaier
-         'n fout en bly die pers grond. */
-      .then(u => u || fetch(oembedAdres(videoId, handvatsel)).then(r => r.json()).then(duimUit))
-      .then(u => { if (lewendig && u) setDuim(u) })
-      .catch(() => {})
-    return () => { lewendig = false }
-  }, [isTiktok, videoId, handvatsel, voorskou])
-  const prent = voorskou || (isTiktok ? duim : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`)
   const amenKey = `amened_video_${videoId}`
   const [amenSaid, setAmenSaid] = useState(() => {
     try { return localStorage.getItem(amenKey) === '1' } catch { return false }
@@ -48,31 +34,39 @@ export default function SaturdayVideoCard({ videoId, bron, handvatsel, voorskou,
 
   /* ── TikTok se klank ──
    *
-   * Hulle speler begin ALTYD gedemp, ook ná 'n tik. Dieselfde boodskappe as die
-   * Reels-voer (src/data/tiktokKlank.js, met die hele rede daar): by die raam se
-   * `load`, by hulle EERSTE antwoord, en op 'n kort, begrensde ry tydhouers —
-   * nooit 'n interval nie. Die tik op die duimnael is die aanraking wat die
-   * blaaier vra; `allow="autoplay"` gee dit aan die raam deur. */
+   * Hulle speler begin ALTYD gedemp (src/data/tiktokKlank.js). Die mens druk
+   * hulle EIE speelknoppie, BINNE hulle raam, en daardie druk sien ons nie —
+   * behalwe dat die venster sy fokus aan die raam afgee (`blur`, met die raam
+   * as `document.activeElement`). Dan stuur ons die ontdemp-boodskappe op 'n
+   * kort, begrensde ry tydhouers, en een keer weer by hulle eerste antwoord
+   * daarna. Nooit 'n interval nie, en nooit 'n antwoord op elke boodskap nie —
+   * hulle speler antwoord op 'n opdrag, en dit sou 'n eindelose pingpong wees. */
   useEffect(() => {
-    if (!isTiktok || !speel) return
+    if (!isTiktok) return
     const raam = raamRef.current
     if (!raam) return
+    let ts = []
+    let wagVirAntwoord = false
     const stuur = () => stelKlank(raam.contentWindow, true)
-    let geantwoord = false
+    function opBlur() {
+      if (document.activeElement !== raam) return
+      ts.forEach(clearTimeout)
+      ts = [0, 200, 600, 1200, 2000, 3500].map(ms => setTimeout(stuur, ms))
+      wagVirAntwoord = true
+    }
     function opBoodskap(e) {
-      if (!isTiktokBoodskap(e) || geantwoord) return
-      geantwoord = true
+      if (!wagVirAntwoord || !isTiktokBoodskap(e)) return
+      wagVirAntwoord = false
       stuur()
     }
+    window.addEventListener('blur', opBlur)
     window.addEventListener('message', opBoodskap)
-    raam.addEventListener('load', stuur)
-    const ts = [200, 600, 1200, 2000, 3500].map(ms => setTimeout(stuur, ms))
     return () => {
+      window.removeEventListener('blur', opBlur)
       window.removeEventListener('message', opBoodskap)
-      raam.removeEventListener('load', stuur)
       ts.forEach(clearTimeout)
     }
-  }, [isTiktok, speel])
+  }, [isTiktok, videoId])
 
   async function handleAmen() {
     if (amenSaid) return
@@ -101,10 +95,11 @@ export default function SaturdayVideoCard({ videoId, bron, handvatsel, voorskou,
           by die eerste druk. Dieselfde patroon as SorgVideo, wat al maande
           so werk. */}
       <div className="saturday-video-wrap">
-        {speel && isTiktok ? (
+        {isTiktok ? (
           <iframe
             ref={raamRef}
-            src={spelerAdres(videoId, { speel: true })}
+            /* Presies die Reels-voer se speler, en NIE eers ná 'n tik nie. */
+            src={spelerAdres(videoId, { speel: false })}
             title={title || 'Naweekgebed vir jou'}
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
@@ -118,16 +113,10 @@ export default function SaturdayVideoCard({ videoId, bron, handvatsel, voorskou,
           />
         ) : (
           <button
-            className={`saturday-duim${isTiktok ? ' saturday-duim-tiktok' : ''}`}
+            className="saturday-duim"
             onClick={() => setSpeel(true)}
             aria-label={`Speel ${title || 'die videogebed'}`}
-            /* YouTube se duimnael staan by 'n vaste adres; TikTok s'n kom deur
-               die bediener (hierbo), oor die kaart se eie grond. */
-            style={prent
-              /* Die prent BO-OP die gradiënt: laai dit nie, wys die gradiënt
-                 steeds en nooit 'n gat nie. */
-              ? { backgroundImage: `url("${prent}"), linear-gradient(180deg, #1B1526 0%, #3D3166 55%, #8A6A9E 100%)` }
-              : undefined}
+            style={{ backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }}
           >
             <span className="saturday-duim-speel" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">

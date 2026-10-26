@@ -632,7 +632,7 @@ export default function BidSaam() {
 
         {/* ── Gebedspoort Video ── */}
         {satVid.active && satVid.videoId && (
-          <SaturdayVideoCard videoId={satVid.videoId} bron={satVid.bron} handvatsel={satVid.handvatsel} voorskou={satVid.voorskou} title={satVid.title} subtitle={satVid.subtitle} />
+          <SaturdayVideoCard videoId={satVid.videoId} bron={satVid.bron} title={satVid.title} subtitle={satVid.subtitle} />
         )}
 
         {/* ── Prayer input ── */}

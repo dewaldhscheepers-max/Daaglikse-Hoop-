@@ -165,10 +165,3 @@
 }
 .saturday-duim:active .saturday-duim-speel { background: #4A3E75; }
 
-/* TikTok het geen duimnael by 'n vaste adres nie. 'n Ondeursigtige gradiënt
-   — nag bo, dagbreek onder, soos die gebedskaart in Reels — eerder as 'n
-   swart blok wat soos 'n fout lyk. */
-.saturday-duim-tiktok {
-  background-color: #2A2142;
-  background-image: linear-gradient(180deg, #1B1526 0%, #3D3166 55%, #8A6A9E 100%);
-}
