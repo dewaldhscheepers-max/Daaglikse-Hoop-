@@ -6,7 +6,7 @@ import VolgJesusAdmin from './VolgJesusAdmin'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { videoIdUit } from '../data/youtubeId'
+import { videoBronUit } from '../data/videoBron'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { isEngels } from '../data/engelsBoeke'
@@ -69,6 +69,7 @@ export default function Admin({ onClose }) {
   const [svSubtitle, setSvSubtitle] = useState('')
   const [svSaving,   setSvSaving]   = useState(false)
   const [svSaved,    setSvSaved]    = useState(false)
+  const [svFout,     setSvFout]     = useState('')
 
 
   // ── Notes state ──
@@ -153,12 +154,41 @@ export default function Admin({ onClose }) {
     }).catch(() => {})
   }, [unlocked])
 
+  /* YouTube OF TikTok (sien src/data/videoBron.js). 'n KORT TikTok-skakel van
+     die foon dra nie sy ID nie, dus maak die bediener hom oop — dieselfde
+     admin-alleen oplosser as die Reels-invoer. Niks word gestoor voordat daar
+     'n egte ID is nie: 'n leë speler op Bid Saam is erger as die ou video. */
   async function handleSvSave() {
+    setSvFout('')
+    let { bron, id, kort } = videoBronUit(svVideoId)
+    if (!bron) {
+      setSvFout('Dit lyk nie soos \'n YouTube- of TikTok-videoskakel nie.')
+      return
+    }
     setSvSaving(true)
-    await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: videoIdUit(svVideoId), title: svTitle.trim(), subtitle: svSubtitle.trim() })
-    setSvSaving(false)
-    setSvSaved(true)
-    setTimeout(() => setSvSaved(false), 2500)
+    try {
+      if (kort) {
+        const r = await fetch('/api/reels-skakel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-sorg-geheim': geheim },
+          body: JSON.stringify({ skakel: svVideoId.trim() }),
+        })
+        const d = await r.json().catch(() => ({}))
+        id = d && d.id ? String(d.id) : ''
+        if (!id) {
+          setSvFout('Ons kon nie die TikTok-skakel oopmaak nie. Probeer weer, of plak die volle skakel.')
+          return
+        }
+      }
+      await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: id, bron, title: svTitle.trim(), subtitle: svSubtitle.trim() })
+      setSvVideoId(id)
+      setSvSaved(true)
+      setTimeout(() => setSvSaved(false), 2500)
+    } catch {
+      setSvFout('Dit het nie gestoor nie. Probeer weer.')
+    } finally {
+      setSvSaving(false)
+    }
   }
 
   useEffect(() => {
@@ -1812,16 +1842,23 @@ export default function Admin({ onClose }) {
                 />
               </div>
               <div className="admin-field">
-                <label>YouTube Video ID</label>
+                <label>YouTube- of TikTok-skakel</label>
                 <input
                   value={svVideoId}
-                  onChange={e => setSvVideoId(e.target.value)}
-                  placeholder="bv. LK-kieYHZJA"
+                  onChange={e => { setSvVideoId(e.target.value); setSvFout('') }}
+                  placeholder="Plak die skakel van YouTube of TikTok"
                 />
                 <div className="admin-books-note" style={{ marginTop: 6 }}>
-                  Kopieer net die ID na "?v=" in die YouTube skakel, of die laaste deel van 'n Shorts skakel.
+                  {(() => {
+                    const b = videoBronUit(svVideoId)
+                    if (!svVideoId.trim()) return 'Plak die hele skakel soos jou foon dit gee — YouTube of TikTok.'
+                    if (b.bron === 'tiktok') return b.kort ? '🎵 TikTok-skakel. Ons maak dit oop wanneer jy stoor.' : '🎵 TikTok-video'
+                    if (b.bron === 'youtube') return '▶️ YouTube-video'
+                    return 'Dit lyk nie soos \'n YouTube- of TikTok-videoskakel nie.'
+                  })()}
                 </div>
               </div>
+              {svFout && <div className="admin-error">{svFout}</div>}
               {svSaved && <div className="admin-success">✅ Gestoor!</div>}
               <button className="admin-save-btn" onClick={handleSvSave} disabled={svSaving || !svVideoId.trim()}>
                 {svSaving ? 'Besig om te stoor...' : 'Stoor'}
