@@ -7,6 +7,8 @@ import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { videoBronUit } from '../data/videoBron'
+import { handvatselUit } from '../data/tiktokId'
+import { geldigeHandvatsel } from '../data/tiktokDuim'
 import { subscribeToNotifications, isSamsungBrowser } from '../firebase'
 import { BOOKS as STATIC_BOOKS } from '../data/books'
 import { isEngels } from '../data/engelsBoeke'
@@ -166,6 +168,10 @@ export default function Admin({ onClose }) {
       return
     }
     setSvSaving(true)
+    /* Die maker se handvatsel help TikTok se oEmbed om die voorskouprent te
+       vind (src/data/tiktokDuim.js). Uit die volle skakel, of uit die bediener
+       se antwoord by 'n kort skakel. */
+    let handvatsel = bron === 'tiktok' ? geldigeHandvatsel(handvatselUit(svVideoId)) : ''
     try {
       if (kort) {
         const r = await fetch('/api/reels-skakel', {
@@ -175,12 +181,13 @@ export default function Admin({ onClose }) {
         })
         const d = await r.json().catch(() => ({}))
         id = d && d.id ? String(d.id) : ''
+        handvatsel = geldigeHandvatsel(d && d.handvatsel)
         if (!id) {
           setSvFout('Ons kon nie die TikTok-skakel oopmaak nie. Probeer weer, of plak die volle skakel.')
           return
         }
       }
-      await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: id, bron, title: svTitle.trim(), subtitle: svSubtitle.trim() })
+      await setDoc(doc(db, 'config', 'saturdayVideo'), { active: svActive, videoId: id, bron, handvatsel, title: svTitle.trim(), subtitle: svSubtitle.trim() })
       setSvVideoId(id)
       setSvSaved(true)
       setTimeout(() => setSvSaved(false), 2500)

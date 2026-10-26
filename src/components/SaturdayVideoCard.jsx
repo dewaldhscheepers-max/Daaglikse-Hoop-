@@ -7,9 +7,23 @@ import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
 
 /* `bron` is 'youtube' of 'tiktok' (src/data/videoBron.js). Elke video wat voor
    26 Oktober 2026 gestoor is, dra geen `bron` nie en is YouTube. */
-export default function SaturdayVideoCard({ videoId, bron, title, subtitle, onNavigate }) {
+export default function SaturdayVideoCard({ videoId, bron, handvatsel, title, subtitle, onNavigate }) {
   const isTiktok = bron === 'tiktok'
   const raamRef = useRef(null)
+  /* TikTok se voorskouprent, vars by die bediener (api/tiktok-duim.mjs). Kom
+     daar niks nie, bly die pers grond — die kaart breek nooit hieroor nie. */
+  const [duim, setDuim] = useState('')
+  useEffect(() => {
+    if (!isTiktok || !videoId) return
+    let lewendig = true
+    const q = new URLSearchParams({ id: videoId })
+    if (handvatsel) q.set('h', handvatsel)
+    fetch(`/api/tiktok-duim?${q}`)
+      .then(r => r.json())
+      .then(d => { if (lewendig && d && typeof d.duim === 'string') setDuim(d.duim) })
+      .catch(() => {})
+    return () => { lewendig = false }
+  }, [isTiktok, videoId, handvatsel])
   const amenKey = `amened_video_${videoId}`
   const [amenSaid, setAmenSaid] = useState(() => {
     try { return localStorage.getItem(amenKey) === '1' } catch { return false }
@@ -99,10 +113,13 @@ export default function SaturdayVideoCard({ videoId, bron, title, subtitle, onNa
             className={`saturday-duim${isTiktok ? ' saturday-duim-tiktok' : ''}`}
             onClick={() => setSpeel(true)}
             aria-label={`Speel ${title || 'die videogebed'}`}
-            /* TikTok gee nie 'n duimnael by 'n vaste adres nie (YouTube wel),
-               dus kry 'n TikTok-video die kaart se eie grond en die
-               speelknoppie. 'n Geraaide prent-adres sou 'n gat wys. */
-            style={isTiktok ? undefined : { backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }}
+            /* YouTube se duimnael staan by 'n vaste adres; TikTok s'n kom deur
+               die bediener (hierbo), oor die kaart se eie grond. */
+            style={isTiktok
+              /* Die prent BO-OP die gradiënt: laai dit nie, wys die gradiënt
+                 steeds en nooit 'n gat nie. */
+              ? (duim ? { backgroundImage: `url("${duim}"), linear-gradient(180deg, #1B1526 0%, #3D3166 55%, #8A6A9E 100%)` } : undefined)
+              : { backgroundImage: `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)` }}
           >
             <span className="saturday-duim-speel" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
