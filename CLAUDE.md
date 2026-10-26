@@ -107,6 +107,7 @@ node api/_telSorg.toets.mjs                   # die Sorg-trechter se drie getall
 node src/data/kasBesluit.toets.mjs            # wat die diensketter mag kas, 71 toetse
 node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag land — nooit by 'n EERSTE installasie, 22
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
+node src/data/videoBron.toets.mjs             # Bid Saam se videogebed: YouTube OF TikTok, 18 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
 node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
@@ -2552,6 +2553,15 @@ die skerm — hy het net 'n dooie grys knoppie gesien. Nou lyk die knoppie dof
 (`sv-stuur-wag`) maar 'n druk SÊ wat kort (`sv-watkort`) en rol na die kassie.
 Ook geen `aria-disabled` nie: 'n knoppie wat iets doen, is nie gesper nie.
 Blaaiertoets: `kykDeelKnop.mjs`.
+
+**Die videogebed op Bid Saam kan ook 'n TikTok wees.** Dewald, 26 Oktober
+2026: YouTube het 'n video se klank op 'n vals kopiereg-eis afgesit. Die admin se
+veld (📹-oortjie) neem nou 'n YouTube- OF TikTok-skakel (`src/data/videoBron.js`);
+'n kort `vt.tiktok.com`-skakel word deur `api/reels-skakel.mjs` oopgemaak voordat
+iets gestoor word. `config/saturdayVideo` kry 'n `bron`-veld, en GEEN veld is
+YouTube, dus wys elke ou video soos altyd. Die TikTok-speler begin gedemp, en die
+kaart stuur dieselfde ontdemp-boodskappe as Reels (`tiktokKlank.js`). Blaaiertoets:
+`kykVideoGebed.mjs`, met 'n vals Firestore in `node_modules/.toets/`.
 
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná
