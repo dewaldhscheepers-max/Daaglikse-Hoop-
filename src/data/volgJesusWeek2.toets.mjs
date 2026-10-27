@@ -141,7 +141,7 @@ is('hetDae(2)', hetDae(2), true)
 is('hetDae(1) ook', hetDae(1), true)
 /* Week 3 het intussen bygekom (sien volgJesusWeek3.js) — hierdie toets vra
    net of die register Week 2 self ken, nie of Week 3 nog ontbreek nie. */
-is('en n week wat nog nie bestaan nie, gee niks', hetDae(12), false)
+is('en n week wat nog nie bestaan nie, gee niks', hetDae(13), false)
 is('weekDae(2) gee vyf dae', weekDae(2).length, 5)
 /* Dag 1 dra vyf inhoudsblokke plus die groepbrug (§40: die brug kom NA die
    stemboodskap). Die brug is nie werk nie — sien die perke hierbo. */

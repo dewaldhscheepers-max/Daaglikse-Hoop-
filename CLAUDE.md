@@ -56,7 +56,8 @@ node src/data/volgJesusWeek7.toets.mjs        # Week 7 se pad, 179 toetse
 node src/data/volgJesusWeek8.toets.mjs        # Week 8 se pad (die weergawe van 29 Sep), 177 toetse
 node src/data/volgJesusWeek9.toets.mjs        # Week 9 "Here, leer ons bid" — geen terugblik, 181 toetse
 node src/data/volgJesusWeek10.toets.mjs       # Week 10 "Dieselfde saad" — Dag 1 se gebed IN die boodskap, 213
-node src/data/volgJesusWeek11.toets.mjs       # Week 11 "Wat is die grootste gebod?" — een tikfout reggemaak, 203
+node src/data/volgJesusWeek11.toets.mjs       # Week 11 "Wat is die grootste gebod?" — een tikfout reggemaak, 206
+node src/data/volgJesusWeek12.toets.mjs       # Week 12 "Julle moet julle vyande liefhê" — Dewald se aanhalings, nie die GAB s'n, 204
 node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies, 26 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse
@@ -825,6 +826,13 @@ Week 1 tot 6 se toetse het `weekOpening(9)` en `blokkeVir(9, 1)` gebruik as
 "'n week wat nie bestaan nie", en die dag wat Week 9 bygekom het, het al vyf
 geval terwyl die app heeltemal reg was. Die "volgende week bestaan nog
 nie"-toetse (`hetDae(N+1) === false`) skuif wel saam — dit is hulle werk.
+
+**Die brug se GETAL het twee name.** Week 1 tot 5 se `WEEK<N>_VOLGENDE` dra
+`nommer`, Week 6 en later `week`. `VolgJesusStap.jsx` het net `nommer` gelees,
+dus het die "volgende week"-kaart van Week 6 tot Week 11 net "WEEK" sonder 'n
+getal gewys — 27 Oktober 2026 gevind toe Week 12 se blaaierlopie
+(`kykWeek12.mjs`) die kaart se kop gelees het. Die kaart lees nou albei; 'n
+nuwe week se brug gebruik steeds `week`, soos die toetse eis.
 
 `.vs-klaar-lyf` dra nou `white-space: pre-line` soos elke ander teksblok. Die
 week se slot het sedert Week 5 paragrawe gehad wat in een blok saamgeloop het;

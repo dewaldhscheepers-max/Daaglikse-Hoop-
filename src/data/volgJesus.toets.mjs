@@ -232,6 +232,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 11 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
       /* Week 11 */ 'Matteus 22:34–40', 'Matteus 22:37', 'Johannes 13:34–35',
                     'Matteus 5:43–44', '1 Johannes 3:18',
+      /* Week 12 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 12 */ 'Matteus 5:43–48', 'Matteus 5:44', 'Romeine 12:17–21',
+                    'Matteus 5:45', 'Matteus 5:46–48',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

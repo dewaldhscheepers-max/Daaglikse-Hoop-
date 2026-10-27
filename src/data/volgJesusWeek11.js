@@ -379,9 +379,15 @@ export const WEEK11_DEELSIN =
 
 /* ── Die brug na Week 12 ──
  *
- * `null` totdat Dewald Week 12 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK11_VOLGENDE = null
+ * Week 12 bestaan nou (27 Oktober 2026). Die titel is Week 12 se EGTE titel, en
+ * die lyf is Dewald se eie "BEGIN VAN DIE WEEK". */
+export const WEEK11_VOLGENDE = {
+  week: 12,
+  titel: 'Jesus sê: Julle moet julle vyande liefhê',
+  lyf: 'Jesus gee een van Sy moeilikste opdragte: julle moet julle vyande liefhê. '
+     + 'Nie omdat wat hulle gedoen het reg was nie, maar omdat hulle sonde nie ook '
+     + 'jou hart moet begin vorm nie.',
+}
 
 export function blokkeVirDag11(n) {
   const dag = WEEK11_DAE.find(d => d.n === n)

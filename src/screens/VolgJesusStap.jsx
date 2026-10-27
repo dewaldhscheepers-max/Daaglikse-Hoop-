@@ -319,7 +319,10 @@ export default function VolgJesusStap({
             wys ons NIKS eerder as 'n leë kaart. */}
         {volgende && (
         <div className="vs-kaart vs-volgende">
-          <div className="vs-kop">WEEK {volgende.nommer}</div>
+          {/* Week 1 tot 5 se brûe dra `nommer`, Week 6 en later `week`. Die
+              kaart het net `nommer` gelees en sedert Week 6 "WEEK" sonder 'n
+              getal gewys — 27 Oktober 2026 gevind toe Week 12 bygekom het. */}
+          <div className="vs-kop">WEEK {volgende.nommer || volgende.week}</div>
           <h3>{volgende.titel}</h3>
           <p className="vs-lyf">{volgende.lyf}</p>
           {binnekort && <p className="vs-fyn">{binnekort.lyf}</p>}

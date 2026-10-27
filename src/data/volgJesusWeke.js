@@ -643,4 +643,59 @@ export const WEKE = {
       'Moenie die week in ’n algemene gesprek oor verhoudings of grense verander nie.\n\nDie fokus bly:\n\nLiefde vir God moet deurwerk in hoe ons met mense leef.',
     pastoraleRisiko: 'laag',
   },
+  12: {
+    weeknommer: 12,
+    titel: 'Jesus sê: Julle moet julle vyande liefhê',
+    doel:
+      'Om te leer dat Jesus ons roep om nie deur haat, wraak of bitterheid gevorm te word nie, maar selfs vir mense wat ons seergemaak het, te bid.',
+    weekKern:
+      'JOU VYAND HET JOU DALK SEERGEMAAK. MOENIE HOM OOK TOELAAT OM TE BESLUIT WATTER MENS JY WORD NIE.',
+    openingskerm:
+      'Jesus gee hierdie week een van Sy moeilikste opdragte:\n\n'
+      + 'Julle moet julle vyande liefhê.\n\n'
+      + 'Nie omdat wat hulle gedoen het reg was nie, maar omdat hulle sonde nie ook jou hart moet begin vorm nie.',
+    primereSkrif: 'Matteus 5:43–48',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 11 se noot. Dewald: "Daar is GEEN stemnota, audio of
+       klankspeler in Week 12 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'JOU VYAND HET JOU DALK SEERGEMAAK. MOENIE HOM OOK TOELAAT OM TE BESLUIT WATTER MENS JY WORD NIE.',
+    eenSin:
+      'Jesus roep my nie om soos my vyand te word nie. Hy roep my om soos my Vader te word.',
+    privaatRefleksie:
+      'Het iemand wat my seergemaak het nog te veel invloed op my gedagtes, emosies of reaksies?',
+    gehoorsaamheidStap:
+      'Kies een persoon wat jou seergemaak het.\n\nBid hierdie week doelbewus vir hulle.\n\nNie om die verkeerde goed te praat nie, maar om jou hart aan God oor te gee.',
+    gebed:
+      'Here, U weet waar ons seergekry het. Help ons om nie deur haat, wraak of bitterheid gevorm te word nie. Gee ons die genade om te bid vir mense wat ons seergemaak het en om nie kwaad met kwaad terug te betaal nie. Maak ons meer soos U. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Bid vir hulle',
+    dag1Titel: 'Jesus sê: Julle moet julle vyande liefhê',
+    dag2Titel: 'Bid vir hulle',
+    dag3Titel: 'Moenie kwaad met kwaad beantwoord nie',
+    dag4Titel: 'Kyk na die Vader',
+    dag5Titel: 'Jesus vra meer van ons',
+    groepVraag1:
+      'Waarom dink julle sê Jesus ons moet vir mense bid wat ons vervolg?',
+    groepVraag2:
+      'Hoe kan iemand anders se verkeerde gedrag begin bepaal wie ons word?',
+    groepVraag3:
+      'Wat is die verskil tussen liefde vir ’n vyand en om sy gedrag goed te keur?',
+    groepVraag4:
+      'Wat beteken dit prakties om kwaad met die goeie te oorwin?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Die kern van Week 12 is nie dat mense verkeerde gedrag moet verdra nie.\n\nDie kern is Jesus se opdrag:\n\n“Hê julle vyande lief en bid vir dié wat julle vervolg.”\n\nHelp die groep om te verstaan dat liefde vir ’n vyand nie beteken dat sonde goedgekeur word nie. Dit beteken dat ons weier om haat, wraak of bitterheid toe te laat om ons karakter te vorm.',
+    fasiliteerderGrens:
+      'Moenie die week in ’n lang bespreking oor grense verander nie.\n\nMoet ook nie druk op mense plaas om onmiddellik weer ’n verhouding aan te knoop met iemand wat hulle ernstig seergemaak het nie.\n\nDie fokus bly:\n\nWat gebeur in my hart, en hoe roep Jesus my om te reageer?',
+    /* 'Medium' en nie 'laag' nie: 'n week oor mense wat jou seergemaak het, kan
+       mishandeling oopmaak. Dewald se eie BELANGRIK hierbo sê dit reeds aan die
+       groepleier. */
+    pastoraleRisiko: 'medium',
+  },
 }
