@@ -1,7 +1,11 @@
 /* ────────────────────────────────────────────────────────────
    VOLG JESUS — WEEK 12: "JESUS SÊ: JULLE MOET JULLE VYANDE LIEFHÊ"
 
-   Dewald het die week op 27 Oktober 2026 voluit gestuur. Dag 1 se boodskap
+   Dewald het die week op 27 Oktober 2026 voluit gestuur, en DIESELFDE DAG
+   Dag 1 se boodskap met 'n nuwe weergawe vervang ("Vervang dag een se
+   boodskap"). Die titel, die gedeelte, die vraag-id en die wallpapers het nie
+   geskuif nie, dus is daar niks om op die fone uit te vee nie (sien
+   volgJesusHerskryf.js: net 'n NUWE vraag-id vra dit). Dag 1 se boodskap
    staan hier PRESIES soos hy dit gegee het: *"Gebruik Dewald se Dag 1-boodskap
    presies soos dit hierbo staan. Moenie enige woord verander nie… of
    taalversorging daarop doen nie."* Sy woorde op Dag 2 tot 5 staan ook so.
@@ -36,11 +40,11 @@
    ── DIE AANHALINGS ──
 
    Al die gedeeltes is teen die egte public/gab/ nagegaan en bestaan. Dewald se
-   aanhalings is sy EIE bewoording en nie die GAB s'n nie — bv. "Hê julle vyande
-   lief en bid vir dié wat julle vervolg" (GAB: "Het julle vyande lief… en bid
-   vir hulle wat julle smadelik behandel, en julle vervolg") en "Moenie deur die
-   kwaad oorwin word nie" (GAB: "Word nie deur die kwaad oorwin nie"). Sy woorde
-   staan onveranderd; hy is daarop gewys.
+   aanhalings is sy EIE bewoording en nie die GAB s'n nie — bv. Dag 2 se "Bid
+   vir dié wat julle vervolg" (GAB: "bid vir hulle wat julle smadelik behandel,
+   en julle vervolg") en Dag 3 se "Moenie deur die kwaad oorwin word nie" (GAB:
+   "Word nie deur die kwaad oorwin nie"). Sy woorde staan onveranderd; hy is
+   daarop gewys.
 
    ── DIE TWEE WALLPAPERS ──
 
@@ -58,87 +62,49 @@ export const WEEK12_OPENING =
 /* ── Dag 1 se hoofboodskap ──
  *
  * Dewald: "Gebruik Dewald se Dag 1-boodskap presies soos dit hierbo staan." */
-const DAG1_BOODSKAP = `Hier raak Jesus ongemaklik.
+const DAG1_BOODSKAP = `Jesus sê ons moet selfs die mense liefhê wat ons seermaak, en vir hulle bid.
 
-Hy sê:
+Dis een van die moeilikste dinge wat Jesus van ons vra, want wanneer iemand jou seergemaak het, is jou natuurlike reaksie nie om vir hulle te bid nie.
 
-“Hê julle vyande lief en bid vir dié wat julle vervolg.”
+Jy wil eerder terugbaklei, jouself verdedig of hoop dat hulle eendag presies sal ervaar wat hulle aan jou gedoen het.
 
-Dit is maklik om mense lief te hê wat goed is vir jou.
+Maar Jesus wys hier vir ons dat iemand anders se verkeerde optrede nie ook moet bepaal wat in jou hart gebeur nie.
 
-Maar Jesus praat hier van mense wat jou teëstaan, seermaak en selfs vervolg.
+As iemand jou met haat behandel en jy begin dieselfde haat dra, het dit wat hulle gedoen het, verder gegaan as net die oorspronklike seer. Dit begin nou ook verander hoe jy dink, hoe jy mense vertrou en hoe jy ander behandel.
 
-Hy sê nie hulle gedrag is reg nie.
+IEMAND HET JOU DALK SEERGEMAAK. MOENIE TOELAAT DAT WAT HULLE AAN JOU GEDOEN HET, BESLUIT WATTER MENS JY WORD NIE.
 
-Hy sê nie jy moet maak asof niks gebeur het nie.
+Jesus sê daarom dat ons selfs vir die mense moet bid wat ons sleg behandel.
 
-Hy sê ook nie jy moet iemand onbeperkte toegang tot jou lewe gee nie.
+Wanneer jy vir iemand bid wat jou seergemaak het, beteken dit nie dat jy hulle gedrag goedkeur nie.
 
-Maar Hy waarsku jou om nie toe te laat dat haat jou hart begin vorm nie.
+Jy kan bid:
 
-Want iemand kan jou seermaak, en as jy nie versigtig is nie, kan daardie wond begin bepaal hoe jy met almal leef.
+“Here, verander hulle hart. Wys hulle waar hulle verkeerd is. Bring hulle tot bekering. En help my om nie deur bitterheid verander te word nie.”
 
-Jy raak hard.
+Dan wys Jesus na die Vader.
 
-Jy vertrou niemand nie.
+Hy sê God laat die son opgaan oor goeie én slegte mense en laat reën oor regverdiges én onregverdiges.
 
-Jy begin mense behandel volgens wat iemand anders aan jou gedoen het.
+Jesus wys dat die Vader se goedheid nie beperk is tot mense wat dit verdien nie, en Hy roep ons om iets van daardie karakter te weerspieël.
 
-En dan het daardie persoon jou twee keer seergemaak:
+Hy vra:
 
-Eers deur wat hulle gedoen het.
+As julle net die mense liefhet wat julle liefhet, wat doen julle dan anders as ander mense?
 
-En daarna deur wat hulle jou laat word het.
+Dis maklik om liefde te wys wanneer iemand jou goed behandel.
 
-JOU VYAND HET JOU DALK SEERGEMAAK. MOENIE HOM OOK TOELAAT OM TE BESLUIT WATTER MENS JY WORD NIE.
+Die moeilike deel is om nie iemand anders se verkeerde gedrag jou eie karakter te laat verander nie.
 
-Jesus wys ons ’n ander pad.
+Liefde vir jou vyand beteken nie dat jy moet voorgee hulle het niks verkeerd gedoen nie.
 
-Hy sê:
+Dit beteken ook nie dat jy warm gevoelens vir hulle moet hê nie.
 
-Bid vir hulle.
+Dit beteken dat jy hulle aan God oorgee, vir hulle bid en weier om dieselfde kwaad wat jou seergemaak het deur jou eie lewe na iemand anders toe te dra.
 
-Nie omdat hulle gedrag aanvaarbaar geword het nie.
+JESUS ROEP JOU NIE OM SOOS JOU VYAND TE WORD NIE. HY ROEP JOU OM SOOS JOU VADER TE WORD.
 
-Nie omdat jy die verkeerde moet goedpraat nie.
-
-Maar omdat jy weier om jou hart aan haat, wraak en bitterheid oor te gee.
-
-Jesus wys dan na die Vader.
-
-God laat die son opgaan oor goeie én slegte mense en laat reën oor regverdiges én onregverdiges.
-
-Met ander woorde: God se goedheid word nie bepaal deur die karakter van die persoon voor Hom nie.
-
-Jesus roep ons om soos ons Vader te begin leef.
-
-Nie net om mense lief te hê wat dit maklik maak nie, maar om te weier om kwaad met kwaad terug te betaal.
-
-Dit beteken nie jy moet warm gevoelens vir jou vyand hê nie.
-
-Dit beteken jy kies om nie hulle vernietiging te soek nie.
-
-Jy bid dat God hulle sal verander.
-
-Jy bid dat waarheid hulle sal bereik.
-
-En jy bid dat jou eie hart nie deur bitterheid verander sal word nie.
-
-Want die grootste oorwinning is nie dat jou vyand uiteindelik verloor nie.
-
-Dit is dat jy nie jou karakter verloor omdat iemand anders verkeerd opgetree het nie.
-
-Vra jouself dus vandag:
-
-Vir wie moet ek begin bid, sodat haat nie begin bepaal wie ek word nie?
-
-En doen dan wat Jesus sê:
-
-Bid vir hulle.
-
-MOENIE TOELAAT DAT IEMAND ANDERS SE SONDE JOU KARAKTER BEGIN VORM NIE.
-
-Here, U weet wie my seergemaak het en wat dit aan my gedoen het. Help my om nie deur haat, wraak of bitterheid gevorm te word nie. Gee my die genade om te bid vir mense wat my seergemaak het, en verander my hart sodat ek meer soos U word. Amen.`
+Here, U weet wie my seergemaak het en wat dit aan my gedoen het. Help my om nie toe te laat dat bitterheid my verander nie. Gee my die genade om vir mense te bid wat my seergemaak het, en help my om op ’n manier te leef wat wys dat ek aan U behoort. Amen.`
 
 /* ── Die vyf dae ── */
 

@@ -38,7 +38,7 @@ const MAKS_BLOKKE = 5
 const MAKS_ANTWOORDE = 2
 /* Dag 1 se boodskap, soos Dewald dit gestuur het — getel met die
    vergelyking teen sy teks, nie gekies nie. */
-const WOORDE_DAG1 = 460
+const WOORDE_DAG1 = 443
 
 console.log('\n── Vyf dae, en elkeen het n naam ──\n')
 {
@@ -139,17 +139,18 @@ console.log('\n── Dag 1 se boodskap is Dewald s\'n, woord vir woord ──\n
      boodskap: die begin, elke vorm van die grond, die hoofletter-reels, en die
      einde. Val een, het iemand aan sy teks geraak. */
   const b = WEEK12_DAE[0].blokke.find(x => x.soort === 'boodskap').lyf
-  waar('die begin', b.startsWith('Hier raak Jesus ongemaklik.\n\nHy sê:'))
+  /* Dewald het Dag 1 op 27 Oktober 2026 met hierdie weergawe vervang. */
+  waar('die begin', b.startsWith('Jesus sê ons moet selfs die mense liefhê wat ons seermaak, en vir hulle bid.\n\nDis een van die moeilikste dinge'))
   for (const t of [
-    '“Hê julle vyande lief en bid vir dié wat julle vervolg.”',
-    'Hy sê ook nie jy moet iemand onbeperkte toegang tot jou lewe gee nie.',
-    'En dan het daardie persoon jou twee keer seergemaak:',
-    'JOU VYAND HET JOU DALK SEERGEMAAK. MOENIE HOM OOK TOELAAT OM TE BESLUIT WATTER MENS JY WORD NIE.',
+    'Jy wil eerder terugbaklei, jouself verdedig of hoop dat hulle eendag presies sal ervaar wat hulle aan jou gedoen het.',
+    'IEMAND HET JOU DALK SEERGEMAAK. MOENIE TOELAAT DAT WAT HULLE AAN JOU GEDOEN HET, BESLUIT WATTER MENS JY WORD NIE.',
+    '“Here, verander hulle hart. Wys hulle waar hulle verkeerd is. Bring hulle tot bekering. En help my om nie deur bitterheid verander te word nie.”',
     'God laat die son opgaan oor goeie én slegte mense en laat reën oor regverdiges én onregverdiges.',
-    'Vir wie moet ek begin bid, sodat haat nie begin bepaal wie ek word nie?',
-    'MOENIE TOELAAT DAT IEMAND ANDERS SE SONDE JOU KARAKTER BEGIN VORM NIE.',
+    'As julle net die mense liefhet wat julle liefhet, wat doen julle dan anders as ander mense?',
+    'JESUS ROEP JOU NIE OM SOOS JOU VYAND TE WORD NIE. HY ROEP JOU OM SOOS JOU VADER TE WORD.',
   ]) waar(`"${t.slice(0, 40)}…"`, b.includes(t))
-  waar('die einde', b.endsWith('verander my hart sodat ek meer soos U word. Amen.'))
+  waar('die einde', b.endsWith('help my om op ’n manier te leef wat wys dat ek aan U behoort. Amen.'))
+  waar('die OU weergawe is nêrens meer nie', !b.includes('Hier raak Jesus ongemaklik.'))
   is('woordtelling soos hy dit gestuur het', b.trim().split(/\s+/).length, WOORDE_DAG1)
   waar('geen drie newlines agtermekaar', !/\n\n\n/.test(b))
 }
