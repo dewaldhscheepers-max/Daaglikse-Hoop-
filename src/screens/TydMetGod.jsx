@@ -246,6 +246,43 @@ export default function TydMetGod({
      skerm, presies waar sy duim die vorige knoppie gelos het. */
   useEffect(() => { if (lyfRef.current) lyfRef.current.scrollTop = 0 }, [i])
 
+  /* ── "Daar is meer hieronder" ──
+   *
+   * Dewald, 30 Oktober 2026: *"What if they dont know to scroll."* Die pyltjie
+   * wys NET wanneer daar werklik iets onder die rand lê — die app meet dit op
+   * elke foon, dus sien niemand op 'n groot skerm hom nie — en hy verdwyn
+   * sodra die mens self rol, vir die res van daardie skerm. 'n Pyltjie wat
+   * altyd staan, word raas, en dan leer 'n mens om hom te ignoreer.
+   *
+   * Gemeet by elke skerm, by elke rol, en wanneer die inhoud se grootte skuif
+   * (die wallpaper laai, die sleutelbord kom op, die dankie verskyn). */
+  const [meer, setMeer] = useState(false)
+  const geroldRef = useRef(false)
+  useEffect(() => {
+    const el = lyfRef.current
+    if (!el) return
+    geroldRef.current = false
+    function meet() {
+      if (el.scrollTop > 24) geroldRef.current = true
+      const oor = el.scrollHeight - el.clientHeight - el.scrollTop
+      setMeer(!geroldRef.current && oor > 48)
+    }
+    meet()
+    el.addEventListener('scroll', meet, { passive: true })
+    let ro = null
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(meet)
+      ro.observe(el)
+      if (el.firstElementChild) ro.observe(el.firstElementChild)
+    }
+    return () => { el.removeEventListener('scroll', meet); if (ro) ro.disconnect() }
+  }, [i])
+
+  function rolAf() {
+    const el = lyfRef.current
+    if (el) el.scrollBy({ top: Math.round(el.clientHeight * 0.7), behavior: 'smooth' })
+  }
+
   function verder() {
     setI(n => Math.min(n + 1, stappe.length - 1))
   }
@@ -364,6 +401,20 @@ export default function TydMetGod({
         </div>
       </div>
       </VoetKonteks.Provider>
+
+      {/* 'n Hoogte van nul, sodat dit die uitleg nie skuif nie; die vervaging
+          en die pyltjie hang daaruit OOR die onderkant van die lyf. */}
+      {meer && (
+        <div className="tmg-meer">
+          <div className="tmg-meer-vaag" />
+          <button className="tmg-meer-pyl" onClick={rolAf} aria-label="Daar is meer hieronder">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Die "Volgende"-balk staan BUITE die rol-lyf, dus op presies dieselfde
           plek op elke skerm. Die skerm self sit sy knoppie hierin (sien

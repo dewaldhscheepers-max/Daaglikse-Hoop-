@@ -1104,6 +1104,16 @@ Blaaiertoets: `kykVolgende.mjs` (een balk per skerm, dieselfde y op al vyf,
 `elementFromPoint` op sy middel, geen ander soliede goue knoppie, die gloed, en
 skerm 5 se twee gesigte).
 
+**"Daar is meer hieronder"** — Dewald, dieselfde dag: *"What if they dont know
+to scroll."* 'n Klein goue pyltjie met 'n vervaging onder in die lyf
+(`.tmg-meer`), maar NET wanneer daar meer as 48px onder die rand lê: die app
+meet dit by elke skerm, elke rol en elke grootteverandering (`ResizeObserver`),
+dus sien niemand op 'n groot foon hom nie. Hy verdwyn sodra sy self rol en kom
+nie op daardie skerm terug nie; 'n tik rol vir haar af. Die wip loop op `top`,
+drie keer. In die praktyk is dit die klaar-skerm op 'n klein foon. Sonder 'n
+voet (klaar-skerm) dra die lyf weer sy onderste veilige rand — `:has()`.
+Blaaiertoets: `kykMeer.mjs`.
+
 **Die dakkie op ê, ô, î, û, â kom uit EB Garamond.** Elke Cormorant-familie
 teken die kappie hoog en spits, los bo die letter — "lê" lees op 'n foon soos
 "l^e". `index.css` het 'n `@font-face 'Dakkie'` met 'n `unicode-range` van net

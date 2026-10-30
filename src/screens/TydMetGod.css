@@ -191,6 +191,57 @@
   border-top: 1px solid var(--rand);
 }
 .tmg-voet:empty { display: none; }
+/* Sonder 'n voet (die klaar-skerm) moet die lyf self weer die onderste
+   veilige rand dra, anders lê die laaste knoppie onder die foon se gebaar-balk. */
+.tmg:has(.tmg-voet:empty) .tmg-lyf {
+  padding-bottom: calc(46px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── "Daar is meer hieronder" ──
+ * 'n Houer van hoogte NUL tussen die lyf en die voet; die vervaging en die
+ * pyltjie hang daaruit OOR die onderkant van die lyf. Die vervaging is 'n
+ * `linear-gradient` na die skerm se eie houtskool — geen `backdrop-filter`
+ * nie, want die lyf rol daaragter. Die beweging loop op `top`, NOOIT op
+ * `transform` nie, en net drie keer: 'n aanhoudende wip word raas. */
+.tmg-meer {
+  position: relative;
+  z-index: 2;
+  height: 0;
+  flex: 0 0 auto;
+}
+.tmg-meer-vaag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(26, 26, 29, 0) 0%, var(--grond) 92%);
+}
+.tmg-meer-pyl {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -52px;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(217, 177, 131, 0.45);
+  border-radius: 50%;
+  background: var(--kaart);
+  color: var(--goud);
+  padding: 0;
+  cursor: pointer;
+  animation: tmg-wip 1.4s ease-in-out 3;
+}
+.tmg-meer-pyl:active { background: var(--grond); }
+@keyframes tmg-wip {
+  0%, 100% { top: -52px; }
+  50%      { top: -46px; }
+}
 
 .tmg-volgende {
   display: flex;
@@ -767,5 +818,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tmg-knop, .tmg-hart, .tmg-steun-knop, .tmg-volgende { transition: none; }
   .tmg-volgende-gloei { animation: none; }
+  .tmg-meer-pyl { animation: none; }
   .tmg-skerm, .tmg-dankie { animation: none; }
 }
