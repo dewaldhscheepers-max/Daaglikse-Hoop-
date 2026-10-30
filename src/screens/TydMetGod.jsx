@@ -67,6 +67,9 @@ const SEWE_DAE = 7 * 24 * 60 * 60 * 1000
    sien CLAUDE.md. Tien sekondes is ruim vir 'n slegte lyn en kort genoeg dat
    niemand dink die app is dood nie. */
 const HAAL_TYDGRENS = 10000
+/* Hoe lank "Deel my gebedsversoek" op die bediener wag voordat sy voortgaan.
+   Sien Hart se `deel()`. */
+const SKRYF_TYDGRENS = 10000
 
 /* Wat elke stap in die vordering-byskrif heet. Kort, want dit staan langs
    "2 van 5" in 'n reël wat nie mag oorloop nie. */
@@ -226,17 +229,24 @@ export default function TydMetGod({
   /* Elke verandering aan die staat gaan dadelik na die foon. Daar is geen
      STOOR-knoppie nie en daar moet nie een wees nie: 'n mens wat vergeet druk,
      verloor sy dag. */
+  /* Deur 'n ref en BUITE `setStaat` se opdatering. Die skryf waai
+     `tmg-verander`, en die kaart op Luister werk daarop sy eie toestand by;
+     binne 'n opdatering gebeur dit terwyl React hierdie skerm teken, en dan
+     waarsku React "Cannot update a component while rendering a different
+     component". 'n Opdatering moet suiwer wees. Die ref hou twee stel-roepe
+     in dieselfde oomblik reg: die tweede bou op die eerste. */
+  const staatRef = useRef(staat)
   function stel(fn) {
-    setStaat(vorige => {
-      const nuut = fn(vorige)
-      /* Die merk-funksies gee DIESELFDE voorwerp terug wanneer niks verander
-         nie (merkStap doen dit by elke skerm). Dan skryf ons nie na die foon
-         nie en waai ook nie 'n gebeurtenis wat die kaart op Luister laat
-         herteken nie. */
-      if (nuut === vorige) return vorige
-      skryfStaat(nuut)
-      return nuut
-    })
+    const vorige = staatRef.current
+    const nuut = fn(vorige)
+    /* Die merk-funksies gee DIESELFDE voorwerp terug wanneer niks verander
+       nie (merkStap doen dit by elke skerm). Dan skryf ons nie na die foon
+       nie en waai ook nie 'n gebeurtenis wat die kaart op Luister laat
+       herteken nie. */
+    if (nuut === vorige) return
+    staatRef.current = nuut
+    skryfStaat(nuut)
+    setStaat(nuut)
   }
 
   /* Waar hy is, word onthou sodat die kaart op Luister "GAAN VOORT" kan sê. */
@@ -866,6 +876,7 @@ function Hart({ staat, stel, verder }) {
   const [klaar, setKlaar] = useState(false)
   const [fout, setFout]   = useState('')
   const [krisis, setKrisis] = useState(false)
+  const [traag, setTraag]   = useState(false)
 
   async function deel() {
     if (besig || !teks.trim()) return
@@ -885,19 +896,38 @@ function Hart({ staat, stel, verder }) {
     }
 
     setBesig(true)
+    /* ── `addDoc` het geen tydgrens nie ──
+     *
+     * Dieselfde fout as `getDocs` (sien CLAUDE.md), net aan die skryf-kant: die
+     * belofte los eers op wanneer die BEDIENER die skryf bevestig. Op 'n swak
+     * lyn of sonder sein gebeur dit nie, en die knoppie het vir altyd "Besig…"
+     * gestaan — 'n mens wat pas haar hart oopgemaak het, sit vas.
+     *
+     * Ná die tydgrens gaan sy voort. Die SDK hou die skryf in sy ry en stuur
+     * dit self sodra die lyn terug is; daarom word dit NIE weer gestuur nie
+     * ('n tweede `addDoc` sou 'n tweede versoek op die muur sit). Die skerm sê
+     * dit eerlik. 'n Egte weiering (die bediener sê nee) kom steeds as 'n fout. */
+    let klok
+    const tyd = new Promise(los => { klok = setTimeout(() => los('traag'), SKRYF_TYDGRENS) })
     try {
-      await addDoc(collection(db, 'prayers'), {
-        text: teks.trim(),
-        prayedCount: 0,
-        createdAt: serverTimestamp(),
-        reported: false,
-        deelbaar: keuring.mag,
-      })
+      const uitslag = await Promise.race([
+        addDoc(collection(db, 'prayers'), {
+          text: teks.trim(),
+          prayedCount: 0,
+          createdAt: serverTimestamp(),
+          reported: false,
+          deelbaar: keuring.mag,
+        }),
+        tyd,
+      ])
       stel(merkGetik)
       setKrisis(keuring.rede === 'krisis')
+      setTraag(uitslag === 'traag')
       setKlaar(true)
     } catch {
       setFout('Kon nie stuur nie. Probeer asseblief weer.')
+    } finally {
+      clearTimeout(klok)
     }
     setBesig(false)
   }
@@ -919,8 +949,9 @@ function Hart({ staat, stel, verder }) {
       <section className="tmg-skerm">
         <h1 className="tmg-titel">Jy is nie alleen nie</h1>
         <p className="tmg-lei">
-          Jou versoek staan nou op die Bid Saam-muur. Iemand anders gaan vandag
-          vir jou bid, net soos jy vir iemand gebid het.
+          {traag
+            ? 'Jou verbinding is stadig. Jou versoek gaan op die Bid Saam-muur sodra dit deurkom, en dan gaan iemand anders vir jou bid, net soos jy vir iemand gebid het.'
+            : 'Jou versoek staan nou op die Bid Saam-muur. Iemand anders gaan vandag vir jou bid, net soos jy vir iemand gebid het.'}
         </p>
         {krisis && (
           <div className="tmg-krisis">

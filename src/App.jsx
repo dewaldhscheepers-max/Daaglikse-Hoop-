@@ -1452,7 +1452,7 @@ export default function App() {
      wat 'n mens van 'n oorlegblad met stappe verwag. */
   const tmgTerugRef = useRef(null)
   function tmgTerugOfSluit() {
-    if (tmgTerugRef.current && tmgTerugRef.current()) return
+    if (tmgTerugRef.current && tmgTerugRef.current()) return 'bly'
     tmgSluit()
   }
 
@@ -1806,7 +1806,19 @@ export default function App() {
     function opTerug() {
       if (negeerPop.current > 0) { negeerPop.current--; return }
       const laag = boonsteRef.current
-      if (laag) { uitPop.current = true; laag.toe(); return }
+      if (laag) {
+        uitPop.current = true
+        /* 'n Laag met eie stappe (Tyd met God) kan 'n terug-druk BINNE homself
+           verbruik en oop bly. Dan het die blaaier tog sy inskrywing geëet, en
+           sonder 'n nuwe een gooi die VOLGENDE druk die mens uit die app uit —
+           op skerm 2 van die vloei. Sit dit dus terug, en laat `uitPop` los:
+           niks het toegegaan nie. */
+        if (laag.toe() === 'bly') {
+          uitPop.current = false
+          try { window.history.pushState({ dh: diepteRef.current }, '') } catch {}
+        }
+        return
+      }
       if (tabRef.current !== 'luister') { uitPop.current = true; setTab('luister'); return }
       /* Niks oop en ons is op Luister — daar is geen inskrywing meer nie en
          die stelsel maak die app toe. Presies wat 'n mens verwag. */

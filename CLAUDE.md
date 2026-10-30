@@ -1284,6 +1284,33 @@ klaar gedoen het, maak van 'n gewoonte 'n eis.
   dag is getel.
 * **`getDocs` kry 'n tydgrens van 10s.** Sonder dit bly "Een oomblik..." vir
   altyd staan wanneer Android die oortjie opgeskort het.
+* **`addDoc` het OOK geen tydgrens nie** (`SKRYF_TYDGRENS`, 10s). Die belofte
+  los eers op wanneer die BEDIENER die skryf bevestig; op 'n swak lyn het "Deel
+  my gebedsversoek" vir altyd "Besig…" gestaan. Ná 10s gaan sy voort en die
+  skerm sê *"Jou verbinding is stadig…"* — die SDK stuur die skryf self sodra
+  die lyn terug is, dus word dit NIE weer gestuur nie ('n tweede `addDoc` is 'n
+  tweede versoek op die muur). Bid Saam se eie vorm het nog dieselfde gat.
+* **Die foon se terug-knoppie binne die vloei sit sy geskiedenis-inskrywing
+  TERUG.** `tmgTerugOfSluit` gee `'bly'` as die vloei net 'n stap teruggegaan
+  het; `opTerug` in App.jsx stoot dan 'n nuwe inskrywing. Sonder dit het die
+  blaaier by elke stap terug een inskrywing geëet en die TWEEDE druk die mens
+  uit die app gegooi (30 Oktober 2026, gevind deur `kykTmgOudit.mjs`).
+* **`stel()` skryf BUITE `setStaat` se opdatering** (deur `staatRef`). Die
+  skryf waai `tmg-verander`, die kaart op Luister werk daarop sy toestand by,
+  en binne 'n opdatering is dit "Cannot update a component while rendering a
+  different component".
+* **Die skenk-ry op die klaar-skerm staan ALTYD**, ook op 'n dag wat sy getik
+  het — Dewald se besluit, sien die kommentaar by `.tmg-steun` in
+  TydMetGod.jsx. Die drie hekke hieronder by "Een vraag aan die einde" beskryf
+  'n ouer weergawe; die OPSPRINGER (`magVraGeld`, `naTydMetGod`) hou wel die
+  reël "nooit geld op 'n dag wat iemand getik het".
+
+Volle deurloop: `kykTmgOudit.mjs` (die dev-bediener met
+`node_modules/.toets/vite.toets.config.mjs` op 5175 — vals `addDoc` vir
+`prayers`; `optimizeDeps.exclude` is nodig, anders bundel Vite die egte
+Firestore en die vals een word nooit geroep nie). 68 metings oor sewe gevalle:
+die volle dag, die terug-knoppie, 'n kaal nota, krisis, 'n swak lyn, 'n leë
+muur en 'n klein foon.
 
 ### Die gedeelde skakel
 
