@@ -168,8 +168,62 @@
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 22px 46px;
-  padding-bottom: calc(46px + env(safe-area-inset-bottom, 0px));
+  padding: 0 22px 24px;
+}
+
+/* ── Die "Volgende"-balk ──
+ *
+ * BUITE die rol-lyf, dus altyd op dieselfde plek, ook wanneer 'n skerm se
+ * inhoud langer is as die foon. Die grond is ondeursigtig (die skerm se eie
+ * houtskool) en daar is geen `backdrop-filter` nie: die lyf rol daaragter, en
+ * 'n vervaag-filter oor bewegende inhoud is presies waar die gekleurde strepe
+ * op Android vandaan kom. Op die klaar-skerm is hy leeg en neem hy geen plek
+ * nie. */
+.tmg-voet {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 10px 22px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--grond);
+  border-top: 1px solid var(--rand);
+}
+.tmg-voet:empty { display: none; }
+
+.tmg-volgende {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+  min-height: 58px;
+  border: 0;
+  border-radius: 999px;
+  padding: 16px 22px;
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #241B12;
+  background: linear-gradient(180deg, #EDD3AE 0%, #D6AC7C 100%);
+  box-shadow: 0 8px 26px rgba(217, 177, 131, 0.22);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+/* Net KLEUR op `:active` — geen transform nie. */
+.tmg-volgende:active { background: linear-gradient(180deg, #DBBC93 0%, #C79A6A 100%); }
+.tmg-volgende:disabled { background: var(--kaart); color: var(--sag); box-shadow: none; cursor: default; }
+
+/* Die boodskap is klaar gehoor: twee sagte asems van gloed. Dit is 'n
+   `box-shadow`-animasie — dit verf in die ouer se laag en maak geen
+   saamgestelde laag nie, anders as `transform` of `opacity`. */
+.tmg-volgende-gloei { animation: tmg-gloei 1.6s ease-in-out 2; }
+@keyframes tmg-gloei {
+  0%, 100% { box-shadow: 0 8px 26px rgba(217, 177, 131, 0.22); }
+  50%      { box-shadow: 0 0 0 6px rgba(217, 177, 131, 0.20), 0 10px 34px rgba(217, 177, 131, 0.45); }
 }
 
 .tmg-skerm {
@@ -289,6 +343,17 @@
   cursor: default;
 }
 .tmg-knop .tmg-teken { color: currentColor; }
+
+/* 'n Aksie OP die skerm (Bybel, stoor, ek het gebid): 'n goue rand, nie
+   solied nie. Solied goud is die "Volgende"-balk se eie, en net syne. */
+.tmg-knop-rand {
+  background: transparent;
+  border: 1.5px solid rgba(217, 177, 131, 0.6);
+  color: var(--goud-op);
+  box-shadow: none;
+}
+.tmg-knop-rand:active { background: var(--kaart); }
+.tmg-knop-rand:disabled { background: transparent; color: var(--sag); border-color: var(--rand-op); }
 
 /* Die stil een is 'n uitgang en moet soos een lyk. */
 .tmg-knop-stil {
@@ -700,6 +765,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tmg-knop, .tmg-hart, .tmg-steun-knop { transition: none; }
+  .tmg-knop, .tmg-hart, .tmg-steun-knop, .tmg-volgende { transition: none; }
+  .tmg-volgende-gloei { animation: none; }
   .tmg-skerm, .tmg-dankie { animation: none; }
 }

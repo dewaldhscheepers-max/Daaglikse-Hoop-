@@ -38,7 +38,8 @@
    App.jsx). Hulle sou andersins tussen "luister" en "bid" inskuif.
    ──────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import Stemboodskap from '../components/Stemboodskap'
@@ -220,6 +221,7 @@ export default function TydMetGod({
   const stappe = bouStappe(nota)
   const stap   = stappe[Math.min(i, stappe.length - 1)]
   const lyfRef = useRef(null)
+  const [voet, setVoet] = useState(null)
 
   /* Elke verandering aan die staat gaan dadelik na die foon. Daar is geen
      STOOR-knoppie nie en daar moet nie een wees nie: 'n mens wat vergeet druk,
@@ -335,6 +337,7 @@ export default function TydMetGod({
         <button className="tmg-rond" onClick={onSluit} aria-label="Maak toe">&#10005;</button>
       </header>
 
+      <VoetKonteks.Provider value={voet}>
       <div className="tmg-lyf" ref={lyfRef}>
         <div key={stap} className="tmg-skerm-omhulsel">
         {stap === 'luister' && (
@@ -360,7 +363,45 @@ export default function TydMetGod({
         )}
         </div>
       </div>
+      </VoetKonteks.Provider>
+
+      {/* Die "Volgende"-balk staan BUITE die rol-lyf, dus op presies dieselfde
+          plek op elke skerm. Die skerm self sit sy knoppie hierin (sien
+          `Volgende`); op die klaar-skerm is hy leeg en dan verdwyn hy. */}
+      <footer className="tmg-voet" ref={setVoet} />
     </div>
+  )
+}
+
+/* ── Die "Volgende"-balk ──
+ *
+ * Dewald, 30 Oktober 2026: *"die knoppies onder wat moet sê Gaan verder moet
+ * uitstaan teenoor die res... elke blad duidelik wees gaan verder."* Dit was op
+ * elke skerm 'n ander ding: op skerm 1 'n goue pil, op skerm 2 klein goue teks
+ * onder 'n GOUE "Maak in die Bybel oop" (wat dus soos die volgende stap gelees
+ * het), op skerm 5 glad nie.
+ *
+ * Nou is daar een reël: die SOLIEDE goue balk heel onder is altyd die pad
+ * vorentoe, en niks anders op 'n skerm is solied goud nie. Die aksies op die
+ * skerm self (Bybel, stoor, ek het gebid) het 'n goue RAND.
+ *
+ * Die balk word deur 'n portaal in `.tmg-voet` gesit, sodat elke skerm sy eie
+ * woorde en sy eie aksie hou en die balk tog nooit van plek verskuif nie. */
+const VoetKonteks = createContext(null)
+
+function Volgende({ onClick, gloei = false, disabled = false, children = 'Volgende' }) {
+  const voet = useContext(VoetKonteks)
+  if (!voet) return null
+  return createPortal(
+    <button className={`tmg-volgende${gloei ? ' tmg-volgende-gloei' : ''}`}
+            onClick={onClick} disabled={disabled}>
+      <span>{children}</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="13 6 19 12 13 18" />
+      </svg>
+    </button>,
+    voet,
   )
 }
 
@@ -368,6 +409,9 @@ export default function TydMetGod({
 
 function Luister({ nota, staat, stel, verder }) {
   const reedsGeluister = staat.geluister === nota.id
+  /* Die boodskap het tot die einde gespeel: die balk gloei een keer sag. Dit
+     sê "goed, nou die volgende" sonder om iemand te haas. */
+  const [klaarGehoor, setKlaarGehoor] = useState(false)
 
   /* ── Die hart ──
    *
@@ -422,6 +466,7 @@ function Luister({ nota, staat, stel, verder }) {
           sleutel={`tmg_${nota.id}`}
           kop="VANDAG SE BOODSKAP"
           opSpeel={() => stel(s => merkGeluister(s, nota.id))}
+          opKlaar={() => setKlaarGehoor(true)}
         />
       </div>
 
@@ -438,7 +483,7 @@ function Luister({ nota, staat, stel, verder }) {
 
       {/* Nooit gesper nie. Val die klank om op iemand se eerste dag, kom hy
           nooit weer nie — en die res van die ritueel werk sonder klank. */}
-      <button className="tmg-knop" onClick={verder}>Gaan verder</button>
+      <Volgende onClick={verder} gloei={klaarGehoor} />
     </section>
   )
 }
@@ -483,18 +528,16 @@ function Woord({ skrif, opskrif, teks, staat, stel, verder }) {
           ken nie), staan die vers steeds hier — net sonder 'n knoppie wat
           niks sou doen nie. */}
       {skrif && (
-        <button className="tmg-knop tmg-knop-met-teken" onClick={maakOop}>
+        <button className="tmg-knop tmg-knop-rand tmg-knop-met-teken" onClick={maakOop}>
           <TekenBoek />
           <span>Maak in die Bybel oop</span>
         </button>
       )}
 
-      {/* Ná die Bybel kom 'n mens hierheen terug. Die knoppie moet dan die
-          natuurlike volgende ding wees, nie 'n tweede uitnodiging nie. */}
-      <button className={`tmg-knop${skrif ? ' tmg-knop-stil' : ''}`}
-              onClick={() => { if (!skrif) stel(merkGelees); verder() }}>
-        {!skrif || staat.gelees ? 'Gaan verder' : 'Later — gaan verder'}
-      </button>
+      {/* Ná die Bybel kom 'n mens hierheen terug, en dan is die balk die
+          natuurlike volgende ding. Sonder 'n Bybel-knoppie IS die vers die
+          lees, en tel "Volgende" as gelees. */}
+      <Volgende onClick={() => { if (!skrif) stel(merkGelees); verder() }} />
     </section>
   )
 }
@@ -581,12 +624,12 @@ function Wallpaper({ nota, verder }) {
              loading="lazy" decoding="async" />
       </div>
 
-      <button className="tmg-knop tmg-knop-met-teken" onClick={stoor} disabled={besig}>
+      <button className="tmg-knop tmg-knop-rand tmg-knop-met-teken" onClick={stoor} disabled={besig}>
         <TekenAf />
         <span>{besig ? 'Besig…' : 'Stoor op my foon'}</span>
       </button>
       {nota2 && <p className="tmg-fyn tmg-fyn-alleen">{nota2}</p>}
-      <button className="tmg-knop tmg-knop-stil" onClick={verder}>Gaan verder</button>
+      <Volgende onClick={verder} />
     </section>
   )
 }
@@ -693,6 +736,7 @@ function Dra({ staat, stel, verder }) {
       <section className="tmg-skerm">
         <h1 className="tmg-titel">Bid vandag vir iemand</h1>
         <p className="tmg-lei">Een oomblik…</p>
+        <Volgende onClick={verder} />
       </section>
     )
   }
@@ -708,7 +752,7 @@ function Dra({ staat, stel, verder }) {
             ? 'Jy het almal gedra wat vandag om gebed gevra het. Dankie.'
             : 'Niemand het die afgelope dae om gebed gevra nie. Dalk is jy vandag die een wat kan vra.'}
         </p>
-        <button className="tmg-knop" onClick={verder}>Gaan verder</button>
+        <Volgende onClick={verder} />
       </section>
     )
   }
@@ -741,22 +785,22 @@ function Dra({ staat, stel, verder }) {
           en dan is die daad niks werd nie. */}
       {!gebid ? (
         <>
-          <button className="tmg-knop tmg-knop-met-teken" onClick={ekHetGebid}>
+          <button className="tmg-knop tmg-knop-rand tmg-knop-met-teken" onClick={ekHetGebid}>
             <TekenHande />
             <span>Ek het vir hulle gebid</span>
           </button>
           {/* 'n EGTE pad verby. Sonder dit is die enigste knoppie op hierdie
               skerm "ek het gebid", en dan moet iemand wat nie wil of kan nie,
               óf lieg óf die hele vloei toemaak. Die opsomming vink net af wat
-              werklik gebeur het — dus mag dit ook niks wees nie. */}
-          <button className="tmg-knop tmg-knop-stil" onClick={verder}>Nie vandag nie</button>
+              werklik gebeur het — dus merk die balk hier niks. */}
+          <Volgende onClick={verder} />
         </>
       ) : (
         <div className="tmg-dankie">
           <TekenHande klas="tmg-teken tmg-teken-groot" />
           <p className="tmg-dankie-teks">Dankie. Jy het vandag iemand in gebed gedra.</p>
-          <button className="tmg-knop" onClick={nogIemand}>Bid vir nog iemand</button>
-          <button className="tmg-knop tmg-knop-stil" onClick={verder}>Gaan verder</button>
+          <button className="tmg-knop tmg-knop-rand" onClick={nogIemand}>Bid vir nog iemand</button>
+          <Volgende onClick={verder} />
         </div>
       )}
     </section>
@@ -833,7 +877,7 @@ function Hart({ staat, stel, verder }) {
             <p>SADAG 0800 567 567 · Lifeline 0861 322 322 · Noodgeval 112</p>
           </div>
         )}
-        <button className="tmg-knop" onClick={verder}>Gaan verder</button>
+        <Volgende onClick={verder} />
       </section>
     )
   }
@@ -859,9 +903,12 @@ function Hart({ staat, stel, verder }) {
 
       {fout && <p className="tmg-fout">{fout}</p>}
 
-      <button className="tmg-knop" onClick={deel} disabled={besig || !teks.trim()}>
-        {besig ? 'Besig…' : 'Deel my gebedsversoek'}
-      </button>
+      {/* Die balk sê wat gaan gebeur. Met woorde in die kassie DEEL hy; met 'n
+          leë kassie gaan hy net verder en merk niks — "jy het jou hart voor God
+          gebring" kom eers wanneer hy dit self sê (die reël hieronder). */}
+      {teks.trim()
+        ? <Volgende onClick={deel} disabled={besig}>{besig ? 'Besig…' : 'Deel my gebedsversoek'}</Volgende>
+        : <Volgende onClick={verder} />}
       {/* 'n EGTE uitgang, nie 'n skuldsin nie. Niemand moet voel hy moet iets
           publiek indien om die dag klaar te maak nie. */}
       <button className="tmg-knop tmg-knop-stil" onClick={privaat}>

@@ -1,6 +1,49 @@
 /* ─── Google Fonts ─── */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap');
 
+/* ─── Die dakkie op ê, ô, î, û, â ───
+   Cormorant Garamond teken die kappie hoog en spits, los bo die letter — op
+   'n foon lees "lê" soos "l^e" (Dewald se skermkiekie, 30 Oktober 2026). Elke
+   Cormorant-familie doen dit. Net DAARDIE letters kom dus uit EB Garamond, 'n
+   Garamond wat die kappie reg teken; `size-adjust` 92% laat hulle presies by
+   Cormorant se hoogte pas. Die res van die woord bly Cormorant. */
+@font-face {
+  font-family: 'Dakkie';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 92%;
+  src: url(https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RkBI9_Wa-XgA.woff2) format('woff2');
+  unicode-range: U+00C2, U+00CA, U+00CE, U+00D4, U+00DB, U+00E2, U+00EA, U+00EE, U+00F4, U+00FB;
+}
+@font-face {
+  font-family: 'Dakkie';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  size-adjust: 92%;
+  src: url(https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-NfNkBI9_Wa-XgA.woff2) format('woff2');
+  unicode-range: U+00C2, U+00CA, U+00CE, U+00D4, U+00DB, U+00E2, U+00EA, U+00EE, U+00F4, U+00FB;
+}
+@font-face {
+  font-family: 'Dakkie';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  size-adjust: 92%;
+  src: url(https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-DPNkBI9_Wa-XgA.woff2) format('woff2');
+  unicode-range: U+00C2, U+00CA, U+00CE, U+00D4, U+00DB, U+00E2, U+00EA, U+00EE, U+00F4, U+00FB;
+}
+@font-face {
+  font-family: 'Dakkie';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 92%;
+  src: url(https://fonts.gstatic.com/s/ebgaramond/v33/SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7e8QL99U6i1gmFJ.woff2) format('woff2');
+  unicode-range: U+00C2, U+00CA, U+00CE, U+00D4, U+00DB, U+00E2, U+00EA, U+00EE, U+00F4, U+00FB;
+}
+
 /* ─── Reset & Base ─── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -27,7 +70,7 @@
   --gradient: linear-gradient(175deg, #B8A0DC 0%, #D4A0C0 35%, #EDB890 70%, #D4956A 100%);
   --gradient-light: linear-gradient(175deg, #C8B8EC 0%, #E4B4CC 40%, #F2C8A0 75%, #E0A87A 100%);
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-serif: 'Dakkie', 'Cormorant Garamond', Georgia, serif;
   --font-body:  'Inter', system-ui, sans-serif;
 
   --nav-height:  68px;

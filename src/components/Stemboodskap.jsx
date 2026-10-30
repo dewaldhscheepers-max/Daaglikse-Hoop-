@@ -49,6 +49,7 @@ export default function Stemboodskap({
   bron, titel, duurTeks, sleutel, transkripsie,
   kop = 'DIE WEEK SE STEMBOODSKAP',
   opSpeel,
+  opKlaar,
 }) {
   const audioRef = useRef(null)
   const [speel, setSpeel]   = useState(false)
@@ -62,6 +63,10 @@ export default function Stemboodskap({
      luisteraar-effek afbreek en herbou nie — dit sou die klank onderbreek. */
   const opSpeelRef = useRef(opSpeel)
   opSpeelRef.current = opSpeel
+  /* Tyd met God se "Volgende"-balk gloei een keer wanneer die boodskap klaar
+     is. Om dieselfde rede deur 'n ref. */
+  const opKlaarRef = useRef(opKlaar)
+  opKlaarRef.current = opKlaar
 
   const berg = sleutel ? `vj_stem_${sleutel}` : ''
 
@@ -94,6 +99,7 @@ export default function Stemboodskap({
     function opEinde() {
       setSpeel(false)
       try { localStorage.removeItem(berg) } catch {}
+      if (opKlaarRef.current) { try { opKlaarRef.current() } catch {} }
     }
 
     /* `play` en `pause` was anonieme funksies en is dus NOOIT afgehaal nie.

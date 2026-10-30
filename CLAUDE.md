@@ -1075,6 +1075,42 @@ nooit op `:active` nie. Duik daar ooit gekleurde strepe in hierdie vloei op,
 is `animation: tmg-in` in `TydMetGod.css` die eerste plek om te kyk — haal dit
 uit en die skerm werk presies soos hy is.
 
+### Die "Volgende"-balk: een reël vir die hele vloei
+
+Dewald, 30 Oktober 2026: *"die knoppies onder wat moet sê Gaan verder moet
+uitstaan teenoor die res... elke blad duidelik wees gaan verder."* Dit was op
+elke skerm 'n ander ding — op skerm 2 was die GOUE pil "Maak in die Bybel oop",
+dus het dit soos die volgende stap gelees, en op skerm 5 was daar geen
+"verder" nie.
+
+**Die SOLIEDE goue balk heel onder is altyd die pad vorentoe, en niks anders op
+skerms 1–5 is solied goud nie.** Aksies op die skerm self (Bybel, stoor, ek het
+gebid, bid vir nog iemand) dra `.tmg-knop-rand` — 'n goue rand. Die balk
+(`Volgende` in TydMetGod.jsx) word deur 'n PORTAAL in `.tmg-voet` gesit, BUITE
+die rol-lyf, sodat hy op elke skerm op presies dieselfde plek staan terwyl elke
+skerm sy eie woorde en aksie hou. Op die klaar-skerm is die voet leeg en
+`:empty` laat hom verdwyn. Geen `backdrop-filter` op die voet nie — die lyf rol
+daaragter.
+
+* Skerm 5: woorde in die kassie → die balk sê **"Deel my gebedsversoek"**; leeg
+  → **"Volgende"**, en dit merk NIKS (die opsomming sê eers "jou hart voor God
+  gebring" wanneer hy "Ek hou dit vandag tussen my en God" druk).
+* Skerm 4: "Nie vandag nie" is die balk, en ook hy merk niks.
+* Skerm 1: wanneer die boodskap klaar gespeel het (`opKlaar` op
+  `Stemboodskap.jsx`), gloei die balk twee keer — 'n `box-shadow`-animasie,
+  nooit `transform` of `opacity` nie.
+
+Blaaiertoets: `kykVolgende.mjs` (een balk per skerm, dieselfde y op al vyf,
+`elementFromPoint` op sy middel, geen ander soliede goue knoppie, die gloed, en
+skerm 5 se twee gesigte).
+
+**Die dakkie op ê, ô, î, û, â kom uit EB Garamond.** Elke Cormorant-familie
+teken die kappie hoog en spits, los bo die letter — "lê" lees op 'n foon soos
+"l^e". `index.css` het 'n `@font-face 'Dakkie'` met 'n `unicode-range` van net
+daardie tien letters en `size-adjust: 92%`, en `--font-serif` begin daarmee.
+Die res van elke woord bly Cormorant. Die lêer laai eers wanneer 'n blad werklik
+'n dakkie-letter wys.
+
 ### "Hy het sy hart gebring" is NIE "hy het getik" nie
 
 Twee velde wat maklik EEN veld lyk, en hulle was dit ook — 'n fout wat amper
