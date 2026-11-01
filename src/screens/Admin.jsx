@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import KinderAdmin from './KinderAdmin'
 import ReelsAdmin from './ReelsAdmin'
 import SorgAdmin from './SorgAdmin'
+import AdminGetuienisse from './AdminGetuienisse'
 import VolgJesusAdmin from './VolgJesusAdmin'
 import { db, storage } from '../firebase'
 import { collection, query, orderBy, getDocs, getDoc, setDoc, deleteDoc, doc, onSnapshot, addDoc, limit, where, Timestamp, serverTimestamp } from 'firebase/firestore'
@@ -37,7 +38,7 @@ function leesGeheim() {
 }
 
 const OORTJIE_SLEUTEL = 'admin_oortjie'
-const OORTJIES = ['notes', 'books', 'kinders', 'notif', 'email', 'english', 'video', 'sorg']
+const OORTJIES = ['notes', 'books', 'kinders', 'notif', 'email', 'english', 'video', 'getuienis', 'sorg']
 
 /* Wat uit localStorage kom, word nagegaan. 'n Onbekende waarde sou elke
    oortjie leeg laat en soos 'n stukkende admin lyk. */
@@ -1006,6 +1007,9 @@ export default function Admin({ onClose }) {
           <button className={`admin-tab ${activeTab === 'video' ? 'active' : ''}`} onClick={() => setActiveTab('video')}>
             📹 Video
           </button>
+          <button className={`admin-tab ${activeTab === 'getuienis' ? 'active' : ''}`} onClick={() => setActiveTab('getuienis')}>
+            🕊️ Getuienisse
+          </button>
           <button className={`admin-tab ${activeTab === 'volgjesus' ? 'active' : ''}`} onClick={() => setActiveTab('volgjesus')}>
             ✝️ Volg Jesus
           </button>
@@ -1807,6 +1811,8 @@ export default function Admin({ onClose }) {
               )}
             </div>
           )}
+
+          {activeTab === 'getuienis' && <AdminGetuienisse />}
 
           {activeTab === 'video' && (
             <div className="admin-section">

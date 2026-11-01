@@ -2635,6 +2635,16 @@ die skerm — hy het net 'n dooie grys knoppie gesien. Nou lyk die knoppie dof
 Ook geen `aria-disabled` nie: 'n knoppie wat iets doen, is nie gesper nie.
 Blaaiertoets: `kykDeelKnop.mjs`.
 
+**Getuienisse word in die admin weggesteek, nooit uitgevee nie** (🕊️
+Getuienisse, `AdminGetuienisse.jsx`). Dewald, 1 November 2026: *"Delete die 2
+uit die getuienis afdeling... dis gebede nie getuienisse nie."* `firestore.rules`
+verbied `delete` op `testimonies` en dit bly so; die knoppie skryf `reported:
+true` + `verwyderDeurAdmin: true`, en Bid Saam filter reeds op `!t.reported`.
+"Skuif na Bid Saam" sit die woorde eers op die gebedsmuur (`magDeel()`, dieselfde
+keuring as die muur se vorm) — wie om gebed gevra het, kry dit steeds.
+Blaaiertoets: `kykGetuienisAdmin.mjs` (vals `getDocs`/`updateDoc` in
+`node_modules/.toets/valsFirestore.js`).
+
 **Die videogebed op Bid Saam kan ook 'n TikTok wees.** Dewald, 26 Oktober
 2026: YouTube het 'n video se klank op 'n vals kopiereg-eis afgesit. Die admin se
 veld (📹-oortjie) neem nou 'n YouTube- OF TikTok-skakel (`src/data/videoBron.js`);
