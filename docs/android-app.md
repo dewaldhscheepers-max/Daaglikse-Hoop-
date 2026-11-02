@@ -324,9 +324,37 @@ Wees eerlik hieroor, want dit is waar die vorige keer misluk het:
   daaglikse stemboodskap speel voort met die skerm af." 
 * **'n Bank se 3-D Secure-blad.** Is dit nie op `payfast.co.za` nie, gaan
   daardie blad na Chrome toe. Toets 'n klein skenking.
-* **Die heel eerste oopmaak SONDER internet** wys "Daaglikse Hoop laai…"
-  uit `android-web/`. Ná een oopmaak met internet laai die diensketter die
-  app aflyn.
+* **Sonder internet** — sien "Sonder internet" hieronder. Toets dit op
+  vliegtuigmodus voordat 'n bondel ooit na Google Play gaan.
+
+## Sonder internet
+
+Hier het gestaan dat die eerste oopmaak sonder internet "Daaglikse Hoop laai…"
+uit `android-web/` sou wys. **Dit was nooit waar nie, en niemand het dit
+getoets nie.** Met `server.url` laai Capacitor die lewendige werf direk; misluk
+dit, wys die WebView sy eie grys "Webpage not available" — sonder 'n enkele
+knoppie. Google Play het weergawe 106 op 2 November 2026 presies daarom
+geweier: *"Broken Functionality — Unresponsive UI elements"*, met 'n
+skermkiekie van `net::ERR_INTERNET_DISCONNECTED`. Hulle toetser maak die app
+doelbewus sonder internet oop.
+
+Nou wys `server.errorPath: "index.html"` die app se EIE blad wanneer die werf
+nie laai nie (sonder internet, of 'n bediener-fout op die hoofraam). Capacitor
+bedien dit van `https://localhost/index.html` uit die bondel, dus werk dit
+sonder internet. Die blad:
+
+* sê in Afrikaans (en een reël Engels vir Google se toetser) wat fout is;
+* het 'n **"Probeer weer"**-knoppie wat die werf weer laai — misluk dit weer,
+  kom die blad weer;
+* laai die werf VANSELF sodra die `online`-gebeurtenis vuur;
+* herlaai NOOIT op 'n tydhouer nie. Die ou blad het ná 1,5s self herlaai, en as
+  foutblad sou dit sonder internet 'n eindelose flikker-lus gewees het.
+
+Die bou (`.github/workflows/android.yml`) keur nou dat `errorPath` in die
+bondel se `capacitor.config.json` staan en dat die blad met sy knoppie daar is.
+Blaaiertoets van die blad self: `kykAflyn.mjs`. Wat NIE hier getoets kan word
+nie, is Capacitor se omskakeling na die blad op 'n regte foon — **vliegtuigmodus
+op 'n foon, voor elke oplaai.**
 
 ## Gedeelde skakels maak die APP oop
 

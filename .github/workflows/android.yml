@@ -145,6 +145,16 @@ jobs:
           moet(b'MediaSessionService' in m, 'die klankdiens (skerm af) is in die manifest')
           cfg = [n for n in name if n.endswith('capacitor.config.json')]
           moet(bool(cfg) and b'https://www.dewaldscheepers.com' in z.read(cfg[0]) and b'payfast' in z.read(cfg[0]), 'capacitor.config.json (lewendige werf + PayFast)')
+          # Sonder internet: Google het 106 hieroor geweier ("unresponsive UI" —
+          # die foon se eie grys "Webpage not available"). server.errorPath wys
+          # na die app se EIE foutblad, en daardie blad moet in die bondel wees,
+          # 'n knoppie hê, en NIE op 'n tydhouer herlaai nie (dit sou sonder
+          # internet 'n flikker-lus wees).
+          moet(bool(cfg) and b'"errorPath"' in z.read(cfg[0]), 'capacitor.config.json: server.errorPath (foutblad sonder internet)')
+          fb = [n for n in name if n.endswith('assets/public/index.html')]
+          fbt = z.read(fb[0]) if fb else b''
+          moet(b'Probeer weer' in fbt and b'<button' in fbt, 'die foutblad (index.html) is in die bondel, met n knoppie')
+          moet(b'setTimeout(function () { location.replace' not in fbt, 'die foutblad herlaai nie vanself op n tydhouer nie')
           plug = [n for n in name if n.endswith('capacitor.plugins.json')]
           pj = z.read(plug[0]).decode() if plug else ''
           for p in ('PushNotifications', 'Share', 'Filesystem', 'App', 'MediaSession'):

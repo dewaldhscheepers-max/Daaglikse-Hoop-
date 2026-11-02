@@ -10,6 +10,7 @@
     "url": "https://www.dewaldscheepers.com",
     "androidScheme": "https",
     "cleartext": false,
+    "errorPath": "index.html",
     "allowNavigation": [
       "dewaldscheepers.com",
       "www.dewaldscheepers.com",

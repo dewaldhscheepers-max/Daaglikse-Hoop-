@@ -3033,6 +3033,15 @@ was dood op die tuisblad, die mikrofoon-toestemming het ontbreek, en
 getoets kan word nie. **`src/data/inheemsBrug.js` doen niks in 'n blaaier
 nie** — moenie daaraan verander sonder om `kykInheemsBrug.mjs` te loop nie.
 
+**Sonder internet wys die app sy EIE blad** (`server.errorPath` →
+`android-web/index.html`). Google Play het 106 op 2 November 2026 geweier omdat
+die toetser die app sonder internet oopgemaak en die WebView se grys
+"Webpage not available" gekry het — geen knoppie, "unresponsive UI". Die blad
+het "Probeer weer", laai vanself by `online`, en herlaai NOOIT op 'n tydhouer
+nie (sonder internet 'n flikker-lus). Die bou keur dit. **Vliegtuigmodus op 'n
+regte foon voor elke oplaai.** Volledig in `docs/android-app.md`, "Sonder
+internet"; blaaiertoets `kykAflyn.mjs`.
+
 **Die stemboodskap met die skerm af** (20 Oktober 2026, build 105 op 'n regte
 foon: *"screen eventually goes black after few sec it stops playing"*). Android
 vries 'n app sonder 'n voorgronddiens; Chrome het een, die WebView nie. Die

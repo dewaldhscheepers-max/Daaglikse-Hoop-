@@ -2,27 +2,85 @@
 <html lang="af">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Daaglikse Hoop</title>
 <!--
   Die Android-app laai die LEWENDE webwerf (capacitor.config.json se
-  server.url), nie hierdie lêer nie. Capacitor eis net 'n index.html in
-  webDir. Dit was eers `dist`: 220 MB se e-boeke en Bybel IN die app, wat
-  niemand ooit gebruik nie — en Google Play weier 'n bondel bo 200 MB.
-  Verskyn hierdie blad ooit, stuur dit die mens na die regte plek.
+  server.url). Hierdie blad leef IN die app en is die app se foutblad:
+  `server.errorPath` wys hierheen wanneer die webwerf nie laai nie — sonder
+  internet, of as die bediener 'n fout gee. Capacitor bedien dit van
+  https://localhost/index.html uit die app self, dus werk dit SONDER internet.
+
+  Google Play het weergawe 106 op 2 November 2026 hierom geweier ("Broken
+  Functionality — unresponsive UI"): hulle toetser het die app sonder internet
+  oopgemaak en die foon se eie grys "Webpage not available" gekry, sonder 'n
+  enkele knoppie. Dit mag nooit weer gebeur nie.
+
+  Drie reëls:
+  * GEEN outomatiese herlaai op 'n tydhouer nie. Sonder internet sou dit 'n
+    lus wees: foutblad → herlaai → fout → foutblad, elke sekonde of twee, en
+    die skerm flikker vir altyd. Die blad wag vir die `online`-gebeurtenis, of
+    vir 'n druk op die knoppie.
+  * Niks van buite nie — geen lettertipe, geen prent van die web nie. Daar is
+    geen internet nie; alles staan in hierdie lêer.
+  * Engels onder die Afrikaans: Google se toetser lees Engels, en "Probeer
+    weer" moet vir hom ook 'n knoppie wees wat hy verstaan.
+
+  Sien docs/android-app.md, "Sonder internet".
 -->
 <style>
-  body { margin: 0; min-height: 100svh; display: flex; align-items: center; justify-content: center;
-         background: #FAF8F5; color: #3A2E2A; font: 17px/1.5 system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
-  a { display: inline-block; margin-top: 16px; padding: 12px 22px; border-radius: 999px; background: #C97D3A; color: #fff; text-decoration: none; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    min-height: 100svh; display: flex; align-items: center; justify-content: center;
+    background: #FAF8F5; color: #3A2E2A;
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    text-align: center; padding: 24px; box-sizing: border-box;
+  }
+  .kaart { max-width: 340px; }
+  .son { width: 64px; height: 64px; margin: 0 auto 18px; color: #C97D3A; }
+  h1 { font-size: 22px; margin: 0 0 8px; font-weight: 700; }
+  p { margin: 0 0 6px; }
+  .en { color: #8A7F78; font-size: 14px; margin-top: 14px; }
+  button {
+    margin-top: 22px; min-width: 200px; min-height: 52px; padding: 14px 26px;
+    border: 0; border-radius: 999px; background: #C97D3A; color: #fff;
+    font: 600 17px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    cursor: pointer;
+  }
+  /* Net KLEUR op :active — geen transform nie (sien CLAUDE.md, Android). */
+  button:active { background: #A9662C; }
+  .besig { color: #8A7F78; font-size: 14px; margin-top: 12px; min-height: 21px; }
 </style>
 </head>
 <body>
-  <div>
-    <p>Daaglikse Hoop laai…</p>
-    <p>Kyk of jou foon aan die internet gekoppel is.</p>
-    <a href="https://www.dewaldscheepers.com/">Probeer weer</a>
+  <div class="kaart">
+    <svg class="son" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+      <path d="M12 44h40" /><path d="M20 44a12 12 0 0 1 24 0" />
+      <path d="M32 18v6" /><path d="M16 26l4 4" /><path d="M48 26l-4 4" />
+    </svg>
+    <h1>Geen internet nie</h1>
+    <p>Daaglikse Hoop het internet nodig om vandag se boodskap te laai.</p>
+    <p>Kyk of jou foon aan die internet of Wi-Fi gekoppel is.</p>
+    <button id="weer" type="button">Probeer weer</button>
+    <div class="besig" id="besig" aria-live="polite"></div>
+    <p class="en">No internet connection. Connect to the internet and tap “Probeer weer” (Try again).</p>
   </div>
-  <script>setTimeout(function () { location.replace('https://www.dewaldscheepers.com/') }, 1500)</script>
+  <script>
+    /* ES5 met opset — dit is die app se laaste vangnet. */
+    var WERF = 'https://www.dewaldscheepers.com/';
+    var knop = document.getElementById('weer');
+    var besig = document.getElementById('besig');
+    function probeer() {
+      besig.textContent = 'Een oomblik…';
+      knop.disabled = true;
+      /* Bly die laai hang, kom die knoppie terug: 'n knoppie wat vir altyd
+         gesper bly, is presies wat Google afgekeur het. */
+      setTimeout(function () { knop.disabled = false; besig.textContent = ''; }, 8000);
+      location.replace(WERF);
+    }
+    knop.addEventListener('click', probeer);
+    /* Kom die internet terug terwyl die blad oop is, laai die app vanself. */
+    window.addEventListener('online', probeer);
+  </script>
 </body>
 </html>
