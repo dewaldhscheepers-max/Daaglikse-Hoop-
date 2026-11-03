@@ -2,6 +2,7 @@ const { magAdminDing } = require('./_geheim.js')
 const crypto = require('crypto')
 const { haalEnOntleed } = require('./_eposLys')
 const { stuurBondel } = require('./_eposStuur')
+const { haalAfgemeld } = require('./_eposAfmeld')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -141,6 +142,12 @@ module.exports = async function handler(req, res) {
   const emails = lys.adresse
   if (emails.length === 0) return res.status(400).json({ error: 'Geen inskrywers nie. Voer eers die lys in.' })
 
+  /* Wie op die afmeld-knoppie gedruk het. Kan dit nie gelees word nie,
+     stuur ons NIKS — sien _eposAfmeld.js. */
+  let afgemeld
+  try { afgemeld = await haalAfgemeld(projectId, token) } catch (e) {
+    return res.status(500).json({ error: e.message })
+  }
   const html = buildHtml(body)
   let sentCount = 0
   let failedCount = 0
@@ -158,6 +165,7 @@ module.exports = async function handler(req, res) {
       antwoordNa: 'info@dewaldscheepers.com',
       onderwerp:  subject.trim(),
       html,
+      afgemeld,
     })
     sentCount   += uitslag.gestuur
     failedCount += uitslag.misluk

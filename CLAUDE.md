@@ -99,7 +99,8 @@ node src/data/installTelling.toets.mjs        # die installasie-telling se afron
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
 node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
-node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 38 toetse
+node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 72 toetse
+node api/_eposAfmeld.toets.mjs                # die afmeld-knoppie: skakel, blad, stuur, 54 toetse
 node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uitvee, 20 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_ouPrente.toets.mjs                  # VOLG JESUS se vorige prente: witlys + net LEES, 21 toetse
@@ -2875,6 +2876,29 @@ Dit verskil per toestel, die geslag kan nie gekies word nie (Chrome op Android
 wys dikwels net een stem), en dit klink soos 'n masjien. Die enigste weergawe
 wat sou werk, is 'n EGTE opname per boek (of een keer deur 'n AI-stemdiens
 gemaak), wat dan speel soos die stemboodskappe.
+
+## Die afmeld-knoppie onder die weeklikse e-pos
+
+Dewald, 3 November 2026: *"it needs to work 1000000%."* Elke e-pos uit
+✉️ E-pos (`send-bulk-email`, `process-email-queue`) kry onderaan 'n
+**eie** afmeld-skakel per ontvanger, plus die `List-Unsubscribe`-koppe vir
+Gmail se eie knoppie. Alles in `api/_eposAfmeld.js` en `api/afmeld.js`.
+
+* **Die skakel is GETEKEN** (HMAC, sleutel afgelei van CRON_SECRET). Sonder
+  dit kon enigiemand enige adres afmeld. Word CRON_SECRET ooit geroteer,
+  werk OU skakels nie meer nie — die blad sê dan om info@ te e-pos.
+* **'n GET meld NIEMAND af nie**, net 'n blad met een knoppie. E-posfilters
+  (Outlook Safe Links, regeringsfilters) maak elke skakel oop; 'n skakel wat
+  by oopmaak afmeld, meld mense af wat nooit gedruk het nie. Die afmelding is
+  'n POST — ook Gmail se een-klik (RFC 8058).
+* **Die blok staan in `stuurBondel`**, soos `_eposGeblok.js`, en `afgemeld`
+  is VERPLIGTEND: 'n nuwe stuur-pad wat die lys vergeet, gooi en stuur niks.
+  Kan `haalAfgemeld` nie lees nie, stuur die eindpunt NIKS (500). 'n Week se
+  e-pos wat 'n dag later gaan, is beter as een aan 'n afgemelde mens.
+* `afgemeld/<sha256 van die adres>` — die adres self word nie gestoor nie.
+  `firestore.rules` het geen reël daarvoor nie, dus is dit toe vir kliënte.
+* Die transaksie-e-posse (gratis boek, skenk-dankie) dra dit nie; hulle is
+  nie die nuusbrief nie.
 
 ## E-boeke: 'n boek skrap
 

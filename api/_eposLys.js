@@ -17,9 +17,9 @@
    Hierdie lêer is nou die enigste plek waar daardie som gemaak word. Albei
    endpunte voer dit in, dus kan hulle nie weer verskil nie.
 
-   Let wel: daar is TANS GEEN afmeld-veld in die data nie. Ons kan dus nie
-   afgemelde mense tel nie, en ons maak nie of ons kan nie. Sien die nota
-   onder by `afgemeld`.
+   Afmeldings (die knoppie onder die e-pos) staan NIE hier nie maar in hul
+   eie versameling, en die STUUR slaan hulle oor — sien `_eposAfmeld.js`.
+   `afgemeld` hieronder bly null; `email-status.js` vul die getal in.
 
    Wat daar WEL is, is 'n blok-lys — mense wat gevra het om nie meer te hoor
    nie. Dit is nie dieselfde ding as 'n afmeld-knoppie nie: dit is met die

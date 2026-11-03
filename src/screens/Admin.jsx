@@ -1658,7 +1658,7 @@ export default function Admin({ onClose }) {
                   van die twee was verkeerd nie — die een het rou dokumente
                   getel en die ander die unieke adresse. Nou staan albei hier,
                   met die verskil uitgeskryf. */}
-              {lysOpsomming && lysOpsomming.uitgesluit > 0 && (
+              {lysOpsomming && (lysOpsomming.uitgesluit > 0 || lysOpsomming.afgemeld > 0) && (
                 <div className="admin-books-note" style={{ marginBottom: 14 }}>
                   {lysOpsomming.totaal} rekords · <b>{lysOpsomming.aktief} aktief</b> · {lysOpsomming.uitgesluit} uitgesluit
                   <br />
@@ -1669,7 +1669,9 @@ export default function Admin({ onClose }) {
                     {/* Mense wat gevra het om af te kom. Dit staan APART van
                         "ongeldig" — hulle adres is reg, ons stuur net nie. */}
                     {lysOpsomming.geblok > 0 && ` · ${lysOpsomming.geblok} het gevra om af te kom`}
-                    {lysOpsomming.afgemeld === null && ' · afmeldings word nog nie aangeteken nie'}
+                    {/* Die afmeld-knoppie onder elke e-pos (_eposAfmeld.js). Hulle
+                        staan nog in die lys; die stuur slaan hulle oor. */}
+                    {lysOpsomming.afgemeld > 0 && ` · ${lysOpsomming.afgemeld} het met die knoppie afgemeld (kry niks meer nie)`}
                   </span>
                 </div>
               )}

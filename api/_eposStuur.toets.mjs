@@ -90,7 +90,9 @@ globalThis.fetch = async (url, opsies) => {
   return { ok: true, json: async () => ({}) }
 }
 
-const gemeen = { sleutel: 'x', van: 'a@b.c', antwoordNa: 'a@b.c', onderwerp: 'S', html: '<p>H</p>' }
+/* Die afmeld-skakel onder elke e-pos word met CRON_SECRET geteken. */
+process.env.CRON_SECRET = process.env.CRON_SECRET || 'toets-geheim-van-genoeg-lengte'
+const gemeen = { sleutel: 'x', van: 'a@b.c', antwoordNa: 'a@b.c', onderwerp: 'S', html: '<p>H</p>', afgemeld: new Set() }
 
 console.log("\n── 'n Skoon bondel ──")
 bondelOproepe = enkelOproepe = 0

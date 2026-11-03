@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const { stuurBondel } = require('./_eposStuur')
+const { haalAfgemeld } = require('./_eposAfmeld')
 const { magAdminDing } = require('./_geheim.js')
 
 async function getAccessToken() {
@@ -150,6 +151,12 @@ module.exports = async function handler(req, res) {
     return res.json({ ok: true, message: 'Kampanje voltooi!', total: campaign.total })
   }
 
+  /* Wie op die afmeld-knoppie gedruk het. Kan dit nie gelees word nie,
+     stuur ons NIKS — sien _eposAfmeld.js. */
+  let afgemeld
+  try { afgemeld = await haalAfgemeld(projectId, token) } catch (e) {
+    return res.status(500).json({ error: e.message })
+  }
   const html = buildHtml(campaign.body)
   let sentCount = 0
 
@@ -164,6 +171,7 @@ module.exports = async function handler(req, res) {
       antwoordNa: 'info@dewaldscheepers.com',
       onderwerp:  campaign.subject,
       html,
+      afgemeld,
     })
     sentCount += uitslag.gestuur
     for (const s of uitslag.slegtes) console.error('Geweier:', s.adres, '—', s.rede)

@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const { haalEnOntleed } = require('./_eposLys')
+const { haalAfgemeld } = require('./_eposAfmeld')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -67,6 +68,10 @@ module.exports = async function handler(req, res) {
      "2131" gelewer. */
   let lys = { totaal: 0, aktief: 0, duplikate: 0, ongeldig: 0, sonderVeld: 0, uitgesluit: 0, geblok: 0, afgemeld: null }
   try { lys = await haalEnOntleed(projectId, token) } catch {}
+  /* Wie op die afmeld-knoppie onder die e-pos gedruk het (_eposAfmeld.js).
+     Hulle staan nog in `aktief` — die STUUR slaan hulle oor. Kan dit nie
+     gelees word nie, bly dit null ("onbekend"), nooit 'n vals 0 nie. */
+  try { lys.afgemeld = (await haalAfgemeld(projectId, token)).size } catch { lys.afgemeld = null }
 
   return res.json({
     // emailCount is nou die getal wat WERKLIK gestuur gaan word.

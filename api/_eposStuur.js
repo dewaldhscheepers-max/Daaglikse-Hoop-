@@ -24,15 +24,26 @@
    Dit is stadiger, maar net vir 'n bondel wat in elk geval sou misluk het.
    ──────────────────────────────────────────────────────────── */
 
-const { sifGeblok } = require('./_eposGeblok')
+const { sifGeblok, sleutel: blokSleutel } = require('./_eposGeblok')
+const { afmeldVoet, afmeldKoppe } = require('./_eposAfmeld')
 
 const GELYK = 20
+
+/* Die e-pos vir EEN ontvanger: dieselfde boodskap, met SY afmeld-skakel
+   onderaan en in die koppe. Sien `_eposAfmeld.js`. */
+function eposVir({ to, van, antwoordNa, onderwerp, html }) {
+  return {
+    from: van, to, reply_to: antwoordNa, subject: onderwerp,
+    html: html + afmeldVoet(to),
+    headers: afmeldKoppe(to),
+  }
+}
 
 async function stuurEen({ sleutel, to, van, antwoordNa, onderwerp, html }) {
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${sleutel}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: van, to, reply_to: antwoordNa, subject: onderwerp, html }),
+    body: JSON.stringify(eposVir({ to, van, antwoordNa, onderwerp, html })),
   })
   if (r.ok) return { ok: true, to }
   const uit = await r.json().catch(() => ({}))
@@ -41,8 +52,13 @@ async function stuurEen({ sleutel, to, van, antwoordNa, onderwerp, html }) {
 
 /* Stuur een bondel. Gee terug hoeveel werklik deurgekom het, en WATTER
    adresse geweier is. */
-async function stuurBondel({ sleutel, adresse: rou, van, antwoordNa, onderwerp, html }) {
+async function stuurBondel({ sleutel, adresse: rou, van, antwoordNa, onderwerp, html, afgemeld }) {
   const slegtes = []
+
+  /* `afgemeld` is VERPLIGTEND: die stel sleutels uit `haalAfgemeld()`. 'n
+     Nuwe stuur-pad wat vergeet om dit te lees, gooi hier en stuur niks —
+     eerder as om stilweg mense te skryf wat afgemeld het. */
+  if (!(afgemeld instanceof Set)) throw new Error('stuurBondel: die afmeld-lys ontbreek — niks gestuur nie')
 
   /* ── Die blok, hier en nie hoër nie ──
 
@@ -55,16 +71,16 @@ async function stuurBondel({ sleutel, adresse: rou, van, antwoordNa, onderwerp, 
      Elke bulk-stuur in hierdie projek — `send-bulk-email.js` en
      `process-email-queue.js` — kom hierlangs. Dit is die enigste plek waar
      een sif almal dek. */
-  const { adresse, geblok } = sifGeblok(rou)
+  const na = sifGeblok(rou)
+  const adresse = na.adresse.filter(a => !afgemeld.has(blokSleutel(a)))
+  const geblok = na.geblok + (na.adresse.length - adresse.length)
   if (!adresse.length) return { gestuur: 0, misluk: 0, slegtes, geblok }
 
   try {
     const r = await fetch('https://api.resend.com/emails/batch', {
       method: 'POST',
       headers: { Authorization: `Bearer ${sleutel}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(adresse.map(to => ({
-        from: van, to, reply_to: antwoordNa, subject: onderwerp, html,
-      }))),
+      body: JSON.stringify(adresse.map(to => eposVir({ to, van, antwoordNa, onderwerp, html }))),
     })
     if (r.ok) return { gestuur: adresse.length, misluk: 0, slegtes, geblok }
 
@@ -95,4 +111,4 @@ async function stuurBondel({ sleutel, adresse: rou, van, antwoordNa, onderwerp, 
   return { gestuur, misluk: adresse.length - gestuur, slegtes, geblok }
 }
 
-module.exports = { stuurBondel, stuurEen, GELYK }
+module.exports = { stuurBondel, stuurEen, eposVir, GELYK }
