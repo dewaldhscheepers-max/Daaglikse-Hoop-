@@ -50,8 +50,20 @@ export const isInApp = (() => {
   try {
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &&
         window.Capacitor.isNativePlatform()) return true
+    /* Die TWA-verwyser is net op die EERSTE laai daar. Herlaai die blad (die
+       diensketter se nuwe weergawe, die wit-skerm-vangnet, 'n sprong na /go),
+       is hy weg — en Samsung Internet se TWA meld NIE "standalone" nie. Dan
+       het die ou Play-app binne-in homself "Maak oop in Chrome" gewys, en
+       daardie skakel doen niks in 'n TWA nie (3 November 2026, 'n gebruiker:
+       "as ek daarop click gebeur daar niks"). Die sein word dus in
+       sessionStorage vasgehou: dit hoort aan HIERDIE oortjie, die TWA s'n, en
+       lek nie na 'n gewone Samsung Internet-oortjie nie. */
     if (typeof document !== 'undefined' &&
-        String(document.referrer || '').startsWith('android-app://')) return true
+        String(document.referrer || '').startsWith('android-app://')) {
+      try { sessionStorage.setItem('dh_twa', '1') } catch {}
+      return true
+    }
+    try { if (sessionStorage.getItem('dh_twa') === '1') return true } catch {}
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true
     if (window.navigator && window.navigator.standalone === true) return true
   } catch {}
