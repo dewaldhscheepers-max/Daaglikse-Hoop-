@@ -346,9 +346,14 @@ export const WEEK12_DEELSIN =
 
 /* ── Die brug na Week 13 ──
  *
- * `null` totdat Dewald Week 13 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK12_VOLGENDE = null
+ * Week 13 bestaan sedert 5 November 2026 (volgJesusWeek13.js). Die titel en die
+ * woorde kom uit Dewald se eie "BEGIN VAN DIE WEEK". */
+export const WEEK12_VOLGENDE = {
+  week: 13,
+  titel: 'Twee huise. Een storm.',
+  lyf: 'Jesus eindig die Bergrede met twee mense wat dieselfde woorde hoor. Albei '
+     + 'bou. Albei kry ’n storm. Maar net een huis bly staan.',
+}
 
 export function blokkeVirDag12(n) {
   const dag = WEEK12_DAE.find(d => d.n === n)

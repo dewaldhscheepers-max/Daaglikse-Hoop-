@@ -698,4 +698,59 @@ export const WEKE = {
        groepleier. */
     pastoraleRisiko: 'medium',
   },
+  13: {
+    weeknommer: 13,
+    titel: 'Twee huise. Een storm.',
+    doel:
+      'Om nie net Jesus se woorde te ken nie, maar daarvolgens te leef.',
+    weekKern:
+      'DIE VERSKIL TUSSEN DIE TWEE HUISE WAS NIE WIE JESUS GEHOOR HET NIE. DIT WAS WIE GEDOEN HET WAT HY SÊ.',
+    openingskerm:
+      'Jesus eindig die Bergrede met twee mense wat dieselfde woorde hoor.\n\n'
+      + 'Albei bou.\n\n'
+      + 'Albei kry ’n storm.\n\n'
+      + 'Maar net een huis bly staan.\n\n'
+      + 'Die groot verskil is eenvoudig:\n\n'
+      + 'Die een hoor wat Jesus sê en doen dit.',
+    primereSkrif: 'Matteus 7:24–27',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 12 se noot. Dewald: "Daar is GEEN stemnota, audio of
+       klankspeler in Week 13 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'DIE VERSKIL TUSSEN DIE TWEE HUISE WAS NIE WIE JESUS GEHOOR HET NIE. DIT WAS WIE GEDOEN HET WAT HY SÊ.',
+    eenSin:
+      'Die verskil was nie wie Jesus gehoor het nie. Die verskil was wie gedoen het wat Hy sê.',
+    privaatRefleksie:
+      'Waar hoor ek wat Jesus sê, maar doen ek dit nog nie?',
+    gehoorsaamheidStap:
+      'Skryf een eenvoudige stap neer.\n\nWat gaan jy doen?\n\nDoen dit.',
+    gebed:
+      'Vader, help ons om nie net te hoor wat Jesus sê nie, maar dit te doen. Wys ons waar ons op ander dinge vertrou. Leer ons om Jesus te gehoorsaam en ons lewe op Sy woorde te bou. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Hoor én doen',
+    dag1Titel: 'Twee huise. Een storm.',
+    dag2Titel: 'Hoor én doen',
+    dag3Titel: 'Bou jy op sand?',
+    dag4Titel: 'Die storm wys waarop jy staan',
+    dag5Titel: 'Doen wat Jesus sê',
+    groepVraag1:
+      'Waarom is dit moontlik om Jesus se woorde te hoor sonder om daarvolgens te leef?',
+    groepVraag2:
+      'Wat is die verskil tussen om iets te weet en om dit te doen?',
+    groepVraag3:
+      'Wat kan moeilike tye wys oor waarop ons vertrou?',
+    groepVraag4:
+      'Wat is een ding wat Jesus jou reeds geleer het wat jy hierdie week kan begin doen?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Die kern van Week 13 is eenvoudig:\n\nAlbei mense hoor Jesus. Die verskil is dat die een doen wat Hy sê en die ander een nie.\n\nMoenie die week net oor die “storms van die lewe” laat gaan nie.\n\nJesus se hoofpunt is hoor en doen.',
+    fasiliteerderGrens:
+      'Moenie gehoorsaamheid voorstel as iets waarmee ons redding verdien nie.\n\nOns word deur genade gered.\n\nHier gaan dit oor dissipelskap: iemand wat Jesus volg, neem Sy woorde ernstig op en leer om daarvolgens te leef.',
+    pastoraleRisiko: 'laag',
+  },
 }

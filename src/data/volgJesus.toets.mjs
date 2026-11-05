@@ -235,6 +235,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 12 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
       /* Week 12 */ 'Matteus 5:43–48', 'Matteus 5:44', 'Romeine 12:17–21',
                     'Matteus 5:45', 'Matteus 5:46–48',
+      /* Week 13 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 13 */ 'Matteus 7:24–27', 'Matteus 7:24', 'Matteus 7:26–27',
+                    'Matteus 7:25, 27', 'Lukas 6:46–49',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
