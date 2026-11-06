@@ -391,6 +391,18 @@ moes red — loop teen die hek vas. Die app kan homself nie herstel nie.
 Wikkel dit dus in 'n `Promise.race` met 'n tydgrens en laat die slot in 'n
 `finally` los.
 
+**Dit kan 'n OU antwoord gee — en dan sien niemand vandag se wallpaper nie.**
+Dewald, 6 November 2026: *"Todays wallpaper doesn't show. If a person is in the
+app.... they need to go out of app and in again."* Hy laai die nota en voeg die
+wallpaper LATER by (`merge` op dieselfde dokument). Twee gate het dit gekeer:
+die `limit(1)`-luisteraar het net na die nota se ID gekyk (dieselfde ID = niks
+nuuts), en ná 'n opgeskorte oortjie het `getDocs` uit die SDK se ou kas
+geantwoord, wat gestoor is en die kas se klok teruggestel het. Nou: die
+luisteraar smelt 'n VERANDERDE nuutste nota in (net 'n bediener-antwoord),
+`fetchNotes` gebruik `getDocsFromServer`, en terugkom probeer een keer weer ná
+6s en ook by `online`. Blaaiertoets: `kykWallpaperVars.mjs` (vals Firestore in
+die scratchpad se `wp/`) — dit val op die ou kode.
+
 **Dit kan 'n halwe antwoord gee.** Is die SDK vanlyn, bedien `getDocs` uit sy
 eie kas, en daardie kas hou net wat die SDK al gesien het. Met 'n
 `limit(1)`-luisteraar iewers is die antwoord soms EEN dokument. Skryf dit

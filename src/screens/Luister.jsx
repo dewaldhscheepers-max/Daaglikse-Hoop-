@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { db } from '../firebase'
-import { collection, query, orderBy, limit, startAfter, getDocs, getDoc, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, limit, startAfter, getDocs, getDocsFromServer, getDoc, doc, setDoc, increment, onSnapshot } from 'firebase/firestore'
 import '../components/PopupStyles.css'
 import './Luister.css'
 import './DaeVanVrede.css'
@@ -369,8 +369,16 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     if (!silent) setLoadingMore(true)
     try {
       const q = query(collection(db, 'notes'), orderBy('publishedAt', 'desc'), limit(PAGE_SIZE))
+      /* VAN DIE BEDIENER, nie `getDocs` nie. Dewald, 6 November 2026: *"Todays
+         wallpaper doesn't show... they need to go out of app and in again."*
+         Ná 'n opgeskorte oortjie is die SDK se verbinding dood, en `getDocs`
+         antwoord dan uit sy EIE kas — die nota soos dit was voordat hy die
+         wallpaper bygevoeg het. Daardie ou antwoord is gestoor en het die
+         kas se klok teruggestel, dus het die volgende vyf minute niks weer
+         probeer nie. `getDocsFromServer` antwoord net met die bediener se
+         waarheid of gooi, en 'n gooi laat staan wat ons het. */
       const snap = await Promise.race([
-        getDocs(q),
+        getDocsFromServer(q),
         new Promise((_, nee) => setTimeout(() => nee(new Error('te lank')), HAAL_TYDGRENS)),
       ])
       const loaded = snap.docs.map(mapDoc)
@@ -430,8 +438,19 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
     const unsub = onSnapshot(q, snap => {
       if (!snap.docs.length) return
       const latestId = snap.docs[0].id
+      /* Dieselfde nota, maar VERANDER — die wallpaper, die vers of die klank
+         is ná die oplaai bygesit (die admin skryf dit met `merge` op dieselfde
+         dokument). Hier is net na die ID gekyk, dus het wie die app oop gehad
+         het, vandag se wallpaper eers gesien nadat hy uit en weer in gegaan
+         het. Net 'n BEDIENER-antwoord tel: 'n kas-antwoord is ouer as ons s'n. */
+      const vars = snap.metadata && snap.metadata.fromCache ? null : mapDoc(snap.docs[0])
       setNotes(prev => {
-        if (prev.length > 0 && prev[0].id !== latestId) fetchNotes(true)
+        if (prev.length > 0 && prev[0].id !== latestId) { fetchNotes(true); return prev }
+        if (vars && prev.length > 0 && JSON.stringify({ ...prev[0], ...vars }) !== JSON.stringify(prev[0])) {
+          const nuut = [{ ...prev[0], ...vars }, ...prev.slice(1)]
+          writeCache(nuut)
+          return nuut
+        }
         return prev
       })
     }, () => {})
@@ -449,13 +468,27 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   // ── On visibility change: silently refresh if cache is stale or notes empty ──
   useEffect(() => {
+    let weer = null
     function onVisible() {
       if (document.visibilityState !== 'visible') return
       const { stale: isStale } = readCache()
-      if (isStale || notes.length === 0) fetchNotes(true)
+      if (!(isStale || notes.length === 0)) return
+      fetchNotes(true)
+      /* Die eerste probeerslag ná 'n opgeskorte oortjie val dikwels: die
+         verbinding is nog nie terug nie, en `getDocsFromServer` gooi. Probeer
+         dus een keer weer — maar net as die kas steeds oud is. */
+      clearTimeout(weer)
+      weer = setTimeout(() => { if (readCache().stale) fetchNotes(true) }, 6000)
     }
+    /* Die lyn kom terug terwyl die app oop is. */
+    function opAanlyn() { if (readCache().stale) fetchNotes(true) }
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    window.addEventListener('online', opAanlyn)
+    return () => {
+      clearTimeout(weer)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('online', opAanlyn)
+    }
   }, [fetchNotes, notes.length])
 
   // ── Real-time: all play counts (fires the moment anyone plays) ──
