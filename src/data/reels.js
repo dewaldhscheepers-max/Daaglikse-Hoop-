@@ -77,7 +77,7 @@
 
 /* Dieselfde basis as `hoopSkakel.js`. Twee basisse en die een sou stil verkeerd
    raak die dag wanneer die domein verander. */
-export const BASIS = 'https://dewaldscheepers.com'
+export const BASIS = 'https://www.dewaldscheepers.com'
 
 /* Waar 'n clip vandaan kom. Die speler word hierop gekies, en dit is met opset
    inprop-baar: TikTok se speler is nie 'n ding waarop hierdie app sy hele voer

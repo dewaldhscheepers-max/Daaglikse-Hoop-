@@ -91,7 +91,7 @@ export function kodeUitAdres(pad = '', soek = '') {
  *
  * Nou deel ons 'n skakel na die APP by daardie week. Wie dit oopmaak, land in
  * VOLG JESUS en die stemboodskap speel daar, saam met alles rondom hom. */
-export function weekSkakel(w, basis = 'https://dewaldscheepers.com') {
+export function weekSkakel(w, basis = 'https://www.dewaldscheepers.com') {
   const n = Number(w)
   if (!Number.isInteger(n) || n < 1 || n > 52) return `${basis}/go/volg-jesus`
   return `${basis}/go/volg-jesus?week=${n}`

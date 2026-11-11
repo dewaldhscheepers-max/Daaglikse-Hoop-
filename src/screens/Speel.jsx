@@ -3,7 +3,7 @@ import './Speel.css'
 
 /* Die hele punt van hierdie blad is om die app in mense se hande te kry.
    Elke speletjie kry dus sy eie deel-knoppie. */
-const APP = 'https://dewaldscheepers.com/go'
+const APP = 'https://www.dewaldscheepers.com/go'
 
 async function deelSpel(spel) {
   const teks = `${spel.titel} — ${spel.beskryf}\n\nGratis in Daaglikse Hoop.`

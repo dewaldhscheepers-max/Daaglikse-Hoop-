@@ -17,10 +17,10 @@ const waar = (n, k) => is(n, !!k, true)
 
 console.log('\n── Die skakel dra die BOEK ──')
 {
-  is('n vaste boek', boekSkakel('toksies'), 'https://dewaldscheepers.com/boek/toksies')
+  is('n vaste boek', boekSkakel('toksies'), 'https://www.dewaldscheepers.com/boek/toksies')
   /* n Opgelaaide boek dra n tydstempel in sy id. */
   is('n opgelaaide boek', boekSkakel('skinderstories-1758500000000'),
-     'https://dewaldscheepers.com/boek/skinderstories-1758500000000')
+     'https://www.dewaldscheepers.com/boek/skinderstories-1758500000000')
   is('die basis kan verander', boekSkakel('toksies', 'https://toets.co.za'),
      'https://toets.co.za/boek/toksies')
   is('n skuinsstreep aan die einde van die basis val weg',
@@ -92,7 +92,7 @@ console.log('\n── Die woorde ──')
 }
 
 console.log('\n── Die basis ──')
-is('die app se eie domein', BASIS, 'https://dewaldscheepers.com')
+is('die app se eie domein', BASIS, 'https://www.dewaldscheepers.com')
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

@@ -299,7 +299,7 @@ export function NooiPastoor({ opTerug }) {
     '',
     'Ek sal graag wil hê ons gemeente of groep moet dit oorweeg.',
     '',
-    'Kyk hier: https://dewaldscheepers.com/go',
+    'Kyk hier: https://www.dewaldscheepers.com/go',
   ].join('\n')
 
   return (

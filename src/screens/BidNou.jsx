@@ -105,9 +105,9 @@ export default function BidNou() {
   }, [])
 
   async function handleShare() {
-    const msg = 'Daaglikse Hoop – elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nhttps://dewaldscheepers.com/go'
+    const msg = 'Daaglikse Hoop – elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nhttps://www.dewaldscheepers.com/go'
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://www.dewaldscheepers.com/go' }) } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
     }

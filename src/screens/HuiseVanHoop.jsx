@@ -72,9 +72,9 @@ export default function HuiseVanHoop({ onClose, installPrompt, isInstalled, onNa
   }
 
   async function handleShare() {
-    const shareMsg = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ${liveCount.toLocaleString('af-ZA')} huise van hoop al:\nhttps://dewaldscheepers.com/go`
+    const shareMsg = `Ek het sopas die Rustelose Gedagtes e-boek gratis gekry via Daaglikse Hoop 🙏🏻\n\nKry joune ook — ${liveCount.toLocaleString('af-ZA')} huise van hoop al:\nhttps://www.dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ text: shareMsg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ text: shareMsg, url: 'https://www.dewaldscheepers.com/go' }) } catch {}
     } else {
       try {
         await navigator.clipboard.writeText(shareMsg)

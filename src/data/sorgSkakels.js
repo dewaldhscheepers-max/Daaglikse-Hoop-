@@ -32,7 +32,7 @@
    Geen id, geen adres, niks wat 'n mens identifiseer nie.
    ──────────────────────────────────────────────────────────── */
 
-export const WORTEL = 'https://dewaldscheepers.com'
+export const WORTEL = 'https://www.dewaldscheepers.com'
 
 /* Die skerms wat 'n eie skakel het. Die sleutel is wat in die pad staan; die
    `afdeling` is wat die Sorg-blad se oortjie-toestand moet wees. */

@@ -1073,7 +1073,7 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
      Dan word dit GESE. 'n Stille terugval na teks is presies hoe hierdie
      fout die eerste keer verby gekom het. */
-  const DEEL_SIN = 'Luister die volle boodskap by https://dewaldscheepers.com/go'
+  const DEEL_SIN = 'Luister die volle boodskap by https://www.dewaldscheepers.com/go'
 
   function prentPad(url) {
     /* 'n Relatiewe pad of ons eie domein: haal dit soos dit is. */
@@ -1161,9 +1161,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
 
   async function handleListenShare() {
     setListenShareNote(null)
-    const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://dewaldscheepers.com/go`
+    const msg = `Ek luister elke oggend na Daaglikse Hoop — kort boodskappe van hoop en bemoediging. Ek dink jy sal dit ook geniet.\n\nLuister hier: https://www.dewaldscheepers.com/go`
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://www.dewaldscheepers.com/go' }) } catch {}
     } else {
       try { await navigator.clipboard.writeText(msg); setShareToast(true); setTimeout(() => setShareToast(false), 2500) } catch {}
     }

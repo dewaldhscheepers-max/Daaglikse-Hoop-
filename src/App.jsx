@@ -67,6 +67,7 @@ import { idUitPad } from './data/gebedDeel'
 import Reels from './screens/Reels'
 import { idUitPad as reelIdUitPad } from './data/reels'
 import { idUitPad as boekIdUitPad } from './data/boekSkakel'
+import { kinderBoekUitPad } from './data/kinderBoekSkakel'
 import './App.css'
 
 function shouldShowSharePopup() {
@@ -498,9 +499,9 @@ export default function App() {
 
   async function handleShareApp() {
     localStorage.setItem('sharePopupSharedAt', String(Date.now()))
-    const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://dewaldscheepers.com/go'
+    const msg = 'Ek dink hierdie app gaan jou help. Daaglikse Hoop gee elke oggend \'n kort boodskap van hoop, gebed en bemoediging.\n\nLaai dit hier af: https://www.dewaldscheepers.com/go'
     if (navigator.share) {
-      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://dewaldscheepers.com/go' }) } catch {}
+      try { await navigator.share({ title: 'Daaglikse Hoop', text: msg, url: 'https://www.dewaldscheepers.com/go' }) } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
     }
@@ -1269,6 +1270,20 @@ export default function App() {
    * installasie-sprong oorleef omdat die ontvanger dalk eers installeer. 'n
    * Boek staan op 'n blad wat in elk geval bly, en 'n id wat n week later
    * weer rol, is 'n app wat vreemd optree. */
+  /* ── 'n Gedeelde KINDERBOEK: /boeke/kinders/<id> (en die ou /go/...-vorm) ──
+   * Sien src/data/kinderBoekSkakel.js. Die e-boekblad maak die biblioteek oop
+   * by daardie boek; die pad word uitgevee soos by /boek. */
+  useEffect(() => {
+    try {
+      const kind = kinderBoekUitPad(window.location.pathname || '')
+      if (!kind) return
+      window.history.replaceState({}, '', '/')
+      try { sessionStorage.setItem('kinderboek_oop', kind) } catch {}
+      setTab('meer')
+      window.dispatchEvent(new CustomEvent('open-kinderboek'))
+    } catch {}
+  }, [])
+
   useEffect(() => {
     try {
       const boek = boekIdUitPad(window.location.pathname || '')

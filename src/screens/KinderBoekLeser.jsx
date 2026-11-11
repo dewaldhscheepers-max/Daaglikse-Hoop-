@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './KinderBoekLeser.css'
+import { kinderBoekSkakel } from '../data/kinderBoekSkakel'
 
 export default function KinderBoekLeser({ book, onClose }) {
   const [currentPage, setCurrentPage]       = useState(0)
@@ -104,7 +105,7 @@ export default function KinderBoekLeser({ book, onClose }) {
 
   // ── Share ──
   async function handleShare() {
-    const url  = `https://dewaldscheepers.com/go/boeke/kinders/${book.id}`
+    const url  = kinderBoekSkakel(book.id)
     const text = `Hierdie gratis Bybelse prenteboek is gemaak vir klein hartjies. Lees dit saam met jou kind:`
     if (navigator.share) {
       try { await navigator.share({ title: book.title, text: `${text}\n${url}`, url }) } catch {}

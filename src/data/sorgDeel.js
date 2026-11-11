@@ -14,7 +14,7 @@
  *
  * Dewald: "dit moet soos bid nou se deel links werk."
  *
- * Bid Nou deel `https://dewaldscheepers.com/bid/<id>` — 'n gewone PAD. Sorg
+ * Bid Nou deel `https://www.dewaldscheepers.com/bid/<id>` — 'n gewone PAD. Sorg
  * het 'n HASH gedeel (`…/#sorg-plasing-<id>`) op wat ook al die blaaier se
  * eie gasheer was. Twee dinge daaraan is stukkend:
  *
@@ -26,7 +26,7 @@
  * Nou is dit dieselfde vorm as Bid Nou: /sorg/<id>. Die ou hash word STEEDS
  * gelees (sien leesSorgSkakel), want daar loop skakels in mense se gesprekke
  * rond wat moet bly werk. */
-export const DEEL_WORTEL = 'https://dewaldscheepers.com'
+export const DEEL_WORTEL = 'https://www.dewaldscheepers.com'
 
 /* Die uitnodiging se veldtog. Sonder dit lyk elke mens wat deur 'n gedeelde
    skakel kom, soos "direk", en dan lyk dit of deel niemand bring nie. Sien

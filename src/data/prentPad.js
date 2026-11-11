@@ -34,7 +34,7 @@ export function prentPad(url) {
      sou proxy nie, en dan meet die toets die verkeerde ding. */
   if (!HET_SKEMA.test(url) && !url.startsWith('//')) return url
   try {
-    const basis = typeof window !== 'undefined' ? window.location.href : 'https://dewaldscheepers.com'
+    const basis = typeof window !== 'undefined' ? window.location.href : 'https://www.dewaldscheepers.com'
     const u = new URL(url, basis)
     /* `data:` en `blob:` dra die grepe self — daar is niks om te gaan haal nie. */
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return url

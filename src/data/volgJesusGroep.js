@@ -259,7 +259,7 @@ export function ongeleesWoorde(n) {
  * Wat WEL altyd werk, is die kode. Dus staan albei hier: die skakel vir wie die
  * app nog nie het nie, en die kode vir wie hom wel het. Niemand kom by 'n
  * doodloopstraat uit nie. */
-export function uitnodiging(groep, basis = 'https://dewaldscheepers.com') {
+export function uitnodiging(groep, basis = 'https://www.dewaldscheepers.com') {
   const naam = String((groep && groep.naam) || '').trim() || 'ons groep'
   const kode = String((groep && groep.kode) || '').trim()
   const skakel = `${basis}/go/volg-jesus/join?kode=${encodeURIComponent(kode)}`

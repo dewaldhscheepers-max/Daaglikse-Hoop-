@@ -28,7 +28,7 @@
    nie oor homself wil kan sê nie.
    ──────────────────────────────────────────────────────────── */
 
-export const BASIS = 'https://dewaldscheepers.com'
+export const BASIS = 'https://www.dewaldscheepers.com'
 
 /* Nota-id's in hierdie app lyk soos `Nie_my_wil_nie_1788231738800` — die
    titel, skoongemaak, plus 'n tydstempel. Ons aanvaar ruim, maar nooit 'n

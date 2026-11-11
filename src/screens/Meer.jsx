@@ -175,6 +175,20 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   }
   const [claimedMap,          setClaimedMap]          = useState({})
   const [showKinderBibloteek, setShowKinderBibloteek] = useState(false)
+  /* Die boek uit 'n gedeelde kinderboek-skakel. App.jsx sit dit in
+     sessionStorage (die blad is dalk nog nie gemonteer nie) EN waai 'n sein
+     (vir as hy reeds oop is). */
+  const [kinderBeginBoek, setKinderBeginBoek] = useState(null)
+  useEffect(() => {
+    function kyk() {
+      let id = null
+      try { id = sessionStorage.getItem('kinderboek_oop'); sessionStorage.removeItem('kinderboek_oop') } catch {}
+      if (id) { setKinderBeginBoek(id); setShowKinderBibloteek(true) }
+    }
+    kyk()
+    window.addEventListener('open-kinderboek', kyk)
+    return () => window.removeEventListener('open-kinderboek', kyk)
+  }, [])
   const [showLeesplanne,     setShowLeesplanne]     = useState(false)
   /* Die speletjies sit agter een stil kaart — hulle is bysaak op hierdie blad.
      Sien die kaart self vir Dewald se eie woorde. */
@@ -635,7 +649,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
       </div>
 
       {showKinderBibloteek && (
-        <KinderBibloteek onClose={() => setShowKinderBibloteek(false)} />
+        <KinderBibloteek beginBoek={kinderBeginBoek} onClose={() => { setShowKinderBibloteek(false); setKinderBeginBoek(null) }} />
       )}
 
       {showLeesplanne && (

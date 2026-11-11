@@ -695,7 +695,7 @@ function Wallpaper({ bron, week, kaal }) {
 async function deelWoorde(teks, skakel) {
   const boodskap = skakel
     ? `${teks}\n\n${skakel}`
-    : `${teks}\n\nhttps://dewaldscheepers.com/go`
+    : `${teks}\n\nhttps://www.dewaldscheepers.com/go`
   try {
     if (navigator.share) { await navigator.share({ text: boodskap }); return }
   } catch { return }

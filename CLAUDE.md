@@ -81,6 +81,7 @@ node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in 
 node src/data/bybel365.toets.mjs              # die 365-dae-plan, teen die egte GAB, 85 toetse
 node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie, 24 toetse
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
+node src/data/kinderBoekSkakel.toets.mjs      # die kinderboek se deelskakel (ook die ou /go/-vorm), 17 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
 node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
@@ -3021,7 +3022,31 @@ drie gate gehad, 15 Oktober 2026:
 Blaaiertoets: `kykInstalleer.mjs` (egte diensketter, elke pad per blaaier, en
 dat hy ná 12s nog staan — die herlaai van 'n eerste besoek het hom weggevee).
 
-## Die Android-app is NIE voltooi nie — Daaglikse Hoop is web/PWA
+## Die Android-app is LEWENDIG op Google Play (sedert 11 November 2026)
+
+Weergawe 107 (2.0.7, Capacitor) staan op produksie, 100% uitgerol. Wat
+daarmee saam verander het:
+
+* **`/go` stuur Android na Google Play** (`PLAY_LEWE = true` in
+  `public/go.html`), in elke blaaier — ook Samsung Internet en Facebook s'n.
+  iPhone kry steeds die tuisskerm-stappe. Blaaiertoets: `kykSkakels.mjs`.
+* **Elke deelskakel gaan na `https://www.dewaldscheepers.com`**, nie die kaal
+  domein nie. Die kaal domein stuur deur na www, en Android kan die app nie aan
+  'n domein koppel wat deurstuur nie (Play Console: "13 deep links may be
+  failing"). Ou skakels met die kaal domein werk steeds — net in die blaaier.
+  Die kennisgewings (`api/send-notifications.js`) is NIE aangeraak nie.
+  Vredepad s'n ook nie (moenie aan raak nie).
+* **Die kinderboek se deelskakel is `/boeke/kinders/<id>`**
+  (`src/data/kinderBoekSkakel.js`). Dit was `/go/boeke/kinders/<id>` en het
+  op die tuisblad geland sonder om die boek oop te maak. Die ou vorm word
+  steeds gelees. `/boeke` val onder die manifest se `/boek`-voorvoegsel, dus
+  maak dit in die app oop sonder 'n nuwe bou.
+* Die app se ondertekensleutel in Play ("App signing key certificate") moet in
+  `public/.well-known/assetlinks.json` staan, anders maak skakels in Chrome oop.
+
+Wat hieronder staan, is die geskiedenis van hoe ons hier gekom het.
+
+### Die ou toestand: Daaglikse Hoop was web/PWA
 
 **Daar is GEEN lewende Google Play-app nie.** 'n Capacitor-steier lê in
 `android/`, maar dit is **nooit voltooi of na Google Play ontplooi nie** — die

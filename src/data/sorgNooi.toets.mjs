@@ -29,7 +29,7 @@ console.log('\n── Dewald se eie woorde ──\n')
      Wat sy weergawe reg doen: dit praat met die MENS wat dit kry, nie oor die
      blad nie. "Ek het gedink jy het dalk iets" is 'n rede om te kom; "daar is
      mense wat wag" is 'n advertensie. */
-  const SKAKEL = 'https://dewaldscheepers.com/sorg/m123'
+  const SKAKEL = 'https://www.dewaldscheepers.com/sorg/m123'
   const w = nooiWoorde(SKAKEL)
 
   waar('dit begin met "Ek het hierdie storie"', /^Ek het hierdie storie/.test(w))
@@ -76,7 +76,7 @@ console.log('\n── Dit stuur soos Bid Nou stuur ──\n')
 console.log('\n── Die skakel lyk soos Bid Nou s\'n: n PAD, nie n hash nie ──\n')
 {
   /* Dewald: "dit moet soos bid nou se deel links werk." Bid Nou deel
-     https://dewaldscheepers.com/bid/<id>. 'n Hash oorleef nie altyd 'n plak
+     https://www.dewaldscheepers.com/bid/<id>. 'n Hash oorleef nie altyd 'n plak
      nie, en WhatsApp wys niks van hom nie. */
   const u = sorgSkakel('plasing', 'm123')
   waar('die plasing se skakel', u.startsWith(`${DEEL_WORTEL}/sorg/m123`))
@@ -94,7 +94,7 @@ console.log('\n── Die skakel lyk soos Bid Nou s\'n: n PAD, nie n hash nie �
   is('n pad MET n veldtog lees steeds reg', uitSorgPad('/sorg/m123?utm_source=uitnodiging'),
      { soort: 'plasing', id: 'm123' })
   is('en met n hash ook', uitSorgPad('/sorg/m123?a=b#c'), { soort: 'plasing', id: 'm123' })
-  waar('en dit is dieselfde gasheer as Bid Nou', u.startsWith('https://dewaldscheepers.com/'))
+  waar('en dit is dieselfde gasheer as Bid Nou', u.startsWith('https://www.dewaldscheepers.com/'))
 
   /* Heen en terug. */
   is('die pad lees terug', uitSorgPad('/sorg/m123'), { soort: 'plasing', id: 'm123' })

@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { boekeWatWys } from '../data/kinderBoekeWys'
 import KinderBoekLeser from './KinderBoekLeser'
+import { kinderBoekSkakel } from '../data/kinderBoekSkakel'
 import './KinderBibloteek.css'
 
 async function shareBook(book) {
-  const url  = `https://dewaldscheepers.com/go/boeke/kinders/${book.id}`
+  const url  = kinderBoekSkakel(book.id)
   const text = `Hierdie gratis Bybelse prenteboek is gemaak vir klein hartjies. Lees dit saam met jou kind:`
   if (navigator.share) {
     try { await navigator.share({ title: book.title, text: `${text}\n${url}`, url }) } catch {}
@@ -61,10 +62,22 @@ function BookCard({ book, onRead, onShare }) {
 }
 
 /* ── Main library screen ── */
-export default function KinderBibloteek({ onClose }) {
+export default function KinderBibloteek({ onClose, beginBoek = null }) {
   const [activeBook, setActiveBook]   = useState(null)
   const [books, setBooks]             = useState(null)
   const [fsLoading, setFsLoading]     = useState(true)
+
+  /* 'n Gedeelde skakel (/boeke/kinders/<id>) maak DIE boek oop, nie net die
+     rak nie. Eers die ingeboude lys (dadelik), en val dit mis, die bediener se
+     lys wanneer dit kom — 'n opgelaaide boek staan net daar. Een keer. */
+  const [beginGedoen, setBeginGedoen] = useState(!beginBoek)
+  useEffect(() => {
+    if (beginGedoen) return
+    const lys = books ?? KINDER_BOEKE
+    const b = lys.find(x => x && x.id === beginBoek)
+    if (b) { setActiveBook(b); setBeginGedoen(true) }
+    else if (books) setBeginGedoen(true)   // die volle lys het hom ook nie: wys die rak
+  }, [books, beginBoek, beginGedoen])
 
   /* ── Waarom dit deur die bediener lees en nie deur Firestore nie ──
 

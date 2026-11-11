@@ -465,7 +465,7 @@ export default function Bybel({ onClose, beginBy = null }) {
   }
 
   async function deelVers() {
-    const APP = 'https://dewaldscheepers.com/go'
+    const APP = 'https://www.dewaldscheepers.com/go'
     const teks = `"${gekose.teks}"\n\n— ${versVerwysing()} (${sleutel})\n\nGelees in Daaglikse Hoop — 'n gratis Afrikaanse app met daaglikse oordenkings, gebed, leesplanne en die Bybel.`
     try {
       if (navigator.share) await navigator.share({ title: versVerwysing(), text: teks, url: APP })

@@ -35,7 +35,7 @@
 
 import { prentPad } from './prentPad'
 
-export const DEEL_SIN = 'Luister die volle boodskap by https://dewaldscheepers.com/go'
+export const DEEL_SIN = 'Luister die volle boodskap by https://www.dewaldscheepers.com/go'
 
 /* Haal die prent as 'n blob, of `null`. 'n Foutbladsy is ook 'n geldige
    antwoord — net 'n PRENT tel, en 'n prent is groter as 'n kilogreep. */

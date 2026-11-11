@@ -99,7 +99,7 @@ export function saamSinVirOntvanger(n) {
 /* ── Die skakel ──
 
    Kort, en dit lees soos wat dit is. /bid/<id> */
-export function gebedSkakel(id, basis = 'https://dewaldscheepers.com') {
+export function gebedSkakel(id, basis = 'https://www.dewaldscheepers.com') {
   return `${String(basis).replace(/\/+$/, '')}/bid/${encodeURIComponent(String(id || ''))}`
 }
 

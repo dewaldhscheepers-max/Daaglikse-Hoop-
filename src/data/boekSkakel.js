@@ -30,7 +30,7 @@
    Hierdie lêer is SUIWER: 'n id in, 'n string uit. Geen window, geen fetch.
    ──────────────────────────────────────────────────────────── */
 
-export const BASIS = 'https://dewaldscheepers.com'
+export const BASIS = 'https://www.dewaldscheepers.com'
 
 /* Boek-id's is slakvorm: `bid-nou`, `toksies`, of 'n opgelaaide een met 'n
    tydstempel agteraan — `skinderstories-1758500000000`. Ons aanvaar ruim, maar

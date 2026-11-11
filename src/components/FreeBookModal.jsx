@@ -157,7 +157,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
 
   async function handleShare() {
     /* Engels deel die Engelse blad — die ontvanger moet by die BOEKE land. */
-    const shareUrl = taal === 'en' ? 'https://www.dewaldscheepers.com/english' : 'https://dewaldscheepers.com/go'
+    const shareUrl = taal === 'en' ? 'https://www.dewaldscheepers.com/english' : 'https://www.dewaldscheepers.com/go'
     const msg = t.deelMsg(book.title)
     if (navigator.share) {
       try { await navigator.share({ text: msg, url: shareUrl }) } catch {}

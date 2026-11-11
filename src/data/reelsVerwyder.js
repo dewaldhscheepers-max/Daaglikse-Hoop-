@@ -25,7 +25,7 @@
  *
  * 'n Mens plak wat hy byderhand het, nie wat 'n program verwag nie:
  *
- *   · ons deel-skakel      `https://dewaldscheepers.com/reels/7412…`
+ *   · ons deel-skakel      `https://www.dewaldscheepers.com/reels/7412…`
  *   · 'n KAAL id           `7412345678901234567`
  *   · TikTok se volle adres `https://www.tiktok.com/@iemand/video/7412…`
  *   · TikTok se KORT skakel `https://vt.tiktok.com/ZSqHxCETq/`

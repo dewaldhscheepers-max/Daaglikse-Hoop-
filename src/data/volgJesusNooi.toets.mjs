@@ -116,11 +116,11 @@ console.log('\n── Deel die week, nie die klanklêer nie ──\n')
      die Storage-teken vir enigiemand wat dit aanstuur, en 'n adres wat soos
      gemors lyk in 'n gesprek. */
   is('die skakel wys na die APP',
-     weekSkakel(1), 'https://dewaldscheepers.com/go/volg-jesus?week=1')
-  is('week 12', weekSkakel(12), 'https://dewaldscheepers.com/go/volg-jesus?week=12')
+     weekSkakel(1), 'https://www.dewaldscheepers.com/go/volg-jesus?week=1')
+  is('week 12', weekSkakel(12), 'https://www.dewaldscheepers.com/go/volg-jesus?week=12')
   is('n onmoontlike week val terug op die program self',
-     weekSkakel(99), 'https://dewaldscheepers.com/go/volg-jesus')
-  is('en rommel ook', weekSkakel('nee'), 'https://dewaldscheepers.com/go/volg-jesus')
+     weekSkakel(99), 'https://www.dewaldscheepers.com/go/volg-jesus')
+  is('en rommel ook', weekSkakel('nee'), 'https://www.dewaldscheepers.com/go/volg-jesus')
   is('daar is NIKS van firebasestorage in nie',
      /firebasestorage|token=/.test(weekSkakel(1)), false)
 
