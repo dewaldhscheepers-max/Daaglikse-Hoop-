@@ -35,14 +35,22 @@
 
                  GEEN /api, /privaatheid of prent-paaie nie — net bladsye wat
                  die app WYS. /go (die installeerblad) gaan binne die app na
-                 die tuisblad. -->
+                 die tuisblad.
+
+                 NET www. Die kaal domein (dewaldscheepers.com) stuur deur na
+                 www, en Android weier om 'n app te koppel aan 'n gasheer wat
+                 deurstuur. Play Console het 11 November 2026 gesê "13 deep
+                 links may be failing" terwyl die sleutel in assetlinks.json
+                 presies reg was (58:43:BF…2F:73, Google se app signing key).
+                 Op Android 11 en ouer laat EEN mislukte gasheer die hele filter
+                 val. Elke deelskakel in die app gaan sedertdien na www; ou
+                 skakels met die kaal domein maak in die blaaier oop. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="www.dewaldscheepers.com" />
-                <data android:host="dewaldscheepers.com" />
                 <data android:path="/" />
                 <data android:pathPrefix="/hoop/" />
                 <data android:pathPrefix="/bid/" />
