@@ -3041,6 +3041,13 @@ daarmee saam verander het:
   op die tuisblad geland sonder om die boek oop te maak. Die ou vorm word
   steeds gelees. `/boeke` val onder die manifest se `/boek`-voorvoegsel, dus
   maak dit in die app oop sonder 'n nuwe bou.
+* **Elke installeervraag op Android stuur na Google Play** (`installeerVoorkeur`
+  in `installeerPad.js`, `PLAY_LEWE` + `PLAY_URL`): die uitklap ná 3s, die balk
+  op Luister, die Reels-vraag ná 'n swiep, ná 'n gebed en ná Dra Mekaar. Dit was
+  die blaaier se eie venster — die WEBweergawe — ook vir 'n vreemdeling op 'n
+  gedeelde skakel. `kiesPad` self het NIE verander nie (go.html dra 'n kopie);
+  go.html se `PLAY_LEWE` moet met die module s'n stem, en die toets eis dit.
+  iPhone bly soos altyd. Blaaiertoets: `kykPlayInstalleer.mjs`.
 * Die app se ondertekensleutel in Play ("App signing key certificate") moet in
   `public/.well-known/assetlinks.json` staan, anders maak skakels in Chrome oop.
 

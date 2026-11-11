@@ -25,7 +25,7 @@ import {
 import { haalOpgelaaideBoeke } from './data/eboekLys'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
-import { kiesPad } from './data/installeerPad'
+import { kiesPad, installeerVoorkeur, PLAY_URL } from './data/installeerPad'
 import { wysKnoppie } from './data/kennisgewingStaat'
 import { leesKennisgewingStaat, huidigeToken } from './data/kennisgewingLees'
 import KennisgewingKnoppie from './components/KennisgewingKnoppie'
@@ -516,6 +516,12 @@ export default function App() {
 
   // ── Install handlers ──
   async function handleInstallCta() {
+    /* Op Android is die app op Google Play — nooit die webweergawe nie. */
+    if (!isInApp && installeerVoorkeur({ ua: navigator.userAgent }) === 'play') {
+      setShowInstallPopup(false)
+      window.location.href = PLAY_URL
+      return
+    }
     if (installPrompt) {
       installPrompt.prompt()
       const { outcome } = await installPrompt.userChoice
@@ -1864,7 +1870,8 @@ export default function App() {
      sy foon. */
   const installeerPad = isInApp
     ? 'geinstalleer'
-    : kiesPad({ ua: navigator.userAgent, kanPrompt: !!installPrompt, geinstalleer: isInstalled })
+    /* Android → Google Play (sien installeerVoorkeur in installeerPad.js). */
+    : installeerVoorkeur({ ua: navigator.userAgent, kanPrompt: !!installPrompt, geinstalleer: isInstalled })
 
   // ── Facebook in-app browser → open externally banner ──
   const [fbBannerDismissed, setFbBannerDismissed] = useState(
@@ -1905,7 +1912,7 @@ export default function App() {
 
      Buite die app bly die balk soos hy was: Samsung Internet se web-push
      is onbetroubaar en Chrome is daar die regte raad. */
-  const samsungOpenInChromeBanner = isSamsungBrowser && !isInApp && !samsungChromeDismissed ? (
+  const samsungOpenInChromeBanner = isSamsungBrowser && !isInApp && !samsungChromeDismissed && installeerPad !== 'play' ? (
     <div className="samsung-chrome-banner">
       <div className="samsung-chrome-text">
         <strong>Kry kennisgewings elke oggend</strong>
@@ -1942,7 +1949,7 @@ export default function App() {
           wat werklik iets doen. */}
       <div className="install-persist-actions">
         <button className="install-persist-btn" onClick={() => setShowInstallPopup(true)}>
-          {installeerPad === 'prompt' ? 'Sit op my foon' : 'Wys my hoe'}
+          {installeerPad === 'play' ? 'Kry dit op Google Play' : installeerPad === 'prompt' ? 'Sit op my foon' : 'Wys my hoe'}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import InstallTelling from './InstallTelling'
+import { PLAY_URL } from '../data/installeerPad'
 import { useState, useEffect } from 'react'
 import './PopupStyles.css'
 
@@ -63,6 +64,7 @@ export function InstallPopup({ pad = 'prompt', onInstall, onLater, onHelp, chrom
   const [gekopieer, setGekopieer] = useState(false)
 
   const lyf = {
+    play:   'Kry die Daaglikse Hoop-app gratis op Google Play — met jou oggendboodskap elke dag.',
     prompt: 'Sit dit op jou foon se tuisskerm, dan kan jy elke oggend maklik luister.',
     chrome: 'Maak dit een keer in Chrome oop, tik Installeer, en dit staan op jou tuisskerm — met ’n boodskap elke oggend.',
     safari: 'Op ’n iPhone kan net Safari dit op jou tuisskerm sit.',
@@ -103,6 +105,9 @@ export function InstallPopup({ pad = 'prompt', onInstall, onLater, onHelp, chrom
             eerder as van 'n knoppie. */}
         <InstallTelling klas="popup-telling" />
 
+        {pad === 'play' && (
+          <a className="popup-btn-primary" href={PLAY_URL}>📲 Installeer van Google Play</a>
+        )}
         {pad === 'chrome' && (
           <a className="popup-btn-primary" href={chromeUrl}>Maak oop in Chrome</a>
         )}

@@ -84,10 +84,37 @@ export function kiesPad({ ua = '', kanPrompt = false, geinstalleer = false } = {
 /* Vir 'n mens: wat gaan die knoppie se? Een plek, sodat die uitklap, die
  * balk en /go dieselfde woorde gebruik. */
 export const KNOP_WOORDE = {
+  play:    'Installeer van Google Play',
   prompt:  'Sit op my foon',
   chrome:  'Maak oop in Chrome',
   safari:  'Maak oop in Safari',
   ios:     'Wys my hoe',
   stappe:  'Wys my hoe',
   rekenaar: 'Maak die app oop',
+}
+
+/* ── Google Play ──
+ *
+ * Sedert 11 November 2026 staan die app op Google Play (weergawe 107,
+ * produksie, 100%). Dewald: *"hoe gaan mense die app install... as hulle eers
+ * op die boeke of reels land wanneer hulle link klik wat iemand met hulle
+ * gedeel het."* Elke installeervraag in die app (die uitklap ná 3s, die balk op
+ * Luister, die vraag in Reels ná 'n swiep, ná 'n gebed, ná Dra Mekaar) loop
+ * deur EEN pad-besluit — en op Android was dit nog die blaaier se eie
+ * installeervenster: die WEBweergawe op die tuisskerm, nie die Play-app nie.
+ *
+ * Nou kry ELKE Android-besoeker die Play-knoppie, in watter blaaier ook al
+ * (ook Samsung Internet en Facebook s'n — die Play-app maak self oop). Die
+ * iPhone bly presies soos altyd: daar is geen App Store-app nie.
+ *
+ * `kiesPad` self verander NIE: hy is woord vir woord in public/go.html gekopieer
+ * en die toets vergelyk die twee. go.html het sy eie `PLAY_LEWE`; hou die twee
+ * gelyk. */
+export const PLAY_LEWE = true
+export const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.dewaldscheepers.daaglikshoop'
+
+export function installeerVoorkeur({ ua = '', kanPrompt = false, geinstalleer = false } = {}) {
+  if (geinstalleer) return 'geinstalleer'
+  if (PLAY_LEWE && /Android/i.test(ua)) return 'play'
+  return kiesPad({ ua, kanPrompt, geinstalleer })
 }
