@@ -368,9 +368,15 @@ export const WEEK13_DEELSIN =
 
 /* ── Die brug na Week 14 ──
  *
- * `null` totdat Dewald Week 14 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK13_VOLGENDE = null
+ * Week 14 bestaan sedert 13 November 2026 (volgJesusWeek14.js). Die titel en
+ * die woorde kom uit Dewald se eie "BEGIN VAN DIE WEEK". */
+export const WEEK13_VOLGENDE = {
+  week: 14,
+  titel: 'Ek is die Goeie Herder',
+  lyf: 'Jesus beskryf Homself as die Goeie Herder. Hy ken Sy skape, Hy gaan voor '
+     + 'hulle uit, Hy loop nie weg wanneer gevaar kom nie, en Hy lê Sy lewe vir '
+     + 'hulle af.',
+}
 
 export function blokkeVirDag13(n) {
   const dag = WEEK13_DAE.find(d => d.n === n)

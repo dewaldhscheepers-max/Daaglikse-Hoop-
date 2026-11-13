@@ -58,7 +58,8 @@ node src/data/volgJesusWeek9.toets.mjs        # Week 9 "Here, leer ons bid" — 
 node src/data/volgJesusWeek10.toets.mjs       # Week 10 "Dieselfde saad" — Dag 1 se gebed IN die boodskap, 213
 node src/data/volgJesusWeek11.toets.mjs       # Week 11 "Wat is die grootste gebod?" — een tikfout reggemaak, 206
 node src/data/volgJesusWeek12.toets.mjs       # Week 12 "Julle moet julle vyande liefhê" — Dewald se aanhalings, nie die GAB s'n, 205
-node src/data/volgJesusWeek13.toets.mjs       # Week 13 "Twee huise. Een storm." — die STAP is die skryfkassie, 192
+node src/data/volgJesusWeek13.toets.mjs       # Week 13 "Twee huise. Een storm." — die STAP is die skryfkassie, 193
+node src/data/volgJesusWeek14.toets.mjs       # Week 14 "Ek is die Goeie Herder" — KYK TERUG is die skryfkassie, 194
 node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies, 26 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse

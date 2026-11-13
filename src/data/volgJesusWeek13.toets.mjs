@@ -213,7 +213,7 @@ console.log('\n── Die register ken Week 13 ──\n')
   is('die klaar-skerm', weekKlaar(13), WEEK13_KLAAR)
   is('blokkeVir stem ooreen', blokkeVir(13, 3), blokkeVirDag13(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag13(9), [])
-  is('maar nie week 14 nie', hetDae(14), false)
+  is('maar nie week 15 nie', hetDae(15), false)
 }
 
 console.log('\n── Week 12 wys nou NA Week 13, en die titel stem ──\n')
@@ -225,10 +225,12 @@ console.log('\n── Week 12 wys nou NA Week 13, en die titel stem ──\n')
   waar('en dit se iets oor die week', WEEK12_VOLGENDE.lyf.length > 40)
 }
 
-console.log('\n── En Week 13 loop nog nie verder nie ──\n')
+console.log('\n── Week 13 wys nou NA Week 14 ──\n')
 {
-  is('WEEK13_VOLGENDE is null', WEEK13_VOLGENDE, null)
-  is('en die register gee ook null', weekVolgende(13), null)
+  /* Week 14 bestaan sedert 13 November 2026 — sien volgJesusWeek14.toets.mjs. */
+  waar('WEEK13_VOLGENDE bestaan', !!WEEK13_VOLGENDE)
+  is('en dit wys na week 14', WEEK13_VOLGENDE.week, 14)
+  is('die register gee dieselfde', weekVolgende(13), WEEK13_VOLGENDE)
 }
 
 console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')

@@ -34,14 +34,14 @@ console.log('\n── Geen kaart wanneer daar niks is nie ──\n')
   /* Week 6 het intussen bygekom (sien volgJesusWeek6.js) — hierdie toets
      gebruik nou 'n week wat werklik nog nie bestaan nie. Skuif dit saam elke
      keer as 'n week bygevoeg word; sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-  is('week 14 bestaan nog nie', onderwerp(14, 0), null)
+  is('week 15 bestaan nog nie', onderwerp(15, 0), null)
   is('week 52 ook nie', onderwerp(52, 0), null)
   is('geen weeknommer', onderwerp(undefined, 0), null)
   is('null', onderwerp(null, 0), null)
   is('rommel', onderwerp('appelkoos', 0), null)
   is('nul', onderwerp(0, 0), null)
   is('negatief', onderwerp(-1, 0), null)
-  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(14), [])
+  is('en weekVrae gee dan n LEE lys, nooit undefined', weekVrae(15), [])
 
   /* Week 7 BESTAAN nou, en dra vier vrae. Hierdie reel is die kontrole: sonder
      hom sou n `weekVrae` wat ALTYD leeg gee, ook groen wees. */

@@ -753,4 +753,58 @@ export const WEKE = {
       'Moenie gehoorsaamheid voorstel as iets waarmee ons redding verdien nie.\n\nOns word deur genade gered.\n\nHier gaan dit oor dissipelskap: iemand wat Jesus volg, neem Sy woorde ernstig op en leer om daarvolgens te leef.',
     pastoraleRisiko: 'laag',
   },
+  14: {
+    weeknommer: 14,
+    titel: 'Ek is die Goeie Herder',
+    doel:
+      'Om Jesus beter te leer ken as die Herder wat ons ken, lei en Sy lewe vir ons gegee het.',
+    weekKern:
+      'JESUS WIL NIE NET VIR JOU DIE PAD WYS NIE. HY WIL JOU LEI.',
+    openingskerm:
+      'Jesus beskryf Homself as die Goeie Herder.\n\n'
+      + 'Hy ken Sy skape.\n\n'
+      + 'Hy gaan voor hulle uit.\n\n'
+      + 'Hy loop nie weg wanneer gevaar kom nie.\n\n'
+      + 'En Hy lê Sy lewe vir hulle af.',
+    primereSkrif: 'Johannes 10:1–18',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 13 se noot. Dewald: "Daar is GEEN stemnota, audio of
+       klankspeler in Week 14 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'JESUS WIL NIE NET VIR JOU DIE PAD WYS NIE. HY WIL JOU LEI.',
+    eenSin:
+      'Jy hoef nie die hele pad te sien nie. Jy moet die Herder volg.',
+    privaatRefleksie:
+      'Waar probeer ek nog die hele pad self beheer in plaas daarvan om Jesus te volg?',
+    gehoorsaamheidStap:
+      'Kies een area waarin jy ophou om alles self te probeer beheer.\n\nBid daaroor.\n\nEn volg wat Jesus reeds vir jou duidelik gemaak het.',
+    gebed:
+      'Vader, dankie dat Jesus die Goeie Herder is. Help ons om Sy stem te leer ken, Hom te vertrou en Hom te volg. Dankie dat Hy nie wegloop wanneer dinge moeilik raak nie en dat Hy Sy lewe vir ons gegee het. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Hy ken jou',
+    dag1Titel: 'Ek is die Goeie Herder',
+    dag2Titel: 'Hy ken jou',
+    dag3Titel: 'Leer Sy stem ken',
+    dag4Titel: 'Hy loop nie weg nie',
+    dag5Titel: 'Hy het Sy lewe gegee',
+    groepVraag1:
+      'Wat beteken dit vir jou dat Jesus sê Hy ken Sy skape?',
+    groepVraag2:
+      'Hoe leer ons Jesus se stem beter ken?',
+    groepVraag3:
+      'Wat leer die verskil tussen Jesus en die persoon wat wegloop wanneer die wolf kom vir ons?',
+    groepVraag4:
+      'Waar vind jy dit tans moeilik om Jesus te vertrou en te volg?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Week 14 gaan oor wie Jesus as die Goeie Herder is.\n\nHou die groep by Johannes 10:\n\nHy ken Sy skape.\nHy gaan voor hulle uit.\nHulle ken Sy stem.\nHy loop nie weg wanneer gevaar kom nie.\nHy lê Sy lewe vir hulle af.',
+    fasiliteerderGrens:
+      'Moenie die gesprek verander in ’n spekulatiewe bespreking oor hoe elke persoon “God se stem hoor” nie.\n\nJesus se woorde en karakter bly die veilige vertrekpunt.\n\nDie doel is dat mense Jesus beter leer ken en Hom vertrou om hulle te lei.',
+    pastoraleRisiko: 'laag',
+  },
 }

@@ -238,6 +238,9 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 13 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
       /* Week 13 */ 'Matteus 7:24–27', 'Matteus 7:24', 'Matteus 7:26–27',
                     'Matteus 7:25, 27', 'Lukas 6:46–49',
+      /* Week 14 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 14 */ 'Johannes 10:1–18', 'Johannes 10:14', 'Johannes 10:3–4',
+                    'Johannes 10:11–13', 'Johannes 10:11, 17–18',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 
