@@ -58,6 +58,8 @@ const GEBLOK = new Set([
   'b2babd889c73e9d19d11c345ef0e2f939fde2a08a09ea18a7ad332e63ac8e966', // p…8@gmail.com · 2026-09-21
   '476cc0ff17028546f27a943cf55e979066fc0b1a67177d7b7af635e75d6a9201', // f…4@gmail.com · 2026-10-05
   '44d8b41fb3812115a3cc93ae3c29e10487c2d2dff5e840b40f13910fc404a501', // f…n@gauteng.gov.za · 2026-10-29
+  'c8db8e31b595d433d1551377baadd8fede12dffc46f78fe5ae7025e4f03bbfc3', // a…2@gmail.com · 2026-11-16
+  '3d84c2d471f3de02728d2ec22c4c6474c059599f13878c936ab597028cb3ac64', // f…t@yahoo.com · 2026-11-16
 ])
 
 function isGeblok(adres) {
