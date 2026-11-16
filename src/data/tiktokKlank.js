@@ -133,6 +133,22 @@ export function isTiktokBoodskap(gebeurtenis) {
   return d[MERKER] === true
 }
 
+/* Sê TikTok se speler dat die video NIE kan speel nie?
+ *
+ * Dewald, 16 November 2026, met 'n skermkiekie van Dra Mekaar: *"Player
+ * authentication failed — This link is invalid or has expired."* Twee van die
+ * ses TikTok-video's was by TikTok self weg (hulle eie item-API: `nil_core_data`,
+ * en hulle speler: "Video currently unavailable"). Die ID's was reg; die video's
+ * bestaan net nie meer nie. Hulle speler sê dit vir ons, met
+ * `{ type: 'onError' }` en `{ type: 'onPlayerError', value: { errorCode } }` —
+ * gemeet, nie geraai nie. Dan steek die blad die video weg in plaas van 'n
+ * swart blok met 'n Engelse fout. */
+export function isTiktokFout(gebeurtenis) {
+  if (!isTiktokBoodskap(gebeurtenis)) return false
+  const t = gebeurtenis.data.type
+  return t === 'onError' || t === 'onPlayerError'
+}
+
 /* ── Die video se TYD uit hulle boodskappe, sonder om te raai ──
  *
  * Dewald: *"wanneer iemand die video share en hulle kyk moet die popup opkom so

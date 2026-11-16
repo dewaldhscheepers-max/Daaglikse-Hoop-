@@ -15,9 +15,11 @@
  * raam net na sy EIE fokus en sy EIE boodskappe (`e.source`).
  */
 import { useEffect } from 'react'
-import { stelKlank, isTiktokBoodskap } from '../data/tiktokKlank'
+import { stelKlank, isTiktokBoodskap, isTiktokFout } from '../data/tiktokKlank'
 
-export default function useTiktokKlank(raamRef, aan, sleutel) {
+/* `opFout` (opsioneel): hulle speler het gesê die video kan nie speel nie —
+   weg, privaat of afgehaal. Net vir HIERDIE raam (`e.source`). */
+export default function useTiktokKlank(raamRef, aan, sleutel, opFout) {
   useEffect(() => {
     if (!aan) return
     const raam = raamRef.current
@@ -32,6 +34,7 @@ export default function useTiktokKlank(raamRef, aan, sleutel) {
       wagVirAntwoord = true
     }
     function opBoodskap(e) {
+      if (opFout && isTiktokFout(e) && (!e.source || e.source === raam.contentWindow)) { opFout(); return }
       if (!wagVirAntwoord || !isTiktokBoodskap(e)) return
       if (e.source && e.source !== raam.contentWindow) return
       wagVirAntwoord = false

@@ -8,6 +8,7 @@
  *   node src/data/tiktokKlank.toets.mjs
  */
 import {
+  isTiktokFout,
   klankBoodskappe, isTiktokBoodskap, stelKlank, MERKER, TIKTOK_OORSPRONG,
   wagBoodskappe, beginBoodskappe, stelWag, beginVanVoor, tydUitBoodskap,
 } from './tiktokKlank.js'
@@ -207,6 +208,19 @@ console.log('\n── Die video se TYD uit hulle boodskappe ──')
   is('sonder die merker',
     tydUitBoodskap({ origin: 'https://www.tiktok.com', data: { value: { currentTime: 27, duration: 30 } } }), null)
   is('niks in', tydUitBoodskap(null), null)
+}
+
+/* ── 'n Dooie video: hulle speler se eie foutboodskappe (gemeet 16 Nov 2026) ── */
+{
+  const tt = (data, origin = 'https://www.tiktok.com') => ({ origin, data })
+  is('onError is n fout', isTiktokFout(tt({ type: 'onError', value: 1, 'x-tiktok-player': true })), true)
+  is('onPlayerError is n fout', isTiktokFout(tt({ type: 'onPlayerError', value: { errorCode: 2001, errorType: 'SERVER_ERROR' }, 'x-tiktok-player': true })), true)
+  is('onPlayerReady is nie', isTiktokFout(tt({ type: 'onPlayerReady', 'x-tiktok-player': true })), false)
+  is('onStateChange is nie', isTiktokFout(tt({ type: 'onStateChange', value: 1, 'x-tiktok-player': true })), false)
+  is('sonder die merker: nie', isTiktokFout(tt({ type: 'onError', value: 1 })), false)
+  is('n vreemde oorsprong mag nie n video wegsteek nie', isTiktokFout(tt({ type: 'onError', 'x-tiktok-player': true }, 'https://tiktok.com.boos.net')), false)
+  is('n string: nie', isTiktokFout(tt('{"type":"onError","x-tiktok-player":true}')), false)
+  is('niks: nie', isTiktokFout(null), false)
 }
 
 console.log(`\n${reg} reg, ${vals} vals\n`)

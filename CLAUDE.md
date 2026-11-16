@@ -114,7 +114,7 @@ node src/data/herlaaiBesluit.toets.mjs        # wanneer 'n nuwe weergawe mag lan
 node src/data/youtubeId.toets.mjs             # die video-skakel wat geplak word, 39 toetse
 node src/data/videoBron.toets.mjs             # Bid Saam se videogebed: YouTube OF TikTok, 18 toetse
 node src/data/tiktokId.toets.mjs              # die TikTok-skakel wat geplak word, 101 toetse
-node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler, 69
+node src/data/tiktokKlank.toets.mjs           # die boodskappe na hulle speler + 'n dooie video, 77
 node src/data/reelsPlak.toets.mjs             # 124 skakels AANMEKAAR geplak, 52 toetse
 node src/data/reelsOpenbaar.toets.mjs         # wat van n clip oor die draad gaan, 53 toetse
 node src/data/reels.toets.mjs                 # die voer se reels + die skommeling + die tale, 323
@@ -2692,6 +2692,14 @@ altyd oop staan, sou elke video 'n hele skerm hoog maak. YouTube bly die
 kaartjie wat by 'n tik oopvou. Die klank-logika staan EEN keer, in
 `src/components/useTiktokKlank.js`, vir albei blaaie; elke raam reageer net op
 sy eie fokus en sy eie boodskappe. Blaaiertoets: `kykSorgTiktok.mjs`.
+
+**'n TikTok wat by TikTok weg is, verdwyn van Dra Mekaar.** Dewald, 16 November
+2026: *"Player authentication failed"* op 'n video. Twee van die ses TikToks was
+by TikTok self uitgevee of privaat (hulle item-API: `nil_core_data`); die ID's
+was reg. Hulle speler stuur dan `onError`/`onPlayerError`, en `isTiktokFout()`
+(`tiktokKlank.js`) laat `SorgVideo` die kaart wegsteek. Die dokument bly in
+Firestore — haal hom in die admin uit of plak die nuwe skakel. Blaaiertoets:
+`kykDooieTiktok.mjs`.
 
 **Wat op die skerm staan, moet waar bly.** Twee sinne het gelieg op die oomblik
 dat dit ontplooi het: *"Niks kom outomaties op hierdie muur nie"* en *"Ná

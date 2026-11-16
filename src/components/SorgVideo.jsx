@@ -47,9 +47,12 @@ import './SorgVideo.css'
 export default function SorgVideo({ video, etiket = null, wysBalk = true, onSpeel = null }) {
   const [speel, setSpeel] = useState(false)
   const raamRef = useRef(null)
+  const [weg, setWeg] = useState(false)
   const isTiktok = !!video && video.bron === 'tiktok'
-  useTiktokKlank(raamRef, isTiktok, video && video.videoId)
-  if (!video || !video.videoId) return null
+  /* 'n TikTok wat by TikTok self weg is (uitgevee, privaat), verdwyn van die
+     blad — nooit 'n swart blok met "Player authentication failed" nie. */
+  useTiktokKlank(raamRef, isTiktok, video && video.videoId, () => setWeg(true))
+  if (!video || !video.videoId || weg) return null
 
   const duim = `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
 
