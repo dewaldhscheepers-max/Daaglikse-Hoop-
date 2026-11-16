@@ -208,6 +208,10 @@ export default function Admin({ onClose }) {
   const [enLys,       setEnLys]       = useState(null)
   const [enLysBesig,  setEnLysBesig]  = useState(false)
   const [enLysFout,   setEnLysFout]   = useState('')
+  const [soekLys,     setSoekLys]     = useState(null)   /* die Afrikaanse lys se adresse */
+  const [soekWoord,   setSoekWoord]   = useState('')
+  const [soekBesig,   setSoekBesig]   = useState(false)
+  const [soekFout,    setSoekFout]    = useState('')
   const [activeCampaign, setActiveCampaign] = useState(null)
   const [bulkSubject,    setBulkSubject]    = useState('')
   const [bulkBody,       setBulkBody]       = useState('')
@@ -239,6 +243,46 @@ export default function Admin({ onClose }) {
   const [sendAllResult, setSendAllResult] = useState(null)
   const [customTitle,   setCustomTitle]   = useState('')
   const [customBody,    setCustomBody]    = useState('')
+
+  /* ── Die Engelse e-poslys ──
+     Hierdie twee funksies is per ongeluk saam met LUISTER uitgehaal
+     (0c87008), terwyl die knoppies bly staan het — die 🌍-oortjie het dan op
+     'n onbekende naam omgeval. */
+  async function haalEngelseLys() {
+    setEnLysBesig(true); setEnLysFout('')
+    try {
+      const r = await fetch('/api/epos-engels', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) setEnLysFout(j.fout || 'Kon nie die lys lees nie')
+      else setEnLys(j)
+    } catch { setEnLysFout('Kon nie die lys lees nie') }
+    setEnLysBesig(false)
+  }
+
+  function laaiEngelseLysAf() {
+    if (!enLys || !enLys.adresse) return
+    const csv = 'email\n' + enLys.adresse.join('\n') + '\n'
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `engelse-eposlys-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a); a.click(); a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 2000)
+  }
+
+  /* ── Soek op die Afrikaanse lys ──
+     Die lys stoor net ADRESSE, geen name nie. Die lys word EEN keer gehaal en
+     dan in die blaaier gefilter — elke letter is dus nie 'n nuwe lesing nie. */
+  async function haalSoekLys() {
+    setSoekBesig(true); setSoekFout('')
+    try {
+      const r = await fetch('/api/epos-engels?lys=af', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok || !Array.isArray(j.adresse)) setSoekFout(j.fout || 'Kon nie die lys lees nie')
+      else setSoekLys(j.adresse)
+    } catch { setSoekFout('Kon nie die lys lees nie') }
+    setSoekBesig(false)
+  }
 
   async function handleSendAll() {
     if (!customTitle.trim()) { alert('Voer eers \'n titel in'); return }
@@ -1675,6 +1719,47 @@ export default function Admin({ onClose }) {
                   </span>
                 </div>
               )}
+
+              {/* ── Soek 'n mens op die lys ── */}
+              <div className="admin-books-note" style={{ marginBottom: 14 }}>
+                <b>🔍 Soek op die lys</b>
+                <div style={{ fontSize: 12, margin: '4px 0 8px' }}>
+                  Die lys stoor net e-posadresse, geen name nie. Tik 'n stuk van die adres,
+                  bv. "jordaan" of "liekie".
+                </div>
+                {!soekLys ? (
+                  <button className="admin-save-btn" onClick={haalSoekLys} disabled={soekBesig}>
+                    {soekBesig ? 'Besig…' : 'Laai die lys om te soek'}
+                  </button>
+                ) : (
+                  <>
+                    <input
+                      className="admin-input"
+                      type="search"
+                      value={soekWoord}
+                      onChange={e => setSoekWoord(e.target.value)}
+                      placeholder="Tik 'n naam of stuk van die adres"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: 16 }}
+                    />
+                    {(() => {
+                      const woorde = soekWoord.toLowerCase().split(/[\s,]+/).filter(w => w.length >= 2)
+                      if (!woorde.length) return <div style={{ fontSize: 12, marginTop: 6 }}>{soekLys.length} aktiewe adresse gelaai.</div>
+                      const treffers = soekLys.filter(a => woorde.some(w => a.toLowerCase().includes(w)))
+                      return (
+                        <div className="soek-treffers" style={{ marginTop: 8, fontSize: 13, lineHeight: 1.7 }}>
+                          {treffers.length === 0
+                            ? <div>Niks gevind nie.</div>
+                            : <>
+                                <div><b>{treffers.length}</b> gevind:</div>
+                                {treffers.slice(0, 100).map(a => <div key={a}>{a}</div>)}
+                              </>}
+                        </div>
+                      )
+                    })()}
+                  </>
+                )}
+                {soekFout && <div style={{ marginTop: 6 }}>⚠️ {soekFout}</div>}
+              </div>
 
               {/* Import existing list */}
               {!bulkImported && (emailCount === 0 || emailCount === null) && (

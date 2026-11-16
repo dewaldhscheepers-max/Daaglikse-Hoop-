@@ -1,7 +1,12 @@
 /* ── Die ENGELSE e-poslys, vir die admin ──
  *
- *   GET /api/epos-engels   (x-sorg-geheim)
+ *   GET /api/epos-engels          (x-sorg-geheim) — die Engelse lys
+ *   GET /api/epos-engels?lys=af   (x-sorg-geheim) — die AFRIKAANSE lys
  *     → { totaal, aktief, duplikate, ongeldig, geblok, adresse: [...] }
+ *
+ * `?lys=af` is vir die soekkassie in ✉️ E-pos. Dewald, 16 November 2026:
+ * "is there anyone with the name ... on my email list" — die lys stoor net
+ * ADRESSE, geen name nie, dus soek die admin binne die adresse.
  *
  * Dewald, 10 Oktober 2026: *"daar moet aparte plek in admin wees vir engelse
  * eposte."* Die mense wat 'n ENGELSE boek aflaai of vanaf die Engelse blad
@@ -49,7 +54,8 @@ module.exports = async function handler(req, res) {
   try { token = await getAccessToken() } catch { return res.status(500).json({ fout: 'Auth' }) }
 
   try {
-    const lys = await haalEnOntleed(projectId, token, ENGELSE_LYS)
+    const afr = String((req.query && req.query.lys) || '') === 'af'
+    const lys = await haalEnOntleed(projectId, token, afr ? 'emailList' : ENGELSE_LYS)
     res.setHeader('Cache-Control', 'no-store')
     return res.status(200).json({
       totaal:    lys.totaal,
