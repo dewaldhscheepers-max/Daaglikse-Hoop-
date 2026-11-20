@@ -10,6 +10,9 @@
     }
   ],
   "functions": {
+    "api/boek-aflaaie.js": {
+      "maxDuration": 60
+    },
     "api/send-bulk-email.js": {
       "maxDuration": 300
     },

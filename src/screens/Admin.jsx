@@ -208,6 +208,9 @@ export default function Admin({ onClose }) {
   const [enLys,       setEnLys]       = useState(null)
   const [enLysBesig,  setEnLysBesig]  = useState(false)
   const [enLysFout,   setEnLysFout]   = useState('')
+  const [topBoeke,    setTopBoeke]    = useState(null)   /* { totaal, boeke } */
+  const [topBesig,    setTopBesig]    = useState(false)
+  const [topFout,     setTopFout]     = useState('')
   const [soekLys,     setSoekLys]     = useState(null)   /* die Afrikaanse lys se adresse */
   const [soekWoord,   setSoekWoord]   = useState('')
   const [soekBesig,   setSoekBesig]   = useState(false)
@@ -268,6 +271,18 @@ export default function Admin({ onClose }) {
     a.download = `engelse-eposlys-${new Date().toISOString().slice(0, 10)}.csv`
     document.body.appendChild(a); a.click(); a.remove()
     setTimeout(() => URL.revokeObjectURL(url), 2000)
+  }
+
+  /* ── Aflaaie per boek (freeDownloads, een per e-pos per boek) ── */
+  async function haalTopBoeke() {
+    setTopBesig(true); setTopFout('')
+    try {
+      const r = await fetch('/api/boek-aflaaie', { headers: { 'x-sorg-geheim': geheim } })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok || !Array.isArray(j.boeke)) setTopFout(j.fout || 'Kon nie die aflaaie lees nie')
+      else setTopBoeke(j)
+    } catch { setTopFout('Kon nie die aflaaie lees nie') }
+    setTopBesig(false)
   }
 
   /* ── Soek op die Afrikaanse lys ──
@@ -1259,8 +1274,29 @@ export default function Admin({ onClose }) {
                 .filter(([id, d]) => !staticIds.has(id) && d.title)
                 .map(([id, d]) => ({ id, color: '#EDE8F8', emoji: '📚', price: 0, free: false, ...d }))
             ]
+            const titelVan = id => (allBooks.find(b => b.id === id) || {}).title || id
             return (
             <div className="admin-section">
+              {/* ── Die mees afgelaaide boeke ── */}
+              <div className="admin-books-note" style={{ marginBottom: 18 }}>
+                <b>📊 Mees afgelaai</b>
+                <div style={{ fontSize: 12, margin: '4px 0 8px' }}>
+                  Mense per boek: wie dieselfde boek twee keer vra, tel een keer.
+                </div>
+                <button className="admin-save-btn" onClick={haalTopBoeke} disabled={topBesig}>
+                  {topBesig ? 'Besig om te tel…' : (topBoeke ? 'Tel weer' : 'Wys die mees afgelaaide boeke')}
+                </button>
+                {topFout && <div style={{ marginTop: 6 }}>⚠️ {topFout}</div>}
+                {topBoeke && (
+                  <ol className="top-boeke" style={{ margin: '10px 0 0', paddingLeft: 22, fontSize: 14, lineHeight: 1.8 }}>
+                    {topBoeke.boeke.map(b => (
+                      <li key={b.bookId}>{titelVan(b.bookId)} — <b>{b.aantal.toLocaleString('af-ZA')}</b></li>
+                    ))}
+                  </ol>
+                )}
+                {topBoeke && <div style={{ fontSize: 12, marginTop: 6 }}>{topBoeke.totaal.toLocaleString('af-ZA')} aflaaie in totaal.</div>}
+              </div>
+
               <div className="admin-section-title">Voeg nuwe boek by</div>
               <div className="admin-field">
                 <label>Titel *</label>

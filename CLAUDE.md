@@ -105,6 +105,7 @@ node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 72 toetse
 node api/_eposAfmeld.toets.mjs                # die afmeld-knoppie: skakel, blad, stuur, 54 toetse
 node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uitvee, 20 toetse
+node api/_boekAflaaie.toets.mjs               # aflaaie PER boek uit freeDownloads, 5 toetse
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_ouPrente.toets.mjs                  # VOLG JESUS se vorige prente: witlys + net LEES, 21 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
