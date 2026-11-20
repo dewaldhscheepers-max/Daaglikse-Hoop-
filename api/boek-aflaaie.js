@@ -6,10 +6,16 @@
  * Lees `freeDownloads` met net die `bookId`-veld (mask), duisend op 'n bladsy,
  * en tel met `telPerBoek` (_boekAflaaie.js). Admin-alleen: dit is dokumente
  * wat e-posadresse dra, al gaan net die boek-id's terug.
+ *
+ * Elke telling word ook GESTOOR in `berekening/topBoeke` — 'n versameling
+ * sonder reël in firestore.rules, dus toe vir elke kliënt (`stats` is oop vir
+ * skryf, en dan kon enigiemand die e-boekblad herrangskik). Die e-boekblad
+ * lees dit deur /api/top-boeke, wat dit self weer bereken sodra dit ouer as 24
+ * uur is — daar is dus geen cron nodig nie.
  */
 const crypto = require('crypto')
 const { magAdminDing } = require('./_geheim.js')
-const { telPerBoek } = require('./_boekAflaaie.js')
+const { telEnStoor } = require('./_boekAflaaie.js')
 
 async function getAccessToken() {
   const now    = Math.floor(Date.now() / 1000)
@@ -43,21 +49,9 @@ module.exports = async function handler(req, res) {
   try { token = await getAccessToken() } catch { return res.status(500).json({ fout: 'Auth' }) }
 
   try {
-    const documents = []
-    let pageToken = ''
-    do {
-      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/freeDownloads`
-        + `?pageSize=1000&mask.fieldPaths=bookId${pageToken ? '&pageToken=' + encodeURIComponent(pageToken) : ''}`
-      const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      /* 'n Halwe telling lyk soos 'n feit — val eerder om. */
-      if (!r.ok) return res.status(500).json({ fout: 'Kon nie die aflaaie lees nie' })
-      const data = await r.json()
-      if (data.documents) documents.push(...data.documents)
-      pageToken = data.nextPageToken || ''
-    } while (pageToken)
-
+    const uit = await telEnStoor(projectId, token)
     res.setHeader('Cache-Control', 'no-store')
-    return res.status(200).json({ totaal: documents.length, boeke: telPerBoek(documents) })
+    return res.status(200).json(uit)
   } catch {
     return res.status(500).json({ fout: 'Kon nie die aflaaie lees nie' })
   }

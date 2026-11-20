@@ -105,7 +105,8 @@ node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 72 toetse
 node api/_eposAfmeld.toets.mjs                # die afmeld-knoppie: skakel, blad, stuur, 54 toetse
 node api/_adminSlot.toets.mjs                 # die admin-geheim, en wie mag uitvee, 20 toetse
-node api/_boekAflaaie.toets.mjs               # aflaaie PER boek uit freeDownloads, 5 toetse
+node api/_boekAflaaie.toets.mjs               # aflaaie PER boek + /api/top-boeke se hertelling, vals Firestore, 18
+node src/data/eboekGroepe.toets.mjs           # e-boekblad: 2 nuutste, 5 mees gewild, die res — elke boek een keer, 19
 node api/_kinderOplaai.toets.mjs              # die kinderboek-oplaai se aflaai-teken, 12 toetse
 node api/_ouPrente.toets.mjs                  # VOLG JESUS se vorige prente: witlys + net LEES, 21 toetse
 node api/_wallpaper.toets.mjs                 # die wallpaper-proxy se hekke, 34 toetse
@@ -2923,6 +2924,32 @@ Gmail se eie knoppie. Alles in `api/_eposAfmeld.js` en `api/afmeld.js`.
   `firestore.rules` het geen reël daarvoor nie, dus is dit toe vir kliënte.
 * Die transaksie-e-posse (gratis boek, skenk-dankie) dra dit nie; hulle is
   nie die nuusbrief nie.
+
+## Die e-boekblad in drie groepe: nuut, mees gewild, die res
+
+Dewald, 20 November 2026: *"die 2 nuutste boeke bo... dan 5 mees afgelaaide
+boeke ooit... en dan al die ander... die app moet dit altyd outomaties doen"*,
+en *"die top 5 moet my mees famous boeke wees"* — dus ALLE TYD, nie 30 dae
+nie. Net die Afrikaanse blad; /english is nie aangeraak nie.
+
+* **Die reëls** staan in `src/data/eboekGroepe.js` (suiwer, met toetse): die
+  2 boeke met die jongste `boekTyd`, dan die 5 met die meeste aflaaie uit die
+  res, dan alles anders in die ou orde. Geen boek twee keer nie — is 'n nuwe
+  boek ook gewild, skuif die volgende op. 'n Vaste boek (books.js) is nooit
+  "nuut" nie. Rustelose Gedagtes is ingesluit; sy vaste NUUT-baadjie wys net
+  in die Nuut-groep.
+* **Die tellings** is `freeDownloads` per `bookId` (een per e-pos per boek),
+  gestoor in `berekening/topBoeke` — 'n versameling SONDER reël, dus toe vir
+  kliënte. NIE `stats/` nie: dit is oop vir skryf, en enigiemand kon die blad
+  herrangskik. Die blad lees dit deur `api/top-boeke.js` (oop, rand-kas 'n uur).
+* **Geen cron nie**, met opset: 'n derde cron kan op party Vercel-planne die
+  ontplooiing laat misluk. `top-boeke` tel self weer as die lys ouer as 24 uur
+  is; die admin se "📊 Mees afgelaai" (📚 Boeke) skryf dieselfde dokument.
+* Kom die tellings nie, is daar geen gewild-groep nie en die blad lyk soos
+  voorheen. 'n Leë antwoord vervang nooit die foon se kas (`topBoekeKas`) nie.
+
+Blaaiertoets: `kykBoekGroepe.mjs` (dev-bediener met die vals Firestore —
+`window.__BOEKE` voer die `books`-versameling).
 
 ## E-boeke: 'n boek skrap
 

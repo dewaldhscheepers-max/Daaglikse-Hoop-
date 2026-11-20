@@ -16,6 +16,7 @@ import KinderBibloteek from './KinderBibloteek'
 import LeesplanneLys from './LeesplanneLys'
 import { KINDER_BOEKE } from '../data/kinderBoeke'
 import { sorteerNuutsteBo } from '../data/eboekeVolgorde'
+import { groepeerBoeke } from '../data/eboekGroepe'
 import { isEngels } from '../data/engelsBoeke'
 import { ToetsKnoppie } from '../components/KennisgewingKnoppie'
 import { huidigeToken } from '../data/kennisgewingLees'
@@ -48,9 +49,9 @@ function FreeBookCard({ book, claimed, onClaim, onDeel, downloadCount }) {
         <span className="book-badge free-badge">GRATIS</span>
       </div>
       <div className="book-info">
-        {book.badge && (
+        {(book.badge || downloadCount > 0) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <span className="book-new-badge">{book.badge}</span>
+            {book.badge && <span className="book-new-badge">{book.badge}</span>}
             {downloadCount > 0 && (
               <span className="book-download-count">{downloadCount.toLocaleString('af-ZA')} keer afgelaai</span>
             )}
@@ -290,6 +291,27 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
   useEffect(() => {
     setClaimedMap(buildClaimedMap(bookOverrides))
   }, [bookOverrides])
+
+  /* ── "Mees gewild": die aflaai-tellings, een keer per oopmaak ──
+     Uit /api/top-boeke (die rand kas dit 'n uur). Eers die foon se kas, sodat
+     die groepe nie spring wanneer die antwoord kom nie; en 'n LEË antwoord
+     vervang nooit 'n goeie lys nie — dieselfde les as Luister se getDocs.
+     Sien src/data/eboekGroepe.js vir die reëls. */
+  const [topTel, setTopTel] = useState(() => {
+    try { const k = JSON.parse(localStorage.getItem('topBoekeKas') || 'null'); return Array.isArray(k) ? k : null } catch { return null }
+  })
+  useEffect(() => {
+    let weg = false
+    fetch('/api/top-boeke')
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (weg || !j || !Array.isArray(j.boeke) || j.boeke.length === 0) return
+        setTopTel(j.boeke)
+        try { localStorage.setItem('topBoekeKas', JSON.stringify(j.boeke)) } catch { /* privaat modus */ }
+      })
+      .catch(() => {})
+    return () => { weg = true }
+  }, [])
 
   const BOOKS = [
     /* ── Die opgelaaide boeke, NUUTSTE BO ──
@@ -587,26 +609,53 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
           </button>
         </div>
 
-        {/* All books */}
-        <div className="meer-section">
-          <div className="section-header">
-            <h3 className="section-title">📚 Al die e-boeke</h3>
-            <span className="section-count">{BOOKS.length} boeke</span>
-          </div>
-          <div className="book-list">
-            {BOOKS.map(b => (
-              <div key={b.id} id={`book-${b.id}`}>
-                <FreeBookCard
-                  book={b}
-                  claimed={!!claimedMap[b.id]}
-                  onClaim={() => setActiveBook(b)}
-                  onDeel={() => deelBoek(b)}
-                  downloadCount={b.isRG ? rgCount : undefined}
-                />
+        {/* ── Die boeke in drie groepe: nuut, mees gewild, al die ander ──
+            Dewald, 20 November 2026. Die reëls staan in eboekGroepe.js; elke
+            boek wys presies een keer, dus bly elke #book-<id>-sprong werk. */}
+        {(() => {
+          const groepe = groepeerBoeke(BOOKS, topTel)
+          /* 'n "NUUT"-baadjie (Rustelose Gedagtes dra een vas) mag net in die
+             Nuut-groep staan — onder "Mees gewild" sou dit lieg. */
+          const kaart = (b, telling, nuut = false) => (
+            <div key={b.id} id={`book-${b.id}`}>
+              <FreeBookCard
+                book={!nuut && b.badge === 'NUUT' ? { ...b, badge: undefined } : b}
+                claimed={!!claimedMap[b.id]}
+                onClaim={() => setActiveBook(b)}
+                onDeel={() => deelBoek(b)}
+                downloadCount={b.isRG ? rgCount : telling}
+              />
+            </div>
+          )
+          return (
+            <>
+              {groepe.nuut.length > 0 && (
+                <div className="meer-section boeke-nuut">
+                  <div className="section-header">
+                    <h3 className="section-title">✨ Nuutste boeke</h3>
+                    <span className="section-count">{BOOKS.length} boeke</span>
+                  </div>
+                  <div className="book-list">{groepe.nuut.map(b => kaart(b, undefined, true))}</div>
+                </div>
+              )}
+              {groepe.gewild.length > 0 && (
+                <div className="meer-section boeke-gewild">
+                  <div className="section-header">
+                    <h3 className="section-title">⭐ Mees gewild</h3>
+                  </div>
+                  <div className="book-list">{groepe.gewild.map(b => kaart(b, groepe.aantalVan(b.id)))}</div>
+                </div>
+              )}
+              <div className="meer-section boeke-res">
+                <div className="section-header">
+                  <h3 className="section-title">📚 {groepe.nuut.length || groepe.gewild.length ? 'Al die ander e-boeke' : 'Al die e-boeke'}</h3>
+                  {!groepe.nuut.length && <span className="section-count">{BOOKS.length} boeke</span>}
+                </div>
+                <div className="book-list">{groepe.res.map(b => kaart(b))}</div>
               </div>
-            ))}
-          </div>
-        </div>
+            </>
+          )
+        })()}
 
         {/* ── "Kry ek kennisgewings?" ──
 
