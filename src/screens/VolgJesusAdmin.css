@@ -472,3 +472,9 @@
 }
 .vj-agtergrond-knoppe { display: flex; gap: 10px; flex-wrap: wrap; }
 .vj-agtergrond-nota { margin: 10px 0 0 !important; font-size: 12.5px !important; }
+
+/* Laat weer toe — dieselfde kaart as "Begin oor", sonder die rooi. */
+.vj-toelaat { background: #F8F6FC; border-color: #E3DEEE; }
+.vj-toelaat .vj-oor-kop { color: #5C4E8E; }
+.vj-toelaat-lys { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.vj-toelaat-ry { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: #3A2E44; }

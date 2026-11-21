@@ -37,10 +37,10 @@ import { beginOor } from '../data/volgJesusTerugstel'
 import { haalAgtergrond, stelAgtergrond } from '../data/vjChatAgtergrond'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { storage } from '../firebase'
-import { myGroepe, verwyderLid, verlaatGroep } from '../data/volgJesusGroepApi'
+import { myGroepe, verwyderLid, verlaatGroep, laatToe } from '../data/volgJesusGroepApi'
 /* Die lede kom DIREK uit Firestore. 'n Lid mag sy eie groep se lede lees — dit
    is die reel wat die chat se name laat werk. */
-import { haalLede } from '../data/volgJesusChat'
+import { haalLede, haalVerwyderdes } from '../data/volgJesusChat'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -415,6 +415,8 @@ export default function VolgJesusAdmin({ geheim = '' }) {
         <Tellers tellers={tellers} lys={lys} />
 
         <ChatAgtergrond />
+
+        <LaatWeerToe />
 
         <BeginOor />
 
@@ -827,6 +829,64 @@ function ChatAgtergrond() {
   )
 }
 
+/* ── Laat iemand weer toe wat uit jou groep verwyder is ──
+ *
+ * Dewald, 21 November 2026: *"My vrou sê sy is uit die groep gegooi en kan nie
+ * weer join nie."* 'n Verwydering was 'n verbanning vir altyd, en die enigste
+ * pad daarheen was die toets-knoppie hieronder — wat nou net UITHAAL. Hierdie
+ * paneel hef 'n bestaande verbanning op: die mens sluit dan self weer aan met
+ * die groep se kode. Net groepe waarin JY nog 'n fasiliteerder is. */
+function LaatWeerToe() {
+  const [lys, setLys]     = useState(null)   /* [{ groep, lid }] */
+  const [besig, setBesig] = useState(false)
+  const [nota, setNota]   = useState('')
+
+  async function soek() {
+    setBesig(true); setNota('')
+    const r = await myGroepe()
+    const groepe = (r && r.ok && Array.isArray(r.groepe)) ? r.groepe.filter(g => g.myRol === 'fasiliteerder') : []
+    const uit = []
+    for (const g of groepe) {
+      for (const l of await haalVerwyderdes(g.id)) uit.push({ groep: g, lid: l })
+    }
+    setLys(uit)
+    if (!r || !r.ok) setNota((r && r.fout) || 'Kon nie jou groepe kry nie.')
+    setBesig(false)
+  }
+
+  async function laat(item) {
+    setBesig(true)
+    const r = await laatToe(item.groep.id, item.lid.uid)
+    if (r && r.ok) {
+      setLys(l => l.filter(x => x !== item))
+      setNota(`${item.lid.naam || 'Die persoon'} kan nou weer by ${item.groep.naam} aansluit met die kode ${item.groep.kode || ''}.`.trim())
+    } else setNota((r && r.fout) || 'Kon nie nou nie. Probeer weer.')
+    setBesig(false)
+  }
+
+  return (
+    <div className="vj-oor vj-toelaat">
+      <div className="vj-oor-kop">IEMAND UIT JOU GROEP VERWYDER?</div>
+      <p>Wie verwyder is, kan nie weer aansluit nie. Hier laat jy so iemand weer toe; sy sluit dan self aan met die groep se kode.</p>
+      <button className="vj-knop-los" disabled={besig} onClick={soek}>
+        {besig ? 'Besig…' : (lys ? 'Kyk weer' : 'Wys wie verwyder is')}
+      </button>
+      {lys && lys.length === 0 && !nota && <p className="vj-oor-fyn" style={{ marginTop: 10 }}>Niemand is uit jou groepe verwyder nie.</p>}
+      {lys && lys.length > 0 && (
+        <div className="vj-toelaat-lys">
+          {lys.map(item => (
+            <div key={item.groep.id + item.lid.uid} className="vj-toelaat-ry">
+              <span><strong>{item.lid.naam || 'Iemand'}</strong> · {item.groep.naam}</span>
+              <button className="vj-knop" disabled={besig} onClick={() => laat(item)}>Laat weer toe</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {nota && <p className="vj-oor-fyn" style={{ marginTop: 10 }}>{nota}</p>}
+    </div>
+  )
+}
+
 /* ── Begin heeltemal oor op HIERDIE foon ──
  *
  * Dewald: "ek wil dit nou heeltemal oor toets ... reset dit dat ons dit kan
@@ -851,7 +911,9 @@ function BeginOor() {
     setBesig(true); setKlaar(null)
     const v = await beginOor({
       stap: setStap,
-      api: { myne: myGroepe, lede: haalLede, verwyder: verwyderLid, verlaat: verlaatGroep },
+      /* verban: false — die ander lede word net uitgehaal, nie verban nie. Hulle
+         moet weer met die kode kan aansluit (sien api/vj-groep.mjs). */
+      api: { myne: myGroepe, lede: haalLede, verwyder: (g, u) => verwyderLid(g, u, { verban: false }), verlaat: verlaatGroep },
     })
     setStap('')
     setBesig(false)
@@ -862,9 +924,10 @@ function BeginOor() {
     <div className="vj-oor">
       <div className="vj-oor-kop">TOETS DIT SOOS 'N VREEMDE MENS</div>
       <p>
-        Dit haal jou uit elke VOLG JESUS-groep uit, verwyder die ander lede uit
-        die groepe wat JY lei, en vee alles wat hierdie foon oor die program
-        onthou — jou week, jou merkies en jou geskrewe antwoorde.
+        Dit haal jou uit elke VOLG JESUS-groep uit, haal die ander lede uit die
+        groepe wat JY lei (hulle kan weer met die kode aansluit), en vee alles
+        wat hierdie foon oor die program onthou — jou week, jou merkies en jou
+        geskrewe antwoorde.
       </p>
       <p className="vj-oor-fyn">
         Dit raak net VOLG JESUS. Jou stemboodskappe, Sorg en die speletjies bly

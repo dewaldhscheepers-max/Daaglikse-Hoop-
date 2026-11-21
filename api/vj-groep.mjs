@@ -5,7 +5,8 @@
  *   POST { doen: 'sluitaan', kode, vertoonnaam }
  *   POST { doen: 'chat', groepId, uid, aan }   → uit/terug in die groepchat
  *   POST { doen: 'verlaat',  groepId }
- *   POST { doen: 'verwyder', groepId, uid }
+ *   POST { doen: 'verwyder', groepId, uid, verban? } → verban: false = net uithaal
+ *   POST { doen: 'laatToe',  groepId, uid }           → hef 'n verwydering op
  *   POST { doen: 'rol',      groepId, uid, rol }
  *   POST { doen: 'kode',     groepId, aan }               → roteer of sluit af
  *   POST { doen: 'myne' }                                 → my groepe
@@ -325,13 +326,17 @@ export default async function handler(req, res) {
            private antwoorde bly — hulle is in elk geval op sy foon. */
         const bestaande = await fs.lees(`vjGroepe/${groep.id}/lede/${uid}`)
         if (bestaande && bestaande.status === 'verwyder') {
-          return res.status(403).json({ fout: 'Jy is uit hierdie groep verwyder.' })
+          return res.status(403).json({ fout: 'Jy is uit hierdie groep verwyder. Vra die groepleier om jou weer toe te laat.' })
         }
+        /* Wie uit die CHAT gehaal is, bly uit die chat — ook ná uitgaan en weer
+           aansluit. Sonder dit was "verlaat en sluit weer aan" die omweg. */
+        const chatAf = !!(bestaande && bestaande.chatAf === true)
         await fs.stel(`vjGroepe/${groep.id}/lede/${uid}`, {
           naam: vnaam.waarde,
           rol: (bestaande && bestaande.rol) || 'deelnemer',
           status: 'aktief',
           aangesluit: (bestaande && bestaande.aangesluit) || nouISO,
+          ...(chatAf ? { chatAf: true, chatAfOp: bestaande.chatAfOp || nouISO, chatAfDeur: bestaande.chatAfDeur || '' } : {}),
         }, false)
 
         await onthouLidmaatskap(fs, uid, groep.id, nouISO)
@@ -380,10 +385,37 @@ export default async function handler(req, res) {
         if (wie === groep.eienaar) return res.status(409).json({ fout: 'Die eienaar kan nie verwyder word nie.' })
         if (wie === uid) return res.status(409).json({ fout: 'Gebruik eerder Verlaat die groep.' })
 
-        await fs.stel(`vjGroepe/${groepId}/lede/${wie}`, {
-          status: 'verwyder', verwyderOp: nouISO, verwyderDeur: uid,
-        })
+        /* `verban: false` haal net uit (status 'weg'): die mens kan met die
+           kode weer aansluit. Dit is wat die admin se "Toets dit soos 'n
+           vreemde mens" gebruik — Dewald, 21 November 2026: sy vrou is so uit
+           sy groep gehaal en kon nooit weer aansluit nie. Die verstek bly 'n
+           verbanning, vir iemand wat moeilikheid maak. */
+        const verban = lyf.verban !== false
+        await fs.stel(`vjGroepe/${groepId}/lede/${wie}`, verban
+          ? { status: 'verwyder', verwyderOp: nouISO, verwyderDeur: uid }
+          : { status: 'weg', wegOp: nouISO })
         await vergeetLidmaatskap(fs, wie, groepId)
+        return res.status(200).json({ ok: true, verban })
+      }
+
+      /* ── Laat iemand wat verwyder is, weer toe ───────────────────── */
+      case 'laatToe': {
+        const groepId = String(lyf.groepId || '')
+        const wie = String(lyf.uid || '')
+        const groep = await fs.lees(`vjGroepe/${groepId}`)
+        if (!groep) return res.status(404).json({ fout: 'Ons kry nie daardie groep nie.' })
+        const ek = await fs.lees(`vjGroepe/${groepId}/lede/${uid}`)
+        if (!ek || ek.status !== 'aktief' || ek.rol !== 'fasiliteerder') {
+          return res.status(403).json({ fout: 'Net n fasiliteerder kan dit doen.' })
+        }
+        const lid = await fs.lees(`vjGroepe/${groepId}/lede/${wie}`)
+        if (!lid || lid.status !== 'verwyder') {
+          return res.status(404).json({ fout: 'Daardie mens is nie uit hierdie groep verwyder nie.' })
+        }
+        /* 'weg', nie 'aktief' nie: sy sluit self weer aan met die kode, en kies
+           dan haar eie naam. Ons sit niemand terug in 'n groep sonder dat sy
+           dit wil nie. */
+        await fs.stel(`vjGroepe/${groepId}/lede/${wie}`, { status: 'weg', laatToeOp: nouISO, laatToeDeur: uid })
         return res.status(200).json({ ok: true })
       }
 

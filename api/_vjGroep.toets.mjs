@@ -224,6 +224,29 @@ is('wie verwyder is, kom nie weer in nie',
 is('die eienaar kan nie verwyder word nie',
    (await roep('maria', { doen: 'verwyder', groepId: GID, uid: 'dewald' })).status, 409)
 
+console.log('\n── Laat weer toe, en net UITHAAL sonder verbanning ──\n')
+/* Dewald, 21 November 2026: sy vrou is deur die admin se toets-knoppie uit sy
+   groep gehaal en kon nooit weer aansluit nie. */
+is('n deelnemer mag niemand weer toelaat nie',
+   (await roep('nuweling', { doen: 'laatToe', groepId: GID, uid: 'indringer' })).status, 403)
+is('n fasiliteerder mag', (await roep('maria', { doen: 'laatToe', groepId: GID, uid: 'indringer' })).status, 200)
+is('en dan is sy net weg, nie meer verban nie', winkel.get(`vjGroepe/${GID}/lede/indringer`).status, 'weg')
+is('sy kan weer aansluit',
+   (await roep('indringer', { doen: 'sluitaan', kode: KODE, vertoonnaam: 'Indringer' })).status, 200)
+is('as gewone deelnemer', winkel.get(`vjGroepe/${GID}/lede/indringer`).rol, 'deelnemer')
+is('iemand wat NIE verwyder is nie, kan nie "toegelaat" word nie',
+   (await roep('maria', { doen: 'laatToe', groepId: GID, uid: 'indringer' })).status, 404)
+is('verwyder met verban:false', (await roep('maria', { doen: 'verwyder', groepId: GID, uid: 'indringer', verban: false })).status, 200)
+is('laat net weg, nie verwyder nie', winkel.get(`vjGroepe/${GID}/lede/indringer`).status, 'weg')
+is('en sy kan dadelik weer aansluit',
+   (await roep('indringer', { doen: 'sluitaan', kode: KODE, vertoonnaam: 'Indringer' })).status, 200)
+/* Wie uit die CHAT gehaal is, mag dit nie omseil deur uit te gaan en weer aan te sluit nie. */
+is('uit die chat gehaal', (await roep('maria', { doen: 'chat', groepId: GID, uid: 'indringer', aan: false })).status, 200)
+await roep('indringer', { doen: 'verlaat', groepId: GID })
+await roep('indringer', { doen: 'sluitaan', kode: KODE, vertoonnaam: 'Indringer' })
+is('ná uitgaan en weer aansluit is sy steeds uit die chat', winkel.get(`vjGroepe/${GID}/lede/indringer`).chatAf, true)
+await roep('indringer', { doen: 'verlaat', groepId: GID })
+
 console.log('\n── Verlaat ──\n')
 is('die eienaar met ander lede mag nie', (await roep('dewald', { doen: 'verlaat', groepId: GID })).status, 409)
 is('n gewone lid mag', (await roep('maria', { doen: 'verlaat', groepId: GID })).status, 200)

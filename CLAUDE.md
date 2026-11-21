@@ -85,7 +85,7 @@ node src/data/reekse.toets.mjs                # een reeks mag nie twee word nie,
 node src/data/hoopSkakel.toets.mjs            # die gedeelde skakel /hoop/<id>, 44 toetse
 node src/data/kinderBoekSkakel.toets.mjs      # die kinderboek se deelskakel (ook die ou /go/-vorm), 17 toetse
 node src/data/vjChatPrent.toets.mjs           # watter adres agter die groepchat mag staan, 23 toetse
-node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings, 58 toetse
+node api/_vjGroep.toets.mjs                   # die groep-eindpunt, met inbraakpogings + laat weer toe, 87 toetse
 node src/data/volgJesusTel.toets.mjs          # een keer per toestel, 27 toetse
 node api/_volgJesusTelVelde.toets.mjs         # watter tellers n oop POST mag optel, 33 toetse
 node api/_telSkerwe.toets.mjs                 # die tellers oor tien dokumente, 42 toetse
@@ -908,6 +908,18 @@ Twee dinge om te onthou wanneer iets nie werk nie:
   groep aansluit, kan sy rekening koppel — `linkWithCredential` hou dieselfde
   uid — en dit is die enigste manier waarop 'n groep 'n herinstallasie
   oorleef. Dit is nooit 'n muur nie: misluk dit, werk die groep steeds.
+
+**Verwyder is 'n VERBANNING; die toets-knoppie verban niemand nie.** Dewald,
+21 November 2026: *"My vrou sê sy is uit die groep gegooi en kan nie weer join
+nie."* `verwyder` sit `status: 'verwyder'` en `sluitaan` weier so iemand vir
+altyd — en die enigste pad daarheen was die admin se "Toets dit soos 'n vreemde
+mens", wat ELKE ander lid van sy groepe so uitgehaal het. Nou stuur daardie
+knoppie `verban: false` (status `weg`, kan weer aansluit), en die admin het
+"Iemand uit jou groep verwyder?" met **Laat weer toe** (`doen: 'laatToe'`,
+fasiliteerder-alleen, `verwyder` → `weg`). Wie uit die CHAT gehaal is
+(`chatAf`), bly uit ná uitgaan en weer aansluit — dit was 'n omweg. Blaaiertoets:
+`kykLaatToe.mjs` (vals Firestore se `window.__LEDE`, en 'n nagebootste anonieme
+aanmelding).
 
 Blaaiertoetse: `kykChat.mjs` (TWEE oortjies met twee uids — die enigste eerlike
 toets vir 'n chat) en `kykGroepBegin.mjs` (die pad wat 'n nuwe mens vandag

@@ -32,7 +32,9 @@ export const skepGroep   = (naam, gemeente, vertoonnaam) => vra('skep', { naam, 
 export const kykGroep    = kode => vra('kyk', { kode })
 export const sluitAan    = (kode, vertoonnaam) => vra('sluitaan', { kode, vertoonnaam })
 export const verlaatGroep = groepId => vra('verlaat', { groepId })
-export const verwyderLid = (groepId, uid) => vra('verwyder', { groepId, uid })
+export const verwyderLid = (groepId, uid, opsies = {}) => vra('verwyder', { groepId, uid, ...(opsies.verban === false ? { verban: false } : {}) })
+/* Hef 'n verwydering op: die mens kan dan weer met die kode aansluit. */
+export const laatToe     = (groepId, uid) => vra('laatToe', { groepId, uid })
 export const stelRol     = (groepId, uid, rol) => vra('rol', { groepId, uid, rol })
 /* Uit die groepchat, maar NIE uit die groep nie. Die mens loop die program
    klaar; net die gesprek gaan toe. */

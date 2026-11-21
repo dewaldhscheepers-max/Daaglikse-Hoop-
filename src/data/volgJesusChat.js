@@ -254,6 +254,18 @@ export function luisterGroep(groepId, op, opFout) {
   )
 }
 
+/* Wie uit hierdie groep VERWYDER (verban) is — vir die admin se "Laat weer toe". */
+export async function haalVerwyderdes(groepId) {
+  try {
+    const kiek = await getDocs(collection(db, 'vjGroepe', groepId, 'lede'))
+    const uit = []
+    kiek.forEach(d => uit.push({ uid: d.id, ...(d.data() || {}) }))
+    return uit.filter(l => l.status === 'verwyder')
+  } catch {
+    return []
+  }
+}
+
 export async function haalLede(groepId) {
   try {
     const kiek = await getDocs(collection(db, 'vjGroepe', groepId, 'lede'))
