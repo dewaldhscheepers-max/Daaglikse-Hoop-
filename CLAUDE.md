@@ -921,6 +921,16 @@ fasiliteerder-alleen, `verwyder` → `weg`). Wie uit die CHAT gehaal is
 `kykLaatToe.mjs` (vals Firestore se `window.__LEDE`, en 'n nagebootste anonieme
 aanmelding).
 
+**"Geen groupchat" sonder dat iemand uitgehaal is.** Dewald, dieselfde dag:
+*"Daar is geen groupchat nou by haar nie"* — en die admin het niemand as
+uitgehaal gewys nie. Twee gate in `VolgJesusLewe.jsx`: 'n mislukte `myne`-navraag
+het 'n groeplid stil na die keuseskerm gestuur (nou: een keer weer probeer, dan
+"Ons kon nie jou groep laai nie" met **Probeer weer**), en wie "alleen" gekies
+het — of wie se uid nuut is (die Play-app, 'n nuwe foon) — het geen pad na 'n
+groep gehad nie behalwe 'n uitnodigingskakel (nou: "Doen jy dit saam met 'n
+groep? Sluit aan met die kode" onder die week). 'n Nuwe uid is 'n nuwe lid; die
+kode is die pad terug. Blaaiertoets: `kykGroepWeg.mjs`.
+
 Blaaiertoetse: `kykChat.mjs` (TWEE oortjies met twee uids — die enigste eerlike
 toets vir 'n chat) en `kykGroepBegin.mjs` (die pad wat 'n nuwe mens vandag
 loop).

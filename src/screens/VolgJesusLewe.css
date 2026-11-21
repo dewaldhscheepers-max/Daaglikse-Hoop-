@@ -142,6 +142,30 @@
 /* Uit die groepchat, maar nie uit die groep nie. 'n Stil reël waar die
    chat-knoppie sou gestaan het — 'n knoppie wat stilweg verdwyn, laat 'n mens
    dink die app is stukkend. */
+/* Die pad na 'n groep vir wie alleen is, en die groepfout-skerm se tweede
+   knoppie. Stil: dit is 'n deur, nie 'n vraag nie. Net kleur op :active. */
+.vjl-sluitaan {
+  display: block;
+  margin: 18px auto 0;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #6B4FA8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.vjl-sluitaan:active { color: #3E2A6E; }
+.vjl-groepfout p { margin: 0 0 16px; }
+.vjl-groepfout .vjl-terugknop {
+  background: #4A3580;
+  border-color: #4A3580;
+  color: #fff;
+}
+.vjl-groepfout .vjl-terugknop:active { background: #3E2A6E; }
+
 .vjl-chat-af {
   margin: 16px 0 0;
   background: #F3F0FA;

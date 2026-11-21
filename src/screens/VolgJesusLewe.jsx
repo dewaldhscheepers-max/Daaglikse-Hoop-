@@ -79,6 +79,8 @@ export default function VolgJesusLewe({ onClose: opToe }) {
      mens hom nie hoef oor te tik nie — die skakel se hele punt. */
   const [nooiKode, setNooiKode] = useState('')
   const [chatAanset, setChatAanset] = useState('')
+  /* "Probeer weer" op die groepfout-skerm: elke druk loop die navraag weer. */
+  const [laaiGroep, setLaaiGroep] = useState(0)
 
   useEffect(() => {
     let dood = false
@@ -92,9 +94,21 @@ export default function VolgJesusLewe({ onClose: opToe }) {
 
       /* Wie 'n uid het, vra die bediener waar hy hoort. Dit is hoe 'n groep 'n
          herinstallasie oorleef — die uid is dieselfde sodra hy weer aanmeld. */
-      if (u) {
-        const r = await myGroepe()
+      /* Was hierdie foon in 'n groep en antwoord die bediener nie, is dit NIE
+         "geen groep" nie. Dewald se vrou, 21 November 2026: "Daar is geen
+         groupchat nou by haar nie" — 'n mislukte navraag het haar stil na die
+         keuseskerm gestuur, en wie daar "alleen" druk, het geen pad terug nie.
+         Een keer weer probeer, en dan 'n eerlike sin met "Probeer weer". */
+      let r = u ? await myGroepe() : { ok: false }
+      if (dood) return
+      if (!r.ok && gekies === 'groep') {
+        await new Promise(k => setTimeout(k, 2500))
         if (dood) return
+        r = u ? await myGroepe() : { ok: false }
+        if (dood) return
+        if (!r.ok) { setModus('groepfout'); return }
+      }
+      if (u) {
         const eerste = r.ok && r.groepe && r.groepe[0]
         if (eerste) {
           setGroep(eerste)
@@ -122,7 +136,7 @@ export default function VolgJesusLewe({ onClose: opToe }) {
       }
     })()
     return () => { dood = true }
-  }, [])
+  }, [laaiGroep])
 
   /* Die mens het GEKIES: alleen of saam. Dit is die oomblik waarop hy die
      program begin doen, en dit is die enigste getal wat "hoeveel mense" beteken
@@ -287,6 +301,19 @@ export default function VolgJesusLewe({ onClose: opToe }) {
     binne = <div className="vjl-stil">Besig om te laai…</div>
   } else if (groepBlad && groepSkerm) {
     binne = groepSkerm
+  } else if (modus === 'groepfout') {
+    binne = (
+      <div className="vjl-stil vjl-groepfout">
+        <p>Ons kon nie jou groep laai nie. Kyk of jy aanlyn is.</p>
+        <button className="vjl-terugknop"
+                onClick={() => { setModus('wag'); setLaaiGroep(n => n + 1) }}>
+          Probeer weer
+        </button>
+        <button className="vjl-sluitaan" onClick={() => setGroepBlad('kode')}>
+          Sluit weer aan met jou groep se kode
+        </button>
+      </div>
+    )
   } else if (modus === 'onbeslis') {
     binne = groepSkerm || <GroepOfSolo opSaam={() => setGroepBlad('mense')} opSolo={() => setGroepBlad('alleen')} />
   } else if (besig && !week) {
@@ -445,6 +472,17 @@ export default function VolgJesusLewe({ onClose: opToe }) {
           <div className="vjl-chat-af">
             Jy is uit die groepchat. Jy kan die program klaarmaak soos altyd.
           </div>
+        )}
+
+        {/* ── Alleen, maar dalk nie vir altyd nie ──
+         *
+         * Wie eers "alleen" gekies het, of wie se groep op 'n nuwe foon of in
+         * die Play-app nie saamgekom het nie (dit is 'n NUWE anonieme uid),
+         * het geen pad na 'n groep gehad nie behalwe 'n uitnodigingskakel. */}
+        {modus === 'solo' && !groepBlad && (
+          <button className="vjl-sluitaan" onClick={() => setGroepBlad('mense')}>
+            Doen jy dit saam met ’n groep? Sluit aan met die kode
+          </button>
         )}
       </div>
 
