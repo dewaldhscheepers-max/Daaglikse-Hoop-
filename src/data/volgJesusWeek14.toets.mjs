@@ -213,7 +213,7 @@ console.log('\n── Die register ken Week 14 ──\n')
   is('die klaar-skerm', weekKlaar(14), WEEK14_KLAAR)
   is('blokkeVir stem ooreen', blokkeVir(14, 3), blokkeVirDag14(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag14(9), [])
-  is('maar nie week 15 nie', hetDae(15), false)
+  is('maar nie week 16 nie', hetDae(16), false)
 }
 
 console.log('\n── Week 13 wys nou NA Week 14, en die titel stem ──\n')
@@ -225,10 +225,12 @@ console.log('\n── Week 13 wys nou NA Week 14, en die titel stem ──\n')
   waar('en dit se iets oor die week', WEEK13_VOLGENDE.lyf.length > 40)
 }
 
-console.log('\n── En Week 14 loop nog nie verder nie ──\n')
+console.log('\n── Week 14 wys nou NA Week 15 ──\n')
 {
-  is('WEEK14_VOLGENDE is null', WEEK14_VOLGENDE, null)
-  is('en die register gee ook null', weekVolgende(14), null)
+  waar('WEEK14_VOLGENDE bestaan', !!WEEK14_VOLGENDE)
+  is('en dit wys na week 15', WEEK14_VOLGENDE.week, 15)
+  is('die register gee dieselfde', weekVolgende(14), WEEK14_VOLGENDE)
+  is('die titel is Week 15 se egte titel', WEEK14_VOLGENDE.titel, WEKE[15].titel)
 }
 
 console.log('\n── Die klaar-skerm praat oor HIERDIE week ──\n')

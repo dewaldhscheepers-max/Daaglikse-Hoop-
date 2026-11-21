@@ -379,9 +379,15 @@ export const WEEK14_DEELSIN =
 
 /* ── Die brug na Week 15 ──
  *
- * `null` totdat Dewald Week 15 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK14_VOLGENDE = null
+ * Dewald het Week 15 op 21 November 2026 gestuur. Die titel is Week 15 se egte
+ * titel (die toets eis dit), en die sin kom uit sy "BEGIN VAN DIE WEEK". */
+export const WEEK14_VOLGENDE = {
+  week: 15,
+  titel: 'Die melaatse wat niemand wou aanraak nie',
+  lyf: '’n Man wat ander mense op ’n afstand moes hou, kom na Jesus toe. Jesus stuur '
+     + 'hom nie weg nie. Hy raak hom aan, Hy maak hom rein, en die man wat buite moes '
+     + 'bly, kan weer teruggaan.',
+}
 
 export function blokkeVirDag14(n) {
   const dag = WEEK14_DAE.find(d => d.n === n)

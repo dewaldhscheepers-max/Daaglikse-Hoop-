@@ -807,4 +807,58 @@ export const WEKE = {
       'Moenie die gesprek verander in ’n spekulatiewe bespreking oor hoe elke persoon “God se stem hoor” nie.\n\nJesus se woorde en karakter bly die veilige vertrekpunt.\n\nDie doel is dat mense Jesus beter leer ken en Hom vertrou om hulle te lei.',
     pastoraleRisiko: 'laag',
   },
+  15: {
+    weeknommer: 15,
+    titel: 'Die melaatse wat niemand wou aanraak nie',
+    doel:
+      'Om te sien dat ons met ons gebrokenheid na Jesus toe kan kom, en dat Sy reinheid sterker is as dit wat ons onrein maak.',
+    weekKern:
+      'DIE PLEK WAAR MENSE VAN JOU WEGSTAAN, IS NIE NOODWENDIG DIE PLEK WAAR JESUS WEGSTAAN NIE.',
+    openingskerm:
+      '’n Man wat ander mense op ’n afstand moes hou, kom na Jesus toe.\n\n'
+      + 'Jesus stuur hom nie weg nie.\n\n'
+      + 'Hy raak hom aan.\n\n'
+      + 'Hy maak hom rein.\n\n'
+      + 'En die man wat buite moes bly, kan weer teruggaan.',
+    primereSkrif: 'Markus 1:40–45',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 14 se noot. Dewald: "Daar is GEEN stemnota, audio of
+       klankspeler in Week 15 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'DIE PLEK WAAR MENSE VAN JOU WEGSTAAN, IS NIE NOODWENDIG DIE PLEK WAAR JESUS WEGSTAAN NIE.',
+    eenSin:
+      'Jy hoef nie eers reg te wees voordat jy na Jesus toe kom nie.',
+    privaatRefleksie:
+      'Is daar iets waarvoor ek skaam is wat maak dat ek van Jesus af wil wegkruip?',
+    gehoorsaamheidStap:
+      'Bring vandag daardie een ding na Jesus toe wat jy gewoonlik probeer wegsteek.\n\nNoem dit eerlik in gebed.',
+    gebed:
+      'Vader, dankie dat Jesus nie gebroke mense wegstuur nie. Help ons om eerlik na Hom toe te kom. Dankie dat Sy reinheid sterker is as ons onreinheid en Sy genade groter is as ons skaamte. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Kom soos jy is',
+    dag1Titel: 'Die melaatse wat niemand wou aanraak nie',
+    dag2Titel: 'Kom soos jy is',
+    dag3Titel: 'Jesus raak hom aan',
+    dag4Titel: 'Jesus se reinheid wen',
+    dag5Titel: 'Die man wat buite was, kan teruggaan',
+    groepVraag1:
+      'Wat tref jou die meeste van die manier waarop die man na Jesus toe kom?',
+    groepVraag2:
+      'Waarom dink julle is dit belangrik dat Jesus hom aanraak?',
+    groepVraag3:
+      'Wat wys hierdie verhaal vir ons oor Jesus se reinheid?',
+    groepVraag4:
+      'Wat leer die einde van die verhaal vir ons oor die man wat buite was en Jesus wat buite bly?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Week 15 gaan oor wat Jesus doen wanneer ’n mens wat as onrein en afgesonder beskou is, na Hom toe kom.\n\nHou die groep by die beweging van Markus 1:\n\nDie man kom.\nJesus kry hom jammer.\nJesus raak hom aan.\nJesus maak hom rein.\nDie man wat buite was, kan teruggaan.',
+    fasiliteerderGrens:
+      'Moenie die man se siekte gebruik as ’n eenvoudige beeld vir enige spesifieke sonde of moderne siekte nie.\n\nDie teks gaan eerstens oor hierdie man se werklike toestand en Jesus se reaksie op hom.\n\nDie verandering aan die einde — die man kan teruggaan terwyl Jesus buite bly — is ’n sterk beeld, maar moenie meer daarvan maak as wat Markus self sê nie.',
+    pastoraleRisiko: 'laag',
+  },
 }
