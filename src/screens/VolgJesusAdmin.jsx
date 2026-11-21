@@ -37,10 +37,10 @@ import { beginOor } from '../data/volgJesusTerugstel'
 import { haalAgtergrond, stelAgtergrond } from '../data/vjChatAgtergrond'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { storage } from '../firebase'
-import { myGroepe, verwyderLid, verlaatGroep, laatToe } from '../data/volgJesusGroepApi'
+import { myGroepe, verwyderLid, verlaatGroep, laatToe, stelChat } from '../data/volgJesusGroepApi'
 /* Die lede kom DIREK uit Firestore. 'n Lid mag sy eie groep se lede lees — dit
    is die reel wat die chat se name laat werk. */
-import { haalLede, haalVerwyderdes } from '../data/volgJesusChat'
+import { haalLede, haalVerwyderdes, haalChatAf } from '../data/volgJesusChat'
 import './VolgJesusAdmin.css'
 
 /* ── Die video ──
@@ -847,7 +847,10 @@ function LaatWeerToe() {
     const groepe = (r && r.ok && Array.isArray(r.groepe)) ? r.groepe.filter(g => g.myRol === 'fasiliteerder') : []
     const uit = []
     for (const g of groepe) {
-      for (const l of await haalVerwyderdes(g.id)) uit.push({ groep: g, lid: l })
+      for (const l of await haalVerwyderdes(g.id)) uit.push({ groep: g, lid: l, soort: 'groep' })
+      /* Uit die CHAT gehaal, maar nog in die groep — sy sien dan geen
+         groepchat nie. Dewald: "Daar is geen groupchat nou by haar nie." */
+      for (const l of await haalChatAf(g.id)) uit.push({ groep: g, lid: l, soort: 'chat' })
     }
     setLys(uit)
     if (!r || !r.ok) setNota((r && r.fout) || 'Kon nie jou groepe kry nie.')
@@ -856,28 +859,31 @@ function LaatWeerToe() {
 
   async function laat(item) {
     setBesig(true)
-    const r = await laatToe(item.groep.id, item.lid.uid)
+    const chat = item.soort === 'chat'
+    const r = chat ? await stelChat(item.groep.id, item.lid.uid, true) : await laatToe(item.groep.id, item.lid.uid)
     if (r && r.ok) {
       setLys(l => l.filter(x => x !== item))
-      setNota(`${item.lid.naam || 'Die persoon'} kan nou weer by ${item.groep.naam} aansluit met die kode ${item.groep.kode || ''}.`.trim())
+      setNota(chat
+        ? `${item.lid.naam || 'Die persoon'} is terug in ${item.groep.naam} se groepchat.`
+        : `${item.lid.naam || 'Die persoon'} kan nou weer by ${item.groep.naam} aansluit met die kode ${item.groep.kode || ''}.`.trim())
     } else setNota((r && r.fout) || 'Kon nie nou nie. Probeer weer.')
     setBesig(false)
   }
 
   return (
     <div className="vj-oor vj-toelaat">
-      <div className="vj-oor-kop">IEMAND UIT JOU GROEP VERWYDER?</div>
-      <p>Wie verwyder is, kan nie weer aansluit nie. Hier laat jy so iemand weer toe; sy sluit dan self aan met die groep se kode.</p>
+      <div className="vj-oor-kop">IEMAND UIT JOU GROEP OF CHAT GEHAAL?</div>
+      <p>Wie uit die groep verwyder is, kan nie weer aansluit nie, en wie uit die chat gehaal is, sien geen groepchat nie. Hier sit jy so iemand terug.</p>
       <button className="vj-knop-los" disabled={besig} onClick={soek}>
-        {besig ? 'Besig…' : (lys ? 'Kyk weer' : 'Wys wie verwyder is')}
+        {besig ? 'Besig…' : (lys ? 'Kyk weer' : 'Wys wie uitgehaal is')}
       </button>
-      {lys && lys.length === 0 && !nota && <p className="vj-oor-fyn" style={{ marginTop: 10 }}>Niemand is uit jou groepe verwyder nie.</p>}
+      {lys && lys.length === 0 && !nota && <p className="vj-oor-fyn" style={{ marginTop: 10 }}>Niemand is uit jou groepe of hulle chat gehaal nie.</p>}
       {lys && lys.length > 0 && (
         <div className="vj-toelaat-lys">
           {lys.map(item => (
             <div key={item.groep.id + item.lid.uid} className="vj-toelaat-ry">
-              <span><strong>{item.lid.naam || 'Iemand'}</strong> · {item.groep.naam}</span>
-              <button className="vj-knop" disabled={besig} onClick={() => laat(item)}>Laat weer toe</button>
+              <span><strong>{item.lid.naam || 'Iemand'}</strong> · {item.groep.naam} · {item.soort === 'chat' ? 'uit die chat' : 'uit die groep'}</span>
+              <button className="vj-knop" disabled={besig} onClick={() => laat(item)}>{item.soort === 'chat' ? 'Sit terug in die chat' : 'Laat weer toe'}</button>
             </div>
           ))}
         </div>

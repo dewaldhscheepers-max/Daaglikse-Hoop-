@@ -266,6 +266,18 @@ export async function haalVerwyderdes(groepId) {
   }
 }
 
+/* Wie nog in die groep is, maar uit die GROEPCHAT gehaal is (`chatAf`). */
+export async function haalChatAf(groepId) {
+  try {
+    const kiek = await getDocs(collection(db, 'vjGroepe', groepId, 'lede'))
+    const uit = []
+    kiek.forEach(d => uit.push({ uid: d.id, ...(d.data() || {}) }))
+    return uit.filter(l => l.status === 'aktief' && l.chatAf === true)
+  } catch {
+    return []
+  }
+}
+
 export async function haalLede(groepId) {
   try {
     const kiek = await getDocs(collection(db, 'vjGroepe', groepId, 'lede'))

@@ -917,7 +917,7 @@ mens", wat ELKE ander lid van sy groepe so uitgehaal het. Nou stuur daardie
 knoppie `verban: false` (status `weg`, kan weer aansluit), en die admin het
 "Iemand uit jou groep verwyder?" met **Laat weer toe** (`doen: 'laatToe'`,
 fasiliteerder-alleen, `verwyder` → `weg`). Wie uit die CHAT gehaal is
-(`chatAf`), bly uit ná uitgaan en weer aansluit — dit was 'n omweg. Blaaiertoets:
+(`chatAf`), bly uit ná uitgaan en weer aansluit — dit was 'n omweg — en dieselfde paneel sit so iemand met **Sit terug in die chat** terug (`doen: 'chat', aan: true`). Blaaiertoets:
 `kykLaatToe.mjs` (vals Firestore se `window.__LEDE`, en 'n nagebootste anonieme
 aanmelding).
 
