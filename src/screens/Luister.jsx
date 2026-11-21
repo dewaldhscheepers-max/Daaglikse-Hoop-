@@ -1262,6 +1262,9 @@ export default function Luister({ onPlayingChange, installBanner, onAdminAccess,
         </div>
 
         <div className="hero-song-info">
+          {/* Dewald, 21 November 2026: daar moet uitdruklik "Vandag se boodskap"
+              staan — anders weet 'n nuwe mens nie dat dit elke dag nuut is nie. */}
+          <div className="hero-vandag">Vandag se boodskap</div>
           <div className="hero-song-title">{today.title}</div>
           {today.scripture && <div className="hero-song-ref">{today.scripture}</div>}
           {playCount >= 10 && <div className="hero-play-count">🎧 {playCount} keer geluister</div>}

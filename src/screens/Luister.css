@@ -116,6 +116,17 @@
   margin-top: 16px;
 }
 
+.hero-vandag {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #F2C97A;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  margin-bottom: 3px;
+}
+
 .hero-song-title {
   font-family: var(--font-serif);
   font-size: 17px;
