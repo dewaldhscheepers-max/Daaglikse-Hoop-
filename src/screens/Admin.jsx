@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import KinderAdmin from './KinderAdmin'
 import ReelsAdmin from './ReelsAdmin'
 import SorgAdmin from './SorgAdmin'
@@ -463,6 +463,22 @@ export default function Admin({ onClose }) {
   /* Watter boek se skrap-vraag oop is, en of die skryf loop. Sien skrapBoek. */
   const [boekSkrap, setBoekSkrap] = useState(null)
   const [boekBesig, setBoekBesig] = useState(false)
+  /* ✏️ Die naam van 'n boek wat hy self bygevoeg het. Dewald, 23 November
+     2026: "Verander die eboek se naam". Daar was geen manier nie — net skrap
+     en weer oplaai, wat die aflaai-tellings by die ou id laat. Net `title`
+     word met merge geskryf; die id, PDF en cover bly. */
+  const [boekNaam, setBoekNaam] = useState(null) /* { id, titel } */
+  async function stoorBoekNaam() {
+    const titel = (boekNaam?.titel || '').trim()
+    if (!titel) return
+    setBoekBesig(true)
+    try {
+      await setDoc(doc(db, 'books', boekNaam.id), { title: titel }, { merge: true })
+      vergeetBoeke()
+      setBoekNaam(null)
+    } catch (e) { alert('Kon nie die naam stoor nie: ' + e.message) }
+    setBoekBesig(false)
+  }
 
   function getAdminTodaySAST() {
     return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10)
@@ -1350,7 +1366,8 @@ export default function Admin({ onClose }) {
                 const isCoverSaved      = coverSaved === book.id
 
                 return (
-                  <div key={book.id} className="admin-book-row">
+                  <Fragment key={book.id}>
+                  <div className="admin-book-row">
                     <div className="admin-book-icon" style={{ position: 'relative' }}>
                       {hasCover
                         ? <img src={override.coverUrl} style={{ width: 36, height: 48, borderRadius: 6, objectFit: 'cover' }} />
@@ -1437,6 +1454,12 @@ export default function Admin({ onClose }) {
                       {/* NET 'n boek wat hy self bygevoeg het. 'n Vaste boek se
                           dokument is sy byvoegsel, nie sy bestaan nie — sien
                           skrapBoek. */}
+                      {!staticIds.has(book.id) && boekNaam?.id !== book.id && (
+                        <button className="admin-pdf-btn" title="Verander die boek se naam"
+                                onClick={() => setBoekNaam({ id: book.id, titel: book.title || '' })}>
+                          ✏️ Naam
+                        </button>
+                      )}
                       {!staticIds.has(book.id) && (
                         boekSkrap === book.id ? (
                           <>
@@ -1453,6 +1476,28 @@ export default function Admin({ onClose }) {
                       )}
                     </div>
                   </div>
+                  {/* Die naam-kassie staan op sy EIE volbreedte-lyn: langs die
+                      knoppies was hy so smal dat die naam nie leesbaar was nie
+                      en die knoppies oor "Kanselleer" gelê het. */}
+                  {boekNaam?.id === book.id && (
+                    <div className="admin-boeknaam" style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '-4px 0 12px', padding: '12px', background: '#F6F2FB', borderRadius: 12 }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: '#5B4E8C' }}>Nuwe naam vir die boek</label>
+                      <input
+                        value={boekNaam.titel}
+                        onChange={e => setBoekNaam({ id: book.id, titel: e.target.value })}
+                        onKeyDown={e => { if (e.key === 'Enter') stoorBoekNaam() }}
+                        autoFocus
+                        style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #DDD5EC', fontSize: 15 }}
+                      />
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="admin-pdf-btn" disabled={boekBesig || !boekNaam.titel.trim()} onClick={stoorBoekNaam}>
+                          {boekBesig ? '…' : 'Stoor naam'}
+                        </button>
+                        <button className="admin-delete-no" onClick={() => setBoekNaam(null)}>Kanselleer</button>
+                      </div>
+                    </div>
+                  )}
+                  </Fragment>
                 )
               })}
 

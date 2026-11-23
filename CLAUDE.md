@@ -2994,6 +2994,15 @@ tydstempel.
 Blaaiertoets: `kykBoekSkrap.mjs` in die scratchpad maak die admin oop en eis
 dat 'n vaste boek presies drie knoppies het en NIE 'n 🗑 nie.
 
+**'n Boek se NAAM verander** (✏️ Naam, `stoorBoekNaam` in Admin.jsx). Dewald,
+23 November 2026: *"Verander die eboek se naam"* — daar was net skrap en weer
+oplaai, wat die aflaai-tellings by die ou id los. Dit skryf net `title` met
+`merge`; die id, PDF, cover en tellings bly. Net vir 'n boek wat hy self
+bygevoeg het, om dieselfde rede as die 🗑. Die kassie staan op sy eie
+volbreedte-lyn ONDER die boek — langs die knoppies was hy onleesbaar smal en het
+die knoppies oor "Kanselleer" gelê. Blaaiertoets: `kykBoekNaam.mjs`
+(`window.__BOEK_SKRYF` in die vals Firestore).
+
 ## Ranglyste
 
 Albei speletjies se ranglyste loop deur 'n Vercel-funksie met die
