@@ -81,6 +81,8 @@ export function leegStaat() {
     dag:        '',    // die dag waarvoor die onderstaande tellings geld
     stap:       0,     // hoe ver hy vandag is; 0 = nog nie begin nie
     klaarOp:    '',    // die dag waarop hy laas heeltemal klaar gemaak het
+    klaarNota:  '',    // die nota-id wat hy laas klaar gemaak het
+    vloeiNota:  '',    // die nota waaraan `stap` en die dag se merkies behoort
     geluister:  '',    // die nota-id waarna hy vandag geluister het
     gelees:     false, // het hy vandag die Skrifgedeelte oopgemaak
     gebid:      0,     // hoeveel mense hy vandag gedra het
@@ -174,9 +176,48 @@ export function bouStappe(nota) {
  */
 export function kaartToestand({ nota, staat, dag }) {
   if (!nota || !nota.id) return 'geen'
-  const s = rolDag(staat, dag)
-  if (s.klaarOp === dag) return 'klaar'
+  const s = rolNota(rolDag(staat, dag), nota.id)
+  if (isKlaarVir(s, nota.id, dag)) return 'klaar'
   return s.stap > 0 ? 'voort' : 'begin'
+}
+
+/* ── "Klaar" hoort aan die BOODSKAP, nie aan die datum nie ──
+ *
+ * Dewald, 24 November 2026, met 'n skermkiekie om 04:36: hy het die nuwe
+ * boodskap voor 06:30 opgelaai en die kaart het steeds "Jy het vandag tyd met
+ * God gemaak" gesê. Voor DAG_BEGIN_UUR is dit volgens die klok nog GISTER, en
+ * gister is klaargemaak. Die datum het gelieg; die nota-id lieg nie.
+ *
+ * Dit herstel ook die ander kant van dieselfde fout: tussen 05:00 en wanneer hy
+ * die nuwe nota oplaai, het die kaart "begin" gesê vir GISTER se boodskap, wat
+ * die mens al gedoen het. Nou bly dit "klaar" tot daar 'n NUWE boodskap is.
+ *
+ * `klaarNota` bestaan eers vandat hierdie weergawe land; 'n ou staat sonder dit
+ * val terug op die datum, soos altyd. */
+export function isKlaarVir(staat, notaId, dag) {
+  const s = staat || {}
+  if (s.klaarNota) return s.klaarNota === notaId
+  return s.klaarOp === dag
+}
+
+/* 'n NUWE boodskap maak die vloei se vordering skoon, ook binne dieselfde
+ * "dag" (voor DAG_BEGIN_UUR). Die maand se tellings bly. 'n Ou staat sonder
+ * `vloeiNota` word net gemerk, nie skoongemaak nie: sy vordering hoort aan die
+ * nota wat nou wys. */
+export function rolNota(staat, notaId) {
+  const s = { ...leegStaat(), ...(staat || {}) }
+  if (!notaId || s.vloeiNota === notaId) return s
+  if (s.vloeiNota) {
+    s.stap      = 0
+    /* Die hero kan die NUWE nota reeds gemerk het voordat die vloei oopmaak. */
+    if (s.geluister !== notaId) s.geluister = ''
+    s.gelees    = false
+    s.gebid     = 0
+    s.getik     = false
+    s.hart      = false
+  }
+  s.vloeiNota = notaId
+  return s
 }
 
 /* ── Die een vraag aan die einde ──
@@ -313,8 +354,9 @@ export function merkStap(staat, stap) {
 /* Klaar. `daeMaand` tel net EEN keer per dag op, ook al maak hy die vloei
    weer oop en weer klaar — anders tel 'n mens wat drie keer deurgaan as drie
    dae, en dan is die getal 'n leuen. */
-export function merkKlaar(staat, dag) {
+export function merkKlaar(staat, dag, notaId = '') {
   const s = { ...leegStaat(), ...(staat || {}) }
-  if (s.klaarOp === dag) return s
-  return { ...s, klaarOp: dag, daeMaand: s.daeMaand + 1 }
+  const nota = notaId || s.klaarNota
+  if (s.klaarOp === dag) return s.klaarNota === nota ? s : { ...s, klaarNota: nota }
+  return { ...s, klaarOp: dag, klaarNota: nota, daeMaand: s.daeMaand + 1 }
 }

@@ -13,7 +13,7 @@
  */
 
 import {
-  dagSleutel, maandSleutel, leegStaat, rolDag, bouStappe, kaartToestand,
+  dagSleutel, maandSleutel, leegStaat, rolDag, rolNota, isKlaarVir, bouStappe, kaartToestand,
   slotVraag, magVraGeld, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
   DAG_BEGIN_UUR,
@@ -260,6 +260,46 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   is('hart alleen merk nie getik nie', netHart.getik, false)
 }
 
+
+/* ── "Klaar" hoort aan die BOODSKAP (24 November 2026) ──
+   Nuwe nota om 04:36 opgelaai: volgens die klok nog gister, en gister is
+   klaargemaak. Die kaart het "Jy het vandag tyd met God gemaak" gesê. */
+{
+  const GISTER = '2026-11-23'
+  const ou = { id: 'ou', title: 'Gister' }, nuut = { id: 'nuut', title: 'Vandag' }
+  const klaarGister = merkKlaar(rolNota(rolDag(leegStaat(), GISTER), 'ou'), GISTER, 'ou')
+  is('merkKlaar onthou die nota', klaarGister.klaarNota, 'ou')
+  is('nuwe nota VOOR vyfuur (dieselfde dag-sleutel): begin, nie klaar nie',
+     kaartToestand({ nota: nuut, staat: klaarGister, dag: GISTER }), 'begin')
+  is('dieselfde ou nota, dieselfde dag: klaar',
+     kaartToestand({ nota: ou, staat: klaarGister, dag: GISTER }), 'klaar')
+  is('ná vyfuur, nog die OU nota (nuwe nog nie opgelaai): steeds klaar, nie "begin" vir gister se boodskap nie',
+     kaartToestand({ nota: ou, staat: klaarGister, dag: '2026-11-24' }), 'klaar')
+  is('ná vyfuur met die nuwe nota: begin',
+     kaartToestand({ nota: nuut, staat: klaarGister, dag: '2026-11-24' }), 'begin')
+
+  /* Klaar met die nuwe nota om 04:40, en dan slaan die klok vyf. */
+  const vloei = rolNota(klaarGister, 'nuut')
+  is('die vloei van die nuwe nota begin by stap 0', vloei.stap, 0)
+  const klaarNuut = merkKlaar(vloei, GISTER, 'nuut')
+  is('klaar met die nuwe nota voor vyf: klaar', kaartToestand({ nota: nuut, staat: klaarNuut, dag: GISTER }), 'klaar')
+  is('en om vyfuur NIE weer "begin" vir dieselfde nota nie',
+     kaartToestand({ nota: nuut, staat: klaarNuut, dag: '2026-11-24' }), 'klaar')
+  is('twee boodskappe binne een dag-sleutel tel EEN dag in die maand', klaarNuut.daeMaand, 1)
+
+  /* Halfpad deur 'n ou nota, dan kom 'n nuwe een: die vordering begin oor. */
+  const halfpad = { ...rolNota(rolDag(leegStaat(), GISTER), 'ou'), stap: 3, gelees: true }
+  is('halfpad met die ou nota: voort', kaartToestand({ nota: ou, staat: halfpad, dag: GISTER }), 'voort')
+  is('nuwe nota: begin, nie "voort" met die ou nota se stap nie', kaartToestand({ nota: nuut, staat: halfpad, dag: GISTER }), 'begin')
+  is('die hero se "geluister" vir die NUWE nota oorleef rolNota',
+     rolNota({ ...halfpad, geluister: 'nuut' }, 'nuut').geluister, 'nuut')
+  is('die maand se tellings bly', rolNota({ ...halfpad, gebidMaand: 4, daeMaand: 2 }, 'nuut').gebidMaand, 4)
+
+  /* 'n Ou staat sonder klaarNota val terug op die datum. */
+  is('ou staat: klaar volgens die datum', isKlaarVir({ klaarOp: GISTER }, 'x', GISTER), true)
+  is('ou staat: ander dag, nie klaar nie', isKlaarVir({ klaarOp: GISTER }, 'x', '2026-11-24'), false)
+  is('ou staat sonder vloeiNota word nie skoongemaak nie', rolNota({ ...leegStaat(), stap: 2 }, 'ou').stap, 2)
+}
 
 console.log(`\n${reg} reg, ${val} vals\n`)
 process.exit(val ? 1 : 0)

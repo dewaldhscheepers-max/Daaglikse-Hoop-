@@ -50,7 +50,7 @@ import { prentPad } from '../data/prentPad'
 import { hoopSkakel, deelBoodskap } from '../data/hoopSkakel'
 import { like as likeNota, hetGelike, telling as likeTelling, GEBEURTENIS as LIKE_GEBEURTENIS } from '../data/notaLike'
 import {
-  dagSleutel, bouStappe, slotVraag, opsomming, maandSin,
+  dagSleutel, rolNota, bouStappe, slotVraag, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
 } from '../data/tydMetGod'
 import { leesStaat, skryfStaat } from '../data/tydMetGodBerging'
@@ -218,7 +218,9 @@ export default function TydMetGod({
 }) {
   const dag = dagSleutel()
 
-  const [staat, setStaat] = useState(leesStaat)
+  /* 'n Nuwe boodskap begin die vloei van voor af, ook voor DAG_BEGIN_UUR —
+     sien rolNota in tydMetGod.js. */
+  const [staat, setStaat] = useState(() => rolNota(leesStaat(), nota && nota.id))
   const [i, setI]         = useState(0)
 
   const stappe = bouStappe(nota)
@@ -1008,7 +1010,7 @@ function Klaar({ nota, staat, stel, dag, opskrif, reedsGegee, onSluit, onKlaarGe
   useEffect(() => {
     if (gemerk.current) return
     gemerk.current = true
-    stel(s => merkKlaar(s, dag))
+    stel(s => merkKlaar(s, dag, nota && nota.id))
     /* ── Die dag is GEVRA ──
      *
      * Hier was 'n fout. Die dag is net gemerk as die mens die skenk-knoppie
