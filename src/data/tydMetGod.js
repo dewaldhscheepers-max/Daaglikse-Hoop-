@@ -176,7 +176,7 @@ export function bouStappe(nota) {
  */
 export function kaartToestand({ nota, staat, dag }) {
   if (!nota || !nota.id) return 'geen'
-  const s = rolNota(rolDag(staat, dag), nota.id)
+  const s = rolNota(rolDag(staat, dag), nota)
   if (isKlaarVir(s, nota, dag)) return 'klaar'
   return s.stap > 0 ? 'voort' : 'begin'
 }
@@ -232,10 +232,18 @@ export function notaDag(nota) {
  * "dag" (voor DAG_BEGIN_UUR). Die maand se tellings bly. 'n Ou staat sonder
  * `vloeiNota` word net gemerk, nie skoongemaak nie: sy vordering hoort aan die
  * nota wat nou wys. */
-export function rolNota(staat, notaId) {
+export function rolNota(staat, nota) {
+  const n = typeof nota === 'string' ? { id: nota } : (nota || {})
+  const notaId = n.id
   const s = { ...leegStaat(), ...(staat || {}) }
   if (!notaId || s.vloeiNota === notaId) return s
-  if (s.vloeiNota) {
+  /* 'n Ou staat sonder `vloeiNota`: is die nota vir 'n LATER dag as die staat
+     se dag, hoort die vordering aan gister se boodskap. Dewald se foon om
+     04:47: "Jou tyd met God wag nog · Jy is halfpad" vir 'n boodskap wat hy
+     nog nooit oopgemaak het nie. */
+  const nd = notaDag(n)
+  const ouVordering = !s.vloeiNota && nd && s.dag && nd > s.dag
+  if (s.vloeiNota || ouVordering) {
     s.stap      = 0
     /* Die hero kan die NUWE nota reeds gemerk het voordat die vloei oopmaak. */
     if (s.geluister !== notaId) s.geluister = ''

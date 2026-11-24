@@ -307,6 +307,11 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
      kaartToestand({ nota: nuweNota, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', klaarOp: GISTER }, dag: GISTER }), 'begin')
   is('ou staat, nota vir dieselfde dag: klaar soos altyd',
      kaartToestand({ nota: { id: 'Y', publishedAt: { seconds: Math.floor(new Date('2026-11-23T06:00:00').getTime() / 1000) } }, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', klaarOp: GISTER }, dag: GISTER }), 'klaar')
+  /* 04:47: ou staat, gister HALFPAD (stap 5), nuwe nota vir vandag → "gereed", nie "wag nog". */
+  is('ou staat halfpad met gister, nota vir vandag: begin, nie voort nie',
+     kaartToestand({ nota: nuweNota, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', stap: 5, klaarOp: GISTER }, dag: GISTER }), 'begin')
+  is('ou staat halfpad, nota vir dieselfde dag: voort soos altyd',
+     kaartToestand({ nota: { id: 'Y', publishedAt: { seconds: Math.floor(new Date('2026-11-23T06:00:00').getTime() / 1000) } }, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', stap: 3 }, dag: GISTER }), 'voort')
   is('ou staat sonder vloeiNota word nie skoongemaak nie', rolNota({ ...leegStaat(), stap: 2 }, 'ou').stap, 2)
 }
 

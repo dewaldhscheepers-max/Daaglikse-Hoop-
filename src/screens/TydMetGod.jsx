@@ -220,7 +220,7 @@ export default function TydMetGod({
 
   /* 'n Nuwe boodskap begin die vloei van voor af, ook voor DAG_BEGIN_UUR —
      sien rolNota in tydMetGod.js. */
-  const [staat, setStaat] = useState(() => rolNota(leesStaat(), nota && nota.id))
+  const [staat, setStaat] = useState(() => rolNota(leesStaat(), nota))
   const [i, setI]         = useState(0)
 
   const stappe = bouStappe(nota)
