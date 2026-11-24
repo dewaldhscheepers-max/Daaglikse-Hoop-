@@ -13,7 +13,7 @@
  */
 
 import {
-  dagSleutel, maandSleutel, leegStaat, rolDag, rolNota, isKlaarVir, bouStappe, kaartToestand,
+  dagSleutel, maandSleutel, leegStaat, rolDag, rolNota, isKlaarVir, notaDag, bouStappe, kaartToestand,
   slotVraag, magVraGeld, opsomming, maandSin,
   merkGeluister, merkGelees, merkGebid, merkGetik, merkHart, merkStap, merkKlaar,
   DAG_BEGIN_UUR,
@@ -298,6 +298,15 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   /* 'n Ou staat sonder klaarNota val terug op die datum. */
   is('ou staat: klaar volgens die datum', isKlaarVir({ klaarOp: GISTER }, 'x', GISTER), true)
   is('ou staat: ander dag, nie klaar nie', isKlaarVir({ klaarOp: GISTER }, 'x', '2026-11-24'), false)
+  /* Dewald se foon om 04:43: 'n OU staat (geen klaarNota) en 'n nuwe nota vir vandag. */
+  const nuweNota = { id: 'Die_man_by_Betesda_1795400000000', publishedAt: { seconds: Math.floor(new Date('2026-11-24T06:00:00').getTime() / 1000) } }
+  is('notaDag uit publishedAt (Timestamp-vorm)', notaDag(nuweNota), '2026-11-24')
+  is('notaDag uit die id se tydstempel', notaDag({ id: 'X_' + new Date('2026-11-24T04:20:00').getTime() }), '2026-11-24')
+  is('notaDag onbekend: leeg', notaDag({ id: 'n1' }), '')
+  is('ou staat, nota vir n LATER dag: nie klaar nie',
+     kaartToestand({ nota: nuweNota, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', klaarOp: GISTER }, dag: GISTER }), 'begin')
+  is('ou staat, nota vir dieselfde dag: klaar soos altyd',
+     kaartToestand({ nota: { id: 'Y', publishedAt: { seconds: Math.floor(new Date('2026-11-23T06:00:00').getTime() / 1000) } }, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', klaarOp: GISTER }, dag: GISTER }), 'klaar')
   is('ou staat sonder vloeiNota word nie skoongemaak nie', rolNota({ ...leegStaat(), stap: 2 }, 'ou').stap, 2)
 }
 

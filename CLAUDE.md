@@ -76,7 +76,7 @@ node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die d
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
-node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 95 toetse
+node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 100 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/tmgPopup.toets.mjs              # die opspringer NA die vloei, 23 toetse
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
@@ -1241,8 +1241,10 @@ November 2026, skermkiekie om 04:36: *"When i upload a new voicenote before
 nota maak die vloei se vordering skoon (`rolNota`, ook binne een dag-sleutel),
 die maand se tellings bly. Dit herstel ook die ander kant: tussen 05:00 en die
 oplaai het die kaart "begin" gesê vir gister se boodskap. 'n Ou staat sonder
-`klaarNota` val terug op die datum en stel homself reg by die volgende
-klaarmaak. Blaaiertoets: `kykTmgNuweNota.mjs` (klok vas op 04:36).
+`klaarNota` val terug op die datum, MAAR is die nota vir 'n later dag as
+`klaarOp` (`notaDag()`: `publishedAt`, anders die id se `_<ms>`), is dit nie
+klaar nie — sonder dit het Dewald se eie foon die fout om 04:43 nog een keer
+gewys. Blaaiertoets: `kykTmgNuweNota.mjs` (klok vas op 04:36).
 
 ### Die kaart op Luister
 

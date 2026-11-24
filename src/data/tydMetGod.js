@@ -177,7 +177,7 @@ export function bouStappe(nota) {
 export function kaartToestand({ nota, staat, dag }) {
   if (!nota || !nota.id) return 'geen'
   const s = rolNota(rolDag(staat, dag), nota.id)
-  if (isKlaarVir(s, nota.id, dag)) return 'klaar'
+  if (isKlaarVir(s, nota, dag)) return 'klaar'
   return s.stap > 0 ? 'voort' : 'begin'
 }
 
@@ -194,10 +194,38 @@ export function kaartToestand({ nota, staat, dag }) {
  *
  * `klaarNota` bestaan eers vandat hierdie weergawe land; 'n ou staat sonder dit
  * val terug op die datum, soos altyd. */
-export function isKlaarVir(staat, notaId, dag) {
+export function isKlaarVir(staat, nota, dag) {
   const s = staat || {}
-  if (s.klaarNota) return s.klaarNota === notaId
+  const n = typeof nota === 'string' ? { id: nota } : (nota || {})
+  if (s.klaarNota) return s.klaarNota === n.id
+  /* 'n Ou staat weet nie WATTER nota klaar was nie. Dewald se foon, dieselfde
+     oggend om 04:43: die fout het een laaste keer gewys. Die nota se eie dag
+     red dit: is die nota vir 'n LATER dag as die klaarmaak, kan dit nie die
+     een wees wat klaar is nie. */
+  const nd = notaDag(n)
+  if (nd && s.klaarOp && nd > s.klaarOp) return false
   return s.klaarOp === dag
+}
+
+/* Die dag waarvoor 'n nota bedoel is: `publishedAt` (die admin se datumveld,
+ * 'n Firestore-Timestamp, of {seconds} uit die kas), anders die tydstempel in
+ * die id (`Titel_<ms>`). Plaaslike kalenderdatum, NIE teruggeskuif nie —
+ * die nota se datum is wat Dewald gekies het. '' as ons dit nie weet nie. */
+export function notaDag(nota) {
+  const n = nota || {}
+  let ms = 0
+  const p = n.publishedAt
+  if (p && typeof p === 'object' && Number.isFinite(Number(p.seconds))) ms = Number(p.seconds) * 1000
+  else if (p && typeof p.toDate === 'function') ms = p.toDate().getTime()
+  else if (typeof p === 'string' || typeof p === 'number') ms = new Date(p).getTime()
+  if (!Number.isFinite(ms) || ms <= 0) {
+    const m = String(n.id || '').match(/_(\d{13})$/)
+    ms = m ? Number(m[1]) : 0
+  }
+  if (!ms) return ''
+  const d = new Date(ms)
+  if (!Number.isFinite(d.getTime())) return ''
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 /* 'n NUWE boodskap maak die vloei se vordering skoon, ook binne dieselfde
