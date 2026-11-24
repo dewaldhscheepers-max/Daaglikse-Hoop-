@@ -690,7 +690,12 @@ export default function Admin({ onClose }) {
   }
 
   // ── Upload PDF for a book ──
-  function triggerPdfUpload(book) {
+  /* `soort` is 'gewoon' (die foon-PDF, `pdfUrl`) of 'a4' (die drukweergawe,
+     `pdfUrlA4`). Dewald, 24 November 2026: "365 Dae van Hoop" kom in twee
+     groottes. EEN boek, twee lêers — sien FreeBookModal se twee knoppies. */
+  const pdfSoortRef = useRef('gewoon')
+  function triggerPdfUpload(book, soort = 'gewoon') {
+    pdfSoortRef.current = soort
     setPdfUploadTarget(book)
     pdfInputRef.current?.click()
   }
@@ -704,15 +709,18 @@ export default function Admin({ onClose }) {
     setPdfUploading(book.id); setPdfProgress(0)
 
     try {
-      const sRef = ref(storage, `pdfs/${book.id}.pdf`)
+      const a4   = pdfSoortRef.current === 'a4'
+      /* Die A4 kry 'n EIE naam met 'n tydstempel: dieselfde naam is dieselfde
+         skakel, en 'n foon wat die oue het, hou die oue. */
+      const sRef = ref(storage, a4 ? `pdfs/${book.id}_a4_${Date.now()}.pdf` : `pdfs/${book.id}.pdf`)
       await new Promise((resolve, reject) => {
         const task = uploadBytesResumable(sRef, file)
         task.on('state_changed',
           s => setPdfProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)),
           reject,
           async () => {
-            const pdfUrl = await getDownloadURL(task.snapshot.ref)
-            await setDoc(doc(db, 'books', book.id), { pdfUrl }, { merge: true })
+            const url = await getDownloadURL(task.snapshot.ref)
+            await setDoc(doc(db, 'books', book.id), a4 ? { pdfUrlA4: url } : { pdfUrl: url }, { merge: true })
             vergeetBoeke()
             resolve()
           }
@@ -1391,7 +1399,7 @@ export default function Admin({ onClose }) {
                           : isCoverUploading ? `Cover ${coverProgress}%...`
                           : isPdfSaved ? '✅ PDF opgelaai!'
                           : isCoverSaved ? '✅ Cover opgelaai!'
-                          : [hasCover ? 'Cover ✓' : null, hasPdf ? 'PDF ✓' : 'Geen PDF'].filter(Boolean).join(' · ')}
+                          : [hasCover ? 'Cover ✓' : null, hasPdf ? 'PDF ✓' : 'Geen PDF', override?.pdfUrlA4 ? 'A4 ✓' : null].filter(Boolean).join(' · ')}
                       </div>
                       {/* WAAR die boek wys — sodat niemand hoef te raai nie. */}
                       {!staticIds.has(book.id) && (
@@ -1421,6 +1429,16 @@ export default function Admin({ onClose }) {
                         title="Laai PDF op"
                       >
                         {hasPdf ? '↑ PDF' : '↑ PDF'}
+                      </button>
+                      {/* Die drukweergawe. Opsioneel: sonder dit lyk die boek
+                          presies soos altyd. */}
+                      <button
+                        className="admin-pdf-btn"
+                        onClick={() => triggerPdfUpload(book, 'a4')}
+                        disabled={isPdfUploading || isCoverUploading}
+                        title="Laai die A4-weergawe (om te druk) op"
+                      >
+                        {override?.pdfUrlA4 ? '↑ A4 ✓' : '↑ A4-PDF'}
                       </button>
                       <button
                         className="admin-pdf-btn"

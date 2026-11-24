@@ -83,7 +83,7 @@ function raam(lyf) {
 
 /* Die e-pos met die gratis boek. Met 'n PDF: die aflaai-knoppie. Sonder: 'n
    eerlike "dit kom binnekort". Dieselfde twee gevalle as die Afrikaanse een. */
-function boekEpos({ titel, pdfUrl }) {
+function boekEpos({ titel, pdfUrl, pdfUrlA4 = null }) {
   const t = ontsnap(titel)
   if (pdfUrl) {
     return {
@@ -95,9 +95,14 @@ function boekEpos({ titel, pdfUrl }) {
         <p style="color:#666;line-height:1.7;margin:0 0 20px;">Click below to download your free e-book:</p>
         <div style="margin:16px 0;padding:16px;background:#f8f5ff;border-radius:10px;border-left:4px solid #5C4E8E;">
           <p style="margin:0 0 10px;font-weight:700;color:#2d2d2d;font-size:16px;">${t}</p>
-          <a href="${ontsnap(pdfUrl)}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;">
-            📥 Download
+          ${pdfUrlA4 ? `<a href="${ontsnap(pdfUrl)}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 8px 8px 0;">
+            📱 Read on my phone
           </a>
+          <a href="${ontsnap(pdfUrlA4)}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 0 8px 0;">
+            🖨️ A4 to print
+          </a>` : `<a href="${ontsnap(pdfUrl)}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;">
+            📥 Download
+          </a>`}
         </div>
         <p style="color:#666;line-height:1.7;margin:16px 0 0;">More free English books are on <a href="${ENGELSE_BLAD}" style="color:#5C4E8E;">dewaldscheepers.com/english</a>.</p>
         ${STEUN}

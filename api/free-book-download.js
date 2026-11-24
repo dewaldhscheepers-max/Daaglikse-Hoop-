@@ -101,6 +101,9 @@ module.exports = async function handler(req, res) {
   // Get book data from Firestore
   let bookTitle = cleanBookTitle(bookId)
   let pdfUrl    = null
+  /* 'n Tweede, A4-weergawe (om te druk). Opsioneel; sonder dit is elke e-pos
+     en elke antwoord woord vir woord soos altyd. */
+  let pdfUrlA4  = null
   let bookValue = BOOK_VALUES[bookId] ?? 50
   let bookTaal  = ''
   try {
@@ -108,6 +111,7 @@ module.exports = async function handler(req, res) {
     if (bookDoc?.fields) {
       bookTitle = bookDoc.fields.title?.stringValue  || cleanBookTitle(bookId)
       pdfUrl    = bookDoc.fields.pdfUrl?.stringValue || null
+      pdfUrlA4  = bookDoc.fields.pdfUrlA4?.stringValue || null
       bookTaal  = bookDoc.fields.taal?.stringValue   || ''
       // Support explicit value field for dynamic/new books (integer or float)
       const rawVal = bookDoc.fields.value?.integerValue ?? bookDoc.fields.value?.doubleValue
@@ -205,7 +209,7 @@ module.exports = async function handler(req, res) {
 
   let emailSubject, html
   if (isEngels) {
-    const e = engels.boekEpos({ titel: bookTitle, pdfUrl })
+    const e = engels.boekEpos({ titel: bookTitle, pdfUrl, pdfUrlA4 })
     emailSubject = e.onderwerp
     html = e.html
   } else if (pdfUrl) {
@@ -220,9 +224,16 @@ module.exports = async function handler(req, res) {
           <p style="color:#666;line-height:1.7;margin:0 0 20px;">Klik hieronder om jou gratis e-boek af te laai:</p>
           <div style="margin:16px 0;padding:16px;background:#f8f5ff;border-radius:10px;border-left:4px solid #5C4E8E;">
             <p style="margin:0 0 10px;font-weight:700;color:#2d2d2d;font-size:16px;">${bookTitle}</p>
+            ${pdfUrlA4 ? `
+            <a href="${pdfUrl}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 8px 8px 0;">
+              📱 Lees op my foon
+            </a>
+            <a href="${pdfUrlA4}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 0 8px 0;">
+              🖨️ A4 om te druk
+            </a>` : `
             <a href="${pdfUrl}" style="display:inline-block;padding:11px 22px;background:#5C4E8E;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;">
               📥 Laai af
-            </a>
+            </a>`}
           </div>
           ${donateBlock}
         </div>
@@ -261,5 +272,5 @@ module.exports = async function handler(req, res) {
     })
   } catch {}
 
-  return res.status(200).json({ ok: true, pdfUrl, title: bookTitle, duplicate: isDuplicate })
+  return res.status(200).json({ ok: true, pdfUrl, ...(pdfUrlA4 ? { pdfUrlA4 } : {}), title: bookTitle, duplicate: isDuplicate })
 }

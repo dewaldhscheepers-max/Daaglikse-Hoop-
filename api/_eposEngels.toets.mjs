@@ -57,6 +57,12 @@ console.log('\n── Die boek-e-pos ──')
   /* 'n Titel uit Firestore beland in HTML. */
   const h = E.boekEpos({ titel: '<script>x</script>', pdfUrl: null })
   vals('titel word ontsnap', h.html.includes('<script>'))
+
+  /* 'n A4-weergawe: twee knoppies; sonder dit EEN, soos altyd. */
+  const a = E.boekEpos({ titel: '365', pdfUrl: 'https://x.test/foon.pdf', pdfUrlA4: 'https://x.test/a4.pdf' })
+  waar('A4: albei skakels', a.html.includes('https://x.test/foon.pdf') && a.html.includes('https://x.test/a4.pdf'))
+  waar('A4: "A4 to print"', a.html.includes('A4 to print'))
+  vals('sonder A4: geen "A4 to print"', m.html.includes('A4 to print'))
 }
 
 console.log('\n── Die dankie-e-posse ──')
@@ -75,7 +81,7 @@ process.env.FIREBASE_PROJECT_ID = 'toets'
 process.env.RESEND_API_KEY = 'rk'
 
 let roepe = []
-function vervangFetch(boekTaal) {
+function vervangFetch(boekTaal, a4 = null) {
   roepe = []
   globalThis.fetch = async (url, opts = {}) => {
     const u = String(url)
@@ -85,6 +91,7 @@ function vervangFetch(boekTaal) {
     if (u.includes('/documents/books/')) {
       const fields = { title: { stringValue: 'Boek X' }, pdfUrl: { stringValue: 'https://x.test/b.pdf' } }
       if (boekTaal) fields.taal = { stringValue: boekTaal }
+      if (a4) fields.pdfUrlA4 = { stringValue: a4 }
       return json({ fields })
     }
     if (u.includes('/documents/freeDownloads/') && (opts.method || 'GET') === 'GET') return json({}, 404)
@@ -170,6 +177,27 @@ console.log('\n── payfast-itn: n AFRIKAANSE vennoot loop die ou pad ──')
   await wag()
   is('Afrikaanse lys', geskryfNa(), ['emailList'])
   is('Afrikaanse welkom', resend()[0] && resend()[0].subject, "Dankie dat jy 'n Hoop-Vennoot geword het 🙏")
+}
+
+console.log('\n── free-book-download: n boek met n A4-weergawe ──')
+{
+  vervangFetch(null, 'https://x.test/a4.pdf')
+  const h = require('./free-book-download.js')
+  const res = vangRes()
+  await h({ method: 'POST', body: { email: 'a@b.co', bookId: '365-dae', consent: true } }, res)
+  is('antwoord dra pdfUrlA4', res.liggaam && res.liggaam.pdfUrlA4, 'https://x.test/a4.pdf')
+  const e = resend()
+  waar('e-pos: albei knoppies', e[0] && e[0].html.includes('Lees op my foon') && e[0].html.includes('https://x.test/a4.pdf'))
+  vals('e-pos: nie die enkel "Laai af" nie', e[0] && e[0].html.includes('📥 Laai af'))
+  is('die teller tel EEN keer', roepe.filter(c => c.method === 'PATCH' && c.url.includes('/stats/ebooks_given')).length, 1)
+}
+{
+  vervangFetch(null)
+  const h = require('./free-book-download.js')
+  const res = vangRes()
+  await h({ method: 'POST', body: { email: 'a@b.co', bookId: 'toksies', consent: true } }, res)
+  vals('sonder A4: geen pdfUrlA4 in die antwoord', 'pdfUrlA4' in (res.liggaam || {}))
+  waar('sonder A4: die enkel "Laai af"', resend()[0] && resend()[0].html.includes('📥 Laai af'))
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

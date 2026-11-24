@@ -73,7 +73,7 @@ node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-bo
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
 node src/data/eboekPopup.toets.mjs            # watter e-boek die opspringer wys — nooit 'n Engelse een, 34
 node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die draad gaan, 5 toetse
-node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
+node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys + die A4-weergawe, vals Firestore, 71
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 107 toetse
@@ -3038,6 +3038,25 @@ bygevoeg het, om dieselfde rede as die 🗑. Die kassie staan op sy eie
 volbreedte-lyn ONDER die boek — langs die knoppies was hy onleesbaar smal en het
 die knoppies oor "Kanselleer" gelê. Blaaiertoets: `kykBoekNaam.mjs`
 (`window.__BOEK_SKRYF` in die vals Firestore).
+
+## Een boek, twee weergawes: foon en A4
+
+Dewald, 24 November 2026, met *365 Dae van Hoop (2027)* in twee PDF's (foon,
+1 325 bladsye; A4 om te druk, 584): *"I will add a A4 book as well... so how do
+we do that."* EEN boek, nie twee kaarte nie — twee kaarte lees soos 'n duplikaat
+en verdeel die aflaaie, sodat die boek stadiger in "Mees gewild" klim.
+
+* **`pdfUrlA4`** op die boek se dokument, langs `pdfUrl`. Die admin se
+  **↑ A4-PDF** (`triggerPdfUpload(book, 'a4')`) laai dit op met 'n EIE naam
+  (`pdfs/<id>_a4_<tyd>.pdf`) en skryf net daardie veld met `merge`.
+* **`FreeBookModal`** wys dan TWEE knoppies (📱 Lees op my foon · 🖨️ A4 om te
+  druk); die kaart se "Laai af" vir wie dit reeds het, maak daardie keuse oop in
+  plaas van reguit na een lêer te gaan. `free-book-download.js` stuur albei
+  skakels in die e-pos (ook Engels, `boekEpos({ pdfUrlA4 })`) en `pdfUrlA4` in
+  die antwoord. Die teller en die ontdubbeling tel die BOEK een keer.
+* **Sonder `pdfUrlA4` is alles soos altyd** — die toetse eis die enkel "Laai af".
+
+Blaaiertoets: `kykA4Boek.mjs` (vals Firestore se `window.__BOEKE`).
 
 ## Ranglyste
 

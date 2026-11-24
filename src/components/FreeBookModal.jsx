@@ -35,6 +35,8 @@ const WOORDE = {
     klaarTitel:   'Jou boek is gereed!',
     klaarSub:     "Ons het ook 'n kopie na jou e-pos gestuur.",
     laai:         (t) => `📥 Laai ${t} af`,
+    laaiFoon:     '📱 Lees op my foon',
+    laaiA4:       '🖨️ A4 om te druk',
     komBinnekort: 'Hierdie boek word binnekort beskikbaar. Kyk jou e-pos.',
     deel:         "🔗 Deel met 'n vriend",
     gekopieer:    '✓ Gekopieer!',
@@ -66,6 +68,8 @@ const WOORDE = {
     klaarTitel:   'Your book is ready!',
     klaarSub:     'We also sent a copy to your inbox.',
     laai:         (t) => `📥 Download ${t}`,
+    laaiFoon:     '📱 Read on my phone',
+    laaiA4:       '🖨️ A4 to print',
     komBinnekort: 'This book is coming soon. Check your email.',
     deel:         '🔗 Share with a friend',
     gekopieer:    '✓ Copied!',
@@ -100,7 +104,7 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
   const [consent,     setConsent]     = useState(false)
   const [busy,        setBusy]        = useState(false)
   const [error,       setError]       = useState('')
-  const [result,      setResult]      = useState(alreadyClaimed && book.pdfUrl ? { pdfUrl: book.pdfUrl, title: book.title } : null)
+  const [result,      setResult]      = useState(alreadyClaimed && book.pdfUrl ? { pdfUrl: book.pdfUrl, pdfUrlA4: book.pdfUrlA4 || null, title: book.title } : null)
   const [shareToast,  setShareToast]  = useState(false)
 
   async function handleInstall() {
@@ -176,6 +180,9 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
   }
 
   const displayPdfUrl = result?.pdfUrl ?? book.pdfUrl
+  /* 'n Boek kan 'n tweede, A4-weergawe dra (365 Dae van Hoop, November 2026).
+     Dan is daar TWEE knoppies; sonder dit lyk die skerm presies soos altyd. */
+  const displayA4     = result?.pdfUrlA4 ?? book.pdfUrlA4 ?? null
   const displayTitle  = result?.title  || book.title
 
   return (
@@ -257,7 +264,18 @@ export default function FreeBookModal({ book, onClose, installPrompt, isInstalle
             <h2 className="fb-title">{t.klaarTitel}</h2>
             <p className="fb-sub">{t.klaarSub}</p>
 
-            {displayPdfUrl ? (
+            {displayPdfUrl && displayA4 ? (
+              <div className="fb-weergawes" style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                <a href={displayPdfUrl} target="_blank" rel="noopener noreferrer"
+                   className="fb-btn-primary fb-weergawe-foon" style={{ textDecoration: 'none', textAlign: 'center' }}>
+                  {t.laaiFoon}
+                </a>
+                <a href={displayA4} target="_blank" rel="noopener noreferrer"
+                   className="fb-btn-primary fb-weergawe-a4" style={{ textDecoration: 'none', textAlign: 'center' }}>
+                  {t.laaiA4}
+                </a>
+              </div>
+            ) : displayPdfUrl ? (
               <a
                 href={displayPdfUrl}
                 target="_blank"

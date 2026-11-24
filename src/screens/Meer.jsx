@@ -61,7 +61,9 @@ function FreeBookCard({ book, claimed, onClaim, onDeel, downloadCount }) {
         <p className="book-desc">{book.desc}</p>
         <div className="book-footer">
           {claimed
-            ? pdfUrl
+            /* Met 'n A4-weergawe gaan die knoppie na die venster met die TWEE
+               keuses (foon / druk) in plaas van reguit na een lêer. */
+            ? pdfUrl && !book.pdfUrlA4
               ? <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-free book-buy-btn">📥 Laai af</a>
               : <button className="btn-free book-buy-btn" onClick={onClaim}>📥 Laai af</button>
             : <button className="btn-primary book-buy-btn" onClick={onClaim}>Kry gratis →</button>
@@ -336,7 +338,7 @@ export default function Meer({ targetBookId, onScrolled, installPrompt, isInstal
     // Static books with Firestore overrides for pdfUrl/coverUrl
     ...STATIC_BOOKS.map(b => {
       const ov = bookOverrides[b.id] || {}
-      return { ...b, pdfUrl: ov.pdfUrl ?? b.pdfUrl ?? null, coverUrl: ov.coverUrl ?? null }
+      return { ...b, pdfUrl: ov.pdfUrl ?? b.pdfUrl ?? null, pdfUrlA4: ov.pdfUrlA4 ?? null, coverUrl: ov.coverUrl ?? null }
     }),
   ]
 
