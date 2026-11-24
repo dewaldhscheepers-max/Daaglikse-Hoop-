@@ -115,7 +115,11 @@ export function rolDag(staat, dag, maand = String(dag || '').slice(0, 7)) {
   }
   if (s.dag !== dag) {
     s.dag       = dag
-    s.stap      = 0
+    /* Hoe ver hy is, hoort aan die NOTA (`vloeiNota`), nie aan die klok nie:
+       halfpad met die nuwe boodskap om 04:50, en om 05:00 het die kaart weer
+       "begin" gesê. `rolNota` maak dit skoon wanneer 'n nuwe nota kom. 'n Ou
+       staat sonder `vloeiNota` rol soos altyd. */
+    if (!s.vloeiNota) s.stap = 0
     s.geluister = ''
     s.gelees    = false
     s.gebid     = 0
@@ -393,6 +397,13 @@ export function merkStap(staat, stap) {
 export function merkKlaar(staat, dag, notaId = '') {
   const s = { ...leegStaat(), ...(staat || {}) }
   const nota = notaId || s.klaarNota
-  if (s.klaarOp === dag) return s.klaarNota === nota ? s : { ...s, klaarNota: nota }
+  if (s.klaarOp === dag) {
+    if (s.klaarNota === nota) return s
+    /* 'n ANDER boodskap binne dieselfde dag-sleutel (die nuwe een voor 05:00
+       klaargemaak) is 'n ander dag se boodskap en tel as 'n dag. Was daar nog
+       geen `klaarNota` nie (ou staat), weet ons nie — tel dan nie dubbel nie. */
+    const tel = s.klaarNota && nota ? 1 : 0
+    return { ...s, klaarNota: nota, daeMaand: s.daeMaand + tel }
+  }
   return { ...s, klaarOp: dag, klaarNota: nota, daeMaand: s.daeMaand + 1 }
 }

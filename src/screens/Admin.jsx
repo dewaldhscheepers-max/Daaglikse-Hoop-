@@ -17,6 +17,11 @@ import { reekseUit, stelReeksGelyk } from '../data/reekse'
    ses uur wag voordat die app dit kan adverteer nie. */
 import { vergeetBoeke } from '../data/eboekLys'
 
+function plaaslikeDatum() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /* ── Die wagwoord ──
 
    Dit was `const ADMIN_PIN = '2025'` — 'n string in die kode. So 'n string
@@ -79,7 +84,11 @@ export default function Admin({ onClose }) {
   const [scripture, setScripture]     = useState('')
   const [scriptureText, setScriptText]= useState('')
   const [series, setSeries]           = useState('')
-  const [publishedAt, setPublishedAt] = useState(new Date().toISOString().slice(0, 10))
+  /* Die PLAASLIKE datum, nie UTC nie. `toISOString()` is UTC, en tussen 00:00
+     en 02:00 SA-tyd gaf dit GISTER — dan staan die nuwe nota op gister se
+     datum, langs gister se nota, en wys die app dalk die verkeerde een as
+     "vandag se boodskap". */
+  const [publishedAt, setPublishedAt] = useState(plaaslikeDatum)
   const [uploadProgress, setProgress] = useState(0)
   const [uploading, setUploading]     = useState(false)
   const [saving, setSaving]           = useState(false)
@@ -665,7 +674,7 @@ export default function Admin({ onClose }) {
       try { localStorage.removeItem('cachedNotesTime') } catch {}
       setSaved(true)
       setTitle(''); setAudioFile(null); setScripture(''); setScriptText(''); setSeries('')
-      setPublishedAt(new Date().toISOString().slice(0, 10))
+      setPublishedAt(plaaslikeDatum())
       if (fileInputRef.current) fileInputRef.current.value = ''
       clearRecording()
       await loadNotes()

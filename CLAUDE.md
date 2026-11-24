@@ -76,7 +76,7 @@ node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die d
 node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys, vals Firestore, 62
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
-node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 102 toetse
+node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 107 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
 node src/data/tmgPopup.toets.mjs              # die opspringer NA die vloei, 23 toetse
 node src/data/skrifVerwysing.toets.mjs        # "Matteus 6:25-34" -> 'n plek in die Bybel, 61
@@ -1246,7 +1246,13 @@ oplaai het die kaart "begin" gesê vir gister se boodskap. 'n Ou staat sonder
 klaar nie — sonder dit het Dewald se eie foon die fout om 04:43 nog een keer
 gewys. Dieselfde vir HALFPAD: `rolNota` maak 'n ou staat se vordering skoon as die
 nota vir 'n later dag as `staat.dag` is (04:47: *"Jou tyd met God wag nog · Jy
-is halfpad"* vir 'n boodskap wat hy nog nie oopgemaak het nie). Blaaiertoets: `kykTmgNuweNota.mjs` (klok vas op 04:36).
+is halfpad"* vir 'n boodskap wat hy nog nie oopgemaak het nie).
+
+Die hele vordering hoort nou aan die nota: `rolDag` los `stap` uit wanneer
+`vloeiNota` gestel is (halfpad met die nuwe nota om 04:50 bly "wag nog" ná
+05:00), en `merkKlaar` tel 'n ANDER nota binne dieselfde dag-sleutel as 'n dag.
+Die admin se datumveld vir 'n nuwe nota is die PLAASLIKE datum
+(`plaaslikeDatum()`); `toISOString()` het tussen 00:00 en 02:00 gister gegee. Blaaiertoets: `kykTmgNuweNota.mjs` (klok vas op 04:36).
 
 ### Die kaart op Luister
 

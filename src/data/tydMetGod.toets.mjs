@@ -285,7 +285,8 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
   is('klaar met die nuwe nota voor vyf: klaar', kaartToestand({ nota: nuut, staat: klaarNuut, dag: GISTER }), 'klaar')
   is('en om vyfuur NIE weer "begin" vir dieselfde nota nie',
      kaartToestand({ nota: nuut, staat: klaarNuut, dag: '2026-11-24' }), 'klaar')
-  is('twee boodskappe binne een dag-sleutel tel EEN dag in die maand', klaarNuut.daeMaand, 1)
+  is('twee boodskappe binne een dag-sleutel: twee dae se boodskappe, twee dae', klaarNuut.daeMaand, 2)
+  is('dieselfde boodskap weer klaar tel nie weer', merkKlaar(klaarNuut, GISTER, 'nuut').daeMaand, 2)
 
   /* Halfpad deur 'n ou nota, dan kom 'n nuwe een: die vordering begin oor. */
   const halfpad = { ...rolNota(rolDag(leegStaat(), GISTER), 'ou'), stap: 3, gelees: true }
@@ -312,6 +313,12 @@ console.log('\n-- "Hy het sy hart gebring" is NIE dieselfde as "hy het getik" ni
      kaartToestand({ nota: nuweNota, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', stap: 5, klaarOp: GISTER }, dag: GISTER }), 'begin')
   is('ou staat halfpad, nota vir dieselfde dag: voort soos altyd',
      kaartToestand({ nota: { id: 'Y', publishedAt: { seconds: Math.floor(new Date('2026-11-23T06:00:00').getTime() / 1000) } }, staat: { ...leegStaat(), dag: GISTER, maand: '2026-11', stap: 3 }, dag: GISTER }), 'voort')
+  /* Halfpad met die NUWE nota om 04:50, dan slaan die klok vyf. */
+  const halfNuut = merkStap(rolNota(rolDag(leegStaat(), GISTER), 'nuut'), 3)
+  is('halfpad met die nuwe nota om 04:50: voort', kaartToestand({ nota: nuut, staat: halfNuut, dag: GISTER }), 'voort')
+  is('om 05:00 steeds voort, nie weer begin nie', kaartToestand({ nota: nuut, staat: halfNuut, dag: '2026-11-24' }), 'voort')
+  is('en die volgende dag se NUWE nota: begin', kaartToestand({ nota: { id: 'more' }, staat: halfNuut, dag: '2026-11-25' }), 'begin')
+  is('ou staat sonder vloeiNota rol om 05:00 soos altyd', rolDag({ ...leegStaat(), dag: GISTER, stap: 3 }, '2026-11-24').stap, 0)
   is('ou staat sonder vloeiNota word nie skoongemaak nie', rolNota({ ...leegStaat(), stap: 2 }, 'ou').stap, 2)
 }
 
