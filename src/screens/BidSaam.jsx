@@ -8,6 +8,7 @@ import {
 import { magDeel, gebedSkakel, deelBoodskap } from '../data/gebedDeel'
 import { toestelId } from '../data/sorgStuur'
 import { merkGebidNou } from '../data/tydMetGodBerging'
+import { isPasGestuur, sonderDuplikate } from '../data/gebedDubbel'
 import './BidSaam.css'
 import DonationCard from '../components/DonationCard'
 import SaturdayVideoCard from '../components/SaturdayVideoCard'
@@ -133,7 +134,7 @@ function SaamgebedFlow({ prayers, prayed, gereed, fout, onClose, onPray, onHerpr
   const queueRef = useRef(null)
   if (queueRef.current === null && gereed && !fout) {
     const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000
-    queueRef.current = [...prayers]
+    queueRef.current = sonderDuplikate([...prayers])
       .filter(p => !p.reported && !prayed.has(p.id) && (p.createdAt?.seconds || 0) * 1000 >= twoDaysAgo)
       .sort((a, b) => {
         const cd = (a.prayedCount || 0) - (b.prayedCount || 0)
@@ -274,6 +275,11 @@ export default function BidSaam() {
   const [herlaai, setHerlaai]     = useState(0)
   const [error, setError]         = useState('')
   const [submitted, setSubmitted] = useState(false)
+  /* Een druk is een versoek. Sien gebedDubbel.js: sonder hierdie slot het 'n
+     swak lyn van een mens se gebed DRIE versoeke op die muur gemaak. */
+  const [stuurBesig, setStuurBesig] = useState(false)
+  const stuurRef = useRef(false)
+  const [stadig, setStadig] = useState(false)
   /* "Bid vir my" — sien gebedDeel.js. `nuweId` is die id van die versoek wat
      pas geplaas is; is dit null, was die versoek nie deelbaar nie en wys ons
      geen deel-knoppie nie. */
@@ -426,27 +432,54 @@ export default function BidSaam() {
 
 
   async function submit() {
-    if (!text.trim()) return
+    if (!text.trim() || stuurRef.current) return
+
+    /* Dieselfde woorde pas van hierdie foon af gestuur (ook ná 'n herlaai):
+       nie weer nie. Die eerste een is op pad of reeds op die muur. */
+    let laaste = null
+    try { laaste = JSON.parse(localStorage.getItem('bidsaam_laaste') || 'null') } catch {}
+    if (isPasGestuur(text, laaste)) {
+      setText('')
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 6000)
+      return
+    }
 
     /* Die hek loop VOOR die skryf, sodat `deelbaar` reeds reg op die dokument
        staan. Die bediener doen dit weer — 'n kliënt kan lieg — maar dit hou
        die data self skoon. */
     const keuring = magDeel({ teks: text })
 
+    stuurRef.current = true
+    setStuurBesig(true)
+    setStadig(false)
+    /* VOOR die skryf, soos volgJesusTel.js se merkie: anders tel 'n swak lyn
+       elke druk as 'n nuwe versoek. */
+    try { localStorage.setItem('bidsaam_laaste', JSON.stringify({ teks: text, tyd: Date.now() })) } catch {}
+
+    const skryf = addDoc(collection(db, 'prayers'), {
+      text: text.trim(),
+      prayedCount: 0,
+      createdAt: serverTimestamp(),
+      reported: false,
+      deelbaar: keuring.mag,
+    })
+    /* `addDoc` los eers op wanneer die BEDIENER bevestig. Ná 10s gaan ons voort:
+       die SDK stuur die skryf self sodra die lyn terug is, dus word dit NIE
+       weer gestuur nie (dieselfde as Tyd met God se SKRYF_TYDGRENS). */
+    const tydgrens = new Promise(los => setTimeout(() => los('stadig'), 10000))
+
     try {
-      const ref = await addDoc(collection(db, 'prayers'), {
-        text: text.trim(),
-        prayedCount: 0,
-        createdAt: serverTimestamp(),
-        reported: false,
-        deelbaar: keuring.mag,
-      })
+      const ref = await Promise.race([skryf, tydgrens])
+      const isStadig = ref === 'stadig'
 
       /* Wys die krisisnommers wanneer die woorde daarop dui. Dit gebeur ook
          wanneer die mens NIE gevra het om te deel nie — die hulp hang nie van
          'n blokkie af nie. */
       setKrisisGewys(keuring.rede === 'krisis')
-      setNuweId(keuring.mag ? ref.id : null)
+      setNuweId(keuring.mag && !isStadig ? ref.id : null)
+      setStadig(isStadig)
+      if (isStadig) skryf.then(r => { if (keuring.mag) setNuweId(r.id); setStadig(false) }).catch(() => {})
 
       setText('')
       setSubmitted(true)
@@ -456,7 +489,12 @@ export default function BidSaam() {
         setTimeout(() => setSubmitted(false), 6000)
       }
     } catch {
+      /* Regtig misluk (nie net stadig nie): mag weer probeer. */
+      try { localStorage.removeItem('bidsaam_laaste') } catch {}
       setError('Kon nie stuur nie. Probeer asseblief weer.')
+    } finally {
+      stuurRef.current = false
+      setStuurBesig(false)
     }
   }
 
@@ -521,19 +559,28 @@ export default function BidSaam() {
     } catch { /* die gebed het gebeur, ook al het die telling nie */ }
   }
 
+  /* Dieselfde gat as die gebedsvorm: een druk is een getuienis. */
+  const getuieRef = useRef(false)
+  const [getuieBesig, setGetuieBesig] = useState(false)
   async function submitTestimony() {
-    if (!testimonyText.trim()) return
+    if (!testimonyText.trim() || getuieRef.current) return
+    getuieRef.current = true
+    setGetuieBesig(true)
+    const skryf = addDoc(collection(db, 'testimonies'), {
+      text: testimonyText.trim(),
+      likeCount: 0,
+      createdAt: serverTimestamp(),
+    })
     try {
-      await addDoc(collection(db, 'testimonies'), {
-        text: testimonyText.trim(),
-        likeCount: 0,
-        createdAt: serverTimestamp(),
-      })
+      await Promise.race([skryf, new Promise(los => setTimeout(los, 10000))])
       setTestimonyText('')
       setTestimonySubmitted(true)
       setTimeout(() => setTestimonySubmitted(false), 4000)
     } catch {
       setError('Kon nie stuur nie. Probeer asseblief weer.')
+    } finally {
+      getuieRef.current = false
+      setGetuieBesig(false)
     }
   }
 
@@ -648,8 +695,8 @@ export default function BidSaam() {
           />
           <div className="input-footer">
             <span className="char-count">{text.length}/500</span>
-            <button className="btn-primary submit-btn" onClick={submit} disabled={!text.trim()}>
-              Plaas my gebedsversoek
+            <button className="btn-primary submit-btn" onClick={submit} disabled={!text.trim() || stuurBesig}>
+              {stuurBesig ? 'Besig…' : 'Plaas my gebedsversoek'}
             </button>
           </div>
 
@@ -662,6 +709,9 @@ export default function BidSaam() {
             <div className="bvm-na">
               <p className="bvm-na-kop">Dankie. Jou gebedsversoek is geplaas. 🙏🏻</p>
               <p className="bvm-na-sag">Ons bid saam met jou.</p>
+              {stadig && (
+                <p className="bvm-na-sag">Jou verbinding is stadig. Jou versoek gaan vanself deur sodra die lyn terug is — jy hoef dit nie weer te stuur nie.</p>
+              )}
 
               {nuweId ? (
                 <>
@@ -706,7 +756,7 @@ export default function BidSaam() {
         )}
 
         <div className="prayer-list">
-          {prayers.filter(p => !p.reported).slice(0, visibleCount).map(prayer => {
+          {sonderDuplikate(prayers).filter(p => !p.reported).slice(0, visibleCount).map(prayer => {
             const milestone = getPrayedMilestone(prayer.prayedCount)
             return (
               <div key={prayer.id} className="prayer-card card">
@@ -737,7 +787,7 @@ export default function BidSaam() {
             )
           })}
         </div>
-        {prayers.filter(p => !p.reported).length > visibleCount && (
+        {sonderDuplikate(prayers).filter(p => !p.reported).length > visibleCount && (
           <button className="load-more-btn" onClick={() => setVisibleCount(v => v + 10)}>
             Laai meer gebede
           </button>
@@ -761,7 +811,7 @@ export default function BidSaam() {
             />
             <div className="input-footer">
               <span className="char-count">{testimonyText.length}/900</span>
-              <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim()}>
+              <button className="testimony-submit-btn" onClick={submitTestimony} disabled={!testimonyText.trim() || getuieBesig}>
                 Deel my getuienis
               </button>
             </div>

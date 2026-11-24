@@ -101,6 +101,7 @@ node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 t
 node src/data/inheemsBrug.toets.mjs           # die Android-app se Deel/Stoor/window.open + klank met die skerm af, 61
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
+node src/data/gebedDubbel.toets.mjs           # een druk is EEN versoek + duplikate op die muur, 16 toetse
 node src/data/kinderBoekeWys.toets.mjs        # watter kinderboeke wys, en in watter volgorde
 node src/data/eboekeVolgorde.toets.mjs        # nuwe e-boeke staan bo, 28 toetse
 node api/_eposStuur.toets.mjs                 # een slegte adres mag nie 99 mense kos nie, 72 toetse
@@ -2682,6 +2683,20 @@ in `OU_REAKSIES`: geen knoppie meer nie, maar sy bestaande tellings wys nog
 onder hulle eie naam, en die bediener aanvaar hom nog van ou weergawes. **Moenie
 'n sleutel herbenoem nie** — die tellings in Firestore staan onder die sleutel.
 Blaaiertoets: `kykDraMekaarKeuse.mjs`.
+
+**Dieselfde gebedsversoek drie keer op Bid Saam was die app, nie die mens nie.**
+Dewald, 24 November 2026: *"Why do some people post 3 of the same prayer request
+... Are they trying to force prayer?"* "Plaas my gebedsversoek" het geen
+"Besig…" gehad nie; `addDoc` los eers op wanneer die BEDIENER bevestig, dus het
+op 'n swak lyn sigbaar niks gebeur nie en die mens het weer gedruk — elke druk
+het in die SDK se tou gewag en almal het later geland. Nou (`gebedDubbel.js`):
+'n slot en "Besig…", 'n tydgrens van 10s ("Jou verbinding is stadig… jy hoef dit
+nie weer te stuur nie"; die skryf word NIE herhaal nie), dieselfde woorde binne
+tien minute van dieselfde foon word nie weer gestuur nie (`bidsaam_laaste`, VOOR
+die skryf), en die muur wys bestaande duplikate binne 24 uur as EEN
+(`sonderDuplikate`, die een met die meeste gebede bly; die data word nie
+aangeraak nie). Die getuienis-knoppie het dieselfde slot. Blaaiertoets:
+`kykGebedDubbel.mjs` (vals Firestore: `__ADD_HANG`, `__GEBEDE_LYS`).
 
 **Die sprong na Bid Saam se kassie moet BLY staan.** Dewald, dieselfde dag: die
 knoppie het by die videogebed geland, nie by die kassie nie. Die videogebed
