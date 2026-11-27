@@ -10,7 +10,7 @@
  * hoe hierdie soort ding stil breek.
  */
 import { readFileSync } from 'node:fs'
-import { kiesPad, KNOP_WOORDE, installeerVoorkeur, isAndroidBlaaier, PLAY_LEWE, PLAY_URL } from './installeerPad.js'
+import { kiesPad, KNOP_WOORDE, installeerVoorkeur, isAndroidBlaaier, appIntentUrl, APP_PAKKET, PLAY_LEWE, PLAY_URL } from './installeerPad.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -148,6 +148,16 @@ console.log('── Kennisgewings in n Android-blaaier: neul niks ──')
   for (const n of android) is(`${n} as app/PWA → soos altyd`, isAndroidBlaaier({ ua: UA[n], inApp: true }), false)
   for (const n of Object.keys(UA).filter(n => !/Android/i.test(UA[n])))
     is(`${n} → soos altyd`, isAndroidBlaaier({ ua: UA[n] }), false)
+}
+
+console.log('── Terug na die app ná n skenking ──')
+{
+  const u = appIntentUrl()
+  is('begin as intent na ons tuisblad', u.startsWith('intent://www.dewaldscheepers.com/#Intent;scheme=https;'), true)
+  is('dra ons pakket', u.includes(`package=${APP_PAKKET};`), true)
+  is('pakket is die Play-app s\'n', PLAY_URL.endsWith(`id=${APP_PAKKET}`), true)
+  is('val terug op Google Play', u.includes(`S.browser_fallback_url=${encodeURIComponent(PLAY_URL)};`), true)
+  is('eindig met end', u.endsWith(';end'), true)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

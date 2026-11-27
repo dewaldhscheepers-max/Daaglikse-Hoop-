@@ -167,6 +167,26 @@
   margin-top: 8px;
 }
 
+/* "Terug na die app" — 'n VOLLE knoppie met 'n rand, nie 'n skakel nie
+   (vir hierdie gehoor lees 'n skakel soos fynskrif). Net kleur op :active. */
+.payment-popup-terug {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px;
+  margin-top: 4px;
+  border: 2px solid var(--purple);
+  border-radius: 12px;
+  color: var(--purple);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+.payment-popup-terug:active { background: rgba(91, 61, 140, 0.1); }
+
 .payment-popup-cancel {
   font-size: 14px;
   color: var(--text-muted);

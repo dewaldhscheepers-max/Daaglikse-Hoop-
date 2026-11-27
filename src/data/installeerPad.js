@@ -129,6 +129,22 @@ export function isAndroidBlaaier({ ua = '', inApp = false } = {}) {
   return PLAY_LEWE && !inApp && /Android/i.test(ua)
 }
 
+/* ── "Terug na die app" ná 'n skenking ──
+ *
+ * Dewald, 27 November 2026: hy skenk IN die Play-app, keur goed in sy bank se
+ * app, die app wys "Jou skenking is ontvang" — en dan spring die foon na die
+ * BLAAIER. Die bank se app maak sy eie terugkeer-skakel in die verstek-blaaier
+ * oop; die app kan dit nie keer nie. Daardie blaaier land op ons
+ * ?payment=success, en die dankie daar kry 'n knoppie terug na die app.
+ *
+ * 'n Intent met ons pakket: is die app daar, maak HY www.dewaldscheepers.com/
+ * oop (die manifes se intent-filter dek "/"); is hy nie, gaan die blaaier na
+ * Google Play. Geen nuwe app-weergawe nodig nie. */
+export const APP_PAKKET = 'com.dewaldscheepers.daaglikshoop'
+export function appIntentUrl() {
+  return `intent://www.dewaldscheepers.com/#Intent;scheme=https;package=${APP_PAKKET};S.browser_fallback_url=${encodeURIComponent(PLAY_URL)};end`
+}
+
 export function installeerVoorkeur({ ua = '', kanPrompt = false, geinstalleer = false } = {}) {
   if (geinstalleer) return 'geinstalleer'
   if (PLAY_LEWE && /Android/i.test(ua)) return 'play'

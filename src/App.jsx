@@ -25,7 +25,7 @@ import {
 import { haalOpgelaaideBoeke } from './data/eboekLys'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
-import { kiesPad, installeerVoorkeur, isAndroidBlaaier, PLAY_URL } from './data/installeerPad'
+import { kiesPad, installeerVoorkeur, isAndroidBlaaier, appIntentUrl, PLAY_URL } from './data/installeerPad'
 import { wysKnoppie } from './data/kennisgewingStaat'
 import { leesKennisgewingStaat, huidigeToken } from './data/kennisgewingLees'
 import KennisgewingKnoppie from './components/KennisgewingKnoppie'
@@ -2280,6 +2280,10 @@ export default function App() {
             <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
               {paymentResult.status === 'cancel' ? 'OK' : 'Thank you! 🙏'}
             </button>
+            {/* Die bank se app het die mens in die blaaier laat land — sien appIntentUrl. */}
+            {androidBlaaier && paymentResult.status === 'success' && (
+              <a className="payment-popup-terug" href={appIntentUrl()}>Back to the app</a>
+            )}
           </div>
         </div>
       )}
@@ -2333,6 +2337,10 @@ export default function App() {
             <button className="btn-primary payment-popup-btn" onClick={() => setPayment(null)}>
               Dankie! 🙏
             </button>
+            {/* Die bank se app het die mens in die blaaier laat land — sien appIntentUrl. */}
+            {androidBlaaier && (
+              <a className="payment-popup-terug" href={appIntentUrl()}>Terug na die app</a>
+            )}
           </div>
         </div>
       )}

@@ -2912,6 +2912,13 @@ wees. Weerwens die afrikaans werk reg — moet niks daar verander nie."*
   Daarom het GEEN dankie-e-pos uitgegaan nie, in albei tale, terwyl die gratis
   e-boek-e-pos (relatief geroep) gewerk het. Moet die adres nooit weer vas tik
   nie. Blaaiertoets: `kykNotify.mjs` vang die vorm wat na PayFast gaan.
+* **Ná 'n skenking in die Play-app beland die mens soms in die BLAAIER.** Hy
+  keur goed in sy bank se app; die app wys die dankie, maar die bank se app
+  maak sy eie terugkeer-skakel in die verstek-blaaier oop (Dewald, 27 November
+  2026). Ons kan dit nie keer nie. In 'n Android-blaaier dra die dankie dus
+  **"Terug na die app"** (`appIntentUrl()` in `installeerPad.js`: 'n intent met
+  ons pakket, terugval Google Play). Dit is NIE 'n dubbele skenking nie, en die
+  dankie-e-pos gaan steeds net een keer uit.
 * **`payfast-itn.js` doen sy werk VOOR hy antwoord.** Dit het eers
   `res.send('OK')` gedoen en DAARNA die dankie-e-pos gestuur — en Vercel vries
   'n funksie sodra die antwoord uit is. Die e-pos het dus soms nooit uitgegaan
