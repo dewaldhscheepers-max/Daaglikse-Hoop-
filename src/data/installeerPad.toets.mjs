@@ -10,7 +10,7 @@
  * hoe hierdie soort ding stil breek.
  */
 import { readFileSync } from 'node:fs'
-import { kiesPad, KNOP_WOORDE, installeerVoorkeur, PLAY_LEWE, PLAY_URL } from './installeerPad.js'
+import { kiesPad, KNOP_WOORDE, installeerVoorkeur, isAndroidBlaaier, PLAY_LEWE, PLAY_URL } from './installeerPad.js'
 
 let reg = 0, val = 0
 const is = (n, kry, wag) => {
@@ -139,6 +139,15 @@ console.log('\n── Google Play: elke Android-besoeker kry die Play-app ──
   const go = readFileSync(new URL('../../public/go.html', import.meta.url), 'utf8')
   is('go.html se PLAY_LEWE stem met die app s\'n', /var PLAY_LEWE = (true|false)/.exec(go)?.[1], String(PLAY_LEWE))
   is('go.html wys na dieselfde app', go.includes(PLAY_URL), true)
+}
+
+console.log('── Kennisgewings in n Android-blaaier: neul niks ──')
+{
+  const android = Object.keys(UA).filter(n => /Android/i.test(UA[n]))
+  for (const n of android) is(`${n} in n oortjie → geen kennisgewing-vraag`, isAndroidBlaaier({ ua: UA[n] }), true)
+  for (const n of android) is(`${n} as app/PWA → soos altyd`, isAndroidBlaaier({ ua: UA[n], inApp: true }), false)
+  for (const n of Object.keys(UA).filter(n => !/Android/i.test(UA[n])))
+    is(`${n} → soos altyd`, isAndroidBlaaier({ ua: UA[n] }), false)
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

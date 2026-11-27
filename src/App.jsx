@@ -25,7 +25,7 @@ import {
 import { haalOpgelaaideBoeke } from './data/eboekLys'
 import { subscribeToNotifications, ensureNotificationToken, subscribeSamsung, isSamsungBrowser, isFacebookBrowser, isInApp, db } from './firebase'
 import { isInheems, tekenInInheems, houInheemseTokenVars, luisterInheemseTikke, inheemseToestemming } from './data/inheemseKennisgewings'
-import { kiesPad, installeerVoorkeur, PLAY_URL } from './data/installeerPad'
+import { kiesPad, installeerVoorkeur, isAndroidBlaaier, PLAY_URL } from './data/installeerPad'
 import { wysKnoppie } from './data/kennisgewingStaat'
 import { leesKennisgewingStaat, huidigeToken } from './data/kennisgewingLees'
 import KennisgewingKnoppie from './components/KennisgewingKnoppie'
@@ -634,6 +634,7 @@ export default function App() {
      'prompt' en 'prompt-with-rationale' is Android se manier om "nog nooit
      gevra nie" te se — dieselfde as die web se 'default'. */
   const inheemsePermRef = useRef(null)
+  const androidBlaaier = isAndroidBlaaier({ ua: typeof navigator !== 'undefined' ? navigator.userAgent : '', inApp: isInApp })
   useEffect(() => {
     if (!isInheems) return
     let leef = true
@@ -645,14 +646,21 @@ export default function App() {
     return () => { leef = false }
   }, [])
 
+  /* Weet ons die inheemse staat nog NIE, vra ons niks. Hier het
+     `|| 'default'` gestaan: die vraag ná 2,5s het 'n mens wat lankal ja gesê
+     het, gevra wanneer die antwoord van Android net 'n bietjie laat was —
+     Dewald, 27 November 2026: *"ek kry nou en dan"* 'n opspringer terwyl die
+     oggendboodskap werk. Die volgende oopmaak vra weer as dit nodig is. */
   function huidigeToestemming() {
-    if (isInheems) return inheemsePermRef.current || 'default'
+    if (isInheems) return inheemsePermRef.current
     return 'Notification' in window ? Notification.permission : null
   }
 
   function vraKennisgewingsDalk() {
     const toestemming = huidigeToestemming()
     if (!toestemming) return false
+    /* 'n Android-blaaier: die Play-app is die plek vir kennisgewings. */
+    if (androidBlaaier) return false
 
     /* ── Nooit bo-op iets anders nie ──
      *
@@ -733,7 +741,7 @@ export default function App() {
     else                         setToestemmingAf(true)
   }
 
-  const kennisgewingMerkie = kgStaat && wysKnoppie(kgStaat)
+  const kennisgewingMerkie = kgStaat && !androidBlaaier && wysKnoppie(kgStaat)
     ? <KennisgewingKnoppie staat={kgStaat} opDoen={kgDoen} opStappe={kgStappe} />
     : null
 
@@ -852,7 +860,9 @@ export default function App() {
      aan te sit. Dit vra niks en onderbreek niks — dit is die enigste pad
      terug wat bestaan, want die app self mag nie weer vra nie. */
   const [toestemmingAf, setToestemmingAf] = useState(
-    () => typeof Notification !== 'undefined' && wysPadTerug(Notification.permission)
+    /* In die Play-app is Notification.permission die WEBVIEW s'n en sê niks
+       oor die app nie; in 'n Android-blaaier hoort kennisgewings by die app. */
+    () => !isInheems && !androidBlaaier && typeof Notification !== 'undefined' && wysPadTerug(Notification.permission)
   )
 
   useEffect(() => {

@@ -98,7 +98,7 @@ node api/_volgJesusVersoek.toets.mjs          # "kontak my" — net vier velde o
 node src/data/kennisgewingVra.toets.mjs       # wie gevra word en wanneer, 23 toetse
 node src/data/kennisgewingStaat.toets.mjs     # kry hierdie foon werklik iets, 24 toetse
 node api/_toetsStuur.toets.mjs                # die toetsboodskap se besluite, 32 toetse
-node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe, 32 toetse
+node src/data/installeerPad.toets.mjs         # wie kan installeer, en hoe + geen kennisgewing-neul in n Android-blaaier, 105
 node src/data/inheemsBrug.toets.mjs           # die Android-app se Deel/Stoor/window.open + klank met die skerm af, 61
 node src/data/installTelling.toets.mjs        # die installasie-telling se afronding, 15 toetse
 node src/data/gebedDeel.toets.mjs             # "Bid vir my" se hekke en woorde, 55 toetse
@@ -3344,6 +3344,14 @@ Die eindpunt dra geen geheim nie — dit word deur die app self geroep. Die hek
 is dat die token reeds in `fcm_tokens` moet staan, en die woorde staan vas in
 die kode. 'n 429 of 'n 503 mag NOOIT 'n token uitvee nie; dit se niks oor die
 foon nie.
+
+**'n Android-BLAAIER kry geen kennisgewing-vraag, merkie of "af"-reël nie**
+(`isAndroidBlaaier` in `installeerPad.js`). Dewald, 27 November 2026: hy kry
+die oggendboodskap in die Play-app, en Samsung Internet het "Jy kry nie die
+oggendboodskap nie" gesê — waar vir die blaaier, vals vir die mens. Op Android
+hoort kennisgewings by die app. En in die app vra `huidigeToestemming()` NIKS
+solank Android se antwoord nog nie daar is nie (dit was `|| 'default'`, en dan
+is wie lankal ja gesê het "nou en dan" weer gevra).
 
 ### Wie gevra word, en hoe
 

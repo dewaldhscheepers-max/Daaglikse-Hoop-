@@ -113,6 +113,22 @@ export const KNOP_WOORDE = {
 export const PLAY_LEWE = true
 export const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.dewaldscheepers.daaglikshoop'
 
+/* ── Kennisgewings in 'n Android-BLAAIER: vra niks, neul niks ──
+ *
+ * Dewald, 27 November 2026, met 'n skermkiekie uit Samsung Internet: *"maak
+ * seker dat mense wat reeds push notifications kry nie i popup kry nie."* Hy
+ * kry die oggendboodskap in die Play-app; in die blaaier het die bladsy
+ * "Jy kry nie die oggendboodskap nie" gesê, want die BLAAIER het geen
+ * toestemming nie. Dit is waar vir die blaaier en vals vir die mens.
+ *
+ * Op Android is die app op Google Play die plek vir kennisgewings (sien
+ * `installeerVoorkeur`). 'n Gewone blaaier-oortjie op Android kry dus geen
+ * kennisgewing-vraag, merkie of "kennisgewings is af"-reël nie. 'n
+ * Geïnstalleerde PWA en die Play-app self (`inApp`) bly soos altyd. */
+export function isAndroidBlaaier({ ua = '', inApp = false } = {}) {
+  return PLAY_LEWE && !inApp && /Android/i.test(ua)
+}
+
 export function installeerVoorkeur({ ua = '', kanPrompt = false, geinstalleer = false } = {}) {
   if (geinstalleer) return 'geinstalleer'
   if (PLAY_LEWE && /Android/i.test(ua)) return 'play'
