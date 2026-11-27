@@ -88,6 +88,8 @@ function vervangFetch(boekTaal, a4 = null) {
     roepe.push({ url: u, method: opts.method || 'GET', body: opts.body || '' })
     const json = (o, status = 200) => ({ ok: status < 300, status, json: async () => o, text: async () => JSON.stringify(o) })
     if (u.includes('oauth2.googleapis.com')) return json({ access_token: 't' })
+    /* PayFast se eie kontrole (api/_payfast.js): hierdie toetse stuur EGTE ITN's. */
+    if (u.includes('payfast.co.za/eng/query/validate')) return { ok: true, status: 200, text: async () => (globalThis.__PF_GELDIG === false ? 'INVALID' : 'VALID') }
     if (u.includes('/documents/books/')) {
       const fields = { title: { stringValue: 'Boek X' }, pdfUrl: { stringValue: 'https://x.test/b.pdf' } }
       if (boekTaal) fields.taal = { stringValue: boekTaal }
@@ -198,6 +200,20 @@ console.log('\n── free-book-download: n boek met n A4-weergawe ──')
   await h({ method: 'POST', body: { email: 'a@b.co', bookId: 'toksies', consent: true } }, res)
   vals('sonder A4: geen pdfUrlA4 in die antwoord', 'pdfUrlA4' in (res.liggaam || {}))
   waar('sonder A4: die enkel "Laai af"', resend()[0] && resend()[0].html.includes('📥 Laai af'))
+}
+
+console.log('\n── payfast-itn: n VALS boodskap (nie van PayFast nie) doen NIKS ──')
+{
+  vervangFetch(null)
+  globalThis.__PF_GELDIG = false
+  const h = require('./payfast-itn.js')
+  const res = vangRes()
+  await h({ method: 'POST', body: { payment_status: 'COMPLETE', custom_str1: 'boef@x.co', custom_str2: 'skenking', amount_gross: '1.00', pf_payment_id: 'vals' } }, res)
+  await wag()
+  globalThis.__PF_GELDIG = true
+  is('PayFast kry steeds 200', res.kode, 200)
+  is('geen e-pos', resend().length, 0)
+  is('geen adres op n lys', geskryfNa(), [])
 }
 
 console.log(`\n${reg} reg, ${val} vals\n`)

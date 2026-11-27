@@ -1,9 +1,10 @@
-import md5 from 'md5'
-
-const MERCHANT_ID  = '26753445'
-const MERCHANT_KEY = 'acdbj7mteeup0'
-const PASSPHRASE   = 'DaaglikseHoop5320'
-const PAYFAST_URL  = 'https://www.payfast.co.za/eng/process'
+/* ── Geen geheim in die app nie ──
+ *
+ * Hier het MERCHANT_KEY en PASSPHRASE gestaan, en die handtekening is in die
+ * blaaier bereken. Die app se kode is publiek, dus was die wagwoordfrase
+ * publiek — PayFast het Dewald op 27 November 2026 gevra om dit te vervang.
+ * Die bediener teken nou (`/api/payfast-teken`, sien api/_payfast.js); die app
+ * stuur net die betaling se velde, en die geheim verlaat nooit Vercel nie. */
 /* ── Die ITN-adres is die adres waarop die blad WERKLIK loop ──
  *
  * Dit was vas `https://dewaldscheepers.com/api/payfast-itn` — sonder www. Die
@@ -24,33 +25,39 @@ function itnUrl() {
   return 'https://www.dewaldscheepers.com/api/payfast-itn'
 }
 
-function phpUrlencode(val) {
-  return encodeURIComponent(String(val).trim())
-    .replace(/%20/g, '+')
-    .replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
-}
-
-function buildSignature(params) {
-  let str = Object.entries(params)
-    .map(([k, v]) => `${k}=${phpUrlencode(v)}`)
-    .join('&')
-  if (PASSPHRASE) str += `&passphrase=${phpUrlencode(PASSPHRASE)}`
-  return md5(str)
-}
-
-function submitForm(params) {
-  params.signature = buildSignature(params)
+/* Die bediener teken en sit merchant_id/merchant_key by; ons bou net die vorm
+   uit wat hy teruggee, in sy volgorde. Misluk dit, sê ons dit — 'n knoppie wat
+   stil niks doen nie, is erger as 'n eerlike sin. */
+async function submitForm(params) {
+  const { merchant_id, merchant_key, signature, ...velde } = params // eie waardes word nooit gestuur nie
+  let antwoord = null
+  try {
+    const r = await fetch('/api/payfast-teken', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ velde }),
+    })
+    antwoord = r.ok ? await r.json() : null
+  } catch {}
+  if (!antwoord || !antwoord.velde || !antwoord.aksie) {
+    const en = String(velde.custom_str3 || '') === 'en'
+    alert(en
+      ? 'We could not open PayFast right now. Please try again in a moment.'
+      : 'Ons kon nie nou na PayFast gaan nie. Probeer asseblief oor \'n oomblik weer.')
+    return false
+  }
   const form = document.createElement('form')
   form.method = 'POST'
-  form.action = PAYFAST_URL
+  form.action = antwoord.aksie
   form.style.display = 'none'
-  Object.entries(params).forEach(([k, v]) => {
+  Object.entries(antwoord.velde).forEach(([k, v]) => {
     const input = document.createElement('input')
     input.type = 'hidden'; input.name = k; input.value = String(v)
     form.appendChild(input)
   })
   document.body.appendChild(form)
   form.submit()
+  return true
 }
 
 /* `taal: 'en'` kom van die ENGELSE blad. Dan dra die terugkeer-adres
@@ -65,8 +72,6 @@ export function checkoutBook(book, email, type = 'ebook', { taal } = {}) {
     localStorage.setItem('pendingEmail', email)
   }
   const params = {
-    merchant_id:   MERCHANT_ID,
-    merchant_key:  MERCHANT_KEY,
     return_url:    `${window.location.origin}/?payment=success&type=${type}&books=${encodeURIComponent(book.id)}&em=${encodeURIComponent(email)}${en ? '&lang=en' : ''}`,
     cancel_url:    `${window.location.origin}/?payment=cancel${en ? '&lang=en' : ''}`,
     notify_url:    itnUrl(),
@@ -77,7 +82,7 @@ export function checkoutBook(book, email, type = 'ebook', { taal } = {}) {
     custom_str2:   book.id,
   }
   if (en) params.custom_str3 = 'en'
-  submitForm(params)
+  return submitForm(params)
 }
 
 export function checkoutCart(books, email) {
@@ -89,9 +94,7 @@ export function checkoutCart(books, email) {
 
   localStorage.setItem('pendingPurchase', books.map(b => b.id).join(','))
   localStorage.setItem('pendingEmail', email)
-  submitForm({
-    merchant_id:   MERCHANT_ID,
-    merchant_key:  MERCHANT_KEY,
+  return submitForm({
     return_url:    `${base}/?payment=success&type=ebook&books=${encodeURIComponent(books.map(b => b.id).join(','))}&em=${encodeURIComponent(email)}`,
     cancel_url:    `${base}/?payment=cancel`,
     notify_url:    itnUrl(),
@@ -121,8 +124,6 @@ export function checkoutSubscription(amountRand, email, { taal } = {}) {
     : `${window.location.origin}/?payment=success&type=subscription`) + (en ? '&lang=en' : '')
 
   const params = {
-    merchant_id:       MERCHANT_ID,
-    merchant_key:      MERCHANT_KEY,
     return_url:        returnUrl,
     cancel_url:        `${window.location.origin}/?payment=cancel&type=subscription${en ? '&lang=en' : ''}`,
     notify_url:        itnUrl(),
@@ -138,5 +139,5 @@ export function checkoutSubscription(amountRand, email, { taal } = {}) {
   }
   if (email) params.email_address = email
 
-  submitForm(params)
+  return submitForm(params)
 }

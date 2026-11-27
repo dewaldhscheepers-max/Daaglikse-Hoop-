@@ -21,6 +21,8 @@ globalThis.fetch = async (u, o = {}) => {
   u = String(u)
   const j = (x, s = 200) => ({ ok: s < 300, status: s, json: async () => x, text: async () => JSON.stringify(x) })
   if (u.includes('oauth2')) return j({ access_token: 't' })
+  /* PayFast se eie kontrole (api/_payfast.js): hierdie toetse stuur EGTE ITN's. */
+  if (u.includes('payfast.co.za/eng/query/validate')) return { ok: true, status: 200, text: async () => 'VALID' }
   if (u.includes('resend')) { eposse.push(JSON.parse(o.body)); return j({ id: 'e' }) }
   if (u.includes('firestore')) {
     const pad = u.split('/documents/')[1]

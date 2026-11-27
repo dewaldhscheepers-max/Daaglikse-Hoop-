@@ -65,7 +65,7 @@ export function DonationModal({ onClose, beginBedrag = null, taal = 'af' }) {
       email,
       'donation',
       { taal }
-    )
+    ).then(ok => { if (!ok) setBusy(false) })  /* misluk die ondertekening: die knoppie werk weer */
   }
 
   return (

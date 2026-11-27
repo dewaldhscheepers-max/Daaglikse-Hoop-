@@ -5,6 +5,8 @@ const engels = require('./_eposEngels.js')
 /* Die dankie-e-pos self — gedeel met die app se terugkeer (api/skenk-dankie.js),
    sodat die mens hom EEN keer kry, watter pad ook al eerste aankom. */
 const { stuurSkenkDankie } = require('./_skenkDankie.js')
+/* Is die boodskap werklik van PayFast? Sien _payfast.js (27 November 2026). */
+const { isEgteItn } = require('./_payfast.js')
 
 // ── Get Firebase service-account access token (same pattern as send-notifications) ──
 async function getAccessToken() {
@@ -130,6 +132,16 @@ module.exports = async function handler(req, res) {
 
 async function verwerkItn(data) {
   if (!data) return
+
+  /* ── Eers: is dit PayFast? ──
+     Daar was geen kontrole nie — 'n vals "COMPLETE" van enigiemand het 'n
+     dankie-e-pos, 'n aankoop-rekord en 'n adres op die lys laat uitgaan. Nou
+     moet die handtekening klop, of PayFast self moet "VALID" sê. */
+  const keur = await isEgteItn(data)
+  if (!keur.egte) {
+    console.error('payfast-itn: NIE van PayFast nie (' + keur.hoe + ')', data.pf_payment_id || '')
+    return
+  }
 
   // ── Subscription ITN (has a recurring token, no bookIds) ──────────────────
   if (data.token) {

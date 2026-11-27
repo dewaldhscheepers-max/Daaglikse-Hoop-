@@ -73,8 +73,9 @@ node src/data/eboekTotale.toets.mjs           # die twee getalle bo-aan die e-bo
 node src/data/engelsBoeke.toets.mjs           # watter boeke is Engels (/english), 20 toetse
 node src/data/eboekPopup.toets.mjs            # watter e-boek die opspringer wys — nooit 'n Engelse een, 34
 node src/data/engelseBoekeOpenbaar.toets.mjs  # wat van n Engelse boek oor die draad gaan, 5 toetse
-node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys + die A4-weergawe, vals Firestore, 71
+node api/_eposEngels.toets.mjs                # Engelse e-posse + APARTE lys + die A4-weergawe + 'n vals ITN, vals Firestore, 74
 node api/_skenkDankie.toets.mjs               # die dankie ná 'n skenking: EEN e-pos, twee paaie, 17
+node api/_payfast.toets.mjs                   # PayFast teken op die BEDIENER + die ITN-kontrole, 44 toetse
 node src/data/volgJesusBegin.toets.mjs        # WATTER week die kaart wys, en of hy WAG, 56 toetse
 node src/data/tydMetGod.toets.mjs             # Vandag se Tyd met God se reels + "klaar" hoort aan die NOTA, 107 toetse
 node src/data/tydMetGodBerging.toets.mjs      # wat op die FOON beland, en oorleef, 20
@@ -3404,6 +3405,19 @@ Die vergelyking staan **een keer**, in `api/_geheim.js` (`wieMag`,
 `magAdminDing`, `tekenSleutel`), deur `timingSafeEqual`. 'n Geheim wat op
 sewe plekke vergelyk word, is 'n geheim wat op ses plekke agterbly wanneer dit
 verander.
+
+**Die SESDE keer was PayFast se passphrase**, in `src/utils/payfast.js`, saam
+met die merchant key — die handtekening is in die blaaier bereken. PayFast het
+Dewald op 27 November 2026 gevra om albei te vervang. Nou teken die BEDIENER
+(`/api/payfast-teken`, `api/_payfast.js`) met `PAYFAST_PASSPHRASE` en
+`PAYFAST_MERCHANT_KEY` uit Vercel; die app stuur net die betaling se velde, en
+die vorm word in PayFast se eie veldvolgorde gebou. Ontbreek die twee
+veranderlikes, gee die eindpunt 503 en die app sê eerlik "Ons kon nie nou na
+PayFast gaan nie" — nooit 'n stille knoppie nie. En `payfast-itn.js` doen nou
+NIKS met 'n boodskap wat nie van PayFast kom nie (`isEgteItn`: die handtekening,
+anders PayFast se eie `/eng/query/validate`); daarvoor kon enigiemand 'n vals
+"COMPLETE" stuur. `_payfast.toets.mjs` eis dat die ou waardes nooit weer in die
+kliënt staan nie. Blaaiertoets: `kykPayfastTeken.mjs`.
 
 Moet **nooit** 'n geheim in `vercel.json` se cron-pad sit nie. Vercel stuur sy
 crons se geheim self in 'n kopstuk, en 'n geheim in daardie lêer breek stil

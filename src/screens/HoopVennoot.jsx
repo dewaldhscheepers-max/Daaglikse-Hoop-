@@ -72,7 +72,7 @@ export default function HoopVennoot({ onClose, beginBedrag = null, taal = 'af' }
       return
     }
     setBusy(true)
-    checkoutSubscription(amount, email, { taal })
+    checkoutSubscription(amount, email, { taal }).then(ok => { if (!ok) setBusy(false) })  /* misluk die ondertekening: die knoppie werk weer */
   }
 
   return (
