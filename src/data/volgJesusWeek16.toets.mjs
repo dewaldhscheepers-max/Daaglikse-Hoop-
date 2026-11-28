@@ -68,9 +68,8 @@ console.log('\n── Die perke: dit mag nie soos huiswerk voel nie ──\n')
            woorde <= MAKS_TEKS)
     }
   }
-  /* Dewald se KYK TERUG eindig hierdie week NIE met 'n vraag nie, en die stap is
-     'n opdrag: Dag 5 vra niks om te skryf nie. Ons sit niks by wat hy nie gestuur het nie. */
-  is('Dag 5 het geen skryfkassie', WEEK16_DAE[4].blokke.filter(b => b.soort === 'vraag').length, 0)
+  /* Dag 5 vra EEN ding om te skryf: KYK TERUG eindig met Dewald se PRIVATE VRAAG. */
+  is('Dag 5 het presies een skryfkassie', WEEK16_DAE[4].blokke.filter(b => b.soort === 'vraag').length, 1)
   for (const d of WEEK16_DAE.slice(0, 4)) {
     is(`dag ${d.n} het presies een vraag`, d.blokke.filter(b => b.soort === 'vraag').length, 1)
   }
@@ -102,20 +101,11 @@ console.log('\n── Elke Skrifgedeelte maak die Bybel oop ──\n')
     if (d.n === 1) is('dag 1 se LEES-blok versin geen reel nie', lees[0].lyf, undefined)
     else waar(`dag ${d.n} se leesreel se wat om raak te sien`, lees[0].lyf && lees[0].lyf.length > 20)
   }
-  /* DIE EEN UITSONDERING, met die rede in die kop van volgJesusWeek16.js:
-     Dewald se Dag 3 en Dag 4 lees albei Markus 2:5 — die twee HELFTES van die
-     vers, met 'n ander aanhaling en 'n ander fokus. Elke ander paar verskil. */
-  const UITSONDERING = new Set(['3-4'])
   for (let i = 1; i < skrifte.length; i++) {
-    const paar = `${i}-${i + 1}`
-    if (UITSONDERING.has(paar)) {
-      is(`dag ${i} en ${i + 1} lees albei Dewald se Markus 2:5`, [skrifte[i - 1], skrifte[i]], ['Markus 2:5', 'Markus 2:5'])
-      waar('maar die leesreel verskil', WEEK16_DAE[i - 1].blokke[0].lyf !== WEEK16_DAE[i].blokke[0].lyf)
-    } else {
-      is(`dag ${i + 1} se Skrif verskil van dag ${i} s n`, skrifte[i] === skrifte[i - 1], false)
-    }
+    is(`dag ${i + 1} se Skrif verskil van dag ${i} s n`, skrifte[i] === skrifte[i - 1], false)
   }
-  is('vier verskillende gedeeltes', new Set(skrifte).size, 4)
+  is('al vyf gedeeltes verskil', new Set(skrifte).size, 5)
+  is('Dag 3 lees Markus 2:4–5 (Dewald se keuse)', skrifte[2], 'Markus 2:4–5')
   is('Dag 1 lees die hele gedeelte', skrifte[0], 'Markus 2:1–12')
   is('Dag 5 se gedeelte is drie verse', ontleedVerwysing(skrifte[4]).map(s => [s.hoofstuk, s.van, s.tot]), [[2, 10, 12]])
 }
@@ -179,10 +169,11 @@ console.log('\n── Elke vraag se id is UNIEK ──\n')
 {
   const ids = WEEK16_DAE.flatMap(d => d.blokke).filter(b => b.id).map(b => b.id)
   is('geen duplikaat', new Set(ids).size, ids.length)
-  is('en daar is vier', ids.length, 4)
+  is('en daar is vyf', ids.length, 5)
   const kyk = WEEK16_DAE[4].blokke.find(b => b.kop === 'KYK TERUG')
-  is('KYK TERUG is n teksblok (dit eindig NIE met n vraag nie)', kyk && kyk.soort, 'teks')
-  waar('met Dewald se slot', kyk && /het Jesus gewys dat Hy gesag het om sondes te vergewe\.$/.test(kyk.lyf))
+  is('KYK TERUG is die skryfkassie (dit eindig met die PRIVATE VRAAG)', kyk && kyk.soort, 'vraag')
+  waar('met Dewald se opsomming', kyk && kyk.lyf.includes('het Jesus gewys dat Hy gesag het om sondes te vergewe.'))
+  waar('en sy private vraag', kyk && /Wat is die probleem in my lewe wat almal kan sien, en wat is dalk die dieper behoefte wat net Jesus sien\?$/.test(kyk.lyf))
   const stap = WEEK16_DAE[4].blokke.find(b => b.kop === 'JOU VOLGENDE STAP')
   is('JOU VOLGENDE STAP is n teksblok (n opdrag)', stap && stap.soort, 'teks')
   waar('en dit staan NA KYK TERUG', WEEK16_DAE[4].blokke.indexOf(stap) > WEEK16_DAE[4].blokke.indexOf(kyk))
@@ -192,11 +183,14 @@ console.log('\n── Elke vraag se id is UNIEK ──\n')
 
 console.log('\n── Dewald se aanhalings staan soos HY dit geskryf het ──\n')
 {
-  /* "Toe Jesus hulle geloof sien" stem met die GAB; die ander twee is SY bewoording. */
-  const alles = JSON.stringify(WEEK16_DAE)
-  waar('Dag 3: "Toe Jesus hulle geloof sien…"', alles.includes('“Toe Jesus hulle geloof sien…”'))
-  waar('Dag 4: "Seun, jou sondes word vergewe."', alles.includes('“Seun, jou sondes word vergewe.”'))
-  waar('Dag 5: "Staan op, vat jou mat en gaan huis toe."', alles.includes('“Staan op, vat jou mat en gaan huis toe.”'))
+  /* In die LEES EERS-blokke van Dag 2–5: die GAB se presiese bewoording (Dewald
+     se keuse). Dag 1 se boodskap bly SY woorde — dit word hierbo apart gekeur. */
+  const lees = n => WEEK16_DAE[n - 1].blokke.find(b => b.soort === 'lees').lyf
+  waar('Dag 3: "Toe Jesus hulle geloof sien…"', lees(3).includes('“Toe Jesus hulle geloof sien…”'))
+  waar('Dag 4: GAB 2:5 "Seun, jou sondes is jou vergewe."', lees(4).includes('“Seun, jou sondes is jou vergewe.”'))
+  waar('Dag 5: GAB 2:11 "Staan op, en neem jou bed op, en gaan na jou huis."', lees(5).includes('“Staan op, en neem jou bed op, en gaan na jou huis.”'))
+  const dag2tot5 = JSON.stringify(WEEK16_DAE.slice(1))
+  waar('Dewald se eie bewoording staan nie meer in Dag 2–5 nie', !dag2tot5.includes('word vergewe.”') && !dag2tot5.includes('vat jou mat'))
   is('daar is geen keuse-blok nie', WEEK16_DAE.flatMap(d => d.blokke).filter(b => b.soort === 'kies').length, 0)
 }
 
@@ -209,7 +203,7 @@ console.log('\n── Die reis aan die einde wys net wat gevra is ──\n')
   }
   is('drie stappe', WEEK16_REIS.length, 3)
   is('dit begin by Dag 1', WEEK16_REIS[0].id, 'dieper1')
-  is('en eindig by Dag 4 se vraag (Dag 5 het geen skryfkassie)', WEEK16_REIS[2].id, 'hart4')
+  is('en eindig by Dag 5 se vraag', WEEK16_REIS[2].id, 'behoefte5')
 }
 
 console.log('\n── Die opening is kort ──\n')

@@ -61,7 +61,7 @@ node src/data/volgJesusWeek12.toets.mjs       # Week 12 "Julle moet julle vyande
 node src/data/volgJesusWeek13.toets.mjs       # Week 13 "Twee huise. Een storm." — die STAP is die skryfkassie, 193
 node src/data/volgJesusWeek14.toets.mjs       # Week 14 "Ek is die Goeie Herder" — KYK TERUG is die skryfkassie, 196
 node src/data/volgJesusWeek15.toets.mjs       # Week 15 "Die melaatse wat niemand wou aanraak nie" — "Ek wil. Word rein." is Dewald s'n, 197
-node src/data/volgJesusWeek16.toets.mjs       # Week 16 "Hulle breek die dak oop" — Dag 3 en 4 lees albei Markus 2:5, Dag 5 het geen skryfkassie, 206
+node src/data/volgJesusWeek16.toets.mjs       # Week 16 "Hulle breek die dak oop" — GAB-bewoording in LEES EERS, Dag 1 bly Dewald s'n, 208
 node src/data/volgJesusHerskryf.toets.mjs     # 'n herskrewe week se OU dag-merkies, 26 toetse
 node src/data/volgJesusOpenbaar.toets.mjs     # wat die publiek mag sien, 76 toetse
 node api/_volgJesusOpenbaar.toets.mjs         # die openbare eindpunt se hek, 50 toetse

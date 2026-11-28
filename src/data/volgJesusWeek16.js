@@ -31,29 +31,26 @@
      · Dag 2–4: LEES, die teks, die vraag, die gebed;
      · Dag 5: LEES, die teks, KYK TERUG, JOU VOLGENDE STAP, die gebed.
 
-   Anders as Week 12 tot 15 eindig "KYK TERUG" hierdie keer NIE met 'n vraag
-   nie — dit is 'n opsomming. Dag 5 het dus GEEN skryfkassie nie; daar word
-   niks bygevoeg wat Dewald nie gestuur het nie. Sy "PRIVATE VRAAG" staan op die
-   plat rekord (`privaatRefleksie`), soos elke week s'n.
+   Dewald se KYK TERUG was 'n opsomming sonder vraag. Op sy versoek (28
+   November) eindig dit nou met sy "PRIVATE VRAAG" en is dit die skryfkassie,
+   soos Week 12 tot 15 s'n; "JOU VOLGENDE STAP" bly 'n opdrag.
 
    Dewald se Dag 2 tot 5 dra geen tussenopskrif nie (net die dag se titel), dus
    dra die teksblokke geen `kop` nie — die titel staan reeds bo-aan die blad.
 
-   ── DAG 3 EN DAG 4 LEES ALBEI MARKUS 2:5 ──
+   ── DAG 3 LEES MARKUS 2:4–5 ──
 
-   Dewald se eie verwysings. Die twee dae lees die twee HELFTES van een vers:
-   Dag 3 "Toe Jesus hulle geloof sien…", Dag 4 "Seun, jou sondes word vergewe."
-   Die reël "geen Skrifgedeelte twee dae na mekaar nie" keer dat 'n dag soos
-   die vorige een voel; hier is die aanhaling en die fokus elke dag anders. Die
-   toets maak dit EEN sigbare uitsondering met hierdie rede.
+   Dewald het albei Dag 3 en Dag 4 eers op Markus 2:5 gehad; Dag 3 is nou 2:4–5
+   (die dak én hulle geloof), sodat geen gedeelte twee dae na mekaar staan nie.
 
    ── DIE AANHALINGS ──
 
-   Al die gedeeltes is teen die egte public/gab/ nagegaan en bestaan. "Toe
-   Jesus hulle geloof sien" (2:5) stem woord vir woord met die GAB. "Seun, jou
-   sondes word vergewe." (GAB: "Seun, jou sondes is jou vergewe.") en "Staan op,
-   vat jou mat en gaan huis toe." (GAB 2:11: "Staan op, en neem jou bed op, en
-   gaan na jou huis.") is Dewald se EIE bewoording. Sy woorde staan onveranderd.
+   Al die gedeeltes is teen die egte public/gab/ nagegaan en bestaan. In die
+   LEES EERS-blokke van Dag 2 tot 5 staan elke direkte aanhaling in die GAB se
+   PRESIESE bewoording (Dewald se keuse): "Toe Jesus hulle geloof sien" (2:5),
+   "Seun, jou sondes is jou vergewe." (2:5) en "Staan op, en neem jou bed op, en
+   gaan na jou huis." (2:11). Dag 1 se hoofboodskap bly woord vir woord sy eie
+   ("Seun, jou sondes word vergewe.", "Staan op, vat jou mat en gaan huis toe.").
 
    ── DIE TWEE WALLPAPERS ──
 
@@ -271,7 +268,7 @@ const DAG3 = [
   {
     soort: 'lees',
     merk: 'LEES EERS',
-    skrif: 'Markus 2:5',
+    skrif: 'Markus 2:4–5',
     lyf: '“Toe Jesus hulle geloof sien…”',
   },
   {
@@ -304,7 +301,7 @@ const DAG4 = [
     soort: 'lees',
     merk: 'LEES EERS',
     skrif: 'Markus 2:5',
-    lyf: 'Jesus sê:\n\n“Seun, jou sondes word vergewe.”',
+    lyf: 'Jesus sê:\n\n“Seun, jou sondes is jou vergewe.”',
   },
   {
     soort: 'teks',
@@ -336,7 +333,7 @@ const DAG5 = [
     merk: 'LEES EERS',
     skrif: 'Markus 2:10–12',
     lyf: 'Jesus sê vir die man:\n\n'
-       + '“Staan op, vat jou mat en gaan huis toe.”\n\n'
+       + '“Staan op, en neem jou bed op, en gaan na jou huis.”\n\n'
        + 'En die man staan op.',
   },
   {
@@ -350,16 +347,22 @@ const DAG5 = [
        + 'JY HOEF NIE IEMAND SE REDDER TE WEES NIE. BRING HULLE NADER AAN JESUS.',
   },
   {
-    /* Dewald se KYK TERUG eindig hierdie week nie met 'n vraag nie — 'n
-       opsomming, dus 'n teksblok en geen skryfkassie. */
-    soort: 'teks',
+    /* KYK TERUG eindig nou met Dewald se PRIVATE VRAAG en is dus die
+       skryfkassie — sy keuse, 28 November 2026: "skuif die PRIVATE VRAAG na
+       Dag 5 as skryfkassie". Een blok, soos Week 12 tot 15 s'n, sodat die dag
+       by vyf blokke bly. */
+    soort: 'vraag',
+    id: 'behoefte5',
     kop: 'KYK TERUG',
     lyf: 'Hierdie week het jy gesien:\n\n'
        + 'Vier mense het een man gedra.\n\n'
        + 'Hulle geloof het tot optrede gelei.\n\n'
        + 'Jesus het dieper gekyk as die probleem wat almal kon sien.\n\n'
        + 'Hy het die man se sondes vergewe.\n\n'
-       + 'En deur die man te genees, het Jesus gewys dat Hy gesag het om sondes te vergewe.',
+       + 'En deur die man te genees, het Jesus gewys dat Hy gesag het om sondes te vergewe.\n\n'
+       + 'Wat is die probleem in my lewe wat almal kan sien, en wat is dalk die dieper '
+       + 'behoefte wat net Jesus sien?',
+    prompt: 'Skryf dit hier neer…',
   },
   {
     /* 'n Opdrag, nie 'n vraag nie — daar is niks om te skryf nie. */
@@ -419,12 +422,11 @@ export const WEEK16_DAE = [
   },
 ]
 
-/* Wat aan die einde van die week teruggewys word. Net wat werklik geskryf is.
-   Dag 5 het geen skryfkassie nie, dus kom die laaste stap van Dag 4. */
+/* Wat aan die einde van die week teruggewys word. Net wat werklik geskryf is. */
 export const WEEK16_REIS = [
-  { id: 'dieper1', kop: 'Aan die begin van hierdie week het jy geskryf waar jy net op die probleem fokus wat jy kan sien:' },
-  { id: 'dra2',    kop: 'Daarna het jy geskryf wie jou help dra wanneer jy nie meer self kan nie:' },
-  { id: 'hart4',   kop: 'En later het jy geskryf of jy Jesus ook toelaat om in jou hart te werk:' },
+  { id: 'dieper1',   kop: 'Aan die begin van hierdie week het jy geskryf waar jy net op die probleem fokus wat jy kan sien:' },
+  { id: 'dra2',      kop: 'Daarna het jy geskryf wie jou help dra wanneer jy nie meer self kan nie:' },
+  { id: 'behoefte5', kop: 'En vandag het jy geskryf wat dalk die dieper behoefte is wat net Jesus sien:' },
 ]
 
 /* Die klaar-skerm se eie woorde — Dewald se "EINDE VAN WEEK 16". */
