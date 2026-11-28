@@ -213,7 +213,7 @@ console.log('\n── Die register ken Week 13 ──\n')
   is('die klaar-skerm', weekKlaar(13), WEEK13_KLAAR)
   is('blokkeVir stem ooreen', blokkeVir(13, 3), blokkeVirDag13(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag13(9), [])
-  is('maar nie week 16 nie', hetDae(16), false)
+  is('maar nie week 17 nie', hetDae(17), false)
 }
 
 console.log('\n── Week 12 wys nou NA Week 13, en die titel stem ──\n')

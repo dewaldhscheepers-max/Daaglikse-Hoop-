@@ -232,7 +232,7 @@ console.log('\n── Die register ken Week 12 ──\n')
   is('blokkeVir stem ooreen', blokkeVir(12, 3), blokkeVirDag12(3))
   is('n dag wat nie bestaan nie gee niks', blokkeVirDag12(9), [])
   /* Sonder hierdie inskrywing val die week terug op die ou huiswerk-skerm. */
-  is('maar nie week 16 nie', hetDae(16), false)
+  is('maar nie week 17 nie', hetDae(17), false)
 }
 
 console.log('\n── Week 11 wys nou NA Week 12, en die titel stem ──\n')

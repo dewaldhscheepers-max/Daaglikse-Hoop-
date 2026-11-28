@@ -385,9 +385,14 @@ export const WEEK15_DEELSIN =
 
 /* ── Die brug na Week 16 ──
  *
- * `null` totdat Dewald Week 16 stuur. 'n Brug wat 'n titel VOORSPEL, is 'n
- * belofte wat ons nie kan hou nie. Sien CLAUDE.md se "Om 'n WEEK by te voeg". */
-export const WEEK15_VOLGENDE = null
+ * Dewald het Week 16 op 28 November 2026 gestuur. Die titel is Week 16 se egte
+ * titel (die toets eis dit), en die sin kom uit sy "BEGIN VAN DIE WEEK". */
+export const WEEK15_VOLGENDE = {
+  week: 16,
+  titel: 'Hulle breek die dak oop',
+  lyf: 'Vier vriende dra ’n verlamde man na Jesus toe. Die skare keer hulle, maar hulle '
+     + 'draai nie om nie. Hulle breek die dak oop en laat hom tot reg voor Jesus afsak.',
+}
 
 export function blokkeVirDag15(n) {
   const dag = WEEK15_DAE.find(d => d.n === n)

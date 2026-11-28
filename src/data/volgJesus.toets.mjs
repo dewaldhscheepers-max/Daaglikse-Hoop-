@@ -244,6 +244,8 @@ console.log('\n── En nou teen die EGTE Bybel ──\n')
       /* Week 15 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
       /* Week 15 */ 'Markus 1:40–45', 'Markus 1:40', 'Markus 1:41',
                     'Markus 1:41–42', 'Markus 1:44–45',
+      /* Week 16 — elke dag se LEES-blok; Dag 1 se gedeelte is ook die sessie s'n. */
+      /* Week 16 */ 'Markus 2:1–12', 'Markus 2:3', 'Markus 2:5', 'Markus 2:10–12',
       /* Die program se fondamentteks */ 'Matteus 28:18–20',
     ]
 

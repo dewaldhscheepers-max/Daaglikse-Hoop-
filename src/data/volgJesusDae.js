@@ -82,6 +82,10 @@ import {
   WEEK15_DAE, WEEK15_REIS, WEEK15_OPENING, WEEK15_DEELSIN, WEEK15_VOLGENDE,
   WEEK15_TRANSKRIPSIE, WEEK15_SESSIE, WEEK15_KLAAR,
 } from './volgJesusWeek15.js'
+import {
+  WEEK16_DAE, WEEK16_REIS, WEEK16_OPENING, WEEK16_DEELSIN, WEEK16_VOLGENDE,
+  WEEK16_TRANSKRIPSIE, WEEK16_SESSIE, WEEK16_KLAAR,
+} from './volgJesusWeek16.js'
 
 const WEKE = {
   1: {
@@ -243,12 +247,23 @@ const WEKE = {
     reis: WEEK15_REIS,
     opening: WEEK15_OPENING,
     deelsin: WEEK15_DEELSIN,
-    /* `null` totdat Week 16 bestaan — sien die kop van volgJesusWeek15.js. */
     volgende: WEEK15_VOLGENDE,
     /* Leeg: Dewald: "Daar is GEEN stemnota, audio of klankspeler in Week 15 nie." */
     transkripsie: WEEK15_TRANSKRIPSIE,
     sessie: WEEK15_SESSIE,
     klaar: WEEK15_KLAAR,
+  },
+  16: {
+    dae: WEEK16_DAE,
+    reis: WEEK16_REIS,
+    opening: WEEK16_OPENING,
+    deelsin: WEEK16_DEELSIN,
+    /* `null` totdat Week 17 bestaan — sien die kop van volgJesusWeek16.js. */
+    volgende: WEEK16_VOLGENDE,
+    /* Leeg: Dewald: "Daar is GEEN stemnota, oudio of klankspeler in Week 16 nie." */
+    transkripsie: WEEK16_TRANSKRIPSIE,
+    sessie: WEEK16_SESSIE,
+    klaar: WEEK16_KLAAR,
   },
 }
 

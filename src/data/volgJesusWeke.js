@@ -861,4 +861,60 @@ export const WEKE = {
       'Moenie die man se siekte gebruik as ’n eenvoudige beeld vir enige spesifieke sonde of moderne siekte nie.\n\nDie teks gaan eerstens oor hierdie man se werklike toestand en Jesus se reaksie op hom.\n\nDie verandering aan die einde — die man kan teruggaan terwyl Jesus buite bly — is ’n sterk beeld, maar moenie meer daarvan maak as wat Markus self sê nie.',
     pastoraleRisiko: 'laag',
   },
+  16: {
+    weeknommer: 16,
+    titel: 'Hulle breek die dak oop',
+    doel:
+      'Om te sien dat Jesus die hele mens sien, dat ware geloof tot optrede lei en dat ons soms ander mense nodig het om ons te help dra.',
+    weekKern:
+      'JESUS SIEN SOMS ’N DIEPER BEHOEFTE AS DIE EEN WAARVOOR JY HOM GEVRA HET.',
+    openingskerm:
+      'Vier vriende dra ’n verlamde man na Jesus toe.\n\n'
+      + 'Die skare keer hulle.\n\n'
+      + 'Maar hulle draai nie om nie.\n\n'
+      + 'Hulle breek die dak oop en laat hom tot reg voor Jesus afsak.\n\n'
+      + 'Jesus sien hulle geloof.\n\n'
+      + 'Maar voordat Hy die man laat loop, spreek Hy iets diepers aan:\n\n'
+      + '“Jou sondes word vergewe.”',
+    primereSkrif: 'Markus 2:1–12',
+    ondersteunendeSkrif: '',
+    videoId: '',
+    stemboodskapUrl: '',
+    /* Sien Week 5 tot 15 se noot. Dewald: "Daar is GEEN stemnota, oudio of
+       klankspeler in Week 16 nie." */
+    geskreweBoodskap: true,
+    kernwaarheid:
+      'JESUS SIEN SOMS ’N DIEPER BEHOEFTE AS DIE EEN WAARVOOR JY HOM GEVRA HET.',
+    eenSin:
+      'Soms het jy mense nodig wat jou help dra wanneer jy nie meer self kan nie.',
+    privaatRefleksie:
+      'Wat is die probleem in my lewe wat almal kan sien, en wat is dalk die dieper behoefte wat net Jesus sien?',
+    gehoorsaamheidStap:
+      'Dink aan een persoon wat tans swaarkry.\n\nBid vandag doelbewus vir daardie persoon.\n\nHelp waar jy kan.\n\nMaar onthou:\n\nJy hoef nie hulle probleem op te los nie.\n\nHelp hulle om nader aan Jesus te kom.',
+    gebed:
+      'Vader, dankie dat Jesus ons hele lewe sien. Help ons om geloof te hê wat tot optrede lei, om mekaar te help dra en om nie net op ons sigbare probleme te fokus nie. Dankie dat Jesus gesag het om sondes te vergewe. Amen.',
+    wallpaper: '',
+    wallpaperDag1: '',
+    moreTeaser:
+      'Môre: Hulle het hom gedra',
+    dag1Titel: 'Hulle breek die dak oop',
+    dag2Titel: 'Hulle het hom gedra',
+    dag3Titel: 'Toe Jesus hulle geloof sien',
+    dag4Titel: 'Jesus sien dieper',
+    dag5Titel: 'Vat jou mat en loop',
+    groepVraag1:
+      'Wat leer die vier vriende jou oor geloof en vriendskap?',
+    groepVraag2:
+      'Waarom dink jy praat Jesus eerste oor die man se sondes?',
+    groepVraag3:
+      'Wat wys die genesing vir ons oor Jesus se gesag?',
+    groepVraag4:
+      'Is dit vir jou makliker om iemand anders te help dra, of om toe te laat dat iemand jou help dra?',
+    /* Dewald se "VIR DIE GROEPLEIER": HOOFPUNT, en BELANGRIK. */
+    fasiliteerderHoofpunt:
+      'Week 16 gaan nie net oor goeie vriende of deursettingsvermoë nie.\n\nDie middelpunt van Markus 2:1–12 is Jesus en Sy gesag.\n\nDie vier vriende bring die man na Jesus.\n\nJesus sien hulle geloof.\n\nHy vergewe die man se sondes.\n\nDaarna genees Hy die man om te wys dat die Seun van die mens gesag het om sondes te vergewe.',
+    fasiliteerderGrens:
+      'Moenie leer dat die man se verlamming deur sy sonde veroorsaak is nie.\n\nMarkus sê dit nie.\n\nJesus vergewe sy sondes voordat Hy hom genees, maar die teks sê nie dat sy fisiese toestand deur ’n spesifieke sonde veroorsaak is nie.\n\nMoet ook nie die week net oor “goeie vriende” maak nie.\n\nDie vier vriende is belangrik, maar Jesus bly die middelpunt van die verhaal.\n\nDie beweging van die verhaal is eenvoudig:\n\nDie man kan nie self by Jesus uitkom nie.\nVier mense dra hom.\nJesus sien hulle geloof.\nJesus spreek iets diepers aan as die probleem wat almal kon sien.\nJesus vergewe.\nJesus genees.\nJesus wys Sy gesag.',
+    pastoraleRisiko: 'laag',
+  },
 }
